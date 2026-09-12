@@ -5,7 +5,15 @@
   "type": "module",
   "description": "The Rabaed marketing site.",
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.11"
+  },
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test",
     "baselines:capture": "node scripts/capture-baselines.mjs",
     "baselines:verify": "node scripts/capture-baselines.mjs --verify",
     "fonts:sync": "node scripts/sync-fonts.mjs"
@@ -14,8 +22,18 @@
     "@fontsource/dm-mono": "^5.3.0",
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
     "@fontsource/plus-jakarta-sans": "^5.3.0",
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "pixelmatch": "^7.2.0",
     "playwright": "^1.56.1",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

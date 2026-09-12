@@ -1,0 +1,31 @@
+/**
+ * Skeleton styling only. The design system — tokens, dark and light section
+ * treatments, the page shell — is ticket 04, and deliberately nothing here
+ * anticipates it: a placeholder that guesses at the tokens is a placeholder
+ * somebody later has to notice and unpick.
+ *
+ * The one thing this file does carry is the typeface, because self-hosting it
+ * is part of ticket 03 and every visual baseline depends on it.
+ */
+@import '../../assets/fonts/site-fonts.css';
+
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  line-height: 1.8;
+}
+
+.skeleton {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.skeleton-eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+}
+
+.skeleton-lead {
+  font-size: 1.05rem;
+}
