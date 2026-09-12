@@ -1,0 +1,61 @@
+# The check that stands between a pull request and `main`.
+#
+# It builds the application and runs the end-to-end suite against the build —
+# the one seam the spec tests at. Nothing here runs against the dev server, and
+# nothing is mocked: if this is green, the built site behaved.
+#
+# Not run here: `npm run baselines:verify`. The visual baselines are pixel
+# comparisons, and text rasterisation differs between the machine that captured
+# them and a hosted Linux runner, so a run on this runner would fail for
+# reasons that have nothing to do with the change. Comparing the rebuild
+# against the baselines is a local step until a pinned rendering environment
+# exists for it.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push supersedes the run in flight for the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Chromium only: it is the browser the suite runs in and the one the
+      # visual baselines were captured with.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Builds the application and serves it — see playwright.config.ts.
+      - name: End-to-end tests
+        run: npm test
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
