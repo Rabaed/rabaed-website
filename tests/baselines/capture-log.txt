@@ -1,0 +1,5 @@
+Captured 160 baselines from reference/site/ in 438s.
+Pages: index, partnership, pour-tracker, privacy, product, referral, referral-terms, start, terms, tool
+Viewports: 360x900, 390x900, 768x900, 820x900, 1024x900, 1280x900, 1440x900, 1600x900, 1280x840, 1280x700, 1280x600, 1280x550, 1440x840, 1440x700, 1440x600, 1440x550
+
+No console errors, failed requests or blocked external requests.
