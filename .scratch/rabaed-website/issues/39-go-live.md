@@ -8,6 +8,7 @@
 
 - [ ] Updated Privacy Policy from the lawyer published before anything becomes public
 - [ ] `noindex` removed from production — and only production
+- [ ] Ticket 39a done first — the site must be deployed on Vercel before a domain can point at it
 - [ ] Domain pointed from GoDaddy to Vercel; HTTPS verified; `www` and bare domain resolve consistently
 - [ ] Lead alert address supplied and a live test submission received end to end, including the applicant's confirmation
 - [ ] Real social account links in place, or the icons removed

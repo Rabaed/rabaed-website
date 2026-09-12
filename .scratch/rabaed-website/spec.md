@@ -245,4 +245,6 @@ Tests run against the built application with a seeded test database and test sto
 
 **Awaiting from the founders, none of it blocking the start:** the lead alert address, the real social account links, Microsoft 365 credentials, GoDaddy DNS access at launch, and the lawyer's updated Privacy Policy text. Each is wired as configuration so it can be supplied late.
 
+Two account actions are deferred to the end of Stage 1 by the founder’s decision and tracked as ticket 39a: connecting Vercel to the GitHub repository, and deciding whether a failing CI run blocks a merge. Until the first is done there are no preview links, so work is reviewed by running the site locally.
+
 **Cleared by the founders:** Trust strip logo permissions (covered by existing contracts), the 60-day guarantee, and the SAR 2,000 referral amount with its 10% client discount — all approved as binding commitments.

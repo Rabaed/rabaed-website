@@ -4,16 +4,16 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-human — the application, its tests and CI are in place; connecting Vercel and making CI mandatory are account steps only the founder can take (see `docs/deployment.md`)
+**Status:** resolved — commit `5b280f9`. The two account steps it surfaced (connecting Vercel, and making a failing CI run block a merge) were deferred by the founder to the end of Stage 1 and are tracked as ticket 39a; nothing waits on them.
 
 - [x] Next.js App Router application, server-rendered; primary content is never client-rendered (ADR-0001)
 - [x] Locale-aware routing in place from the start: Arabic at `/`, English reserved at `/en`, `lang` and `dir` set per locale
 - [x] IBM Plex Sans Arabic and DM Mono self-hosted as `woff2`; no request to Google Fonts
 - [x] `noindex` applied automatically to every non-production environment
-- [ ] Connected to the GitHub repository so each pull request gets its own preview URL — **awaiting the founder**, steps in `docs/deployment.md`
+- [ ] Connected to the GitHub repository so each pull request gets its own preview URL — **deferred to ticket 39a** by the founder
 - [x] Page text is present in the server response with JavaScript disabled
 - [x] Playwright runs against the built app in CI
-- [ ] CI blocks merging when it fails — **blocked**: branch protection is unavailable on the Free organisation plan for a private repository
+- [ ] CI blocks merging when it fails — **deferred to ticket 39a**: branch protection is unavailable on the Free organisation plan for a private repository
 
 ## Comments
 
@@ -55,7 +55,7 @@ Each guard was verified by breaking the thing it watches and confirming the run 
 
 **CI.** `.github/workflows/ci.yml` runs on every pull request and every push to `main`: typecheck, then `npm test`, which builds the application and runs the suite against the build. `npm run baselines:verify` is deliberately not in it — pixel comparison against baselines captured on a different machine would fail for reasons unrelated to the change. **This needs deciding before ticket 04**, which is the first ticket whose acceptance depends on matching the baselines: either that comparison stays a local step, or the baselines move to a pinned rendering environment that CI can reproduce.
 
-**Two things need the founder.** Both are written up in plain language in `docs/deployment.md`.
+**Two things need the founder — now ticket 39a.** Raised here, deferred by the founder on 12 September 2026 to the end of Stage 1 so they are done once, together, rather than interrupting the build. Both are written up in plain language in `docs/deployment.md`. The practical consequence of deferring the first is that there are no preview links until then, so tickets 04–38 are reviewed by running the site locally.
 
 1. **Vercel is not connected yet.** Importing the repository is a five-click job in the Vercel dashboard and needs no configuration on our side — no build settings, no environment variables, and the indexing block is on by default in every environment. Until it is done there are no preview links.
 2. **CI cannot block a merge.** Branch protection is not available on the Free organisation plan for a private repository; the GitHub API answers `Upgrade to GitHub Pro or make this repository public to enable this feature.` Making the repository public is not an option. So this is a decision: the GitHub Team plan, or the convention of not merging a pull request with a red cross. `docs/github-ruleset.json` holds the rule ready, and `docs/deployment.md` has the one command that applies it the day the organisation is upgraded.
