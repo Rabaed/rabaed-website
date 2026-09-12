@@ -4,11 +4,12 @@
 
 **Blocked by:** None (can start immediately). Requires two human steps first: the founder runs `gh auth login`, and creates the `rabaed` GitHub organisation (Free plan).
 
-**Status:** ready-for-agent
+**Status:** resolved — commit `ab14016` pushed to https://github.com/Rabaed/rabaed-website (private, default branch `main`)
 
-- [ ] `git init` with `main` as the default branch
-- [ ] `.gitignore` covering environment files, dependencies, build output, OS junk and Playwright artefacts
-- [ ] Everything currently in the working directory committed, including `reference/` in full (see spec: it is the specification, not a leftover)
-- [ ] Private repository `rabaed-website` created under the `rabaed` organisation and pushed
-- [ ] No credential, key or password is present in any committed file
-- [ ] `CLAUDE.md` added pointing at `AGENTS.md` so future sessions load the project setup
+- [x] `git init` with `main` as the default branch
+- [x] `.gitignore` covering environment files, dependencies, build output, OS junk and Playwright artefacts
+- [x] Everything currently in the working directory committed, including `reference/` in full (see spec: it is the specification, not a leftover)
+- [x] Private repository `rabaed-website` created under the `Rabaed` organisation and pushed
+- [x] No credential, key or password is present in any committed file
+- [x] `CLAUDE.md` added pointing at `AGENTS.md` so future sessions load the project setup
+- [x] `.gitattributes` keeps `reference/` byte-identical and out of diffs
