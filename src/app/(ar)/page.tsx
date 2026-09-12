@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { Hero } from '@/components/home/hero';
+import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
@@ -11,14 +13,14 @@ export const metadata: Metadata = pageMetadata({
 });
 
 /**
- * The Arabic home page, in the state ticket 04 leaves it: the real page shell
- * around two real sections.
+ * The Arabic home page, in the state ticket 06 leaves it: the full-height hero
+ * and the Trust strip below it, then the repeating tail.
  *
- * The opening section uses `.phero`, the compact hero every page below this
- * one carries. Ticket 06 replaces it with `#hero` — full height, with the
- * document travelling between the three parties. The closing section is the
- * repeating tail; ticket 11 puts the demo form in its second column and
- * ticket 27 makes that form real.
+ * Tickets 07-11 fill in what belongs between the two — the card decks, the
+ * four units, the Record section, the before-and-after and the FAQs. The
+ * closing section is the tail every page carries; ticket 11 puts the demo form
+ * in its second column and ticket 27 makes that form real, which is why it
+ * looks half-empty at desktop widths today (bug 44).
  *
  * All copy is verbatim from `reference/site/index.html`. Nothing here is
  * placeholder text, and nothing waits to be reworded.
@@ -26,24 +28,8 @@ export const metadata: Metadata = pageMetadata({
 export default function HomePage() {
   return (
     <PageShell locale="ar" path="/">
-      <section className="phero">
-        <div className="pglow" />
-        <div className="wrap">
-          <div className="eyebrow">نظام تشغيل مشاريع الإنشاء · ربائد</div>
-          <h1>
-            ثلاثة أطراف.
-            <br />
-            سجل واحد.
-            <br />
-            مسؤولية واضحة.
-          </h1>
-          <p className="lead">
-            ربائد تجمع المالك والاستشاري والمقاول على منصة واحدة: مراسلات معتمدة، اعتمادات
-            وطلبات فحص، مستندات بأحدث إصدار، وتقارير يومية من الميدان — وكل خطوة موثّقة ومؤرخة
-            باسم من قام بها.
-          </p>
-        </div>
-      </section>
+      <Hero />
+      <TrustStrip />
 
       <section id="tail" className="light pad">
         <div className="wrap tail-grid">

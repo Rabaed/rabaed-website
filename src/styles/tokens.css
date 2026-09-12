@@ -59,6 +59,28 @@ h2 { font-size: 38px; margin-bottom: 12px }
 .btn.g:hover { background: rgba(255, 255, 255, .12) }
 .btn.o { background: #fff; color: var(--ink); border: 1px solid var(--line) }
 
+/* A row of calls to action, and the pill that states the guarantee under one.
+   The Reference site files both under its "hero" heading, but neither belongs
+   to a hero: each appears on six of its nine pages.
+
+   They sit here, beside `.btn`, rather than in `shell.css` beside `.phero`,
+   because they are not part of the frame a page sits in — they are two of the
+   pieces a page is built from, and they turn up inside the home page's `#hero`
+   and every sub-page's `.phero` alike. `shell.css` would own them only if the
+   compact page hero were their only home, and it is not.
+
+   The guarantee is a commitment the founders have approved as binding (spec:
+   Further Notes) — the wording is not decoration. */
+.ctas { display: flex; gap: 12px; flex-wrap: wrap }
+.guar { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--dark-text); background: rgba(249, 87, 56, .12); border: 1px solid rgba(249, 87, 56, .42); border-radius: 999px; padding: 7px 16px }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the same one the footer
+   carries: the Reference site sets the whole of "60 يوماً" in DM Mono, a face
+   with no Arabic glyphs, so the word beside the numeral drops to the browser's
+   last-resort monospace. The spec forbids exactly that. Only the numeral is
+   Latin, so only the numeral is `.mono` — in the markup, not here. */
+.guar b { color: var(--acc); font-size: 13px }
+.light .guar { color: var(--ink); background: var(--acc-soft); border-color: rgba(249, 87, 56, .32) }
+
 /* section treatments */
 section { position: relative }
 .dark { background: var(--dark); color: var(--dark-text) }
