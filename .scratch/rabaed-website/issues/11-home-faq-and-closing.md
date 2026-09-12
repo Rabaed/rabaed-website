@@ -12,3 +12,5 @@
 - [ ] No fake success message anywhere; the Reference site's `data-fake-send` behaviour is not carried over
 - [ ] Homepage as a whole now matches baselines at all eight widths
 - [ ] Zero console errors and zero failed requests across the full page
+
+**Note:** ticket 04 built this section's left column already, from the same Reference markup, so this ticket adds the form beside it rather than starting from nothing. Filling that second column also closes bug 44 — check whether it is still open when this is done.
