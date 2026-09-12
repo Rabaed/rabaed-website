@@ -1,0 +1,1796 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>متتبّع الصبّات واختبارات المكعبات — أداة مجانية من رَبَاعِد</title>
+<meta name="description" id="meta-desc" content="ملف HTML واحد يفتح بنقرتين. سجّل الصبّة واعرف موعد اختبار المكعبات 7 و 28 يوماً قبل أن يتأخر. بدون حساب، بدون سيرفر، بياناتك تبقى على جهازك.">
+<meta name="theme-color" content="#f7ece8">
+<meta property="og:type" content="website">
+<meta property="og:title" id="og-title" content="متتبّع الصبّات واختبارات المكعبات — أداة مجانية">
+<meta property="og:description" id="og-desc" content="سجّل الصبّة اليوم، واعرف متى يحين اختبار المكعبات — قبل أن يتأخر. ملف واحد، بدون حساب، بياناتك تبقى عندك.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   RABAED CLAY · DESIGN SYSTEM
+   Claymorphism · Tomato palette · Bilingual (EN / AR-RTL)
+   ----------------------------------------------------------------------------
+   Extracted from the Concrete Pour Tracker, 2026-08-24.
+   Drop this file next to your HTML and link it:
+
+       <link rel="preconnect" href="https://fonts.googleapis.com">
+       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+       <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+       <link rel="stylesheet" href="rabaed-clay.css">
+
+   Switch language direction with <html dir="rtl"> — every rule below is
+   written with logical properties, so the whole UI mirrors on its own.
+
+   CONTENTS
+     1. Tokens ................ :root custom properties
+     2. Base .................. reset, body, headings
+     3. Primitives ............ .clay .clay-sm .inset
+     4. Buttons ............... .btn and variants
+     5. Forms ................. .field .input .drop .tagbox
+     6. Chips & tags .......... .chip .etag .tag
+     7. Utilities ............. .muted .row .grow ...
+     8. Shell ................. .app .topbar .brand .avatar .crumb
+     9. Navigation ............ .seg .lang .ms (multi-select)
+    10. Cards & tiles ......... .proj-card .tile .pour
+    11. Table ................. table.tbl
+    12. Timeline ............., .tl
+    13. Modal ................. .overlay .modal .blk
+    14. Media ................. .ph-grid .lightbox .file-pill
+    15. Feedback .............. .toast .fab .empty .bell
+    16. Print ................. A4 submittal sheet
+    17. Responsive ............ <=720px
+    18. Generic aliases ....... semantic names for new apps
+   ============================================================================ */
+
+/* ============================================================
+   CLAYMORPHISM · TOMATO PALETTE
+   ============================================================ */
+:root{
+  --bg:            #f7ece8;
+  --surface:       #fdf4f1;
+  --surface-2:     #f6e6e0;
+  --ink:           #4a332e;
+  --ink-soft:      #9c7a71;
+  --ink-faint:     #c2a49c;
+
+  --clay-tomato:   #ffb3a0;
+  --clay-coral:    #ffcbb8;
+  --clay-blush:    #ffd9d2;
+  --clay-sand:     #ffe6c9;
+  --clay-olive:    #d9e5c4;
+
+  --accent:        #ff6347;   /* tomato */
+  --accent-2:      #ff8f78;
+  --accent-deep:   #e04a30;
+  --accent-bg:     #ffe1d9;
+  --accent-ink:    #c93d21;
+
+  --ok:            #2f8f6a;  --ok-bg:     #d9f0e5;
+  --warn:          #c07a12;  --warn-bg:   #ffeccb;
+  --danger:        #c8323f;  --danger-bg: #ffdcdb;
+  --info:          #3f7fb8;  --info-bg:   #dfeaf7;
+  --idle:          #9c7a71;  --idle-bg:   #f0e2dc;
+
+  --r-sm: 14px; --r-md: 20px; --r-lg: 28px; --r-xl: 36px;
+
+  /* clay recipe, warmed */
+  --clay:
+    8px 8px 20px rgba(198,142,124,.42),
+    -8px -8px 20px rgba(255,252,250,.95),
+    inset 2px 2px 4px rgba(255,255,255,.85),
+    inset -3px -3px 8px rgba(200,150,135,.20);
+  --clay-sm:
+    5px 5px 12px rgba(198,142,124,.34),
+    -5px -5px 12px rgba(255,252,250,.92),
+    inset 1px 1px 2px rgba(255,255,255,.8),
+    inset -2px -2px 5px rgba(200,150,135,.16);
+  --clay-press:
+    inset 5px 5px 12px rgba(198,142,124,.45),
+    inset -5px -5px 12px rgba(255,252,250,.92);
+  --clay-in:
+    inset 4px 4px 10px rgba(198,142,124,.32),
+    inset -4px -4px 10px rgba(255,252,250,.95);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  background-image:
+    radial-gradient(1100px 700px at 10% -8%,  #ffe3d8 0%, transparent 55%),
+    radial-gradient(900px 600px at 100% 0%,   #ffd6cb 0%, transparent 50%),
+    radial-gradient(900px 700px at 50% 115%,  #fff0dc 0%, transparent 55%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+html[dir="rtl"] body{font-family:'IBM Plex Sans Arabic','Plus Jakarta Sans',system-ui,sans-serif}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-.02em}
+html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] h4{letter-spacing:0}
+p{margin:0}
+
+/* ---------- Scrollbars · clay groove ----------
+   The bar is a pressed groove in the same clay as .inset, with a convex
+   tomato pill riding in it. Applied with * so nested scroll areas (modals,
+   tables, the notes pane) match the page bar instead of falling back to the
+   browser default. */
+*::-webkit-scrollbar{width:14px;height:14px}
+*::-webkit-scrollbar-button{display:none}
+*::-webkit-scrollbar-track{
+  background:var(--surface-2);
+  border-radius:99px;
+  box-shadow:inset 2px 2px 5px rgba(198,142,124,.50),
+             inset -2px -2px 4px rgba(255,255,255,.95);
+}
+*::-webkit-scrollbar-track:vertical{margin:6px 0}
+*::-webkit-scrollbar-track:horizontal{margin:0 6px}
+*::-webkit-scrollbar-thumb{
+  min-height:34px;
+  border:3px solid transparent;          /* keeps the groove visible around the pill */
+  border-radius:99px;
+  background:linear-gradient(145deg,#ffc4b3,var(--clay-tomato) 55%,#ff9d88) padding-box;
+  /* inset only — an outer shadow would draw on the border box and sit off
+     the pill by 3px */
+  box-shadow:inset 1.5px 1.5px 2px rgba(255,255,255,.85),
+             inset -1.5px -1.5px 3px rgba(200,120,100,.35);
+}
+*::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(145deg,var(--accent-2),var(--accent)) padding-box;
+}
+*::-webkit-scrollbar-thumb:active{
+  background:linear-gradient(145deg,var(--accent),var(--accent-deep)) padding-box;
+}
+*::-webkit-scrollbar-corner{background:transparent}
+/* Firefox. Chromium ignores every ::-webkit-scrollbar rule on any element
+   that sets scrollbar-color, so these are scoped to engines that have no
+   ::-webkit-scrollbar at all. */
+@supports not selector(::-webkit-scrollbar){
+  html{scrollbar-width:thin;scrollbar-color:var(--clay-tomato) var(--surface-2)}
+}
+
+/* ---------- Clay primitives ---------- */
+.clay{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay)}
+.clay-sm{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--clay-sm)}
+.inset{background:var(--surface-2);border-radius:var(--r-md);box-shadow:var(--clay-in)}
+
+.btn{
+  border:0;cursor:pointer;font-weight:700;letter-spacing:-.01em;
+  padding:13px 22px;border-radius:var(--r-md);
+  background:var(--surface);color:var(--ink);
+  box-shadow:var(--clay-sm);
+  transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
+  display:inline-flex;align-items:center;gap:9px;justify-content:center;
+}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.02)}
+.btn:active{transform:translateY(1px);box-shadow:var(--clay-press)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:var(--clay-sm)}
+.btn-primary{
+  background:linear-gradient(145deg,#ff7d63,#ec4b2c);color:#fff;
+  box-shadow:6px 6px 16px rgba(236,75,44,.34),-5px -5px 14px rgba(255,252,250,.92),
+             inset 2px 2px 4px rgba(255,255,255,.42),inset -3px -3px 8px rgba(160,40,20,.30);
+}
+.btn-ok{background:linear-gradient(145deg,#5ac199,#2f8f6a);color:#fff;
+  box-shadow:6px 6px 16px rgba(47,143,106,.32),-5px -5px 14px rgba(255,252,250,.92),
+             inset 2px 2px 4px rgba(255,255,255,.45),inset -3px -3px 8px rgba(10,90,65,.3)}
+.btn-warn{background:linear-gradient(145deg,#ffc46b,#e09a1f);color:#5a3a07;
+  box-shadow:6px 6px 16px rgba(224,154,31,.32),-5px -5px 14px rgba(255,252,250,.92),
+             inset 2px 2px 4px rgba(255,255,255,.5),inset -3px -3px 8px rgba(150,90,10,.24)}
+.btn-ghost{background:transparent;box-shadow:none;color:var(--ink-soft);padding:10px 14px}
+.btn-ghost:hover{background:var(--surface);box-shadow:var(--clay-sm);color:var(--ink)}
+.btn-sm{padding:9px 15px;border-radius:var(--r-sm);font-size:13px}
+.btn-tiny{padding:6px 11px;border-radius:12px;font-size:11.5px;margin-top:8px;gap:5px}
+.btn-block{width:100%}
+.btn-icon{padding:11px;border-radius:50%;width:42px;height:42px}
+
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);
+  margin:0 0 7px;margin-inline-start:4px;text-transform:uppercase;letter-spacing:.06em}
+html[dir="rtl"] .field label{text-transform:none;letter-spacing:0;font-size:12.5px}
+.input,select.input,textarea.input{
+  width:100%;padding:14px 16px;border:0;outline:0;
+  border-radius:var(--r-md);background:var(--surface-2);
+  box-shadow:var(--clay-in);color:var(--ink);font-weight:600;
+  transition:box-shadow .18s ease;
+}
+.input::placeholder{color:var(--ink-faint);font-weight:500}
+.input:focus{box-shadow:var(--clay-in),0 0 0 3px rgba(255,99,71,.3)}
+select.input{appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239c7a71' stroke-width='3' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 16px center;padding-right:42px}
+html[dir="rtl"] select.input{background-position:left 16px center;padding-right:16px;padding-left:42px}
+textarea.input{resize:vertical;min-height:80px;line-height:1.5}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 13px;border-radius:999px;font-size:12px;font-weight:800;
+  letter-spacing:.01em;white-space:nowrap;
+  box-shadow:3px 3px 8px rgba(198,142,124,.28),-3px -3px 8px rgba(255,252,250,.88),
+             inset 1px 1px 2px rgba(255,255,255,.6);
+}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.chip-ok{background:var(--ok-bg);color:#227353}
+.chip-warn{background:var(--warn-bg);color:#95600d}
+.chip-danger{background:var(--danger-bg);color:#a92634}
+.chip-info{background:var(--info-bg);color:#2c6394}
+.chip-idle{background:var(--idle-bg);color:#8a6a61}
+.chip-accent{background:var(--accent-bg);color:var(--accent-ink)}
+
+.muted{color:var(--ink-soft)}
+.faint{color:var(--ink-faint)}
+.tiny{font-size:12px}
+.small{font-size:13px}
+.row{display:flex;align-items:center;gap:12px}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.hidden{display:none !important}
+.mono{font-variant-numeric:tabular-nums}
+
+/* ---------- Language switch ---------- */
+.lang{display:flex;gap:3px;padding:4px;border-radius:14px;background:var(--surface-2);box-shadow:var(--clay-in)}
+.lang button{border:0;background:transparent;padding:7px 11px;border-radius:10px;cursor:pointer;
+  font-size:12px;font-weight:800;color:var(--ink-soft)}
+.lang button.on{background:var(--surface);color:var(--accent-ink);box-shadow:var(--clay-sm)}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+.login-wrap{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.logo-blob img{width:62px;height:auto;display:block}
+.by-line{display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:14px 0 22px;font-size:11.5px;font-weight:700;color:var(--ink-faint)}
+.by-line img{height:19px;width:auto;display:block}
+.build-line{margin:9px 0 20px;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  color:var(--ink-faint);opacity:.5;direction:ltr;text-align:center}
+.build-tag{position:fixed;inset-inline-end:10px;bottom:8px;z-index:40;
+  font:700 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.05em;
+  color:var(--ink-faint);opacity:.38;pointer-events:none;user-select:none;direction:ltr}
+@media print{.build-tag{display:none}}
+.login-card{width:100%;max-width:430px;padding:30px 32px;background:var(--surface);
+  border-radius:var(--r-xl);box-shadow:var(--clay);text-align:center}
+.who-box{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);
+  background:var(--surface-2);box-shadow:var(--clay-in)}
+.logo-blob{
+  width:88px;height:88px;margin:0 auto 18px;border-radius:28px;
+  background:linear-gradient(145deg,#fffaf7,var(--clay-blush));
+  display:grid;place-items:center;font-size:36px;
+  box-shadow:8px 8px 18px rgba(198,142,124,.42),-6px -6px 16px rgba(255,252,250,.95),
+             inset 3px 3px 6px rgba(255,255,255,.7),inset -4px -4px 10px rgba(205,90,60,.28);
+}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:10px;margin-bottom:20px}
+.role-opt{
+  padding:15px 8px 13px;border-radius:var(--r-md);background:var(--surface);
+  box-shadow:var(--clay-sm);cursor:pointer;text-align:center;border:0;
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.role-opt .emo{font-size:23px;display:block;margin-bottom:6px}
+.role-opt .lbl{font-size:11.5px;font-weight:800;color:var(--ink-soft);line-height:1.25}
+.role-opt:hover{transform:translateY(-2px)}
+.role-opt.on{box-shadow:var(--clay-press);background:var(--surface-2)}
+.role-opt.on .lbl{color:var(--accent-ink)}
+.hint-box{margin-top:20px;padding:13px 15px;border-radius:var(--r-md);
+  background:var(--surface-2);box-shadow:var(--clay-in);font-size:11.5px;
+  color:var(--ink-soft);text-align:start;line-height:1.7}
+.err{color:var(--danger);font-size:13px;font-weight:700;margin-top:12px;min-height:18px}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.app{max-width:1320px;margin:0 auto;padding:22px 20px 90px}
+.topbar{
+  display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:20px;
+  background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);
+}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em}
+.brand .mark{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:19px;
+  background:linear-gradient(145deg,#fffaf7,var(--clay-blush));overflow:hidden;
+  box-shadow:4px 4px 10px rgba(198,142,124,.35),-3px -3px 8px rgba(255,252,250,.92),
+             inset 2px 2px 4px rgba(255,255,255,.7)}
+.brand .mark img{width:31px;height:auto;display:block}
+.who{margin-inline-start:auto;display:flex;align-items:center;gap:11px}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  font-weight:800;font-size:14px;background:linear-gradient(145deg,#ffdcc9,var(--clay-tomato));
+  color:#a33f26;box-shadow:var(--clay-sm)}
+
+/* ---------- Notification bell ---------- */
+.bell-wrap{position:relative}
+.bell{position:relative;overflow:visible}
+.bell-dot{position:absolute;top:-3px;inset-inline-end:-3px;min-width:19px;height:19px;padding:0 5px;
+  border-radius:99px;background:linear-gradient(145deg,#ff7d63,#ec4b2c);color:#fff;
+  font-size:10.5px;font-weight:800;display:grid;place-items:center;
+  box-shadow:0 2px 6px rgba(236,75,44,.5)}
+.notif-panel{position:absolute;top:calc(100% + 12px);inset-inline-end:0;width:330px;max-height:70vh;
+  overflow:auto;z-index:50;padding:10px;background:var(--surface);
+  border-radius:var(--r-lg);box-shadow:var(--clay);animation:pop .18s ease}
+.notif{display:flex;align-items:flex-start;gap:10px;width:100%;border:0;cursor:pointer;
+  padding:11px 10px;border-radius:14px;background:transparent;text-align:start;margin-bottom:3px}
+.notif:hover{background:var(--surface-2)}
+.notif.unread{background:var(--accent-bg)}
+.notif.unread:hover{filter:brightness(.98)}
+.nt-emo{font-size:16px;flex:none;margin-top:1px}
+.nt-msg{display:block;font-size:12.5px;font-weight:700;line-height:1.45}
+.nt-meta{display:block;font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:3px}
+
+.crumb{display:flex;align-items:center;gap:9px;margin-bottom:16px;font-size:13px;color:var(--ink-soft);font-weight:600}
+.crumb b{color:var(--ink)}
+
+/* Project cards */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:18px}
+.proj-card{padding:22px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);
+  cursor:pointer;transition:transform .16s ease;text-align:start;border:0;width:100%}
+.proj-card:hover{transform:translateY(-4px)}
+.proj-icon{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:24px;
+  margin-bottom:14px;box-shadow:var(--clay-sm)}
+.proj-stat{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+/* Summary tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:20px}
+.tile{padding:17px 19px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);
+  border:0;cursor:pointer;text-align:start;width:100%;font-family:inherit;color:inherit;
+  transition:transform .15s ease, box-shadow .15s ease}
+.tile:hover{transform:translateY(-3px)}
+.tile:active{transform:translateY(0)}
+.tile.on{box-shadow:var(--clay),0 0 0 2.5px var(--accent)}
+.tile.on .k{color:var(--accent-ink)}
+.tile .v{font-size:29px;font-weight:800;line-height:1.1;letter-spacing:-.03em}
+.tile .k{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;
+  letter-spacing:.06em;margin-top:5px}
+html[dir="rtl"] .tile .k{text-transform:none;letter-spacing:0;font-size:12.5px}
+.tile .bar{height:6px;border-radius:99px;margin-top:11px;background:var(--surface-2);box-shadow:var(--clay-in);overflow:hidden}
+.tile .bar i{display:block;height:100%;border-radius:99px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.seg-row{display:flex;overflow-x:auto;margin-bottom:18px;padding-bottom:2px}
+.seg-row .seg{flex:none}
+.search{flex:1;min-width:200px;position:relative}
+.search .input{padding-inline-start:44px}
+.search .ico{position:absolute;inset-inline-start:16px;top:50%;transform:translateY(-50%);opacity:.5;font-size:15px}
+.seg{display:flex;gap:4px;padding:5px;border-radius:var(--r-md);background:var(--surface-2);box-shadow:var(--clay-in)}
+.seg button{border:0;background:transparent;padding:9px 14px;border-radius:13px;cursor:pointer;
+  font-size:12.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--clay-sm)}
+
+/* Advanced filter panel */
+.adv{padding:16px 18px;margin-bottom:16px;background:var(--surface);
+  border-radius:var(--r-lg);box-shadow:var(--clay);animation:pop .18s ease}
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+/* multi-select dropdown */
+.ms{position:relative}
+.ms-btn{display:flex;align-items:center;gap:8px;cursor:pointer;text-align:start;font-weight:600}
+.ms-btn.on{color:var(--accent-ink);box-shadow:var(--clay-in),0 0 0 2px rgba(255,99,71,.35)}
+.ms-menu{position:absolute;top:calc(100% + 7px);inset-inline-start:0;inset-inline-end:0;z-index:35;
+  background:var(--surface);border-radius:var(--r-md);box-shadow:var(--clay);
+  padding:6px;max-height:238px;overflow:auto;animation:pop .16s ease;min-width:180px}
+.ms-opt{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;
+  padding:9px 10px;border-radius:11px;cursor:pointer;font-size:13px;font-weight:600;
+  text-align:start;color:inherit}
+.ms-opt:hover{background:var(--surface-2)}
+.ms-opt .box{width:18px;height:18px;border-radius:6px;flex:none;display:grid;place-items:center;
+  font-size:10px;background:var(--surface-2);box-shadow:var(--clay-in);color:transparent}
+.ms-opt.on .box{background:linear-gradient(145deg,#ff8f78,#ec4b2c);color:#fff;box-shadow:none}
+
+.mem-row{display:flex;align-items:center;gap:9px;padding:9px 11px;margin-bottom:7px;
+  border-radius:var(--r-sm);background:var(--surface);box-shadow:var(--clay-sm)}
+.mem-row:not(.on){opacity:.62;box-shadow:none;background:transparent}
+.mem-row .pick button{padding:6px 9px;font-size:14px;line-height:1}
+
+.chip-x{border:0;background:transparent;cursor:pointer;color:inherit;opacity:.55;
+  font-weight:800;font-size:11px;padding:0 0 0 3px;line-height:1}
+.chip-x:hover{opacity:1}
+
+/* Pour cards */
+.pour-list{display:flex;flex-direction:column;gap:15px}
+.pour{padding:20px 22px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);
+  cursor:pointer;transition:transform .16s ease}
+.pour:hover{transform:translateY(-3px)}
+.pour-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.pour-ref{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--accent-ink);text-transform:uppercase}
+.pour-title{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+.elem-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.etag{padding:6px 11px;border-radius:11px;background:var(--surface-2);box-shadow:var(--clay-in);
+  font-size:11.5px;font-weight:700;color:var(--ink-soft)}
+.mile-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.mile{padding:13px 15px;border-radius:var(--r-md);background:var(--surface-2);box-shadow:var(--clay-in)}
+.mile .m-k{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--ink-faint);
+  text-transform:uppercase;margin-bottom:8px}
+html[dir="rtl"] .mile .m-k{text-transform:none;letter-spacing:0;font-size:11.5px}
+.mile .m-due{font-size:11px;color:var(--ink-faint);font-weight:600;margin-top:7px}
+
+/* ---------- Table view ---------- */
+.tbl-wrap{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);padding:8px;overflow-x:auto}
+table.tbl{width:100%;border-collapse:separate;border-spacing:0 7px;min-width:880px}
+table.tbl thead th{
+  text-align:start;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);padding:10px 12px 6px;white-space:nowrap;
+}
+html[dir="rtl"] table.tbl thead th{text-transform:none;letter-spacing:0;font-size:11.5px}
+table.tbl thead th.c{text-align:center}
+table.tbl tbody tr{cursor:pointer}
+table.tbl tbody td{
+  background:var(--surface-2);padding:12px 11px;vertical-align:middle;
+  box-shadow:inset 0 2px 5px rgba(198,142,124,.15), inset 0 -2px 5px rgba(255,252,250,.85);
+  transition:transform .14s ease, box-shadow .14s ease;
+}
+table.tbl tbody td:first-child{border-start-start-radius:var(--r-md);border-end-start-radius:var(--r-md)}
+table.tbl tbody td:last-child{border-start-end-radius:var(--r-md);border-end-end-radius:var(--r-md)}
+table.tbl tbody tr:hover td{background:var(--surface);box-shadow:var(--clay-sm)}
+.t-ref{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.t-el{font-weight:800;font-size:13.5px;line-height:1.3}
+.t-sub{font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:3px}
+.t-date{font-weight:700;font-size:13px;white-space:nowrap}
+.t-due{font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:4px;white-space:nowrap}
+.t-mile{text-align:center}
+.t-count{font-weight:800;font-size:13px}
+.tbl-foot{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px 8px;font-size:12px;font-weight:700;color:var(--ink-soft)}
+
+/* ---------- Admin panel ---------- */
+table.tbl-adm{min-width:1020px}
+.pick{display:flex;flex-wrap:wrap;gap:7px}
+.pick button{border:0;cursor:pointer;padding:8px 12px;border-radius:12px;font-size:12.5px;font-weight:700;
+  background:var(--surface);color:var(--ink-soft);box-shadow:var(--clay-sm);transition:transform .14s ease}
+.pick button:hover{transform:translateY(-2px)}
+.pick button.on{background:var(--accent-bg);color:var(--accent-ink);box-shadow:var(--clay-press)}
+.pick.emo button{font-size:19px;padding:9px 11px;line-height:1}
+.pick.tint button{width:34px;height:34px;padding:0;border-radius:11px}
+.pick.tint button.on{outline:3px solid var(--accent);outline-offset:2px}
+.act{display:flex;gap:6px;flex-wrap:nowrap;justify-content:flex-end}
+.act .btn{margin:0;white-space:nowrap}
+html[dir="rtl"] .act{justify-content:flex-start}
+.note-line{padding:12px 15px;border-radius:var(--r-md);background:var(--surface-2);
+  box-shadow:var(--clay-in);font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:16px}
+
+/* Timeline */
+.tl{position:relative;padding-inline-start:26px;margin-top:6px}
+.tl:before{content:'';position:absolute;inset-inline-start:7px;top:8px;bottom:8px;width:3px;border-radius:9px;
+  background:var(--surface-2);box-shadow:var(--clay-in)}
+.tl-item{position:relative;padding:0 0 18px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;inset-inline-start:-26px;top:2px;width:17px;height:17px;border-radius:50%;
+  background:var(--surface);box-shadow:var(--clay-sm);display:grid;place-items:center;font-size:9px}
+.tl-item.done .tl-dot{background:linear-gradient(145deg,#63c8a1,#2f8f6a);color:#fff}
+.tl-item.now .tl-dot{background:linear-gradient(145deg,#ff8f78,#ec4b2c);color:#fff}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(105,62,50,.34);backdrop-filter:blur(7px);
+  display:grid;place-items:center;padding:18px;z-index:60;animation:fade .18s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.modal{width:100%;max-width:720px;max-height:90dvh;overflow:auto;padding:26px;
+  background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--clay);animation:pop .22s ease}
+.modal-sm{max-width:470px}
+.modal-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.modal h3{font-size:20px}
+
+/* Form blocks */
+.blk{padding:17px;border-radius:var(--r-md);background:var(--surface-2);box-shadow:var(--clay-in);margin-bottom:13px}
+.blk-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;gap:10px}
+.n{font-size:11.5px;font-weight:800;letter-spacing:.08em;color:var(--accent-ink);text-transform:uppercase}
+html[dir="rtl"] .n{text-transform:none;letter-spacing:0;font-size:12.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.x{border:0;background:var(--surface);width:29px;height:29px;border-radius:50%;cursor:pointer;
+  box-shadow:var(--clay-sm);color:var(--danger);font-weight:800;line-height:1;font-size:15px;flex:none}
+.ticket-row{display:flex;gap:9px;margin-bottom:9px;align-items:center}
+
+/* ---------- Tag input ---------- */
+.tagbox{position:relative;display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  min-height:52px;padding:8px 10px;border-radius:var(--r-md);
+  background:var(--surface-2);box-shadow:var(--clay-in);cursor:text;
+  transition:box-shadow .18s ease}
+.tagbox.focus{box-shadow:var(--clay-in),0 0 0 3px rgba(255,99,71,.3)}
+.tag{display:inline-flex;align-items:center;gap:7px;padding:6px 8px 6px 11px;
+  border-radius:11px;font-size:12.5px;font-weight:700;white-space:nowrap;
+  box-shadow:2px 2px 6px rgba(198,142,124,.22),-2px -2px 6px rgba(255,252,250,.8)}
+html[dir="rtl"] .tag{padding:6px 11px 6px 8px}
+.tag button{border:0;background:transparent;cursor:pointer;font-size:13px;line-height:1;
+  font-weight:800;color:inherit;opacity:.5;padding:2px}
+.tag button:hover{opacity:1}
+.tag-input{border:0;background:transparent;outline:0;flex:1;min-width:100px;
+  padding:7px 4px;font-weight:600;color:var(--ink)}
+.tag-input::placeholder{color:var(--ink-faint);font-weight:500;font-size:13px}
+.tag-menu{position:absolute;top:calc(100% + 7px);inset-inline-start:0;inset-inline-end:0;z-index:30;
+  background:var(--surface);border-radius:var(--r-md);box-shadow:var(--clay);
+  padding:6px;max-height:196px;overflow:auto}
+.tag-opt{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:12px;
+  cursor:pointer;font-size:13px;font-weight:600}
+.tag-opt.on,.tag-opt:hover{background:var(--surface-2)}
+.tag-opt .sw{width:13px;height:13px;border-radius:4px;flex:none}
+.tag-opt .new{font-size:11px;font-weight:800;color:var(--accent-ink);margin-inline-start:auto}
+/* latin/numeric fields keep LTR order inside an RTL form */
+html[dir="rtl"] .num{direction:ltr;text-align:right}
+
+/* ---------- Site photos ---------- */
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px}
+.ph-item{position:relative;aspect-ratio:4/3;border-radius:var(--r-sm);overflow:hidden;
+  box-shadow:var(--clay-sm);background:var(--surface)}
+.ph-item img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;display:block}
+.ph-del{position:absolute;top:5px;inset-inline-end:5px;width:24px;height:24px;border:0;border-radius:50%;
+  cursor:pointer;background:rgba(255,252,250,.92);color:var(--danger);font-weight:800;font-size:12px;
+  line-height:1;box-shadow:0 2px 6px rgba(120,70,55,.35)}
+.lightbox{position:relative;max-width:min(94vw,1100px);max-height:92vh}
+.lightbox img{max-width:100%;max-height:92vh;border-radius:var(--r-md);display:block;
+  box-shadow:0 18px 50px rgba(80,40,30,.45)}
+.lb-x{position:absolute;top:10px;inset-inline-end:10px;background:var(--surface)}
+
+/* Dropzone */
+.drop{padding:26px 20px;border-radius:var(--r-md);background:var(--surface-2);box-shadow:var(--clay-in);
+  text-align:center;cursor:pointer;transition:box-shadow .16s ease}
+.drop:hover{box-shadow:var(--clay-in),0 0 0 3px rgba(255,99,71,.25)}
+.drop .big{font-size:32px;margin-bottom:9px;transition:transform .16s ease}
+/* children must not swallow the drag events, or dragleave fires as the pointer
+   crosses the icon and the highlight flickers */
+.drop>*{pointer-events:none}
+.drop.over{background:var(--danger-bg);box-shadow:var(--clay-in),0 0 0 3px rgba(255,99,71,.55)}
+.drop.over .big{transform:translateY(-3px) scale(1.12)}
+.file-pill{display:flex;align-items:center;gap:11px;padding:12px 15px;border-radius:var(--r-md);
+  background:var(--surface);box-shadow:var(--clay-sm);margin-top:11px}
+.file-pill .fi{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:var(--danger-bg);font-size:15px;flex:none}
+
+/* Toast */
+.toast-wrap{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;
+  display:flex;flex-direction:column;gap:9px;align-items:center;pointer-events:none}
+.toast{padding:13px 20px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--clay);
+  font-weight:700;font-size:13.5px;animation:pop .2s ease;display:flex;gap:9px;align-items:center}
+
+/* FAB */
+.fab{position:fixed;inset-inline-end:24px;bottom:24px;z-index:40;padding:16px 24px;border-radius:22px;
+  font-size:14.5px;box-shadow:8px 8px 20px rgba(236,75,44,.38),-5px -5px 14px rgba(255,252,250,.85),
+  inset 2px 2px 4px rgba(255,255,255,.4),inset -3px -3px 8px rgba(160,40,20,.3)}
+
+.empty{padding:52px 24px;text-align:center;color:var(--ink-soft)}
+.empty .big{font-size:46px;margin-bottom:14px;opacity:.55}
+
+/* ============================================================
+   PRINT — submittal sheet
+   ============================================================ */
+#print-area{display:none}
+@media print{
+  @page{ size:A4; margin:14mm; }
+  body{background:#fff !important;background-image:none !important;color:#000}
+  #root,.toast-wrap,.overlay,.fab{display:none !important}
+  #print-area{display:block !important;font-size:11px;color:#000}
+  .pr-head{display:flex;justify-content:space-between;align-items:flex-start;
+    border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}
+  .pr-head h1{font-size:17px;margin:0}
+  .pr-head .sub{font-size:11px;margin-top:3px}
+  .pr-meta{font-size:10px;text-align:end;line-height:1.6}
+  .pr-sec{margin:12px 0 4px;font-size:11px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.06em;border-bottom:1px solid #999;padding-bottom:3px}
+  table.pr{width:100%;border-collapse:collapse;margin-bottom:6px}
+  table.pr th,table.pr td{border:1px solid #999;padding:4px 6px;font-size:10.5px;text-align:start;
+    vertical-align:top}
+  table.pr th{background:#eee;font-weight:800}
+  .pr-kv{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  .pr-kv div{border:1px solid #999;padding:4px 6px;font-size:10.5px}
+  .pr-kv b{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;color:#444}
+  .pr-note{border:1px solid #999;padding:6px 8px;font-size:10.5px;margin-bottom:6px}
+  .pr-photos{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+  .pr-photos img{width:23%;border:1px solid #999}
+  .pr-sign{display:flex;gap:10px;margin-top:22px}
+  .pr-sign div{flex:1;border-top:1px solid #000;padding-top:5px;font-size:10px}
+  .pr-sign b{display:block;font-size:11px;margin-bottom:16px}
+  .pr-foot{margin-top:14px;font-size:9px;color:#555;border-top:1px solid #ccc;padding-top:5px}
+}
+
+@media (max-width:720px){
+  .app{padding:14px 13px 90px}
+  .grid2,.grid3,.mile-grid{grid-template-columns:1fr}
+  .topbar{flex-wrap:wrap;padding:13px}
+  .who .nm{display:none}
+  .modal{padding:20px;border-radius:var(--r-lg)}
+  .fab{inset-inline-end:14px;bottom:14px;padding:14px 20px}
+}
+
+/* ============================================================
+   18. GENERIC ALIASES
+   Semantic names so a new app doesn't have to borrow
+   pour-tracker vocabulary. Same styles, friendlier names.
+   ============================================================ */
+.card        { padding:22px; background:var(--surface); border-radius:var(--r-lg); box-shadow:var(--clay); }
+.card-hover  { cursor:pointer; transition:transform .16s ease; }
+.card-hover:hover { transform:translateY(-3px); }
+.card-grid   { display:grid; grid-template-columns:repeat(auto-fill,minmax(285px,1fr)); gap:18px; }
+.stat-grid   { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:14px; margin-bottom:20px; }
+.list        { display:flex; flex-direction:column; gap:15px; }
+.list-card   { padding:20px 22px; background:var(--surface); border-radius:var(--r-lg); box-shadow:var(--clay);
+               cursor:pointer; transition:transform .16s ease; }
+.list-card:hover { transform:translateY(-3px); }
+.eyebrow     { font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--accent-ink); text-transform:uppercase; }
+html[dir="rtl"] .eyebrow { text-transform:none; letter-spacing:0; font-size:12px; }
+.section-title { font-size:17px; font-weight:800; letter-spacing:-.02em; }
+.well        { padding:17px; border-radius:var(--r-md); background:var(--surface-2); box-shadow:var(--clay-in); }
+.divider     { height:3px; border-radius:9px; background:var(--surface-2); box-shadow:var(--clay-in); margin:18px 0; }
+
+/* Accent tints — for category swatches, tag colours, project icons.
+   Softer set (backgrounds behind dark ink): */
+:root{
+  --tint-1:#ffe0d6; --tint-2:#ffe9cf; --tint-3:#e7f2dc; --tint-4:#dcefe8;
+  --tint-5:#dfeaf7; --tint-6:#eee0f3; --tint-7:#ffdfe6; --tint-8:#fdf0d2;
+  --clay-sky:#cfe6ff;
+}
+
+/* ============================================================
+   LANDING PAGE — additions composed from the clay primitives
+   ============================================================ */
+html{scroll-behavior:smooth}
+body{min-height:100%;height:auto;overflow-x:clip}
+.lp{max-width:1120px;margin:0 auto;padding:18px 18px 60px}
+
+/* A grid item defaults to min-width:auto, so anything with an unbreakable
+   minimum inside it (the folder tree, a long email) refuses to shrink and
+   spills out of the page on a phone. Every grid in this file opts out. */
+.grid2>*,.grid3>*,.hero>*,.feat-grid>*,.cc-row>*,.pain-grid>*,.steps>*,
+.also>*,.data-wrap>*,.up-card>*,.mock-tiles>*,.mock-mile>*,.tick li>*{min-width:0}
+.tree,.mock,.form-card,.card,.up-card{max-width:100%}
+
+/* ---------- top bar ---------- */
+.lp-top{position:sticky;top:0;z-index:50;padding-top:14px}
+/* a frosted strip so page content does not scroll through the gap above the bar */
+.lp-top:before{content:'';position:fixed;top:0;inset-inline:0;height:82px;pointer-events:none;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  -webkit-mask-image:linear-gradient(#000 22%,transparent 78%);mask-image:linear-gradient(#000 22%,transparent 78%)}
+.lp-top .topbar{position:relative;margin-bottom:26px}
+.brand .mark img{width:29px}
+.brand .nm{display:block;font-size:15.5px;line-height:1.15}
+.brand .sub{display:block;font-size:10.5px;font-weight:700;color:var(--ink-faint);letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+html[dir="rtl"] .brand .sub{text-transform:none;letter-spacing:0;font-size:11.5px}
+.top-end{margin-inline-start:auto;display:flex;align-items:center;gap:10px}
+
+/* ---------- generic section ---------- */
+.sec{margin:64px 0 0}
+.sec-head{max-width:660px;margin:0 auto 26px;text-align:center}
+.sec-head h2{font-size:clamp(23px,3.4vw,31px);line-height:1.25;margin-top:9px}
+.sec-head p{margin-top:11px;font-size:14.5px;font-weight:600;color:var(--ink-soft);line-height:1.75}
+.eyebrow-c{display:inline-block}
+a.btn{text-decoration:none}
+section[id]{scroll-margin-top:96px}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center;margin-top:8px}
+.hero h1{font-size:clamp(28px,4.6vw,44px);line-height:1.22}
+.hero .lede{margin-top:16px;font-size:15.5px;font-weight:600;color:var(--ink-soft);line-height:1.8;max-width:34em}
+.hero-cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:24px}
+.trust-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+
+/* ---------- hero mock ---------- */
+.mock{padding:16px}
+.mock-head{display:flex;align-items:center;gap:9px;padding:2px 6px 12px}
+.mock-dots{display:flex;gap:5px}
+.mock-dots i{width:9px;height:9px;border-radius:50%;background:var(--surface-2);box-shadow:var(--clay-in)}
+.mock-ttl{font-size:11.5px;font-weight:800;color:var(--ink-faint);letter-spacing:.04em}
+.mock-body{padding:13px}
+.mock-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
+.mock-tile{padding:11px 12px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--clay-sm)}
+.mock-tile .v{font-size:21px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.mock-tile .k{font-size:10px;font-weight:800;color:var(--ink-soft);margin-top:3px;line-height:1.3}
+.mock-row{padding:14px 15px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--clay-sm);margin-bottom:9px}
+.mock-row:last-child{margin-bottom:0}
+.mock-ref{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--accent-ink)}
+html[dir="rtl"] .mock-ref{letter-spacing:.04em}
+.mock-name{font-size:14px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+html[dir="rtl"] .mock-name{letter-spacing:0}
+.mock-mile{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+.mock-m{padding:9px 10px;border-radius:14px;background:var(--surface-2);box-shadow:var(--clay-in)}
+.mock-m .mk{font-size:9.5px;font-weight:800;color:var(--ink-faint);margin-bottom:6px}
+.chip-xs{padding:5px 10px;font-size:10.5px}
+
+/* ---------- pain cards ---------- */
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.pain{padding:22px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay)}
+.pain .emo{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;font-size:22px;
+  background:linear-gradient(145deg,#fffaf7,var(--clay-blush));box-shadow:var(--clay-sm);margin-bottom:14px}
+.pain h3{font-size:16px;line-height:1.35}
+.pain p{margin-top:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);line-height:1.8}
+
+/* ---------- features ---------- */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.feat{padding:22px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);
+  transition:transform .16s ease}
+.feat:hover{transform:translateY(-3px)}
+.feat .emo{font-size:26px;line-height:1;margin-bottom:12px}
+.feat h3{font-size:16px;line-height:1.35}
+.feat p{margin-top:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);line-height:1.8}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+
+/* ---------- also list ---------- */
+.also{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px;margin-top:16px}
+.also div{padding:12px 15px;border-radius:var(--r-md);background:var(--surface-2);box-shadow:var(--clay-in);
+  font-size:13px;font-weight:700;color:var(--ink-soft);line-height:1.6}
+
+/* ---------- steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.step{padding:22px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay);position:relative}
+.step .num{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:16px;font-weight:800;
+  background:linear-gradient(145deg,#ff8f78,#ec4b2c);color:#fff;margin-bottom:14px;
+  box-shadow:5px 5px 12px rgba(236,75,44,.3),inset 2px 2px 4px rgba(255,255,255,.35)}
+.step h3{font-size:15.5px;line-height:1.35}
+.step p{margin-top:8px;font-size:13.5px;font-weight:600;color:var(--ink-soft);line-height:1.8}
+
+/* ---------- data / trust ---------- */
+.data-wrap{display:grid;grid-template-columns:1.02fr .98fr;gap:22px;align-items:center}
+.tree{padding:18px 20px;border-radius:var(--r-md);background:var(--surface-2);box-shadow:var(--clay-in);
+  direction:ltr;text-align:left;font:700 12.5px/2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color:var(--ink-soft);overflow-x:auto;white-space:pre}
+.tick{list-style:none;margin:0;padding:0}
+.tick li{display:flex;gap:11px;align-items:flex-start;padding:11px 0;font-size:14px;font-weight:600;
+  color:var(--ink-soft);line-height:1.75}
+.tick li b{color:var(--ink);font-weight:800}
+.tick .ck{width:24px;height:24px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:11px;
+  background:var(--ok-bg);color:#227353;font-weight:800;margin-top:2px}
+
+/* ---------- form ---------- */
+.form-wrap{max-width:620px;margin:0 auto}
+.form-card{padding:28px;background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--clay)}
+.cc-row{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:12px}
+/* the dial code is a Latin token: force LTR in both directions so "+966" never
+   gets reordered, and keep the chevron on the physical right where the text ends.
+   Country flags are deliberately NOT in the option text — Windows has no flag
+   glyphs and renders them as two bare letters. */
+#f-cc{direction:ltr;text-align:left;font-size:13px;padding:14px 38px 14px 14px !important;
+  background-position:right 13px center !important;text-overflow:ellipsis}
+/* below this width the two boxes stack, so the country name is never clipped */
+@media (max-width:560px){ .cc-row{grid-template-columns:minmax(0,1fr)} }
+.fld-err{font-size:11.5px;font-weight:700;color:var(--danger);margin:6px 0 0;margin-inline-start:4px;
+  min-height:15px;line-height:1.35}
+.input.bad{box-shadow:var(--clay-in),0 0 0 2.5px rgba(200,50,63,.42)}
+.opt-tag{font-weight:700;color:var(--ink-faint);text-transform:none;letter-spacing:0}
+.dl-note{margin-top:14px;font-size:11.5px;font-weight:600;color:var(--ink-faint);line-height:1.75;text-align:center}
+.form-foot{margin-top:16px}
+.progress-line{height:6px;border-radius:99px;background:var(--surface-2);box-shadow:var(--clay-in);
+  overflow:hidden;margin-bottom:18px}
+.progress-line i{display:block;height:100%;border-radius:99px;width:0;
+  background:linear-gradient(145deg,#ff8f78,#ec4b2c);transition:width .25s ease}
+
+/* ---------- success ---------- */
+.success{text-align:center}
+.success .big{width:76px;height:76px;margin:0 auto 16px;border-radius:26px;display:grid;place-items:center;
+  font-size:34px;background:linear-gradient(145deg,#d9f0e5,#a9dcc6);
+  box-shadow:7px 7px 16px rgba(47,143,106,.28),-5px -5px 14px rgba(255,252,250,.9),
+             inset 2px 2px 5px rgba(255,255,255,.7)}
+.success h3{font-size:21px;line-height:1.3}
+.success p{margin-top:10px;font-size:14px;font-weight:600;color:var(--ink-soft);line-height:1.8}
+.next-steps{margin-top:20px;text-align:start}
+.next-steps .ns{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-md);
+  background:var(--surface-2);box-shadow:var(--clay-in);margin-bottom:9px;font-size:13px;font-weight:600;
+  color:var(--ink-soft);line-height:1.7}
+.next-steps .ns b{color:var(--ink);font-weight:800}
+.next-steps .ns i{font-style:normal;font-size:16px;flex:none}
+
+/* ---------- faq ---------- */
+.faq{max-width:760px;margin:0 auto}
+.faq-item{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--clay-sm);
+  margin-bottom:11px;overflow:hidden}
+.faq-item summary{list-style:none;cursor:pointer;padding:18px 20px;font-size:14.5px;font-weight:800;
+  display:flex;align-items:center;gap:12px;letter-spacing:-.01em}
+html[dir="rtl"] .faq-item summary{letter-spacing:0}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary:after{content:'+';margin-inline-start:auto;font-size:20px;font-weight:800;
+  color:var(--accent-ink);flex:none;line-height:1;transition:transform .18s ease}
+.faq-item[open] summary:after{transform:rotate(45deg)}
+.faq-body{padding:0 20px 20px;font-size:13.5px;font-weight:600;color:var(--ink-soft);line-height:1.9}
+
+/* ---------- upgrade / footer ---------- */
+.up-card{padding:28px;border-radius:var(--r-xl);background:var(--surface);box-shadow:var(--clay);
+  display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center}
+.up-list{list-style:none;margin:0;padding:0}
+.up-list li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13px;font-weight:600;
+  color:var(--ink-soft);line-height:1.7}
+.up-list .ck{width:21px;height:21px;border-radius:8px;flex:none;display:grid;place-items:center;font-size:10px;
+  background:var(--accent-bg);color:var(--accent-ink);font-weight:800;margin-top:2px}
+.lp-foot{margin-top:56px;padding-top:22px;text-align:center;font-size:12px;font-weight:600;color:var(--ink-faint);
+  line-height:1.9}
+.lp-foot a{color:var(--accent-ink);text-decoration:none;font-weight:800}
+.lp-foot a:hover{text-decoration:underline}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .hero,.data-wrap,.up-card{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .lp{padding:12px 13px 48px}
+  .lp-top{position:static;padding-top:0}
+  .lp-top:before{display:none}
+  .sec{margin-top:48px}
+  .brand .sub{display:none}
+  .mock-tile{padding:9px 10px}
+  .mock-tile .v{font-size:19px}
+  .mock-tile .k{font-size:9.5px}
+  .form-card{padding:20px;border-radius:var(--r-lg)}
+  .hero-cta .btn{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="lp">
+
+  <!-- ═══════════ TOP BAR ═══════════ -->
+  <div class="lp-top">
+    <div class="topbar">
+      <div class="brand">
+        <span class="mark" id="brand-mark">🏗️</span>
+        <span>
+          <span class="nm" data-i="brand.name"></span>
+          <span class="sub" data-i="brand.sub"></span>
+        </span>
+      </div>
+      <div class="top-end">
+        <div class="lang" role="group" aria-label="Language">
+          <button type="button" id="lang-ar" onclick="setLang('ar')">العربية</button>
+          <button type="button" id="lang-en" onclick="setLang('en')">English</button>
+        </div>
+        <a class="btn btn-primary btn-sm" href="#get" data-i="nav.cta"></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero">
+    <div>
+      <span class="chip chip-accent" data-i="hero.eyebrow"></span>
+      <h1 style="margin-top:16px" data-i="hero.h1"></h1>
+      <p class="lede" data-i="hero.lede"></p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#get" data-i="hero.cta1"></a>
+        <a class="btn" href="#how" data-i="hero.cta2"></a>
+      </div>
+      <div class="trust-row">
+        <span class="chip chip-idle" data-i="hero.t1"></span>
+        <span class="chip chip-idle" data-i="hero.t2"></span>
+        <span class="chip chip-idle" data-i="hero.t3"></span>
+        <span class="chip chip-idle" data-i="hero.t4"></span>
+      </div>
+    </div>
+
+    <div class="mock-wrap">
+      <div class="mock clay" aria-hidden="true">
+        <div class="mock-head">
+          <span class="mock-dots"><i></i><i></i><i></i></span>
+          <span class="mock-ttl" data-i="mock.title"></span>
+        </div>
+        <div class="mock-body well">
+          <div class="mock-tiles">
+            <div class="mock-tile"><div class="v mono">12</div><div class="k" data-i="mock.k1"></div></div>
+            <div class="mock-tile"><div class="v mono" style="color:var(--warn)">3</div><div class="k" data-i="mock.k2"></div></div>
+            <div class="mock-tile"><div class="v mono" style="color:var(--danger)">1</div><div class="k" data-i="mock.k3"></div></div>
+          </div>
+
+          <div class="mock-row">
+            <div class="mock-ref">ANT-014</div>
+            <div class="mock-name" data-i="mock.r1n"></div>
+            <div class="mock-mile">
+              <div class="mock-m">
+                <div class="mk" data-i="mock.d7"></div>
+                <span class="chip chip-xs chip-warn"><span class="dot"></span><span data-i="mock.due2"></span></span>
+              </div>
+              <div class="mock-m">
+                <div class="mk" data-i="mock.d28"></div>
+                <span class="chip chip-xs chip-idle"><span class="dot"></span><span data-i="mock.far"></span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-row">
+            <div class="mock-ref">ANT-013</div>
+            <div class="mock-name" data-i="mock.r2n"></div>
+            <div class="mock-mile">
+              <div class="mock-m">
+                <div class="mk" data-i="mock.d7"></div>
+                <span class="chip chip-xs chip-ok"><span class="dot"></span><span data-i="mock.appr"></span></span>
+              </div>
+              <div class="mock-m">
+                <div class="mk" data-i="mock.d28"></div>
+                <span class="chip chip-xs chip-danger"><span class="dot"></span><span data-i="mock.late"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ THE PROBLEM ═══════════ -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="eyebrow eyebrow-c" data-i="pain.eyebrow"></span>
+      <h2 data-i="pain.h2"></h2>
+      <p data-i="pain.sub"></p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain"><div class="emo">📅</div><h3 data-i="pain.1h"></h3><p data-i="pain.1p"></p></div>
+      <div class="pain"><div class="emo">🗂️</div><h3 data-i="pain.2h"></h3><p data-i="pain.2p"></p></div>
+      <div class="pain"><div class="emo">📉</div><h3 data-i="pain.3h"></h3><p data-i="pain.3p"></p></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FEATURES ═══════════ -->
+  <section class="sec" id="features">
+    <div class="sec-head">
+      <span class="eyebrow eyebrow-c" data-i="feat.eyebrow"></span>
+      <h2 data-i="feat.h2"></h2>
+      <p data-i="feat.sub"></p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="emo">⏳</div>
+        <h3 data-i="feat.1h"></h3>
+        <p data-i="feat.1p"></p>
+        <div class="legend">
+          <span class="chip chip-xs chip-idle"><span class="dot"></span><span data-i="feat.lg1"></span></span>
+          <span class="chip chip-xs chip-warn"><span class="dot"></span><span data-i="feat.lg2"></span></span>
+          <span class="chip chip-xs chip-danger"><span class="dot"></span><span data-i="feat.lg3"></span></span>
+          <span class="chip chip-xs chip-info"><span class="dot"></span><span data-i="feat.lg4"></span></span>
+          <span class="chip chip-xs chip-ok"><span class="dot"></span><span data-i="feat.lg5"></span></span>
+        </div>
+      </div>
+      <div class="feat"><div class="emo">📎</div><h3 data-i="feat.2h"></h3><p data-i="feat.2p"></p></div>
+      <div class="feat"><div class="emo">📧</div><h3 data-i="feat.3h"></h3><p data-i="feat.3p"></p></div>
+      <div class="feat"><div class="emo">🚚</div><h3 data-i="feat.4h"></h3><p data-i="feat.4p"></p></div>
+      <div class="feat"><div class="emo">🖨️</div><h3 data-i="feat.5h"></h3><p data-i="feat.5p"></p></div>
+      <div class="feat"><div class="emo">🌐</div><h3 data-i="feat.6h"></h3><p data-i="feat.6p"></p></div>
+    </div>
+    <div class="also">
+      <div data-i="feat.a1"></div>
+      <div data-i="feat.a2"></div>
+      <div data-i="feat.a3"></div>
+      <div data-i="feat.a4"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ HOW IT WORKS ═══════════ -->
+  <section class="sec" id="how">
+    <div class="sec-head">
+      <span class="eyebrow eyebrow-c" data-i="how.eyebrow"></span>
+      <h2 data-i="how.h2"></h2>
+      <p data-i="how.sub"></p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num mono">1</div><h3 data-i="how.1h"></h3><p data-i="how.1p"></p></div>
+      <div class="step"><div class="num mono">2</div><h3 data-i="how.2h"></h3><p data-i="how.2p"></p></div>
+      <div class="step"><div class="num mono">3</div><h3 data-i="how.3h"></h3><p data-i="how.3p"></p></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ YOUR DATA ═══════════ -->
+  <section class="sec" id="data">
+    <div class="card">
+      <div class="data-wrap">
+        <div>
+          <span class="eyebrow" data-i="data.eyebrow"></span>
+          <h2 style="font-size:clamp(22px,3.2vw,28px);line-height:1.28;margin-top:9px" data-i="data.h2"></h2>
+          <ul class="tick">
+            <li><span class="ck">✓</span><span data-i="data.1"></span></li>
+            <li><span class="ck">✓</span><span data-i="data.2"></span></li>
+            <li><span class="ck">✓</span><span data-i="data.3"></span></li>
+            <li><span class="ck">✓</span><span data-i="data.4"></span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="tree" id="tree"></div>
+          <p class="tiny muted" style="margin-top:11px;line-height:1.8;font-weight:600" data-i="data.cap"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ REQUIREMENTS ═══════════ -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="eyebrow eyebrow-c" data-i="req.eyebrow"></span>
+      <h2 data-i="req.h2"></h2>
+    </div>
+    <div class="also" style="max-width:900px;margin-inline:auto">
+      <div data-i="req.1"></div>
+      <div data-i="req.2"></div>
+      <div data-i="req.3"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ THE FORM ═══════════ -->
+  <section class="sec" id="get">
+    <div class="sec-head">
+      <span class="eyebrow eyebrow-c" data-i="form.eyebrow"></span>
+      <h2 data-i="form.h2"></h2>
+      <p data-i="form.sub"></p>
+    </div>
+
+    <div class="form-wrap">
+      <div class="form-card">
+
+        <div id="form-view">
+          <div class="progress-line"><i id="prog"></i></div>
+
+          <form id="lead-form" novalidate autocomplete="on">
+            <div class="grid2">
+              <div class="field">
+                <label for="f-first" data-i="form.first"></label>
+                <input class="input" id="f-first" name="given-name" type="text" autocomplete="given-name" data-ph="form.firstPh" required>
+                <p class="fld-err" id="e-first"></p>
+              </div>
+              <div class="field">
+                <label for="f-last" data-i="form.last"></label>
+                <input class="input" id="f-last" name="family-name" type="text" autocomplete="family-name" data-ph="form.lastPh" required>
+                <p class="fld-err" id="e-last"></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="f-phone" data-i="form.phone"></label>
+              <div class="cc-row">
+                <select class="input" id="f-cc" name="country-code" aria-label="Country code"></select>
+                <input class="input num" id="f-phone" name="tel" type="tel" inputmode="tel" autocomplete="tel-national" data-ph="form.phonePh" required>
+              </div>
+              <p class="fld-err" id="e-phone"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-email" data-i="form.email"></label>
+              <input class="input num" id="f-email" name="email" type="email" inputmode="email" autocomplete="email" data-ph="form.emailPh" required>
+              <p class="fld-err" id="e-email"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-company"><span data-i="form.company"></span> <span class="opt-tag" data-i="form.optional"></span></label>
+              <input class="input" id="f-company" name="organization" type="text" autocomplete="organization" data-ph="form.companyPh">
+              <p class="fld-err" id="e-company"></p>
+            </div>
+
+            <div class="form-foot">
+              <button class="btn btn-primary btn-block" id="dl-btn" type="submit" disabled>
+                <span id="dl-btn-txt" data-i="form.btnLocked"></span>
+              </button>
+              <p class="dl-note" data-i="form.privacy"></p>
+            </div>
+          </form>
+        </div>
+
+        <div id="done-view" class="success hidden">
+          <div class="big">✅</div>
+          <h3 data-i="done.h"></h3>
+          <p data-i="done.p"></p>
+          <div class="next-steps">
+            <div class="ns"><i>1️⃣</i><span data-i="done.s1"></span></div>
+            <div class="ns"><i>2️⃣</i><span data-i="done.s2"></span></div>
+            <div class="ns"><i>3️⃣</i><span data-i="done.s3"></span></div>
+          </div>
+          <a class="btn btn-block" id="dl-again" href="#" style="margin-top:16px" data-i="done.again"></a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ FAQ ═══════════ -->
+  <section class="sec" id="faq">
+    <div class="sec-head">
+      <span class="eyebrow eyebrow-c" data-i="faq.eyebrow"></span>
+      <h2 data-i="faq.h2"></h2>
+    </div>
+    <div class="faq">
+      <details class="faq-item"><summary data-i="faq.q1"></summary><div class="faq-body" data-i="faq.a1"></div></details>
+      <details class="faq-item"><summary data-i="faq.q2"></summary><div class="faq-body" data-i="faq.a2"></div></details>
+      <details class="faq-item"><summary data-i="faq.q3"></summary><div class="faq-body" data-i="faq.a3"></div></details>
+      <details class="faq-item"><summary data-i="faq.q4"></summary><div class="faq-body" data-i="faq.a4"></div></details>
+      <details class="faq-item"><summary data-i="faq.q5"></summary><div class="faq-body" data-i="faq.a5"></div></details>
+      <details class="faq-item"><summary data-i="faq.q6"></summary><div class="faq-body" data-i="faq.a6"></div></details>
+    </div>
+  </section>
+
+  <!-- ═══════════ UPGRADE ═══════════ -->
+  <section class="sec">
+    <div class="up-card">
+      <div>
+        <span class="eyebrow" data-i="up.eyebrow"></span>
+        <h2 style="font-size:clamp(21px,3vw,27px);line-height:1.3;margin-top:9px" data-i="up.h2"></h2>
+        <p class="muted" style="margin-top:11px;font-size:14px;font-weight:600;line-height:1.8" data-i="up.p"></p>
+        <a class="btn btn-primary" id="up-cta" style="margin-top:18px" href="#" target="_blank" rel="noopener noreferrer" data-i="up.cta"></a>
+      </div>
+      <ul class="up-list">
+        <li><span class="ck">✦</span><span data-i="up.1"></span></li>
+        <li><span class="ck">✦</span><span data-i="up.2"></span></li>
+        <li><span class="ck">✦</span><span data-i="up.3"></span></li>
+        <li><span class="ck">✦</span><span data-i="up.4"></span></li>
+        <li><span class="ck">✦</span><span data-i="up.5"></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="lp-foot">
+    <div class="divider" style="max-width:180px;margin-inline:auto"></div>
+    <p data-i="foot.line"></p>
+    <p style="margin-top:6px"><a href="https://rabaedapp.com" target="_blank" rel="noopener noreferrer">rabaedapp.com</a></p>
+  </div>
+
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+<div class="build-tag" id="build-tag"></div>
+
+<script>
+/* ============================================================================
+   RABAED — FREE TOOL LANDING PAGE
+   ----------------------------------------------------------------------------
+   THREE LINES YOU EDIT. Nothing else needs changing.
+   ============================================================================ */
+
+/* 1 ── Where the leads go. Paste the Apps Script Web App URL here.
+        Leave it empty and the form still works — it just logs to the console. */
+const SHEET_ENDPOINT = '';
+
+/* 2 ── The tool file that gets downloaded, relative to this page. */
+const TOOL_FILE     = 'pour-tracker.html';
+const DOWNLOAD_NAME = 'Rabaed-Pour-Tracker.html';
+
+/* 3 ── Where "Request the cloud version" sends people. */
+const UPGRADE_URL = 'https://rabaedapp.com/?utm_source=free-tool-landing#contact';
+
+/* 4 ── Which language a first-time visitor sees. 'ar' or 'en'.
+        Anyone who touches the switch gets their choice remembered from then on.
+        To follow the visitor's browser instead, set this to 'auto'. */
+const DEFAULT_LANG = 'ar';
+
+const BUILD = '2026-08-25.1';
+const LOGO_RABAED = 'data:image/png;base64,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';
+
+/* ============================================================================
+   COUNTRY CODES
+   ============================================================================ */
+const COUNTRIES = [
+  {c:'+966', f:'🇸🇦', ar:'السعودية',        en:'Saudi Arabia'},
+  {c:'+971', f:'🇦🇪', ar:'الإمارات',         en:'United Arab Emirates'},
+  {c:'+965', f:'🇰🇼', ar:'الكويت',           en:'Kuwait'},
+  {c:'+974', f:'🇶🇦', ar:'قطر',              en:'Qatar'},
+  {c:'+973', f:'🇧🇭', ar:'البحرين',          en:'Bahrain'},
+  {c:'+968', f:'🇴🇲', ar:'عُمان',            en:'Oman'},
+  {c:'+967', f:'🇾🇪', ar:'اليمن',            en:'Yemen'},
+  {c:'+962', f:'🇯🇴', ar:'الأردن',           en:'Jordan'},
+  {c:'+961', f:'🇱🇧', ar:'لبنان',            en:'Lebanon'},
+  {c:'+963', f:'🇸🇾', ar:'سوريا',            en:'Syria'},
+  {c:'+964', f:'🇮🇶', ar:'العراق',           en:'Iraq'},
+  {c:'+970', f:'🇵🇸', ar:'فلسطين',           en:'Palestine'},
+  {c:'+20',  f:'🇪🇬', ar:'مصر',              en:'Egypt'},
+  {c:'+249', f:'🇸🇩', ar:'السودان',          en:'Sudan'},
+  {c:'+218', f:'🇱🇾', ar:'ليبيا',            en:'Libya'},
+  {c:'+216', f:'🇹🇳', ar:'تونس',             en:'Tunisia'},
+  {c:'+213', f:'🇩🇿', ar:'الجزائر',          en:'Algeria'},
+  {c:'+212', f:'🇲🇦', ar:'المغرب',           en:'Morocco'},
+  {c:'+222', f:'🇲🇷', ar:'موريتانيا',        en:'Mauritania'},
+  {c:'+252', f:'🇸🇴', ar:'الصومال',          en:'Somalia'},
+  {c:'+253', f:'🇩🇯', ar:'جيبوتي',           en:'Djibouti'},
+  {c:'+269', f:'🇰🇲', ar:'جزر القمر',        en:'Comoros'},
+  {c:'+90',  f:'🇹🇷', ar:'تركيا',            en:'Türkiye'},
+  {c:'+98',  f:'🇮🇷', ar:'إيران',            en:'Iran'},
+  {c:'+92',  f:'🇵🇰', ar:'باكستان',          en:'Pakistan'},
+  {c:'+91',  f:'🇮🇳', ar:'الهند',            en:'India'},
+  {c:'+880', f:'🇧🇩', ar:'بنغلاديش',         en:'Bangladesh'},
+  {c:'+94',  f:'🇱🇰', ar:'سريلانكا',         en:'Sri Lanka'},
+  {c:'+977', f:'🇳🇵', ar:'نيبال',            en:'Nepal'},
+  {c:'+93',  f:'🇦🇫', ar:'أفغانستان',        en:'Afghanistan'},
+  {c:'+63',  f:'🇵🇭', ar:'الفلبين',          en:'Philippines'},
+  {c:'+62',  f:'🇮🇩', ar:'إندونيسيا',        en:'Indonesia'},
+  {c:'+60',  f:'🇲🇾', ar:'ماليزيا',          en:'Malaysia'},
+  {c:'+65',  f:'🇸🇬', ar:'سنغافورة',         en:'Singapore'},
+  {c:'+86',  f:'🇨🇳', ar:'الصين',            en:'China'},
+  {c:'+81',  f:'🇯🇵', ar:'اليابان',          en:'Japan'},
+  {c:'+82',  f:'🇰🇷', ar:'كوريا الجنوبية',   en:'South Korea'},
+  {c:'+44',  f:'🇬🇧', ar:'المملكة المتحدة',  en:'United Kingdom'},
+  {c:'+353', f:'🇮🇪', ar:'أيرلندا',          en:'Ireland'},
+  {c:'+33',  f:'🇫🇷', ar:'فرنسا',            en:'France'},
+  {c:'+49',  f:'🇩🇪', ar:'ألمانيا',          en:'Germany'},
+  {c:'+39',  f:'🇮🇹', ar:'إيطاليا',          en:'Italy'},
+  {c:'+34',  f:'🇪🇸', ar:'إسبانيا',          en:'Spain'},
+  {c:'+31',  f:'🇳🇱', ar:'هولندا',           en:'Netherlands'},
+  {c:'+46',  f:'🇸🇪', ar:'السويد',           en:'Sweden'},
+  {c:'+7',   f:'🇷🇺', ar:'روسيا',            en:'Russia / Kazakhstan'},
+  {c:'+1',   f:'🇺🇸', ar:'أمريكا / كندا',    en:'USA / Canada'},
+  {c:'+52',  f:'🇲🇽', ar:'المكسيك',          en:'Mexico'},
+  {c:'+55',  f:'🇧🇷', ar:'البرازيل',         en:'Brazil'},
+  {c:'+61',  f:'🇦🇺', ar:'أستراليا',         en:'Australia'},
+  {c:'+27',  f:'🇿🇦', ar:'جنوب أفريقيا',     en:'South Africa'},
+  {c:'+234', f:'🇳🇬', ar:'نيجيريا',          en:'Nigeria'},
+  {c:'+254', f:'🇰🇪', ar:'كينيا',            en:'Kenya'},
+  {c:'+251', f:'🇪🇹', ar:'إثيوبيا',          en:'Ethiopia'}
+];
+
+/* ============================================================================
+   COPY — both languages side by side. Edit here, not in the markup.
+   ============================================================================ */
+const I18N = {
+ar: {
+  'meta.title'   : 'متتبّع الصبّات واختبارات المكعبات — أداة مجانية من رَبَاعِد',
+  'meta.desc'    : 'ملف HTML واحد يفتح بنقرتين. سجّل الصبّة واعرف موعد اختبار المكعبات ٧ و ٢٨ يوماً قبل أن يتأخر. بدون حساب، بدون سيرفر، بياناتك تبقى على جهازك.',
+
+  'brand.name'   : 'رَبَاعِد',
+  'brand.sub'    : 'أدوات مواقع الإنشاء',
+  'nav.cta'      : 'حمّل مجاناً',
+
+  'hero.eyebrow' : '🎁 أداة مجانية · بدون حساب · بدون اشتراك',
+  'hero.h1'      : 'سجّل الصبّة اليوم، واعرف متى يحين اختبار المكعبات — <span style="color:var(--accent-ink)">قبل أن يتأخر</span>',
+  'hero.lede'    : 'ملف HTML واحد يفتح بنقرتين على جهازك. تختار له مجلداً، ومن تلك اللحظة كل صبّة تسجّلها تُكتب هناك: العدّ التنازلي لـ ٧ و ٢٨ يوماً، تقارير المختبر، موافقات الاستشاري، وورقة اعتماد A4 جاهزة للطباعة.',
+  'hero.cta1'    : '⬇️ حمّل الأداة مجاناً',
+  'hero.cta2'    : 'كيف تعمل؟',
+  'hero.t1'      : 'مجانية بالكامل',
+  'hero.t2'      : 'تعمل بدون إنترنت',
+  'hero.t3'      : 'بياناتك تبقى عندك',
+  'hero.t4'      : 'عربي / English',
+
+  'mock.title'   : 'برج النخيل — المرحلة الثانية',
+  'mock.k1'      : 'صبّة مسجّلة',
+  'mock.k2'      : 'اختبار قريب',
+  'mock.k3'      : 'اختبار متأخر',
+  'mock.r1n'     : 'أساسات — قاعدة F12، المنسوب −٣٫٥',
+  'mock.r2n'     : 'أعمدة — الدور الأرضي، C1 إلى C6',
+  'mock.d7'      : 'مكعب ٧ أيام',
+  'mock.d28'     : 'مكعب ٢٨ يوماً',
+  'mock.due2'    : 'بعد يومين',
+  'mock.far'     : 'لم يحن بعد',
+  'mock.appr'    : 'معتمد',
+  'mock.late'    : 'متأخر ٣ أيام',
+
+  'pain.eyebrow' : 'لماذا هذه الأداة',
+  'pain.h2'      : 'الصبّة تُنفَّذ في ساعة. متابعتها تستمر شهراً.',
+  'pain.sub'     : 'ثلاثة أشياء تجعل ملف الخرسانة يتأخر — ولا واحد منها له علاقة بجودة الخرسانة نفسها.',
+  'pain.1h'      : '٧ و ٢٨ يوماً تمرّ بصمت',
+  'pain.1p'      : 'التاريخ الوحيد الذي تتذكره هو تاريخ الصبّة. مواعيد كسر المكعبات تمرّ داخل البرنامج الأسبوعي بلا تنبيه، وتكتشف التأخير في اللحظة التي يسأل فيها الاستشاري.',
+  'pain.2h'      : 'التقرير موجود… في مكان ما',
+  'pain.2p'      : 'تقرير المختبر في واتساب، وموافقة الاستشاري في الإيميل، وصورة الصبّة في جوال المراقب. عند إعداد ملف التسليم تبحث في ثلاثة أماكن مختلفة.',
+  'pain.3h'      : 'الجدول لا يطاردك',
+  'pain.3p'      : 'إكسل ممتاز في التخزين، وسيّئ في التذكير. لا يعرف أن مكعب اليوم متأخر، ولا يفرّق بين اختبار عند المختبر واختبار عند الاستشاري.',
+
+  'feat.eyebrow' : 'ما الذي تفعله',
+  'feat.h2'      : 'ستة أشياء تختصر عليك متابعة شهر كامل',
+  'feat.sub'     : 'كل ما تحتاجه لملف خرسانة نظيف — في ملف واحد على جهازك.',
+  'feat.1h'      : 'عدّ تنازلي يحسب نفسه',
+  'feat.1p'      : 'أدخل تاريخ الصبّة فقط. الأداة تحسب موعد ٧ و ٢٨ يوماً وتعطي كل اختبار لوناً يقول حالته من مسافة متر.',
+  'feat.lg1'     : 'بعيد',
+  'feat.lg2'     : '٣ أيام أو أقل',
+  'feat.lg3'     : 'متأخر',
+  'feat.lg4'     : 'عند الاستشاري',
+  'feat.lg5'     : 'معتمد',
+  'feat.2h'      : 'المرفق هو الذي يحرّك الحالة',
+  'feat.2p'      : 'أرفق تقرير المختبر فتصبح الحالة «مستلم من المختبر» ويختفي زر تذكير المختبر. أرفق موافقة الاستشاري فيُغلق الاختبار أخضر. الحركة للأمام فقط — الاختبار المرفوض لا ينقلب معتمداً بصمت لأن أحدهم أسقط ملفاً.',
+  'feat.3h'      : 'تذكير المختبر بنقرة',
+  'feat.3p'      : 'زر واحد يفتح بريدك أنت، بالموضوع والنص جاهزين، موجّهاً إلى بريد المختبر المسجّل في بيانات المشروع. الرسالة تخرج من عنوانك — وهذا ما يجعل المطالبة تصل فعلاً. كل تذكير يُسجَّل في تاريخ الاختبار.',
+  'feat.4h'      : 'بوالص التوريد كما تصل',
+  'feat.4p'      : 'البوالص تصل طوال الصباح بعد تسجيل الصبّة بوقت طويل. أضف صفاً وقتما تشاء، أو الصق دفعة كاملة من جدولك: رقم البوليصة، الكمية، رقم الخلاطة، الوقت. يُحفظ فوراً ويحدّث إجمالي الكمية.',
+  'feat.5h'      : 'ورقة اعتماد A4 جاهزة',
+  'feat.5p'      : 'كل بيانات الصبّة والعناصر والاختبارات والصور، مرتّبة في ورقة واحدة بخانات التواقيع الثلاث. اضغط طباعة وسلّمها كما هي، أو احفظها PDF.',
+  'feat.6h'      : 'عربية وإنجليزية بالكامل',
+  'feat.6p'      : 'واجهة عربية بترتيب من اليمين لليسار — لا ترجمة نصف مكتملة ولا حقول مقلوبة. اختيار اللغة محفوظ لكل من يفتح الملف.',
+  'feat.a1'      : '🏗️ عناصر متعددة في الصبّة الواحدة، مع وسم المبنى والدور',
+  'feat.a2'      : '📸 صور الموقع تُصغَّر قبل الحفظ حتى لا ينتفخ المجلد',
+  'feat.a3'      : '📊 تصدير CSV لكامل السجل بضغطة واحدة',
+  'feat.a4'      : '🔎 بحث وفلاتر حسب الحالة والعنصر والمورّد والتاريخ',
+
+  'how.eyebrow'  : 'ثلاث خطوات',
+  'how.h2'       : 'من التحميل إلى أول صبّة مسجّلة — دقيقتان',
+  'how.sub'      : 'لا تثبيت، لا حساب، لا سيرفر محلي، لا Node، لا خطوة بناء.',
+  'how.1h'       : 'حمّل الملف',
+  'how.1p'       : 'املأ البيانات بالأسفل ويبدأ التحميل مباشرة. ملف HTML واحد — احفظه في أي مكان على جهازك.',
+  'how.2h'       : 'افتحه بنقرتين',
+  'how.2p'       : 'في Chrome أو Edge. يعمل من الملف مباشرة بدون أي خادم. لو نقلته لجهاز آخر يعمل هناك أيضاً.',
+  'how.3h'       : 'اختر مجلد المشروع',
+  'how.3p'       : 'الأداة تطلب منك مجلداً مرة واحدة. من تلك اللحظة كل ما تسجّله يُكتب داخله، وتفتحه في المرة القادمة بنقرة واحدة.',
+
+  'data.eyebrow' : 'الخصوصية',
+  'data.h2'      : 'ملفاتك لا تغادر جهازك — لأنه لا يوجد مكان تذهب إليه',
+  'data.1'       : '<b>لا يوجد سيرفر نرفع إليه شيئاً.</b> لا حساب، لا تسجيل دخول، لا قاعدة بيانات عندنا. الأداة لا تعرف عنك شيئاً.',
+  'data.2'       : '<b>مجلد واحد يملكه المشروع.</b> تختاره أنت، ويحوي ملف السجل ومجلد المرفقات. انسخه، ارفعه على الشبكة الداخلية، أو خذه معك — يعمل كما هو.',
+  'data.3'       : '<b>ملف نصي مفتوح، وليس صندوقاً مغلقاً.</b> ‏<span class="num">concrete_db.json</span>‏ تقرؤه، تنسخه احتياطياً، وتفتحه بأي أداة. لا شيء محبوس في مخزن متصفح لا تصل إليه.',
+  'data.4'       : '<b>تعمل والإنترنت مقطوع.</b> في القبو، في موقع بعيد، أو في طائرة. (الخطوط فقط تُجلب من الإنترنت في أول فتح — بدونها يتغيّر شكل الخط ويبقى كل شيء يعمل.)',
+  'data.cap'     : 'هذا هو كل ما تنتجه الأداة على جهازك. لا شيء غيره، ولا شيء في مكان آخر.',
+
+  'req.eyebrow'  : 'المتطلبات',
+  'req.h2'       : 'ما الذي تحتاجه لتشغيلها',
+  'req.1'        : '💻 ويندوز أو ماك أو لينكس — سطح المكتب',
+  'req.2'        : '🟢 Chrome أو Edge للتجربة الكاملة مع المرفقات',
+  'req.3'        : '🟡 Firefox و Safari تعمل بوضع مبسّط: السجلات داخل المتصفح والمرفقات معطّلة',
+
+  'form.eyebrow' : 'التحميل',
+  'form.h2'      : 'حمّل الأداة الآن',
+  'form.sub'     : 'أكمل البيانات ويبدأ التحميل مباشرة. نستخدمها لإرسال التحديثات وتحسينات الأداة — لا أكثر.',
+  'form.first'   : 'الاسم الأول',
+  'form.firstPh' : 'أحمد',
+  'form.last'    : 'اسم العائلة',
+  'form.lastPh'  : 'السالم',
+  'form.phone'   : 'رقم الجوال',
+  'form.phonePh' : '5X XXX XXXX',
+  'form.email'   : 'البريد الإلكتروني',
+  'form.emailPh' : 'name@company.com',
+  'form.company' : 'اسم الشركة',
+  'form.optional': '(اختياري)',
+  'form.companyPh':'شركة المقاولات …',
+  'form.btnLocked': '🔒 أكمل البيانات لتفعيل التحميل',
+  'form.btnReady' : '⬇️ حمّل الأداة الآن',
+  'form.btnBusy'  : '⏳ جارٍ التجهيز …',
+  'form.privacy'  : 'بالضغط على زر التحميل توافق على أن نتواصل معك بخصوص الأداة وتحديثاتها. لن نشارك بياناتك مع أي جهة أخرى.',
+
+  'err.first'    : 'اكتب الاسم الأول (حرفان على الأقل)',
+  'err.last'     : 'اكتب اسم العائلة (حرفان على الأقل)',
+  'err.phone'    : 'اكتب رقم جوال صحيح (٦ إلى ١٥ رقماً)',
+  'err.email'    : 'اكتب بريداً إلكترونياً صحيحاً',
+
+  'done.h'       : 'تم — التحميل بدأ',
+  'done.p'       : 'ابحث عن <b class="num">Rabaed-Pour-Tracker.html</b> في مجلد التنزيلات. ثلاث خطوات وتكون جاهزاً:',
+  'done.s1'      : '<b>احفظ الملف</b> في مكان ثابت — سطح المكتب أو مجلد المشروع. ليس في مجلد التنزيلات.',
+  'done.s2'      : '<b>افتحه بنقرتين</b> في Chrome أو Edge.',
+  'done.s3'      : '<b>اختر مجلداً للمشروع</b> عند أول تشغيل — وابدأ بتسجيل أول صبّة.',
+  'done.again'   : 'لم يبدأ التحميل؟ اضغط هنا',
+
+  'faq.eyebrow'  : 'أسئلة شائعة',
+  'faq.h2'       : 'قبل أن تحمّل',
+  'faq.q1'       : 'هل هي مجانية فعلاً؟',
+  'faq.a1'       : 'نعم. نسخة كاملة تعمل لمشروع واحد، بلا حد زمني ولا نسخة تجريبية ولا علامة مائية على الطباعة. نحن نصنع نسخة سحابية مدفوعة للفرق التي تدير عدة مشاريع، وهذه الأداة هي نصفها الفردي — تعمل وحدها بالكامل.',
+  'faq.q2'       : 'أين تُحفظ بياناتي بالضبط؟',
+  'faq.a2'       : 'في المجلد الذي تختاره أنت على جهازك: ملف <span class="num">concrete_db.json</span> يحوي كل صبّة واختبار وحالة وتاريخ، ومجلد <span class="num">attachments</span> يحوي نسخاً من التقارير والصور. لا شيء يُرفع إلى أي خادم — لا يوجد خادم أصلاً.',
+  'faq.q3'       : 'هل تعمل بدون إنترنت؟',
+  'faq.a3'       : 'نعم، بالكامل. الشيء الوحيد الذي يُجلب من الإنترنت هو ملفا الخطوط عند أول فتح. بدون إنترنت يستخدم المتصفح خط النظام، ويبقى كل شيء — الحفظ، المرفقات، الطباعة — يعمل كما هو.',
+  'faq.q4'       : 'كم مشروعاً تدعم؟',
+  'faq.a4'       : 'مجلد واحد = مشروع واحد. تقدر تفتح مجلداً آخر لمشروع آخر، لكن كل مجلد مستقل بذاته. لو تحتاج كل مشاريعك في لوحة واحدة مع مقارنة بينها، هذا ما تفعله النسخة السحابية.',
+  'faq.q5'       : 'هل أقدر أشاركها مع فريقي؟',
+  'faq.a5'       : 'الملف نفسه نعم — أرسله لمن تشاء، لا يوجد ترخيص ولا مفتاح تفعيل. لكن انتبه: كل نسخة تعمل على مجلدها الخاص، فلا يوجد سجل مشترك بين شخصين ولا اعتماد إلكتروني من الاستشاري. المشاركة الحقيقية هي ما تضيفه النسخة السحابية.',
+  'faq.q6'       : 'ما الفرق بينها وبين النسخة السحابية؟',
+  'faq.a6'       : 'النسخة المجانية تحل مشكلة المهندس الفرد على مشروع واحد. النسخة السحابية تحل مشكلة الشركة: كل المشاريع في لوحة واحدة، اعتماد إلكتروني فوري من الاستشاري، حساب للمختبر يرفع تقريره بنفسه، ربط مع بقية منصة رَبَاعِد (إدارة الوثائق والتقارير اليومية والمراسلات)، وسجل تدقيق موثّق.',
+
+  'up.eyebrow'   : 'الخطوة التالية',
+  'up.h2'        : 'تحتاج أكثر من مشروع واحد؟',
+  'up.p'         : 'الأداة المجانية تصل إلى حدها الطبيعي عندما يدخل شخص ثانٍ على السجل. عندها تبدأ النسخة السحابية.',
+  'up.cta'       : 'اطلب النسخة السحابية 🚀',
+  'up.1'         : 'كل مشاريعك في لوحة واحدة، مع مقارنة بينها',
+  'up.2'         : 'اعتماد إلكتروني فوري من الاستشاري — بدون بريد',
+  'up.3'         : 'حساب للمختبر يرفع تقريره مباشرة',
+  'up.4'         : 'ربط مع منصة رَبَاعِد: الوثائق، التقارير اليومية، المراسلات',
+  'up.5'         : 'سجل تدقيق موثّق لكل تغيير ومن قام به',
+
+  'foot.line'    : 'صُنعت في رَبَاعِد لمهندسي المواقع. الأداة مجانية — استخدمها كما تشاء.',
+
+  'toast.ok'     : '✅ شكراً — بدأ التحميل',
+  'toast.err'    : '⚠️ لم نتمكن من حفظ بياناتك، لكن التحميل بدأ'
+},
+en: {
+  'meta.title'   : 'Concrete Pour & Cube Test Tracker — a free tool by Rabaed',
+  'meta.desc'    : 'One HTML file that opens with a double-click. Log the pour, know when the 7 and 28-day cubes are due before they slip. No account, no server, your data stays on your machine.',
+
+  'brand.name'   : 'Rabaed',
+  'brand.sub'    : 'Construction site tools',
+  'nav.cta'      : 'Get it free',
+
+  'hero.eyebrow' : '🎁 Free tool · No account · No subscription',
+  'hero.h1'      : 'Log the pour today. Know when the cubes are due — <span style="color:var(--accent-ink)">before they slip</span>',
+  'hero.lede'    : 'One HTML file that opens with a double-click on your own machine. Point it at a folder, and from that moment every pour you log is written there: the 7 and 28-day countdown, lab reports, consultant approvals, and an A4 submittal sheet ready to print.',
+  'hero.cta1'    : '⬇️ Get the free tool',
+  'hero.cta2'    : 'See how it works',
+  'hero.t1'      : 'Genuinely free',
+  'hero.t2'      : 'Works offline',
+  'hero.t3'      : 'Your files stay yours',
+  'hero.t4'      : 'English / عربي',
+
+  'mock.title'   : 'Al Nakheel Tower — Phase 2',
+  'mock.k1'      : 'Pours logged',
+  'mock.k2'      : 'Due soon',
+  'mock.k3'      : 'Overdue',
+  'mock.r1n'     : 'Foundation — Footing F12, level −3.5',
+  'mock.r2n'     : 'Columns — Ground floor, C1 to C6',
+  'mock.d7'      : '7-day cube',
+  'mock.d28'     : '28-day cube',
+  'mock.due2'    : 'In 2 days',
+  'mock.far'     : 'Not yet due',
+  'mock.appr'    : 'Approved',
+  'mock.late'    : '3 days late',
+
+  'pain.eyebrow' : 'Why this exists',
+  'pain.h2'      : 'The pour takes an hour. Chasing it takes a month.',
+  'pain.sub'     : 'Three things make a concrete file run late — and none of them is the concrete.',
+  'pain.1h'      : '7 and 28 days pass quietly',
+  'pain.1p'      : 'The only date anyone remembers is the pour date. Cube test dates slide past inside the weekly programme with nothing to announce them, and you find out the moment the consultant asks.',
+  'pain.2h'      : 'The report exists… somewhere',
+  'pain.2p'      : 'The lab report is in WhatsApp, the approval is in email, the pour photo is on the foreman’s phone. Building the submittal means searching three different places.',
+  'pain.3h'      : 'A spreadsheet will not chase you',
+  'pain.3p'      : 'Excel is excellent at storing and hopeless at reminding. It does not know today’s cube is overdue, and it cannot tell a test sitting at the lab from one sitting with the consultant.',
+
+  'feat.eyebrow' : 'What it does',
+  'feat.h2'      : 'Six things that take a month of chasing off your desk',
+  'feat.sub'     : 'Everything a clean concrete file needs — in one file, on your machine.',
+  'feat.1h'      : 'A countdown that runs itself',
+  'feat.1p'      : 'Enter the pour date and nothing else. The tool works out the 7 and 28-day dates and gives every test a colour you can read from a metre away.',
+  'feat.lg1'     : 'Far off',
+  'feat.lg2'     : '3 days or less',
+  'feat.lg3'     : 'Overdue',
+  'feat.lg4'     : 'With consultant',
+  'feat.lg5'     : 'Approved',
+  'feat.2h'      : 'The attachment is what moves the status',
+  'feat.2p'      : 'Attach the lab report and the test becomes <i>Received from lab</i> — the Remind lab button disappears, because there is nothing left to chase. Attach the consultant approval and the test closes green. The move is forward-only, so a rejected test never quietly turns into an approval because someone dropped a file on it.',
+  'feat.3h'      : 'Chase the lab in one click',
+  'feat.3p'      : 'One button opens your own mail client with the subject and body already written, addressed to the lab email from the project details. It leaves from your address — which is what makes a chase-up land. Every reminder is logged against the test.',
+  'feat.4h'      : 'Delivery notes as they arrive',
+  'feat.4p'      : 'Tickets come in all morning, long after the pour was logged. Add a row whenever one lands, or paste a whole batch straight from your sheet: note number, volume, mixer number, time. It saves as you type and the total updates live.',
+  'feat.5h'      : 'An A4 submittal sheet, ready',
+  'feat.5p'      : 'Every pour detail, element, test and photo laid out on one page with the three signature blocks. Hit print and hand it over, or save it as PDF.',
+  'feat.6h'      : 'Fully bilingual',
+  'feat.6p'      : 'A complete Arabic right-to-left interface — not a half-finished translation with mirrored fields — and English. The language choice is remembered for whoever opens the file.',
+  'feat.a1'      : '🏗️ Multiple elements per pour, tagged by building and level',
+  'feat.a2'      : '📸 Site photos shrunk before saving so the folder stays light',
+  'feat.a3'      : '📊 One-click CSV export of the whole register',
+  'feat.a4'      : '🔎 Search and filters by status, element, supplier and date',
+
+  'how.eyebrow'  : 'Three steps',
+  'how.h2'       : 'From download to first pour logged — two minutes',
+  'how.sub'      : 'No install, no account, no local server, no Node, no build step.',
+  'how.1h'       : 'Download the file',
+  'how.1p'       : 'Fill in the form below and the download starts straight away. One HTML file — save it anywhere on your machine.',
+  'how.2h'       : 'Double-click it',
+  'how.2p'       : 'In Chrome or Edge. It runs straight from the file with no server at all. Copy it to another machine and it runs there too.',
+  'how.3h'       : 'Pick a project folder',
+  'how.3p'       : 'The tool asks for a folder once. From then on everything you log is written inside it, and you reopen it next time with a single click.',
+
+  'data.eyebrow' : 'Privacy',
+  'data.h2'      : 'Your files never leave your machine — because there is nowhere for them to go',
+  'data.1'       : '<b>There is no server to upload to.</b> No account, no sign-in, no database on our side. The tool knows nothing about you.',
+  'data.2'       : '<b>One folder owns the project.</b> You choose it; it holds the register and the attachments. Copy it, put it on the network drive, or take it with you — it works the same.',
+  'data.3'       : '<b>An open text file, not a sealed box.</b> <span class="num">concrete_db.json</span> is readable, diffable and backup-able with any tool you already use. Nothing is locked inside a browser store you cannot reach.',
+  'data.4'       : '<b>It works with the internet off.</b> In a basement, on a remote site, on a plane. (Only the two web fonts are fetched on first open — without them the type falls back to the system stack and everything else works.)',
+  'data.cap'     : 'That is everything the tool produces on your machine. Nothing else, and nothing anywhere else.',
+
+  'req.eyebrow'  : 'Requirements',
+  'req.h2'       : 'What you need to run it',
+  'req.1'        : '💻 Windows, macOS or Linux — desktop',
+  'req.2'        : '🟢 Chrome or Edge for the full experience with attachments',
+  'req.3'        : '🟡 Firefox and Safari run a simplified mode: records live in the browser, attachments are off',
+
+  'form.eyebrow' : 'Download',
+  'form.h2'      : 'Get the tool',
+  'form.sub'     : 'Complete the details and the download starts immediately. We use them to send tool updates — nothing else.',
+  'form.first'   : 'First name',
+  'form.firstPh' : 'Ahmed',
+  'form.last'    : 'Last name',
+  'form.lastPh'  : 'Al Salem',
+  'form.phone'   : 'Mobile number',
+  'form.phonePh' : '5X XXX XXXX',
+  'form.email'   : 'Email address',
+  'form.emailPh' : 'name@company.com',
+  'form.company' : 'Company',
+  'form.optional': '(optional)',
+  'form.companyPh':'Contracting company …',
+  'form.btnLocked': '🔒 Complete the form to unlock the download',
+  'form.btnReady' : '⬇️ Download the tool',
+  'form.btnBusy'  : '⏳ Preparing …',
+  'form.privacy'  : 'By downloading you agree that we may contact you about the tool and its updates. We will not share your details with anyone else.',
+
+  'err.first'    : 'Enter your first name (at least 2 characters)',
+  'err.last'     : 'Enter your last name (at least 2 characters)',
+  'err.phone'    : 'Enter a valid mobile number (6 to 15 digits)',
+  'err.email'    : 'Enter a valid email address',
+
+  'done.h'       : 'Done — your download has started',
+  'done.p'       : 'Look for <b class="num">Rabaed-Pour-Tracker.html</b> in your Downloads folder. Three steps and you are running:',
+  'done.s1'      : '<b>Save the file</b> somewhere permanent — the desktop or the project folder. Not Downloads.',
+  'done.s2'      : '<b>Double-click it</b> in Chrome or Edge.',
+  'done.s3'      : '<b>Pick a project folder</b> on first run — then log your first pour.',
+  'done.again'   : 'Download did not start? Click here',
+
+  'faq.eyebrow'  : 'Questions',
+  'faq.h2'       : 'Before you download',
+  'faq.q1'       : 'Is it actually free?',
+  'faq.a1'       : 'Yes. A complete tool for one project, with no time limit, no trial, and no watermark on the printout. We build a paid cloud version for teams running several projects, and this is its single-user half, cut loose to stand on its own.',
+  'faq.q2'       : 'Where exactly is my data stored?',
+  'faq.a2'       : 'In the folder you pick on your own machine: <span class="num">concrete_db.json</span> holds every pour, test, status and date, and an <span class="num">attachments</span> folder holds copies of the reports and photos. Nothing is uploaded to a server — there is no server.',
+  'faq.q3'       : 'Does it work offline?',
+  'faq.a3'       : 'Completely. The only thing fetched from the network is the two web fonts on first open. With no connection the browser falls back to the system font and everything — saving, attachments, printing — carries on working.',
+  'faq.q4'       : 'How many projects does it handle?',
+  'faq.a4'       : 'One folder is one project. You can open a different folder for a different project, but each folder stands alone. If you need every project on one dashboard with comparison across them, that is what the cloud version does.',
+  'faq.q5'       : 'Can I share it with my team?',
+  'faq.a5'       : 'The file itself, yes — send it to anyone, there is no licence and no activation key. But note that each copy works on its own folder, so there is no shared register between two people and no electronic approval from the consultant. Real sharing is what the cloud version adds.',
+  'faq.q6'       : 'How is this different from the cloud version?',
+  'faq.a6'       : 'The free tool solves one engineer’s problem on one project. The cloud version solves the company’s: every project on one dashboard, instant electronic approval by the consultant, a lab account that uploads its own report, integration with the rest of the Rabaed platform (document management, daily reports, correspondence), and a documented audit log.',
+
+  'up.eyebrow'   : 'What comes next',
+  'up.h2'        : 'Need more than one project?',
+  'up.p'         : 'The free tool reaches its natural limit the moment a second person needs to be in the register. That is where the cloud version starts.',
+  'up.cta'       : 'Request the cloud version 🚀',
+  'up.1'         : 'Every project on one dashboard, compared side by side',
+  'up.2'         : 'Instant electronic approval by the consultant — no email round-trip',
+  'up.3'         : 'A lab account that uploads its report directly',
+  'up.4'         : 'Integrated with the Rabaed platform: documents, daily reports, correspondence',
+  'up.5'         : 'A documented audit log of every change and who made it',
+
+  'foot.line'    : 'Built at Rabaed for site engineers. The tool is free — use it however you like.',
+
+  'toast.ok'     : '✅ Thanks — your download has started',
+  'toast.err'    : '⚠️ We could not save your details, but the download has started'
+}
+};
+
+const TREE = {
+  ar: ['برج النخيل — المرحلة ٢/',
+       '├─ concrete_db.json      ← كل صبّة واختبار وحالة',
+       '└─ attachments/          ← التقارير والموافقات والصور',
+       '     ANT-014 d7 lab report.pdf',
+       '     ANT-014 photo IMG_4471.jpg'].join('\n'),
+  en: ['Al Nakheel Tower — Phase 2/',
+       '├─ concrete_db.json      ← every pour, test and status',
+       '└─ attachments/          ← reports, approvals, photos',
+       '     ANT-014 d7 lab report.pdf',
+       '     ANT-014 photo IMG_4471.jpg'].join('\n')
+};
+
+/* ============================================================================
+   LANGUAGE
+   ============================================================================ */
+let lang = 'ar';
+
+function detectLang(){
+  try{
+    const saved = localStorage.getItem('rbd_lp_lang');
+    if(saved === 'ar' || saved === 'en') return saved;
+  }catch(e){}
+  if(DEFAULT_LANG === 'ar' || DEFAULT_LANG === 'en') return DEFAULT_LANG;
+  const nav = (navigator.language || '').toLowerCase();
+  return nav.startsWith('ar') ? 'ar' : 'en';
+}
+
+function t(k){ return (I18N[lang] && I18N[lang][k] != null) ? I18N[lang][k] : k; }
+
+function setLang(l){
+  lang = (l === 'en') ? 'en' : 'ar';
+  try{ localStorage.setItem('rbd_lp_lang', lang); }catch(e){}
+  applyLang();
+}
+
+function applyLang(){
+  const html = document.documentElement;
+  html.lang = lang;
+  html.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const v = I18N[lang][el.dataset.i];
+    if(v != null) el.innerHTML = v;
+  });
+  document.querySelectorAll('[data-ph]').forEach(el => {
+    const v = I18N[lang][el.dataset.ph];
+    if(v != null) el.placeholder = v;
+  });
+
+  document.title = t('meta.title');
+  setMeta('meta-desc', t('meta.desc'));
+  setMeta('og-title',  t('meta.title'));
+  setMeta('og-desc',   t('meta.desc'));
+
+  document.getElementById('lang-ar').classList.toggle('on', lang === 'ar');
+  document.getElementById('lang-en').classList.toggle('on', lang === 'en');
+
+  document.getElementById('tree').textContent = TREE[lang];
+  buildCountries();
+  validate();               // re-render the button label + any visible errors
+}
+
+function setMeta(id, val){
+  const el = document.getElementById(id);
+  if(el) el.setAttribute('content', val);
+}
+
+/* ============================================================================
+   COUNTRY SELECT
+   ============================================================================ */
+function buildCountries(){
+  const sel = document.getElementById('f-cc');
+  const keep = sel.value || '+966';
+  sel.innerHTML = COUNTRIES
+    .map(c => '<option value="' + c.c + '">' + c.c + '\u00a0\u00a0 ' + (lang === 'ar' ? c.ar : c.en) + '</option>')
+    .join('');
+  sel.value = keep;
+  if(!sel.value) sel.value = '+966';
+}
+
+/* ============================================================================
+   VALIDATION — the download button unlocks only when everything checks out
+   ============================================================================ */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
+const touched = {};
+let submitted = false;
+
+function digitsOf(s){ return (s || '').replace(/[^0-9]/g, ''); }
+
+function checks(){
+  const first = document.getElementById('f-first').value.trim();
+  const last  = document.getElementById('f-last').value.trim();
+  const phone = digitsOf(document.getElementById('f-phone').value);
+  const email = document.getElementById('f-email').value.trim();
+  return {
+    first: first.length >= 2,
+    last : last.length  >= 2,
+    phone: phone.length >= 6 && phone.length <= 15,
+    email: EMAIL_RE.test(email)
+  };
+}
+
+function validate(){
+  const ok = checks();
+  const fields = [
+    ['first', 'f-first', 'e-first', 'err.first'],
+    ['last',  'f-last',  'e-last',  'err.last'],
+    ['phone', 'f-phone', 'e-phone', 'err.phone'],
+    ['email', 'f-email', 'e-email', 'err.email']
+  ];
+
+  fields.forEach(([key, inputId, errId, msgKey]) => {
+    const input = document.getElementById(inputId);
+    const err   = document.getElementById(errId);
+    const show  = !ok[key] && (touched[key] || submitted) && input.value.trim() !== '';
+    const showEmpty = !ok[key] && submitted && input.value.trim() === '';
+    input.classList.toggle('bad', show || showEmpty);
+    err.textContent = (show || showEmpty) ? t(msgKey) : '';
+  });
+
+  const done  = Object.values(ok).filter(Boolean).length;
+  const all   = done === 4;
+  document.getElementById('prog').style.width = (done / 4 * 100) + '%';
+
+  const btn = document.getElementById('dl-btn');
+  const txt = document.getElementById('dl-btn-txt');
+  if(!btn.dataset.busy){
+    btn.disabled = !all;
+    txt.textContent = all ? t('form.btnReady') : t('form.btnLocked');
+  }
+  return all;
+}
+
+/* ============================================================================
+   SEND THE LEAD, THEN DOWNLOAD — the download must never be blocked
+   ============================================================================ */
+/* One id per submission. The page may send the same lead twice (see sendLead:
+   a cross-origin POST can reach the server even when reading the reply fails),
+   so the id is what lets the sheet drop the second copy. */
+function newLeadId(){
+  try{ if(crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return 'lead-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+function payload(){
+  const cc    = document.getElementById('f-cc').value;
+  const phone = digitsOf(document.getElementById('f-phone').value);
+  return {
+    leadId     : newLeadId(),
+    firstName  : document.getElementById('f-first').value.trim(),
+    lastName   : document.getElementById('f-last').value.trim(),
+    countryCode: cc,
+    phone      : phone,
+    fullPhone  : cc + phone,
+    email      : document.getElementById('f-email').value.trim(),
+    company    : document.getElementById('f-company').value.trim(),
+    language   : lang,
+    source     : 'free-tool-landing',
+    page       : location.href,
+    referrer   : document.referrer || '',
+    userAgent  : navigator.userAgent,
+    build      : BUILD
+  };
+}
+
+async function sendLead(data){
+  if(!SHEET_ENDPOINT){
+    console.warn('[Rabaed] SHEET_ENDPOINT is empty — lead was not sent:', data);
+    return 'skipped';
+  }
+  const body = JSON.stringify(data);
+  const opts = { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body, redirect:'follow' };
+
+  try{
+    const r = await fetch(SHEET_ENDPOINT, opts);
+    if(r.ok) return 'ok';
+    throw new Error('HTTP ' + r.status);
+  }catch(err){
+    try{
+      await fetch(SHEET_ENDPOINT, Object.assign({}, opts, {mode:'no-cors'}));
+      return 'opaque';
+    }catch(err2){
+      try{
+        const sent = navigator.sendBeacon(SHEET_ENDPOINT, new Blob([body], {type:'text/plain;charset=utf-8'}));
+        return sent ? 'beacon' : 'failed';
+      }catch(err3){ return 'failed'; }
+    }
+  }
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function triggerDownload(){
+  const a = document.createElement('a');
+  a.href = TOOL_FILE;
+  a.download = DOWNLOAD_NAME;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 1500);
+}
+
+function toast(msg){
+  const wrap = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+async function onSubmit(e){
+  e.preventDefault();
+  submitted = true;
+  if(!validate()){
+    const bad = document.querySelector('.input.bad');
+    if(bad) bad.focus();
+    return;
+  }
+
+  const btn = document.getElementById('dl-btn');
+  const txt = document.getElementById('dl-btn-txt');
+  btn.dataset.busy = '1';
+  btn.disabled = true;
+  txt.textContent = t('form.btnBusy');
+
+  const data   = payload();
+  /* the logging call gets 8 seconds; after that the download goes ahead regardless */
+  const result = await Promise.race([ sendLead(data), sleep(8000).then(() => 'timeout') ]);
+  console.log('[Rabaed] lead delivery:', result);
+
+  triggerDownload();
+  toast(result === 'failed' ? t('toast.err') : t('toast.ok'));
+
+  document.getElementById('form-view').classList.add('hidden');
+  document.getElementById('done-view').classList.remove('hidden');
+  document.getElementById('done-view').scrollIntoView({block:'center', behavior:'smooth'});
+
+  delete btn.dataset.busy;
+}
+
+/* ============================================================================
+   BOOT
+   ============================================================================ */
+(function boot(){
+  if(LOGO_RABAED.slice(0, 5) === 'data:'){
+    document.getElementById('brand-mark').innerHTML =
+      '<img src="' + LOGO_RABAED + '" alt="Rabaed">';
+  }
+
+  document.getElementById('up-cta').href = UPGRADE_URL;
+  document.getElementById('build-tag').textContent = BUILD;
+
+  const again = document.getElementById('dl-again');
+  again.href = TOOL_FILE;
+  again.setAttribute('download', DOWNLOAD_NAME);
+
+  ['f-first','f-last','f-phone','f-email','f-company'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', validate);
+    el.addEventListener('blur', () => {
+      touched[id.replace('f-','')] = true;
+      validate();
+    });
+  });
+  document.getElementById('f-cc').addEventListener('change', validate);
+  document.getElementById('lead-form').addEventListener('submit', onSubmit);
+
+  lang = detectLang();
+  applyLang();
+})();
+
+</script>
+</body>
+</html>

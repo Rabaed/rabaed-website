@@ -1,0 +1,17 @@
+# Normalise line endings in the working tree, store LF in the repository.
+* text=auto eol=lf
+
+# The Reference site is the specification and must stay byte-identical.
+# No normalisation, no diffing — it is never edited, only read and screenshotted.
+reference/** -text -diff
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.docx binary
+*.pdf binary

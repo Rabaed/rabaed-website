@@ -1,0 +1,52 @@
+# Secrets — never commit. Credentials live in Vercel settings and on your machine only.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+.next/
+out/
+build/
+dist/
+.vercel/
+*.tsbuildinfo
+
+# Test artefacts — baselines in tests/baselines/ are committed deliberately (ticket 02)
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+**/__screenshots__/actual/
+**/*.actual.png
+**/*.diff.png
+
+# Caches
+.cache/
+.turbo/
+.eslintcache
+coverage/
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Word temporary files (the legal sources in reference/legal-source/ are committed)
+~$*.docx
