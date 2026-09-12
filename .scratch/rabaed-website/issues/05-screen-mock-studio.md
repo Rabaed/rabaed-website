@@ -16,7 +16,7 @@
 
 ## Comments
 
-**What was built.** Eight Screen mocks, 260 KB of markup, lifted verbatim out of `reference/site/product.html` into `src/screen-mocks/ar/`. A studio route renders one per URL at 1440×900 and nothing else; `npm run mocks:export` photographs each of them and writes `public/screen-mocks/ar/<id>.webp`. The dimensions are recorded in the registry and asserted against the exported files, rather than in a generated manifest that nothing would read.
+**What was built.** Eight Screen mocks, 260 KB of markup, lifted verbatim out of `reference/site/product.html` into `src/screen-mocks/ar/`. A studio route renders one per URL at 1440×900 and nothing else; `npm run mocks:export` photographs each of them, writes `public/screen-mocks/ar/<id>.webp`, and records in `src/screen-mocks/exported.json` the size of each image and the SHA-256 of the markup it was made from.
 
 The eight are the five the home page and the product page share — `correspondence`, `kanban`, `daily-report`, `documents`, `stamped-sheet` — and three the product page adds: `overview`, `approvals-table`, `submittal`. The five shared ones are byte-identical between the two Reference pages, checked by hashing both copies before taking either, so there is one file each rather than two that could drift.
 
@@ -45,7 +45,14 @@ What remained after that was three pixels on one mock, in the outermost trail of
 
 ### The committed images cannot go stale
 
-A second test decodes each committed `.webp` and compares it to a fresh render of the studio, at zero difference. Without it the failure is silent and slow: somebody edits a label, nobody re-runs the export, and the site serves last month's picture with this month's markup in the repo to prove it was fixed.
+The failure to guard against is silent and slow: somebody edits a label, nobody re-runs the export, and the site serves last month's picture with this month's markup in the repo to prove it was fixed.
+
+It is checked two ways, because neither does the whole job on every machine.
+
+- **The image was exported from this markup.** The export records the SHA-256 of each mock's markup; a test re-hashes the file and compares. Machine-independent, so it runs in CI. Verified by falsification: changing one project number fails it.
+- **The image is what the studio renders, pixel for pixel.** Stronger — it also catches a change in the renderer or the fonts — but it can only pass on the machine that produced the image. Tagged `@pixel`; `npm test` runs it and CI skips it.
+
+That second point was not a guess. The first CI run on this branch failed all eight pixel comparisons at once while every other test passed, which is the same lesson ticket 03 recorded about the visual baselines, arriving in a new place: **anything that compares committed pixels to a fresh render belongs on one machine.** Anything compared within a single browser session — the studio against the Reference site, the shell against the Reference site — runs anywhere.
 
 ### The studio
 
@@ -64,6 +71,7 @@ The studio layout imports the site's stylesheet as well as its own, because a mo
 - **The indexing test could pass for the wrong reason.** Its `X-Robots-Tag` came from the site-wide pre-launch header, which disappears at launch, so it was not testing the studio's own permanence at all. That header rule now exists for the studio unconditionally.
 - **`readScreenMockMarkup` took a string id**, with its safety in a comment saying the caller had checked it against the registry. It takes a `ScreenMock` now, so the filename can only come from the registry.
 - **Two new tests** close a gap the reviews found: every comparison iterated the registry, so a mock quietly dropped from it would take its own coverage with it. One test holds the registry, the markup on disk and the exported images to the same list; another holds that list to what the Home and Product pages actually use.
+- **CI then found the real one.** See "The committed images cannot go stale" above: comparing a committed image to a fresh render cannot work on a machine that rasterises text differently. The manifest of source hashes exists because of that failure, and is what CI checks instead.
 
 Verified afterwards: re-running `npm run mocks:export` produces byte-identical images and leaves port 4400 free.
 

@@ -8,14 +8,24 @@
  *     was lifted out of `reference/site/` by hand, and a mock is 15–50 KB of
  *     absolutely positioned inline styles — a truncation would not look like
  *     an error, it would look like a slightly different screen.
- *  2. The committed image is what the studio currently renders. Otherwise a
- *     label gets edited, nobody re-runs the export, and the site keeps serving
- *     last month's picture with this month's markup in the repo to prove it
- *     was fixed.
+ *  2. The committed image belongs to the markup as it currently stands.
+ *     Otherwise a label gets edited, nobody re-runs the export, and the site
+ *     keeps serving last month's picture with this month's markup in the repo
+ *     to prove it was fixed.
+ *
+ *     Checked two ways, because neither does the whole job on every machine.
+ *     The export records the SHA-256 of the markup each image was made from,
+ *     and comparing that runs anywhere. Comparing the *pixels* of a committed
+ *     image against a fresh render is stronger — it catches a change in the
+ *     renderer or the fonts as well — but it can only pass on the machine that
+ *     produced the image: text rasterises differently on a hosted Linux
+ *     runner, which CI demonstrated by failing all eight of them at once.
+ *     Those are tagged `@pixel`; CI skips them and `npm test` runs them.
  *  3. The studio is not indexable. It is a private route that exists to be
  *     photographed, and its contents duplicate pages that are meant to rank.
  */
 import { test, expect } from '@playwright/test';
+import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import pixelmatch from 'pixelmatch';
@@ -25,6 +35,16 @@ import { openReferencePage, startReferenceSite, type ReferenceSite } from './ref
 import { SCREEN_MOCKS, screenMockImagePath, studioPath } from '../../src/screen-mocks/registry';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
+
+/** One line of `src/screen-mocks/exported.json`, written by the export script. */
+type ExportRecord = {
+  locale: string;
+  id: string;
+  width: number;
+  height: number;
+  /** SHA-256 of the markup this image was rendered from. */
+  source: string;
+};
 
 /**
  * Lays an image on an opaque backdrop before it is compared, and returns its
@@ -158,7 +178,29 @@ test.describe('screen mocks', () => {
       }
     });
 
-    test(`${mock.id}'s exported image is what the studio renders today`, async ({
+    test(`${mock.id}'s exported image was made from the markup as it stands`, async () => {
+      const manifest = JSON.parse(
+        await readFile(path.join(repoRoot, 'src', 'screen-mocks', 'exported.json'), 'utf8'),
+      ) as { images: ExportRecord[] };
+
+      const record = manifest.images.find((image) => image.locale === 'ar' && image.id === mock.id);
+      expect(record, `${mock.id} has no export on record`).toBeDefined();
+
+      const markup = await readFile(
+        path.join(repoRoot, 'src', 'screen-mocks', 'ar', `${mock.id}.html`),
+      );
+      expect(
+        createHash('sha256').update(markup).digest('hex'),
+        `${mock.id}.html has changed since its image was exported — run "npm run mocks:export"`,
+      ).toBe(record!.source);
+
+      expect({ width: record!.width, height: record!.height }).toEqual({
+        width: mock.width * mock.scale,
+        height: mock.height * mock.scale,
+      });
+    });
+
+    test(`@pixel ${mock.id}'s exported image is what the studio renders today`, async ({
       browser,
       baseURL,
     }) => {
