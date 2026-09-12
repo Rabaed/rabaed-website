@@ -1,0 +1,47 @@
+/**
+ * The late responsive pass — phone and tablet, plus the tap-target sizes the
+ * Reference site groups with them — imported last, because on the
+ * Reference site these rules come last and **their position in the cascade is
+ * part of what they do**.
+ *
+ * The rule that proves it: `.wrap { padding: 0 20px }` at 560px is the
+ * shorthand, so it resets `padding-top` and `padding-bottom` to zero on any
+ * element carrying `.wrap` that it outranks. `.foot-bar` sets 20px of its own
+ * above the copyright line at the same specificity, so order alone decides
+ * which wins. Move this file above `shell.css` and the footer grows 20px
+ * taller than the Reference site's at every phone width — the difference that
+ * was measured before the order was fixed.
+ *
+ * The open mobile panel is *not* in that position, though it looks as though
+ * it should be: `.nav .mnav .wrap` is three selectors deep and outranks a bare
+ * `.wrap`, so it keeps its padding wherever this file sits.
+ *
+ * Whether the Reference site meant that is not the question the rebuild gets
+ * to answer: the baselines were captured with it, so it is the behaviour.
+ */
+
+@media (max-width: 700px) {
+  h2 { font-size: 30px }
+  .phero h1 { font-size: 28px }
+
+  /* DELIBERATE EXCEPTION — the shorter header row (spec: Design system).
+     The child combinator says what is meant: only the header's own row drops
+     to 66px, never the panel hanging below it. On today's markup a descendant
+     selector would behave the same, because `.nav .mnav .wrap` outranks it —
+     but that is a coincidence of specificity, and the day a second `.wrap`
+     appears inside the header without three selectors guarding it, the
+     combinator is the only thing still holding. */
+  .nav > .wrap { height: 66px }
+
+  .nav .btn { padding: 10px 14px; font-size: 13.5px }
+  .brand .lg { height: 34px }
+  .brand .l { top: 5px }
+}
+
+@media (max-width: 560px) {
+  /* Shorthand, deliberately: see the note at the top of this file. */
+  .wrap { padding: 0 20px }
+}
+
+/* Tap target: 13px of text alone is a 17px-tall link. */
+.foot-legal a { display: inline-block; padding: 7px 0 }

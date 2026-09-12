@@ -1,0 +1,173 @@
+/**
+ * Header, Partnerships dropdown, mobile panel and footer — the frame every
+ * page sits in, taken from `reference/site/index.html` where it existed nine
+ * times over (ticket 04).
+ *
+ * Class names are the Reference site's own and are load-bearing: the header's
+ * two treatments are expressed as `.nav` versus `.nav.on-light`, and selectors
+ * like `.nav.on-light .brand .lg.l` reach across that boundary. Nothing here
+ * may be scoped, hashed or renamed — CSS Modules would break exactly these
+ * selectors, which is why the spec rules them out for cross-cutting rules.
+ *
+ * Physical `left`/`right` are written as logical properties, because the
+ * rebuild serves both directions from one stylesheet while the Reference site
+ * is Arabic-only (spec: Routing and localisation). In right-to-left the inline
+ * axis begins at the right edge, so `right` becomes `inset-inline-start` and
+ * `left` becomes `inset-inline-end` — the opposite of the reading that comes
+ * naturally, and worth checking rather than assuming. Every conversion here
+ * renders identically in Arabic; the comparison test would say so if not.
+ */
+
+/* ---- header ---- */
+.nav { position: fixed; top: 0; inset-inline: 0; z-index: 50; background: rgba(20, 22, 28, .72); backdrop-filter: blur(14px); border-bottom: 1px solid var(--dark-line) }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 74px }
+
+.brand { display: flex; align-items: center; gap: 12px; position: relative; height: 38px }
+.brand .lg { height: 40px; width: auto; display: block; transition: opacity .35s }
+.brand .l { position: absolute; top: 3px; inset-inline-start: 0; opacity: 0 }
+.nav.on-light .brand .d { opacity: 0 }
+.nav.on-light .brand .l { opacity: 1 }
+.brand.foot { height: auto; gap: 14px }
+.brand.foot .lg { height: 30px }
+
+.links { display: flex; align-items: center; gap: 26px; font-size: 14px; color: var(--dark-muted) }
+.links a:hover { color: #fff }
+.links a.on { color: #fff; font-weight: 600 }
+.nav.on-light .links a.on { color: var(--ink) }
+
+.nav .btn { padding: 10px 18px; font-size: 14px }
+.nav-cta { display: flex; align-items: center; gap: 16px }
+.login { font-size: 14px; color: var(--dark-muted); padding: 9px 14px; border: 1px solid var(--dark-line); border-radius: 999px; transition: all .3s; white-space: nowrap }
+.login:hover { color: #fff; border-color: rgba(255, 255, 255, .28) }
+.nav.on-light .login { color: var(--muted); border-color: var(--line) }
+.nav.on-light .login:hover { color: var(--ink); border-color: var(--ink) }
+@media (max-width: 980px) { .login { display: none } }
+
+/* ---- Partnerships dropdown ---- */
+.nsub { position: relative; display: flex; align-items: center }
+.nsub-t { font-family: inherit; font-size: 14px; line-height: inherit; color: var(--dark-muted); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: color .25s }
+.nsub-t .ar { font-size: 9px; opacity: .75; transition: transform .28s }
+.nsub-t:hover { color: #fff }
+.nsub-t:focus { outline: none }
+.nsub-t:focus-visible { outline: 2px solid var(--acc); outline-offset: 5px; border-radius: 6px }
+.nsub.open > .nsub-t { color: #fff }
+.nsub.open > .nsub-t .ar { transform: rotate(180deg) }
+.nsub.on > .nsub-t { color: #fff; font-weight: 600 }
+.nsub-p { position: absolute; top: 100%; inset-inline-end: -14px; margin-top: 16px; width: 330px; background: rgba(20, 22, 28, .97); backdrop-filter: blur(14px); border: 1px solid var(--dark-line); border-radius: 14px; padding: 8px; box-shadow: 0 26px 60px rgba(0, 0, 0, .45); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .24s, transform .24s, visibility .24s }
+/* Bridges the 16px gap under the trigger, so travelling to the panel with the
+   pointer does not cross a dead strip and close it. */
+.nsub-p:before { content: ""; position: absolute; top: -16px; inset-inline: 0; height: 16px }
+.nsub.open .nsub-p { opacity: 1; visibility: visible; transform: none }
+.nsub-p a { display: block; padding: 11px 13px; border-radius: 10px; transition: background .22s }
+.nsub-p a:hover { background: rgba(255, 255, 255, .06) }
+.nsub-p b { display: block; font-size: 14.5px; font-weight: 600; color: var(--dark-text); margin-bottom: 3px }
+.nsub-p span { display: block; font-size: 12.5px; color: var(--dark-muted); line-height: 1.7 }
+.nsub-p a.on b { color: var(--acc) }
+.nav.on-light .nsub-t { color: var(--muted) }
+.nav.on-light .nsub-t:hover, .nav.on-light .nsub.open > .nsub-t, .nav.on-light .nsub.on > .nsub-t { color: var(--ink) }
+.nav.on-light .nsub-p { background: rgba(255, 255, 255, .98); border-color: var(--line); box-shadow: 0 26px 60px rgba(0, 0, 0, .13) }
+.nav.on-light .nsub-p b { color: var(--ink) }
+.nav.on-light .nsub-p span { color: var(--muted) }
+.nav.on-light .nsub-p a:hover { background: var(--soft) }
+.nav.on-light .nsub-p a.on b { color: var(--acc) }
+
+/* ---- mobile panel ---- */
+.navtog { display: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--dark-line); background: rgba(255, 255, 255, .05); color: #fff; align-items: center; justify-content: center; cursor: pointer; flex: none; padding: 0; transition: border-color .25s, background .25s }
+.navtog i { display: block; width: 18px; height: 2px; background: currentColor; border-radius: 2px; position: relative; transition: background .24s }
+.navtog i:before, .navtog i:after { content: ""; position: absolute; inset-inline-start: 0; width: 18px; height: 2px; background: currentColor; border-radius: 2px; transition: transform .28s }
+.navtog i:before { top: -6px }
+.navtog i:after { top: 6px }
+.nav.on-light .navtog { color: var(--ink); border-color: var(--line); background: rgba(0, 0, 0, .035) }
+.nav.open .navtog i { background: transparent }
+.nav.open .navtog i:before { transform: translateY(6px) rotate(45deg) }
+.nav.open .navtog i:after { transform: translateY(-6px) rotate(-45deg) }
+.mnav { display: none }
+
+@media (max-width: 980px) {
+  /* The desktop row gives way to the button and the panel. */
+  .links { display: none }
+  .navtog { display: flex }
+  .mnav { display: block; overflow: hidden; max-height: 0; transition: max-height .38s cubic-bezier(.4, 0, .2, 1) }
+
+  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate.
+     The Reference site caps the open panel at 360px against 396px of content,
+     so the bottom 36px of the sign-in button is cut off — measured in a
+     browser, not inferred. Ticket 04 requires the panel to open fully, so the
+     cap is raised to clear the content, bounded by the viewport so that a
+     short screen scrolls rather than hiding the end of the menu.
+     It is still a fixed cap because max-height cannot transition to auto. The
+     test in tests/e2e/page-shell.spec.ts fails the moment the content outgrows
+     it again, which is what happens the first time a link is added.
+     The 74px is the header at its tallest; below 700px it is 66px, so the
+     bound is 8px conservative there, erring towards the panel scrolling
+     rather than towards it reaching up under the header. */
+  .nav.open .mnav { max-height: min(440px, calc(100dvh - 74px)); overflow-y: auto }
+
+  /* DELIBERATE EXCEPTION — the mobile panel's wrap (spec: Design system).
+     `.nav .wrap` is a 74px-tall flex row. The panel reuses `.wrap` for its
+     gutters only, so it has to opt out of that height and stack instead.
+     Three selectors deep is what carries it: it outranks `.nav .wrap` on
+     specificity, so it holds wherever the two files end up relative to each
+     other. Flatten it to `.mnav .wrap` and the open panel collapses to 74px. */
+  .nav .mnav .wrap { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; height: auto; padding-top: 6px; padding-bottom: 18px }
+
+  /* DELIBERATE EXCEPTION — the open header's background (spec: Design system).
+     The closed header is translucent so the page shows through it. Open, it
+     covers a screenful of whatever it happens to be over, and the links stop
+     being readable. `!important` beats the inline `background` the colour
+     toggle writes on `.nav` — a stylesheet rule cannot. */
+  .nav.open { background: rgba(20, 22, 28, .97) !important }
+  .nav.on-light.open { background: rgba(250, 250, 248, .98) !important }
+
+  .mnav a { display: block; padding: 14px 2px; font-size: 16px; color: var(--dark-muted); border-top: 1px solid var(--dark-line) }
+  .mnav a.on { color: #fff; font-weight: 600 }
+  .mnav .mlogin { margin-top: 14px; text-align: center; border: 1px solid var(--dark-line); border-radius: 999px; padding: 13px; color: #fff; font-size: 15px }
+  .nav.on-light .mnav a { color: var(--muted); border-top-color: var(--line) }
+  .nav.on-light .mnav a.on { color: var(--ink) }
+  .nav.on-light .mnav .mlogin { border-color: var(--line); color: var(--ink) }
+}
+
+.mnav .msub { border-top: 1px solid var(--dark-line); padding: 13px 0 4px }
+.mnav .msub .msub-t { display: block; font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--acc); margin-bottom: 2px }
+.mnav .msub a { border-top: 0; padding: 9px 0; font-size: 15px; position: relative; padding-inline-start: 16px }
+.mnav .msub a:before { content: ""; position: absolute; inset-inline-start: 2px; top: 50%; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, .28); transform: translateY(-50%) }
+.mnav .msub a.on:before { background: var(--acc) }
+.nav.on-light .mnav .msub a:before { background: var(--line) }
+
+/* ---- footer ---- */
+footer { background: var(--dark); color: var(--dark-muted); padding: 40px 0; font-size: 13px }
+footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center }
+.social { display: flex; gap: 10px }
+.social a { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--dark-line); display: flex; align-items: center; justify-content: center; color: var(--dark-muted); transition: color .22s, border-color .22s, background .22s }
+.social a:hover { color: #fff; border-color: var(--acc); background: var(--acc) }
+.foot-bar { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--dark-line) }
+.foot-legal { display: flex; gap: 22px; align-items: center; flex-wrap: wrap }
+.foot-legal a { color: var(--dark-muted); text-decoration: none; border-bottom: 1px solid transparent; transition: color .22s, border-color .22s }
+.foot-legal a:hover { color: #fff; border-color: var(--acc) }
+@media (max-width: 700px) { footer .wrap { justify-content: center; text-align: center } .foot-legal { justify-content: center } }
+
+/* ---- the compact page hero ---- */
+/* Every page below the home page opens with this. Its top padding is what
+   clears the fixed header, which is why the header itself needs none. */
+.phero { background: var(--dark); color: var(--dark-text); padding: 150px 0 var(--sp); position: relative; overflow: hidden }
+.phero .wrap { position: relative; z-index: 2 }
+.phero h1 { max-width: 900px; font-size: clamp(30px, 3.4vw, 46px); line-height: 1.28; margin: 10px 0 14px; font-weight: 700; letter-spacing: -.01em }
+.phero .lead { color: var(--dark-muted); font-size: 17px; line-height: 1.85; max-width: 660px; margin: 0 }
+.phero .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px }
+.phero .pglow { position: absolute; inset: auto -10% -60% 40%; width: 60%; height: 220px; background: radial-gradient(closest-side, rgba(249, 87, 56, .20), transparent 70%); filter: blur(20px); z-index: 1; pointer-events: none }
+@media (max-width: 980px) { .phero { padding: 120px 0 var(--sp) } }
+@media (min-width: 981px) and (max-height: 700px) { .phero { padding: 120px 0 56px } .phero h1 { font-size: 32px } .phero .lead { font-size: 15px } }
+
+/* ---- the repeating tail ---- */
+/* The closing block every page carries. Ticket 11 adds the demo form beside
+   it; ticket 27 makes that form real. */
+#tail { background: #F3F2EF; border-top: 1px solid var(--line) }
+.tail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start }
+.tail-steps { list-style: none; padding: 0; margin: 20px 0 0 }
+.tail-steps li { display: flex; gap: 14px; align-items: baseline; padding: 11px 0; border-bottom: 1px dashed var(--line) }
+.tail-steps li:last-child { border-bottom: 0 }
+.tail-steps b { font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc); white-space: nowrap; min-width: 96px; direction: rtl }
+.tail-steps span { font-size: 14.5px; color: var(--muted); line-height: 1.75 }
+.tail-more { display: inline-block; margin-top: 16px; font-size: 14px; color: var(--acc); font-weight: 600; padding: 6px 0 }
+.tail-more:hover { text-decoration: underline }
+@media (max-width: 980px) { .tail-grid { grid-template-columns: 1fr; gap: 28px } }

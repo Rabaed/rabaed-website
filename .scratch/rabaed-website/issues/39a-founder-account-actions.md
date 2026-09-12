@@ -1,8 +1,10 @@
 # 39a: Founder account actions
 
-**What to do:** The two things in Stage 1 that need somebody with the company accounts, gathered in one place so they are done once, together, at the end of Stage 1 rather than interrupting the build. Deferred here deliberately by the founder (12 September 2026); ticket 03 raised them and does not wait on them.
+**What to do:** The two things in Stage 1 that need somebody with the company accounts. Ticket 03 raised them and nothing waits on them.
 
-**Blocked by:** nothing technical. Do these alongside 39, before the site goes public.
+**Blocked by:** nothing technical.
+
+**When:** the founder decided on 12 September 2026 to do **part 1, connecting Vercel, once ticket 04 is merged** — bringing it forward from the end of Stage 1, so that preview links exist for the page-by-page rebuild in tickets 05 onward. Part 2, the GitHub plan decision, stays at the end of Stage 1 alongside ticket 39.
 
 **Status:** ready-for-human — the founder does these, not an agent
 
@@ -17,7 +19,7 @@ Full instructions, in plain language, are in [`docs/deployment.md`](../../../doc
 
 **Note on the Vercel plan.** The repository belongs to an organisation and the site is commercial, so this needs a paid Vercel team rather than the free Hobby plan. That cost is part of this task.
 
-**Note on what deferring costs.** Until this is done there are no preview links, so work on tickets 04–38 can only be looked at by running the site locally. Nothing in the build is blocked by it — only the founder's ability to click a link and see the result.
+**Why it moved earlier.** Until this is done there are no preview links, so work can only be looked at by running the site locally. Tickets 05–38 rebuild the site page by page, and each one is much easier to approve from a link than from a description.
 
 ## 2. Decide how a failing test blocks a merge
 

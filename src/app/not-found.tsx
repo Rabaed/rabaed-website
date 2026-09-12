@@ -24,11 +24,13 @@ import '@/styles/globals.css';
  */
 export default function NotFound() {
   return (
-    <main className="skeleton" lang={DEFAULT_LOCALE} dir={LOCALES[DEFAULT_LOCALE].dir}>
-      <h1>الصفحة غير موجودة</h1>
-      <p className="skeleton-lead">
-        الرابط الذي طلبته غير متاح. <a href="/">العودة إلى الصفحة الرئيسية</a>
-      </p>
+    <main className="phero" lang={DEFAULT_LOCALE} dir={LOCALES[DEFAULT_LOCALE].dir}>
+      <div className="wrap">
+        <h1>الصفحة غير موجودة</h1>
+        <p className="lead">
+          الرابط الذي طلبته غير متاح. <a href="/">العودة إلى الصفحة الرئيسية</a>
+        </p>
+      </div>
     </main>
   );
 }

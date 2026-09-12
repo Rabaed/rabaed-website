@@ -1,31 +1,14 @@
 /**
- * Skeleton styling only. The design system — tokens, dark and light section
- * treatments, the page shell — is ticket 04, and deliberately nothing here
- * anticipates it: a placeholder that guesses at the tokens is a placeholder
- * somebody later has to notice and unpick.
+ * The one stylesheet the root layouts import. Plain CSS, global, in the order
+ * the cascade needs: typeface, the design system, the page shell, and last the
+ * responsive pass — whose position is load-bearing, see `responsive.css`.
  *
- * The one thing this file does carry is the typeface, because self-hosting it
- * is part of ticket 03 and every visual baseline depends on it.
+ * No CSS Modules and no Tailwind. The Reference site's class names are
+ * load-bearing — `.nav.on-light .brand .lg.l` and its like reach across
+ * component boundaries — and scoping or renaming them breaks the selectors
+ * rather than the components (spec: Design system).
  */
 @import '../../assets/fonts/site-fonts.css';
-
-body {
-  margin: 0;
-  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
-  line-height: 1.8;
-}
-
-.skeleton {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: 4rem 2rem;
-}
-
-.skeleton-eyebrow {
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-}
-
-.skeleton-lead {
-  font-size: 1.05rem;
-}
+@import './tokens.css';
+@import './shell.css';
+@import './responsive.css';
