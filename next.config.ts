@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import { isIndexable } from './src/lib/environment';
+import { STUDIO_PREFIX } from './src/screen-mocks/registry';
 
 /**
  * `X-Robots-Tag` alongside the `<meta name="robots">` the layouts emit. The
@@ -9,10 +10,26 @@ import { isIndexable } from './src/lib/environment';
  * recoverable once a page has been crawled.
  */
 const nextConfig: NextConfig = {
+  // The Screen mock studio reads its markup off disk rather than importing it,
+  // so that 260 KB of hand-built HTML never lands in a bundle (ADR-0002).
+  // Nothing statically references those files, so tracing cannot find them.
+  outputFileTracingIncludes: {
+    '/studio/**': ['./src/screen-mocks/**/*.html'],
+  },
+
   async headers() {
-    if (isIndexable()) return [];
+    // The Screen mock studio is private for good, not just before launch: it
+    // shows the same screens as the pages that are meant to rank
+    // (ADR-0002). This rule therefore sits outside the environment check.
+    const studio = {
+      source: `${STUDIO_PREFIX}/:path*`,
+      headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+    };
+
+    if (isIndexable()) return [studio];
 
     return [
+      studio,
       {
         source: '/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
