@@ -12,3 +12,5 @@
 - [ ] `llms.txt` served, based on the handoff's draft, listing the pages and describing the product in Rabaed's own words
 - [ ] `llms.txt` is regenerated from CMS content rather than hand-maintained, so it cannot go stale
 - [ ] Both files are reachable and correctly typed
+
+**Note from ticket 05:** the Screen mock studio must be excluded from the sitemap. It is already `noindex` unconditionally, but it should not be listed. `STUDIO_PREFIX` in `src/screen-mocks/registry.ts` is the prefix to filter on, and ticket 05's checklist leaves that box open until this ticket ticks it.

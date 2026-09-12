@@ -1,0 +1,35 @@
+/**
+ * The Screen mock studio only. None of this reaches a page of the site: on the
+ * site a mock is an exported image, and these rules exist to put the markup on
+ * a stage the export script can photograph (ADR-0002).
+ *
+ * `.vs-shot` and `.vs-shot__stage` are the Reference site's own names and
+ * measurements; the 1440×900 stage is the one `src/screen-mocks/registry.ts`
+ * declares, and the comparison test fails if the two ever disagree. The one change is that the stage is not scaled here — on the
+ * Reference site `--vs-s` shrinks it to fit its column, and the export wants it
+ * at 1:1.
+ */
+
+.studio {
+  margin: 0;
+  /* Transparent, so the exported image carries alpha and sits on whatever
+     section it is later placed in, exactly as the markup does today. */
+  background: transparent;
+}
+
+.vs-shot {
+  position: relative;
+  width: 1440px;
+  height: 900px;
+  overflow: hidden;
+}
+
+.vs-shot__stage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1440px;
+  height: 900px;
+  transform-origin: top right;
+  transform: scale(var(--vs-s, 1));
+}
