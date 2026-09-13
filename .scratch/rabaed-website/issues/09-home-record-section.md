@@ -17,11 +17,11 @@
 
 **What was built.** «لا نسأل "من اعتمد؟" نفتح المعاملة.» — the copy on one side, and on the other a card showing the record one kind of transaction leaves: who sent it, its receipt, who checked it, how it was decided. As the visitor scrolls through, the section turns from dark to light, the card works through the five kinds — letter, material approval, work inspection request, schedule update, payment certificate — and ends stamped «✓ سجل كامل». It sits after the four units, where the Reference site has it.
 
-`src/components/home/record.tsx` is a server component; `record-behaviour.tsx` is the client component that moves it. Which kind shows and whether the stamp is on, for how far the visitor has scrolled, is decided once in `record-state.ts`, which both read, so the section a script-less visitor sees and the start of the cycle cannot disagree. The copy is in `src/content/record-types.ts`.
+`src/components/home/record.tsx` is a server component; `record-behaviour.tsx` is the client component that moves it. Which transaction type shows and whether the stamp is on, for how far the visitor has scrolled, is decided once in `record-state.ts`, which both read, so the section a script-less visitor sees and the start of the cycle cannot disagree. The copy is in `src/content/record-transactions.ts`. The four steps shown for a type are its *trail* in the Record — the Record itself being the one history a project keeps (CONTEXT.md).
 
-### Every record is in the page
+### Every trail is in the page
 
-The Reference site has one record in its markup and rewrites its words from a script. Here all five are in the first response, the first showing and the rest `hidden`, so nothing a crawler or a visitor without JavaScript reads depends on scrolling — as with the four units' screens. The Reference site's markup and its script disagree about the first record's last step; the script's wins, because it rewrites the markup before the section is in view, so it is what visitors read.
+The Reference site has one trail in its markup and rewrites its words from a script. Here all five are in the first response, the first showing and the rest `hidden`, so nothing a crawler or a visitor without JavaScript reads depends on scrolling — as with the four units' screens. The Reference site's markup and its script disagree about the first trail's last step; the script's wins, because it rewrites the markup before the section is in view, so it is what visitors read.
 
 ### Three deliberate differences
 
@@ -44,6 +44,22 @@ The section ends light but is not a `.light` section, so the header stays dark o
 `openBothPages` takes a `motion` option for the scroll comparisons, which need motion on; every other caller keeps reduced motion.
 
 **Verified by falsification.** Holding the box to `height: 100vh` again failed the spill test at 360px. Starting the card's blend at 16% instead of 12% failed exactly the four colour comparisons. The first build left `gsap.matchMedia` with conditions that neither held on a phone with motion on — it builds only when one does — and exactly the phone and tablet tests failed; the `narrow` condition fixed them.
+
+### What the review changed
+
+Two reviews. The spec review found the copy, every CSS value and every GSAP number verbatim, and the three differences justified by the ticket's own criteria. What the reviews did find:
+
+- **Copied test helpers.** The scroll-to-progress and two-frame waits, and the readers of the cycle and the colours, were written in both specs — the duplication tickets 07 and 08 moved into shared files. They are in `tests/e2e/record-section.ts`.
+- **"Record" meant two things.** CONTEXT.md's Record is the one history a project keeps; the code also called each transaction's four steps "a record". They are a transaction type's *trail* in the Record now — `TRANSACTION_TYPES`, `trailHidden`, `src/content/record-transactions.ts` — and the specs use the same names as the code.
+- **Whether a chip is marked was written three times**, in two ternaries and a `classList.toggle`. `transactionTypeAppearance` returns the Reference site's class under a named type, as `unitTabAppearance` does, and both the server and the browser write it.
+- **`.rec-entry` is a class the Reference site does not have**, with nothing saying why. The component says: each trail needs an element of its own to be hidden by.
+- **The divergences in the components** now carry the "DIVERGENCE FROM THE REFERENCE SITE, deliberate" marker the stylesheet uses.
+- **Names**: `still` is `reducedMotion`, the step index is `position`, `onShow` is `inSight`.
+- **`openBothPages(…, undefined, 'no-preference')`** — its optional arguments are one options object.
+- **A stale comment** in `home-matches-reference.spec.ts` still said this ticket had not landed. It now also says what the whole-page comparison will have to allow for (below).
+- **Checked and left.** The GSAP colours repeat the `--paper`, `--ink` and `--line` tokens, as the header's toggle already does — a script cannot read a custom property into a tween without measuring it first, and these are the Reference site's literals. The 981px breakpoint is written in the stylesheet, the journey and here; a shared module for it belongs to the day a fourth place needs it. `height: auto` on the box applies at every width, not only below 981px, and the desktop comparison holds it to the Reference site's box at all twelve desktop viewports, 1280×550 included.
+
+**For ticket 10, and for the whole-page comparison.** Below 981px this section is taller than the Reference site's, so everything after it sits lower on the page there; a whole-page comparison at 360–820px has to measure sections from their own tops, as every comparison here does. And the header test turns light at "the first light section after this one" — the figures deck today, the before-and-after once ticket 10 lands, which is the Reference site's boundary; the test follows without being edited, but that is the moment to watch it.
 
 ### Not covered
 

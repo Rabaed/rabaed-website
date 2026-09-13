@@ -1,9 +1,10 @@
 /**
  * The home page's Record section (ticket 09): as the visitor scrolls through
  * it, the section turns from dark to light and the card beside the copy shows
- * the record of each kind of transaction in turn, ending stamped complete.
+ * the trail each transaction type leaves in the Record, ending stamped
+ * complete.
  *
- * Asserted through what a visitor meets: which kind is marked and whose record
+ * Asserted through what a visitor meets: which type is marked and whose trail
  * can be read, what colour the section and the header are, whether the words
  * can be read against what is behind them, and whether any of it spills out of
  * the section.
@@ -12,9 +13,10 @@
  * points, is asked in `home-record-match-reference.spec.ts`.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { readColours, readCycle, scrollToProgress, settle } from './record-section';
 
-/** The five kinds in order: each chip's label and the title of the record it shows. */
-const KINDS = [
+/** The five transaction types in order: each chip's label and the title of the trail it shows. */
+const TRANSACTION_TYPES = [
   { label: 'خطاب رسمي', title: 'LTR-088 · خطاب — طلب تمديد مدة' },
   { label: 'اعتماد مادة (MIR)', title: 'SUB-031 · اعتماد مادة — بلاط الواجهات' },
   { label: 'طلب تسليم أعمال (WIR)', title: 'WIR-0142 · طلب تسليم أعمال — حديد سقف الدور 3' },
@@ -31,12 +33,7 @@ const HEADER_OVER_LIGHT = 'rgba(250, 250, 248, 0.8)';
 
 const section = (page: Page) => page.locator('#record');
 const chip = (page: Page, index: number) => section(page).locator('.rec-types span').nth(index);
-const title = (page: Page, index: number) => section(page).getByText(KINDS[index].title, { exact: true });
-
-/** Two frames: long enough for a scroll to reach every trigger and for GSAP to draw what they set. */
-async function settle(page: Page) {
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-}
+const title = (page: Page, index: number) => section(page).getByText(TRANSACTION_TYPES[index].title, { exact: true });
 
 async function scrollTo(page: Page, y: number) {
   await page.evaluate((top) => window.scrollTo(0, top), Math.round(y));
@@ -57,21 +54,9 @@ function measure(page: Page) {
   });
 }
 
-/**
- * The kind marked, and whether the stamp is on, read from the page — the
- * stamp from its class rather than its opacity, which takes 0.4s to fade and
- * would still read "on" while the kinds behind it had moved on.
- */
-function readState(page: Page) {
-  return section(page).evaluate((element) => ({
-    chosen: [...element.querySelectorAll('.rec-types span')].findIndex((chip) => chip.classList.contains('on')),
-    stamped: element.querySelector('.stamp')!.classList.contains('on'),
-  }));
-}
-
-/** One kind marked, its record readable, and no other kind's. */
+/** One type marked, its trail readable, and no other type's. */
 async function expectShowing(page: Page, chosen: number) {
-  for (const index of KINDS.keys()) {
+  for (const index of TRANSACTION_TYPES.keys()) {
     if (index === chosen) {
       await expect(chip(page, index)).toHaveClass(/\bon\b/);
       await expect(title(page, index)).toBeVisible();
@@ -83,20 +68,12 @@ async function expectShowing(page: Page, chosen: number) {
 }
 
 async function expectStamped(page: Page, stamped: boolean) {
-  await expect.poll(async () => (await readState(page)).stamped, { message: stamped ? 'the stamp never came on' : 'the stamp is on' }).toBe(stamped);
+  await expect
+    .poll(async () => (await readCycle(page)).stamped, { message: stamped ? 'the stamp never came on' : 'the stamp is on' })
+    .toBe(stamped);
 }
 
-/**
- * On a desktop window the section holds still while the visitor scrolls through
- * it, and `progress` is how far through that they are: the Reference site's own
- * measure, which its cycle is written against.
- */
-async function scrollToProgress(page: Page, progress: number) {
-  const { top, height, window: tall } = await measure(page);
-  await scrollTo(page, top + progress * (height - tall));
-}
-
-/** The desktop cycle, at a point inside each kind's share and either side of the stamp. */
+/** The desktop cycle, at a point inside each type's share and either side of the stamp. */
 async function expectTheDesktopCycle(page: Page) {
   for (const [progress, chosen, stamped] of [
     [0.05, 0, false],
@@ -115,7 +92,7 @@ async function expectTheDesktopCycle(page: Page) {
 
 /**
  * Scrolls from where the section enters the window to where it leaves, in
- * small steps, noting each kind as it first appears and where the card was at
+ * small steps, noting each type as it first appears and where the card was at
  * that moment.
  */
 async function walkThrough(page: Page, direction: 'down' | 'up') {
@@ -127,7 +104,7 @@ async function walkThrough(page: Page, direction: 'down' | 'up') {
 
   for (let offset = 0; offset <= to - from; offset += step) {
     await scrollTo(page, direction === 'down' ? from + offset : to - offset);
-    const state = await readState(page);
+    const state = await readCycle(page);
     const last = seen.at(-1);
     if (last?.chosen === state.chosen && last.stamped === state.stamped) continue;
     const { cardCentre } = await measure(page);
@@ -145,26 +122,26 @@ test('the whole section is in the first response', async ({ request }) => {
   expect(html).toContain('ومتى؟');
   expect(html).toContain('وبعد سنة، أو بعد نهاية المشروع، السجل نفسه ما زال هناك.');
   expect(html).toContain(STAMP);
-  // Every kind's record, not only the first: nothing a crawler reads depends
+  // Every type's trail, not only the first: nothing a crawler reads depends
   // on scrolling.
-  for (const kind of KINDS) {
-    expect(html).toContain(kind.label);
-    expect(html).toContain(kind.title);
+  for (const type of TRANSACTION_TYPES) {
+    expect(html).toContain(type.label);
+    expect(html).toContain(type.title);
   }
   for (const step of ['“يُمنح 14 يوماً” — المالك', 'م. سارة · 4 صور', 'تأخر 6 أيام على التسليم', 'بعد خصم بند غير مطابق']) {
     expect(html).toContain(step);
   }
 });
 
-test('with JavaScript off, the section shows the first record, dark, unstamped', async ({ browser }) => {
+test('with JavaScript off, the section shows the first trail, dark, unstamped', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto('/');
   await section(page).scrollIntoViewIfNeeded();
 
   await expectShowing(page, 0);
-  expect((await readState(page)).stamped).toBe(false);
-  expect(await section(page).evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(DARK);
+  expect((await readCycle(page)).stamped).toBe(false);
+  expect((await readColours(page)).section).toBe(DARK);
 
   await context.close();
 });
@@ -173,7 +150,7 @@ for (const viewport of [
   { width: 1440, height: 900 },
   { width: 1280, height: 550 },
 ]) {
-  test(`at ${viewport.width}x${viewport.height} the kinds follow the scroll, and the stamp comes last`, async ({ page }) => {
+  test(`at ${viewport.width}x${viewport.height} the types follow the scroll, and the stamp comes last`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await expectTheDesktopCycle(page);
@@ -181,13 +158,13 @@ for (const viewport of [
 }
 
 // The Reference site's own trigger has no room to run below 981px, where the
-// section is one window tall, so it jumps from the first kind to the stamped
-// last. Here the kinds follow the card across the window instead.
+// section is one window tall, so it jumps from the first type to the stamped
+// last. Here the types follow the card across the window instead.
 for (const viewport of [
   { width: 390, height: 900 },
   { width: 768, height: 900 },
 ]) {
-  test(`at ${viewport.width}x${viewport.height} every kind is shown in turn while the card is in view`, async ({ page }) => {
+  test(`at ${viewport.width}x${viewport.height} every type is shown in turn while the card is in view`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
 
@@ -206,33 +183,29 @@ test('the section turns from dark to light, and the card with it', async ({ page
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const { top, height } = await measure(page);
-  const colours = () =>
-    section(page).evaluate((element) => ({
-      section: getComputedStyle(element).backgroundColor,
-      text: getComputedStyle(element).color,
-      card: getComputedStyle(element.querySelector('.rec-card')!).backgroundColor,
-    }));
 
   await scrollTo(page, top - 10);
-  expect(await colours()).toMatchObject({ section: DARK, text: 'rgb(237, 238, 243)' });
+  expect(await readColours(page)).toMatchObject({ section: DARK, text: 'rgb(237, 238, 243)' });
 
   // Half-way through the change it is neither.
   await scrollTo(page, top + height * 0.125);
-  const between = await colours();
+  const between = await readColours(page);
   expect(between.section).not.toBe(DARK);
   expect(between.section).not.toBe(PAPER);
 
   await scrollTo(page, top + height * 0.4);
-  await expect.poll(colours).toEqual({ section: PAPER, text: 'rgb(34, 34, 34)', card: 'rgb(255, 255, 255)' });
+  await expect.poll(() => readColours(page)).toMatchObject({ section: PAPER, text: 'rgb(34, 34, 34)', card: 'rgb(255, 255, 255)' });
 
   // And back.
   await scrollTo(page, top - 10);
-  await expect.poll(colours).toMatchObject({ section: DARK, text: 'rgb(237, 238, 243)' });
+  await expect.poll(() => readColours(page)).toMatchObject({ section: DARK, text: 'rgb(237, 238, 243)' });
 });
 
 test('the header stays dark through the section, and turns light at the first light section after it', async ({ page }) => {
   // The section turns light, but it is not a light section: the Reference
-  // site keeps the header dark over it, until the next section starts.
+  // site keeps the header dark over it, until the next section starts. Until
+  // ticket 10 lands that next section is the figures deck; after, it is the
+  // before-and-after, as on the Reference site, and this test follows.
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const { top, height, window: tall } = await measure(page);
@@ -315,7 +288,7 @@ test('the section still works after leaving the page and coming back', async ({ 
 test.describe('with reduced motion', () => {
   test.use({ contextOptions: { reducedMotion: 'reduce' } });
 
-  test('the chosen record is there at once, without fading in', async ({ page }) => {
+  test('the chosen trail is there at once, without fading in', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
 
@@ -343,25 +316,24 @@ test.describe('with reduced motion', () => {
 
       for (let y = top - tall / 2; y <= top + height; y += height / 40) {
         await scrollTo(page, y);
-        const contrast = await section(page).evaluate((element) => {
-          const rgb = (colour: string) => colour.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+        const colours = await readColours(page);
+        const contrast = await page.evaluate(({ text, section, card }) => {
           const luminance = (colour: string) => {
-            const [r, g, b] = rgb(colour).map((channel) => {
-              const c = channel / 255;
-              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-            });
+            const [r, g, b] = colour
+              .match(/[\d.]+/g)!
+              .slice(0, 3)
+              .map((channel) => {
+                const c = Number(channel) / 255;
+                return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+              });
             return 0.2126 * r + 0.7152 * g + 0.0722 * b;
           };
           const ratio = (a: string, b: string) => {
             const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
             return (light + 0.05) / (dark + 0.05);
           };
-          const text = getComputedStyle(element).color;
-          return {
-            onSection: ratio(text, getComputedStyle(element).backgroundColor),
-            onCard: ratio(text, getComputedStyle(element.querySelector('.rec-card')!).backgroundColor),
-          };
-        });
+          return { onSection: ratio(text, section), onCard: ratio(text, card) };
+        }, colours);
         const where = `at ${Math.round(y - top)}px into the section`;
         expect(contrast.onSection, where).toBeGreaterThanOrEqual(4.5);
         expect(contrast.onCard, where).toBeGreaterThanOrEqual(4.5);

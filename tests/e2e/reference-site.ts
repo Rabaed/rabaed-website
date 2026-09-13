@@ -118,8 +118,7 @@ export async function openBothPages(
   baseURL: string,
   site: ReferenceSite,
   viewport: { width: number; height: number },
-  pages: PagePair = HOME_PAGES,
-  motion: 'reduce' | 'no-preference' = 'reduce',
+  { pages = HOME_PAGES, motion = 'reduce' }: { pages?: PagePair; motion?: 'reduce' | 'no-preference' } = {},
 ) {
   const options = { viewport, reducedMotion: motion };
   const referenceContext = await browser.newContext(options);

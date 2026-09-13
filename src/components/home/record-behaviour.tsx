@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { recordAt, recordTypeAppearance } from '@/components/home/record-state';
+import { recordAt, transactionTypeAppearance } from '@/components/home/record-state';
 import { REDUCED_MOTION } from '@/lib/motion';
 import { readingDirectionOf } from '@/lib/reading-direction';
 
@@ -19,29 +19,29 @@ const NARROW = '(max-width: 980px)';
  * - **Dark to light.** The section's ground and words blend to the light
  *   treatment over its first quarter, and the card to white from 12% to 32% —
  *   the Reference site's ranges, following the scroll exactly.
- * - **The five kinds.** The card shows each kind's record in turn, and the
- *   stamp comes on at the end (`record-state.ts`). A change fades the old
- *   record out and brings the new one in step by step, as on the Reference
+ * - **The five transaction types.** The card shows each type's trail in turn,
+ *   and the stamp comes on at the end (`record-state.ts`). A change fades the
+ *   old trail out and brings the new one in step by step, as on the Reference
  *   site.
  *
- * Two things differ from the Reference site, on purpose:
+ * **DIVERGENCE FROM THE REFERENCE SITE, deliberate**, twice:
  *
- * - **Below 981px the kinds follow the card across the window.** There the
+ * - **Below 981px the types follow the card across the window.** There the
  *   section is only as tall as the window, so the Reference site's cycle —
  *   from the section's top meeting the window's top to its bottom meeting the
- *   window's bottom — has no distance to run, and jumps from the first kind
+ *   window's bottom — has no distance to run, and jumps from the first type
  *   straight to the stamped last. Here the cycle runs while the card's centre
- *   crosses the middle 70% of the window, so every kind is seen.
- * - **With reduced motion nothing blends or fades.** A record changes at once,
+ *   crosses the middle 70% of the window, so every type is seen.
+ * - **With reduced motion nothing blends or fades.** A trail changes at once,
  *   and the section and its card change colour together, in one step, 12.5%
- *   of the way in — half-way through the blend. A blend passes through a grey
- *   against which neither dark words nor light ones can be read; a step never
- *   does. The kinds still follow the scroll, because scrolling is the only way
- *   to reach them.
+ *   of the way in — half-way through the section's blend. A blend passes
+ *   through a grey against which neither dark words nor light ones can be
+ *   read; a step never does. The types still follow the scroll, because
+ *   scrolling is the only way to reach them.
  *
  * `gsap.matchMedia` builds all of it for the window and the preference there
  * are, and takes it apart and builds it again when either changes. Teardown
- * reverts everything and puts the first record back, so React's development
+ * reverts everything and puts the first trail back, so React's development
  * double-invocation starts again from what the server drew.
  */
 export function RecordBehaviour() {
@@ -51,56 +51,60 @@ export function RecordBehaviour() {
     const stamp = section?.querySelector<HTMLElement>('.stamp');
     if (!section || !card || !stamp) return;
     const chips = [...section.querySelectorAll<HTMLElement>('.rec-types span')];
-    const records = [...section.querySelectorAll<HTMLElement>('.rec-entry')];
-    if (records.length === 0 || chips.length !== records.length) return;
+    const trails = [...section.querySelectorAll<HTMLElement>('.rec-entry')];
+    if (trails.length === 0 || chips.length !== trails.length) return;
 
-    const titleOf = (record: HTMLElement) => record.querySelector<HTMLElement>('.h b')!;
-    const listOf = (record: HTMLElement) => record.querySelector<HTMLElement>('.tl')!;
-    const stepsOf = (record: HTMLElement) => [...record.querySelectorAll<HTMLElement>('.tl > li')];
-    const everyPart = records.flatMap((record) => [titleOf(record), listOf(record), ...stepsOf(record)]);
+    const titleOf = (trail: HTMLElement) => trail.querySelector<HTMLElement>('.h b')!;
+    const listOf = (trail: HTMLElement) => trail.querySelector<HTMLElement>('.tl')!;
+    const stepsOf = (trail: HTMLElement) => [...trail.querySelectorAll<HTMLElement>('.tl > li')];
+    const everyPart = trails.flatMap((trail) => [titleOf(trail), listOf(trail), ...stepsOf(trail)]);
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // The steps of a new record slide in from 10px towards where a line
+    // The steps of a new trail slide in from 10px towards where a line
     // begins: from the left, reading right to left.
     const enterFrom = readingDirectionOf(section) === 'rtl' ? -10 : 10;
-    const start = recordAt(0, records.length);
-    let showing = start.chosen;
-    let still = false;
+    const start = recordAt(0, trails.length);
+    let chosenNow = start.chosen;
+    let reducedMotion = false;
 
-    const reveal = (chosen: number) => {
-      records.forEach((record, index) => {
-        record.hidden = recordTypeAppearance(index, chosen).recordHidden;
+    /** Marks the chip, and shows the trail, of the type `chosen` — at once. */
+    const markChip = (chosen: number) =>
+      chips.forEach((chip, index) => {
+        chip.className = transactionTypeAppearance(index, chosen).chipClass ?? '';
       });
-    };
+    const showTrail = (chosen: number) =>
+      trails.forEach((trail, index) => {
+        trail.hidden = transactionTypeAppearance(index, chosen).trailHidden;
+      });
 
     const choose = (chosen: number) => {
-      if (chosen === showing) return;
-      showing = chosen;
-      chips.forEach((chip, index) => chip.classList.toggle('on', recordTypeAppearance(index, chosen).chipOn));
+      if (chosen === chosenNow) return;
+      chosenNow = chosen;
+      markChip(chosen);
 
       // Whatever is fading stops where it is, so a change of mind half-way
       // through cannot be overtaken by the change it replaced.
       gsap.killTweensOf(everyPart);
-      if (still) {
+      if (reducedMotion) {
         gsap.set(everyPart, { clearProps: 'opacity,transform' });
-        reveal(chosen);
+        showTrail(chosen);
         return;
       }
 
-      const onShow = records.filter((record) => !record.hidden);
+      const inSight = trails.filter((trail) => !trail.hidden);
       gsap.to(
-        onShow.flatMap((record) => [titleOf(record), listOf(record)]),
+        inSight.flatMap((trail) => [titleOf(trail), listOf(trail)]),
         {
           opacity: 0,
           duration: 0.16,
           onComplete: () => {
             gsap.set(everyPart, { clearProps: 'opacity,transform' });
-            reveal(chosen);
-            const record = records[chosen];
-            gsap.fromTo(titleOf(record), { opacity: 0 }, { opacity: 1, duration: 0.22 });
+            showTrail(chosen);
+            const trail = trails[chosen];
+            gsap.fromTo(titleOf(trail), { opacity: 0 }, { opacity: 1, duration: 0.22 });
             gsap.fromTo(
-              stepsOf(record),
+              stepsOf(trail),
               { opacity: 0.2, x: enterFrom },
               { opacity: 1, x: 0, duration: 0.32, stagger: 0.09, ease: 'power2.out' },
             );
@@ -110,7 +114,7 @@ export function RecordBehaviour() {
     };
 
     const follow = (self: ScrollTrigger) => {
-      const moment = recordAt(self.progress, records.length);
+      const moment = recordAt(self.progress, trails.length);
       choose(moment.chosen);
       stamp.classList.toggle('on', moment.stamped);
     };
@@ -119,7 +123,7 @@ export function RecordBehaviour() {
 
     media.add({ desktop: DESKTOP, narrow: NARROW, reduced: REDUCED_MOTION }, (context) => {
       const { desktop, reduced } = context.conditions as { desktop: boolean; reduced: boolean };
-      still = reduced;
+      reducedMotion = reduced;
 
       if (reduced) {
         ScrollTrigger.create({
@@ -167,9 +171,9 @@ export function RecordBehaviour() {
       media.revert();
       gsap.killTweensOf(everyPart);
       gsap.set(everyPart, { clearProps: 'opacity,transform' });
-      showing = start.chosen;
-      chips.forEach((chip, index) => chip.classList.toggle('on', recordTypeAppearance(index, start.chosen).chipOn));
-      reveal(start.chosen);
+      chosenNow = start.chosen;
+      markChip(start.chosen);
+      showTrail(start.chosen);
       stamp.classList.toggle('on', start.stamped);
     };
   }, []);

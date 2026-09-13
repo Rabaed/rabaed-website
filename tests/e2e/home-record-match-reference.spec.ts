@@ -6,31 +6,32 @@
  *
  * **At rest**, at all sixteen baseline viewports with reduced motion on:
  * everything in the section — the copy, the chips, the card and every part of
- * the record showing in it, and the stamp waiting to come on.
+ * the trail showing in it, and the stamp waiting to come on.
  *
  * **While scrolling**, with motion on: the colours of the section and the card
- * at points through their change, and on a desktop window which kind is marked
- * and whether the stamp is on at points through the cycle.
+ * at points through their change, and on a desktop window which transaction
+ * type is marked and whether the stamp is on at points through the cycle.
  *
  * Two deliberate differences shape the comparison, each left out only where it
  * reaches:
  *
- * - **Every kind's record is in the page**, where the Reference site has one
- *   and rewrites it. The records not showing are `hidden`, so every part of a
- *   record is selected through a parent that is not — which on the Reference
- *   site is simply the card.
+ * - **Every type's trail is in the page**, where the Reference site has one and
+ *   rewrites it. The trails not showing are `hidden`, so every part of a trail
+ *   is selected through a parent that is not — which on the Reference site is
+ *   simply the card.
  * - **Below 981px the section is padded, and never shorter than what is in
  *   it.** The Reference site holds it to the window's height with no padding,
  *   so on a phone its copy and card spill over the sections either side, and
  *   on a tablet they sit 30px from its edges. There, the section's height and
  *   where its content sits in it are not compared; everything inside the
- *   content still is, at all sixteen viewports. Below 981px the kinds also
+ *   content still is, at all sixteen viewports. Below 981px the types also
  *   follow the card rather than the section, because the Reference site's
  *   cycle has no room to run there, so the cycle is compared on desktop
  *   windows only.
  */
 import { test, expect, type Page } from '@playwright/test';
 import { measureRegion, type Measurement, type Region } from './geometry';
+import { readColours, readCycle, scrollIntoSection, scrollToProgress } from './record-section';
 import {
   BASELINE_VIEWPORTS,
   openBothPages,
@@ -38,7 +39,7 @@ import {
   type ReferenceSite,
 } from './reference-site';
 
-/** Selects inside the record showing, on either site. */
+/** Selects inside the trail showing, on either site. */
 const SHOWING = '.rec-card :not([hidden]) >';
 
 const CONTENT: Region = {
@@ -81,11 +82,11 @@ function sectionRegion(viewport: { width: number }): Region {
 }
 
 /**
- * The Reference site rewrites its first record, and fades it in, as soon as
- * its script runs — reduced motion or not. Compared before that, the last
- * step would be the markup's rather than the one visitors read.
+ * The Reference site rewrites its first trail, and fades it in, as soon as its
+ * script runs — reduced motion or not. Compared before that, the last step
+ * would be the markup's rather than the one visitors read.
  */
-async function waitForTheReferenceRecord(page: Page) {
+async function waitForTheReferenceTrail(page: Page) {
   await expect(page.locator('#rec-tl li').last().locator('.a')).toHaveText('رُدَّ عليه');
   await expect
     .poll(() =>
@@ -96,37 +97,6 @@ async function waitForTheReferenceRecord(page: Page) {
       ),
     )
     .toBe(true);
-}
-
-async function scrollIntoSection(page: Page, fraction: number) {
-  await page.evaluate((through) => {
-    const section = document.getElementById('record')!;
-    const top = section.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo(0, Math.round(top + through * section.offsetHeight));
-  }, fraction);
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-}
-
-async function scrollToProgress(page: Page, progress: number) {
-  await page.evaluate((through) => {
-    const section = document.getElementById('record')!;
-    const top = section.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo(0, Math.round(top + through * (section.offsetHeight - window.innerHeight)));
-  }, progress);
-  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-}
-
-function colours(page: Page) {
-  return page.evaluate(() => {
-    const section = getComputedStyle(document.getElementById('record')!);
-    const card = getComputedStyle(document.querySelector('.rec-card')!);
-    return {
-      section: section.backgroundColor,
-      text: section.color,
-      card: card.backgroundColor,
-      cardBorder: card.borderTopColor,
-    };
-  });
 }
 
 /**
@@ -140,7 +110,9 @@ function expectCloseColours(actual: Record<string, string>, expected: Record<str
   for (const key of Object.keys(expected)) {
     const [a, e] = [channels(actual[key]), channels(expected[key])];
     expect(a.length, `${key} ${where}`).toBe(e.length);
-    a.forEach((value, index) => expect(Math.abs(value - e[index]), `${key} ${where}: ${actual[key]} against ${expected[key]}`).toBeLessThanOrEqual(3));
+    a.forEach((value, index) =>
+      expect(Math.abs(value - e[index]), `${key} ${where}: ${actual[key]} against ${expected[key]}`).toBeLessThanOrEqual(3),
+    );
   }
 }
 
@@ -160,7 +132,7 @@ test.describe('the Record section matches the Reference site at rest', () => {
       const pages = await openBothPages(browser, baseURL!, site, viewport);
 
       try {
-        await waitForTheReferenceRecord(pages.reference);
+        await waitForTheReferenceTrail(pages.reference);
         for (const region of [sectionRegion(viewport), CONTENT]) {
           expect(await measureRegion(pages.rebuilt, region), region.name).toEqual(
             await measureRegion(pages.reference, region),
@@ -181,7 +153,7 @@ test.describe('the Record section changes as on the Reference site while scrolli
     { width: 390, height: 900 },
   ]) {
     test(`colours at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
-      const pages = await openBothPages(browser, baseURL!, site, viewport, undefined, 'no-preference');
+      const pages = await openBothPages(browser, baseURL!, site, viewport, { motion: 'no-preference' });
 
       try {
         // Through the section's own change, which runs over its first quarter,
@@ -189,7 +161,7 @@ test.describe('the Record section changes as on the Reference site while scrolli
         for (const fraction of [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.28, 0.32, 0.45]) {
           await scrollIntoSection(pages.reference, fraction);
           await scrollIntoSection(pages.rebuilt, fraction);
-          expectCloseColours(await colours(pages.rebuilt), await colours(pages.reference), `at ${fraction} of the section`);
+          expectCloseColours(await readColours(pages.rebuilt), await readColours(pages.reference), `at ${fraction} of the section`);
         }
       } finally {
         await pages.close();
@@ -202,21 +174,16 @@ test.describe('the Record section changes as on the Reference site while scrolli
     { width: 1280, height: 550 },
   ]) {
     test(`the cycle at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
-      const pages = await openBothPages(browser, baseURL!, site, viewport, undefined, 'no-preference');
-      const state = (page: Page) =>
-        page.evaluate(() => ({
-          chosen: [...document.querySelectorAll('.rec-types span')].findIndex((chip) => chip.classList.contains('on')),
-          stamped: document.querySelector('#record .stamp')!.classList.contains('on'),
-        }));
+      const pages = await openBothPages(browser, baseURL!, site, viewport, { motion: 'no-preference' });
 
       try {
-        // Each clear of the boundaries between kinds (0.296, 0.472, 0.648,
+        // Each clear of the boundaries between types (0.296, 0.472, 0.648,
         // 0.824) and the stamp's (0.9), where a pixel's rounding could land
         // the two sites either side.
         for (const progress of [0, 0.1, 0.2, 0.33, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.95, 1, 0.5]) {
           await scrollToProgress(pages.reference, progress);
           await scrollToProgress(pages.rebuilt, progress);
-          expect(await state(pages.rebuilt), `at progress ${progress}`).toEqual(await state(pages.reference));
+          expect(await readCycle(pages.rebuilt), `at progress ${progress}`).toEqual(await readCycle(pages.reference));
         }
       } finally {
         await pages.close();

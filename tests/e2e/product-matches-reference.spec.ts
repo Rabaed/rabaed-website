@@ -206,7 +206,7 @@ test.describe('the product page matches the Reference site', () => {
   for (const viewport of BASELINE_VIEWPORTS) {
     test(`at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
       test.slow();
-      const pages = await openBothPages(browser, baseURL!, site, viewport, PRODUCT_PAGES);
+      const pages = await openBothPages(browser, baseURL!, site, viewport, { pages: PRODUCT_PAGES });
       const { reference, rebuilt } = pages;
 
       // Soft, so one run reports every region that differs rather than the first.
