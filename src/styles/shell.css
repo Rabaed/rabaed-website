@@ -158,9 +158,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 @media (max-width: 980px) { .phero { padding: 120px 0 var(--sp) } }
 @media (min-width: 981px) and (max-height: 700px) { .phero { padding: 120px 0 56px } .phero h1 { font-size: 32px } .phero .lead { font-size: 15px } }
 
-/* ---- the repeating tail ---- */
-/* The closing block every page carries. Ticket 11 adds the demo form beside
-   it; ticket 27 makes that form real. */
+/* ---- the closing section ---- */
+/* The block the home and product pages end on: three steps beside the demo
+   request form (src/components/closing-section.tsx). */
 #tail { background: #F3F2EF; border-top: 1px solid var(--line) }
 .tail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start }
 .tail-steps { list-style: none; padding: 0; margin: 20px 0 0 }
@@ -171,3 +171,19 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .tail-more { display: inline-block; margin-top: 16px; font-size: 14px; color: var(--acc); font-weight: 600; padding: 6px 0 }
 .tail-more:hover { text-decoration: underline }
 @media (max-width: 980px) { .tail-grid { grid-template-columns: 1fr; gap: 28px } }
+
+/* ---- the demo request form ---- */
+/* One form in three places (src/components/demo-request-form.tsx). */
+.form { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 26px; display: grid; gap: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, .06) }
+.form h3 { font-size: 22px }
+.form input, .form select { font-family: inherit; font-size: 15px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; width: 100%; background: var(--paper) }
+.form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.form small { color: var(--muted); font-size: 12px }
+.form .fine { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 1.7 }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small. The header's and
+   the hero's «احجز عرضاً حياً» jump here. The Reference site scrolls there by
+   script, stopping 78px short so the fixed header does not cover the form;
+   this stops in the same place with no script at all. The Reference site's
+   script stops short of every in-page anchor, not just this one; each later
+   anchor target wants the same margin when it is built. */
+#demo { scroll-margin-top: 78px }

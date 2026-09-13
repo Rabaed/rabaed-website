@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { ClosingSection } from '@/components/closing-section';
 import { Figures } from '@/components/home/figures';
 import { FourUnits } from '@/components/home/four-units';
 import { Hero } from '@/components/home/hero';
+import { Questions } from '@/components/home/questions';
 import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
-import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -16,16 +17,12 @@ export const metadata: Metadata = pageMetadata({
 });
 
 /**
- * The Arabic home page, in the state ticket 08 leaves it: the full-height hero,
- * the Trust strip, the situations deck, the four units, the figures deck, then
- * the repeating tail.
+ * The Arabic home page, in the state ticket 11 leaves it: the full-height hero,
+ * the Trust strip, the situations deck, the four units, the figures deck, the
+ * questions, and the closing section with the demo request form.
  *
- * The gaps are marked where they fall, in the Reference site's order: tickets
- * 09-10 fill the space before the figures deck, and ticket 11 puts the FAQs
- * before the tail. The closing section is the tail every page carries; ticket
- * 11 puts the demo form
- * in its second column and ticket 27 makes that form real, which is why it
- * looks half-empty at desktop widths today (bug 44).
+ * One gap remains, marked where it falls in the Reference site's order:
+ * tickets 09 and 10 fill the space before the figures deck.
  *
  * All copy is verbatim from `reference/site/index.html`. Nothing here is
  * placeholder text, and nothing waits to be reworded.
@@ -40,39 +37,8 @@ export default function HomePage() {
       {/* Tickets 09 and 10: the Record, and the before-and-after with its
           calculator. */}
       <Figures />
-      {/* Ticket 11: the FAQs. */}
-
-      <section id="tail" className="light pad">
-        <div className="wrap tail-grid">
-          <div>
-            <div className="eyebrow">كيف نبدأ معك</div>
-            <h2 style={{ fontSize: '29px', lineHeight: 1.4 }}>
-              فريقنا في موقعك. الأطراف الثلاثة على المنصة خلال أيام.
-            </h2>
-            <ul className="tail-steps">
-              <li>
-                <b>01 · إعداد</b>
-                <span>
-                  نُعدّ المشروع والنماذج، وندعو المالك والاستشاري والمقاول — و15 دقيقة مع كل فريق.
-                </span>
-              </li>
-              <li>
-                <b>02 · تشغيل</b>
-                <span>أقل من يوم، دون توقف للعمل. يبدأ الجميع من حيث وصل المشروع.</span>
-              </li>
-              <li>
-                <b>03 · ضمان</b>
-                <span>
-                  60 يوماً من التفعيل — أو نعيد كامل المبلغ، ونسلّمكم نسخة كاملة من السجل.
-                </span>
-              </li>
-            </ul>
-            <a className="tail-more" href={localePath('ar', '/start')}>
-              التفاصيل والأسئلة الشائعة ←
-            </a>
-          </div>
-        </div>
-      </section>
+      <Questions />
+      <ClosingSection />
     </PageShell>
   );
 }

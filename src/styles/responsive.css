@@ -39,6 +39,12 @@
   .brand .l { top: 5px }
 }
 
+@media (max-width: 620px) {
+  /* The Reference site's own rule and reason: side by side, 130px-wide fields
+     clipped every placeholder, so a phone gives each field its own line. */
+  .form .two { grid-template-columns: 1fr }
+}
+
 @media (max-width: 560px) {
   /* Shorthand, deliberately: see the note at the top of this file. */
   .wrap { padding: 0 20px }

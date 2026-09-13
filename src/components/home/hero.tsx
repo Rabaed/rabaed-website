@@ -36,10 +36,10 @@ export function Hero() {
               باسم من قام بها.
             </p>
             <div className="ctas">
-              {/* Both anchors point at sections later tickets build: the demo
-                  form is ticket 27, inside the closing section of ticket 11,
-                  and the journey is ticket 08. Until then they behave as the
-                  Reference site's own do on its sub-pages — they go nowhere. */}
+              {/* The first jumps to the demo request form at the foot of this
+                  page (ticket 11). The second points at `#journey`, which no
+                  section on this page carries yet, so it goes nowhere — as the
+                  Reference site's own anchors do on its sub-pages. */}
               <a className="btn p" href="#demo">
                 احجز عرضاً حياً
               </a>

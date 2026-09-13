@@ -65,9 +65,9 @@ export function SiteNav({ locale, path }: { locale: Locale; path: string }) {
           <a className="login" href={SIGN_IN_URL} target="_blank" rel="noopener">
             {SIGN_IN_LABEL}
           </a>
-          {/* The demo form is ticket 27, and the section that holds it is
-              ticket 11. Until then this anchor has nothing to jump to, which
-              is what the Reference site does on its sub-pages too. */}
+          {/* On the home page this jumps to the demo request form (ticket 11).
+              On a page without the form it goes nowhere, which is what the
+              Reference site does on its sub-pages too. */}
           <a className="btn p" href="#demo">
             احجز عرضاً حياً
           </a>
