@@ -31,7 +31,10 @@ function testPort(value: string | undefined): number {
 }
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  // `tests/e2e` drives the built site; `tests/unit` holds the one direct unit
+  // test the spec permits (the delay-cost formula), which opens no browser.
+  // `tests/baselines` is images and has no specs for this to find.
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,

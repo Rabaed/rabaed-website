@@ -1,8 +1,8 @@
 /**
  * The home page's own sections, taken from `reference/site/index.html`: the
  * full-height hero and the Trust strip below it (ticket 06), the two card decks
- * (ticket 07), the four units (ticket 08), and the Record (ticket 09). Ticket 10
- * adds the before-and-after and its calculator here.
+ * (ticket 07), the four units (ticket 08), the Record (ticket 09), and the
+ * before-and-after comparison and the delay-cost calculator (ticket 10).
  *
  * Imported after `shell.css` and before `responsive.css`, which has to stay
  * last for the reason written at the top of it. Nothing here collides with a
@@ -380,6 +380,125 @@
   .rec-trails { display: grid }
   .rec-entry { grid-area: 1 / 1 }
   .rec-entry[hidden] { display: block; visibility: hidden }
+}
+
+/* ---- the before-and-after ---- */
+
+/* Kept together here, media queries included, like the four units and the
+   Record. The Reference site wrote the section's white ground and its rules
+   above and below as an inline style; they are the section's, so they are
+   here. */
+#ba { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
+
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: `touch-action: pan-y` where
+   the Reference site has `none`. With `none`, a thumb that lands anywhere on
+   the comparison — most of a phone's screen, stacked two by two — cannot
+   scroll the page past it. `pan-y` gives vertical swipes to the page and
+   keeps sideways ones for the seam, as the card deck does. */
+.cmp { position: relative; margin-top: 34px; padding: 18px 32px 16px; cursor: ew-resize; user-select: none; touch-action: pan-y; --p: 50% }
+/* DELIBERATE EXCEPTION to the logical-properties rule: the seam, the wash
+   behind it and the two tags are a picture with a left and a right, and
+   `--p` is measured from the left (src/components/home/before-after-seam.ts).
+   The usual way is on the left, Rabaed's on the right. The English site
+   revisits it (ticket 42). */
+.cmp-wash { position: absolute; inset: 0; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(to right, var(--soft) 0 calc(var(--p) - 1px), #FFF6F3 calc(var(--p) + 1px) 100%) }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the tags are Arabic, and the
+   Reference site sets them in DM Mono, which has no Arabic glyphs — the defect
+   the footer, the guarantee pill and the four units' «المخرَج» already fix. */
+.cmp-tag { position: absolute; top: -13px; font-size: 11.5px; padding: 5px 14px; border-radius: 999px; pointer-events: none; z-index: 3; opacity: .5; transition: opacity .28s ease }
+.cmp-tag.tb { left: 22px; background: var(--ink); color: #fff }
+.cmp-tag.ta { right: 22px; background: var(--acc); color: #fff }
+.cmp-steps, .cmp-cols { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; z-index: 2 }
+.cmp-steps { margin-bottom: 10px }
+.cmp-steps span { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); padding-inline-start: 4px }
+.cmp-steps i { font-family: "DM Mono", monospace; font-style: normal; font-size: 11px; color: var(--acc) }
+.cmp-col { position: relative; min-height: 172px }
+.face { position: absolute; inset: 0; border-radius: 14px; padding: 34px 18px 18px; font-size: 14.5px; line-height: 1.65; background: #fff; border: 1px solid var(--line); will-change: opacity, transform }
+.face p { margin: 0 }
+/* In the Arabic face for the same reason as the tags: «ورق», «واتساب». */
+.face .ch { position: absolute; top: 12px; inset-inline-start: 16px; font-size: 10.5px; padding: 3px 9px; border-radius: 999px }
+.face.fb { background: #EFEEEB; border-color: #DFDDD8; color: #5E5B55 }
+.face.fb .ch { background: #E2DFD9; color: #7c7269 }
+.face.fa { box-shadow: 0 14px 34px rgba(249, 87, 56, .13); border-color: #F6C9BB }
+.face.fa .ch { background: #FFEFEA; color: var(--acc) }
+.face.fa b { color: var(--acc) }
+/* Centred on the seam: `translateX(-1px)` on a 2px line, and the grip centred
+   on the line, are symmetric, so they stay physical with it. */
+.cmp-handle { position: absolute; top: -8px; bottom: -8px; left: var(--p); width: 2px; background: var(--acc); transform: translateX(-1px); cursor: ew-resize; z-index: 4 }
+.cmp-handle .grip { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 52px; height: 52px; border-radius: 50%; background: var(--acc); color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 22px; line-height: 1; box-shadow: 0 8px 26px rgba(249, 87, 56, .45); border: 3px solid #fff; transition: transform .18s }
+.cmp-handle .grip b { font-weight: 400; opacity: .9 }
+.cmp-handle:hover .grip, .cmp.drag .grip { transform: translate(-50%, -50%) scale(1.09) }
+.cmp-handle:focus-visible { outline: none }
+.cmp-handle:focus-visible .grip { box-shadow: 0 0 0 4px rgba(249, 87, 56, .35) }
+/* The three verdicts share one place; only one is ever shown. */
+.cmp-verdicts { display: grid; margin-top: 24px; min-height: 34px }
+.cmp-verdict { grid-area: 1 / 1; margin: 0; font-size: 19px; font-weight: 600; transition: opacity .25s }
+.cmp-verdict.bad { color: #c5401f; opacity: 0 }
+.cmp-verdict.good { color: #157a5a; opacity: 0 }
+.cmp-verdict.mid { color: var(--muted); font-weight: 500 }
+
+/* The seam at rest, before the script takes over — see
+   src/components/home/before-after.tsx. A step turns over once the seam is
+   left of its column's centre; at rest that is the right-hand half, which is
+   the first two columns of four, and the first of each row of two. The values
+   are the ones the script paints for a step all the way over or not at all. */
+.face.fa { opacity: 0; transform: translateY(14px) scale(.97) }
+.face.fb { opacity: 1 }
+
+@media (min-width: 981px) {
+  .cmp-col:nth-child(-n+2) .face.fa { opacity: 1; transform: none }
+  .cmp-col:nth-child(-n+2) .face.fb { opacity: 0; transform: translateY(-14px) scale(.97) }
+}
+
+@media (max-width: 980px) {
+  .cmp-steps, .cmp-cols { grid-template-columns: 1fr 1fr }
+  .cmp-col { min-height: 190px }
+  .cmp-verdict { font-size: 17px }
+  .cmp-col:nth-child(odd) .face.fa { opacity: 1; transform: none }
+  .cmp-col:nth-child(odd) .face.fb { opacity: 0; transform: translateY(-14px) scale(.97) }
+}
+
+@media (max-width: 700px) {
+  .cmp-verdict { font-size: 16px }
+}
+
+/* ---- the delay-cost calculator ---- */
+
+.calc { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: stretch; margin-top: 28px }
+.calc .in { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: grid; gap: 26px; align-content: center }
+.calc label { display: grid; gap: 0; font-size: 14px; color: var(--muted) }
+/* The Reference site's rule for text fields, which its calculator no longer
+   has. It still reaches the sliders, and outranks `.rng` below: the padding,
+   the border, the 10px corners and the pale ground under the track's filling
+   are all this rule's. Its `text-align: right` stays physical: inside a box it
+   forces to left-to-right, `end` would mean the same side, and it is the
+   Reference site's rule as written. */
+.calc input { font-family: "DM Mono", monospace; font-size: 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; width: 100%; direction: ltr; text-align: right; background: var(--paper) }
+.calc .out { background: var(--ink); color: #fff; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; justify-content: center }
+.calc .out small { color: var(--dark-muted); font-size: 14px }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: not DM Mono. Only the number
+   inside is, in the markup, because the currency beside it is Arabic. */
+.calc .out b { font-size: 52px; font-weight: 500; line-height: 1.1; margin: 8px 0 }
+.calc .out .n { font-size: 13px; color: var(--dark-muted); border-top: 1px solid var(--dark-line); padding-top: 12px; margin-top: 14px }
+.lr { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--muted) }
+/* Not DM Mono, for the same reason: «7 أيام». */
+.lr b { font-size: 17px; color: var(--ink); font-weight: 500 }
+/* The number inside a reading or the cost, in DM Mono beside Arabic words.
+   Two typefaces sit their baselines at different heights in a line, so
+   lining them up would make the line 1px taller at 17px and 3px at 52px than
+   the one-line height the Reference site's single typeface gives it, and push
+   everything below down. A number whose own line height is nothing still sits
+   on the shared baseline, but no longer decides how tall the line is. */
+.lr b .mono, .calc .out b .mono { line-height: 0 }
+/* The track runs left to right in either direction, filled from the left up to
+   the thumb by an inline gradient (src/components/home/delay-calculator-state.ts). */
+.rng { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; background: var(--line); outline: none; direction: ltr; margin: 14px 0 0; cursor: pointer }
+.rng::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--acc); border: 3px solid #fff; box-shadow: 0 3px 12px rgba(249, 87, 56, .5); cursor: grab }
+.rng::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.08) }
+.rng::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--acc); border: 3px solid #fff; box-shadow: 0 3px 12px rgba(249, 87, 56, .5); cursor: grab }
+
+@media (max-width: 980px) {
+  .calc { grid-template-columns: 1fr }
 }
 
 /* ---- narrower and shorter ---- */
