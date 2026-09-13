@@ -101,7 +101,9 @@
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small, as `#demo` in
    `shell.css`: the hero's two calls to action land here. The Reference site's
    script stops 78px short so the fixed header does not cover the section; this
-   stops in the same place with no script, instantly rather than smoothly. */
+   stops in the same place with no script, instantly rather than smoothly.
+   The referral page's hero lands on a `#how` of its own, so this holds it too
+   (tests/e2e/referral-page.spec.ts). */
 #get, #how { scroll-margin-top: 78px }
 
 /* ---- the upsell ---- */

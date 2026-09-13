@@ -13,3 +13,17 @@
 - [ ] Upload fields keep the Reference site's label structure and selected-state styling
 - [ ] Both consent checkboxes are required, and consent is recorded with the submission
 - [ ] A test proves an uploaded document is not publicly retrievable
+
+## Comments
+
+**What ticket 15 leaves for this one.**
+
+The signup form is `src/components/referral/signup-form.tsx`:
+
+- **Its fields are ready.** Every field is named, and the starred ones, the IBAN certificate and both consents are already `required`.
+- **Its submit button is disabled.**
+- **Its small print still reads «نموذج أولي — لا يُرسل فعلياً في هذه النسخة.»** That is true until this ticket, and must go with it.
+
+The document fields are `src/components/referral/upload-field.tsx`. They already show the chosen file's name and the green selected state. This ticket adds progress and the server's rejection.
+
+**The page promises a referral code «فوراً على جوالك وبريدك», and no ticket issues one.** See ticket 15's note for the founder.

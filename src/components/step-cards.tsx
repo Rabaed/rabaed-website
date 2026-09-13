@@ -1,7 +1,7 @@
 /**
- * Three steps, each in a card of its own, one of them marked out — the start
- * page's steps to going live and the tool page's steps to a first pour both
- * take this shape on the Reference site.
+ * Steps, each in a card of its own, one of them marked out — the start page's
+ * steps to going live, the tool page's steps to a first pour and the referral
+ * page's four steps to a payout all take this shape on the Reference site.
  */
 export type StepCard = {
   readonly number: string;
@@ -12,9 +12,16 @@ export type StepCard = {
   readonly markedOut: boolean;
 };
 
-export function StepCards({ steps }: { steps: readonly StepCard[] }) {
+export function StepCards({
+  steps,
+  columns = 'three',
+}: {
+  steps: readonly StepCard[];
+  /** Three across, or four — at desktop widths only (`programmes.css`). */
+  columns?: 'three' | 'four';
+}) {
   return (
-    <div className="start">
+    <div className={columns === 'four' ? 'start four' : 'start'}>
       {steps.map((step) => (
         <div key={step.number} className={step.markedOut ? 's gs' : 's'}>
           {/* Only the numeral is `.mono`: DM Mono has no Arabic glyphs

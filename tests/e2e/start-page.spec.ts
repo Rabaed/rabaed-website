@@ -12,6 +12,7 @@
  * `health.spec.ts`'s, which covers every route in `routes.ts`.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { ANIMATIONS, scriptsOf } from './animation-code';
 import { sidewaysOverflow } from './geometry';
 import { BASELINE_VIEWPORTS } from './reference-site';
 
@@ -203,39 +204,10 @@ test('the free tool teaser leads to the tool page', async ({ page }) => {
 
 /**
  * "The page does not load the animation library or homepage animation code it
- * has no use for" (ticket 13). The Reference start page carries all of it.
- *
- * Each marker is a string from one behaviour's source that survives
- * minification. The same markers are looked for on the pages that do use the
- * code, so a marker that stopped appearing in the bundle — renamed, or
- * minified away — fails there rather than letting this pass by finding
- * nothing.
- *
- * GSAP itself does load here, and is meant to: the header's colour toggle and
- * the Trust strip are on this page and are built on it.
+ * has no use for" (ticket 13). The Reference start page carries all of it. The
+ * markers are in `animation-code.ts`; GSAP itself does load here, for the
+ * header's colour toggle and the Trust strip.
  */
-const ANIMATIONS = [
-  // The Reference start page runs its `.reveal` entrance with nothing to
-  // reveal. Quoted, because React's `revealOrder` and Next's `revealAfter`
-  // contain `.reveal` too.
-  { name: 'the `.reveal` entrance', marker: '".reveal"', usedOn: '/' },
-  { name: "the home page's hero loop", marker: 'hero-art', usedOn: '/' },
-  { name: "the home page's card decks", marker: '.pcard', usedOn: '/' },
-  { name: "the home page's four units", marker: '.jt-hint', usedOn: '/' },
-  { name: "the product page's journey", marker: '.j-head', usedOn: '/product' },
-  { name: "the product page's roles", marker: 'role on', usedOn: '/product' },
-] as const;
-
-/** Every script a page loads, as text. */
-async function scriptsOf(page: Page, path: string) {
-  const scripts: Promise<string>[] = [];
-  page.on('response', (response) => {
-    if (response.request().resourceType() === 'script') scripts.push(response.text());
-  });
-  await page.goto(path, { waitUntil: 'networkidle' });
-  return (await Promise.all(scripts)).join('\n');
-}
-
 test("the page loads none of the home and product pages' animations", async ({ page }) => {
   const start = await scriptsOf(page, '/start');
   for (const animation of ANIMATIONS) {
