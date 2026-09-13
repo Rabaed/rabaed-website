@@ -45,17 +45,37 @@ export async function legalDocument(request: APIRequestContext, slug: string) {
   return docs[0];
 }
 
+/** One kept version of a legal document: when it was made, and the document as it stood. */
+export type LegalVersion = {
+  id: string;
+  updatedAt: string;
+  // The document's own fields, as many as the tests read.
+  version: {
+    _status: 'draft' | 'published';
+    editedBy: string;
+    description: string;
+    clauses: { heading: string }[];
+  };
+};
+
 /**
  * Every version kept of a legal document, oldest first — ordered by
  * `updatedAt`, when the version was made, as the admin's Versions list is. A
  * restored version carries the `createdAt` of the document it restores.
  */
-export async function legalVersions(request: APIRequestContext, id: number) {
+export async function legalVersions(request: APIRequestContext, id: number): Promise<LegalVersion[]> {
   const response = await request.get(
     `/api/legal-documents/versions?where[parent][equals]=${id}&sort=updatedAt&pagination=false&depth=0`,
   );
   expect(response.ok()).toBe(true);
   return (await response.json()).docs;
+}
+
+/** The newest published version of a legal document: what its page shows. */
+export async function latestPublishedVersion(request: APIRequestContext, id: number): Promise<LegalVersion> {
+  const published = (await legalVersions(request, id)).filter((version) => version.version._status === 'published').at(-1);
+  expect(published, `no published version of document ${id}`).toBeDefined();
+  return published!;
 }
 
 /**
@@ -64,10 +84,8 @@ export async function legalVersions(request: APIRequestContext, id: number) {
  * the next one. Visitors see nothing of it either way.
  */
 export async function discardLegalDraft(request: APIRequestContext, id: number): Promise<void> {
-  const published = (await legalVersions(request, id)).filter(
-    (version: { version: { _status: string } }) => version.version._status === 'published',
-  );
-  const restored = await request.post(`/api/legal-documents/versions/${published.at(-1).id}?draft=true`);
+  const published = await latestPublishedVersion(request, id);
+  const restored = await request.post(`/api/legal-documents/versions/${published.id}?draft=true`);
   expect(restored.ok()).toBe(true);
 }
 

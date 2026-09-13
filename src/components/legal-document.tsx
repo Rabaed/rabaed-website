@@ -86,10 +86,10 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           ))}
 
           <div className="xref">
-            {paragraphsOf(document.seeAlso).map((paragraph, index) => (
+            {linesOf(document.seeAlso).map((line, index) => (
               <Fragment key={index}>
                 {index > 0 ? <br /> : null}
-                <Inlines nodes={paragraph.children} />
+                <Inlines nodes={line.children} />
               </Fragment>
             ))}
           </div>
@@ -133,8 +133,15 @@ function nodesOf(text: RichText): TextNode[] {
   return (text?.root.children ?? []) as TextNode[];
 }
 
-function paragraphsOf(text: RichText): TextNode[] {
-  return nodesOf(text).filter((node) => node.type !== 'list' && hasWordsIn(node));
+/**
+ * The lines of a field drawn as one run of text, the see-also line: each
+ * paragraph is a line, and so is each item of a list, so that nothing typed
+ * into it goes missing from the page.
+ */
+function linesOf(text: RichText): TextNode[] {
+  return nodesOf(text)
+    .flatMap((node) => (node.type === 'list' ? (node.children ?? []) : [node]))
+    .filter(hasWordsIn);
 }
 
 function hasWordsIn(node: TextNode): boolean {
@@ -175,7 +182,11 @@ function Blocks({ text }: { text: RichText }) {
 /** Where a link may point: the web, an email address, a phone number, or a page or clause of this site. */
 const SAFE_LINK = /^(?:https?:|mailto:|tel:|\/|#)/i;
 
-/** The runs of text in one line — plain words, bold phrases and links — with a link to this site given its locale. */
+/**
+ * The runs of text in one line — plain words, bold phrases, links and line
+ * breaks — with a link to this site given its locale. Anything else is drawn
+ * as the words inside it.
+ */
 function Inlines({ nodes = [] }: { nodes?: TextNode[] }): ReactNode {
   return nodes.map((node, index) => {
     switch (node.type) {

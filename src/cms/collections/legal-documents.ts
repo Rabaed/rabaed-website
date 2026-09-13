@@ -65,8 +65,11 @@ const recordEditor: FieldHook = ({ req, value }) => {
 };
 
 /**
- * A legal page always shows a published version, so none can be withdrawn:
- * Unpublish is refused. A change of mind is a new version, published.
+ * A legal page always shows its newest published version
+ * (`cms/legal-documents.ts`), so a document cannot be withdrawn, and the admin
+ * does not offer to: Unpublish is refused rather than marking a document as
+ * withdrawn while its page still shows it. A change of mind is a new version,
+ * published.
  *
  * An unpublish is an update that sets the document itself back to draft; a
  * saved draft is an update made with `draft`, which leaves the published

@@ -139,8 +139,11 @@ Word files in `reference/legal-source/` stay as the pre-launch archive.
   itself.
 - Every save is kept under **Versions**, with its date and the Editor who made
   it, and none is ever deleted. Any version can be opened and restored; a
-  restore is itself a new version.
-- The page's «آخر تحديث» is the day the version it shows was published.
+  restore is itself a new version. Restoring a draft gives a draft, which
+  visitors see only once it is published. Restoring a published version
+  straight away, rather than as a draft, publishes it again.
+- Visitors always see the newest published version, and the page's
+  «آخر تحديث» is the day it was published.
 - A legal document cannot be unpublished, added or deleted: each is a page of
   the site. To change one back, restore an earlier version and publish it.
 

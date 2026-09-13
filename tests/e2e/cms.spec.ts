@@ -22,6 +22,7 @@ import {
   discardLegalDraft,
   footerLink,
   lastUpdatedLine,
+  latestPublishedVersion,
   legalDocument,
   legalVersions,
   logIn,
@@ -254,9 +255,7 @@ test.describe('legal documents', () => {
       expect(await lastUpdatedLine(request, '/privacy')).toBe(`آخر تحديث: ${todayInRiyadh()}`);
 
       // Kept as a version, with who published it and when.
-      const published = (await legalVersions(page.request, privacy.id)).findLast(
-        (version: { version: { _status: string } }) => version.version._status === 'published',
-      );
+      const published = await latestPublishedVersion(page.request, privacy.id);
       expect(published.version.description).toBe(DESCRIPTION);
       expect(published.version.editedBy).toContain(TEST_EDITOR.email);
       expect(Date.now() - Date.parse(published.updatedAt)).toBeLessThan(5 * 60_000);
@@ -294,43 +293,63 @@ test.describe('legal documents', () => {
   }) => {
     const EDITED = ' — عنوان معدّل';
     await logIn(page);
-    const terms = await legalDocument(page.request, 'referral-terms');
-    const [imported] = await legalVersions(page.request, terms.id);
-    const heading = terms.clauses[0].heading;
+    const referralTerms = await legalDocument(page.request, 'referral-terms');
+    const [imported] = await legalVersions(page.request, referralTerms.id);
+    const heading = referralTerms.clauses[0].heading;
 
     try {
-      const clauses = structuredClone(terms.clauses);
+      const clauses = structuredClone(referralTerms.clauses);
       clauses[0].heading = `${heading}${EDITED}`;
-      const saved = await page.request.patch(`/api/legal-documents/${terms.id}?draft=true`, {
+      const saved = await page.request.patch(`/api/legal-documents/${referralTerms.id}?draft=true`, {
         data: { clauses, _status: 'draft' },
       });
       expect(saved.ok()).toBe(true);
 
-      const edit = (await legalVersions(page.request, terms.id)).at(-1);
+      const edit = (await legalVersions(page.request, referralTerms.id)).at(-1)!;
       expect(edit.version._status).toBe('draft');
       expect(edit.version.clauses[0].heading).toBe(`${heading}${EDITED}`);
       expect(edit.version.editedBy).toContain(TEST_EDITOR.email);
 
       // The imported version, opened in the admin.
-      await page.goto(`${ADMIN_PATH}/collections/legal-documents/${terms.id}/versions/${imported.id}`);
+      await page.goto(`${ADMIN_PATH}/collections/legal-documents/${referralTerms.id}/versions/${imported.id}`);
       await expect(page.getByText(heading, { exact: true }).first()).toBeVisible();
 
       // Restored: a new version, holding the old text, recorded as this editor's.
       const restored = await page.request.post(`/api/legal-documents/versions/${imported.id}?draft=true`);
       expect(restored.ok()).toBe(true);
-      const restoration = (await legalVersions(page.request, terms.id)).at(-1);
+      const restoration = (await legalVersions(page.request, referralTerms.id)).at(-1)!;
       expect(restoration.id).not.toBe(edit.id);
       expect(restoration.version.clauses[0].heading).toBe(heading);
       expect(restoration.version.editedBy).toContain(TEST_EDITOR.email);
 
       // And every earlier version is still there.
-      const ids = (await legalVersions(page.request, terms.id)).map((version: { id: string }) => version.id);
+      const ids = (await legalVersions(page.request, referralTerms.id)).map((version) => version.id);
       expect(ids).toEqual(expect.arrayContaining([imported.id, edit.id, restoration.id]));
 
       // None of it was published.
       expect(await (await request.get('/referral-terms')).text()).not.toContain(EDITED.trim());
+
+      // Restoring the draft itself — the only restore the admin offers for a
+      // draft — leaves the document holding that draft, with nothing
+      // published. Visitors must still get the published text once the page
+      // is rebuilt, which republishing the site settings unchanged forces.
+      const restoredDraft = await page.request.post(`/api/legal-documents/versions/${edit.id}`);
+      expect(restoredDraft.ok()).toBe(true);
+      const settings = await (await page.request.get('/api/globals/site-settings?depth=0')).json();
+      const republished = await page.request.post('/api/globals/site-settings', {
+        data: { whatsappNumber: settings.whatsappNumber, social: settings.social, _status: 'published' },
+      });
+      expect(republished.ok()).toBe(true);
+      await request.get('/referral-terms');
+      await expect
+        .poll(async () => (await (await request.get('/referral-terms')).text()).includes(heading))
+        .toBe(true);
+      expect(await (await request.get('/referral-terms')).text()).not.toContain(EDITED.trim());
     } finally {
-      await discardLegalDraft(page.request, terms.id);
+      // A plain restore of what is published puts the document itself back.
+      const published = await latestPublishedVersion(page.request, referralTerms.id);
+      const putBack = await page.request.post(`/api/legal-documents/versions/${published.id}`);
+      expect(putBack.ok()).toBe(true);
     }
   });
 });

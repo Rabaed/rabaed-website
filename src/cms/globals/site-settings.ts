@@ -3,9 +3,10 @@ import type { GlobalAfterChangeHook, GlobalConfig } from 'payload';
 import { signedIn } from '../access';
 
 /**
- * Set on `context` by anything that writes site settings outside a request to
+ * Set on `context` by anything that writes CMS content outside a request to
  * the running site — a migration, a script — where there is no page cache to
- * refresh and Next refuses to be asked.
+ * refresh and Next refuses to be asked. Site settings and the legal documents
+ * both honour it.
  */
 export const SKIP_REVALIDATION = 'skipRevalidation';
 

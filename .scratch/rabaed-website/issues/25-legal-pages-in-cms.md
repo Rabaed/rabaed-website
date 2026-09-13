@@ -53,4 +53,27 @@
 4. **Pages always reading drafts**, again, with the strengthened publish test and the import's timestamps fixed — exactly the publish test failed, finding the draft's «— مسودة بعد النشر» on the rebuilt Privacy Policy. The import test now held.
 5. **Publishing no longer refreshing the page** — exactly the publish test failed, the Privacy Policy still carrying its old search description.
 
+**What the standards review changed.**
+
+- **A list typed into the see-also line would have vanished.** That line is drawn as one run of text, and only its paragraphs were read. Each list item is now a line too.
+- **Comments that had gone stale.** `SKIP_REVALIDATION` was described as site settings' alone; the legal documents use it too. The renderer's inline drawing now says it handles line breaks as well, and draws anything else as the words inside it.
+- **Test helpers.** The "newest published version" filter was written twice; it is `latestPublishedVersion` in `tests/e2e/cms.ts`, and versions have a `LegalVersion` type instead of inline annotations. The restore test's `terms` variable held the Referral Terms; it is `referralTerms`.
+
+Checked and left:
+
+- **The version tests read Payload's versions API.** The spec asks tests not to assert CMS implementation details. The versions API is the running application's record of who changed what and when — the thing this ticket exists to keep — and the admin's Versions list shows the same facts in a table the tests could only scrape. The admin is still driven for what an Editor does by hand: typing an edit, Save Draft, Preview, Publish changes, opening an old version.
+- **The legal documents' refresh-on-publish hook** has the shape of site settings'. Each refreshes different pages; one shared helper would be two lines.
+
+**What the spec review changed.**
+
+- **Restoring a draft could have put it on the site unpublished.** The admin offers a draft version only a plain restore, and a plain restore copies the version, draft status and all, onto the document itself. The page read the document, so its next rebuild would have shown the draft's text with nobody having published it. Visitors' pages now read the **newest published version from the history**, never the document, so only Publish changes what they see, and the date shown is that version's own. The restore test now restores the draft itself, forces every page to rebuild, and checks the published text is still what visitors get.
+- `docs/deployment.md` says what a restore does: a restored draft is a draft; a published version restored straight away is published again.
+
+Checked and left:
+
+- **The date while previewing** is the day the draft was saved, not a published date — there is none yet for a draft. A preview banner already says the page is not what visitors see.
+- **More than the words is editable** — the search title and description, the line under the title, whether a clause is in the contents — and the renderer handles line breaks, new-tab links and unsafe addresses. All of it follows from what the editor allows; none of it reaches visitors except through Publish.
+
+**The full suite** passed, 728 tests, on `TEST_PORT=3225` rather than this ticket's 3125: an earlier run's database left port 5125 listed as listening under a process that no longer exists, and a new database refused to start there.
+
 The unpublish, delete and create refusals, and keeping every version (`maxPerDoc: 0`), are not broken on purpose here beyond the first build: a retention limit of Payload's default 100 would only show after a hundred saves.
