@@ -228,6 +228,7 @@ test.describe('legal documents', () => {
     // The search description, which no other suite reads, so that the suites
     // checking the words keep reading the approved text while this runs.
     const DESCRIPTION = 'وصف منشور من لوحة التحرير للاختبار.';
+    const DRAFTED = ' — مسودة بعد النشر';
     await logIn(page);
     const privacy = await legalDocument(page.request, 'privacy');
 
@@ -237,16 +238,32 @@ test.describe('legal documents', () => {
       await page.getByRole('button', { name: 'Publish changes' }).click();
       await expect(page.getByText('Updated successfully')).toBeVisible();
 
+      // A draft saved before the page's next visit. Publishing marked the page
+      // stale; it must be rebuilt from what is published, not from the draft.
+      // Nothing rebuilds a page after a draft alone, so the test above cannot
+      // see a page that reads drafts; this one can.
+      const clauses = structuredClone(privacy.clauses);
+      clauses[0].heading = `${clauses[0].heading}${DRAFTED}`;
+      const drafted = await page.request.patch(`/api/legal-documents/${privacy.id}?draft=true`, {
+        data: { clauses, _status: 'draft' },
+      });
+      expect(drafted.ok()).toBe(true);
+
       await expect.poll(() => metaDescription(request, '/privacy')).toBe(DESCRIPTION);
+      expect(await (await request.get('/privacy')).text()).not.toContain(DRAFTED.trim());
       expect(await lastUpdatedLine(request, '/privacy')).toBe(`آخر تحديث: ${todayInRiyadh()}`);
 
       // Kept as a version, with who published it and when.
-      const published = (await legalVersions(page.request, privacy.id)).at(-1);
-      expect(published.version._status).toBe('published');
+      const published = (await legalVersions(page.request, privacy.id)).findLast(
+        (version: { version: { _status: string } }) => version.version._status === 'published',
+      );
       expect(published.version.description).toBe(DESCRIPTION);
       expect(published.version.editedBy).toContain(TEST_EDITOR.email);
       expect(Date.now() - Date.parse(published.updatedAt)).toBeLessThan(5 * 60_000);
     } finally {
+      // The draft first: publishing the old description on top of it would
+      // publish its heading too.
+      await discardLegalDraft(page.request, privacy.id);
       const restored = await page.request.patch(`/api/legal-documents/${privacy.id}`, {
         data: { description: privacy.description, _status: 'published' },
       });

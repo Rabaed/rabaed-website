@@ -42,7 +42,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   }
 
   await db.execute(sql`UPDATE "legal_documents" SET "created_at" = ${APPROVED_ON}, "updated_at" = ${APPROVED_ON}`);
-  await db.execute(sql`UPDATE "_legal_documents_v" SET "created_at" = ${APPROVED_ON}, "updated_at" = ${APPROVED_ON}`);
+  // A version holds its own timestamps and a copy of the document's; a draft
+  // being previewed is dated by the copy.
+  await db.execute(sql`
+    UPDATE "_legal_documents_v"
+    SET "created_at" = ${APPROVED_ON}, "updated_at" = ${APPROVED_ON},
+        "version_created_at" = ${APPROVED_ON}, "version_updated_at" = ${APPROVED_ON}
+  `);
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
