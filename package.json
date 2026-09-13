@@ -12,7 +12,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "playwright test",
     "baselines:capture": "node scripts/capture-baselines.mjs",
     "baselines:verify": "node scripts/capture-baselines.mjs --verify",

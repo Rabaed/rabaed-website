@@ -10,6 +10,21 @@ import { STUDIO_PREFIX } from './src/screen-mocks/registry';
  * recoverable once a page has been crawled.
  */
 const nextConfig: NextConfig = {
+  // Off: since 16.3, `next dev` writes a managed block of Next.js guidance into
+  // AGENTS.md and CLAUDE.md whenever it detects an AI agent, so every session
+  // that started the dev server left the repo's own agent instructions edited
+  // behind it (ticket 46). The one instruction in that block this repo wants —
+  // read the version-matched docs in `node_modules/next/dist/docs/` — is written
+  // into AGENTS.md by hand instead.
+  agentRules: false,
+
+  // The dev server refuses its own resources to any origin but `localhost`, so
+  // a page opened at http://127.0.0.1:<port> loads but never hydrates, and every
+  // client behaviour silently does nothing — an easy address to reach for, and
+  // an hour lost in ticket 06 before it was spotted (ticket 46). Affects the dev
+  // server only.
+  allowedDevOrigins: ['127.0.0.1'],
+
   // The Screen mock studio reads its markup off disk rather than importing it,
   // so that 260 KB of hand-built HTML never lands in a bundle (ADR-0002).
   // Nothing statically references those files, so tracing cannot find them.

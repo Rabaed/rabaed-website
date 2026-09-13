@@ -2,7 +2,7 @@
 
 **What to build:** The Referral Program page: how it works, the offer, who qualifies, what is required, the summarised terms, the FAQ, and the signup form with its document uploads.
 
-**Blocked by:** 04
+**Blocked by:** 04, 11
 
 **Status:** ready-for-agent
 
@@ -12,3 +12,7 @@
 - [ ] Upload fields keep the Reference site's label structure and selected-state styling; wiring happens in ticket 28
 - [ ] The hardcoded fake referral code and fake success message are **not** carried over
 - [ ] Zero console errors, zero failed requests, zero horizontal overflow
+
+## Comments
+
+**Ticket 11 added as a blocker on 13 September 2026**, when the founder chose to run several sessions at once. Ticket 11 builds the FAQ's native disclosure pattern and the form markup this page reuses; taking this page before it would build them twice, in two lanes at the same time.
