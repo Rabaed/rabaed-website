@@ -74,31 +74,35 @@ export function BeforeAfterBehaviour() {
     };
 
     const paint = () => {
-      let over = 0;
+      let stepsOver = 0;
       steps.forEach((step) => {
         const turned = turnedOver(step.centre, seam);
-        if (turned > 0.5) over += 1;
+        if (turned > 0.5) stepsOver += 1;
         const faces = facesAt(turned);
         Object.assign(step.rabaed.style, faces.rabaed);
         Object.assign(step.usual.style, faces.usual);
       });
-      const verdict = verdictFor(over, steps.length);
+      const verdict = verdictFor(stepsOver, steps.length);
       (Object.keys(verdicts) as Verdict[]).forEach((which) => {
         const element = verdicts[which];
         if (element) element.style.opacity = which === verdict ? '1' : '0';
       });
       // One tag at a time: each fades as its way leaves the comparison.
-      const share = over / steps.length;
+      const share = stepsOver / steps.length;
       rabaedTag.style.opacity = String(share);
       usualTag.style.opacity = String(1 - share);
     };
 
-    /** Moves the seam. A hint's positions are not announced: they are not the visitor's. */
-    const setSeam = (position: number, announce = true) => {
+    /** Draws the seam at `position`, and everything it decides. The hint moves it this way: its positions are not the visitor's, so they are not announced. */
+    const placeSeam = (position: number) => {
       seam = clampSeam(position);
       comparison.style.setProperty('--p', `${seam}%`);
-      if (announce) handle.setAttribute('aria-valuenow', String(Math.round(seam)));
       paint();
+    };
+    /** Moves the seam where the visitor put it, and tells assistive technology where that is. */
+    const moveSeam = (position: number) => {
+      placeSeam(position);
+      handle.setAttribute('aria-valuenow', String(Math.round(seam)));
     };
 
     const takeHold = () => {
@@ -109,7 +113,7 @@ export function BeforeAfterBehaviour() {
 
     const fromPointer = (event: PointerEvent) => {
       const across = comparison.getBoundingClientRect();
-      setSeam(((event.clientX - across.left) / across.width) * 100);
+      moveSeam(((event.clientX - across.left) / across.width) * 100);
     };
     const onPointerDown = (event: PointerEvent) => {
       takeHold();
@@ -129,7 +133,7 @@ export function BeforeAfterBehaviour() {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
       takeHold();
-      setSeam(seam + (event.key === 'ArrowLeft' ? -SEAM_KEY_STEP : SEAM_KEY_STEP));
+      moveSeam(seam + (event.key === 'ArrowLeft' ? -SEAM_KEY_STEP : SEAM_KEY_STEP));
     };
     const onResize = () => {
       measure();
@@ -144,7 +148,7 @@ export function BeforeAfterBehaviour() {
     window.addEventListener('resize', onResize);
 
     measure();
-    setSeam(SEAM_AT_REST);
+    moveSeam(SEAM_AT_REST);
 
     // ---- the one-time hint ----
     gsap.registerPlugin(ScrollTrigger);
@@ -159,9 +163,9 @@ export function BeforeAfterBehaviour() {
             const sweep = { position: SEAM_AT_REST };
             hint = gsap
               .timeline({ delay: 0.3 })
-              .set(sweep, { position: 100, onUpdate: () => setSeam(100, false) })
-              .to(sweep, { position: 0, duration: 1.8, ease: 'power2.inOut', onUpdate: () => setSeam(sweep.position, false) })
-              .to(sweep, { position: SEAM_AT_REST, duration: 0.8, ease: 'power2.out', onUpdate: () => setSeam(sweep.position, false) }, '+=.35');
+              .set(sweep, { position: 100, onUpdate: () => placeSeam(100) })
+              .to(sweep, { position: 0, duration: 1.8, ease: 'power2.inOut', onUpdate: () => placeSeam(sweep.position) })
+              .to(sweep, { position: SEAM_AT_REST, duration: 0.8, ease: 'power2.out', onUpdate: () => placeSeam(sweep.position) }, '+=.35');
           },
         });
 

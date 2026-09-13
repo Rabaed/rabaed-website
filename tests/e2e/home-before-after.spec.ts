@@ -12,7 +12,7 @@
  * `home-before-after-and-calculator-match-reference.spec.ts`.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { dragSeam, readSeam } from './before-after';
+import { dragSeam, readSeam, sampleSeamOnScreen, seamOnScreen } from './before-after';
 
 /** A phrase from each step's two faces, in order. */
 const STEPS = [
@@ -71,20 +71,6 @@ async function expectVerdict(page: Page, showing: keyof typeof VERDICTS) {
   }
 }
 
-/** The seam's position, read every 50ms for `ms` — as numbers, from the comparison's own `--p`. */
-function sampleSeam(page: Page, ms: number) {
-  return page.evaluate(async (duration) => {
-    const comparison = document.querySelector<HTMLElement>('#ba .cmp')!;
-    const samples: number[] = [];
-    const end = performance.now() + duration;
-    while (performance.now() < end) {
-      samples.push(parseFloat(comparison.style.getPropertyValue('--p')));
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    return samples;
-  }, ms);
-}
-
 /** Scrolls until the comparison's section is well into the window, past where its hint starts. */
 async function scrollToComparison(page: Page) {
   await page.evaluate(() => {
@@ -105,7 +91,7 @@ test('the whole comparison is in the first response', async ({ request }) => {
     expect(html).toContain(step.usual);
     expect(html).toContain(step.rabaed);
   }
-  expect(html).toContain('النتيجة: نزاع بلا مرجع، وكل طرف معه نسخته.');
+  expect(html).toContain(VERDICTS.usual);
   expect(html).toContain('النتيجة: لا سؤال &quot;من اعتمد؟&quot; — الإجابة داخل المستند.');
   expect(html).toContain(VERDICTS.between);
 });
@@ -182,7 +168,7 @@ test.describe('with reduced motion, so the hint does not move the seam', () => {
     await page.goto('/');
     await scrollToComparison(page);
 
-    expect(new Set(await sampleSeam(page, 3000))).toEqual(new Set([50]));
+    expect(new Set(await sampleSeamOnScreen(page, 3000))).toEqual(new Set([50]));
   });
 
   test('the steps still follow the seam after the window changes size', async ({ page }) => {
@@ -221,7 +207,7 @@ test('once, when the comparison first comes into view, the seam sweeps across an
   await page.goto('/');
   await scrollToComparison(page);
 
-  const samples = await sampleSeam(page, 4500);
+  const samples = await sampleSeamOnScreen(page, 4500);
   // It jumps to the right and eases away at once, so a sample every 50ms
   // catches it just short of the edge rather than on it.
   const reachedRight = samples.findIndex((position) => position >= 99);
@@ -235,7 +221,7 @@ test('once, when the comparison first comes into view, the seam sweeps across an
   // Not again.
   await page.evaluate(() => window.scrollTo(0, 0));
   await scrollToComparison(page);
-  expect(new Set(await sampleSeam(page, 2500))).toEqual(new Set([50]));
+  expect(new Set(await sampleSeamOnScreen(page, 2500))).toEqual(new Set([50]));
 });
 
 test('taking hold of the seam stops the hint', async ({ page }) => {
@@ -244,14 +230,14 @@ test('taking hold of the seam stops the hint', async ({ page }) => {
   await scrollToComparison(page);
 
   // Once the sweep is on its way from the right…
-  await expect.poll(async () => parseFloat((await readSeam(page)).position), { intervals: [50] }).toBeLessThan(80);
+  await expect.poll(() => seamOnScreen(page), { intervals: [50] }).toBeLessThan(80);
   // To 26%: clear of the columns centred at 14% and 38%, so every step is
   // wholly one way or the other.
   await dragSeam(page, 0.9, 0.26);
   const settled = await announced(page);
 
   // …it stays where the visitor put it.
-  expect(new Set(await sampleSeam(page, 3000)).size).toBe(1);
+  expect(new Set(await sampleSeamOnScreen(page, 3000)).size).toBe(1);
   expect(await announced(page)).toBe(settled);
   await expectStepsFollowTheSeam(page);
 });

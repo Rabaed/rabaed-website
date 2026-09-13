@@ -44,7 +44,7 @@ Financing is the project's value at 8% a year for the days of delay; site overhe
 
 `tests/e2e/home-whole-page-matches-reference.spec.ts` checks, at all sixteen viewports, that the page has the Reference site's sections in the Reference site's order, each as tall as the Reference site's. Every section already has a part-by-part comparison measured from its own top, so equal heights in the same order are what put everything on the page where the Reference site has it.
 
-It found every section that is deliberately a different height, and each is listed in the spec with the ticket that decided it and the windows where it reaches: the Trust strip below 981px (ticket 06), the four units' captions (ticket 08), the Record below 981px (ticket 09), the calculator on a phone (this ticket), the figures section below 981px, where the placeholder testimonial is left out (tickets 07 and 47), and the closing section's disabled button, 2px taller (ticket 11). Every other section — the hero, the situations deck, the before-and-after, the questions, the footer — is exactly as tall as the Reference site's at every viewport, and the listed ones are wherever their reason does not reach.
+It found every section that is deliberately a different height, and each is listed in that test file, in `DELIBERATELY_DIFFERENT`, with the ticket that decided it and the windows where it reaches: the Trust strip below 981px (ticket 06), the four units' captions (ticket 08), the Record below 981px (ticket 09), the calculator on a phone (this ticket), the figures section below 981px, where the placeholder testimonial is left out (tickets 07 and 47), and the closing section's disabled button (ticket 11). The two that differ at every window are held to how much: the closing section to exactly 2px taller, and the four units to no taller than the caption and the space above it. Every other section — the hero, the situations deck, the before-and-after, the questions, the footer — is exactly as tall as the Reference site's at every viewport, and the listed ones are wherever their reason does not reach.
 
 ### Tests
 
@@ -57,6 +57,19 @@ It found every section that is deliberately a different height, and each is list
 **Verified by falsification.** Widening the band over which a card turns from 11% to 12% failed exactly the seam comparisons — dragged at all three widths, and by the arrow keys, whose 6% steps land inside the wider band. Removing the rule that keeps a DM Mono number from making its line taller failed the calculator's comparison at all sixteen viewports, and the whole-page check at every window from 768px up, where the calculator's height is compared, and not on a phone, where it is not. Letting the hint carry on after the visitor takes hold of the seam failed exactly the test that it stops. Raising the financing rate to 9% failed the four unit tests that check a figure, and left the three that check a proportion or the formatting passing.
 
 **Two test mistakes the first runs found.** The verdicts fade over a quarter of a second, so a test reading one straight after a drag caught it part-way; it waits for the fade now. And two drags stopped within 5.5% of a card's centre, where a card is, correctly, only part of the way over; they stop clear of every centre now.
+
+### What the review changed
+
+Two reviews. The spec review checked the copy by script against the Reference page, and the slider ranges, the formula and every number in the seam and its hint, and found them exact. What the reviews did find:
+
+- **A behaviour test read the page's own styles.** The hint tests followed the seam through the comparison's `--p`, a detail of how the stylesheet is fed — the kind of reading ticket 06's review took out of the hero's tests. They measure where the handle's line is drawn now (`seamOnScreen` in `tests/e2e/before-after.ts`).
+- **The calculator was read by two copies of the same code** in two specs. It is `tests/e2e/delay-calculator.ts`.
+- **The whole-page check let two sections off entirely.** The four units and the closing section differ at every window, so their heights were never compared. The closing section is held to exactly 2px taller now, and the four units to no taller than their caption and the space above it.
+- **The write-up said the exceptions were listed "in the spec"** — meaning the test file, which is what it says now.
+- **The order of the three sliders was written four times.** `settingsAsValues` and `settingsFromValues` in `delay-calculator-state.ts` are the one place it is.
+- **Names**: `over` is `stepsOver`; `WordsOf` and `FigureOf`, which read as types, are `WrittenWords` and `FigureWithWord`; and the `announce` switch on moving the seam is two functions — `moveSeam` for the visitor's moves, announced, and `placeSeam` for the hint's, not.
+- **Two smaller notes**: the unit test says where its "eight times" comes from (48 months against 6), and `.calc input`'s physical `text-align: right` says why it stays physical.
+- **Checked and left.** The seam at rest is drawn by the stylesheet before the script runs and by the script after, so its numbers are written in both — a stylesheet cannot measure where the columns are; the two are commented as one, and a test holds the stylesheet's drawing equal to the script's. `aria-valuetext` on the sliders stays: it is small, and it is what lets a screen reader say riyals rather than a bare number. The 700px edge of the calculator's exception is borne out by the run: at 768px and above its height matches the Reference site's.
 
 ### Not covered
 

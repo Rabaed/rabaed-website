@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { calculatorDisplay, figureText, type Figure } from '@/components/home/delay-calculator-state';
+import {
+  calculatorDisplay,
+  figureText,
+  settingsFromValues,
+  type Figure,
+} from '@/components/home/delay-calculator-state';
 
 /**
  * Redraws the calculator whenever a slider moves, attached to markup the server
@@ -30,8 +35,7 @@ export function DelayCalculatorBehaviour() {
     };
 
     const redraw = () => {
-      const [projectValue, delayDays, durationMonths] = sliders.map((slider) => Number(slider.value));
-      const display = calculatorDisplay({ projectValue, delayDays, durationMonths });
+      const display = calculatorDisplay(settingsFromValues(sliders.map((slider) => Number(slider.value))));
       sliders.forEach((slider, index) => {
         write(readings[index], display.readings[index]);
         slider.setAttribute('aria-valuetext', figureText(display.readings[index]));

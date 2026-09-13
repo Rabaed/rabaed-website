@@ -3,6 +3,7 @@ import {
   STARTING_SETTINGS,
   calculatorDisplay,
   figureText,
+  settingsAsValues,
   type Figure,
 } from '@/components/home/delay-calculator-state';
 import { DelayCalculatorBehaviour } from '@/components/home/delay-calculator-behaviour';
@@ -26,7 +27,7 @@ import { CALCULATOR_COPY } from '@/content/delay-calculator';
  */
 export function DelayCalculator() {
   const display = calculatorDisplay(STARTING_SETTINGS);
-  const values = [STARTING_SETTINGS.projectValue, STARTING_SETTINGS.delayDays, STARTING_SETTINGS.durationMonths];
+  const values = settingsAsValues(STARTING_SETTINGS);
 
   return (
     <section id="calc" className="light pad">
@@ -40,7 +41,7 @@ export function DelayCalculator() {
             {SLIDERS.map((range, index) => (
               <label key={range.label}>
                 <span className="lr">
-                  {range.label} <FigureOf figure={display.readings[index]} />
+                  {range.label} <FigureWithWord figure={display.readings[index]} />
                 </span>
                 <input
                   className="rng"
@@ -58,7 +59,7 @@ export function DelayCalculator() {
 
           <div className="out">
             <small>{CALCULATOR_COPY.resultLabel}</small>
-            <FigureOf figure={display.cost} />
+            <FigureWithWord figure={display.cost} />
             <small>{display.breakdown}</small>
             <div className="n">{CALCULATOR_COPY.assumptions}</div>
             {/* The Reference site's own inline spacing above the button. */}
@@ -77,7 +78,7 @@ export function DelayCalculator() {
 }
 
 /** «84,405 ر.س»: the number in DM Mono, the word in the Arabic face. */
-function FigureOf({ figure }: { figure: Figure }) {
+function FigureWithWord({ figure }: { figure: Figure }) {
   return (
     <b>
       <span className="mono">{figure.number}</span>

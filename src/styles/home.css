@@ -470,7 +470,9 @@
 /* The Reference site's rule for text fields, which its calculator no longer
    has. It still reaches the sliders, and outranks `.rng` below: the padding,
    the border, the 10px corners and the pale ground under the track's filling
-   are all this rule's. */
+   are all this rule's. Its `text-align: right` stays physical: inside a box it
+   forces to left-to-right, `end` would mean the same side, and it is the
+   Reference site's rule as written. */
 .calc input { font-family: "DM Mono", monospace; font-size: 18px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; width: 100%; direction: ltr; text-align: right; background: var(--paper) }
 .calc .out { background: var(--ink); color: #fff; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; justify-content: center }
 .calc .out small { color: var(--dark-muted); font-size: 14px }

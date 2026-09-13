@@ -33,6 +33,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { dragSeam, readSeam } from './before-after';
+import { readCalculator } from './delay-calculator';
 import { measureRegion, type Measurement, type Region } from './geometry';
 import {
   BASELINE_VIEWPORTS,
@@ -108,23 +109,6 @@ function costLines(page: Page) {
   return page.evaluate(() => {
     const cost = document.querySelector('#calc .out b')!;
     return Math.round(cost.getBoundingClientRect().height / parseFloat(getComputedStyle(cost).lineHeight));
-  });
-}
-
-/** The calculator's words and figures, and how each slider's track is coloured. */
-function readCalculator(page: Page) {
-  return page.evaluate(() => {
-    const text = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
-    const calculator = document.getElementById('calc')!;
-    return {
-      cost: text(calculator.querySelector('.out b')!),
-      small: [...calculator.querySelectorAll('.out small')].map(text),
-      readings: [...calculator.querySelectorAll('.lr b')].map(text),
-      tracks: [...calculator.querySelectorAll<HTMLInputElement>('.rng')].map((input) => ({
-        value: input.value,
-        painted: getComputedStyle(input).backgroundImage,
-      })),
-    };
   });
 }
 

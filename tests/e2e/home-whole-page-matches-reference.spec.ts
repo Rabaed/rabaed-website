@@ -28,12 +28,24 @@ import {
 
 type Viewport = { width: number; height: number };
 
+/** How much taller than the Reference site's a section may be, in pixels. */
+type Allowance = { readonly atLeast: number; readonly atMost: number };
+
 /**
  * The sections deliberately a different height, the windows where they are,
  * and why. Each `why` names the ticket that decided it and says what the
  * difference is, so a new entry here has to be argued rather than added.
+ *
+ * Where the size of the difference can be stated, `allowance` states it, and
+ * the section is held to it rather than let off: a section that differs at
+ * every window would otherwise never have its height compared at all.
  */
-const DELIBERATELY_DIFFERENT: readonly { section: string; where: (viewport: Viewport) => boolean; why: string }[] = [
+const DELIBERATELY_DIFFERENT: readonly {
+  section: string;
+  where: (viewport: Viewport) => boolean;
+  why: string;
+  allowance?: (rebuilt: Page) => Promise<Allowance>;
+}[] = [
   {
     section: '.logos.dark',
     where: ({ width }) => width <= 980,
@@ -43,6 +55,13 @@ const DELIBERATELY_DIFFERENT: readonly { section: string; where: (viewport: View
     section: 'jt',
     where: () => true,
     why: 'Ticket 08 and ADR-0002: every Screen mock has a caption under it saying in words what the picture shows. The Reference site has none.',
+    // No taller than the caption and the space above it; no taller at all
+    // where the column of tabs beside the screen is what sets the height.
+    allowance: (rebuilt) =>
+      rebuilt.evaluate(() => {
+        const caption = [...document.querySelectorAll<HTMLElement>('#jt .jt-hint')].find((hint) => !hint.hidden)!;
+        return { atLeast: 0, atMost: caption.getBoundingClientRect().height + parseFloat(getComputedStyle(caption).marginTop) };
+      }),
   },
   {
     section: 'record',
@@ -63,6 +82,7 @@ const DELIBERATELY_DIFFERENT: readonly { section: string; where: (viewport: View
     section: 'tail',
     where: () => true,
     why: 'Ticket 11: the demo request button is disabled until ticket 27 gives the form somewhere to send, and a disabled button has a 1px border above and below that the Reference site\'s does not.',
+    allowance: async () => ({ atLeast: 2, atMost: 2 }),
   },
 ];
 
@@ -101,11 +121,21 @@ test.describe('the home page as a whole matches the Reference site', () => {
           reference.map((section) => section.name),
         );
 
-        const differences = rebuilt
-          .map((section, index) => ({ ...section, reference: reference[index].height }))
-          .filter((section) => section.height !== section.reference)
-          .filter((section) => !DELIBERATELY_DIFFERENT.some((known) => known.section === section.name && known.where(viewport)))
-          .map((section) => `${section.name}: ${section.height} against ${section.reference}`);
+        const differences: string[] = [];
+        for (const [index, section] of rebuilt.entries()) {
+          const taller = Math.round((section.height - reference[index].height) * 100) / 100;
+          const known = DELIBERATELY_DIFFERENT.find((entry) => entry.section === section.name && entry.where(viewport));
+          const described = `${section.name}: ${section.height} against ${reference[index].height}`;
+          if (!known) {
+            if (taller !== 0) differences.push(described);
+          } else if (known.allowance) {
+            // Half a pixel either way, for the rounding of two measurements.
+            const { atLeast, atMost } = await known.allowance(pages.rebuilt);
+            if (taller < atLeast - 0.5 || taller > atMost + 0.5) {
+              differences.push(`${described}, where ${atLeast}–${Math.round(atMost * 100) / 100}px taller is expected`);
+            }
+          }
+        }
         expect(differences, 'sections a different height from the Reference site').toEqual([]);
       } finally {
         await pages.close();

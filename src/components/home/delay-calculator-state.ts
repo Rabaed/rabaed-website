@@ -17,7 +17,7 @@ import { delayCost, formatRiyals, type DelayCostInputs } from '@/lib/delay-cost'
  * and a slider moved back to where it started cannot disagree.
  */
 
-/** The three sliders, in the order they stand. */
+/** The three sliders, in the order they stand, and the order `settingsAsValues` lists their values in. */
 export const SLIDERS: readonly [SliderRange, SliderRange, SliderRange] = [PROJECT_VALUE, DELAY_DAYS, DURATION_MONTHS];
 
 export const STARTING_SETTINGS: DelayCostInputs = {
@@ -25,6 +25,16 @@ export const STARTING_SETTINGS: DelayCostInputs = {
   delayDays: DELAY_DAYS.start,
   durationMonths: DURATION_MONTHS.start,
 };
+
+/** A setting of the sliders as their three values, in the sliders' order. */
+export function settingsAsValues(settings: DelayCostInputs): [number, number, number] {
+  return [settings.projectValue, settings.delayDays, settings.durationMonths];
+}
+
+/** The three sliders' values, in their order, as a setting. */
+export function settingsFromValues([projectValue, delayDays, durationMonths]: readonly number[]): DelayCostInputs {
+  return { projectValue, delayDays, durationMonths };
+}
 
 /**
  * A figure beside its word — «84,405» and «ر.س». Kept apart because they are
@@ -35,7 +45,7 @@ export type Figure = { readonly number: string; readonly word: string };
 
 export function calculatorDisplay(settings: DelayCostInputs) {
   const cost = delayCost(settings);
-  const values = [settings.projectValue, settings.delayDays, settings.durationMonths];
+  const values = settingsAsValues(settings);
   return {
     readings: [
       { number: formatRiyals(settings.projectValue), word: RIYALS },

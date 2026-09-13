@@ -13,6 +13,7 @@
  * `home-before-after-and-calculator-match-reference.spec.ts`.
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { readCalculator } from './delay-calculator';
 
 const calculator = (page: Page) => page.locator('#calc');
 const slider = (page: Page, name: string) => calculator(page).getByRole('slider', { name: new RegExp(name) });
@@ -23,13 +24,8 @@ const result = (page: Page) => calculator(page).locator('.out b');
 
 /** What the calculator says: the cost, its two parts, and the three sliders' readings. */
 async function readFigures(page: Page) {
-  const text = (locator: Locator) => locator.evaluate((element) => element.textContent!.replace(/\s+/g, ' ').trim());
-  const readings = calculator(page).locator('.lr b');
-  return {
-    cost: await text(result(page)),
-    parts: await text(calculator(page).locator('.out small').nth(1)),
-    readings: [await text(readings.nth(0)), await text(readings.nth(1)), await text(readings.nth(2))],
-  };
+  const { cost, parts, readings } = await readCalculator(page);
+  return { cost, parts, readings };
 }
 
 /**
@@ -172,19 +168,16 @@ test('the numbers read in the right order and typeface inside the Arabic', async
 });
 
 test('with JavaScript off, the sliders show their starting positions filled in', async ({ browser }) => {
-  const tracks = async (javaScriptEnabled: boolean) => {
+  const read = async (javaScriptEnabled: boolean) => {
     const context = await browser.newContext({ javaScriptEnabled });
     const page = await context.newPage();
     await page.goto('/');
-    const painted = await calculator(page)
-      .locator('input[type="range"]')
-      .evaluateAll((inputs) => inputs.map((input) => getComputedStyle(input).backgroundImage));
-    const figures = await readFigures(page);
+    const calculatorNow = await readCalculator(page);
     await context.close();
-    return { painted, figures };
+    return calculatorNow;
   };
 
-  const off = await tracks(false);
-  expect(off.painted.every((track) => track.startsWith('linear-gradient'))).toBe(true);
-  expect(off).toEqual(await tracks(true));
+  const off = await read(false);
+  expect(off.tracks.every((track) => track.painted.startsWith('linear-gradient'))).toBe(true);
+  expect(off).toEqual(await read(true));
 });

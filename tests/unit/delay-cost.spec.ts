@@ -76,6 +76,8 @@ test('a longer project spreads its site overhead thinner, and leaves financing a
   const long = delayCost({ projectValue: 45_000_000, delayDays: 7, durationMonths: 48 });
 
   expect(long.financing).toBe(short.financing);
+  // Spread over 48 months rather than 6 — eight times as long — each day of
+  // delay carries an eighth of the overhead.
   expect(short.siteOverhead).toBeCloseTo(long.siteOverhead * 8, 6);
 });
 

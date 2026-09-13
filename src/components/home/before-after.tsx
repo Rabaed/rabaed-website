@@ -26,7 +26,7 @@ export function BeforeAfter() {
         <div className="eyebrow">{BEFORE_AFTER_COPY.eyebrow}</div>
         <h2>{BEFORE_AFTER_COPY.heading}</h2>
         <p className="lead">
-          <WordsOf words={BEFORE_AFTER_COPY.lead} />
+          <WrittenWords words={BEFORE_AFTER_COPY.lead} />
         </p>
 
         <div className="cmp" style={{ '--p': `${SEAM_AT_REST}%` } as CSSProperties}>
@@ -85,13 +85,13 @@ function FaceCard({ face, className }: { face: Face; className: string }) {
     <div className={className}>
       <div className="ch">{face.channel}</div>
       <p>
-        <WordsOf words={face.words} />
+        <WrittenWords words={face.words} />
       </p>
     </div>
   );
 }
 
-function WordsOf({ words }: { words: Words }) {
+function WrittenWords({ words }: { words: Words }) {
   return words.map((piece, index) => (
     <Fragment key={index}>
       {piece === 'line-break' ? <br /> : typeof piece === 'string' ? piece : <b>{piece.bold}</b>}
