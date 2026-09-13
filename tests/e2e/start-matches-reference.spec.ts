@@ -86,7 +86,7 @@ test.describe('the start page matches the Reference site', () => {
 
   for (const viewport of BASELINE_VIEWPORTS) {
     test(`at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
-      const pages = await openBothPages(browser, baseURL!, site, viewport, START_PAGES);
+      const pages = await openBothPages(browser, baseURL!, site, viewport, { pages: START_PAGES });
 
       try {
         // Soft, so one run reports every region that differs rather than the first.

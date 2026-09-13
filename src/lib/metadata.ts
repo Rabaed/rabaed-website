@@ -27,6 +27,11 @@ export function baseMetadata(): Metadata {
  * every locale's real URL is derived, so the alternates stay correct without
  * anyone writing them out by hand.
  *
+ * `locales` names the locales the page exists in, every one unless it says
+ * otherwise. A page that will never be translated — the legal documents,
+ * whose Arabic is binding (spec: Out of Scope) — names only its own, so no
+ * alternate sends a search engine to a page that is not there.
+ *
  * Open Graph, Twitter cards, the 1200×630 sharing image and structured data
  * are ticket 32. Nothing here emits a half-version of them.
  */
@@ -35,8 +40,9 @@ export function pageMetadata(options: {
   path?: string;
   title: string;
   description: string;
+  locales?: readonly Locale[];
 }): Metadata {
-  const { locale, path = '/', title, description } = options;
+  const { locale, path = '/', title, description, locales = LOCALE_CODES } = options;
 
   return {
     title,
@@ -44,7 +50,7 @@ export function pageMetadata(options: {
     alternates: {
       canonical: localePath(locale, path),
       languages: Object.fromEntries(
-        LOCALE_CODES.map((code) => [code, localePath(code, path)]),
+        locales.map((code) => [code, localePath(code, path)]),
       ),
     },
   };
