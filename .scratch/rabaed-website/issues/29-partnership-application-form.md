@@ -14,4 +14,13 @@
 
 ## Comments
 
+**What ticket 16 leaves for this one.**
+
+The form is `src/components/partnership/application-form.tsx`, on `/partnership#apply`:
+
+- **Its fields are ready.** Thirteen, named in the Reference site's order: `company`, `commercialRegistration` (the shared `src/components/upload-field.tsx`), `city`, `name`, `jobTitle`, `phone`, `email`, the five lists `activity`, `activeProjects`, `clientType`, `projectArea`, `partnershipMode`, and the free text `goals`. Every starred field and the commercial registration are `required`; `goals` is not.
+- **The lists send English values, not their Arabic text.** The Reference site's options have no `value`, so they would have sent the words shown. Here each has a stable value — `consulting-office`, `over-25`, `under-5000` (square metres), `embedded-in-proposal` and the rest — and the first option of each is the empty prompt `required` refuses. Store these values, and show the admin the Arabic labels beside them.
+- **Its submit button is disabled.**
+- **Its small print still reads «نموذج أولي — لا يُرسل فعلياً في هذه النسخة.»** That is true until this ticket, and must go with it.
+
 **Mostly a definition (decided 13 September 2026).** Ticket 27 builds one submission pipeline and ticket 28 puts the upload checks and private storage inside it. This form is a new definition run through them, not a new pipeline. Its wording is editable by Editors; its fields are not (spec: Forms).

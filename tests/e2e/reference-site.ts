@@ -101,6 +101,7 @@ export const PRODUCT_PAGES: PagePair = { reference: 'product.html', rebuilt: '/p
 export const START_PAGES: PagePair = { reference: 'start.html', rebuilt: '/start' };
 export const TOOL_PAGES: PagePair = { reference: 'tool.html', rebuilt: '/tool' };
 export const REFERRAL_PAGES: PagePair = { reference: 'referral.html', rebuilt: '/referral' };
+export const PARTNERSHIP_PAGES: PagePair = { reference: 'partnership.html', rebuilt: '/partnership' };
 
 /**
  * A Reference page and the rebuilt one — the home page unless told otherwise —

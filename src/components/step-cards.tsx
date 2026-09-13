@@ -1,7 +1,8 @@
 /**
  * Steps, each in a card of its own, one of them marked out — the start page's
- * steps to going live, the tool page's steps to a first pour and the referral
- * page's four steps to a payout all take this shape on the Reference site.
+ * steps to going live, the tool page's steps to a first pour, the referral
+ * page's four steps to a payout and the partnership page's three modes all
+ * take this shape on the Reference site.
  */
 export type StepCard = {
   readonly number: string;
@@ -10,6 +11,8 @@ export type StepCard = {
   readonly text: string;
   /** Drawn with the accent border: the step the section wants remembered. */
   readonly markedOut: boolean;
+  /** Who it suits, under a dashed rule: the partnership page's modes (`programmes.css`). */
+  readonly fit?: string;
 };
 
 export function StepCards({
@@ -31,6 +34,7 @@ export function StepCards({
           </div>
           <h3>{step.title}</h3>
           <p>{step.text}</p>
+          {step.fit === undefined ? null : <span className="fit">{step.fit}</span>}
         </div>
       ))}
     </div>

@@ -11,8 +11,8 @@
 - [ ] Entries render as native disclosure elements so the answers stay readable to search engines and AI
 - [ ] Reordering and hiding work from the admin
 - [ ] The visible answer text and the structured data are generated from the same source, so they can never drift apart
-- [ ] One Questions section serves every page with FAQs, given the page's group and its heading; the four page-specific wrappers (`home/`, `referral/`, `tool/` and `start/questions.tsx`) go, the start page's questions-beside-the-form layout becomes a variant of it, and the partnership page uses it too
+- [ ] One Questions section serves every page with FAQs, given the page's group and its heading; the five page-specific wrappers (`home/`, `referral/`, `tool/`, `start/` and `partnership/questions.tsx`) go, and the start page's questions-beside-the-form layout becomes a variant of it
 
 ## Comments
 
-**Added on 13 September 2026** from the architecture review. `Faq` already had a small interface, but four wrappers copied the section and heading markup around it — the tool page through `TeaserHead` in `tool/parts.tsx`, the others inline. Collapsing them gives this ticket and ticket 32 one module to change. **Blocked by 52**, which gives each page one content module; the Questions section then receives its entries rather than importing them.
+**Added on 13 September 2026** from the architecture review. `Faq` already had a small interface, but four wrappers copied the section and heading markup around it — five once ticket 16 added the partnership page's — the tool page through `TeaserHead` in `tool/parts.tsx`, the others inline. Collapsing them gives this ticket and ticket 32 one module to change. **Blocked by 52**, which gives each page one content module; the Questions section then receives its entries rather than importing them.

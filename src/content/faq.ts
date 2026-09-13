@@ -1,7 +1,6 @@
 /**
  * The questions and answers on the site's pages, grouped by the page they
  * appear on — the grouping ticket 22 keeps when it moves them into the CMS.
- * Tickets 15 and 16 add their pages' lists here until then.
  *
  * Each answer is drawn in a native disclosure element, so its text is in the
  * page whether or not the visitor has opened it. That is what lets search
@@ -161,5 +160,33 @@ export const REFERRAL_FAQ: readonly FaqEntry[] = [
   {
     question: 'أعمل لدى جهة قد يُعدّ هذا تعارضاً معها — ماذا أفعل؟',
     answer: 'مسؤوليتك أن تتأكد من عدم وجود ما يمنعك من قبول المقابل، وهذا ما يغطّيه الإقرار الذي توقّعه عند التسجيل.',
+  },
+];
+
+/** The partnership page's «قبل الاجتماع الأول». */
+export const PARTNERSHIP_FAQ: readonly FaqEntry[] = [
+  {
+    question: 'كم تكلفة الشراكة؟',
+    answer: 'لا توجد رسوم انضمام. أما تسعير المنصة للشريك فيُحدَّد في اجتماع تصميم النموذج، لأنه يختلف باختلاف النمط وحجم المحفظة.',
+  },
+  {
+    question: 'هل تتعاملون مباشرة مع عملائي؟',
+    answer: 'يعتمد على النمط. في نمط التضمين تبقى العلاقة التعاقدية معك بالكامل، ونتعامل نحن مع فريق المشروع فنياً فقط.',
+  },
+  {
+    question: 'ماذا يحدث للمشروع إذا انتهت علاقتي بالعميل في منتصفه؟',
+    answer: 'هذه إحدى النقاط التي تُعالَج صراحةً في اتفاقية الشراكة، بما يضمن استمرار المشروع دون انقطاع وحفظ حقوق الطرفين.',
+  },
+  {
+    question: 'هل هناك حد أدنى من المشاريع للانضمام؟',
+    answer: 'لا حد معلن. لكن الأنماط تختلف بحسب حجم المحفظة، وسنقترح عليك الأنسب بعد الاجتماع الأول.',
+  },
+  {
+    question: 'هل يمكن الجمع بين أكثر من نمط؟',
+    answer: 'نعم، بعض الشركاء يبدأون بالترشيح المعتمد وينتقلون إلى التضمين بعد أول مشروعين.',
+  },
+  {
+    question: 'نحن مكتب صغير — هل البرنامج لنا؟',
+    answer: 'نعم. المشاريع المتوسطة هي تركيزنا، والمكاتب المتوسطة والصغيرة هي شريحتنا الأساسية.',
   },
 ];
