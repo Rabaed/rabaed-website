@@ -13,5 +13,12 @@
  */
 export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return window.matchMedia(REDUCED_MOTION).matches;
 }
+
+/**
+ * The query itself, for a component that has to follow the preference as it
+ * changes rather than ask once — handed to `gsap.matchMedia`, which rebuilds
+ * an animation when its answer does.
+ */
+export const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';

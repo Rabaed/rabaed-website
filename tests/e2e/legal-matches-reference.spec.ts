@@ -62,7 +62,7 @@ test.describe('the legal pages match the Reference site', () => {
   for (const pair of LEGAL_PAGES) {
     for (const viewport of BASELINE_VIEWPORTS) {
       test(`${pair.rebuilt} at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
-        const pages = await openBothPages(browser, baseURL!, site, viewport, pair);
+        const pages = await openBothPages(browser, baseURL!, site, viewport, { pages: pair });
         try {
           for (const region of REGIONS) {
             // Soft, so one run reports every region that differs rather than the first.

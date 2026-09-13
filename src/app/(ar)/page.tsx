@@ -4,9 +4,11 @@ import { Figures } from '@/components/home/figures';
 import { FourUnits } from '@/components/home/four-units';
 import { Hero } from '@/components/home/hero';
 import { Questions } from '@/components/home/questions';
+import { RecordSection } from '@/components/home/record';
 import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
+import { RevealOnScroll } from '@/components/reveal-on-scroll';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -17,12 +19,12 @@ export const metadata: Metadata = pageMetadata({
 });
 
 /**
- * The Arabic home page, in the state ticket 11 leaves it: the full-height hero,
- * the Trust strip, the situations deck, the four units, the figures deck, the
- * questions, and the closing section with the demo request form.
+ * The Arabic home page, in the state ticket 09 leaves it: the full-height hero,
+ * the Trust strip, the situations deck, the four units, the Record, the figures
+ * deck, the questions, and the closing section with the demo request form.
  *
  * One gap remains, marked where it falls in the Reference site's order:
- * tickets 09 and 10 fill the space before the figures deck.
+ * ticket 10 fills the space before the figures deck.
  *
  * All copy is verbatim from `reference/site/index.html`. Nothing here is
  * placeholder text, and nothing waits to be reworded.
@@ -34,11 +36,14 @@ export default function HomePage() {
       <TrustStrip />
       <Situations />
       <FourUnits />
-      {/* Tickets 09 and 10: the Record, and the before-and-after with its
-          calculator. */}
+      <RecordSection />
+      {/* Ticket 10: the before-and-after, with its calculator. */}
       <Figures />
       <Questions />
       <ClosingSection />
+      {/* The page's `.reveal` entrances, attached once for the page. Here
+          rather than in `PageShell`, so pages without any do not load it. */}
+      <RevealOnScroll />
     </PageShell>
   );
 }
