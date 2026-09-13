@@ -1,4 +1,4 @@
-import { UploadField } from '@/components/referral/upload-field';
+import { UploadField } from '@/components/upload-field';
 import { localePath } from '@/lib/locales';
 
 /**

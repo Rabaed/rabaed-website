@@ -84,6 +84,20 @@ export const ROUTES = [
     alternates: { ar: '/referral', en: '/en/referral' },
   },
   {
+    path: '/partnership',
+    locale: 'ar',
+    dir: 'rtl',
+    // The hero, the last stage of the path, and the application form at the
+    // foot of the page. Answers sit closed; `partnership-page.spec.ts` finds
+    // every one in the first response.
+    text: [
+      'منصّة إدارة المشروع… ضمن عرضك أنت',
+      'الإطلاق على أول مشروع',
+      'خلّنا نجلس ونصمّم النموذج المناسب لمكتبك',
+    ],
+    alternates: { ar: '/partnership', en: '/en/partnership' },
+  },
+  {
     path: '/terms',
     locale: 'ar',
     dir: 'rtl',

@@ -36,8 +36,6 @@ export function Audience() {
             </div>
           ))}
         </div>
-        {/* The partnership page is ticket 16's; until it is built the link
-            reaches the 404 page, as the header's link to it does. */}
         {/* The sentence after the bold is one string, its trailing space
             included: split in two, the server marks the join with a comment,
             the browser lays out two runs of text, and the link lands a

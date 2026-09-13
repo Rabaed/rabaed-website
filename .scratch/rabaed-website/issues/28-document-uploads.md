@@ -24,6 +24,8 @@ The signup form is `src/components/referral/signup-form.tsx`:
 - **Its submit button is disabled.**
 - **Its small print still reads «نموذج أولي — لا يُرسل فعلياً في هذه النسخة.»** That is true until this ticket, and must go with it.
 
-The document fields are `src/components/referral/upload-field.tsx`. They already show the chosen file's name and the green selected state. This ticket adds progress and the server's rejection.
+The document fields are `src/components/upload-field.tsx`. They already show the chosen file's name and the green selected state. This ticket adds progress and the server's rejection.
+
+**Moved by ticket 16**, from `src/components/referral/`, because the partnership application's commercial registration is the same field. Progress and rejection added here reach that form too; ticket 29 wires it.
 
 **The page promises a referral code «فوراً على جوالك وبريدك», and no ticket issues one.** See ticket 15's note for the founder.
