@@ -1,5 +1,5 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/globals/site-settings';
+import { SKIP_REVALIDATION } from '../cms/revalidation';
 
 /**
  * Publishes the contact points the site carried before the CMS existed, so
@@ -20,7 +20,7 @@ export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
       _status: 'published',
     },
     // A migration runs outside the site, where there are no pages to
-    // refresh (`src/cms/globals/site-settings.ts`).
+    // refresh (`src/cms/revalidation.ts`).
     context: { [SKIP_REVALIDATION]: true },
     req,
   });

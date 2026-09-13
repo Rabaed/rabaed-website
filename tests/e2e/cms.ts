@@ -11,11 +11,28 @@ import { expect, type APIRequestContext, type Page } from '@playwright/test';
 
 export const ADMIN_PATH = '/maktab';
 
+type Editor = { readonly email: string; readonly password: string };
+
 /** Exists only in the database the test server creates and deletes. */
 export const TEST_EDITOR = {
   email: 'editor@rabaed.test',
   password: 'test-editor-password-19',
 } as const;
+
+/**
+ * The blog suite's own account. Payload records a login by reading the
+ * editor's list of sessions, adding one and writing the list back, so two
+ * suites signing in to one account in the same instant can erase each other's
+ * session — `cms.spec.ts` explains how that surfaced. Suites that run side by
+ * side, as those two do, therefore sign in as different editors.
+ */
+export const BLOG_EDITOR = {
+  email: 'blog-editor@rabaed.test',
+  password: 'test-editor-password-23',
+} as const;
+
+/** Every account the test server creates. */
+export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR];
 
 /** Signs in through the admin's own login form, as Ahmed would. */
 export async function logIn(page: Page): Promise<void> {
@@ -31,8 +48,8 @@ export async function logIn(page: Page): Promise<void> {
  * after a test, which must work whether or not the test got as far as signing
  * in — the form redirects away when there is already a session.
  */
-export async function logInByApi(request: APIRequestContext): Promise<void> {
-  const response = await request.post('/api/users/login', { data: TEST_EDITOR });
+export async function logInByApi(request: APIRequestContext, editor: Editor = TEST_EDITOR): Promise<void> {
+  const response = await request.post('/api/users/login', { data: editor });
   expect(response.ok()).toBe(true);
 }
 

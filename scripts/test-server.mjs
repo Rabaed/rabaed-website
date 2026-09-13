@@ -1,6 +1,6 @@
 /**
  * The server the end-to-end suite runs against (playwright.config.ts): a
- * throwaway database, migrated and given one editor account, then the
+ * throwaway database, migrated and given the suites' editor accounts, then the
  * application built and started against it.
  *
  * Throwaway on purpose. The spec asks for CMS content in tests to be real
@@ -18,7 +18,7 @@ import { rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { NEXT_BIN, PAYLOAD_BIN, repoRoot, runNode, startDatabase } from './local-database.mjs';
-import { TEST_EDITOR } from '../tests/e2e/cms.ts';
+import { TEST_EDITORS } from '../tests/e2e/cms.ts';
 
 const port = Number(process.env.PORT ?? 3100);
 const scratch = path.join(os.tmpdir(), `rabaed-test-server-${port}`);
@@ -33,13 +33,17 @@ const env = {
   DATABASE_URL: database.url,
   PAYLOAD_SECRET: randomBytes(32).toString('hex'),
   MEDIA_DIR: path.join(scratch, 'media'),
-  EDITOR_EMAIL: TEST_EDITOR.email,
-  EDITOR_PASSWORD: TEST_EDITOR.password,
 };
 
 try {
   await runNode([PAYLOAD_BIN, 'migrate'], env);
-  await runNode([PAYLOAD_BIN, 'run', 'scripts/create-editor.ts'], env);
+  for (const editor of TEST_EDITORS) {
+    await runNode([PAYLOAD_BIN, 'run', 'scripts/create-editor.ts'], {
+      ...env,
+      EDITOR_EMAIL: editor.email,
+      EDITOR_PASSWORD: editor.password,
+    });
+  }
   await runNode([NEXT_BIN, 'build'], env);
 } catch (error) {
   await database.stop();
