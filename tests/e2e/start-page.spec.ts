@@ -215,6 +215,10 @@ test('the free tool teaser leads to the tool page', async ({ page }) => {
  * the Trust strip are on this page and are built on it.
  */
 const ANIMATIONS = [
+  // The Reference start page runs its `.reveal` entrance with nothing to
+  // reveal. Quoted, because React's `revealOrder` and Next's `revealAfter`
+  // contain `.reveal` too.
+  { name: 'the `.reveal` entrance', marker: '".reveal"', usedOn: '/' },
   { name: "the home page's hero loop", marker: 'hero-art', usedOn: '/' },
   { name: "the home page's card decks", marker: '.pcard', usedOn: '/' },
   { name: "the home page's four units", marker: '.jt-hint', usedOn: '/' },

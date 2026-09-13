@@ -53,7 +53,23 @@ export const START_FAQ: readonly FaqEntry[] = [
 ];
 
 /**
- * The home page's «قبل أن تسأل» section: the start page's first three, which
- * the Reference site repeats word for word, so they are written once.
+ * The home page's «قبل أن تسأل» section. The Reference site words these three
+ * as the start page's first three, but each page's list is its own: the home
+ * page's does not change when the start page's is reordered.
  */
-export const HOME_FAQ: readonly FaqEntry[] = START_FAQ.slice(0, 3);
+export const HOME_FAQ: readonly FaqEntry[] = [
+  {
+    question: 'كيف يعمل الاشتراك؟',
+    answer:
+      'الاشتراك سنوي لكل مشروع، ويغطي جميع أطرافه ومستخدميه بلا تكلفة إضافية عليهم. وإن كان لديكم أكثر من مشروع نشط، فهناك خصم للمشاريع المتعددة يزيد كلما زاد عددها.',
+  },
+  {
+    question: 'وإن لم يناسبنا بعد التشغيل؟',
+    answer:
+      'ضمان 60 يوماً من تاريخ التفعيل: إن قررتم التوقف خلالها نعيد كامل المبلغ المدفوع، ونسلّمكم نسخة كاملة من سجل مشروعكم. السجل ملككم في كل الأحوال.',
+  },
+  {
+    question: 'كم يحتاج التشغيل؟',
+    answer: 'أيام لا شهور. فريقنا يأتي إلى موقعك، يُعدّ المشروع والنماذج والأطراف، ويبدأ الجميع من حيث وصل المشروع.',
+  },
+];

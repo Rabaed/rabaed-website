@@ -14,23 +14,24 @@ const STEPS = [
     label: 'إعداد',
     title: 'المشروع، الأطراف، النماذج',
     text: 'فريقنا يُعدّ المشروع ويدعو المالك والاستشاري والمقاول، ويجلس مع كل فريق 15 دقيقة.',
+    guarantee: false,
   },
   {
     number: '02',
     label: 'تشغيل',
     title: 'أقل من يوم — دون توقف للعمل',
     text: 'يبدأ الجميع من حيث وصل المشروع. لا تدريب، ولا فترة انتقالية.',
+    guarantee: false,
   },
   {
     number: '03',
     label: 'ضمان',
     title: '60 يوماً — أو نعيد المبلغ',
     text: 'شغّلوها على مشروع حقيقي. إن قررتم التوقف خلال 60 يوماً من التفعيل، نعيد كامل المبلغ.',
+    // The guarantee's card is marked out.
+    guarantee: true,
   },
 ] as const;
-
-/** The guarantee: the step the card is marked out for. */
-const GUARANTEE = STEPS.length - 1;
 
 export function Steps() {
   return (
@@ -39,8 +40,8 @@ export function Steps() {
         <div className="eyebrow">كيف نبدأ معك</div>
         <h2>فريقنا في موقعك. الأطراف الثلاثة على المنصة خلال أيام.</h2>
         <div className="start">
-          {STEPS.map((step, index) => (
-            <div key={step.number} className={index === GUARANTEE ? 's gs' : 's'}>
+          {STEPS.map((step) => (
+            <div key={step.number} className={step.guarantee ? 's gs' : 's'}>
               {/* Only the numeral is `.mono`: DM Mono has no Arabic glyphs
                   (spec: Design system). See `start.css`. */}
               <div className="k">

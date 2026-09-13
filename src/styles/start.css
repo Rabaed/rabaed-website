@@ -7,7 +7,9 @@
  *
  * Imported after `product.css` and before `responsive.css`, which has to stay
  * last for the reason written at the top of it. Every value is held to the
- * Reference site by tests/e2e/start-matches-reference.spec.ts.
+ * Reference site by tests/e2e/start-matches-reference.spec.ts, except the
+ * step labels' typeface, which is a divergence below; the scroll margin is
+ * held by tests/e2e/start-page.spec.ts.
  */
 
 /* ---- the three steps ---- */
@@ -33,7 +35,8 @@
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small, as `#demo` in
    `shell.css`: the hero's «الأسئلة الشائعة ↓» and the home page's «كل الأسئلة»
    land here. The Reference site's script stops 78px short so the fixed header
-   does not cover the section; this does the same with no script. */
+   does not cover the section; this stops in the same place with no script,
+   instantly rather than smoothly. */
 #faq { scroll-margin-top: 78px }
 
 /* ---- the free tool teaser ---- */

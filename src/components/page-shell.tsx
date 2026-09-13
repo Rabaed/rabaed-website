@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { RevealOnScroll } from '@/components/reveal-on-scroll';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteNav } from '@/components/site-nav';
 import type { Locale } from '@/lib/locales';
@@ -13,6 +12,10 @@ import type { Locale } from '@/lib/locales';
  * appears only after JavaScript runs, which is the sort of thing ADR-0001
  * exists to prevent. So the page names its own path, once, and the whole
  * header arrives complete in the first response.
+ *
+ * It carries only what every page uses. A page with `.reveal` entrances mounts
+ * `RevealOnScroll` itself, so a page without them does not download the
+ * script (spec: Analytics and performance).
  */
 export function PageShell({
   locale,
@@ -29,8 +32,6 @@ export function PageShell({
       <SiteNav locale={locale} path={path} />
       {children}
       <SiteFooter locale={locale} />
-      {/* Every page's `.reveal` entrances, attached once for the page. */}
-      <RevealOnScroll />
     </>
   );
 }
