@@ -180,6 +180,12 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 .form small { color: var(--muted); font-size: 12px }
 .form .fine { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 1.7 }
+/* A field's own message, shown once the field has been left wrong, and the
+   field drawn in red with it — the Reference site's, from its tool page's
+   download form (src/components/tool/download-form.tsx). */
+.form .er { display: none; color: #C0392B; font-size: 12px; margin-top: 6px }
+.form .er.on { display: block }
+.form input.bad, .form select.bad { border-color: rgba(192, 57, 43, .55) }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small. The header's and
    the hero's «احجز عرضاً حياً» jump here. The Reference site scrolls there by
    script, stopping 78px short so the fixed header does not cover the form;
