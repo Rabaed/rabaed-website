@@ -106,6 +106,10 @@ export const PRODUCT_PAGES: PagePair = { reference: 'product.html', rebuilt: '/p
  * arrangement every section comparison starts from. Reduced motion is what
  * stops either page being caught half-way through an animation of its own.
  *
+ * `motion: 'no-preference'` leaves it off, for the one kind of comparison that
+ * needs it: of something that follows the scroll, which the rebuild draws
+ * differently for a visitor who has asked for less movement.
+ *
  * Close both with `close()` when done; on a failure while opening, they are
  * closed before the error is passed on.
  */
@@ -115,8 +119,9 @@ export async function openBothPages(
   site: ReferenceSite,
   viewport: { width: number; height: number },
   pages: PagePair = HOME_PAGES,
+  motion: 'reduce' | 'no-preference' = 'reduce',
 ) {
-  const options = { viewport, reducedMotion: 'reduce' as const };
+  const options = { viewport, reducedMotion: motion };
   const referenceContext = await browser.newContext(options);
   const rebuiltContext = await browser.newContext(options);
   const close = async () => {
