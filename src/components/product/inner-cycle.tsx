@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { INNER_EYEBROW, INNER_HEADING, INNER_LEAD, ORGANISATIONS } from '@/content/inner-cycle';
+import { INNER_EYEBROW, INNER_HEADING, INNER_LEAD, REVIEW_CYCLES } from '@/content/inner-cycle';
 
 /**
  * «ماذا يبقى عندك، وماذا يعبر إلى الطرف الآخر؟» — the three parties side by
@@ -18,8 +18,8 @@ export function InnerCycle() {
         <p className="lead">{INNER_LEAD}</p>
 
         <div className="orgs wired">
-          {ORGANISATIONS.map((organisation, index) => (
-            <Fragment key={organisation.party}>
+          {REVIEW_CYCLES.map((cycle, index) => (
+            <Fragment key={cycle.party}>
               {/* The way the Record travels, from one party to the next. The
                   order of the cards already says it to a screen reader. */}
               {index > 0 && (
@@ -30,13 +30,13 @@ export function InnerCycle() {
               <div className="org">
                 <div className="org-h">
                   <i />
-                  {organisation.party}
+                  {cycle.party}
                 </div>
-                <div className="role-note">{organisation.note}</div>
+                <div className="role-note">{cycle.note}</div>
                 <div className="priv">
                   <span className="priv-tag">دورة داخلية · محجوبة</span>
                   <ol className="steps-v">
-                    {organisation.reviewers.map((reviewer, step) => (
+                    {cycle.reviewers.map((reviewer, step) => (
                       <li key={reviewer}>
                         <i>{step + 1}</i>
                         {reviewer}
@@ -50,7 +50,7 @@ export function InnerCycle() {
                 </div>
                 <div className="out">
                   <b>ما يعبر رسمياً</b>
-                  {organisation.crosses}
+                  {cycle.crosses}
                 </div>
               </div>
             </Fragment>

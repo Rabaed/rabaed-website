@@ -9,31 +9,35 @@
  * marks and track, and every part of every panel; how much scrolling the pin
  * adds to the page, and where the track stands at the end of it; the custom
  * strip; the roles section with each of its three parties chosen in turn; the
- * internal review cycle; and the closing section's steps.
+ * internal review cycle; and the closing section with its form.
  *
  * Not measured: the Trust strip, which travels here and wraps there by design
  * (ticket 06, `home-matches-reference.spec.ts`); what is inside a screen, which
  * `screen-mocks.spec.ts` holds to the markup pixel for pixel; and the header,
  * which `shell-matches-reference.spec.ts` covers.
  *
- * Three deliberate differences shape the comparison, each left out only where
- * it reaches:
+ * Deliberate differences shape the comparison, each left out only where it
+ * reaches:
  *
  * - **The caption ADR-0002 requires** sits under every screen, where the
  *   Reference site has none. A stacked panel and a role grow by its height,
  *   and a screen centred with its caption sits higher than one centred alone.
- *   On a short window the screen also gives up the caption's room, so there
- *   the screen's box is compared only on the tall viewports;
- *   `product-journey.spec.ts` holds it inside its panel on the short ones.
+ *   The screen and its caption are fitted into their column by a grid rather
+ *   than a flex row, so how the two are displayed differs by construction. On
+ *   a short window the screen also gives up the caption's room, so there its
+ *   box is compared only on the tall viewports; `product-journey.spec.ts`
+ *   holds it inside its panel, and as large as the room allows, on the short
+ *   ones.
  * - **Arabic labels set in the Arabic face** — «المخرَج», «حسب المشروع»,
  *   «دورة داخلية · محجوبة», «ما يعبر رسمياً», and the two headings of the
  *   note under the review cycle. The Reference site sets them in DM Mono, which
  *   has no Arabic glyphs. Their typeface is not compared, nor the width of a
  *   label that is only as wide as its words; their place and height are.
- * - **The closing section's second column** is empty until ticket 11's form
- *   arrives, so only its first column is compared.
+ * - **The closing section's** own differences are written in
+ *   `closing-section.ts`, which the home page's comparison uses too.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { CLOSING_SECTION } from './closing-section';
 import { measureRegion, type Measurement, type Region } from './geometry';
 import {
   BASELINE_VIEWPORTS,
@@ -45,56 +49,55 @@ import {
 
 type Viewport = { width: number; height: number };
 
-/** In the Arabic face here, in DM Mono there: typeface, and a width that follows the words. */
-const RESET_LABEL: readonly Measurement[] = ['font', 'width', 'left'];
-/** In the Arabic face here, but a block as wide as its container either way. */
-const RESET_BLOCK: readonly Measurement[] = ['font'];
+/** Left out of a label in the Arabic face here and DM Mono there: its typeface, and a width and place that follow its words. */
+const ARABIC_LABEL_LEFT_OUT: readonly Measurement[] = ['font', 'width', 'left'];
+/** Left out of a block in the Arabic face here: only its typeface, since it is as wide as its container either way. */
+const ARABIC_BLOCK_LEFT_OUT: readonly Measurement[] = ['font'];
 
-function heroRegion(): Region {
-  return { name: 'the hero', root: '.phero', parts: ['.eyebrow', 'h1', '.lead', '.ctas', '.ctas .btn.p', '.ctas .btn.g'] };
-}
+const HERO: Region = {
+  name: 'the hero',
+  root: '.phero',
+  parts: ['.eyebrow', 'h1', '.lead', '.ctas', '.ctas .btn.p', '.ctas .btn.g'],
+};
 
 function journeyRegions(viewport: Viewport): Region[] {
   // Below 981px the panels stack, and each grows by its screen's caption.
-  const grows: Measurement[] = viewport.width <= 980 ? ['height'] : [];
-  // The screen and its caption are fitted into the column by a grid rather
-  // than a flex row, so how the column and the screen's window are displayed
-  // differs by construction. Centred with its caption, the screen sits higher.
-  // On a short window it also gives the caption its room.
-  const screen: Measurement[] = viewport.height === 900 ? ['top', 'display'] : ['top', 'left', 'width', 'height', 'display'];
+  const growthLeftOut: Measurement[] = viewport.width <= 980 ? ['height'] : [];
+  const columnLeftOut: Measurement[] = [...growthLeftOut, 'display'];
+  const screenLeftOut: Measurement[] =
+    viewport.height === 900 ? ['top', 'display'] : ['top', 'left', 'width', 'height', 'display'];
   // Below 981px the marks are not displayed, and a box that is not displayed
   // has no position to compare — only the fact that it is not displayed.
-  const marks: Measurement[] = viewport.width <= 980 ? ['top', 'left'] : [];
-  const column: Measurement[] = [...grows, 'display'];
+  const marksLeftOut: Measurement[] = viewport.width <= 980 ? ['top', 'left'] : [];
 
   return [
     {
       name: 'the journey',
       root: '#journey',
-      omitFromRoot: grows,
+      omitFromRoot: growthLeftOut,
       parts: [
         '.j-head',
         '.j-head .eyebrow',
         '.j-head h2',
-        { selector: '.dots', omit: marks },
-        { selector: '.dots i', omit: marks },
-        { selector: '.track', omit: grows },
+        { selector: '.dots', omit: marksLeftOut },
+        { selector: '.dots i', omit: marksLeftOut },
+        { selector: '.track', omit: growthLeftOut },
       ],
     },
     ...[1, 2, 3, 4, 5].map((n) => ({
       name: `journey panel ${n}`,
       root: `#journey .panel:nth-child(${n})`,
-      omitFromRoot: grows,
+      omitFromRoot: growthLeftOut,
       parts: [
         '.num:not(.out)',
-        { selector: '.num.out', omit: RESET_LABEL },
+        { selector: '.num.out', omit: ARABIC_LABEL_LEFT_OUT },
         'h3',
         '.tag',
         ':scope > div:first-child > p',
         '.flow',
         '.flow b',
-        { selector: '.ui', omit: column },
-        { selector: '.win', omit: screen },
+        { selector: '.ui', omit: columnLeftOut },
+        { selector: '.win', omit: screenLeftOut },
       ],
     })),
   ];
@@ -103,7 +106,16 @@ function journeyRegions(viewport: Viewport): Region[] {
 const CUSTOM: Region = {
   name: 'the custom strip',
   root: '#custom',
-  parts: ['.eyebrow', 'h2', '.strip', '.strip .c', { selector: '.strip .c .badge', omit: RESET_LABEL }, '.strip .c h3', '.strip .c p', '.strip .c a'],
+  parts: [
+    '.eyebrow',
+    'h2',
+    '.strip',
+    '.strip .c',
+    { selector: '.strip .c .badge', omit: ARABIC_LABEL_LEFT_OUT },
+    '.strip .c h3',
+    '.strip .c p',
+    '.strip .c a',
+  ],
 };
 
 function roleRegions(n: number): Region[] {
@@ -142,27 +154,20 @@ const INNER: Region = {
     '.org-h i',
     '.role-note',
     '.priv',
-    { selector: '.priv-tag', omit: RESET_LABEL },
+    { selector: '.priv-tag', omit: ARABIC_LABEL_LEFT_OUT },
     '.steps-v',
     '.steps-v li',
     '.steps-v i',
     '.reloop',
     '.reloop span',
     '.org .out',
-    { selector: '.org .out b', omit: RESET_BLOCK },
+    { selector: '.org .out b', omit: ARABIC_BLOCK_LEFT_OUT },
     '.cross',
     '.cross span',
     '.inner-note',
     '.inner-note > div',
-    { selector: '.inner-note .k', omit: RESET_BLOCK },
+    { selector: '.inner-note .k', omit: ARABIC_BLOCK_LEFT_OUT },
   ],
-};
-
-const TAIL: Region = {
-  name: 'the closing section',
-  root: '#tail',
-  omitFromRoot: ['height'],
-  parts: ['.eyebrow', 'h2', '.tail-steps', '.tail-steps li', '.tail-steps b', '.tail-steps span', '.tail-more'],
 };
 
 /** How much page the journey takes up: the pin's whole length when it pins. Read from the top of the page. */
@@ -215,9 +220,9 @@ test.describe('the product page matches the Reference site', () => {
         // The journey's length is the pin's scroll distance, which is only
         // right once the webfont has settled the heading's height. The
         // Reference site has measured by the time it has loaded; the rebuild
-        // is given until the comparison stops changing.
-        // Below 981px the stacked panels are taller by their captions, so the
-        // length is only the Reference site's from 981px up.
+        // is given until the comparison stops changing. Below 981px the
+        // stacked panels are taller by their captions, so the length is only
+        // the Reference site's from 981px up.
         if (viewport.width >= 981) {
           const length = await journeyLength(reference);
           await expect
@@ -225,7 +230,7 @@ test.describe('the product page matches the Reference site', () => {
             .toBe(length);
         }
 
-        await compare([heroRegion(), ...journeyRegions(viewport), CUSTOM, INNER, TAIL]);
+        await compare([HERO, ...journeyRegions(viewport), CUSTOM, INNER, CLOSING_SECTION]);
 
         for (const n of [1, 2, 3]) {
           for (const page of [reference, rebuilt]) await page.locator(`#roles .tab:nth-child(${n})`).click();

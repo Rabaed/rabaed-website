@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
+import { ClosingSection } from '@/components/closing-section';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { CustomStrip } from '@/components/product/custom-strip';
 import { InnerCycle } from '@/components/product/inner-cycle';
 import { Journey } from '@/components/product/journey';
 import { Roles } from '@/components/product/roles';
-import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -18,7 +18,8 @@ export const metadata: Metadata = pageMetadata({
 /**
  * The Arabic product page, in the Reference site's order: the page hero, the
  * Trust strip, the journey through the four units, the custom strip, what each
- * party sees, the review cycle inside each party, and the closing section.
+ * party sees, the review cycle inside each party, and the closing section with
+ * the demo request form (ticket 11's, shared with the home page).
  *
  * All copy is verbatim from `reference/site/product.html`. Nothing here is
  * placeholder text, and nothing waits to be reworded.
@@ -36,9 +37,8 @@ export default function ProductPage() {
             ولا يعبر إلى الآخرين.
           </p>
           <div className="ctas">
-            {/* The demo request form arrives in the closing section with
-                ticket 11; until then this goes nowhere, as the header's own
-                does on a page without it. */}
+            {/* The first jumps to the demo request form at the foot of this
+                page, the second to the journey just below. */}
             <a className="btn p" href="#demo">
               احجز عرضاً حياً
             </a>
@@ -56,41 +56,7 @@ export default function ProductPage() {
       <CustomStrip />
       <Roles />
       <InnerCycle />
-
-      {/* The closing section. Ticket 11 turns this block into a component with
-          the demo request form beside the steps, for this page and the home
-          page alike; whichever of the two tickets lands second puts it here. */}
-      <section id="tail" className="light pad">
-        <div className="wrap tail-grid">
-          <div>
-            <div className="eyebrow">كيف نبدأ معك</div>
-            <h2 style={{ fontSize: '29px', lineHeight: 1.4 }}>
-              فريقنا في موقعك. الأطراف الثلاثة على المنصة خلال أيام.
-            </h2>
-            <ul className="tail-steps">
-              <li>
-                <b>01 · إعداد</b>
-                <span>
-                  نُعدّ المشروع والنماذج، وندعو المالك والاستشاري والمقاول — و15 دقيقة مع كل فريق.
-                </span>
-              </li>
-              <li>
-                <b>02 · تشغيل</b>
-                <span>أقل من يوم، دون توقف للعمل. يبدأ الجميع من حيث وصل المشروع.</span>
-              </li>
-              <li>
-                <b>03 · ضمان</b>
-                <span>
-                  60 يوماً من التفعيل — أو نعيد كامل المبلغ، ونسلّمكم نسخة كاملة من السجل.
-                </span>
-              </li>
-            </ul>
-            <a className="tail-more" href={localePath('ar', '/start')}>
-              التفاصيل والأسئلة الشائعة ←
-            </a>
-          </div>
-        </div>
-      </section>
+      <ClosingSection />
     </PageShell>
   );
 }

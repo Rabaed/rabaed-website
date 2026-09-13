@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FIRST_ROLE, roleAppearance } from '@/components/product/roles-state';
-import { ARROW_KEYS, readingDirectionOf } from '@/lib/reading-direction';
+import { readingDirectionOf } from '@/lib/reading-direction';
+import { listenToTabs } from '@/lib/tab-strip';
 
 /**
  * Switches the roles section between the three parties, attached to markup the
@@ -12,9 +13,9 @@ import { ARROW_KEYS, readingDirectionOf } from '@/lib/reading-direction';
  *
  * **A click chooses, as on the Reference site; the arrow keys choose too**,
  * which the Reference site's tabs do not. They are marked up as tabs, and a
- * tab list whose arrow keys do nothing is a broken promise to a keyboard
- * user; the four units on the home page already move this way, in the reading
- * direction the server wrote. There is no choosing on hover here, because the
+ * tab list whose arrow keys do nothing is a broken promise to a keyboard user;
+ * the four units on the home page already move this way
+ * (`src/lib/tab-strip.ts`). There is no choosing on hover here, because the
  * Reference site has none.
  *
  * **Every choice re-measures the page's scroll triggers**, as the Reference
@@ -33,7 +34,6 @@ export function RolesBehaviour() {
     if (tabs.length === 0 || panels.length !== tabs.length) return;
 
     gsap.registerPlugin(ScrollTrigger);
-    const keys = ARROW_KEYS[readingDirectionOf(section)];
 
     const show = (chosen: number) => {
       tabs.forEach((tab, index) => {
@@ -44,32 +44,16 @@ export function RolesBehaviour() {
       });
     };
 
-    const choose = (chosen: number) => {
-      show(chosen);
-      ScrollTrigger.refresh();
-    };
-
-    const undo = tabs.map((tab, index) => {
-      const onClick = () => choose(index);
-      const onKeyDown = (event: KeyboardEvent) => {
-        const step = event.key === keys.forward ? 1 : event.key === keys.back ? -1 : 0;
-        if (step === 0) return;
-        event.preventDefault();
-        const next = (index + step + tabs.length) % tabs.length;
-        tabs[next].focus();
-        choose(next);
-      };
-
-      tab.addEventListener('click', onClick);
-      tab.addEventListener('keydown', onKeyDown);
-      return () => {
-        tab.removeEventListener('click', onClick);
-        tab.removeEventListener('keydown', onKeyDown);
-      };
+    const stopListening = listenToTabs(tabs, {
+      direction: readingDirectionOf(section),
+      choose: (chosen) => {
+        show(chosen);
+        ScrollTrigger.refresh();
+      },
     });
 
     return () => {
-      undo.forEach((remove) => remove());
+      stopListening();
       show(FIRST_ROLE);
     };
   }, []);

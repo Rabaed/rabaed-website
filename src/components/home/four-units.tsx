@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
 import { FOUR_UNITS_HEADING, UNIT_TABS } from '@/content/four-units';
+import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
 import { localePath } from '@/lib/locales';
 import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
 
@@ -84,7 +85,7 @@ export function FourUnits() {
                 >
                   <Image
                     src={screenMockImagePath('ar', mock.id)}
-                    alt={unit.description}
+                    alt={SCREEN_MOCK_DESCRIPTIONS[unit.mock]}
                     width={mock.width}
                     height={mock.height}
                     // Below 700px the screen is shown at 1040px and panned
@@ -98,7 +99,7 @@ export function FourUnits() {
           <div className="jt-hints" aria-hidden="true">
             {UNIT_TABS.map((unit, index) => (
               <p key={unit.mock} className="jt-hint" hidden={unitTabAppearance(index, FIRST_CHOSEN).hintHidden}>
-                {unit.description}
+                {SCREEN_MOCK_DESCRIPTIONS[unit.mock]}
               </p>
             ))}
           </div>

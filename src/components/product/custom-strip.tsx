@@ -29,9 +29,8 @@ export function CustomStrip() {
               <span className="badge">حسب المشروع</span>
               <h3>{feature.title}</h3>
               <p>{feature.body}</p>
-              {/* The demo request form, which ticket 11 builds into the
-                  closing section. Until it is on this page, this goes nowhere,
-                  as the header's own «احجز عرضاً حياً» does. */}
+              {/* The demo request form, in the closing section at the foot of
+                  this page. */}
               <a href="#demo">اسأل عنها في العرض التوضيحي ←</a>
             </div>
           ))}

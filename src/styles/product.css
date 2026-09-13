@@ -11,9 +11,10 @@
  * rule that set it. The Reference stylesheet builds this page in passes — a
  * `.panel` rule, then `#journey .panel` over it, then short-window rules over
  * both, some of which the second pass outranks and so never apply — and the
- * baselines recorded what survived. Each rule is scoped to its section, so
- * nothing here reaches a `.panel` or a `.tab` another page grows later.
- * Every value is held to the Reference site by
+ * baselines recorded what survived. Each section's rules are scoped to it, so
+ * nothing here reaches a `.panel` or a `.tab` another page grows later; only
+ * the Screen mock rules at the top are not, because the journey and the roles
+ * both place mocks. Every value is held to the Reference site by
  * tests/e2e/product-matches-reference.spec.ts.
  *
  * Physical `left`/`right` become logical properties, as in `shell.css`.
@@ -133,7 +134,8 @@
    column, but in a rule its `#journey .panel` rules outrank — so on a window
    this short a stacked panel keeps the short-window height above and its two
    columns, and that is what the baselines recorded. `--jh` is 0 here, because
-   the heading takes its own place. */
+   the heading takes its own place. The same stacking, for a visitor with no
+   script, is the `<noscript>` in src/components/product/journey.tsx. */
 @media (min-width: 981px) and (max-height: 550px) {
   #journey { height: auto; overflow: visible }
   #journey .j-head { position: static; padding: var(--sp) 0 0 }

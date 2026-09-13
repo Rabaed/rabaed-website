@@ -258,13 +258,20 @@ test('on a short window the heading, the panel and its screen all fit', async ({
       const heading = section.querySelector('h2')!.getBoundingClientRect();
       const panel = section.querySelector('.panel')!;
       const inside = panel.getBoundingClientRect();
+      const column = panel.querySelector('.ui')!.getBoundingClientRect();
       const screen = panel.querySelector('img')!.getBoundingClientRect();
       const caption = panel.querySelector('.ui p')!.getBoundingClientRect();
+      // The picture drawn inside its box, which keeps the mock's 1440×900.
+      const drawnWidth = Math.min(screen.width, screen.height * 1.6);
       return {
         headingClearOfPanel: heading.bottom <= inside.top,
         panelInWindow: inside.bottom <= window.innerHeight,
         screenInPanel: screen.top >= inside.top && screen.bottom <= inside.bottom,
         captionInPanel: caption.bottom <= inside.bottom,
+        // And it gives up no more than the caption's room: as wide as its
+        // column, or as tall as the column less the caption under it.
+        screenAsLargeAsFits:
+          drawnWidth >= column.width - 1 || caption.bottom - screen.top >= column.height - 1,
       };
     });
     expect(fit, `at ${viewport.width}x${viewport.height}`).toEqual({
@@ -272,6 +279,7 @@ test('on a short window the heading, the panel and its screen all fit', async ({
       panelInWindow: true,
       screenInPanel: true,
       captionInPanel: true,
+      screenAsLargeAsFits: true,
     });
   }
 });
@@ -320,6 +328,13 @@ test('the journey is measured again when the window changes size', async ({ page
 });
 
 test('the journey still works after leaving the page and coming back', async ({ page }) => {
+  // Leaving is when teardown runs, and a teardown that fails says so only here.
+  const problems: string[] = [];
+  page.on('pageerror', (error) => problems.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') problems.push(message.text());
+  });
+
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/product');
   const { start, end } = await waitForPin(page);
@@ -331,6 +346,7 @@ test('the journey still works after leaving the page and coming back', async ({ 
   await page.waitForURL((url) => url.pathname === '/product');
 
   await expectAFullJourney(page);
+  expect(problems).toEqual([]);
 });
 
 test('with JavaScript off, a wide window shows every panel, one above another', async ({ browser }) => {
@@ -389,13 +405,13 @@ for (const viewport of [
         range.selectNodeContents(ui.querySelector('p')!);
         const words = range.getBoundingClientRect();
         return {
-          offCentre: Math.abs((words.left + words.right) / 2 - (screen.left + screen.right) / 2) < 2,
+          centred: Math.abs((words.left + words.right) / 2 - (screen.left + screen.right) / 2) < 2,
           belowTheScreen: words.top >= screen.bottom,
         };
       }),
     );
 
-    expect(placed).toEqual(PANELS.map(() => ({ offCentre: true, belowTheScreen: true })));
+    expect(placed).toEqual(PANELS.map(() => ({ centred: true, belowTheScreen: true })));
   });
 }
 

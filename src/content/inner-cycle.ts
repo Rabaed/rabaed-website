@@ -7,7 +7,8 @@
  * into the CMS.
  */
 
-export type Organisation = {
+/** One party's review, inside its own walls. */
+export type ReviewCycle = {
   readonly party: string;
   /** What the party does before anything leaves it. */
   readonly note: string;
@@ -23,7 +24,7 @@ export const INNER_LEAD =
   'لكل جهة دورة مراجعة واعتماد داخلية كاملة قبل أن ترسل شيئاً. هذه الدورة لا يراها الطرفان الآخران إطلاقاً — لا مسوداتها، ولا ملاحظاتها، ولا كم مرة أُعيدت. ما يعبر هو المعاملة الرسمية وحدها.';
 
 /** In the order the Record travels: from the Contractor, through the Consultant, to the Owner. */
-export const ORGANISATIONS: readonly Organisation[] = [
+export const REVIEW_CYCLES: readonly ReviewCycle[] = [
   {
     party: 'المقاول',
     note: 'يجهّز الطلب قبل أن يرسله.',
