@@ -1,16 +1,34 @@
 import { Fragment } from 'react';
 import { RecordBehaviour } from '@/components/home/record-behaviour';
 import { recordAt, transactionTypeAppearance } from '@/components/home/record-state';
-import {
-  RECORD_HEADING,
-  RECORD_LEAD,
-  RECORD_QUESTIONS,
-  RECORD_STAMP,
-  TRANSACTION_TYPES,
-} from '@/content/record-transactions';
 
-/** How the section looks before the visitor has scrolled into it. */
-const AT_START = recordAt(0, TRANSACTION_TYPES.length);
+/** One step of a trail: what happened, who did it or how, and at what time. */
+export type TransactionStep = {
+  readonly action: string;
+  readonly by: string;
+  readonly time: string;
+};
+
+export type TransactionType = {
+  /** The chip naming the type. */
+  readonly label: string;
+  /** The reference number and subject of the one transaction shown for it. */
+  readonly title: string;
+  /** Its trail, always four steps: raised, received, checked, decided. The last is the decision. */
+  readonly steps: readonly [TransactionStep, TransactionStep, TransactionStep, TransactionStep];
+};
+
+export type RecordSectionContent = {
+  readonly eyebrow: string;
+  /** The heading, a line at a time. */
+  readonly heading: readonly string[];
+  /** The four questions the Record answers, set as one line with dots between. */
+  readonly questions: readonly string[];
+  readonly lead: string;
+  readonly types: readonly TransactionType[];
+  /** The seal the Record earns once the visitor has scrolled through every type. */
+  readonly stamp: string;
+};
 
 /**
  * «لا نسأل "من اعتمد؟" نفتح المعاملة.» — the section that explains the Record.
@@ -34,31 +52,37 @@ const AT_START = recordAt(0, TRANSACTION_TYPES.length);
  * It is not a `.light` section, though it ends light: the Reference site keeps
  * the header dark over it, until the section after it begins.
  */
-export function RecordSection() {
+export function RecordSection({ content }: { content: RecordSectionContent }) {
+  // How the section looks before the visitor has scrolled into it.
+  const atStart = recordAt(0, content.types.length);
+
   return (
     <section id="record" data-direction="rtl">
       <div className="sticky">
         <div className="wrap">
           <div className="rec-grid">
             <div>
-              <div className="eyebrow">السجل الموثّق</div>
+              <div className="eyebrow">{content.eyebrow}</div>
               <h2>
-                {RECORD_HEADING.lines[0]}
-                <br />
-                {RECORD_HEADING.lines[1]}
+                {content.heading.map((line, index) => (
+                  <Fragment key={index}>
+                    {index > 0 && <br />}
+                    {line}
+                  </Fragment>
+                ))}
               </h2>
               <div className="fourq">
-                {RECORD_QUESTIONS.map((question, index) => (
+                {content.questions.map((question, index) => (
                   <Fragment key={question}>
                     {index > 0 && <span>·</span>}
                     {question}
                   </Fragment>
                 ))}
               </div>
-              <p className="lead">{RECORD_LEAD}</p>
+              <p className="lead">{content.lead}</p>
               <div className="rec-types">
-                {TRANSACTION_TYPES.map((type, index) => (
-                  <span key={type.label} className={transactionTypeAppearance(index, AT_START.chosen).chipClass}>
+                {content.types.map((type, index) => (
+                  <span key={type.label} className={transactionTypeAppearance(index, atStart.chosen).chipClass}>
                     {type.label}
                   </span>
                 ))}
@@ -68,11 +92,11 @@ export function RecordSection() {
             <div className="rec-card">
               <div className="doc">
                 <div className="rec-trails">
-                {TRANSACTION_TYPES.map((type, index) => (
+                {content.types.map((type, index) => (
                   <div
                     key={type.title}
                     className="rec-entry"
-                    hidden={transactionTypeAppearance(index, AT_START.chosen).trailHidden}
+                    hidden={transactionTypeAppearance(index, atStart.chosen).trailHidden}
                   >
                     <div className="h">
                       <b>{type.title}</b>
@@ -93,7 +117,7 @@ export function RecordSection() {
                   </div>
                 ))}
                 </div>
-                <div className={AT_START.stamped ? 'stamp on' : 'stamp'}>{RECORD_STAMP}</div>
+                <div className={atStart.stamped ? 'stamp on' : 'stamp'}>{content.stamp}</div>
               </div>
             </div>
           </div>

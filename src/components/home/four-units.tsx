@@ -1,10 +1,28 @@
 import Image from 'next/image';
 import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
-import { FOUR_UNITS_HEADING, UNIT_TABS } from '@/content/four-units';
-import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
-import { localePath } from '@/lib/locales';
+import type { HeroLink } from '@/components/page-hero';
 import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
+
+export type UnitTab = {
+  /** The small line above the title: a unit's number, or the name of what the units produce. */
+  readonly tag: { readonly kind: 'unit'; readonly number: string } | { readonly kind: 'output'; readonly name: string };
+  readonly title: string;
+  /** The Screen mock's id in `src/screen-mocks/registry.ts`, whose exported image the tab shows. */
+  readonly mock: string;
+  /** What the screen shows, in words: the picture's `alt` and the caption under it, both at once (ADR-0002). */
+  readonly description: string;
+};
+
+export type FourUnitsContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  /** Names the row of tabs, for a screen reader. */
+  readonly tabsLabel: string;
+  readonly tabs: readonly UnitTab[];
+  /** The link on to the product page, which shows every unit in full. */
+  readonly more: HeroLink;
+};
 
 /**
  * «أربع وحدات. سجل واحد يجمعها.» — five tabs down one side, and beside them the
@@ -30,18 +48,18 @@ import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
  * the handoff describe it widening to 1440px. No Reference page has that rule
  * any more, and the baselines were captured without it — ADR-0005.
  */
-export function FourUnits() {
+export function FourUnits({ content }: { content: FourUnitsContent }) {
   return (
     <section id="jt" className="dark pad" data-direction="rtl">
       <div className="wrap">
         <div className="tz-head">
-          <div className="eyebrow">المنصة</div>
-          <h2>{FOUR_UNITS_HEADING}</h2>
+          <div className="eyebrow">{content.eyebrow}</div>
+          <h2>{content.heading}</h2>
         </div>
         <div className="jt-line" />
 
-        <div className="jt-row" role="tablist" aria-label="وحدات ربائد">
-          {UNIT_TABS.map((unit, index) => {
+        <div className="jt-row" role="tablist" aria-label={content.tabsLabel}>
+          {content.tabs.map((unit, index) => {
             const look = unitTabAppearance(index, FIRST_CHOSEN);
             return (
               <button
@@ -73,7 +91,7 @@ export function FourUnits() {
             than under whichever of the two columns is taller. */}
         <div className="jt-view">
           <div className="jt-stage">
-            {UNIT_TABS.map((unit, index) => {
+            {content.tabs.map((unit, index) => {
               const mock = screenMockFor(unit.mock);
               return (
                 <div
@@ -85,7 +103,7 @@ export function FourUnits() {
                 >
                   <Image
                     src={screenMockImagePath('ar', mock.id)}
-                    alt={SCREEN_MOCK_DESCRIPTIONS[unit.mock]}
+                    alt={unit.description}
                     width={mock.width}
                     height={mock.height}
                     // Below 700px the screen is shown at 1040px and panned
@@ -97,17 +115,17 @@ export function FourUnits() {
             })}
           </div>
           <div className="jt-hints" aria-hidden="true">
-            {UNIT_TABS.map((unit, index) => (
+            {content.tabs.map((unit, index) => (
               <p key={unit.mock} className="jt-hint" hidden={unitTabAppearance(index, FIRST_CHOSEN).hintHidden}>
-                {SCREEN_MOCK_DESCRIPTIONS[unit.mock]}
+                {unit.description}
               </p>
             ))}
           </div>
         </div>
 
         <div className="tz-foot">
-          <a className="tz-more" href={localePath('ar', '/product')}>
-            <span>شاهد الوحدات كاملة بالتفصيل</span>
+          <a className="tz-more" href={content.more.href}>
+            <span>{content.more.label}</span>
             <span className="ar">←</span>
           </a>
         </div>

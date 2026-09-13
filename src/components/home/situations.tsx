@@ -1,6 +1,26 @@
-import { CardDeck } from '@/components/home/card-deck';
-import { DECK_HINT } from '@/content/card-deck';
-import { FIELD_SITUATIONS } from '@/content/field-situations';
+import { CardDeck, type CardDeckWords } from '@/components/home/card-deck';
+
+export type FieldSituation = {
+  /** What gets said on site. */
+  readonly quote: string;
+  /** What it costs, shown under `costLabel`. */
+  readonly cost: string;
+};
+
+export type SituationsContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  /**
+   * The closing line under the heading, in two sentences with a break
+   * between: `first`, then `second` running on into `accent`, which is set in
+   * the brand colour.
+   */
+  readonly close: { readonly first: string; readonly second: string; readonly accent: string };
+  readonly situations: readonly FieldSituation[];
+  /** The label over each card's cost. */
+  readonly costLabel: string;
+  readonly deck: CardDeckWords;
+};
 
 /**
  * «تعرف هذه المواقف؟» — the section after the Trust strip: six things people
@@ -10,19 +30,18 @@ import { FIELD_SITUATIONS } from '@/content/field-situations';
  * The section keeps the Reference site's id, `pain`, because the stylesheet is
  * written against it and the class names and ids are load-bearing (spec:
  * Design system). Everywhere a name is ours to choose, it is "situations".
- *
- * All copy is verbatim from `reference/site/index.html`.
  */
-export function Situations() {
-  const total = FIELD_SITUATIONS.length;
-  const cards = FIELD_SITUATIONS.map((situation, index) => (
+export function Situations({ content }: { content: SituationsContent }) {
+  const { close } = content;
+  const total = content.situations.length;
+  const cards = content.situations.map((situation, index) => (
     <>
       <div className="n">{`${twoDigits(index + 1)} / ${twoDigits(total)}`}</div>
       <q>{situation.quote}</q>
       <div className="cost">
         <div className="ct">
           <WarningIcon />
-          <span>الثمن</span>
+          <span>{content.costLabel}</span>
         </div>
         {situation.cost}
       </div>
@@ -33,24 +52,19 @@ export function Situations() {
     <section id="pain" className="dark">
       <div className="wrap pain-2col">
         <div className="pain-copy">
-          <div className="eyebrow">مواقف من الميدان</div>
-          <h2>تعرف هذه المواقف؟</h2>
+          <div className="eyebrow">{content.eyebrow}</div>
+          <h2>{content.heading}</h2>
           <p className="pain-close reveal">
-            المشكلة ليست البريد الإلكتروني ولا الإكسل.
+            {close.first}
             <br />
-            المشكلة أن الإجراء تحتها <span>يدوي، ومشتّت.</span>
+            {/* One run of text with the space in it, as the Reference site
+                writes it, rather than two beside each other. */}
+            {`${close.second} `}
+            <span>{close.accent}</span>
           </p>
         </div>
 
-        <CardDeck
-          id="situations-deck"
-          label="مواقف من الميدان — اسحب البطاقة أو استخدم الأسهم"
-          previousLabel="الموقف السابق"
-          nextLabel="الموقف التالي"
-          hint={DECK_HINT}
-          direction="rtl"
-          cards={cards}
-        />
+        <CardDeck id="situations-deck" {...content.deck} direction="rtl" cards={cards} />
       </div>
     </section>
   );

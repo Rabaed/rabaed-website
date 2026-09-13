@@ -1,3 +1,23 @@
+import type { HeroLink } from '@/components/page-hero';
+
+/** One stage from a first meeting to a first project. */
+export type PathStage = {
+  readonly number: string;
+  readonly title: string;
+  readonly text: string;
+};
+
+export type PartnershipPathContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lead: string;
+  /** To the application form. */
+  readonly link: HeroLink;
+  /** The word before each stage's number. */
+  readonly stageLabel: string;
+  readonly stages: readonly PathStage[];
+};
+
 /**
  * «مسار الشراكة» on the partnership page: the four stages from a first meeting
  * to a first project, beside a link to the application form. The hero's «كيف
@@ -6,57 +26,33 @@
  * The stages are the closing section's `.tail-steps` (`shell.css`), with a
  * heading of their own in each — `.ph`, and HANDOFF §7.4's wrapping exception
  * in `programmes.css`.
- *
- * All copy is verbatim from `reference/site/partnership.html`.
  */
-const STAGES = [
-  {
-    number: '01',
-    title: 'اجتماع تعارف',
-    text: 'جلسة نفهم فيها حجم مكتبك، طبيعة عملائك، وكيف تُبنى عروضك اليوم. ونعرض المنصة كما يستخدمها الاستشاري فعلياً.',
-  },
-  {
-    number: '02',
-    title: 'تصميم نموذج التعاون',
-    text: 'نتفق على النمط، وآليات التسعير، والالتزامات المتبادلة، ومؤشرات النجاح.',
-  },
-  {
-    number: '03',
-    title: 'الاتفاقية والتأهيل',
-    text: 'توقيع اتفاقية الشراكة، وتأهيل فريقك، وتجهيز المواد التي تحتاجها لعرض المنصة على عملائك.',
-  },
-  {
-    number: '04',
-    title: 'الإطلاق على أول مشروع',
-    text: 'نُطلق معك على مشروع واحد كنموذج، ونتابع معك أولاً بأول حتى يستقر العمل.',
-  },
-] as const;
-
-export function Path() {
+export function Path({ content }: { content: PartnershipPathContent }) {
   return (
     <section id="path" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
         <div className="tail-grid">
           <div>
-            <div className="eyebrow">مسار الشراكة</div>
-            <h2 style={{ fontSize: '32px' }}>من أول اجتماع إلى أول مشروع</h2>
+            <div className="eyebrow">{content.eyebrow}</div>
+            <h2 style={{ fontSize: '32px' }}>{content.heading}</h2>
             <p className="lead" style={{ marginTop: '14px' }}>
-              أربع مراحل واضحة، ولا شيء منها يحتاج قراراً نهائياً منك قبل أن ترى المنصة كما يستخدمها الاستشاري فعلياً.
+              {content.lead}
             </p>
             <div className="tz-foot">
-              <a className="tz-more" href="#apply">
-                اطلب اجتماع شراكة<span className="ar">←</span>
+              <a className="tz-more" href={content.link.href}>
+                {content.link.label}
+                <span className="ar">←</span>
               </a>
             </div>
           </div>
           <ul className="tail-steps">
-            {STAGES.map((stage) => (
+            {content.stages.map((stage) => (
               <li key={stage.number}>
                 {/* The whole label in DM Mono, as the home and product pages'
                     closing steps are: `.tail-steps b` is theirs too, and waits
                     on bug 45's decision with them. One string, so the server
                     does not split it into two runs of text. */}
-                <b>{`المرحلة ${stage.number}`}</b>
+                <b>{`${content.stageLabel} ${stage.number}`}</b>
                 <span>
                   <b className="ph">{stage.title}</b>
                   {stage.text}

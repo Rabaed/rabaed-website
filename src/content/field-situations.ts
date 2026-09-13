@@ -10,13 +10,7 @@
  * Verbatim from `reference/site/index.html`. Ticket 21 moves page copy into the
  * CMS; until then it is here.
  */
-
-export type FieldSituation = {
-  /** What gets said on site. */
-  readonly quote: string;
-  /** What it costs, shown under «الثمن». */
-  readonly cost: string;
-};
+import type { FieldSituation } from '@/components/home/situations';
 
 export const FIELD_SITUATIONS: readonly FieldSituation[] = [
   {

@@ -4,10 +4,27 @@ import {
   calculatorDisplay,
   figureText,
   settingsAsValues,
+  type CalculatorWords,
   type Figure,
 } from '@/components/home/delay-calculator-state';
 import { DelayCalculatorBehaviour } from '@/components/home/delay-calculator-behaviour';
-import { CALCULATOR_COPY } from '@/content/delay-calculator';
+import type { HeroLink } from '@/components/page-hero';
+
+export type DelayCalculatorContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lead: string;
+  /** Each slider's name, in the sliders' order (`SLIDERS`). */
+  readonly sliderLabels: readonly [string, string, string];
+  /** The line over the cost. */
+  readonly resultLabel: string;
+  /** What the estimate assumes and leaves out, under the cost. */
+  readonly assumptions: string;
+  /** The button under them. */
+  readonly callToAction: HeroLink;
+  /** The words written around the numbers, here and again in the browser as a slider moves. */
+  readonly words: CalculatorWords;
+};
 
 /**
  * «كم يكلفك أسبوع تأخير اعتماد واحد؟» — three sliders, and what the delay they
@@ -25,23 +42,23 @@ import { CALCULATOR_COPY } from '@/content/delay-calculator';
  * last-resort monospace — the defect the footer and the guarantee pill already
  * fix. Only the number is `.mono` here.
  */
-export function DelayCalculator() {
-  const display = calculatorDisplay(STARTING_SETTINGS);
+export function DelayCalculator({ content }: { content: DelayCalculatorContent }) {
+  const display = calculatorDisplay(STARTING_SETTINGS, content.words);
   const values = settingsAsValues(STARTING_SETTINGS);
 
   return (
     <section id="calc" className="light pad">
       <div className="wrap">
-        <div className="eyebrow">{CALCULATOR_COPY.eyebrow}</div>
-        <h2>{CALCULATOR_COPY.heading}</h2>
-        <p className="lead">{CALCULATOR_COPY.lead}</p>
+        <div className="eyebrow">{content.eyebrow}</div>
+        <h2>{content.heading}</h2>
+        <p className="lead">{content.lead}</p>
 
         <div className="calc">
           <div className="in">
             {SLIDERS.map((range, index) => (
-              <label key={range.label}>
+              <label key={index}>
                 <span className="lr">
-                  {range.label} <FigureWithWord figure={display.readings[index]} />
+                  {content.sliderLabels[index]} <FigureWithWord figure={display.readings[index]} />
                 </span>
                 <input
                   className="rng"
@@ -58,21 +75,21 @@ export function DelayCalculator() {
           </div>
 
           <div className="out">
-            <small>{CALCULATOR_COPY.resultLabel}</small>
+            <small>{content.resultLabel}</small>
             <FigureWithWord figure={display.cost} />
             <small>{display.breakdown}</small>
-            <div className="n">{CALCULATOR_COPY.assumptions}</div>
+            <div className="n">{content.assumptions}</div>
             {/* The Reference site's own inline spacing above the button. */}
             <div style={{ marginTop: '18px' }}>
-              <a className="btn p" href="#demo">
-                {CALCULATOR_COPY.callToAction}
+              <a className="btn p" href={content.callToAction.href}>
+                {content.callToAction.label}
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      <DelayCalculatorBehaviour />
+      <DelayCalculatorBehaviour words={content.words} />
     </section>
   );
 }

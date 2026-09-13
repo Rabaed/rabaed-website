@@ -1,8 +1,54 @@
 import type { ReactNode } from 'react';
-import { CardDeck } from '@/components/home/card-deck';
-import { DECK_HINT } from '@/content/card-deck';
-import { PROOF_FIGURES, isAttributed, type ProofIcon } from '@/content/proof-figures';
+import { CardDeck, type CardDeckWords } from '@/components/home/card-deck';
 import { isPubliclyDeployed } from '@/lib/environment';
+
+/** The drawing in the corner of each card. */
+export type ProofIcon = 'approval' | 'retrieval' | 'time' | 'governance' | 'activation' | 'onboarding';
+
+/** One bar of a before-and-after, drawn to scale out of 70px. */
+type Bar = { readonly label: string; readonly height: number };
+
+/** Everything a figure's card shows around the figure itself. */
+type FigureFrame = {
+  /** The pill at the top of the card. */
+  readonly topic: string;
+  readonly icon: ProofIcon;
+  /** What changes, in a sentence. */
+  readonly claim: string;
+  /** What the figure is measured against, in the card's footer. */
+  readonly basis: string;
+};
+
+export type ProofFigure = FigureFrame &
+  (
+    | {
+        readonly kind: 'comparison';
+        readonly value: string;
+        readonly before: Bar;
+        readonly after: Bar;
+        /**
+         * Where the figure comes from: which project, measured how, by whom,
+         * over what period. `null` until someone can say — and while it is
+         * `null` the card stays off every public deployment (ticket 47).
+         */
+        readonly source: string | null;
+      }
+    | { readonly kind: 'commitment'; readonly value: string }
+  );
+
+export type FiguresContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lead: string;
+  /** Every card, sourced or not: which of them may be shown is decided here, not by the page. */
+  readonly figures: readonly ProofFigure[];
+  readonly deck: CardDeckWords;
+};
+
+/** Whether a card may be shown to the public: a commitment always, a figure only once it is sourced. */
+function isAttributed(figure: ProofFigure): boolean {
+  return figure.kind === 'commitment' || figure.source !== null;
+}
 
 /**
  * «ماذا يتغيّر بعد التشغيل؟» — what changes once a project runs on Rabaed, as a
@@ -24,11 +70,9 @@ import { isPubliclyDeployed } from '@/lib/environment';
  * The section keeps the Reference site's id, `proof`, because the stylesheet is
  * written against it (spec: Design system). Everywhere a name is ours to
  * choose, it is "figures".
- *
- * All copy is verbatim from `reference/site/index.html`.
  */
-export function Figures() {
-  const shown = isPubliclyDeployed() ? PROOF_FIGURES.filter(isAttributed) : PROOF_FIGURES;
+export function Figures({ content }: { content: FiguresContent }) {
+  const shown = isPubliclyDeployed() ? content.figures.filter(isAttributed) : content.figures;
 
   const cards = shown.map((figure) => (
     <>
@@ -70,24 +114,12 @@ export function Figures() {
       <div className="wrap">
         <div className="proof-2col">
           <div className="proof-copy">
-            <div className="eyebrow">الأثر</div>
-            <h2>ماذا يتغيّر بعد التشغيل؟</h2>
-            <p className="lead">
-              الفرق بين إجراء يدوي مشتّت وإجراء واحد موثّق — على مشروع يعمل فيه المالك والاستشاري
-              والمقاول على المنصة نفسها.
-            </p>
+            <div className="eyebrow">{content.eyebrow}</div>
+            <h2>{content.heading}</h2>
+            <p className="lead">{content.lead}</p>
           </div>
 
-          <CardDeck
-            id="figures-deck"
-            label="أرقام الأثر — اسحب البطاقة أو استخدم الأسهم"
-            previousLabel="الرقم السابق"
-            nextLabel="الرقم التالي"
-            hint={DECK_HINT}
-            direction="rtl"
-            tone="light"
-            cards={cards}
-          />
+          <CardDeck id="figures-deck" {...content.deck} direction="rtl" tone="light" cards={cards} />
         </div>
       </div>
     </section>

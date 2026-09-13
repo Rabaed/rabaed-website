@@ -1,7 +1,26 @@
 import { RolesBehaviour } from '@/components/product/roles-behaviour';
 import { FIRST_ROLE, roleAppearance } from '@/components/product/roles-state';
-import { ScreenMockPicture } from '@/components/product/screen-mock-picture';
-import { ROLES, ROLES_EYEBROW, ROLES_HEADING, SHARED_PROMISES } from '@/content/roles';
+import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/product/screen-mock-picture';
+
+export type Role = {
+  /** The tab's label. */
+  readonly party: string;
+  /** The promise, as the heading. */
+  readonly promise: string;
+  readonly body: string;
+  /** What this party says against a new system, in the party's own words and quotation marks. */
+  readonly objection: string;
+  readonly answer: string;
+  readonly screen: ScreenMockPictureContent;
+};
+
+export type RolesContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly roles: readonly Role[];
+  /** What every party gets, whichever is chosen. */
+  readonly sharedPromises: readonly string[];
+};
 
 /**
  * «ماذا يرى كل طرف حين يفتح المنصة؟» — a tab for each of the three parties,
@@ -16,19 +35,19 @@ import { ROLES, ROLES_EYEBROW, ROLES_HEADING, SHARED_PROMISES } from '@/content/
  * plain buttons are not: a tab list named by the section's heading, each tab
  * saying whether it is selected and which panel it controls.
  */
-export function Roles() {
+export function Roles({ content }: { content: RolesContent }) {
   return (
     <section id="roles" className="light pad" data-direction="rtl">
       <div className="wrap">
-        <div className="eyebrow">{ROLES_EYEBROW}</div>
-        <h2 id="roles-heading">{ROLES_HEADING}</h2>
+        <div className="eyebrow">{content.eyebrow}</div>
+        <h2 id="roles-heading">{content.heading}</h2>
 
         <div className="tabs" role="tablist" aria-labelledby="roles-heading">
-          {ROLES.map((role, index) => {
+          {content.roles.map((role, index) => {
             const look = roleAppearance(index, FIRST_ROLE);
             return (
               <button
-                key={role.mock}
+                key={role.screen.mock}
                 type="button"
                 role="tab"
                 id={`role-tab-${index}`}
@@ -42,9 +61,9 @@ export function Roles() {
           })}
         </div>
 
-        {ROLES.map((role, index) => (
+        {content.roles.map((role, index) => (
           <div
-            key={role.mock}
+            key={role.screen.mock}
             id={`role-panel-${index}`}
             role="tabpanel"
             aria-labelledby={`role-tab-${index}`}
@@ -61,13 +80,16 @@ export function Roles() {
               {/* Below 700px the screen is shown at 1040px and panned across;
                   stacked, it is never wider than 920px; beside the copy, never
                   wider than 620px. */}
-              <ScreenMockPicture mock={role.mock} sizes="(max-width: 700px) 1040px, (max-width: 980px) 920px, 620px" />
+              <ScreenMockPicture
+                content={role.screen}
+                sizes="(max-width: 700px) 1040px, (max-width: 980px) 920px, 620px"
+              />
             </div>
           </div>
         ))}
 
         <div className="shared">
-          {SHARED_PROMISES.map((promise) => (
+          {content.sharedPromises.map((promise) => (
             <span key={promise}>{promise}</span>
           ))}
         </div>

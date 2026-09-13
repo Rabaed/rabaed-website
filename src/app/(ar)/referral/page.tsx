@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { PageHero } from '@/components/page-hero';
 import { PageShell } from '@/components/page-shell';
 import { Audience } from '@/components/referral/audience';
 import { HowItWorks } from '@/components/referral/how-it-works';
@@ -7,14 +8,13 @@ import { Questions } from '@/components/referral/questions';
 import { Signup } from '@/components/referral/signup';
 import { TermsSummary } from '@/components/referral/terms-summary';
 import { WhatIsReferred } from '@/components/referral/what-is-referred';
+import { getReferralPage } from '@/content/pages/referral';
 import { pageMetadata } from '@/lib/metadata';
 
-export const metadata: Metadata = pageMetadata({
-  locale: 'ar',
-  path: '/referral',
-  title: 'ربائد · برنامج الإحالة — 2,000 ريال عن كل مشروع',
-  description: 'أحِل مشروعاً واحداً واكسب 2,000 ريال صافية، ويحصل عميلك على خصم 10% على اشتراك مشروعه.',
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { meta } = await getReferralPage('ar');
+  return pageMetadata({ locale: 'ar', path: '/referral', ...meta });
+}
 
 /**
  * The Arabic Referral Program page, in the Reference site's order: the page
@@ -22,67 +22,32 @@ export const metadata: Metadata = pageMetadata({
  * for, what is referred, the terms in eight points, the questions, and the
  * signup form.
  *
- * **The amounts — 2,000 SAR a project, 10% off for the client — are written
- * into the copy**, as the Reference site writes them, here and in the Referral
- * Terms. Ticket 21 moves them into one place in the CMS that drives both. They
- * are not in the header menu, by the founders' decision (HANDOFF §2).
+ * Its words come from `src/content/pages/referral.ts`.
+ *
+ * **The amounts — 2,000 SAR a project, 10% off for the client — are held
+ * once** (`src/content/referral-program.ts`) and inserted wherever the page
+ * quotes them, its search title and questions included. The Referral Terms
+ * keep their own text, which states the same amounts in the lawyer's words
+ * (ADR-0008). They are not in the header menu, by the founders' decision
+ * (HANDOFF §2).
  *
  * Nothing on it moves but the header, so it loads no other animation code
  * (spec: Analytics and performance). The document fields in the form are the
  * only other client code: they show the file chosen.
- *
- * All copy is verbatim from `reference/site/referral.html`.
  */
-export default function ReferralPage() {
+export default async function ReferralPage() {
+  const content = await getReferralPage('ar');
+
   return (
     <PageShell locale="ar" path="/referral">
-      <section className="phero dark">
-        <div className="pglow" />
-        <div className="wrap">
-          <div className="eyebrow">برنامج الإحالة</div>
-          <h1>أحِل مشروعاً واحداً. اكسب 2,000 ريال.</h1>
-          <p className="lead">
-            تعرف مطوّراً يدير مشروعه على الإيميل والواتساب؟ شارك كودك، واحصل على 2,000 ريال عن كل مشروع يبدأ معنا — ويحصل هو على خصم على اشتراكه.
-          </p>
-          <div className="ctas">
-            {/* Both land further down this page. */}
-            <a className="btn p" href="#signup">
-              سجّل واحصل على كودك
-            </a>
-            <a className="btn g" href="#how">
-              كيف يعمل البرنامج ↓
-            </a>
-          </div>
-          {/* Only the numerals are `.mono`: DM Mono has no Arabic glyphs
-              (spec: Design system). See `programmes.css`. */}
-          <div className="pstats">
-            <div className="pstat">
-              <b>
-                <span className="mono">2,000</span> ريال
-              </b>
-              <span>عن كل مشروع</span>
-            </div>
-            <div className="pstat">
-              <b>
-                <span className="mono">10%</span>
-              </b>
-              <span>خصم لعميلك</span>
-            </div>
-            <div className="pstat">
-              <b>بلا حد</b>
-              <span>عدد المشاريع</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <HowItWorks />
-      <Offer />
-      <Audience />
-      <WhatIsReferred />
-      <TermsSummary />
-      <Questions />
-      <Signup />
+      <PageHero content={content.hero} />
+      <HowItWorks content={content.howItWorks} />
+      {content.offer.shows && <Offer content={content.offer} />}
+      {content.audience.shows && <Audience content={content.audience} />}
+      {content.whatIsReferred.shows && <WhatIsReferred content={content.whatIsReferred} />}
+      {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
+      {content.questions.shows && <Questions content={content.questions} />}
+      <Signup content={content.signup} />
     </PageShell>
   );
 }

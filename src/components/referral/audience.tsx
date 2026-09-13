@@ -1,34 +1,43 @@
-import { localePath } from '@/lib/locales';
+import { Inline, type InlineText } from '@/components/inline-text';
+import type { HeroLink } from '@/components/page-hero';
+
+/** One kind of person the programme is open to. */
+export type AudienceKind = {
+  readonly title: string;
+  readonly text: string;
+};
+
+export type AudienceContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lead: string;
+  readonly kinds: readonly AudienceKind[];
+  /** The note that sends a firm to the Partnership Program, and the link that takes it there. */
+  readonly partnership: {
+    readonly text: InlineText;
+    readonly link: HeroLink;
+  };
+};
 
 /**
  * «لمن هذا البرنامج» on the referral page: the five kinds of people it is open
  * to, and the note that sends engineering offices and project management
  * companies to the Partnership Program instead — a different programme for a
  * different audience (CONTEXT.md).
- *
- * All copy is verbatim from `reference/site/referral.html`.
  */
-const AUDIENCE = [
-  { title: 'مهندسون ومديرو مشاريع', text: 'تعرف من قرب كيف تضيع المراسلات والاعتمادات.' },
-  { title: 'استشاريون مستقلون', text: 'تنتقل بين مشاريع ومطوّرين مختلفين.' },
-  { title: 'مقاولون ومكاتب تنفيذ', text: 'تعمل مع أكثر من مالك في وقت واحد.' },
-  { title: 'مستشارو تطوير عقاري ووسطاء', text: 'علاقتك بالمطوّرين هي أصلك الحقيقي.' },
-  { title: 'صنّاع محتوى متخصصون', text: 'جمهورك من أهل القطاع.' },
-] as const;
-
-export function Audience() {
+export function Audience({ content }: { content: AudienceContent }) {
   return (
     <section id="who" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
         <div className="tz-head">
-          <div className="eyebrow">لمن هذا البرنامج</div>
-          <h2>إذا كنت داخل قطاع البناء، فأنت تعرف على الأرجح مطوّراً يحتاجنا</h2>
+          <div className="eyebrow">{content.eyebrow}</div>
+          <h2>{content.heading}</h2>
           <p className="lead" style={{ marginTop: '12px' }}>
-            البرنامج مفتوح لكل من يعمل في محيط مشاريع التطوير العقاري في السعودية:
+            {content.lead}
           </p>
         </div>
         <div className="rt-row">
-          {AUDIENCE.map((kind, index) => (
+          {content.kinds.map((kind, index) => (
             <div key={kind.title} className="rt-c">
               <div className="k">{String(index + 1).padStart(2, '0')}</div>
               <h3>{kind.title}</h3>
@@ -36,15 +45,10 @@ export function Audience() {
             </div>
           ))}
         </div>
-        {/* The sentence after the bold is one string, its trailing space
-            included: split in two, the server marks the join with a comment,
-            the browser lays out two runs of text, and the link lands a
-            hundredth of a pixel off the Reference site's. */}
         <div className="gain" style={{ marginTop: '22px' }}>
-          إن كنت <b>مكتباً هندسياً أو شركة إدارة مشاريع</b>
-          {' وتريد ترتيباً أوسع من الإحالة الفردية، فبرنامج الشراكات هو الأنسب لك. '}
-          <a className="inl" href={localePath('ar', '/partnership')}>
-            انتقل إلى برنامج الشراكات ←
+          <Inline text={content.partnership.text} />
+          <a className="inl" href={content.partnership.link.href}>
+            {content.partnership.link.label}
           </a>
         </div>
       </div>

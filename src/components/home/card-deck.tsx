@@ -2,6 +2,16 @@ import type { ReactNode } from 'react';
 import { CardDeckBehaviour } from '@/components/home/card-deck-behaviour';
 import { DIRECTIONS, cardAtRest, type ReadingDirection } from '@/components/home/card-deck-stack';
 
+/** The words a deck is drawn with, handed down by the section it sits in. */
+export type CardDeckWords = {
+  /** Names the deck for a screen reader, and says how to use it. */
+  readonly label: string;
+  readonly previousLabel: string;
+  readonly nextLabel: string;
+  /** The line under the buttons telling a visitor the cards can be moved. */
+  readonly hint: string;
+};
+
 /**
  * A pile of cards a visitor throws aside one at a time — by dragging, by touch,
  * by the arrow keys, or with the two buttons under it. Used twice on the home

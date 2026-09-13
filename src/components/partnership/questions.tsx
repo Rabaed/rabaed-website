@@ -1,21 +1,24 @@
-import { Faq } from '@/components/faq';
-import { PARTNERSHIP_FAQ } from '@/content/faq';
+import { Faq, type FaqEntry } from '@/components/faq';
+
+export type PartnershipQuestionsContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly entries: readonly FaqEntry[];
+};
 
 /**
  * «قبل الاجتماع الأول» on the partnership page: the questions, in the row of
  * cards the home and referral pages use.
- *
- * All copy is verbatim from `reference/site/partnership.html`.
  */
-export function Questions() {
+export function Questions({ content }: { content: PartnershipQuestionsContent }) {
   return (
     <section id="faq" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
         <div className="tz-head">
-          <div className="eyebrow">الأسئلة الشائعة</div>
-          <h2>قبل الاجتماع الأول</h2>
+          <div className="eyebrow">{content.eyebrow}</div>
+          <h2>{content.heading}</h2>
         </div>
-        <Faq entries={PARTNERSHIP_FAQ} />
+        <Faq entries={content.entries} />
       </div>
     </section>
   );
