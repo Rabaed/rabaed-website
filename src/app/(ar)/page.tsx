@@ -8,6 +8,7 @@ import { RecordSection } from '@/components/home/record';
 import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
+import { RevealOnScroll } from '@/components/reveal-on-scroll';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -40,6 +41,9 @@ export default function HomePage() {
       <Figures />
       <Questions />
       <ClosingSection />
+      {/* The page's `.reveal` entrances, attached once for the page. Here
+          rather than in `PageShell`, so pages without any do not load it. */}
+      <RevealOnScroll />
     </PageShell>
   );
 }

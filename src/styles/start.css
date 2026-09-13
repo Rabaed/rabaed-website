@@ -1,0 +1,46 @@
+/**
+ * The start page's own sections, taken from `reference/site/start.html`
+ * (ticket 13): the three steps, the questions beside the demo request form,
+ * and the free tool teaser. The page's hero and the form are the shared ones
+ * in `shell.css`, its questions `tokens.css`'s `.qa`, and its Trust strip the
+ * home page's.
+ *
+ * Imported after `product.css` and before `responsive.css`, which has to stay
+ * last for the reason written at the top of it. Every value is held to the
+ * Reference site by tests/e2e/start-matches-reference.spec.ts, except the
+ * step labels' typeface, which is a divergence below; the scroll margin is
+ * held by tests/e2e/start-page.spec.ts.
+ */
+
+/* ---- the three steps ---- */
+.start { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px }
+.start .s { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px }
+/* The last step is the guarantee, and its card is marked out. */
+.start .s.gs { background: #fff; border: 2px solid var(--acc); box-shadow: 0 10px 30px rgba(249, 87, 56, .10) }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the Reference site sets the
+   whole of «01 · إعداد» in DM Mono, which has no Arabic glyphs, so the word
+   falls to the browser's last-resort monospace. Here the label keeps the
+   Arabic face and only the numeral is `.mono`, in the markup — as in the
+   guarantee pill. The letter-spacing is the Reference site's; whether Arabic
+   labels keep it is bug 45's decision. */
+.start .s .k { color: var(--acc); font-size: 12px; letter-spacing: .12em; margin-bottom: 8px }
+.start .s h3 { font-size: 19px; margin-bottom: 6px }
+.start .s p { color: var(--muted); margin: 0; font-size: 14px }
+@media (max-width: 980px) { .start { grid-template-columns: 1fr 1fr } }
+@media (max-width: 640px) { .start { grid-template-columns: 1fr } }
+
+/* ---- the questions, beside the demo request form ---- */
+.faq-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; margin-top: 28px; align-items: start }
+@media (max-width: 980px) { .faq-grid { grid-template-columns: 1fr } }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small, as `#demo` in
+   `shell.css`: the hero's «الأسئلة الشائعة ↓» and the home page's «كل الأسئلة»
+   land here. The Reference site's script stops 78px short so the fixed header
+   does not cover the section; this stops in the same place with no script,
+   instantly rather than smoothly. */
+#faq { scroll-margin-top: 78px }
+
+/* ---- the free tool teaser ---- */
+.free { margin-top: 60px; background: var(--ink); color: #fff; border-radius: 18px; padding: 28px 32px; display: flex; justify-content: space-between; align-items: center; gap: 24px }
+.free h3 { font-size: 22px; margin-bottom: 6px }
+.free p { margin: 0; color: var(--dark-muted); font-size: 14px }
+@media (max-width: 640px) { .free { flex-direction: column; align-items: flex-start } }
