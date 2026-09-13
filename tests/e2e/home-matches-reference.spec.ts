@@ -27,8 +27,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import {
   BASELINE_VIEWPORTS,
-  freezeTransitions,
-  openReferencePage,
+  openBothPages,
   startReferenceSite,
   type ReferenceSite,
 } from './reference-site';
@@ -132,19 +131,10 @@ test.describe('the hero matches the Reference site', () => {
   // tall not one of them is exercised.
   for (const viewport of BASELINE_VIEWPORTS) {
     test(`at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
-      const options = { viewport, reducedMotion: 'reduce' as const };
-      const referenceContext = await browser.newContext(options);
-      const rebuiltContext = await browser.newContext(options);
+      const pages = await openBothPages(browser, baseURL!, site, viewport);
 
       try {
-        const reference = await referenceContext.newPage();
-        await openReferencePage(reference, site, 'index.html');
-        await freezeTransitions(reference);
-
-        const rebuilt = await rebuiltContext.newPage();
-        await rebuilt.goto(baseURL!);
-        await rebuilt.evaluate(() => document.fonts.ready);
-        await freezeTransitions(rebuilt);
+        const { reference, rebuilt } = pages;
 
         // Both scripts park the document at the Contractor and rewrite the
         // status pill when motion is turned down. Waiting for that text is
@@ -156,8 +146,7 @@ test.describe('the hero matches the Reference site', () => {
           await measure(reference, HERO_PARTS),
         );
       } finally {
-        await referenceContext.close();
-        await rebuiltContext.close();
+        await pages.close();
       }
     });
   }

@@ -10,9 +10,9 @@ import {
   held,
   nudged,
   offThePile,
-  type ReadingDirection,
 } from '@/components/home/card-deck-stack';
 import { prefersReducedMotion } from '@/lib/motion';
+import { readingDirectionOf } from '@/lib/reading-direction';
 
 /**
  * Makes one `CardDeck` respond, attached to markup the server already sent:
@@ -50,7 +50,7 @@ export function CardDeckBehaviour({ deckId }: { deckId: string }) {
     // The direction the server fanned the pile for, read back rather than
     // worked out again, so the two can never disagree about which way is
     // forward.
-    const direction: ReadingDirection = deck.dataset.direction === 'ltr' ? 'ltr' : 'rtl';
+    const direction = readingDirectionOf(deck);
     const { ahead, forwardKey, backKey } = DIRECTIONS[direction];
 
     /** `order[0]` is the card on top. */

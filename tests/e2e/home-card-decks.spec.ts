@@ -19,6 +19,7 @@
  * of whatever a test was doing. It has its own tests, with motion on.
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { sidewaysOverflow } from './geometry';
 
 const DECKS = [
   {
@@ -87,13 +88,6 @@ async function drag(page: Page, pile: Locator, by: number) {
   await page.mouse.move(x + by / 2, y, { steps: 5 });
   await page.mouse.move(x + by, y, { steps: 5 });
   await page.mouse.up();
-}
-
-async function sidewaysOverflow(page: Page) {
-  return page.evaluate(() => {
-    const doc = document.documentElement;
-    return doc.scrollWidth - doc.clientWidth;
-  });
 }
 
 /**

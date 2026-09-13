@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Page } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 
 /**
  * Serves `reference/site/` so a test can put the Reference site and the
@@ -92,3 +92,44 @@ export const BASELINE_VIEWPORTS: readonly { width: number; height: number }[] = 
   ...[360, 390, 768, 820, 1024, 1280, 1440, 1600].map((width) => ({ width, height: 900 })),
   ...[1280, 1440].flatMap((width) => [840, 700, 600, 550].map((height) => ({ width, height }))),
 ];
+
+/**
+ * The Reference home page and the rebuilt one, side by side in two fresh
+ * contexts at the same viewport, each with its fonts loaded and its
+ * transitions frozen, and with reduced motion on — the arrangement every
+ * section comparison starts from. Reduced motion is what stops either page
+ * being caught half-way through an animation of its own.
+ *
+ * Close both with `close()` when done; on a failure while opening, they are
+ * closed before the error is passed on.
+ */
+export async function openBothPages(
+  browser: Browser,
+  baseURL: string,
+  site: ReferenceSite,
+  viewport: { width: number; height: number },
+) {
+  const options = { viewport, reducedMotion: 'reduce' as const };
+  const referenceContext = await browser.newContext(options);
+  const rebuiltContext = await browser.newContext(options);
+  const close = async () => {
+    await referenceContext.close();
+    await rebuiltContext.close();
+  };
+
+  try {
+    const reference = await referenceContext.newPage();
+    await openReferencePage(reference, site, 'index.html');
+    await freezeTransitions(reference);
+
+    const rebuilt = await rebuiltContext.newPage();
+    await rebuilt.goto(baseURL);
+    await rebuilt.evaluate(() => document.fonts.ready);
+    await freezeTransitions(rebuilt);
+
+    return { reference, rebuilt, close };
+  } catch (error) {
+    await close();
+    throw error;
+  }
+}

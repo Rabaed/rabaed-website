@@ -23,6 +23,7 @@
 @media (max-width: 700px) {
   h2 { font-size: 30px }
   .phero h1 { font-size: 28px }
+  .tz-head h2 { font-size: 24px }
 
   /* DELIBERATE EXCEPTION — the shorter header row (spec: Design system).
      The child combinator says what is meant: only the header's own row drops

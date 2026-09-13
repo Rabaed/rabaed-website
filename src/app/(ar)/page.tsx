@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Figures } from '@/components/home/figures';
+import { FourUnits } from '@/components/home/four-units';
 import { Hero } from '@/components/home/hero';
 import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
@@ -15,12 +16,12 @@ export const metadata: Metadata = pageMetadata({
 });
 
 /**
- * The Arabic home page, in the state ticket 07 leaves it: the full-height hero,
- * the Trust strip, the situations deck, the figures deck, then the repeating
- * tail.
+ * The Arabic home page, in the state ticket 08 leaves it: the full-height hero,
+ * the Trust strip, the situations deck, the four units, the figures deck, then
+ * the repeating tail.
  *
  * The gaps are marked where they fall, in the Reference site's order: tickets
- * 08-10 fill the space between the two decks, and ticket 11 puts the FAQs
+ * 09-10 fill the space before the figures deck, and ticket 11 puts the FAQs
  * before the tail. The closing section is the tail every page carries; ticket
  * 11 puts the demo form
  * in its second column and ticket 27 makes that form real, which is why it
@@ -35,8 +36,9 @@ export default function HomePage() {
       <Hero />
       <TrustStrip />
       <Situations />
-      {/* Tickets 08, 09 and 10: the four units, the Record, and the
-          before-and-after with its calculator. */}
+      <FourUnits />
+      {/* Tickets 09 and 10: the Record, and the before-and-after with its
+          calculator. */}
       <Figures />
       {/* Ticket 11: the FAQs. */}
 

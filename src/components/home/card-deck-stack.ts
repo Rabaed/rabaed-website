@@ -13,7 +13,9 @@
  * Every number is the Reference site's own.
  */
 
-export type ReadingDirection = 'rtl' | 'ltr';
+import { ARROW_KEYS, type ReadingDirection } from '@/lib/reading-direction';
+
+export type { ReadingDirection };
 
 /** How long things take, and how far a card must travel before it counts as thrown. */
 export const DECK = {
@@ -48,8 +50,8 @@ type Direction = {
  * another about which way is forward.
  */
 export const DIRECTIONS: Record<ReadingDirection, Direction> = {
-  rtl: { ahead: -1, forwardKey: 'ArrowLeft', backKey: 'ArrowRight', previousArrow: '→', nextArrow: '←' },
-  ltr: { ahead: 1, forwardKey: 'ArrowRight', backKey: 'ArrowLeft', previousArrow: '←', nextArrow: '→' },
+  rtl: { ahead: -1, forwardKey: ARROW_KEYS.rtl.forward, backKey: ARROW_KEYS.rtl.back, previousArrow: '→', nextArrow: '←' },
+  ltr: { ahead: 1, forwardKey: ARROW_KEYS.ltr.forward, backKey: ARROW_KEYS.ltr.back, previousArrow: '←', nextArrow: '→' },
 };
 
 /** The pile at rest: each card behind the top one sits further out, higher, smaller and more turned. */

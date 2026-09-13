@@ -81,6 +81,25 @@ h2 { font-size: 38px; margin-bottom: 12px }
 .guar b { color: var(--acc); font-size: 13px }
 .light .guar { color: var(--ink); background: var(--acc-soft); border-color: rgba(249, 87, 56, .32) }
 
+/* The head and foot of a teaser: a short section that introduces something and
+   links to where it is covered in full. Here rather than with any one page,
+   because the home, partnership, referral and tool pages all carry them. */
+.tz-head { margin-bottom: 26px }
+.tz-head h2 { font-size: 28px; line-height: 1.4; margin: 0; max-width: 720px }
+.tz-foot { margin-top: 24px; display: flex; justify-content: flex-start }
+.tz-more { display: inline-flex; align-items: center; gap: 9px; font-size: 14.5px; font-weight: 600; color: var(--acc); border: 1px solid rgba(249, 87, 56, .35); border-radius: 999px; padding: 9px 18px; transition: background .28s, border-color .28s }
+.tz-more:hover { background: rgba(249, 87, 56, .09); border-color: var(--acc) }
+.tz-more .ar { font-family: "DM Mono", monospace; font-size: 15px; line-height: 1; transition: transform .28s }
+/* The arrow leans the way the link goes — leftward, reading right to left. It
+   is physical because the arrow glyph in the markup is; the English site
+   brings its own arrow (ticket 42). */
+.tz-more:hover .ar { transform: translateX(-4px) }
+@media (min-width: 981px) and (max-height: 700px) {
+  .tz-head { margin-bottom: 20px }
+  .tz-head h2 { font-size: 24px }
+  .tz-foot { margin-top: 18px }
+}
+
 /* section treatments */
 section { position: relative }
 .dark { background: var(--dark); color: var(--dark-text) }
