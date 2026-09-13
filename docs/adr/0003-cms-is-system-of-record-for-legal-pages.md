@@ -6,6 +6,6 @@ The rule's purpose is provenance: being able to show what the binding text said 
 
 ## Consequences
 
-- Legal entries require versioning with retained history and explicit publish; edit rights are restricted to the owner account.
+- Legal entries require versioning with retained history and explicit publish. ~~Edit rights are restricted to the owner account.~~ Superseded by ADR-0007: every Editor can edit legal entries.
 - Keeping the `.docx` in sync by hand was rejected: two copies maintained manually always drift, which is the failure the original rule guarded against.
 - The Arabic text is the binding version. Legal pages are not translated (see the spec's Out of Scope).

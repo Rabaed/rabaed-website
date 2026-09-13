@@ -45,8 +45,18 @@ _Avoid_: affiliate program.
 **Partnership Program** (برنامج الشراكات):
 The programme for engineering offices (المكاتب الهندسية) and project management companies. Distinct from the Referral Program: different audience, different application form.
 
+**Referral Program values**:
+The two numbers the Referral Program promises: the **referral payout** to the referrer (SAR 2,000 per project) and the **client discount** to the referred client (10%). Held once and shown wherever the Marketing site quotes them; the Referral Terms state them in their own binding text.
+_Avoid_: commission, reward, affiliate fee.
+
 **Pour Tracker** (متتبّع الصبّات):
 The free downloadable tool — a single self-contained HTML file for tracking concrete pours and break tests — offered as a lead magnet. Distinct from `tool.html`, the marketing page that describes and delivers it.
+
+### The CMS
+
+**Editor**:
+Anyone given access to the CMS. Every Editor can change everything, legal pages included. People who never log in, such as the lawyer, send their changes to an Editor.
+_Avoid_: owner or owner account (the Owner is one of the three parties), admin, user.
 
 ### Visibility
 

@@ -12,3 +12,7 @@
 - [ ] English pages match the Arabic in structure and meaning, with layout mirrored correctly
 - [ ] English pages carry their own titles, descriptions and structured data
 - [ ] No machine-translated filler is published; an untranslated page stays untranslated rather than published badly
+
+## Comments
+
+**Lists are shared across locales (decided 13 September 2026).** Each page list is one list whose items hold text per locale, so English means adding English text to every existing item, not building English lists. A page publishes in English only once every item has English text. FAQs, blog posts and case studies stay per-locale entries (spec: Content model).

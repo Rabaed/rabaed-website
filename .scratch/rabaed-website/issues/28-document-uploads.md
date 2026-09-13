@@ -28,4 +28,6 @@ The document fields are `src/components/upload-field.tsx`. They already show the
 
 **Moved by ticket 16**, from `src/components/referral/`, because the partnership application's commercial registration is the same field. Progress and rejection added here reach that form too; ticket 29 wires it.
 
+**Plugs into ticket 27 (decided 13 September 2026).** The signup form becomes a form definition run through ticket 27's submission pipeline; the upload checks and private storage go inside that pipeline, behind a storage adapter, so ticket 29 reuses them. Its wording is editable by Editors; its fields are not (spec: Forms).
+
 **The page promises a referral code «فوراً على جوالك وبريدك», and no ticket issues one.** See ticket 15's note for the founder.

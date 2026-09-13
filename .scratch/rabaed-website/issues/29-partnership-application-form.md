@@ -22,3 +22,5 @@ The form is `src/components/partnership/application-form.tsx`, on `/partnership#
 - **The lists send English values, not their Arabic text.** The Reference site's options have no `value`, so they would have sent the words shown. Here each has a stable value — `consulting-office`, `over-25`, `under-5000` (square metres), `embedded-in-proposal` and the rest — and the first option of each is the empty prompt `required` refuses. Store these values, and show the admin the Arabic labels beside them.
 - **Its submit button is disabled.**
 - **Its small print still reads «نموذج أولي — لا يُرسل فعلياً في هذه النسخة.»** That is true until this ticket, and must go with it.
+
+**Mostly a definition (decided 13 September 2026).** Ticket 27 builds one submission pipeline and ticket 28 puts the upload checks and private storage inside it. This form is a new definition run through them, not a new pipeline. Its wording is editable by Editors; its fields are not (spec: Forms).
