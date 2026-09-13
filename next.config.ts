@@ -41,10 +41,23 @@ const nextConfig: NextConfig = {
       headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
     };
 
-    if (isIndexable()) return [studio];
+    // The Pour Tracker file (ticket 18) is saved, not opened as a page on the
+    // site, and takes its name from the URL. It is never indexed either, so a
+    // search result cannot hand it out past the form ticket 30 puts in front
+    // of it — though anyone given the link can still fetch it.
+    const downloads = {
+      source: '/downloads/:file*',
+      headers: [
+        { key: 'Content-Disposition', value: 'attachment' },
+        { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+      ],
+    };
+
+    if (isIndexable()) return [studio, downloads];
 
     return [
       studio,
+      downloads,
       {
         source: '/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
