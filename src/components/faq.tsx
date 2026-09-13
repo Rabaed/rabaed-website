@@ -1,7 +1,7 @@
 import type { FaqEntry } from '@/content/faq';
 
 /**
- * A row of questions, each opening to its answer.
+ * Questions, each opening to its answer.
  *
  * A server component with no script at all: `<details>` opens and closes
  * itself, from a click, a tap or the keyboard. That is the point of using it.
@@ -9,19 +9,25 @@ import type { FaqEntry } from '@/content/faq';
  * engines and AI assistants read every one of them — an accordion driven by
  * script would hand them the questions and hide the answers.
  *
- * The home, tool, referral and partnership pages all lay their questions out
- * in this row; the start page lays out a longer list differently, and adds its
- * own layout when ticket 13 builds it.
+ * Only the questions: where they stand is the page's to decide. The home,
+ * tool, referral and partnership pages lay them out in a row of cards (`Faq`);
+ * the start page stacks its longer list in a column beside the demo request
+ * form.
  */
+export function FaqEntries({ entries }: { entries: readonly FaqEntry[] }) {
+  return entries.map((entry) => (
+    <details key={entry.question} className="qa">
+      <summary>{entry.question}</summary>
+      <p>{entry.answer}</p>
+    </details>
+  ));
+}
+
+/** Questions in a row of cards, three across. */
 export function Faq({ entries }: { entries: readonly FaqEntry[] }) {
   return (
     <div className="fq-row">
-      {entries.map((entry) => (
-        <details key={entry.question} className="qa">
-          <summary>{entry.question}</summary>
-          <p>{entry.answer}</p>
-        </details>
-      ))}
+      <FaqEntries entries={entries} />
     </div>
   );
 }

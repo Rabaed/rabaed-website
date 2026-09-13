@@ -98,6 +98,7 @@ export type PagePair = { readonly reference: string; readonly rebuilt: string };
 
 export const HOME_PAGES: PagePair = { reference: 'index.html', rebuilt: '/' };
 export const PRODUCT_PAGES: PagePair = { reference: 'product.html', rebuilt: '/product' };
+export const START_PAGES: PagePair = { reference: 'start.html', rebuilt: '/start' };
 
 /**
  * A Reference page and the rebuilt one — the home page unless told otherwise —

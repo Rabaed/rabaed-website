@@ -41,4 +41,18 @@ export const ROUTES = [
     ],
     alternates: { ar: '/product', en: '/en/product' },
   },
+  {
+    path: '/start',
+    locale: 'ar',
+    dir: 'rtl',
+    // The hero, the last of the questions, and the free tool teaser at the
+    // foot of the page. Answers sit closed, so they are not visible to check
+    // here; `start-page.spec.ts` finds every one in the first response.
+    text: [
+      'كيف نبدأ معك — وكل ما قد تسأل عنه.',
+      'هل يدعم الإنجليزية للفرق غير العربية؟',
+      'سجل صبّات الخرسانة ونتائج التكسير',
+    ],
+    alternates: { ar: '/start', en: '/en/start' },
+  },
 ] as const;
