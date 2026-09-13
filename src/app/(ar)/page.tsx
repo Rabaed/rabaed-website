@@ -11,6 +11,8 @@ import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { RevealOnScroll } from '@/components/reveal-on-scroll';
+import { CLOSING_SECTION } from '@/content/closing-section';
+import { TRUST_STRIP } from '@/content/trust-strip';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -33,7 +35,7 @@ export default function HomePage() {
   return (
     <PageShell locale="ar" path="/">
       <Hero />
-      <TrustStrip />
+      <TrustStrip content={TRUST_STRIP.ar} />
       <Situations />
       <FourUnits />
       <RecordSection />
@@ -41,7 +43,7 @@ export default function HomePage() {
       <DelayCalculator />
       <Figures />
       <Questions />
-      <ClosingSection />
+      <ClosingSection content={CLOSING_SECTION.ar} />
       {/* The page's `.reveal` entrances, attached once for the page. Here
           rather than in `PageShell`, so pages without any do not load it. */}
       <RevealOnScroll />

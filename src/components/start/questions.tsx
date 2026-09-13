@@ -1,7 +1,20 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
-import { FaqEntries } from '@/components/faq';
-import { START_FAQ } from '@/content/faq';
-import { localePath } from '@/lib/locales';
+import { FaqEntries, type FaqEntry } from '@/components/faq';
+import type { HeroLink } from '@/components/page-hero';
+
+export type FreeToolTeaserContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly text: string;
+  readonly link: HeroLink;
+};
+
+export type StartQuestionsContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly entries: readonly FaqEntry[];
+  readonly freeTool: FreeToolTeaserContent;
+};
 
 /**
  * «قبل أن تسأل» on the start page: every question, with the demo request form
@@ -10,26 +23,24 @@ import { localePath } from '@/lib/locales';
  * This is where the home page's «كل الأسئلة» link lands (`#faq`), and the
  * hero's «الأسئلة الشائعة ↓». The form is the one form the home and product
  * pages carry too, so ticket 27 wires all three at once.
- *
- * All copy is verbatim from `reference/site/start.html`.
  */
-export function Questions() {
+export function Questions({ content }: { content: StartQuestionsContent }) {
   return (
     <section id="faq" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
         <div className="faq-grid">
           <div>
-            <div className="eyebrow">الأسئلة الشائعة</div>
-            <h2 style={{ fontSize: '32px' }}>قبل أن تسأل</h2>
+            <div className="eyebrow">{content.eyebrow}</div>
+            <h2 style={{ fontSize: '32px' }}>{content.heading}</h2>
             <div style={{ marginTop: '20px' }}>
-              <FaqEntries entries={START_FAQ} />
+              <FaqEntries entries={content.entries} />
             </div>
           </div>
 
           <DemoRequestForm />
         </div>
 
-        <FreeToolTeaser />
+        <FreeToolTeaser content={content.freeTool} />
       </div>
     </section>
   );
@@ -38,21 +49,20 @@ export function Questions() {
 /**
  * The Pour Tracker, offered free. The Reference site's button goes nowhere
  * (`href="#"`); here it leads to the tool page, which describes the tool and
- * delivers it (CONTEXT.md). Ticket 14 builds that page, so until then the link
- * reaches the 404 page, as the header's links to unbuilt pages do.
+ * delivers it (CONTEXT.md).
  */
-function FreeToolTeaser() {
+function FreeToolTeaser({ content }: { content: FreeToolTeaserContent }) {
   return (
     <div className="free">
       <div>
         <div className="eyebrow" style={{ marginBottom: '6px' }}>
-          أداة مجانية
+          {content.eyebrow}
         </div>
-        <h3>سجل صبّات الخرسانة ونتائج التكسير</h3>
-        <p>أداة مستقلة تعمل بلا حساب وبلا إنترنت — للمهندس في الموقع. من فريق ربائد.</p>
+        <h3>{content.heading}</h3>
+        <p>{content.text}</p>
       </div>
-      <a className="btn o" href={localePath('ar', '/tool')}>
-        تحميل الأداة
+      <a className="btn o" href={content.link.href}>
+        {content.link.label}
       </a>
     </div>
   );

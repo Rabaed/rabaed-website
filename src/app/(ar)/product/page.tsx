@@ -6,6 +6,8 @@ import { CustomStrip } from '@/components/product/custom-strip';
 import { InnerCycle } from '@/components/product/inner-cycle';
 import { Journey } from '@/components/product/journey';
 import { Roles } from '@/components/product/roles';
+import { CLOSING_SECTION } from '@/content/closing-section';
+import { TRUST_STRIP } from '@/content/trust-strip';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -51,12 +53,12 @@ export default function ProductPage() {
 
       {/* The Reference site's product page carries the same strip as its home
           page, under the same label. */}
-      <TrustStrip />
+      <TrustStrip content={TRUST_STRIP.ar} />
       <Journey />
       <CustomStrip />
       <Roles />
       <InnerCycle />
-      <ClosingSection />
+      <ClosingSection content={CLOSING_SECTION.ar} />
     </PageShell>
   );
 }
