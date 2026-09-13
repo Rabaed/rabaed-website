@@ -369,6 +369,17 @@
      cut off — against the section below; and at 768px the Reference site's
      own box leaves the content 30px from either edge. */
   #record .sticky { padding-block: var(--sp) }
+  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the five trails share one
+     space, and the ones not showing keep their room without being seen or
+     read aloud. The trails wrap to different numbers of lines, and a section
+     as tall as its content would otherwise grow and shrink as they change —
+     pushing the rest of the page up and down under the visitor's thumb, and
+     leaving every scroll position measured against its old height. On a
+     desktop window the section's height does not follow its content, so there
+     the card changes with its trail, as on the Reference site. */
+  .rec-trails { display: grid }
+  .rec-entry { grid-area: 1 / 1 }
+  .rec-entry[hidden] { display: block; visibility: hidden }
 }
 
 /* ---- narrower and shorter ---- */

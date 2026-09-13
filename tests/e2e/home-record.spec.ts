@@ -179,6 +179,35 @@ for (const viewport of [
   });
 }
 
+// Below 981px the section is as tall as what is in it, and the trails wrap to
+// different numbers of lines. A card that grew and shrank with each type would
+// push the rest of the page up and down under the visitor's thumb, and leave
+// every scroll position measured against the section's old height stale.
+for (const viewport of [
+  { width: 360, height: 900 },
+  { width: 390, height: 900 },
+  { width: 768, height: 900 },
+]) {
+  test(`at ${viewport.width}x${viewport.height} the section keeps its height while the types change`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    const sectionHeight = () => section(page).evaluate((element) => element.getBoundingClientRect().height);
+    const heights = new Map<number, number>();
+
+    const { top, height, window: tall } = await measure(page);
+    for (let y = top - tall; y <= top + height; y += 24) {
+      await scrollTo(page, y);
+      const { chosen } = await readCycle(page);
+      // Once any fade has finished and the new trail is in place.
+      await page.waitForTimeout(chosen === [...heights.keys()].at(-1) ? 0 : 700);
+      heights.set(chosen, await sectionHeight());
+    }
+
+    expect([...heights.keys()]).toEqual([0, 1, 2, 3, 4]);
+    expect(new Set(heights.values()).size, `heights by type: ${JSON.stringify([...heights])}`).toBe(1);
+  });
+}
+
 test('the section turns from dark to light, and the card with it', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');

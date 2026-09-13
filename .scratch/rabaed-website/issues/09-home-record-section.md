@@ -61,6 +61,12 @@ Two reviews. The spec review found the copy, every CSS value and every GSAP numb
 
 **For ticket 10, and for the whole-page comparison.** Below 981px this section is taller than the Reference site's, so everything after it sits lower on the page there; a whole-page comparison at 360–820px has to measure sections from their own tops, as every comparison here does. And the header test turns light at "the first light section after this one" — the figures deck today, the before-and-after once ticket 10 lands, which is the Reference site's boundary; the test follows without being edited, but that is the moment to watch it.
 
+### What CI caught
+
+The first run on GitHub failed one comparison: at 390px, 28% of the way into the section, the card was nine steps whiter than the Reference site's. It passed locally, and the cause was real rather than timing. Below 981px the section is as tall as its content, and the trails wrap to different numbers of lines — at one phone width the section was 1,140px tall for the first two types and 1,169px for the rest. So each change of type moved everything below the section, and left the colour changes measured against the section's old height; a slower machine read the page while that was so.
+
+Below 981px the five trails now share one space as tall as the tallest, the ones not showing invisible and unread, so the card never changes height there. A test walks through the section at 360, 390 and 768px and fails on any change of height; it failed before the fix. On a desktop window the section's height is fixed, so the card still changes with its trail, as on the Reference site; below 981px the card's height, and the stamp's place under the trails, are left out of the comparison.
+
 ### Not covered
 
 **"No duplicates in development"** is protected by construction — `gsap.matchMedia` reverted and every tween killed on teardown, and the first record put back — and was not separately checked by hand, for the reason ticket 07 gives.

@@ -27,7 +27,9 @@ const AT_START = recordAt(0, TRANSACTION_TYPES.length);
  * what a crawler or a visitor without JavaScript reads does not depend on
  * scrolling, as with the four units' screens. Each trail needs an element of
  * its own to be hidden by, and the Reference site has none to borrow, so it is
- * `.rec-entry`; it carries no styles, and `.doc`'s rules reach through it.
+ * `.rec-entry`; `.doc`'s rules reach through it. `.rec-trails` holds the five
+ * together so that below 981px they can share one space, as tall as the
+ * tallest, and the card keeps its height whichever is showing (`home.css`).
  *
  * It is not a `.light` section, though it ends light: the Reference site keeps
  * the header dark over it, until the section after it begins.
@@ -65,6 +67,7 @@ export function RecordSection() {
 
             <div className="rec-card">
               <div className="doc">
+                <div className="rec-trails">
                 {TRANSACTION_TYPES.map((type, index) => (
                   <div
                     key={type.title}
@@ -89,6 +92,7 @@ export function RecordSection() {
                     </ul>
                   </div>
                 ))}
+                </div>
                 <div className={AT_START.stamped ? 'stamp on' : 'stamp'}>{RECORD_STAMP}</div>
               </div>
             </div>
