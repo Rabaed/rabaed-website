@@ -13,3 +13,4 @@
 - [ ] The calculation is covered by a direct unit test — the one permitted exception to the single-seam rule (see spec)
 - [ ] Numerals render correctly in Arabic context
 - [ ] Matches baselines at all eight widths
+- [ ] The homepage as a whole now matches baselines at all eight widths — handed on from ticket 11, which landed before 09 and 10. If ticket 09 lands after this one, this criterion moves there

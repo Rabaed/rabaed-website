@@ -40,3 +40,7 @@ The English site (tickets 40-42) reaches the same rule from the other side: in E
 - [ ] No Arabic text on the site resolves to a font without Arabic glyphs, on any page, at any width
 - [ ] The English locale still gets DM Mono where DM Mono is right for it
 - [ ] The comparison tests are updated to record the eyebrow as a deliberate divergence, the way the footer's copyright and the hero's guarantee pill already are
+
+## Comments
+
+**One more instance, found by ticket 11:** the closing section's step labels — «01 · إعداد», «02 · تشغيل», «03 · ضمان» — are `.tail-steps b`, set in DM Mono, so the Arabic word in each falls to a monospace fallback. The rule is shared by every page that ends on that section, so it belongs to the same decision as `.eyebrow` rather than a local patch.

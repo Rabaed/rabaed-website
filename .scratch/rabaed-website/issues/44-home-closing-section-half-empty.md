@@ -6,7 +6,7 @@
 
 **Blocked by:** nothing.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 ## Why it happens
 
@@ -25,6 +25,10 @@ Prefer (1) if the site is being shown to anyone before ticket 11 lands, which is
 
 ## Done when
 
-- [ ] No empty column in the home page's closing section at 981px and above
-- [ ] The section still matches the Reference site once its second column has content
-- [ ] Nothing changes below 981px, where the grid is already a single column
+- [x] No empty column in the home page's closing section at 981px and above
+- [x] The section still matches the Reference site once its second column has content
+- [x] Nothing changes below 981px, where the grid is already a single column
+
+## Comments
+
+**Closed by ticket 11, which landed first — fix (2).** The demo request form now fills the second column. `tests/e2e/home-faq-and-closing.spec.ts` holds it: the form sits beside the steps at 1280px, and below them at 980px. `home-faq-and-closing-match-reference.spec.ts` compares the whole section with the Reference site at all sixteen baseline viewports, 1024px and wider among them.

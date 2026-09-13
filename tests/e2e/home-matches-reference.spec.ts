@@ -6,7 +6,7 @@
  * screenshot, and a pixel diff cannot run on a hosted runner at all.
  *
  * The home page still cannot be compared *whole* against its baseline either,
- * because tickets 07-11 have not put the middle of it there yet. When they
+ * because tickets 09 and 10 have not put the middle of it there yet. When they
  * have, the whole-page comparison the spec asks for becomes possible and this
  * file is what it joins.
  *

@@ -58,6 +58,12 @@ h2 { font-size: 38px; margin-bottom: 12px }
 .btn.g { background: rgba(255, 255, 255, .06); color: #fff; border: 1px solid rgba(255, 255, 255, .28); backdrop-filter: blur(10px) }
 .btn.g:hover { background: rgba(255, 255, 255, .12) }
 .btn.o { background: #fff; color: var(--ink); border: 1px solid var(--line) }
+/* A button that cannot be used yet looks it: greyed, with no lift or glow on
+   hover. The Reference site's own rule, from its tool page, where the download
+   button waits for the form to be filled in (ticket 14). The demo request form
+   uses it until ticket 27 gives the form somewhere to send. */
+.btn.p:disabled { background: var(--soft); color: var(--muted); border: 1px solid var(--line); cursor: not-allowed; box-shadow: none }
+.btn.p:disabled:hover { transform: none; box-shadow: none }
 
 /* A row of calls to action, and the pill that states the guarantee under one.
    The Reference site files both under its "hero" heading, but neither belongs
@@ -99,6 +105,23 @@ h2 { font-size: 38px; margin-bottom: 12px }
   .tz-head h2 { font-size: 24px }
   .tz-foot { margin-top: 18px }
 }
+
+/* A question that opens to its answer (src/components/faq.tsx), on the home,
+   start, tool, referral and partnership pages. `<details>` does the opening, so
+   there is no script; `list-style: none` and `display: flex` take away the
+   browser's own triangle, and the + and – below stand in for it. */
+.qa { border-top: 1px solid var(--line) }
+.qa summary { cursor: pointer; padding: 16px 0; font-weight: 600; font-size: 16px; list-style: none; display: flex; justify-content: space-between; align-items: center }
+/* Older Safari draws its triangle from a marker `list-style` does not reach, so
+   there the Reference site shows it beside the +. This removes it there too. */
+.qa summary::-webkit-details-marker { display: none }
+.qa summary:after { content: "+"; font-family: "DM Mono", monospace; color: var(--acc); font-size: 20px }
+.qa[open] summary:after { content: "\2013" }
+.qa p { margin: 0 0 16px; color: var(--muted); font-size: 15px }
+/* Three across, each question in a card of its own; one above another below 981px. */
+.fq-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start }
+.fq-row .qa { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 2px 18px; margin: 0 }
+@media (max-width: 980px) { .fq-row { grid-template-columns: 1fr } }
 
 /* section treatments */
 section { position: relative }
