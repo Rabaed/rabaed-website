@@ -18,6 +18,15 @@ Create a new file under `.scratch/<feature-slug>/` (creating the directory if ne
 
 Read the file at the referenced path. The user will normally pass the path or the issue number directly.
 
+## Taking an implementation ticket
+
+A ticket under `.scratch/<feature-slug>/issues/` is **ready** once every ticket on its `Blocked by` line is `resolved`. Any ready ticket may be taken, in any order.
+
+- **Claim** it before building by pushing a branch named exactly `ticket-NN`, its two-digit number, from an up-to-date `origin/main`. Other sessions work in other checkouts and cannot see an edit to the ticket file until it is merged, but they can see a branch on GitHub: `git ls-remote --heads origin "ticket-*"`. The ticket's `Status:` line stays as it is until the ticket is resolved.
+- **Release** it by deleting that branch. Merging its pull request with `--delete-branch` does this; so does abandoning the ticket.
+
+The Frontier and Claim rules under Wayfinding operations below apply to `/wayfinder` maps only.
+
 ## Wayfinding operations
 
 Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
