@@ -13,13 +13,16 @@
  * الرسمية في ربائد» — which says which screen it is and nothing about what it
  * shows. The product page describes the same five screens, which are
  * byte-identical images (ticket 05), in full: what is on them. Using those
- * makes a real claim without inventing one.
+ * makes a real claim without inventing one, and both pages read them from
+ * `src/content/screen-mock-descriptions.ts` (ticket 12).
  *
  * `mock` names an entry in `src/screen-mocks/registry.ts`, whose exported image
  * is what the tab shows.
  *
  * Ticket 21 moves page copy into the CMS.
  */
+
+import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
 
 export type UnitTab = {
   /** The small line above the title: a unit's number, or the name of what the units produce. */
@@ -38,32 +41,30 @@ export const UNIT_TABS: readonly UnitTab[] = [
     tag: { kind: 'unit', number: '01' },
     title: 'المراسلات الرسمية',
     mock: 'correspondence',
-    description: 'شاشة المراسلات الرسمية في ربائد: خطابات بأرقام مرجعية وحالات الرد ومدة الانتظار بين الأطراف',
+    description: SCREEN_MOCK_DESCRIPTIONS.correspondence,
   },
   {
     tag: { kind: 'unit', number: '02' },
     title: 'الاعتمادات والطلبات',
     mock: 'kanban',
-    description:
-      'لوحة كانبان للاعتمادات في ربائد: مسودة، مراجعة داخلية بمسارَي مهندس المقاول ومدير المشروع، ثم انتظار الموافقة والمعتمدة',
+    description: SCREEN_MOCK_DESCRIPTIONS.kanban,
   },
   {
     tag: { kind: 'unit', number: '03' },
     title: 'التقرير اليومي للموقع',
     mock: 'daily-report',
-    description:
-      'تفاصيل التقرير اليومي في ربائد: الطقس والموقع، جدولا الفريق الإداري والعمالة بالعدد والساعات، والأنشطة والصور',
+    description: SCREEN_MOCK_DESCRIPTIONS['daily-report'],
   },
   {
     tag: { kind: 'unit', number: '04' },
     title: 'المستندات والإصدارات',
     mock: 'documents',
-    description: 'مستودع المستندات في ربائد: المجلدات وجدول الملفات بالإصدار والنوع ومعرف المصدر ومن رفعه',
+    description: SCREEN_MOCK_DESCRIPTIONS.documents,
   },
   {
     tag: { kind: 'output', name: 'المخرَج' },
     title: 'السجل الموثّق',
     mock: 'stamped-sheet',
-    description: 'ورقة الاعتماد المختومة في ربائد: أربعة توقيعات بالدور والشركة ووقت الفعل، ورمز الاعتماد B، والختم',
+    description: SCREEN_MOCK_DESCRIPTIONS['stamped-sheet'],
   },
 ];

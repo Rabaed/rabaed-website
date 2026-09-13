@@ -9,7 +9,9 @@
  * `locale` and `dir` are restated here rather than imported from
  * `src/lib/locales.ts` on purpose: a test that reads its expectation out of
  * the code it is testing agrees with that code by construction, and would keep
- * agreeing after somebody swapped the two directions over.
+ * agreeing after somebody swapped the two directions over. `alternates` is
+ * restated for the same reason — the address the page declares for itself in
+ * each locale.
  */
 export const ROUTES = [
   {
@@ -17,11 +19,26 @@ export const ROUTES = [
     locale: 'ar',
     dir: 'rtl',
     text: ['ثلاثة أطراف', 'المالك والاستشاري والمقاول'],
+    alternates: { ar: '/', en: '/en' },
   },
   {
     path: '/en',
     locale: 'en',
     dir: 'ltr',
     text: ['Rabaed', 'The English site is on its way'],
+    alternates: { ar: '/', en: '/en' },
+  },
+  {
+    path: '/product',
+    locale: 'ar',
+    dir: 'rtl',
+    // The hero, the last panel of the journey — which a desktop visitor only
+    // reaches by scrolling sideways — and the last section before the close.
+    text: [
+      'وحدات ربائد — وما يراه كل طرف منها.',
+      'ليس ميزة تُفعَّل، بل نتيجة كل خطوة.',
+      'ماذا يبقى عندك، وماذا يعبر إلى الطرف الآخر؟',
+    ],
+    alternates: { ar: '/product', en: '/en/product' },
   },
 ] as const;

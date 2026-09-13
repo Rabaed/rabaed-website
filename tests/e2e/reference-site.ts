@@ -93,12 +93,18 @@ export const BASELINE_VIEWPORTS: readonly { width: number; height: number }[] = 
   ...[1280, 1440].flatMap((width) => [840, 700, 600, 550].map((height) => ({ width, height }))),
 ];
 
+/** A Reference page and the rebuilt route that reproduces it. */
+export type PagePair = { readonly reference: string; readonly rebuilt: string };
+
+export const HOME_PAGES: PagePair = { reference: 'index.html', rebuilt: '/' };
+export const PRODUCT_PAGES: PagePair = { reference: 'product.html', rebuilt: '/product' };
+
 /**
- * The Reference home page and the rebuilt one, side by side in two fresh
- * contexts at the same viewport, each with its fonts loaded and its
- * transitions frozen, and with reduced motion on — the arrangement every
- * section comparison starts from. Reduced motion is what stops either page
- * being caught half-way through an animation of its own.
+ * A Reference page and the rebuilt one — the home page unless told otherwise —
+ * side by side in two fresh contexts at the same viewport, each with its fonts
+ * loaded and its transitions frozen, and with reduced motion on: the
+ * arrangement every section comparison starts from. Reduced motion is what
+ * stops either page being caught half-way through an animation of its own.
  *
  * Close both with `close()` when done; on a failure while opening, they are
  * closed before the error is passed on.
@@ -108,6 +114,7 @@ export async function openBothPages(
   baseURL: string,
   site: ReferenceSite,
   viewport: { width: number; height: number },
+  pages: PagePair = HOME_PAGES,
 ) {
   const options = { viewport, reducedMotion: 'reduce' as const };
   const referenceContext = await browser.newContext(options);
@@ -119,11 +126,11 @@ export async function openBothPages(
 
   try {
     const reference = await referenceContext.newPage();
-    await openReferencePage(reference, site, 'index.html');
+    await openReferencePage(reference, site, pages.reference);
     await freezeTransitions(reference);
 
     const rebuilt = await rebuiltContext.newPage();
-    await rebuilt.goto(baseURL);
+    await rebuilt.goto(`${baseURL}${pages.rebuilt === '/' ? '' : pages.rebuilt}`);
     await rebuilt.evaluate(() => document.fonts.ready);
     await freezeTransitions(rebuilt);
 

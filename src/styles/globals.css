@@ -1,8 +1,8 @@
 /**
  * The one stylesheet the root layouts import. Plain CSS, global, in the order
- * the cascade needs: typeface, the design system, the page shell, the home
- * page's own sections, and last the responsive pass — whose position is
- * load-bearing, see `responsive.css`.
+ * the cascade needs: typeface, the design system, the page shell, each page's
+ * own sections, and last the responsive pass — whose position is load-bearing,
+ * see `responsive.css`.
  *
  * No CSS Modules and no Tailwind. The Reference site's class names are
  * load-bearing — `.nav.on-light .brand .lg.l` and its like reach across
@@ -13,4 +13,5 @@
 @import './tokens.css';
 @import './shell.css';
 @import './home.css';
+@import './product.css';
 @import './responsive.css';

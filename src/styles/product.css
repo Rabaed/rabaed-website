@@ -1,0 +1,240 @@
+/**
+ * The product page's own sections, taken from `reference/site/product.html`
+ * (ticket 12): the journey, the custom strip, the roles, and the internal
+ * review cycle. The page's hero, its closing section and its frame are the
+ * shared ones in `shell.css`; its Trust strip is the home page's.
+ *
+ * Imported after `home.css` and before `responsive.css`, which has to stay last
+ * for the reason written at the top of it.
+ *
+ * **Every rule here is the value the Reference site ends up with**, not the
+ * rule that set it. The Reference stylesheet builds this page in passes — a
+ * `.panel` rule, then `#journey .panel` over it, then short-window rules over
+ * both, some of which the second pass outranks and so never apply — and the
+ * baselines recorded what survived. Each rule is scoped to its section, so
+ * nothing here reaches a `.panel` or a `.tab` another page grows later.
+ * Every value is held to the Reference site by
+ * tests/e2e/product-matches-reference.spec.ts.
+ *
+ * Physical `left`/`right` become logical properties, as in `shell.css`.
+ */
+
+/* ---- a Screen mock and its caption ---- */
+
+/* The exported picture fills its window (src/components/product/screen-mock-picture.tsx);
+   `contain` keeps its proportions when the window is given less height than
+   they would need.
+   The proportions are the mock's stage, 1440 by 900, stated outright. The
+   width and height `next/image` writes onto the element say the same until
+   the picture arrives — but a browser then switches to the proportions of the
+   file it was sent, and a copy resized to 750 pixels wide cannot be exactly
+   1.6 times as wide as it is tall. That made the screen a quarter of a pixel
+   taller than the Reference site's, differently for every screen size. */
+.vs-shot-wrap { display: block; width: 100%; height: 100% }
+.vs-shot { display: block; width: 100%; height: 100%; aspect-ratio: 1440 / 900; object-fit: contain }
+
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the caption ADR-0002
+   requires, so what a Screen mock shows in pictures is also said in words. The
+   Reference site has no caption and so no rule for one; these are the values
+   of the home page's `.jt-hint`, the line under the four units' screen. */
+.shot-cap { text-align: center; margin: 12px 0 0; font-size: 12.5px }
+
+@media (max-width: 700px) {
+  /* 1440px of interface squeezed into 350px is unreadable, so a phone shows
+     the screen at 1040px and the visitor pans across it, inside its window —
+     the page never scrolls sideways. Right to left, panning starts at the
+     right-hand edge, where the screen begins. */
+  #journey .vs-shot-wrap, #roles .vs-shot-wrap { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch }
+  #journey .vs-shot, #roles .vs-shot { width: 1040px; height: 650px; max-width: none }
+}
+
+/* ---- the journey ---- */
+
+/* The Reference site scrolls to an in-page anchor by script, stopping 78px
+   short so the fixed header does not cover what it jumped to. This stops in
+   the same place with no script — the hero's «ابدأ من الوحدات ↓» lands here. */
+#journey { height: 100vh; overflow: hidden; scroll-margin-top: 78px }
+
+/* The heading floats over the top of the pinned section, and the panels start
+   `--jh` below the section's top: the heading's height plus a margin, measured
+   by src/components/product/journey-behaviour.tsx. 166px is the Reference
+   site's fallback for before that runs. */
+#journey .j-head { position: absolute; top: 100px; inset-inline: 0; z-index: 3 }
+#journey .j-head .wrap { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px }
+#journey .j-head h2 { flex: 1 1 auto; min-width: 0; font-size: 30px; margin: 0 }
+#journey .dots { flex: none; display: flex; gap: 8px; align-items: center }
+#journey .dots i { width: 28px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .15); display: block; transition: background .3s }
+#journey .dots i.on { background: var(--acc) }
+
+/* One window-wide panel after another, as wide as the content column, with the
+   window's leftover width as a gutter at either end. The track is as wide as
+   all five, and travels sideways inside a section that clips it. */
+#journey .track { --gutter: max(32px, calc((100vw - 1180px) / 2)); display: flex; gap: 28px; height: 100vh; align-items: flex-start; padding: var(--jh, 166px) var(--gutter) 0; width: max-content }
+#journey .panel { width: calc(100vw - 2 * var(--gutter)); height: calc(100vh - var(--jh, 166px) - 52px); min-height: 0; background: var(--dark2); border: 1px solid var(--dark-line); border-radius: 22px; display: grid; grid-template-columns: .74fr 1.26fr; gap: 24px; padding: 30px 34px; flex: none }
+#journey .panel.final { background: linear-gradient(160deg, #1B1E27, #241a18); border-color: rgba(249, 87, 56, .35) }
+
+#journey .num { font-family: "DM Mono", monospace; color: var(--acc); font-size: 13px; letter-spacing: .14em; direction: ltr; display: inline-block }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the one the home page's
+   four units already carry: «المخرَج» is Arabic, and the Reference site sets it
+   in DM Mono, which has no Arabic glyphs (spec: Design system). `direction`
+   is physical because the word is Arabic; the English site brings its own
+   (ticket 42). */
+#journey .num.out { font-family: inherit; direction: rtl; letter-spacing: .02em; background: rgba(249, 87, 56, .12); border: 1px solid rgba(249, 87, 56, .3); border-radius: 999px; padding: 3px 12px; font-size: 12px }
+#journey .panel h3 { font-size: 30px; margin: 10px 0 12px }
+#journey .tag { font-size: 22px; font-weight: 600; line-height: 1.5; margin-bottom: 16px }
+#journey .panel p { color: var(--dark-muted); font-size: 15px; margin: 0 }
+#journey .flow { margin-top: 22px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--dark-muted) }
+#journey .flow b { background: rgba(255, 255, 255, .06); border: 1px solid var(--dark-line); padding: 4px 12px; border-radius: 999px; color: var(--dark-text); font-weight: 500 }
+/* The dot between two routes. The Reference site wrote this as an inline style. */
+#journey .flow span { margin: 0 8px }
+
+/* The screen and its caption, centred together in the panel's second column.
+   The Reference site centres the screen alone, and on a short window caps its
+   width so its height fits the panel. With a caption under it, that cap would
+   push the caption out of the bottom of the panel — so the rows do the fitting
+   instead: the caption takes the height it needs, and the screen takes the
+   rest, up to its own full height. Where the panel is tall enough, which is
+   every window 900px tall, that is exactly the Reference site's screen. */
+#journey .ui { align-self: stretch; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, auto) auto; align-content: center }
+#journey .win { min-width: 0; min-height: 0 }
+#journey .ui .shot-cap { color: var(--dark-muted); font-size: 12.5px; margin: 12px 0 0 }
+
+@media (min-width: 981px) and (max-height: 840px) {
+  #journey .j-head h2 { font-size: 25px }
+  #journey .panel { padding: 24px 30px }
+  #journey .panel h3 { font-size: 25px; margin: 8px 0 10px }
+  #journey .tag { font-size: 19px; margin-bottom: 12px }
+  #journey .panel p { font-size: 14px }
+  #journey .flow { margin-top: 14px }
+}
+
+@media (min-width: 981px) and (max-height: 700px) {
+  #journey .j-head { top: 86px }
+  #journey .j-head h2 { font-size: 22px }
+  #journey .panel { padding: 18px 24px; gap: 18px; height: calc(100vh - var(--jh, 166px) - 32px) }
+  #journey .num { font-size: 12px }
+  #journey .panel h3 { font-size: 22px; margin: 6px 0 8px }
+  #journey .tag { font-size: 17px; margin-bottom: 10px; line-height: 1.45 }
+  #journey .panel p { font-size: 13.5px; line-height: 1.7 }
+  #journey .flow { margin-top: 12px; font-size: 12px }
+  #journey .flow b { padding: 3px 10px }
+}
+
+@media (min-width: 981px) and (max-height: 600px) {
+  #journey .j-head { top: 80px }
+  #journey .j-head h2 { font-size: 20px }
+  #journey .panel h3 { font-size: 20px }
+  #journey .tag { font-size: 15.5px }
+  #journey .panel p { font-size: 13px }
+}
+
+/* Too short to pin in: the panels stack. Only the track lets go, though. The
+   Reference site's fallback also asks the panels for automatic height and one
+   column, but in a rule its `#journey .panel` rules outrank — so on a window
+   this short a stacked panel keeps the short-window height above and its two
+   columns, and that is what the baselines recorded. `--jh` is 0 here, because
+   the heading takes its own place. */
+@media (min-width: 981px) and (max-height: 550px) {
+  #journey { height: auto; overflow: visible }
+  #journey .j-head { position: static; padding: var(--sp) 0 0 }
+  #journey .track { flex-direction: column; width: auto; height: auto; padding: 24px var(--gutter) 60px; align-items: stretch }
+  #journey .panel { width: auto }
+}
+
+@media (max-width: 980px) {
+  #journey { height: auto; overflow: visible }
+  #journey .j-head { position: static; padding: var(--sp) 0 0 }
+  /* The progress marks took the heading's width, and there is no progress to
+     mark in a column of panels. */
+  #journey .j-head .wrap { flex-direction: column; align-items: flex-start; gap: 12px }
+  #journey .j-head .dots { display: none }
+  #journey .j-head h2 { width: 100% }
+  #journey .track { flex-direction: column; width: auto; height: auto; padding: 24px 32px 60px; align-items: stretch }
+  #journey .panel { width: auto; height: auto; grid-template-columns: 1fr; padding: 28px 32px }
+}
+
+@media (max-width: 560px) {
+  #journey .track { padding-inline: 20px }
+  #journey .panel { padding: 24px 20px }
+}
+
+/* ---- the custom strip ---- */
+
+/* The Reference site wrote this section's padding as an inline style. */
+#custom { padding: var(--sp) 0 }
+#custom .strip { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px }
+#custom .strip .c { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; position: relative }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: «حسب المشروع» is Arabic set
+   in DM Mono there, which has no Arabic glyphs. The Arabic face here; every
+   other value is the Reference site's. */
+#custom .strip .c .badge { position: absolute; top: 18px; inset-inline-end: 18px; font-size: 11px; font-family: inherit; background: #FBF6E8; color: #836921; padding: 3px 10px; border-radius: 999px }
+#custom .strip .c h3 { font-size: 20px; margin-bottom: 8px }
+#custom .strip .c p { color: var(--muted); margin: 0; font-size: 15px }
+#custom .strip .c a { display: inline-block; margin-top: 12px; color: var(--acc); font-weight: 600; font-size: 14px }
+@media (max-width: 980px) { #custom .strip { grid-template-columns: 1fr } }
+
+/* ---- the roles ---- */
+
+/* The Reference site wrote this section's top rule as an inline style. */
+#roles { border-top: 1px solid var(--line) }
+#roles .tabs { display: flex; gap: 8px; margin: 28px 0 22px; flex-wrap: wrap }
+#roles .tab { padding: 10px 20px; border-radius: 999px; border: 1px solid var(--line); background: #fff; cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--muted) }
+#roles .tab.on { background: var(--ink); color: #fff; border-color: var(--ink) }
+#roles .role { display: none; grid-template-columns: .9fr 1.1fr; gap: 28px; align-items: center }
+#roles .role.on { display: grid }
+#roles .role h3 { font-size: 28px; margin-bottom: 10px }
+/* Both paragraphs, the objection's included: the Reference site's `.gain` asks
+   for 14px, in a rule `.role p` outranks. */
+#roles .role p { color: var(--muted); font-size: 16px }
+#roles .gain { margin-top: 14px; padding: 12px 16px; background: var(--soft); border-radius: 10px; border-inline-start: 3px solid var(--acc) }
+#roles .gain b { color: var(--ink); font-weight: 600 }
+#roles .role-shot, #roles .win { min-width: 0 }
+#roles .role .shot-cap { color: var(--muted); font-size: 12.5px; margin: 16px 0 0 }
+#roles .shared { margin-top: 36px; display: flex; gap: 10px; flex-wrap: wrap }
+#roles .shared span { background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 14px }
+@media (max-width: 980px) { #roles .role { grid-template-columns: 1fr } }
+
+/* ---- the internal review cycle ---- */
+
+#inner { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
+/* Three parties with an arrow between each: the arrows get a narrow column of their own. */
+#inner .orgs { display: grid; grid-template-columns: 1fr 54px 1fr 54px 1fr; gap: 0; margin-top: 40px; align-items: stretch }
+#inner .org { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px 20px; display: flex; flex-direction: column }
+#inner .org-h { display: flex; align-items: center; gap: 9px; font-size: 17px; font-weight: 700; margin-bottom: 4px }
+#inner .org-h i { width: 9px; height: 9px; border-radius: 50%; background: var(--acc); display: inline-block; flex: none }
+#inner .role-note { font-size: 13px; color: var(--muted); margin-bottom: 14px }
+
+/* The walls of the party: a dashed box, labelled on its top edge. */
+#inner .priv { position: relative; border: 1.5px dashed var(--line); border-radius: 14px; background: #fff; padding: 16px 14px 12px; margin-bottom: 16px }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: Arabic set in DM Mono there.
+   So are «ما يعبر رسمياً» and the note's two headings below. */
+#inner .priv-tag { position: absolute; top: -11px; inset-inline-start: 14px; background: #fff; padding: 0 8px; font-family: inherit; font-size: 10.5px; letter-spacing: .06em; color: var(--muted) }
+#inner .steps-v { list-style: none; padding: 0; margin: 0; position: relative }
+/* The dashed line joining the three reviewers, behind their numbers. */
+#inner .steps-v:before { content: ""; position: absolute; top: 20px; bottom: 20px; inset-inline-start: 12px; width: 1.5px; background: repeating-linear-gradient(to bottom, var(--line) 0 4px, transparent 4px 9px) }
+#inner .steps-v li { display: flex; align-items: center; gap: 11px; padding: 6px 0; font-size: 14.5px; position: relative }
+#inner .steps-v i { width: 25px; height: 25px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 11px; color: var(--muted); flex: none; font-style: normal; position: relative; z-index: 1 }
+/* The last reviewer is the one who decides. */
+#inner .steps-v li:last-child { font-weight: 600 }
+#inner .steps-v li:last-child i { border-color: var(--acc); color: var(--acc); background: var(--acc-soft) }
+#inner .reloop { margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--line); font-size: 12.5px; color: var(--acc); display: flex; align-items: center; gap: 7px }
+#inner .reloop svg { flex: none }
+#inner .reloop span { flex: 1 }
+
+#inner .org .out { margin-top: auto; border-top: 1px dashed var(--line); padding-top: 12px; font-size: 13.5px; color: var(--muted) }
+#inner .org .out b { color: var(--acc); font-weight: 600; display: block; font-size: 12px; font-family: inherit; letter-spacing: .06em; margin-bottom: 4px }
+#inner .cross { display: flex; align-items: center; justify-content: center; padding: 0 6px }
+#inner .cross span { font-size: 26px; color: var(--acc); line-height: 1 }
+
+#inner .inner-note { margin-top: 34px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+#inner .inner-note div { background: var(--soft); border-radius: 12px; padding: 16px 18px; font-size: 14.5px }
+#inner .inner-note b { color: var(--ink) }
+#inner .inner-note .k { display: block; font-family: inherit; font-size: 11px; letter-spacing: .08em; color: var(--acc); margin-bottom: 6px }
+
+@media (max-width: 980px) {
+  #inner .orgs { grid-template-columns: 1fr; gap: 14px }
+  #inner .cross { padding: 2px 0 }
+  /* One party above the next, so the arrow between them points down. */
+  #inner .cross span { transform: rotate(-90deg); display: inline-block }
+  #inner .inner-note { grid-template-columns: 1fr }
+}
