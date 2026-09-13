@@ -1,0 +1,388 @@
+/**
+ * The home page's own sections, taken from `reference/site/index.html`: the
+ * full-height hero and the Trust strip below it (ticket 06), the two card decks
+ * (ticket 07) and the four units (ticket 08). Tickets 09–11 add the rest of the
+ * page here.
+ *
+ * Imported after `shell.css` and before `responsive.css`, which has to stay
+ * last for the reason written at the top of it. Nothing here collides with a
+ * rule in either file, so within this file source order is all that decides.
+ *
+ * Physical `left`/`right` become logical properties for the same reason they
+ * do in `shell.css` — one stylesheet serves both directions — with one
+ * deliberate exception, marked where it lives: the diagram's own coordinates.
+ */
+
+/* ---- hero ---- */
+
+/* Full height, with a floor under it so the diagram is never squeezed flat,
+   and top padding that clears the fixed header. Below 981px both give way to
+   the content's own height — see the end of this file. */
+#hero { height: 100vh; min-height: 760px; padding-top: 110px; overflow: hidden }
+#hero .glow { position: absolute; inset-block: auto -30%; inset-inline: -10% auto; width: 60vw; height: 60vw; background: radial-gradient(closest-side, rgba(249, 87, 56, .28), transparent 70%); pointer-events: none }
+#hero .glow2 { position: absolute; inset-block-start: -20%; inset-inline-end: -10%; width: 40vw; height: 40vw; background: radial-gradient(closest-side, rgba(255, 255, 255, .06), transparent 70%); pointer-events: none }
+
+.hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 40px; align-items: center; height: calc(100vh - 110px); min-height: 650px }
+.hero-copy h1 { font-size: 54px; letter-spacing: -.01em }
+.hero-copy h1 span { color: var(--acc) }
+.hero-copy .lead { margin-top: 18px }
+.trust { font-size: 13px; color: var(--dark-muted); margin-top: 14px }
+
+/* ---- the three-party diagram ---- */
+
+.hero-visual { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px }
+/* A fixed 600×360 box at every width, which is what lets the stations be
+   written once as percentages (src/components/home/hero-stations.ts). */
+.hero-art { position: relative; width: 100%; max-width: 600px; aspect-ratio: 600/360; margin-top: 16px }
+.hero-art .hlines { position: absolute; inset: 0; width: 100%; height: 100%; display: block }
+
+/* DELIBERATE EXCEPTION to the logical-properties rule above. Every position
+   inside the art box is written as a physical `left`, in the markup and here,
+   because these are coordinates in a picture rather than the start and end of
+   a line of text. The Owner's tower stands above and between the other two in
+   Arabic and in English alike; mirroring it in one direction would move the
+   buildings out from under the dashed routes drawn between them. */
+.hero-art .bld { position: absolute; height: auto; display: block; transform: translate(-50%, -50%) }
+.hero-art .spr { position: absolute; height: auto; display: block; will-change: transform, opacity }
+.hero-art .party { position: absolute; transform: translate(-50%, -50%); font-size: 12.5px; letter-spacing: .02em; color: var(--dark-muted); white-space: nowrap; pointer-events: none }
+.hpulse { position: absolute; width: 27%; aspect-ratio: 1; border: 3px solid var(--acc); border-radius: 50%; opacity: 0; pointer-events: none }
+
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate.
+   The document and the pulse ring are placed by their centres, like the
+   buildings above them. The Reference site does that centring from its script,
+   with `gsap.set({xPercent:-50, yPercent:-50})` — so until that script runs,
+   the document hangs below and to the right of the Contractor's tower, and
+   with JavaScript off it stays there. Stating it in CSS puts it in the right
+   place in the first response instead, which is what the rest of this rebuild
+   promises (ADR-0001).
+   It is the standalone `translate` property rather than a `transform`, and
+   that is the whole reason this works: GSAP animates `transform`, so a
+   `transform` here would be overwritten the moment the ring is scaled. The two
+   properties compose, and the percentage stays live — the ring is sized in
+   `%`, so a translate cached in pixels would drift on every resize. */
+.hero-art .spr, .hero-art .hpulse { translate: -50% -50% }
+
+#h-doc { filter: drop-shadow(0 0 5px rgba(20, 22, 28, .95)) drop-shadow(0 0 12px rgba(20, 22, 28, .8)) }
+
+.hero-status { display: inline-flex; align-items: center; gap: 9px; min-height: 34px; padding: 7px 16px; border-radius: 999px; font-size: 13px; color: var(--dark-text); background: rgba(255, 255, 255, .05); border: 1px solid var(--dark-line) }
+.hero-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--acc); flex: none }
+.hero-status b { font-weight: 500 }
+
+/* ---- Trust strip ---- */
+
+/* The rail travels; the label that names it does not. The Reference site lets
+   the whole bar wrap instead — see `src/components/home/trust-strip.tsx` for
+   why this one does not. */
+.logos { padding: 28px 0; border-top: 1px solid var(--dark-line) }
+.logos .wrap { display: flex; gap: 26px; align-items: center; color: var(--dark-muted); font-size: 13.5px }
+.logos .lbl { flex: none; font-size: 12px; color: var(--dark-muted); opacity: .8 }
+
+/* Three things, and only the first is obvious.
+
+   `overflow: hidden` is the window the rail travels behind. It is also what
+   lets the rail be narrower than the eight logos inside it: a flex item's
+   automatic minimum size is its content, *unless* its overflow is anything but
+   visible. `min-width: 0` says the same thing outright, so that changing the
+   overflow later — to `clip`, or to `visible` as the reduced-motion block
+   below does — cannot silently hand the page a 1,500px floor.
+
+   The fade at both ends is an addition the Reference site has no counterpart
+   for, because the Reference site's strip does not move: a rail that cuts its
+   logos off against a hard edge reads as a clipping bug rather than as motion.
+   `to right` is physical and stays that way on purpose — the gradient is
+   symmetric, so there is nothing for a direction to mirror. */
+.logos-rail { flex: 1; min-width: 0; overflow: hidden; mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent) }
+.logos-track { display: flex; width: max-content }
+.logos-row { display: flex; align-items: center; gap: 26px; padding-inline-end: 26px }
+
+.logos .slot { display: inline-flex; align-items: center; height: 44px; flex: none }
+/* Height is set per logo in the markup, because it is a property of the mark
+   rather than of the strip (src/content/trust-strip.ts). */
+.logos .slot img { width: auto; max-width: 118px; object-fit: contain; display: block; opacity: .62; filter: brightness(0) invert(1); transition: opacity .25s, filter .25s }
+.logos .slot:hover img { opacity: 1; filter: none }
+/* The name, shown only when its mark fails to arrive. The `hidden` attribute
+   is what switches the two, and the browser hides a `hidden` element by giving
+   it `display: none` — at the weakest specificity there is. So the mark needs
+   its own rule to be hideable at all, and the name must not be given a
+   `display` it would then have to fight. This is the whole reason the fallback
+   ever failed to appear. */
+.logos .slot img[hidden] { display: none }
+.logos .slot b { font-weight: 600; opacity: .85; letter-spacing: .02em; white-space: nowrap }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Standing still, the rail would show the four marks that happen to fit and
+     hide the rest behind a fade. So it stops being a rail: the list wraps onto
+     as many lines as it needs, and the second copy — which exists only to hide
+     the seam of a loop that is not running — goes away. */
+  .logos-rail { overflow: visible; mask-image: none }
+  .logos-track { display: block; width: auto }
+  .logos-row { flex-wrap: wrap; row-gap: 4px; padding-inline-end: 0 }
+  .logos-row.copy { display: none }
+}
+
+/* ---- the card decks ---- */
+
+/* One deck, two sections: `#pain` is dark and quotes situations from the
+   field, `#proof` is light and states figures. Everything from `.deck-wrap`
+   down is shared; the light deck is `.deck-lt` layered over it
+   (src/components/home/card-deck.tsx). */
+
+/* DELIBERATE EXCEPTION — the pain cards bleed off the canvas (spec: Design
+   system; reference/HANDOFF.md: "not a defect").
+   The resting pile fans each card behind the top one 11px further out and
+   turns it, and a thrown card flies 130% of its own width off the side before
+   the pile closes up. At phone widths both carry the cards past the edge of
+   the screen, on purpose: a pile of paper that stops dead at an invisible wall
+   looks like a widget in a box. `overflow-x: clip` is what makes it safe. It
+   cuts the overhang at the section's edge without making the section a scroll
+   container — `hidden` would, and would force `overflow-y` to `auto` with it,
+   so the fan's upward offset and the cards' shadows would be trimmed or given
+   a scrollbar. Remove it and the page scrolls sideways the first time a card
+   is thrown; tests/e2e/home-card-decks.spec.ts measures exactly that. */
+#pain { padding: var(--sp) 0; overflow-x: clip }
+.pain-2col { display: grid; grid-template-columns: 1.02fr .98fr; gap: 56px; align-items: center }
+.pain-close { margin-top: 34px; font-size: 26px; font-weight: 700 }
+.pain-close span { color: var(--acc) }
+
+.deck-wrap { display: flex; flex-direction: column; align-items: center; gap: 22px }
+/* `touch-action: pan-y` gives vertical swipes to the page and keeps horizontal
+   ones for the card, so a thumb can scroll straight past the deck and still
+   throw a card, without the two fighting over the same gesture. */
+.deck { position: relative; width: 340px; height: 348px; touch-action: pan-y; user-select: none; -webkit-user-select: none }
+.deck:focus { outline: none }
+.deck:focus-visible .pcard.top { box-shadow: 0 0 0 3px var(--acc), 0 30px 70px rgba(0, 0, 0, .55) }
+.pcard { position: absolute; inset: 0; transform-origin: 50% 100%; background: var(--dark2); border: 1px solid var(--dark-line); border-radius: 20px; padding: 30px 28px 26px; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0, 0, 0, .45); overflow: hidden; will-change: transform; backface-visibility: hidden }
+/* The large closing quotation mark behind each quote, at the end of the line. */
+.pcard:before { content: "\201D"; position: absolute; top: -20px; inset-inline-end: 22px; font-size: 130px; color: rgba(249, 87, 56, .15); font-family: serif; line-height: 1 }
+/* The card's number is Latin digits, set left to right so "01 / 06" does not
+   read backwards, and pushed to the right-hand edge where an Arabic line
+   begins. `text-align: right` stays physical on purpose: inside a box forced
+   to left-to-right, `start` would mean the left. The English site revisits it
+   (ticket 42). */
+.pcard .n { font-family: "DM Mono", monospace; font-size: 11.5px; letter-spacing: .1em; color: var(--dark-muted); direction: ltr; unicode-bidi: isolate; text-align: right }
+.pcard q { display: block; font-size: 21px; font-weight: 600; line-height: 1.62; quotes: "\201C" "\201D"; margin: 22px 0 auto }
+.pcard.top { cursor: grab; box-shadow: 0 30px 70px rgba(0, 0, 0, .55) }
+.pcard.top:active { cursor: grabbing }
+.pcard.glide { transition: transform .42s cubic-bezier(.22, .9, .28, 1), opacity .42s ease }
+
+/* What each situation costs, as a boxed alert at the foot of the card. */
+#pain .cost { margin-top: 18px; padding: 12px 14px 13px; background: rgba(249, 87, 56, .075); border: 1px solid rgba(249, 87, 56, .22); border-inline-start: 3px solid var(--acc); border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--dark-muted) }
+#pain .cost .ct { display: flex; align-items: center; gap: 7px; color: var(--acc); font-weight: 600; font-size: 12px; margin-bottom: 5px; letter-spacing: .01em }
+#pain .cost .ct svg { width: 14px; height: 14px; flex: none }
+
+.deck-ui { display: flex; align-items: center; gap: 14px }
+.deck-ui button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--dark-line); background: rgba(255, 255, 255, .05); color: #fff; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, border-color .2s; font-family: inherit }
+.deck-ui button:hover { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .3) }
+.deck-count { font-family: "DM Mono", monospace; font-size: 13px; color: var(--dark-muted); min-width: 64px; text-align: center; direction: ltr; unicode-bidi: isolate }
+.deck-count b { color: #fff; font-weight: 500 }
+.deck-hint { font-size: 12.5px; color: var(--dark-muted) }
+
+/* ---- the proof deck, light ---- */
+
+/* The Reference site wrote this section's white ground and top rule as an
+   inline style on the markup. They are the section's, so they are here. */
+#proof { background: #fff; border-top: 1px solid var(--line); overflow-x: clip }
+/* Aligned to the top, so the deck starts level with the heading beside it. */
+.proof-2col { display: grid; grid-template-columns: 1.02fr .98fr; gap: 56px; align-items: start }
+#proof .proof-copy .lead { margin-bottom: 0 }
+
+/* The Reference site builds the light card in four passes over the dark one,
+   each overriding the last. What is below is where those passes end up. Rules
+   a later pass erased, and rules for elements this deck's markup never has
+   (`.pcard .n`, `.lbl`), are not carried over. Every value here is held to the
+   Reference site by tests/e2e/home-decks-match-reference.spec.ts. */
+.deck-lt .deck { width: 344px; height: 296px }
+.deck-lt .pcard { background: #fff; border: 1px solid var(--line); color: var(--ink); box-shadow: 0 18px 44px rgba(20, 22, 28, .10); padding: 22px 26px 24px; text-align: start }
+.deck-lt .pcard:before { content: none }
+.deck-lt .pcard.top { box-shadow: 0 24px 56px rgba(20, 22, 28, .16) }
+.deck-lt .deck:focus-visible .pcard.top { box-shadow: 0 0 0 3px var(--acc), 0 24px 56px rgba(20, 22, 28, .16) }
+.deck-lt .phead { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.deck-lt .topic { font-size: 13px; font-weight: 600; color: var(--acc); background: var(--acc-soft); border-radius: 999px; padding: 5px 13px; line-height: 1.5 }
+.deck-lt .pcard .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; margin: 0; flex: none }
+.deck-lt .pcard .ic svg { width: 22px; height: 22px }
+.deck-lt .chead { font-size: 16.5px; font-weight: 600; line-height: 1.5; color: var(--ink); margin-top: 13px }
+.deck-lt .pbody { flex: 1 1 auto; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 0 }
+.deck-lt .pcard b.big { font-family: "DM Mono", monospace; font-size: 60px; line-height: 1.02; color: var(--ink); font-weight: 500; direction: ltr; unicode-bidi: isolate; display: block; margin-bottom: 0 }
+/* A phrase rather than a number — «أقل من يوم» — so it is set in the Arabic
+   face. `unicode-bidi: isolate` is not an addition: the Reference site gives
+   it to every `b` in the card and nothing on `b.txtnum` takes it away.
+   `direction: rtl` is physical because the phrase is Arabic whichever page it
+   sits on; the English site brings its own (ticket 42). */
+.deck-lt .pcard b.txtnum { font-family: inherit; font-size: 34px; font-weight: 700; direction: rtl; unicode-bidi: isolate; line-height: 1.25; color: var(--ink); display: block; margin-bottom: 0 }
+.deck-lt .mark { display: flex; align-items: flex-end; gap: 16px; height: 78px; flex: none }
+.deck-lt .mark span { width: 28px; border-radius: 6px 6px 3px 3px; background: #E6E3DC; position: relative }
+.deck-lt .mark span.on { background: var(--acc) }
+/* Centred under its bar. `right: 50%` with `translateX(50%)` is symmetric, so
+   it is the same in either direction and is left physical. */
+.deck-lt .mark em { position: absolute; bottom: -18px; right: 50%; transform: translateX(50%); font-size: 10px; font-style: normal; color: var(--muted); white-space: nowrap; font-family: inherit }
+.deck-lt .src { margin-top: auto; border-top: 1px dashed var(--line); padding-top: 11px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; line-height: 1.5 }
+.deck-lt .src svg { width: 14px; height: 14px; flex: none; color: var(--acc) }
+.deck-lt .deck-ui button { border: 1px solid var(--line); background: #fff; color: var(--ink) }
+.deck-lt .deck-ui button:hover { background: var(--soft); border-color: #CFCCC5 }
+.deck-lt .deck-count { color: var(--muted) }
+.deck-lt .deck-count b { color: var(--ink) }
+.deck-lt .deck-hint { color: var(--muted) }
+
+/* ---- the four units ---- */
+
+/* Kept together here, media queries included, because its rules and their
+   overrides only make sense read side by side. */
+#jt { border-top: 1px solid var(--dark-line) }
+.jt-line { height: 1px; background: linear-gradient(to left, transparent, var(--dark-line), transparent); margin: 0 0 18px }
+.jt-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px }
+.jt-s { background: rgba(255, 255, 255, .035); border: 1px solid var(--dark-line); border-radius: 14px; padding: 16px 15px; position: relative; text-align: start; color: inherit; font: inherit; cursor: pointer; transition: border-color .3s, background .3s; -webkit-tap-highlight-color: rgba(249, 87, 56, .18) }
+.jt-s:hover { border-color: rgba(249, 87, 56, .5); background: rgba(255, 255, 255, .06) }
+.jt-s.on { border-color: var(--acc); background: rgba(249, 87, 56, .10) }
+.jt-s:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px }
+/* The unit's number is Latin digits, set left to right, and pushed to the
+   right-hand edge where an Arabic line begins. `text-align: right` stays
+   physical: inside a box forced to left-to-right, `start` would mean the left,
+   and the box's width would never show the mistake. */
+.jt-s .n { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--acc); letter-spacing: .1em; direction: ltr; unicode-bidi: isolate; display: block; margin-bottom: 8px; text-align: right }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the one the footer and
+   the guarantee pill already carry: «المخرَج» is Arabic, and the Reference
+   site sets it in DM Mono, a face with no Arabic glyphs, so it falls through to
+   the browser's last-resort monospace. The spec forbids that outright. */
+.jt-s .n.out { font-family: inherit; direction: rtl; letter-spacing: .02em }
+.jt-s h3 { font-size: 15px; margin: 0; font-weight: 600; line-height: 1.5 }
+
+.jt-stage { position: relative; width: 100%; max-width: 820px; margin: 26px auto 0; aspect-ratio: 1440/900 }
+.jt-shot { position: absolute; inset: 0; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease, visibility 0s .45s }
+.jt-shot.on { opacity: 1; visibility: visible; transform: none; transition: opacity .45s ease, transform .45s ease }
+/* `next/image` writes the file's width and height onto the element, which is
+   what reserves the box before the picture arrives; this makes it fill it. */
+.jt-shot img { display: block; width: 100%; height: 100% }
+
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the caption ADR-0002
+   requires, so what a Screen mock shows in pictures is also said in words.
+   `.jt-hint` is the Reference site's own rule and class name — written for a
+   line of text under this stage, and never used there. */
+.jt-hint { text-align: center; margin: 16px 0 0; font-size: 12.5px; color: var(--dark-muted) }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The screen changes at once instead of fading and rising into place. */
+  .jt-shot, .jt-shot.on { transition: none }
+}
+
+@media (min-width: 981px) {
+  /* The tabs stand in a column and the screen takes the rest of the width. */
+  #jt .wrap { display: grid; grid-template-columns: 290px minmax(0, 1fr); grid-template-areas: "head head" "line line" "tabs view" "foot foot"; column-gap: 26px; row-gap: 0; align-items: start }
+  #jt .tz-head { grid-area: head }
+  #jt .jt-line { grid-area: line }
+  #jt .jt-row { grid-area: tabs; grid-template-columns: 1fr; gap: 12px; align-content: start; margin-top: 26px }
+  #jt .jt-view { grid-area: view }
+  /* No taller than the window, so the screen and the tabs are seen together. */
+  #jt .jt-stage { margin: 26px 0 0; max-width: min(100%, calc((100vh - 130px) * 1.6)) }
+  /* The captions are held to the same width as the screen above them, so
+     centring one centres it under the picture rather than under the column —
+     which on a short window is wider than the screen. */
+  #jt .jt-hints { max-width: min(100%, calc((100vh - 130px) * 1.6)) }
+  #jt .tz-foot { grid-area: foot; margin-top: 26px }
+  #jt .jt-s { padding: 16px 18px }
+}
+
+/* The Reference site's short-window rules also give the tabs, the stage and
+   the foot other paddings and margins — but in rules the desktop grid's `#jt`
+   selectors above outrank, so they never apply to this section. Only these do. */
+@media (min-width: 981px) and (max-height: 700px) {
+  .jt-s h3 { font-size: 14.5px }
+  .jt-hint { margin-top: 12px }
+}
+
+@media (max-width: 980px) {
+  .jt-row { grid-template-columns: 1fr 1fr }
+}
+
+@media (max-width: 700px) {
+  /* 1440px of interface squeezed into 350px is unreadable, so a phone shows
+     the screen at 1040px and the visitor pans across it. The pan is inside
+     the stage; the page never scrolls sideways. The screen is pinned to the
+     start of the stage, where panning begins. */
+  .jt-stage { aspect-ratio: auto; height: 650px; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch }
+  .jt-shot { inset-block: 0 auto; inset-inline: 0 auto; width: 1040px; height: 650px }
+}
+
+/* ---- narrower and shorter ---- */
+
+@media (max-width: 980px) {
+  /* The hero was 100vh with a 760px floor and the grid stacked, so the diagram
+     fell out of the bottom and `overflow: hidden` ate it. Below the desktop
+     breakpoint it is as tall as what is in it. */
+  #hero { height: auto; min-height: 0; padding-top: 98px; padding-bottom: 56px }
+  .hero-grid { grid-template-columns: 1fr; height: auto; min-height: 0; gap: 26px }
+  .hero-copy h1 { font-size: 38px }
+  .hero-art { max-width: 520px }
+
+  .pain-2col { grid-template-columns: 1fr; gap: 40px }
+  .pain-close { font-size: 22px }
+  .deck { width: 300px; height: 334px }
+  .pcard q { font-size: 19px }
+
+  /* Only the columns change. The Reference site narrows the gap to 34px here
+     too, but in a rule that `#proof .proof-2col { gap: 56px }` outranks — so
+     what visitors get, and what the baselines recorded, is 56px. That is what
+     is written: the 34px never applied. */
+  .proof-2col { grid-template-columns: 1fr }
+  .deck-lt .topic { font-size: 12px; padding: 4px 11px }
+  .deck-lt .pcard .ic { width: 34px; height: 34px; border-radius: 10px }
+  .deck-lt .chead { font-size: 15px; margin-top: 10px }
+  .deck-lt .pcard b.big { font-size: 46px }
+  .deck-lt .pcard b.txtnum { font-size: 27px }
+  .deck-lt .mark { height: 58px; gap: 13px }
+  .deck-lt .mark span { width: 24px }
+  .deck-lt .src { font-size: 11.5px; padding-top: 9px }
+}
+
+/* A desktop window that is wide but short — a laptop with the browser's own
+   furniture eating the screen. Everything shrinks a step so the diagram and
+   the copy still both fit above the fold. */
+@media (min-width: 981px) and (max-height: 700px) {
+  #hero { min-height: 590px; padding-top: 94px }
+  .hero-grid { height: calc(100vh - 94px); min-height: 470px; gap: 32px }
+  .hero-copy h1 { font-size: 44px }
+  .hero-copy .lead { margin-top: 14px; font-size: 15px }
+  .hero-visual { gap: 14px }
+  .hero-art { max-width: 452px }
+
+  #pain .cost { margin-top: 14px; padding: 10px 12px 11px; font-size: 12.5px }
+  .deck-lt .deck { width: 324px; height: 268px }
+  .deck-lt .pcard { padding: 18px 22px 20px }
+  .deck-lt .topic { font-size: 12px; padding: 4px 11px }
+  .deck-lt .pcard .ic { width: 34px; height: 34px; border-radius: 10px }
+  .deck-lt .pcard .ic svg { width: 19px; height: 19px }
+  .deck-lt .chead { font-size: 15px; margin-top: 10px }
+  .deck-lt .pcard b.big { font-size: 46px }
+  .deck-lt .pcard b.txtnum { font-size: 27px }
+  .deck-lt .mark { height: 58px; gap: 13px }
+  .deck-lt .mark span { width: 24px }
+  .deck-lt .src { font-size: 11.5px; padding-top: 9px }
+}
+
+@media (max-width: 700px) {
+  .hero-copy h1 { font-size: 33px }
+  .pain-close { font-size: 20px }
+
+  /* Another consequence of the strip moving rather than wrapping, and so
+     another rule the Reference site has no counterpart for. Its label and its
+     logos share one wrapping row, which needs no breakpoint. A rail cannot
+     wrap, so on a phone the label would leave it about eighty pixels — one
+     logo and a half. It gets the line below instead. */
+  .logos .wrap { flex-wrap: wrap; gap: 14px }
+  .logos-rail { flex-basis: 100% }
+}
+
+@media (max-width: 640px) {
+  .deck-lt .deck { width: min(300px, 84vw); height: 308px }
+  .deck-lt .pcard b.big { font-size: 50px }
+  .deck-lt .pcard b.txtnum { font-size: 29px }
+  .deck-lt .mark { height: 66px }
+}
+
+@media (max-width: 560px) {
+  .pcard { padding: 26px 22px 22px }
+  .deck-lt .pcard { padding: 20px 20px 22px }
+}
+
+@media (max-width: 400px) {
+  .deck { width: min(280px, 84vw); height: 330px }
+}

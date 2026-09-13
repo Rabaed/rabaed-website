@@ -32,7 +32,12 @@
  * only names both of them share.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { openReferencePage, startReferenceSite, type ReferenceSite } from './reference-site';
+import {
+  freezeTransitions,
+  openReferencePage,
+  startReferenceSite,
+  type ReferenceSite,
+} from './reference-site';
 
 /** The eight widths the visual baselines were captured at (ticket 02). */
 const WIDTHS = [360, 390, 768, 820, 1024, 1280, 1440, 1600];
@@ -104,20 +109,6 @@ const STATES: Record<string, readonly string[]> = {
   'with the mobile panel open': ['open'],
   'light, with the mobile panel open': ['on-light', 'open'],
 };
-
-/**
- * Freezes every transition, on both documents alike.
- *
- * Without it the comparison photographs the cross-fade rather than the state:
- * the two wordmarks were caught at opacity 0.9693 and 0.0307 on their way
- * through a 350ms fade, and the burger's border mid-way through its own. What
- * is being compared is where each rule ends up, not how long it takes.
- */
-async function freezeTransitions(page: Page) {
-  await page.addStyleTag({
-    content: '*, *::before, *::after { transition: none !important; animation: none !important }',
-  });
-}
 
 /**
  * With the panel open, its height is the second deliberate divergence: the
