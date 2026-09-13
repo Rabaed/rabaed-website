@@ -5,7 +5,7 @@
  * **The drawing is markup, not an exported Screen mock**, and hidden from
  * assistive technology, as on the Reference site. ADR-0002 turns Rabaed app
  * screens into images because they are thousands of lines of machine-made
- * markup; this is thirty lines drawing the Pour Tracker, a tool the visitor
+ * markup; this is a few dozen lines drawing the Pour Tracker, a tool the visitor
  * downloads, and every claim in it — the countdowns to 7 and 28 days, a test
  * running late — is said in words beside it.
  *

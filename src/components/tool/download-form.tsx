@@ -29,7 +29,8 @@ const UNLOCKED = 'حمّل الأداة الآن';
  * The Pour Tracker download form, as the Reference site behaves: the button
  * stays locked, and says so, until the four required details are valid; the
  * bar above fills a quarter for each; and a field says what is wrong with it
- * only once the visitor has left it, then clears as soon as it is put right.
+ * only once the visitor has been into it and out again, then clears as soon as
+ * it is put right.
  *
  * A client component, rendered on the server first: the whole form, locked, is
  * in the first response, and with JavaScript off it stays locked.
@@ -52,22 +53,27 @@ export function DownloadForm() {
     phone: '',
     email: '',
   });
-  const [left, setLeft] = useState<ReadonlySet<RequiredDetail>>(new Set());
+  /** The fields the visitor has been into and come out of: only those say what is wrong. */
+  const [touched, setTouched] = useState<ReadonlySet<RequiredDetail>>(new Set());
 
   const validCount = REQUIRED_DETAILS.filter((detail) => isValidDetail(detail, details[detail])).length;
   const complete = validCount === REQUIRED_DETAILS.length;
 
-  /** The props a required field takes, and the message under it. */
-  const required = (detail: RequiredDetail) => {
-    const wrong = left.has(detail) && !isValidDetail(detail, details[detail]);
+  /** A required field's props, and the message shown under it. */
+  const requiredField = (detail: RequiredDetail) => {
+    const wrong = touched.has(detail) && !isValidDetail(detail, details[detail]);
     const errorId = `er-${detail}`;
     return {
       field: {
         name: detail,
+        // Marked required for assistive technology and for ticket 30; the
+        // form is `noValidate`, so the browser's own bubbles never appear,
+        // only the Arabic messages below (spec: Forms).
+        required: true,
         value: details[detail],
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           setDetails((previous) => ({ ...previous, [detail]: event.target.value })),
-        onBlur: () => setLeft((previous) => (previous.has(detail) ? previous : new Set(previous).add(detail))),
+        onBlur: () => setTouched((previous) => (previous.has(detail) ? previous : new Set(previous).add(detail))),
         className: wrong ? 'bad' : undefined,
         'aria-invalid': wrong || undefined,
         // Only while the message is shown: a description that is always there
@@ -84,15 +90,15 @@ export function DownloadForm() {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // As on the Reference site, a submit counts every field as left.
-    setLeft(new Set(REQUIRED_DETAILS));
+    // As on the Reference site, a submit counts every field as touched.
+    setTouched(new Set(REQUIRED_DETAILS));
     // Ticket 30: record the details, then deliver the file.
   };
 
-  const firstName = required('firstName');
-  const lastName = required('lastName');
-  const phone = required('phone');
-  const email = required('email');
+  const firstName = requiredField('firstName');
+  const lastName = requiredField('lastName');
+  const phone = requiredField('phone');
+  const email = requiredField('email');
 
   return (
     <div className="form" id="tl-form-card">

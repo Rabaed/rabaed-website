@@ -13,9 +13,12 @@
  */
 
 /* ---- the three steps ---- */
+/* The step cards (src/components/step-cards.tsx), which the tool page's three
+   steps take too. */
 .start { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px }
 .start .s { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px }
-/* The last step is the guarantee, and its card is marked out. */
+/* The step a section wants remembered is marked out: the start page's
+   guarantee, the tool page's project folder. */
 .start .s.gs { background: #fff; border: 2px solid var(--acc); box-shadow: 0 10px 30px rgba(249, 87, 56, .10) }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the Reference site sets the
    whole of «01 · إعداد» in DM Mono, which has no Arabic glyphs, so the word

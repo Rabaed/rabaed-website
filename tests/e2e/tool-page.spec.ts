@@ -99,11 +99,15 @@ test('every section is in the first response, every answer included', async ({ r
 
   expect(html).toContain('سجّل الصبّة اليوم، واعرف متى يحين اختبار الكسر');
   for (const heading of HEADINGS) expect(html).toContain(heading);
-  for (const entry of QUESTIONS) expect(html).toContain(entry.question);
-  // An answer with a file name in it is split by the element that sets the
-  // name left to right, so these two are looked for either side of it.
-  expect(html).toContain('نعم. نسخة كاملة تعمل لمشروع واحد، بلا حد زمني');
-  expect(html).toContain('يحوي كل صبّة واختبار وحالة وتاريخ، ومجلد');
+  for (const entry of QUESTIONS) {
+    expect(html).toContain(entry.question);
+    // An answer with a file name in it is split by the element that sets the
+    // name left to right; its words either side of the name are looked for
+    // below. Every other answer is in the page whole.
+    if (!entry.answer.includes('concrete_db.json')) expect(html).toContain(entry.answer);
+  }
+  expect(html).toContain('في المجلد الذي تختاره أنت على جهازك: ملف ');
+  expect(html).toContain(' يحوي كل صبّة واختبار وحالة وتاريخ، ومجلد ');
   expect(html).toContain('صُنعت في ربائد لمهندسي المواقع. الأداة مجانية — استخدمها كما تشاء.');
 
   expect(html).not.toContain(FAKE_CONFIRMATION);
@@ -140,6 +144,8 @@ test('the numerals are written as the Reference site writes them', async ({ requ
     '٣ أيام أو أقل',
     'برج النخيل — المرحلة ٢',
     ERRORS.phone,
+    // The description search results show.
+    'موعد اختبار الكسر ٧ و ٢٨ يوماً قبل أن يتأخر',
   ]) {
     expect(html).toContain(phrase);
   }
@@ -154,15 +160,16 @@ test('the download form is a real form, with every field named', async ({ page }
       name: each.name,
       type: each instanceof HTMLSelectElement ? 'select' : each.type,
       autocomplete: each.getAttribute('autocomplete'),
+      required: each.required,
     })),
   );
   expect(fields).toEqual([
-    { name: 'firstName', type: 'text', autocomplete: 'given-name' },
-    { name: 'lastName', type: 'text', autocomplete: 'family-name' },
-    { name: 'countryCode', type: 'select', autocomplete: null },
-    { name: 'phone', type: 'tel', autocomplete: 'tel-national' },
-    { name: 'email', type: 'email', autocomplete: 'email' },
-    { name: 'company', type: 'text', autocomplete: 'organization' },
+    { name: 'firstName', type: 'text', autocomplete: 'given-name', required: true },
+    { name: 'lastName', type: 'text', autocomplete: 'family-name', required: true },
+    { name: 'countryCode', type: 'select', autocomplete: null, required: false },
+    { name: 'phone', type: 'tel', autocomplete: 'tel-national', required: true },
+    { name: 'email', type: 'email', autocomplete: 'email', required: true },
+    { name: 'company', type: 'text', autocomplete: 'organization', required: false },
   ]);
 
   const codes = await field(page, 'مفتاح الدولة').evaluate((select: HTMLSelectElement) =>
@@ -247,7 +254,6 @@ for (const { label, invalid, valid } of [
 
 test('a field says what is wrong once it has been left, not while it is being typed', async ({ page }) => {
   await page.goto('/tool');
-  const errors = downloadForm(page).locator('.er');
   for (const message of Object.values(ERRORS)) {
     await expect(downloadForm(page).getByText(message, { exact: true })).toBeHidden();
   }
@@ -261,8 +267,10 @@ test('a field says what is wrong once it has been left, not while it is being ty
   await first.blur();
   await expect(error).toBeVisible();
   await expect(first).toHaveAttribute('aria-invalid', 'true');
-  // Only that field: the others have not been left yet.
-  await expect(errors.filter({ visible: true })).toHaveCount(1);
+  // Only that field: the others have not been touched yet.
+  for (const message of [ERRORS.last, ERRORS.phone, ERRORS.email]) {
+    await expect(downloadForm(page).getByText(message, { exact: true })).toBeHidden();
+  }
 
   // Corrected, the message goes as it is typed.
   await first.fill('أحمد');

@@ -14,6 +14,8 @@
 /**
  * Latin text inside an Arabic answer — a file name — which is set left to
  * right, in DM Mono, so its dots and underscores stay where they belong.
+ * Ticket 32's FAQ structured data joins the parts back into one text, which is
+ * what a visitor reads.
  */
 export type LatinText = { readonly latin: string };
 

@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page-shell';
-import { ToolQuestions, Upsell } from '@/components/tool/closing';
 import { Download } from '@/components/tool/download';
+import { Features } from '@/components/tool/features';
 import { ToolHero } from '@/components/tool/hero';
-import { Features, How, Privacy, Requirements, Why } from '@/components/tool/sections';
+import { How } from '@/components/tool/how';
+import { Privacy } from '@/components/tool/privacy';
+import { ToolQuestions } from '@/components/tool/questions';
+import { Requirements } from '@/components/tool/requirements';
+import { Upsell } from '@/components/tool/upsell';
+import { Why } from '@/components/tool/why';
 import { pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({

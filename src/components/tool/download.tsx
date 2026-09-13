@@ -1,12 +1,13 @@
 import { DownloadForm } from '@/components/tool/download-form';
-import { Tick, TickList } from '@/components/tool/sections';
+import { Tick, TickList } from '@/components/tool/parts';
 
 /**
  * «حمّل الأداة الآن»: what the visitor gets, beside the form that gets it.
  *
- * The copy says the download starts as soon as the details are complete. That
- * is what ticket 30 builds; until then the form unlocks but delivers nothing
- * (`download-form.tsx`), and the words describe the page as it will be.
+ * The copy says the download starts as soon as the details are complete, as
+ * the first of the three steps does. That is what ticket 30 builds; until then
+ * the form unlocks but delivers nothing (`download-form.tsx`), and the words
+ * describe the page as it will be.
  *
  * All copy is verbatim from `reference/site/tool.html`.
  */

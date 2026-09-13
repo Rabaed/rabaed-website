@@ -1,27 +1,19 @@
-import { Faq } from '@/components/faq';
-import { TOOL_FAQ } from '@/content/faq';
 import { localePath } from '@/lib/locales';
 
+const CLOUD_ADDS = [
+  'كل مشاريعك في لوحة واحدة، مع مقارنة بينها',
+  'اعتماد إلكتروني فوري من الاستشاري — بدون بريد',
+  'حساب للمختبر يرفع تقريره مباشرة',
+  'ربط مع منصة ربائد: الوثائق، التقارير اليومية، المراسلات',
+  'سجل تدقيق موثّق لكل تغيير ومن قام به',
+] as const;
+
 /**
- * The end of the tool page: «قبل أن تحمّل», six questions in a row of cards, and
- * the upsell to Rabaed for a visitor who needs more than one project.
+ * «الخطوة التالية»: the end of the tool page, for a visitor who needs more than
+ * one project — what Rabaed adds, and the way to the start and product pages.
  *
  * All copy is verbatim from `reference/site/tool.html`.
  */
-export function ToolQuestions() {
-  return (
-    <section id="faq" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
-      <div className="wrap">
-        <div className="tz-head">
-          <div className="eyebrow">الأسئلة الشائعة</div>
-          <h2>قبل أن تحمّل</h2>
-        </div>
-        <Faq entries={TOOL_FAQ} />
-      </div>
-    </section>
-  );
-}
-
 export function Upsell() {
   return (
     <section id="up" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
@@ -43,13 +35,7 @@ export function Upsell() {
             </div>
           </div>
           <ul className="tl-up-list">
-            {[
-              'كل مشاريعك في لوحة واحدة، مع مقارنة بينها',
-              'اعتماد إلكتروني فوري من الاستشاري — بدون بريد',
-              'حساب للمختبر يرفع تقريره مباشرة',
-              'ربط مع منصة ربائد: الوثائق، التقارير اليومية، المراسلات',
-              'سجل تدقيق موثّق لكل تغيير ومن قام به',
-            ].map((line) => (
+            {CLOUD_ADDS.map((line) => (
               <li key={line}>
                 <i>✦</i>
                 <span>{line}</span>

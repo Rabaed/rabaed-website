@@ -8,8 +8,13 @@
  * Imported after `start.css` and before `responsive.css`, which has to stay
  * last for the reason written at the top of it. Every value is held to the
  * Reference site by tests/e2e/tool-matches-reference.spec.ts, except the
- * typefaces of the divergence below; the scroll margins are held by
- * tests/e2e/tool-page.spec.ts.
+ * typefaces of the page's Arabic labels — the requirement cards' below, the
+ * step labels' in `start.css`, «دقيقتان» in `tokens.css`; the scroll margins
+ * are held by tests/e2e/tool-page.spec.ts.
+ *
+ * Not here: the Reference site's panel for after the download has started
+ * (`.tl-done`, `.tl-ok`, `.tl-steps`). It confirms a delivery, and ticket 30
+ * is the one that delivers.
  *
  * The Reference site already writes this page's sides as logical properties.
  */
