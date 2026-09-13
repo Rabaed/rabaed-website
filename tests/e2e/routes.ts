@@ -41,4 +41,27 @@ export const ROUTES = [
     ],
     alternates: { ar: '/product', en: '/en/product' },
   },
+  {
+    path: '/terms',
+    locale: 'ar',
+    dir: 'rtl',
+    // One of the three misspellings the approved document carries, which is
+    // the phrase most likely to be "corrected" on its way to the browser.
+    text: ['شروط الخدمة', 'يحق لبرائد رفض تقديم الخدمة أو استخدام النظام دون إبداء أسباب.'],
+    alternates: { ar: '/terms', en: '/en/terms' },
+  },
+  {
+    path: '/privacy',
+    locale: 'ar',
+    dir: 'rtl',
+    text: ['سياسة الخصوصية', 'تحكم سياسة الخصوصية الأسلوب الذي تقوم به'],
+    alternates: { ar: '/privacy', en: '/en/privacy' },
+  },
+  {
+    path: '/referral-terms',
+    locale: 'ar',
+    dir: 'rtl',
+    text: ['الشروط والأحكام — برنامج الإحالة', '2,000 ريال سعودي صافية عن كل مشروع مُحال'],
+    alternates: { ar: '/referral-terms', en: '/en/referral-terms' },
+  },
 ] as const;
