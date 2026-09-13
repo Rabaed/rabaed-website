@@ -26,4 +26,6 @@ The signup form is `src/components/referral/signup-form.tsx`:
 
 The document fields are `src/components/referral/upload-field.tsx`. They already show the chosen file's name and the green selected state. This ticket adds progress and the server's rejection.
 
+**Plugs into ticket 27 (decided 13 September 2026).** The signup form becomes a form definition run through ticket 27's submission pipeline; the upload checks and private storage go inside that pipeline, behind a storage adapter, so ticket 29 reuses them. Its wording is editable by Editors; its fields are not (spec: Forms).
+
 **The page promises a referral code «فوراً على جوالك وبريدك», and no ticket issues one.** See ticket 15's note for the founder.

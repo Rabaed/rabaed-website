@@ -17,7 +17,7 @@ Rabaed has no official website. What exists is a Reference site: nine hand-built
 Rebuild the Reference site as the official Marketing site at `rabaedapp.com`: same design, same animations, on a foundation that can be found, edited and extended.
 
 - **Next.js on Vercel, Payload CMS in the same application, Supabase for data and files.** Pages arrive as complete HTML on first request, which is what makes the GEO work possible (see ADR-0001).
-- **Ahmed edits the site himself.** All page copy, images, Trust strip logos, social links, FAQs, Referral Program amounts, blog posts, case studies and legal pages, from an admin area in Arabic and English.
+- **Ahmed edits the site himself.** All page copy, images, the items in every list (FAQs, logos, steps, cards), which sections show, Screen mock images, social links, the Referral Program values, form wording, blog posts, case studies and legal pages, from an admin area in Arabic and English. The admin keeps his edits inside what the design can carry, so a visitor never sees a broken page.
 - **The design survives intact.** Every animation the co-founder built is kept. The Screen mocks become exported images generated from his own markup, per locale, so they stay pixel-exact without carrying thousands of lines of imitation HTML into production (ADR-0002).
 - **Forms become real.** Submissions land in Supabase, applicant documents in private storage, an alert reaches the team, and the applicant receives an Arabic confirmation.
 - **The site is built to be cited.** Indexable, structured, fast, with a launch-day set of Arabic articles answering the questions Rabaed's buyers actually ask.
@@ -72,17 +72,23 @@ Rebuild the Reference site as the official Marketing site at `rabaedapp.com`: sa
 34. As Ahmed, I want to add, reorder and remove Trust strip logos with their links, so that new clients appear as we sign them.
 35. As Ahmed, I want to set the social account links, so that the footer icons point somewhere real.
 36. As Ahmed, I want to add and edit FAQ entries, so that the answers stay current and keep feeding structured data.
-37. As Ahmed, I want to change the Referral Program amounts in one place, so that the page and its terms never disagree.
+37. As Ahmed, I want to change the Referral Program values in one place, and be warned while the Referral Terms still state the old ones, so that the page and its terms never disagree unnoticed.
 38. As Ahmed, I want to write blog posts in Arabic and English, so that we answer the questions our buyers search for.
 39. As Ahmed, I want to write case studies, so that real client stories can be published when they are approved.
 40. As Ahmed, I want case studies hidden until I publish one, so that the site never shows an empty section.
 41. As Ahmed, I want to save a draft and preview it before publishing, so that I do not publish half-finished work.
 42. As Ahmed, I want the admin interface itself in Arabic, so that I can work in my own language.
 43. As Ahmed, I want to see which entries are missing a translation, so that the English site does not silently fall behind.
-44. As Ahmed, I want to edit the legal pages with our lawyer, so that corrections reach the site without waiting for a developer.
+44. As Ahmed, I want to enter our lawyer's corrections into the legal pages myself, so that they reach the site without waiting for a developer. The lawyer never logs in.
 45. As Ahmed, I want every legal edit recorded with a date and an author, so that we can prove what our terms said on any given day.
 46. As Ahmed, I want to set each page's title and description for search, so that I control how we appear in results.
 47. As Ahmed, I want uploaded images automatically resized and converted, so that adding a photograph does not slow the site down.
+70. As Ahmed, I want to add, remove and reorder the items in a section's list — steps, cards, tabs, stats — so that the page grows with the company.
+71. As Ahmed, I want to switch a section off, so that I can pull something out of date without a developer.
+72. As Ahmed, I want the admin to stop me when a text is too long or a list too full for the design, so that I cannot break a page by accident.
+73. As Ahmed, I want to replace a Screen mock image with its description and caption, so that the product pictures can be refreshed.
+74. As Ahmed, I want to change form labels, messages, the confirmation email and where alerts go, so that the forms say what we mean.
+75. As Ahmed, I want to give a colleague CMS access with the same rights as mine, so that whoever edits can edit everything.
 
 **The team — operations**
 
@@ -138,7 +144,13 @@ Rebuild the Reference site as the official Marketing site at `rabaedapp.com`: sa
 
 - **Globals**: site settings (contact details, WhatsApp number, social links), navigation, footer, Trust strip logos (image, name, link, order), Referral Program values (amount, client discount).
 - **Collections**: pages (with localised section content), FAQ entries (grouped by page), blog posts, case studies, legal documents, form submissions, media.
-- **Legal documents** carry versioning with retained history, an explicit publish action, and edit rights restricted to the owner account (ADR-0003). The `.docx` files are imported verbatim once, typos included, and kept as the pre-launch archive.
+- **One role.** Every Editor can change everything: legal documents, Referral Program values and alert addresses included (ADR-0007).
+- **What an Editor can change on a page:** its words and images, the items in its lists (add, remove, reorder), and whether a section shows. Section order is fixed. Sections that links point at cannot be hidden: the demo form, the start page's FAQ, the tool page's download and how-it-works, the referral page's signup and how-it-works. Sections whose design is built around an exact count stay locked at it: the before/after steps (4), the calculator's sliders (3), the hero's buildings (3), and the three parties.
+- **The visitor's experience wins over the Editor's freedom.** Where the design can only carry so much — fixed-size cards, single-line labels, fixed-height headings — the admin enforces a character or item limit rather than letting a page break.
+- **Page lists are shared across locales:** one list, each item carrying its text per locale. A page is published in a locale only once every item has that locale's text. FAQs, blog posts and case studies stay per-locale entries.
+- **Referral Program values** (referral payout, client discount) are a global. Page text that quotes them inserts the value rather than typing the number. The Referral Terms are never generated from them: while the published terms do not state the current values, the CMS warns on the values, on the Referral Terms and on the admin dashboard, without blocking publishing (ADR-0008).
+- **Each page reads its content through one module per page**, as the legal pages already do. Sections receive their content and never fetch it themselves, so the source behind that module can move from static files to the CMS page by page.
+- **Legal documents** carry versioning with retained history, an explicit publish action, and the author of each version (ADR-0003, ADR-0007). The `.docx` files are imported verbatim once, typos included, and kept as the pre-launch archive.
 - **Case studies** ship with the section hidden until the first entry is published.
 - Media uploads are converted to modern formats and multiple sizes on upload.
 - Blog posts and case studies require: title, slug, locale, summary, body, author, published date, and an explicit answer-first opening paragraph field used for both the page and its structured data.
@@ -150,6 +162,7 @@ Rebuild the Reference site as the official Marketing site at `rabaedapp.com`: sa
 - Dark and light are **alternating section treatments**, not a user theme. No `prefers-color-scheme` handling.
 - Plain CSS with the Reference site's class names preserved. No Tailwind rewrite, no CSS Modules on cross-cutting selectors — scoping breaks selectors like `.nav.on-light .brand .lg.l`, and class names are load-bearing for behaviour.
 - The breakpoint contract is fixed: **≥981px** desktop, **≤980px** mobile, with secondary breakpoints at 700, 680, 640, 620, 560 and 400px, plus the Reference site's height-based queries. These are requirements, not suggestions; the pinned sections depend on them.
+- Grids holding Editor-managed lists lay out any number of items neatly — including those the Reference site designed for sets of two, three or four — without changing how today's counts look.
 - Documented exceptions that must survive refactoring: `.nav .mnav .wrap{height:auto}`, `.nav > .wrap` at 700px, `.nav.open` background override, and the intentional off-canvas bleed of `.pcard`. Each is commented in place with the reason.
 
 ### Animation
@@ -164,11 +177,14 @@ Rebuild the Reference site as the official Marketing site at `rabaedapp.com`: sa
 - The co-founder's mock markup is kept in the repo behind a studio route that is excluded from the production sitemap and blocked from indexing.
 - A script renders each mock per locale at high resolution and exports optimised images with dimensions recorded to prevent layout shift.
 - Each mock carries a descriptive `alt` and a visible caption stating the same claim in real text (ADR-0002).
+- An Editor can replace a mock's image, description and caption from the admin; a replacement keeps the 1440×900 shape. Changing what a mock depicts stays a developer's job through the studio. The check that exported images match their markup applies only to mocks not replaced in the admin.
 - Below 700px, mocks render at their intrinsic width inside a horizontally scrollable container, matching the Reference site's panning behaviour.
 
 ### Forms
 
 - Four flows: demo request, Referral Program signup, Partnership Program application, Pour Tracker download.
+- Each form is a definition — its fields, rules and Arabic messages — read by both the browser and the server. All four run through one server-side submission pipeline: validate, honeypot and rate limit, store, alert, confirm. Mail and private storage sit behind that pipeline as swappable adapters, so tests can read what would have been sent.
+- Editors change a form's wording (labels, placeholders, messages, the confirmation email) and the alert address. Which fields a form has is fixed in code, because every field reaches storage, spam protection and the Privacy Policy.
 - Real semantic `<form>` elements with named fields, required attributes, Arabic validation messages, and submission handled server-side. The Reference site's `data-fake-send` behaviour and its hardcoded fake referral code are removed entirely.
 - Uploads keep the Reference site's `.upl` label structure and its selected-state styling. File type and size are validated **on the server**, not only in the browser; the size cap is 10 MB with an Arabic error message.
 - Applicant documents are written to the private bucket and surfaced only through short-lived signed URLs from the submission record.
@@ -215,8 +231,8 @@ Tests run against the built application with a seeded test database and test sto
 - **Interaction.** Navigation colour toggle across section boundaries; the Partnerships dropdown by hover, click, keyboard and Escape; the mobile panel at ≤980px; journey pinning at ≥981px and at short heights; the tab strips; the before/after slider by pointer and keyboard; the card decks.
 - **Reduced motion.** With the preference set, animations are skipped and all content remains present and readable.
 - **Localisation.** Arabic renders RTL and English LTR; the switcher preserves the page; a missing translation offers the alternative rather than a blank page; `hreflang` and canonical tags are correct per locale.
-- **Forms.** Validation messages appear in the right language; the submit button gates on validity; a valid submission creates exactly one row; an uploaded document lands in the private bucket and is **not** retrievable without a signed URL; oversized and wrong-type files are rejected server-side; the honeypot blocks a bot-shaped submission; the Pour Tracker downloads with the correct filename only after the submission is recorded.
-- **CMS.** An edit made through the admin appears on the page; an unpublished draft does not; a hidden case-study section stays hidden until an entry is published; a legal edit produces a new retained version.
+- **Forms.** Validation messages appear in the right language; the submit button gates on validity; a valid submission creates exactly one row; an uploaded document lands in the private bucket and is **not** retrievable without a signed URL; oversized and wrong-type files are rejected server-side; the honeypot blocks a bot-shaped submission; the Pour Tracker downloads with the correct filename only after the submission is recorded. One submission check runs per form and per placement, including the demo form on home, product and start.
+- **CMS.** An edit made through the admin appears on the page; an unpublished draft does not; a hidden case-study section stays hidden until an entry is published; a legal edit produces a new retained version; a text too long or a list too full for its design is refused; a hidden section disappears and a linked-to section cannot be hidden; changing a Referral Program value updates every mention and raises the Referral Terms warning.
 - **Discovery.** Sitemap lists exactly the published pages; `robots.txt` and `llms.txt` are served; structured data validates and its FAQ content matches the visible text verbatim; every page has a canonical URL, a title, a description and an Open Graph image that resolves.
 - **Accessibility.** Automated checks per page, plus assertions that every Screen mock has a non-empty description and every image an `alt`.
 
@@ -227,7 +243,7 @@ Tests run against the built application with a seeded test database and test sto
 - The Rabaed product app at `app.rabaedapp.com`, including sign-in, accounts and any product functionality. The site links to it and contains none of it.
 - End-user accounts on the marketing site. The only logins are CMS editors.
 - **Stage 2 items**, tracked separately: the English site, English Screen mock exports, and English blog and case study translations.
-- **Later phase**: building whole new pages from blocks in the CMS. Stage 1 lets Ahmed edit every existing page, not invent new page types.
+- **Later phase**: building whole new pages from blocks in the CMS. Stage 1 lets Ahmed edit every existing page, including its lists and which sections show, but not reorder sections or invent new page types.
 - English translations of the Terms, Privacy Policy and Referral Terms. Arabic is binding; translating them is a lawyer's job, not this build's.
 - Redesigning the Pour Tracker. It ships as-is with only the brand spelling corrected, keeping its own claymorphic look and its existing bilingual switcher. Restyling it to match the site is a later, separate piece of work.
 - Migrating existing search rankings. Nothing is published today, so there is nothing to redirect and no ranking to preserve.

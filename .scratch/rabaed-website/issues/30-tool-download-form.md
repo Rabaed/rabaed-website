@@ -15,6 +15,8 @@
 
 ## Comments
 
+**Plugs into ticket 27 (decided 13 September 2026).** `download-details.ts` becomes this form's definition in ticket 27, so this ticket runs it through the shared submission pipeline and adds the delivery after the record is stored. Its wording is editable by Editors; its fields are not (spec: Forms).
+
 **Left for this ticket by ticket 14 (13 September 2026).** The tool page's download form validates as the Reference site does, and unlocks once the details are valid, but a valid submit sends nothing and delivers nothing: the spec delivers the file only after the submission is recorded. Three things wait here:
 
 - **The panel for after the download has started.** On the Reference site the form is replaced by «تم — التحميل بدأ», a line naming `Rabaed-Pour-Tracker.html`, three numbered steps — save it somewhere lasting, open it in Chrome or Edge, choose a project folder — and «لم يبدأ التحميل؟ اضغط هنا». Its markup is in `reference/site/tool.html` (`#tl-done`) and its styles are `.tl-done`, `.tl-ok` and `.tl-steps` in that page's stylesheet. Neither was carried over, since there was no download to confirm.
