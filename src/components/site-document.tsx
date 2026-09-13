@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { PreviewBanner } from '@/components/preview-banner';
 import { LOCALES, type Locale } from '@/lib/locales';
 
 /**
@@ -13,7 +14,10 @@ import { LOCALES, type Locale } from '@/lib/locales';
 export function SiteDocument({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
     <html lang={locale} dir={LOCALES[locale].dir}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <PreviewBanner />
+      </body>
     </html>
   );
 }

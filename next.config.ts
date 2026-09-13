@@ -1,3 +1,4 @@
+import { withPayload } from '@payloadcms/next/withPayload';
 import type { NextConfig } from 'next';
 import { isIndexable } from './src/lib/environment';
 import { STUDIO_PREFIX } from './src/screen-mocks/registry';
@@ -53,11 +54,18 @@ const nextConfig: NextConfig = {
       ],
     };
 
-    if (isIndexable()) return [studio, downloads];
+    // The CMS admin and its API (ticket 19) are for editors, never for search.
+    const cms = ['/maktab/:path*', '/api/:path*'].map((source) => ({
+      source,
+      headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+    }));
+
+    if (isIndexable()) return [studio, downloads, ...cms];
 
     return [
       studio,
       downloads,
+      ...cms,
       {
         source: '/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
@@ -66,4 +74,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Payload's own additions: which of its packages stay out of the server
+// bundle, and the aliases its admin needs.
+export default withPayload(nextConfig);

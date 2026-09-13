@@ -71,5 +71,81 @@ break deploys for no benefit.
 `.env.example` lists them, with what each is for. They are set in Vercel's
 project settings, per environment, and never committed.
 
-At the time of writing the site needs none of them: the defaults are correct
-for local development, for previews and for production before launch.
+Locally none has to be set. On Vercel, the CMS variables below are required in
+every environment — a deployment without them fails to build, and says which
+one is missing.
+
+## The CMS
+
+Ahmed edits the site at **`/maktab`** on the site's own address
+(`rabaedapp.com/maktab` once launched). It is Payload CMS, running inside the
+same application as the site; its content is stored in a Supabase Postgres
+database and uploaded images in Supabase Storage (ADR-0004).
+
+Nobody can create an account from the sign-in page. The first account is made
+from the command line (step 5 below); after that, an editor invites others from
+inside the admin under **Editors**.
+
+### One-time setup
+
+This needs somebody with the company accounts. Until it is done, Vercel cannot
+build the site — so it has to happen **before the CMS pull request is merged**,
+or production deployments stop.
+
+1. **Create a Supabase project** at [supabase.com](https://supabase.com), in
+   the region nearest Saudi Arabia, with a strong database password kept in the
+   company password manager.
+2. **Database address.** In the project, **Connect → Transaction pooler**, copy
+   the connection string and put the database password into it. This is
+   `DATABASE_URL`.
+3. **Image storage.** **Storage → New bucket**, named `media`, set to public:
+   the images on the site are public anyway. Then **Storage → Settings → S3
+   connection**: note the endpoint and region, and create an access key. These
+   are `S3_BUCKET` (`media`), `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID` and
+   `S3_SECRET_ACCESS_KEY`. Applicant documents do **not** go in this bucket;
+   they get a private one of their own in ticket 28.
+4. **Vercel.** In the project's **Settings → Environment Variables**, add the
+   six values above plus `PAYLOAD_SECRET`, a long random value (for example the
+   output of `openssl rand -hex 32`). Recommended: a **second** Supabase project
+   for the Preview environment, so that trying out a pull request can never
+   change what is on the live site. If there is only one, previews and
+   production share the same content.
+5. **Create the database tables and the first account**, from a computer with
+   the repository. Set `DATABASE_URL` and `PAYLOAD_SECRET` to production's
+   values **in the terminal, for these commands only** — never in `.env.local`,
+   which `npm run dev` also reads and would then point at the live content.
+
+   ```bash
+   npm run cms:migrate
+   ```
+
+   ```bash
+   npm run cms:create-editor -- ahmed@rabaedapp.com
+   ```
+
+   The second command prints a temporary password once. Hand it over privately;
+   Ahmed changes it after signing in. Close the terminal afterwards.
+
+### When a change adds to the CMS
+
+A change that adds a field or a content type carries a **migration** in
+`src/migrations/`: the instructions that bring the database's tables up to
+date. **Production applies them itself**: its build runs the migrations before
+building the pages (`scripts/migrate-production.mjs`). **Preview builds never
+do**, so that trying out a pull request cannot change the tables the live site
+reads. With a separate preview database, run `npm run cms:migrate` against it,
+the same way as step 5, when a pull request that adds a migration needs a
+preview.
+
+For developers: after changing the CMS configuration, `npm run cms:migration --
+<name>` writes the migration, and `npm run cms:generate` refreshes the admin's
+import map and `src/payload-types.ts`. Payload writes the migration's type
+imports as value imports, which this project's compiler settings refuse; mark
+them `type` by hand.
+
+### Not there yet
+
+- **Email.** No mail account is connected (the Microsoft 365 credentials are
+  still awaited), so "forgot password" in the admin sends nothing, and the
+  reset cannot be finished another way. Until then an editor who forgets their
+  password is given a new one by another editor, under **Editors**.

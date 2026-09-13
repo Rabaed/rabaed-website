@@ -1,0 +1,32 @@
+/* Shown to editors only, while previewing drafts (src/components/preview-banner.tsx).
+   Not part of the Reference site's design, so it borrows its tokens and keeps
+   out of the way: pinned to the bottom edge, above everything. */
+.preview-banner {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--dark);
+  color: var(--dark-text);
+  border-top: 2px solid var(--acc);
+  font-size: 14px;
+}
+
+.preview-banner form {
+  margin: 0;
+}
+
+.preview-banner button {
+  font: inherit;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--acc);
+  color: #fff;
+  cursor: pointer;
+}

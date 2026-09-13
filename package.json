@@ -6,18 +6,22 @@
   "description": "The Rabaed marketing site.",
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=22.11"
+    "node": ">=22.18"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/with-database.mjs next dev",
+    "build": "node scripts/migrate-production.mjs && next build",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "playwright test",
     "baselines:capture": "node scripts/capture-baselines.mjs",
     "baselines:verify": "node scripts/capture-baselines.mjs --verify",
     "fonts:sync": "node scripts/sync-fonts.mjs",
-    "mocks:export": "next build && node scripts/export-screen-mocks.mjs"
+    "mocks:export": "node scripts/with-database.mjs \"next build && node scripts/export-screen-mocks.mjs\"",
+    "cms:migrate": "payload migrate",
+    "cms:migration": "node scripts/with-database.mjs payload migrate:create",
+    "cms:generate": "node scripts/with-database.mjs \"payload generate:importmap && payload generate:types\"",
+    "cms:create-editor": "payload run scripts/create-editor.ts"
   },
   "devDependencies": {
     "@fontsource/dm-mono": "^5.3.0",
@@ -28,16 +32,24 @@
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "embedded-postgres": "18.4.0-beta.17",
     "pixelmatch": "^7.2.0",
     "playwright": "^1.56.1",
     "pngjs": "^7.0.0",
-    "sharp": "^0.35.4",
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@payloadcms/db-postgres": "3.89.0",
+    "@payloadcms/next": "3.89.0",
+    "@payloadcms/storage-s3": "3.89.0",
+    "@payloadcms/translations": "3.89.0",
+    "@payloadcms/ui": "3.89.0",
+    "graphql": "^16.14.2",
     "gsap": "^3.15.0",
     "next": "^16.3.5",
+    "payload": "3.89.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "sharp": "^0.35.4"
   }
 }

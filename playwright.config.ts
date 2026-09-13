@@ -45,15 +45,19 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: `npm run build && npm run start -- --port ${PORT}`,
-    // Also handed to the build, which reads it to work out the origin
-    // canonical URLs point at when nothing else says (src/lib/environment.ts).
+    // Starts a throwaway database, migrates it and creates the test editor,
+    // then builds the application and starts it (ticket 19).
+    command: 'node scripts/test-server.mjs',
+    // Read by the build to work out the origin canonical URLs point at when
+    // nothing else says (src/lib/environment.ts), and by the test server to
+    // choose its port and its database's.
     env: { PORT: String(PORT) },
     url: baseURL,
     // Never reuse: a server already listening is either a dev server or a
     // stale build, and both would make the run a lie.
     reuseExistingServer: false,
-    timeout: 180_000,
+    // The database, its migrations and the build, one after another.
+    timeout: 300_000,
     stdout: 'pipe',
     stderr: 'pipe',
   },
