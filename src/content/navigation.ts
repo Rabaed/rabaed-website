@@ -51,6 +51,3 @@ export const FOOTER_LEGAL_LINKS: readonly NavLink[] = [
  */
 export const SIGN_IN_URL = 'https://rabaedapp.com/signin?lang=ar_ar';
 export const SIGN_IN_LABEL = 'تسجيل الدخول';
-
-/** The real number, from the Reference site. Ticket 21 moves it into site settings. */
-export const WHATSAPP_URL = 'https://wa.me/966576767900';

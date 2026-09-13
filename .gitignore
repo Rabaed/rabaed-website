@@ -6,6 +6,9 @@
 *.key
 secrets/
 
+# The local development database and uploaded images (scripts/with-database.mjs)
+.data/
+
 # Dependencies
 node_modules/
 .pnp/
