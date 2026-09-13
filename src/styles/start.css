@@ -1,7 +1,8 @@
 /**
  * The start page's own sections, taken from `reference/site/start.html`
  * (ticket 13): the three steps, the questions beside the demo request form,
- * and the free tool teaser. The page's hero and the form are the shared ones
+ * and the free tool teaser. The step cards are the referral page's too, four
+ * across there (`programmes.css`). The page's hero and the form are the shared ones
  * in `shell.css`, its questions `tokens.css`'s `.qa`, and its Trust strip the
  * home page's.
  *

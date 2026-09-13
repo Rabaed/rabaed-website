@@ -58,6 +58,20 @@ export const ROUTES = [
     alternates: { ar: '/start', en: '/en/start' },
   },
   {
+    path: '/referral',
+    locale: 'ar',
+    dir: 'rtl',
+    // The hero, the last of the summarised terms, and the signup form at the
+    // foot of the page. Answers sit closed; `referral-page.spec.ts` finds every
+    // one in the first response.
+    text: [
+      'أحِل مشروعاً واحداً. اكسب 2,000 ريال.',
+      'يُوقَّع إلكترونياً عند التسجيل.',
+      'سجّل في برنامج الإحالة',
+    ],
+    alternates: { ar: '/referral', en: '/en/referral' },
+  },
+  {
     path: '/terms',
     locale: 'ar',
     dir: 'rtl',

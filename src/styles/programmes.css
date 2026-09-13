@@ -1,0 +1,108 @@
+/**
+ * The programme pages' own pieces, taken from the block the Reference site
+ * adds to `referral.html` and `partnership.html` alike (HANDOFF §2): the hero's
+ * figures, the lead paragraphs, the audience cards, the terms in points, the
+ * signup grid, its benefits, consents and document fields. The referral page
+ * (ticket 15) uses what is here; the partnership page (ticket 16) adds what
+ * only it uses — `.rt-row.two`, `.start .s .fit`, `.form textarea` and the
+ * closing steps' `.ph`.
+ *
+ * Imported after `start.css`, whose step cards the referral page lays four
+ * across, and before `responsive.css`, which has to stay last for the reason
+ * written at the top of it. Every value is the Reference site's and is held to
+ * it by tests/e2e/referral-matches-reference.spec.ts, except where a
+ * divergence below says otherwise; the scroll margins and the document
+ * fields' focus are held by tests/e2e/referral-page.spec.ts.
+ */
+
+/* ---- the hero's figures ---- */
+.pstats { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px }
+.pstat { background: rgba(255, 255, 255, .04); border: 1px solid var(--dark-line); border-radius: 14px; padding: 14px 20px; min-width: 158px }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the Reference site sets the
+   whole figure in DM Mono, which has no Arabic glyphs, so «ريال» and «بلا حد»
+   fall to the browser's last-resort monospace. Here the figure keeps the
+   Arabic face and only its numerals are `.mono`, in the markup — as in the
+   guarantee pill. */
+.pstat b { display: block; font-size: 24px; font-weight: 500; color: var(--acc); line-height: 1.5 }
+/* The child combinator keeps this off the numeral's own `.mono` span. */
+.pstat > span { font-size: 13px; color: var(--dark-muted) }
+
+/* ---- paragraphs that lead a section ---- */
+.lead-block { max-width: 780px }
+.lead-block p { color: var(--muted); font-size: 16.5px; line-height: 2; margin: 0 0 14px }
+.lead-block p:last-child { margin-bottom: 0 }
+.lead-block b { color: var(--ink); font-weight: 600 }
+
+/* ---- the step cards, four across ---- */
+/* DELIBERATE EXCEPTION (HANDOFF §5): four across only at desktop widths. Below
+   981px `.start` falls back to `start.css`'s two across and then one; written
+   without the media query, this would outrank those and hold four columns on
+   a phone. */
+@media (min-width: 981px) { .start.four { grid-template-columns: repeat(4, 1fr) } }
+
+/* ---- who the programme is for ---- */
+.rt-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px }
+.rt-c { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; transition: border-color .3s, transform .3s }
+.rt-c:hover { border-color: var(--acc); transform: translateY(-2px) }
+.rt-c .k { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--acc); letter-spacing: .08em; margin-bottom: 10px }
+.rt-c h3 { font-size: 17px; margin: 0 0 6px; font-weight: 600 }
+.rt-c p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75 }
+@media (max-width: 980px) { .rt-row { grid-template-columns: 1fr } }
+/* The link inside a note (`.gain`, in `tokens.css`). */
+.gain .inl { color: var(--acc); font-weight: 600 }
+.gain .inl:hover { text-decoration: underline }
+
+/* ---- the terms in points ---- */
+.t8 { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px }
+.t8 li { display: flex; gap: 13px; align-items: flex-start; padding: 14px 0; border-bottom: 1px dashed var(--line); font-size: 15px; color: var(--muted); line-height: 1.8 }
+.t8 i { width: 26px; height: 26px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc); font-style: normal; margin-top: 3px }
+.t8 b { color: var(--ink); font-weight: 600 }
+
+/* ---- the signup: its copy beside the form ---- */
+.sign-grid { display: grid; grid-template-columns: .95fr 1.05fr; gap: 44px; align-items: start; margin-top: 8px }
+.ben-row { list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 36px }
+.ben-row.one { grid-template-columns: 1fr; margin-top: 20px }
+.ben-row li { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 1px dashed var(--line); font-size: 15px; color: var(--muted); line-height: 1.8 }
+.ben-row i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px }
+.ben-row b { color: var(--ink); font-weight: 600 }
+
+/* The consents, and the declaration one of them agrees to. */
+.chk { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--muted); line-height: 1.85; cursor: pointer }
+.chk input { width: 17px; height: 17px; flex: none; margin: 5px 0 0; accent-color: var(--acc) }
+.chk a { color: var(--acc); border-bottom: 1px solid rgba(249, 87, 56, .35) }
+.declar { background: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--muted); line-height: 1.95 }
+
+@media (max-width: 980px) {
+  .sign-grid { grid-template-columns: 1fr; gap: 30px }
+  .t8, .ben-row { grid-template-columns: 1fr }
+  .pstat { flex: 1 1 150px; min-width: 0 }
+}
+
+/* ---- document fields (src/components/referral/upload-field.tsx) ---- */
+.form .upl { display: flex; align-items: center; gap: 12px; border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px; background: var(--paper); cursor: pointer; transition: border-color .25s, background .25s }
+.form .upl:hover { border-color: var(--acc); background: #fff }
+.form .upl:focus-within { outline: 2px solid var(--acc); outline-offset: 3px }
+.form .upl .ic { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; line-height: 1 }
+.form .upl .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 }
+.form .upl .tx b { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.5 }
+.form .upl .tx small { font-size: 11.5px; color: var(--muted); line-height: 1.5 }
+/* A file name is read in its own direction, whatever the page's. */
+.form .upl .nm { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 38%; text-align: end; direction: ltr; unicode-bidi: plaintext }
+/* A file is chosen: the card turns green. */
+.form .upl.has { border-style: solid; border-color: rgba(29, 158, 117, .45); background: rgba(29, 158, 117, .05) }
+.form .upl.has .ic { background: rgba(29, 158, 117, .14); color: var(--green) }
+.form .upl.has .nm { color: var(--green); font-weight: 600 }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the Reference site's file
+   input is `hidden`, which takes it out of the tab order and leaves the
+   `:focus-within` outline above unreachable. Here it is clipped to nothing but
+   still takes focus. Out of the flow, so the card is laid out exactly as
+   before; three selectors deep, so `.form input`'s padding and full width
+   cannot reach it. */
+.form .upl input[type="file"] { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap }
+
+/* ---- the referral page's in-page links ---- */
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small, as `#demo` in
+   `shell.css` and `#faq` in `start.css`: the hero's two links land here. The
+   Reference site's script stops 78px short so the fixed header does not cover
+   the section; this stops in the same place with no script. */
+#how, #signup { scroll-margin-top: 78px }

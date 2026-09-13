@@ -106,6 +106,24 @@ h2 { font-size: 38px; margin-bottom: 12px }
   .tz-foot { margin-top: 18px }
 }
 
+/* Two cards side by side, each with a small badge in its corner: the product
+   page's custom strip and the referral page's offer. */
+.strip { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px }
+.strip .c { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; position: relative }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: every badge — «حسب المشروع»,
+   «لك», «لعميلك» — is Arabic set in DM Mono there, which has no Arabic glyphs.
+   The Arabic face here; every other value is the Reference site's. */
+.strip .c .badge { position: absolute; top: 18px; inset-inline-end: 18px; font-size: 11px; font-family: inherit; background: #FBF6E8; color: #836921; padding: 3px 10px; border-radius: 999px }
+.strip .c h3 { font-size: 20px; margin-bottom: 8px }
+.strip .c p { color: var(--muted); margin: 0; font-size: 15px }
+.strip .c a { display: inline-block; margin-top: 12px; color: var(--acc); font-weight: 600; font-size: 14px }
+@media (max-width: 980px) { .strip { grid-template-columns: 1fr } }
+
+/* A note set off from the copy around it by a bar at its start: the product
+   page's roles and the referral page's audience. */
+.gain { margin-top: 14px; padding: 12px 16px; background: var(--soft); border-radius: 10px; border-inline-start: 3px solid var(--acc); font-size: 14px; color: var(--muted) }
+.gain b { color: var(--ink); font-weight: 600 }
+
 /* A question that opens to its answer (src/components/faq.tsx), on the home,
    start, tool, referral and partnership pages. `<details>` does the opening, so
    there is no script; `list-style: none` and `display: flex` take away the
