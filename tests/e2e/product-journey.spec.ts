@@ -17,6 +17,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { sidewaysOverflow } from './geometry';
+import { HEADER_BACKGROUND_OVER_DARK, HEADER_BACKGROUND_OVER_LIGHT } from './header-colours';
 
 /** The five panels in order, and what each one's screen is described as. */
 const PANELS = [
@@ -52,8 +53,6 @@ const PANELS = [
 /** The colour of a lit progress mark: the brand orange. */
 const LIT = 'rgb(249, 87, 56)';
 
-const HEADER_OVER_DARK = 'rgba(20, 22, 28, 0.72)';
-const HEADER_OVER_LIGHT = 'rgba(250, 250, 248, 0.8)';
 
 const journey = (page: Page) => page.locator('#journey');
 
@@ -295,11 +294,11 @@ test('the header stays dark through the journey and turns light after it', async
   for (const y of [start + 2, Math.round(start + (end - start) * 0.5), end - 1]) {
     await scrollTo(page, y);
     await expect.poll(async () => (await lookAt(page)).top).toBeCloseTo(0, 0);
-    expect(await headerBackground(), `at ${y - start}px into the journey`).toBe(HEADER_OVER_DARK);
+    expect(await headerBackground(), `at ${y - start}px into the journey`).toBe(HEADER_BACKGROUND_OVER_DARK);
   }
 
   await scrollTo(page, end + 900);
-  await expect.poll(headerBackground).toBe(HEADER_OVER_LIGHT);
+  await expect.poll(headerBackground).toBe(HEADER_BACKGROUND_OVER_LIGHT);
 });
 
 test('crossing the size gate switches between pinned and stacked, and back', async ({ page }) => {

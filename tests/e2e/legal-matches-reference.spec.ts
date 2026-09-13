@@ -16,13 +16,8 @@
  */
 import { test, expect } from '@playwright/test';
 import { measureRegion, type Region } from './geometry';
-import { BASELINE_VIEWPORTS, openBothPages, startReferenceSite, type PagePair, type ReferenceSite } from './reference-site';
-
-const PAGES: readonly PagePair[] = [
-  { reference: 'terms.html', rebuilt: '/terms' },
-  { reference: 'privacy.html', rebuilt: '/privacy' },
-  { reference: 'referral-terms.html', rebuilt: '/referral-terms' },
-];
+import { LEGAL_PAGES } from './legal-documents';
+import { BASELINE_VIEWPORTS, openBothPages, startReferenceSite, type ReferenceSite } from './reference-site';
 
 const REGIONS: readonly Region[] = [
   { name: 'the page hero', root: '.phero', parts: ['.wrap', '.eyebrow', 'h1', '.lead'] },
@@ -64,7 +59,7 @@ test.describe('the legal pages match the Reference site', () => {
     await new Promise((resolve) => site.server.close(resolve));
   });
 
-  for (const pair of PAGES) {
+  for (const pair of LEGAL_PAGES) {
     for (const viewport of BASELINE_VIEWPORTS) {
       test(`${pair.rebuilt} at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
         const pages = await openBothPages(browser, baseURL!, site, viewport, pair);

@@ -11,7 +11,9 @@
  * the code it is testing agrees with that code by construction, and would keep
  * agreeing after somebody swapped the two directions over. `alternates` is
  * restated for the same reason — the address the page declares for itself in
- * each locale.
+ * each locale it exists in, and no other. The legal pages exist in Arabic
+ * alone: the Arabic is binding, and they are never translated (spec: Out of
+ * Scope).
  */
 export const ROUTES = [
   {
@@ -48,20 +50,20 @@ export const ROUTES = [
     // One of the three misspellings the approved document carries, which is
     // the phrase most likely to be "corrected" on its way to the browser.
     text: ['شروط الخدمة', 'يحق لبرائد رفض تقديم الخدمة أو استخدام النظام دون إبداء أسباب.'],
-    alternates: { ar: '/terms', en: '/en/terms' },
+    alternates: { ar: '/terms' },
   },
   {
     path: '/privacy',
     locale: 'ar',
     dir: 'rtl',
     text: ['سياسة الخصوصية', 'تحكم سياسة الخصوصية الأسلوب الذي تقوم به'],
-    alternates: { ar: '/privacy', en: '/en/privacy' },
+    alternates: { ar: '/privacy' },
   },
   {
     path: '/referral-terms',
     locale: 'ar',
     dir: 'rtl',
     text: ['الشروط والأحكام — برنامج الإحالة', '2,000 ريال سعودي صافية عن كل مشروع مُحال'],
-    alternates: { ar: '/referral-terms', en: '/en/referral-terms' },
+    alternates: { ar: '/referral-terms' },
   },
 ] as const;

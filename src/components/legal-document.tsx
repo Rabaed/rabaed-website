@@ -8,8 +8,15 @@ import { pageMetadata } from '@/lib/metadata';
 /** The Gregorian months, as the approved documents write them. */
 const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
+/** A legal document's title and description, and its one address: it exists in Arabic alone. */
 export function legalMetadata(document: LegalDocument): Metadata {
-  return pageMetadata({ locale: 'ar', path: document.path, title: document.metaTitle, description: document.description });
+  return pageMetadata({
+    locale: 'ar',
+    locales: ['ar'],
+    path: document.path,
+    title: document.metaTitle,
+    description: document.description,
+  });
 }
 
 /**
@@ -52,7 +59,7 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           <div className="intro">
             {document.intro.map((line, index) => (
               <p key={index}>
-                <Text line={line} />
+                <Runs line={line} />
               </p>
             ))}
           </div>
@@ -77,7 +84,7 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           ))}
 
           <div className="xref">
-            <Text line={document.seeAlso} />
+            <Runs line={document.seeAlso} />
           </div>
         </div>
       </section>
@@ -90,7 +97,7 @@ function ClauseBlock({ block }: { block: Block }) {
     case 'paragraph':
       return (
         <p>
-          <Text line={block.text} />
+          <Runs line={block.text} />
         </p>
       );
     case 'list':
@@ -98,7 +105,7 @@ function ClauseBlock({ block }: { block: Block }) {
         <ul>
           {block.items.map((item, index) => (
             <li key={index}>
-              <Text line={item} />
+              <Runs line={item} />
             </li>
           ))}
         </ul>
@@ -108,7 +115,7 @@ function ClauseBlock({ block }: { block: Block }) {
         <div className="contact-box">
           {block.lines.map((line, index) => (
             <p key={index}>
-              <Text line={line} />
+              <Runs line={line} />
             </p>
           ))}
         </div>
@@ -116,7 +123,8 @@ function ClauseBlock({ block }: { block: Block }) {
   }
 }
 
-function Text({ line }: { line: Line }) {
+/** The runs of text in one line — plain words, bold phrases and links — with a link to this site given its locale. */
+function Runs({ line }: { line: Line }) {
   return line.map((piece, index) => {
     if (typeof piece === 'string') return <Fragment key={index}>{piece}</Fragment>;
     if ('strong' in piece) return <b key={index}>{piece.strong}</b>;

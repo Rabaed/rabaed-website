@@ -13,37 +13,32 @@
  *
  * Whether the pages *look* like the Reference site is asked in
  * `legal-matches-reference.spec.ts`. That they stay out of search results
- * until launch is `indexing.spec.ts`, through `routes.ts` (ADR-0006).
+ * until launch is `indexing.spec.ts`, and that they name no English version
+ * is `localisation.spec.ts`, both through `routes.ts` (ADR-0006).
  */
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import { sidewaysOverflow } from './geometry';
+import { HEADER_BACKGROUND_OVER_DARK, HEADER_BACKGROUND_OVER_LIGHT } from './header-colours';
+import { LEGAL_PAGES } from './legal-documents';
 import { openReferencePage, startReferenceSite, type ReferenceSite } from './reference-site';
 import { readWordParagraphs } from './word-document';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 
-const LEGAL_PAGES = [
-  { path: '/terms', reference: 'terms.html', title: 'شروط الخدمة', word: 'V.0.0_AR_Terms_of_Service.docx' },
-  { path: '/privacy', reference: 'privacy.html', title: 'سياسة الخصوصية', word: 'V.0.0_AR_privacy_policy.docx' },
-  // The Referral Program Terms have no Word document in `reference/legal-source/`:
-  // the Reference page is their only source.
-  { path: '/referral-terms', reference: 'referral-terms.html', title: 'الشروط والأحكام — برنامج الإحالة', word: null },
-] as const;
-
-const HEADER_OVER_DARK = 'rgba(20, 22, 28, 0.72)';
-const HEADER_OVER_LIGHT = 'rgba(250, 250, 248, 0.8)';
-
 /** Text as a reader meets it: runs of spaces and line breaks are one space. */
 const normalise = (text: string) => text.replace(/\s+/g, ' ').trim();
 
-/** Every block of words on a legal page, in reading order. */
-async function textBlocks(page: Page) {
-  return page
-    .locator(
-      '.phero h1, .phero .lead, .legal .updated, .legal .intro p, .legal .toc a, .legal h2, .legal .wrap > p, .legal li, .legal .contact-box p, .legal .xref',
-    )
-    .evaluateAll((blocks) => blocks.map((block) => block.textContent!.replace(/\s+/g, ' ').trim()));
+/** Every block of words on a legal page. */
+const EVERY_BLOCK =
+  '.phero h1, .phero .lead, .legal .updated, .legal .intro p, .legal .toc a, .legal h2, .legal .wrap > p, .legal li, .legal .contact-box p, .legal .xref';
+/** The document's own paragraphs, headings and list items — what a Word document holds. */
+const DOCUMENT_BLOCKS = '.legal .intro p, .legal h2, .legal .wrap > p, .legal li';
+
+/** The text of each element a selector matches, in reading order, as a reader meets it. */
+async function blockTexts(page: Page, selector: string) {
+  const texts = await page.locator(selector).allTextContents();
+  return texts.map(normalise);
 }
 
 test.describe('the words', () => {
@@ -58,7 +53,7 @@ test.describe('the words', () => {
   });
 
   for (const legal of LEGAL_PAGES) {
-    test(`${legal.path} carries the Reference page's text, block for block, with JavaScript off`, async ({
+    test(`${legal.rebuilt} carries the Reference page's text, block for block, with JavaScript off`, async ({
       browser,
       baseURL,
     }) => {
@@ -68,11 +63,11 @@ test.describe('the words', () => {
         const reference = await context.newPage();
         await openReferencePage(reference, site, legal.reference);
         const rebuilt = await context.newPage();
-        await rebuilt.goto(`${baseURL}${legal.path}`);
+        await rebuilt.goto(`${baseURL}${legal.rebuilt}`);
 
-        const expected = await textBlocks(reference);
+        const expected = await blockTexts(reference, EVERY_BLOCK);
         expect(expected.length, 'nothing was read from the Reference page').toBeGreaterThan(20);
-        expect(await textBlocks(rebuilt)).toEqual(expected);
+        expect(await blockTexts(rebuilt, EVERY_BLOCK)).toEqual(expected);
       } finally {
         await context.close();
       }
@@ -82,9 +77,10 @@ test.describe('the words', () => {
 
 for (const legal of LEGAL_PAGES) {
   if (!legal.word) continue;
+  const word = legal.word;
 
-  test(`${legal.path} carries every paragraph of ${legal.word}, in order`, async ({ page }) => {
-    const [title, date, ...body] = await readWordParagraphs(path.join(repoRoot, 'reference', 'legal-source', legal.word));
+  test(`${legal.rebuilt} carries every paragraph of ${word}, in order`, async ({ page }) => {
+    const [title, date, ...body] = await readWordParagraphs(path.join(repoRoot, 'reference', 'legal-source', word));
 
     // The document opens with its own title and a placeholder where the date
     // of publication goes. The page states the first as its heading and fills
@@ -96,12 +92,8 @@ for (const legal of LEGAL_PAGES) {
     let clause = 0;
     const expected = body.map((paragraph) => normalise(paragraph.heading ? `${++clause}. ${paragraph.text}` : paragraph.text));
 
-    await page.goto(legal.path);
-    const onThePage = await page
-      .locator('.legal .intro p, .legal h2, .legal .wrap > p, .legal li')
-      .evaluateAll((blocks) => blocks.map((block) => block.textContent!.replace(/\s+/g, ' ').trim()));
-
-    expect(onThePage).toEqual(expected);
+    await page.goto(legal.rebuilt);
+    expect(await blockTexts(page, DOCUMENT_BLOCKS)).toEqual(expected);
   });
 }
 
@@ -128,14 +120,14 @@ test('the Terms keep the three misspellings of the name that the approved docume
 });
 
 for (const legal of LEGAL_PAGES) {
-  test(`${legal.path} says when it was last updated`, async ({ page }) => {
-    await page.goto(legal.path);
+  test(`${legal.rebuilt} says when it was last updated`, async ({ page }) => {
+    await page.goto(legal.rebuilt);
     await expect(page.locator('.legal .updated')).toHaveText('آخر تحديث: 1 سبتمبر 2026');
   });
 
-  test(`${legal.path}: every entry in the contents list jumps to its clause, clear of the header`, async ({ page }) => {
+  test(`${legal.rebuilt}: every entry in the contents list jumps to its clause, clear of the header`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(legal.path);
+    await page.goto(legal.rebuilt);
 
     const entries = page.locator('.legal .toc a');
     const count = await entries.count();
@@ -165,8 +157,8 @@ for (const legal of LEGAL_PAGES) {
     }
   });
 
-  test(`${legal.path} gives an email address and a phone number to reach the company`, async ({ page }) => {
-    await page.goto(legal.path);
+  test(`${legal.rebuilt} gives an email address and a phone number to reach the company`, async ({ page }) => {
+    await page.goto(legal.rebuilt);
     const box = page.locator('.legal .contact-box');
     await expect(box.locator('a[href="mailto:ahmed.s@rabaedapp.com"]')).toBeVisible();
     await expect(box.locator('a[href="tel:+966576767900"]')).toBeVisible();
@@ -204,9 +196,9 @@ test.describe('the header colour', () => {
   // ticket asks for the animated pages' behaviour exactly, so the window here
   // is short enough for the footer to reach the top, where the two differ.
   for (const legal of LEGAL_PAGES) {
-    test(`on ${legal.path} it follows the animated pages' rule`, async ({ page }) => {
+    test(`on ${legal.rebuilt} it follows the animated pages' rule`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 160 });
-      await page.goto(legal.path);
+      await page.goto(legal.rebuilt);
       await page.evaluate(() => document.fonts.ready);
 
       const { documentTop, footerTop } = await page.evaluate(() => {
@@ -216,19 +208,19 @@ test.describe('the header colour', () => {
       const background = () => page.locator('.nav').evaluate((nav) => getComputedStyle(nav).backgroundColor);
       const scrollTo = (y: number) => page.evaluate((to) => window.scrollTo(0, to), Math.round(y));
 
-      await expect.poll(background, { message: 'over the dark page hero' }).toBe(HEADER_OVER_DARK);
+      await expect.poll(background, { message: 'over the dark page hero' }).toBe(HEADER_BACKGROUND_OVER_DARK);
 
       await scrollTo(documentTop - 78 + 10);
-      await expect.poll(background, { message: 'the document has passed under the header' }).toBe(HEADER_OVER_LIGHT);
+      await expect.poll(background, { message: 'the document has passed under the header' }).toBe(HEADER_BACKGROUND_OVER_LIGHT);
 
       await scrollTo(footerTop - 40);
-      await expect.poll(background, { message: 'the footer 40px from the top' }).toBe(HEADER_OVER_LIGHT);
+      await expect.poll(background, { message: 'the footer 40px from the top' }).toBe(HEADER_BACKGROUND_OVER_LIGHT);
 
       await scrollTo(footerTop + 10);
-      await expect.poll(background, { message: 'the footer past the top' }).toBe(HEADER_OVER_DARK);
+      await expect.poll(background, { message: 'the footer past the top' }).toBe(HEADER_BACKGROUND_OVER_DARK);
 
       await scrollTo(documentTop - 78 - 30);
-      await expect.poll(background, { message: 'back over the page hero' }).toBe(HEADER_OVER_DARK);
+      await expect.poll(background, { message: 'back over the page hero' }).toBe(HEADER_BACKGROUND_OVER_DARK);
     });
   }
 });
@@ -236,9 +228,9 @@ test.describe('the header colour', () => {
 test.describe('layout integrity', () => {
   for (const legal of LEGAL_PAGES) {
     for (const width of [360, 390, 768, 820, 1024, 1280, 1440, 1600]) {
-      test(`${legal.path}: no sideways scrolling at ${width}px`, async ({ page }) => {
+      test(`${legal.rebuilt}: no sideways scrolling at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
-        await page.goto(legal.path);
+        await page.goto(legal.rebuilt);
         expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
       });
     }
