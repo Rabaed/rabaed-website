@@ -86,6 +86,7 @@ No ticket issues referral codes. Ticket 28 stores the application and its docume
 **`tests/e2e/referral-matches-reference.spec.ts`** compares every section part by part at all sixteen viewports, and a document field with a file chosen at 360 and 1280px. It leaves out only:
 
 - the Arabic labels' typeface, and the width and place their words set;
+- the size and place of the hero's three figure cards. On the Reference site their Arabic falls back to whatever face the operating system supplies. On Linux, where CI runs, that face wraps «2,000 ريال» at 390px and widens the first card at desktop widths; on Windows it does not. This was found by CI, after every comparison had passed locally;
 - the disabled button's colours and the 2px its border adds;
 - the file inputs themselves, which draw nothing on either page.
 

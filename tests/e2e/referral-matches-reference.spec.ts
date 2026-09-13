@@ -19,7 +19,10 @@
  *   and «بلا حد», the badges «لك» and «لعميلك», and «7 أيام عمل» in the
  *   guarantee pill. Here the Arabic keeps the Arabic face and only numerals are
  *   `.mono`. Their typeface is left out, and where the words set how wide the
- *   element is, its width and place across.
+ *   element is, its width and place across. The hero's figures reach further:
+ *   the Reference site's fallback face differs by operating system, and on
+ *   Linux it wraps and widens the figures' cards, so their sizes and places
+ *   are left out entirely.
  * - **The submit button is disabled** until ticket 28 gives the form somewhere
  *   to send, drawn in the Reference site's own disabled style, as the demo
  *   request form's is (`demo-request-form.ts`): its colours and height are
@@ -41,6 +44,8 @@ const REGIONS: readonly Region[] = [
   {
     name: 'the hero',
     root: '.phero',
+    // Taller wherever the Reference site's figures wrap: see below.
+    omitFromRoot: ['height'],
     parts: [
       '.eyebrow',
       'h1',
@@ -48,11 +53,17 @@ const REGIONS: readonly Region[] = [
       '.ctas',
       '.ctas .btn.p',
       '.ctas .btn.g',
-      '.pstats',
-      '.pstat',
-      { selector: '.pstat b', omit: ARABIC_LABEL_LEFT_OUT },
+      // The figures' cards are as wide as their words, and on the Reference
+      // site those words are Arabic in whatever face the operating system
+      // falls back to: Linux's is wide enough to wrap «2,000 ريال» onto a
+      // second line at 390px and to widen the first card past its 158px at
+      // desktop widths, where Windows's is not. So every size and place that
+      // follows from the words is left out; the colours and type are held.
+      { selector: '.pstats', omit: ['height'] },
+      { selector: '.pstat', omit: ['width', 'height', 'left', 'top'] },
+      { selector: '.pstat b', omit: [...ARABIC_LABEL_LEFT_OUT, 'height', 'top'] },
       // Not the numerals' `.mono` spans inside the figures.
-      '.pstat > span',
+      { selector: '.pstat > span', omit: ['left', 'top'] },
     ],
   },
   {
