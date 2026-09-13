@@ -2,6 +2,10 @@
  * The three legal pages (ticket 17): شروط الخدمة, سياسة الخصوصية, and
  * الشروط والأحكام — برنامج الإحالة.
  *
+ * The pages show what is published in the CMS (ticket 25); in the test
+ * server's fresh database that is the imported first version, so these are
+ * the checks that the import was verbatim.
+ *
  * What matters about a legal page is that it says exactly what the approved
  * text says, so most of this is about the words: every block of text against
  * the Reference page, every paragraph against the lawyer's Word document, and
@@ -29,9 +33,13 @@ const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 /** Text as a reader meets it: runs of spaces and line breaks are one space. */
 const normalise = (text: string) => text.replace(/\s+/g, ' ').trim();
 
-/** Every block of words on a legal page. */
+/**
+ * Every block of words on a legal page — but the date. The date is the day the
+ * published version was published (ticket 25): the imported one's is checked
+ * in `cms.spec.ts`, before its tests publish anything.
+ */
 const EVERY_BLOCK =
-  '.phero h1, .phero .lead, .legal .updated, .legal .intro p, .legal .toc a, .legal h2, .legal .wrap > p, .legal li, .legal .contact-box p, .legal .xref';
+  '.phero h1, .phero .lead, .legal .intro p, .legal .toc a, .legal h2, .legal .wrap > p, .legal li, .legal .contact-box p, .legal .xref';
 /** The document's own paragraphs, headings and list items — what a Word document holds. */
 const DOCUMENT_BLOCKS = '.legal .intro p, .legal h2, .legal .wrap > p, .legal li';
 
@@ -120,11 +128,6 @@ test('the Terms keep the three misspellings of the name that the approved docume
 });
 
 for (const legal of LEGAL_PAGES) {
-  test(`${legal.rebuilt} says when it was last updated`, async ({ page }) => {
-    await page.goto(legal.rebuilt);
-    await expect(page.locator('.legal .updated')).toHaveText('آخر تحديث: 1 سبتمبر 2026');
-  });
-
   test(`${legal.rebuilt}: every entry in the contents list jumps to its clause, clear of the header`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(legal.rebuilt);

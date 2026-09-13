@@ -1,23 +1,20 @@
-import type { LegalDocument } from '@/content/legal/document';
+import type { ApprovedDocument } from './approved-text';
 
 /**
  * سياسة الخصوصية — imported word for word from reference/legal-source/V.0.0_AR_privacy_policy.docx, by way of reference/site/privacy.html (ticket 17).
  *
- * The approved text, verbatim: do not reword it, and do not correct its
- * spelling here. A change to a legal document is a change to the approved
- * text, which from ticket 25 is edited and versioned in the CMS (ADR-0003).
+ * The approved text, verbatim, as the CMS's first version of the Privacy
+ * Policy (ticket 25). Frozen: the policy is edited and versioned in the CMS,
+ * and this file is only what the import migration reads (`approved-text.ts`).
  */
-export const PRIVACY_POLICY: LegalDocument = {
-  path: '/privacy',
+export const PRIVACY_POLICY: ApprovedDocument = {
   metaTitle: 'ربائد · سياسة الخصوصية',
   description: 'كيف تجمع ربائد بياناتك وتستخدمها وتحميها، ومع من تُشارك.',
   title: 'سياسة الخصوصية',
   lead: 'كيف تجمع ربائد بياناتك وتستخدمها وتحميها، ومع من تُشارك.',
-  updated: { year: 2026, month: 9, day: 1 },
   intro: [
     ['تحكم سياسة الخصوصية الأسلوب الذي تقوم به “ربائد” بجمع، استخدام، الحفاظ والتصريح بالمعلومات التي تم جمعها من قبل مستخدمين خدمة ربائد، وتطبق سياسة الخصوصية هذه في الخدمة وكافة المنتجات والخدمات المقدمة من ربائد.'],
   ],
-  clauseIdPrefix: 's',
   clauses: [
     {
       heading: 'معلومات الهوية الشخصية',

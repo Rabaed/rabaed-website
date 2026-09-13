@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
+import { clauseId, LEGAL_PAGES } from '@/cms/legal-pages';
 import { PageShell } from '@/components/page-shell';
-import { clauseId, type Block, type LegalDocument, type Line } from '@/content/legal/document';
 import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
+import type { LegalDocument } from '@/payload-types';
 
 /** The Gregorian months, as the approved documents write them. */
 const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
@@ -13,7 +14,7 @@ export function legalMetadata(document: LegalDocument): Metadata {
   return pageMetadata({
     locale: 'ar',
     locales: ['ar'],
-    path: document.path,
+    path: LEGAL_PAGES[document.slug].path,
     title: document.metaTitle,
     description: document.description,
   });
@@ -25,8 +26,8 @@ export function legalMetadata(document: LegalDocument): Metadata {
  * numbered clauses, and a line pointing on to the other documents.
  *
  * One component for all three documents, because on the Reference site they
- * are one page three times over, and because ticket 25 hands this whatever
- * version of a document the CMS has published.
+ * are one page three times over, and it draws whichever version of a document
+ * the CMS hands it (ticket 25).
  *
  * A server component with no behaviour: every word is in the first response,
  * the contents list is plain links to the clauses, and the header's colour
@@ -36,8 +37,9 @@ export function legalMetadata(document: LegalDocument): Metadata {
  * (spec: Out of Scope) — so there is no locale to pass.
  */
 export function LegalDocumentPage({ document }: { document: LegalDocument }) {
+  const updated = riyadhDate(document.updatedAt);
   return (
-    <PageShell locale="ar" path={document.path}>
+    <PageShell locale="ar" path={LEGAL_PAGES[document.slug].path}>
       <section className="phero dark">
         <div className="pglow" />
         <div className="wrap">
@@ -49,25 +51,22 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
 
       <section className="legal">
         <div className="wrap">
-          {/* Only the numerals are `.mono`: DM Mono has no Arabic glyphs
-              (spec: Design system). The Reference site sets the whole line in it. */}
+          {/* The date the shown version was published. Only the numerals are
+              `.mono`: DM Mono has no Arabic glyphs (spec: Design system). The
+              Reference site sets the whole line in it. */}
           <span className="updated">
-            آخر تحديث: <span className="mono">{document.updated.day}</span> {MONTHS[document.updated.month - 1]}{' '}
-            <span className="mono">{document.updated.year}</span>
+            آخر تحديث: <span className="mono">{updated.day}</span> {MONTHS[updated.month - 1]}{' '}
+            <span className="mono">{updated.year}</span>
           </span>
 
           <div className="intro">
-            {document.intro.map((line, index) => (
-              <p key={index}>
-                <Runs line={line} />
-              </p>
-            ))}
+            <Blocks text={document.intro} />
           </div>
 
           <div className="toc">
             {document.clauses.map((clause, index) =>
               clause.inContents ? (
-                <a key={index} href={`#${clauseId(document, index)}`}>
+                <a key={index} href={`#${clauseId(document.slug, index)}`}>
                   {clause.heading}
                 </a>
               ) : null,
@@ -76,15 +75,23 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
 
           {document.clauses.map((clause, index) => (
             <Fragment key={index}>
-              <h2 id={clauseId(document, index)}>{`${index + 1}. ${clause.heading}`}</h2>
-              {clause.blocks.map((block, position) => (
-                <ClauseBlock key={position} block={block} />
-              ))}
+              <h2 id={clauseId(document.slug, index)}>{`${index + 1}. ${clause.heading}`}</h2>
+              <Blocks text={clause.body} />
+              {hasWords(clause.contact) ? (
+                <div className="contact-box">
+                  <Blocks text={clause.contact} />
+                </div>
+              ) : null}
             </Fragment>
           ))}
 
           <div className="xref">
-            <Runs line={document.seeAlso} />
+            {paragraphsOf(document.seeAlso).map((paragraph, index) => (
+              <Fragment key={index}>
+                {index > 0 ? <br /> : null}
+                <Inlines nodes={paragraph.children} />
+              </Fragment>
+            ))}
           </div>
         </div>
       </section>
@@ -92,48 +99,111 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
   );
 }
 
-function ClauseBlock({ block }: { block: Block }) {
-  switch (block.kind) {
-    case 'paragraph':
+/** The day, month and year a moment falls on in Riyadh, where the company is. */
+function riyadhDate(moment: string) {
+  const parts = new Intl.DateTimeFormat('en-u-ca-gregory-nu-latn', {
+    timeZone: 'Asia/Riyadh',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(new Date(moment));
+  const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((each) => each.type === type)!.value);
+  return { year: part('year'), month: part('month'), day: part('day') };
+}
+
+/**
+ * A node of the CMS's rich text, as much of it as the page reads. The editor
+ * allows paragraphs, bulleted lists, bold and links (`cms/collections/legal-documents.ts`);
+ * anything else pasted in is drawn as its plain words.
+ */
+type TextNode = {
+  type: string;
+  children?: TextNode[];
+  text?: string;
+  /** Lexical's formatting bit field; 1 is bold. */
+  format?: number | string;
+  fields?: { url?: string; newTab?: boolean; ltr?: boolean };
+};
+
+type RichText = { root: { children: unknown[] } } | null | undefined;
+
+const BOLD = 1;
+
+function nodesOf(text: RichText): TextNode[] {
+  return (text?.root.children ?? []) as TextNode[];
+}
+
+function paragraphsOf(text: RichText): TextNode[] {
+  return nodesOf(text).filter((node) => node.type !== 'list' && hasWordsIn(node));
+}
+
+function hasWordsIn(node: TextNode): boolean {
+  return Boolean(node.text?.trim()) || (node.children ?? []).some(hasWordsIn);
+}
+
+function hasWords(text: RichText): boolean {
+  return nodesOf(text).some(hasWordsIn);
+}
+
+/**
+ * Paragraphs and lists. An empty paragraph — what the editor leaves in a field
+ * that was opened and never written in — is not drawn, so it cannot open a gap
+ * in the document.
+ */
+function Blocks({ text }: { text: RichText }) {
+  return nodesOf(text).map((node, index) => {
+    if (!hasWordsIn(node)) return null;
+    if (node.type === 'list') {
       return (
-        <p>
-          <Runs line={block.text} />
-        </p>
-      );
-    case 'list':
-      return (
-        <ul>
-          {block.items.map((item, index) => (
-            <li key={index}>
-              <Runs line={item} />
+        <ul key={index}>
+          {(node.children ?? []).map((item, position) => (
+            <li key={position}>
+              <Inlines nodes={item.children} />
             </li>
           ))}
         </ul>
       );
-    case 'contact':
-      return (
-        <div className="contact-box">
-          {block.lines.map((line, index) => (
-            <p key={index}>
-              <Runs line={line} />
-            </p>
-          ))}
-        </div>
-      );
-  }
+    }
+    return (
+      <p key={index}>
+        <Inlines nodes={node.children} />
+      </p>
+    );
+  });
 }
 
+/** Where a link may point: the web, an email address, a phone number, or a page or clause of this site. */
+const SAFE_LINK = /^(?:https?:|mailto:|tel:|\/|#)/i;
+
 /** The runs of text in one line — plain words, bold phrases and links — with a link to this site given its locale. */
-function Runs({ line }: { line: Line }) {
-  return line.map((piece, index) => {
-    if (typeof piece === 'string') return <Fragment key={index}>{piece}</Fragment>;
-    if ('strong' in piece) return <b key={index}>{piece.strong}</b>;
-    // A page of this site is written as its path, and given the locale here.
-    const href = piece.href.startsWith('/') ? localePath('ar', piece.href) : piece.href;
-    return (
-      <a key={index} href={href} dir={piece.dir}>
-        {piece.link}
-      </a>
-    );
+function Inlines({ nodes = [] }: { nodes?: TextNode[] }): ReactNode {
+  return nodes.map((node, index) => {
+    switch (node.type) {
+      case 'text':
+        return Number(node.format) & BOLD ? <b key={index}>{node.text}</b> : <Fragment key={index}>{node.text}</Fragment>;
+      case 'linebreak':
+        return <br key={index} />;
+      case 'tab':
+        return <Fragment key={index}>{'\t'}</Fragment>;
+      case 'link':
+      case 'autolink': {
+        const url = node.fields?.url ?? '';
+        if (!SAFE_LINK.test(url)) return <Inlines key={index} nodes={node.children} />;
+        // A page of this site is written as its path, and given the locale here.
+        const href = url.startsWith('/') ? localePath('ar', url) : url;
+        return (
+          <a
+            key={index}
+            href={href}
+            dir={node.fields?.ltr ? 'ltr' : undefined}
+            {...(node.fields?.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          >
+            <Inlines nodes={node.children} />
+          </a>
+        );
+      }
+      default:
+        return <Inlines key={index} nodes={node.children} />;
+    }
   });
 }

@@ -7,7 +7,7 @@ import { SKIP_REVALIDATION } from '../cms/globals/site-settings';
  * Reference site has, and Ahmed changes it from there.
  *
  * The WhatsApp number is the Reference site's own. The email and phone are
- * the ones the approved legal documents give (`src/content/legal/`). The
+ * the ones the approved legal documents give (`src/migrations/legal-import/`). The
  * social accounts start empty: none has been supplied (spec: Further Notes).
  */
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {

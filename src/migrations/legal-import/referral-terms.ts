@@ -1,19 +1,17 @@
-import type { LegalDocument } from '@/content/legal/document';
+import type { ApprovedDocument } from './approved-text';
 
 /**
  * الشروط والأحكام — برنامج الإحالة — imported word for word from reference/site/referral-terms.html — there is no Word document for these terms (ticket 17).
  *
- * The approved text, verbatim: do not reword it, and do not correct its
- * spelling here. A change to a legal document is a change to the approved
- * text, which from ticket 25 is edited and versioned in the CMS (ADR-0003).
+ * The approved text, verbatim, as the CMS's first version of the Referral
+ * Program Terms (ticket 25). Frozen: the terms are edited and versioned in the
+ * CMS, and this file is only what the import migration reads (`approved-text.ts`).
  */
-export const REFERRAL_TERMS: LegalDocument = {
-  path: '/referral-terms',
+export const REFERRAL_TERMS: ApprovedDocument = {
   metaTitle: 'ربائد · الشروط والأحكام — برنامج الإحالة',
   description: 'شروط المشاركة في برنامج الإحالة: احتساب الإحالة، المبلغ والصرف، والإيقاف والتعديل.',
   title: 'الشروط والأحكام — برنامج الإحالة',
   lead: 'الشروط التي تحكم تسجيلك في برنامج الإحالة، واحتساب الإحالات، وصرف المستحقات.',
-  updated: { year: 2026, month: 9, day: 1 },
   intro: [
     ['يوضّح هذا المستند شروط المشاركة في برنامج الإحالة الخاص بمنصة ربائد — من يستحق، ومتى تُحتسب الإحالة، وكيف تُصرف المستحقات. والتسجيل في البرنامج يُعدّ موافقة على هذه الشروط.'],
     [
@@ -24,7 +22,6 @@ export const REFERRAL_TERMS: LegalDocument = {
       '، ولا تحلّ محلهما.',
     ],
   ],
-  clauseIdPrefix: 'r',
   clauses: [
     {
       heading: 'التعريفات',
