@@ -59,22 +59,12 @@ export function ReferralSignupForm() {
         <input name="employer" placeholder="جهة العمل (اختياري)" autoComplete="organization" aria-label="جهة العمل" />
       </div>
       <div className="two">
-        <UploadField name="ibanCertificate" label="شهادة الآيبان" title="شهادة الآيبان *" note="PDF أو صورة" required />
+        <UploadField name="ibanCertificate" label="شهادة الآيبان" note="PDF أو صورة" required />
         <input name="accountHolder" placeholder="اسم صاحب الحساب البنكي *" aria-label="اسم صاحب الحساب البنكي" required />
       </div>
       <div className="two">
-        <UploadField
-          name="commercialRegistration"
-          label="السجل التجاري"
-          title="السجل التجاري"
-          note="اختياري · PDF أو صورة"
-        />
-        <UploadField
-          name="taxRegistrationCertificate"
-          label="شهادة التسجيل الضريبي"
-          title="شهادة التسجيل الضريبي"
-          note="اختياري · PDF أو صورة"
-        />
+        <UploadField name="commercialRegistration" label="السجل التجاري" note="اختياري · PDF أو صورة" />
+        <UploadField name="taxRegistrationCertificate" label="شهادة التسجيل الضريبي" note="اختياري · PDF أو صورة" />
       </div>
 
       <label className="chk">

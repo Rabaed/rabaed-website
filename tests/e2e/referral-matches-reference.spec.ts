@@ -150,6 +150,19 @@ const REGIONS: readonly Region[] = [
   },
 ];
 
+/**
+ * A document field with a file chosen: the Reference site's selected state,
+ * green card, green arrow and the file's name in bold green. Measured on the
+ * IBAN certificate's field, once a file is chosen on both pages.
+ */
+const CHOSEN_DOCUMENT: Region = {
+  name: 'a document field with a file chosen',
+  root: '#signup .form .upl',
+  parts: ['.ic', '.tx', '.tx b', '.tx small', '.nm'],
+};
+
+const CERTIFICATE = { name: 'iban-certificate.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n') };
+
 test.describe('the referral page matches the Reference site', () => {
   let site: ReferenceSite;
 
@@ -172,6 +185,30 @@ test.describe('the referral page matches the Reference site', () => {
             .soft(await measureRegion(pages.rebuilt, region), region.name)
             .toEqual(await measureRegion(pages.reference, region));
         }
+      } finally {
+        await pages.close();
+      }
+    });
+  }
+
+  // One phone and one desktop width: the state is colours, and a card that
+  // stacks or stands two to a row.
+  for (const viewport of [BASELINE_VIEWPORTS[0], BASELINE_VIEWPORTS[5]]) {
+    test(`a document field with a file chosen, at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
+      const pages = await openBothPages(browser, baseURL!, site, viewport, { pages: REFERRAL_PAGES });
+
+      try {
+        for (const page of [pages.reference, pages.rebuilt]) {
+          const field = page.locator(CHOSEN_DOCUMENT.root).first();
+          // Choosing again until the name shows: the rebuilt field's script
+          // may still be starting when the page first answers.
+          await expect(async () => {
+            await field.locator('input[type="file"]').setInputFiles(CERTIFICATE);
+            await expect(field).toContainText(CERTIFICATE.name, { timeout: 500 });
+          }).toPass();
+        }
+
+        expect(await measureRegion(pages.rebuilt, CHOSEN_DOCUMENT)).toEqual(await measureRegion(pages.reference, CHOSEN_DOCUMENT));
       } finally {
         await pages.close();
       }

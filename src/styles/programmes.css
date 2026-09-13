@@ -9,10 +9,12 @@
  *
  * Imported after `start.css`, whose step cards the referral page lays four
  * across, and before `responsive.css`, which has to stay last for the reason
- * written at the top of it. Every value is the Reference site's and is held to
- * it by tests/e2e/referral-matches-reference.spec.ts, except where a
- * divergence below says otherwise; the scroll margins and the document
- * fields' focus are held by tests/e2e/referral-page.spec.ts.
+ * written at the top of it. Every value is the Reference site's, except where
+ * a divergence below says otherwise. tests/e2e/referral-matches-reference.spec.ts
+ * holds where everything sits and how it is coloured, a document field with a
+ * file chosen included; the scroll margins and the document fields' focus are
+ * held by tests/e2e/referral-page.spec.ts. Hover states and transitions are
+ * not compared.
  */
 
 /* ---- the hero's figures ---- */
@@ -34,7 +36,7 @@
 .lead-block b { color: var(--ink); font-weight: 600 }
 
 /* ---- the step cards, four across ---- */
-/* DELIBERATE EXCEPTION (HANDOFF §5): four across only at desktop widths. Below
+/* DELIBERATE EXCEPTION (HANDOFF §7.4): four across only at desktop widths. Below
    981px `.start` falls back to `start.css`'s two across and then one; written
    without the media query, this would outrank those and hold four columns on
    a phone. */

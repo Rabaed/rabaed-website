@@ -16,3 +16,16 @@
 **Ticket 11 added as a blocker on 13 September 2026**, when the founder chose to run several sessions at once. Ticket 11 builds the FAQ's native disclosure pattern and the form markup this page reuses; taking this page before it would build them twice, in two lanes at the same time.
 
 **The closing steps' wrapping exception is this page's (noted by ticket 11).** The handoff lists `.tail-steps .ph { white-space: normal; min-width: 0 }` among the CSS exceptions that must survive. It exists only on the referral and partnership pages, where each step carries a small `.ph` heading — the home page's closing steps have none, so ticket 11 had nothing to apply it to. Carry the rule over with this page's steps, and comment it in place as a deliberate exception.
+
+**`.tail-steps .ph` is this page's alone (noted by ticket 15).** `referral.html` carries the rule in its stylesheet, but it has no `.tail-steps` markup, so ticket 15 had nothing to apply it to.
+
+Ticket 15 started `src/styles/programmes.css` for both programme pages. This page's rules belong there too:
+
+- `.tail-steps .ph`
+- `.rt-row.two`
+- `.start .s .fit`
+- `.form textarea`
+
+Already there: `.pstats`, `.lead-block`, `.t8`, `.ben-row`, `.sign-grid`, `.chk`, `.declar` and `.upl`.
+
+The file field is `src/components/referral/upload-field.tsx`, ready to reuse for the commercial registration.

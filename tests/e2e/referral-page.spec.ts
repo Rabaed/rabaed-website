@@ -366,8 +366,8 @@ test('below 981px the form moves under its copy', async ({ page }) => {
 });
 
 test("the page loads none of the home and product pages' animations", async ({ page }) => {
-  // The Reference referral page carries none of them either, but ticket 13's
-  // test holds every page off the path that brought them to the start page.
+  // The Reference referral page carries all of them, for elements it does not
+  // contain (spec: Analytics and performance).
   const referral = await scriptsOf(page, '/referral');
   for (const animation of ANIMATIONS) {
     expect(referral.includes(animation.marker), `/referral loads ${animation.name}`).toBe(false);

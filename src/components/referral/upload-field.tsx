@@ -27,15 +27,12 @@ const DOCUMENT_TYPES = '.pdf,.png,.jpg,.jpeg';
 export function UploadField({
   name,
   label,
-  title,
   note,
   required = false,
 }: {
   name: string;
-  /** The field's accessible name. */
+  /** The document's name: the field's accessible name, and its visible one with the Reference site's star where it is required. */
   label: string;
-  /** The visible name, with the Reference site's star where it is required. */
-  title: string;
   note: string;
   required?: boolean;
 }) {
@@ -53,7 +50,7 @@ export function UploadField({
       />
       <span className="ic">↑</span>
       <span className="tx">
-        <b>{title}</b>
+        <b>{required ? `${label} *` : label}</b>
         <small>{note}</small>
       </span>
       <span className="nm">{fileName ?? 'اختر ملفاً'}</span>
