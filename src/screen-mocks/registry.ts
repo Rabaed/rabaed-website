@@ -13,13 +13,10 @@ import type { Locale } from '../lib/locales.ts';
  * This table is what the studio route, the export script and the tests all
  * read, so a new mock is added in one place.
  *
- * **No `alt` text here, deliberately.** The Reference site describes the same
- * mock differently depending on the page it is on — `correspondence` is "شاشة
- * المراسلات الرسمية في ربائد" on the home page and a full sentence about
- * reference numbers and waiting times on the product page. The description
- * belongs to the claim the mock is making where it stands, so it is written at
- * the placement (tickets 06 and 12), together with the visible caption ADR-0002
- * requires alongside it.
+ * **No `alt` text here, deliberately.** What a mock shows, in words, is copy —
+ * the picture's description and the visible caption ADR-0002 requires — and it
+ * lives with the copy, in `src/content/screen-mock-descriptions.ts`. This table
+ * says how a mock is drawn, and the export script imports it under plain Node.
  */
 export type ScreenMock = {
   readonly id: string;
