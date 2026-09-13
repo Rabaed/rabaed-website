@@ -4,6 +4,12 @@
 # the one seam the spec tests at. Nothing here runs against the dev server, and
 # nothing is mocked: if this is green, the built site behaved.
 #
+# The suite is split across four machines that run at the same time (ticket
+# 51). A hosted runner for this repository gives Playwright one worker, so the
+# whole suite on one machine took about fifteen minutes. Each machine builds
+# the site itself and runs its own quarter of the tests; the `test` job at the
+# end is the one check a pull request is judged by.
+#
 # Not run here: `npm run baselines:verify`. The visual baselines are pixel
 # comparisons, and text rasterisation differs between the machine that captured
 # them and a hosted Linux runner, so a run on this runner would fail for
@@ -26,9 +32,10 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  # Once, on a machine of its own: it does not depend on the tests.
+  typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +49,31 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+  e2e:
+    name: e2e (${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      # A failure on one machine does not cancel the others, so one run
+      # reports every failing test rather than the first quarter's.
+      fail-fast: false
+      matrix:
+        # Playwright divides the tests by count, not by how long they take, so
+        # the four may finish a few minutes apart. `fullyParallel` in
+        # playwright.config.ts is what lets it divide inside a file.
+        shard: [1/4, 2/4, 3/4, 4/4]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
 
       # Chromium only: it is the browser the suite runs in and the one the
       # visual baselines were captured with.
@@ -57,12 +89,30 @@ jobs:
       # replaces them here is the check that each image was exported from the
       # markup as it currently stands, which is machine-independent.
       - name: End-to-end tests
-        run: npm test -- --grep-invert @pixel
+        run: npm test -- --grep-invert @pixel --shard=${{ matrix.shard }}
 
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          # One name per machine: two uploads under the same name fail.
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-report/
           retention-days: 14
+
+  # The one check a pull request is judged by, under the name the ruleset
+  # requires (docs/github-ruleset.json). `always()` makes it run and fail when
+  # a machine fails or is cancelled: skipped instead, it would count as passed.
+  test:
+    needs: [typecheck, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Every machine passed
+        run: |
+          echo "typecheck: ${{ needs.typecheck.result }}"
+          echo "e2e: ${{ needs.e2e.result }}"
+          test "${{ needs.typecheck.result }}" = success
+          test "${{ needs.e2e.result }}" = success
