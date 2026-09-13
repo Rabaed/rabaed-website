@@ -8,7 +8,9 @@ opening a pull request is the whole process.
 
 1. Work happens on a branch and arrives as a pull request.
 2. GitHub Actions builds the site and runs the end-to-end tests
-   (`.github/workflows/ci.yml`). A red cross means the change is broken.
+   (`.github/workflows/ci.yml`), split across four machines at once so the
+   result comes back in minutes. The pull request shows the outcome as one
+   check, `test`; a red cross means the change is broken.
 3. Vercel builds the same commit and comments on the pull request with a
    **preview link** — a real, working copy of the site at that change, on its
    own web address. This is what you look at to approve the work.
