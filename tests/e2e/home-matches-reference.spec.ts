@@ -5,12 +5,9 @@
  * ticket 04's notes. In short: a crop cannot be aligned inside a 7,480px
  * screenshot, and a pixel diff cannot run on a hosted runner at all.
  *
- * The home page still cannot be compared *whole* against its baseline either,
- * because ticket 10 has not put the before-and-after there yet. When it has,
- * the whole-page comparison the spec asks for becomes possible and this file is
- * what it joins — with one thing to allow for: below 981px the Record section
- * (ticket 09) is deliberately taller than the Reference site's, so everything
- * below it sits lower on the page there.
+ * The page as a whole — every section in the Reference site's order, each as
+ * tall as the Reference site's — is compared in
+ * `home-whole-page-matches-reference.spec.ts`.
  *
  * **Both pages are loaded with reduced motion on**, which is what makes the
  * comparison meaningful rather than a race: the hero's whole point is a

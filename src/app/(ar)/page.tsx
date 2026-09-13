@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { ClosingSection } from '@/components/closing-section';
+import { BeforeAfter } from '@/components/home/before-after';
+import { DelayCalculator } from '@/components/home/delay-calculator';
 import { Figures } from '@/components/home/figures';
 import { FourUnits } from '@/components/home/four-units';
 import { Hero } from '@/components/home/hero';
@@ -18,12 +20,10 @@ export const metadata: Metadata = pageMetadata({
 });
 
 /**
- * The Arabic home page, in the state ticket 09 leaves it: the full-height hero,
- * the Trust strip, the situations deck, the four units, the Record, the figures
- * deck, the questions, and the closing section with the demo request form.
- *
- * One gap remains, marked where it falls in the Reference site's order:
- * ticket 10 fills the space before the figures deck.
+ * The Arabic home page, whole: the full-height hero, the Trust strip, the
+ * situations deck, the four units, the Record, the before-and-after comparison,
+ * the delay-cost calculator, the figures deck, the questions, and the closing
+ * section with the demo request form — in the Reference site's order.
  *
  * All copy is verbatim from `reference/site/index.html`. Nothing here is
  * placeholder text, and nothing waits to be reworded.
@@ -36,7 +36,8 @@ export default function HomePage() {
       <Situations />
       <FourUnits />
       <RecordSection />
-      {/* Ticket 10: the before-and-after, with its calculator. */}
+      <BeforeAfter />
+      <DelayCalculator />
       <Figures />
       <Questions />
       <ClosingSection />
