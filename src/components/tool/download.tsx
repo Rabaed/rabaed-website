@@ -2,7 +2,7 @@ import { Inline, type InlineText } from '@/components/inline-text';
 import { DownloadForm } from '@/components/tool/download-form';
 import { TickList } from '@/components/tool/parts';
 
-export type DownloadContent = {
+export type ToolDownloadContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -17,7 +17,7 @@ export type DownloadContent = {
  *
  * The form keeps its own words (ticket 27).
  */
-export function Download({ content }: { content: DownloadContent }) {
+export function Download({ content }: { content: ToolDownloadContent }) {
   return (
     <section id="get" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

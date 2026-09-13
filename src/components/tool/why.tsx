@@ -1,6 +1,6 @@
 import { Card, TeaserHead, type TeaserCard } from '@/components/tool/parts';
 
-export type WhyContent = {
+export type ToolWhyContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -8,7 +8,7 @@ export type WhyContent = {
 };
 
 /** «لماذا هذه الأداة»: the three reasons a concrete file runs late. */
-export function Why({ content }: { content: WhyContent }) {
+export function Why({ content }: { content: ToolWhyContent }) {
   return (
     <section id="why" className="light pad">
       <div className="wrap">

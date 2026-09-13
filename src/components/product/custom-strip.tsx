@@ -1,4 +1,4 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 /** Something Rabaed builds for a project that needs it. */
 export type OnRequestFeature = {
@@ -6,14 +6,14 @@ export type OnRequestFeature = {
   readonly body: string;
 };
 
-export type CustomStripContent = {
+export type ProductCustomStripContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly features: readonly OnRequestFeature[];
   /** The badge on every card. */
   readonly badge: string;
   /** The link on every card, to where the feature is asked about. */
-  readonly ask: HeroLink;
+  readonly ask: PageLink;
 };
 
 /**
@@ -22,7 +22,7 @@ export type CustomStripContent = {
  *
  * A server component with no behaviour.
  */
-export function CustomStrip({ content }: { content: CustomStripContent }) {
+export function CustomStrip({ content }: { content: ProductCustomStripContent }) {
   return (
     <section id="custom" className="light">
       <div className="wrap">

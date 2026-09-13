@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
 
 export type UnitTab = {
@@ -14,14 +14,14 @@ export type UnitTab = {
   readonly description: string;
 };
 
-export type FourUnitsContent = {
+export type HomeFourUnitsContent = {
   readonly eyebrow: string;
   readonly heading: string;
   /** Names the row of tabs, for a screen reader. */
   readonly tabsLabel: string;
   readonly tabs: readonly UnitTab[];
   /** The link on to the product page, which shows every unit in full. */
-  readonly more: HeroLink;
+  readonly more: PageLink;
 };
 
 /**
@@ -48,7 +48,7 @@ export type FourUnitsContent = {
  * the handoff describe it widening to 1440px. No Reference page has that rule
  * any more, and the baselines were captured without it — ADR-0005.
  */
-export function FourUnits({ content }: { content: FourUnitsContent }) {
+export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
   return (
     <section id="jt" className="dark pad" data-direction="rtl">
       <div className="wrap">

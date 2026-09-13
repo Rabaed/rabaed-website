@@ -1,19 +1,19 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
 import { FaqEntries, type FaqEntry } from '@/components/faq';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
-export type FreeToolTeaserContent = {
+export type StartFreeToolTeaserContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly text: string;
-  readonly link: HeroLink;
+  readonly link: PageLink;
 };
 
 export type StartQuestionsContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly entries: readonly FaqEntry[];
-  readonly freeTool: FreeToolTeaserContent;
+  readonly freeTool: StartFreeToolTeaserContent;
 };
 
 /**
@@ -51,7 +51,7 @@ export function Questions({ content }: { content: StartQuestionsContent }) {
  * (`href="#"`); here it leads to the tool page, which describes the tool and
  * delivers it (CONTEXT.md).
  */
-function FreeToolTeaser({ content }: { content: FreeToolTeaserContent }) {
+function FreeToolTeaser({ content }: { content: StartFreeToolTeaserContent }) {
   return (
     <div className="free">
       <div>

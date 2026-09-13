@@ -36,7 +36,7 @@ export type ProofFigure = FigureFrame &
     | { readonly kind: 'commitment'; readonly value: string }
   );
 
-export type FiguresContent = {
+export type HomeFiguresContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -71,7 +71,7 @@ function isAttributed(figure: ProofFigure): boolean {
  * written against it (spec: Design system). Everywhere a name is ours to
  * choose, it is "figures".
  */
-export function Figures({ content }: { content: FiguresContent }) {
+export function Figures({ content }: { content: HomeFiguresContent }) {
   const shown = isPubliclyDeployed() ? content.figures.filter(isAttributed) : content.figures;
 
   const cards = shown.map((figure) => (

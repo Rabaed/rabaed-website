@@ -1,6 +1,6 @@
 import { Card, TeaserHead, TestStateBadge, type TeaserCard, type TestState } from '@/components/tool/parts';
 
-export type FeaturesContent = {
+export type ToolFeaturesContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -16,7 +16,7 @@ export type FeaturesContent = {
  * «ما الذي تفعله»: six cards, the first with the legend of a test's states,
  * and four more things it does under them.
  */
-export function Features({ content }: { content: FeaturesContent }) {
+export function Features({ content }: { content: ToolFeaturesContent }) {
   return (
     <section id="features" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

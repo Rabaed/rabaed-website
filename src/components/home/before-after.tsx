@@ -16,7 +16,7 @@ export type ComparisonStep = {
   readonly rabaed: Face;
 };
 
-export type BeforeAfterContent = {
+export type HomeBeforeAfterContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: InlineText;
@@ -28,8 +28,11 @@ export type BeforeAfterContent = {
   readonly handleLabel: string;
   /** The line under the steps: which way won, or neither yet (`verdictFor`). */
   readonly verdicts: Readonly<Record<Verdict, string>>;
-  readonly steps: readonly ComparisonStep[];
+  /** Exactly four: the design is built around four steps, so an Editor cannot add or remove one (spec: Content model). */
+  readonly steps: ComparisonSteps;
 };
+
+export type ComparisonSteps = readonly [ComparisonStep, ComparisonStep, ComparisonStep, ComparisonStep];
 
 /**
  * «نفس الاعتماد… بطريقتين.» — four moments in one material approval, the usual
@@ -46,7 +49,7 @@ export type BeforeAfterContent = {
  * overlap. Here the stylesheet draws the seam at rest from the start: the two
  * steps on its right turned over, the half-way verdict, both tags half-shown.
  */
-export function BeforeAfter({ content }: { content: BeforeAfterContent }) {
+export function BeforeAfter({ content }: { content: HomeBeforeAfterContent }) {
   const { verdicts } = content;
   return (
     <section id="ba" className="light pad">

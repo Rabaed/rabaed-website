@@ -1,12 +1,12 @@
 import { Faq, type FaqEntry } from '@/components/faq';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 export type HomeQuestionsContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly entries: readonly FaqEntry[];
   /** The link on to every question, on the start page. */
-  readonly more: HeroLink;
+  readonly more: PageLink;
 };
 
 /**

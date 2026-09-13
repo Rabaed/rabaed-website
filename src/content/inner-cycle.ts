@@ -1,4 +1,4 @@
-import type { InnerCycleContent } from '@/components/product/inner-cycle';
+import type { ProductInnerCycleContent } from '@/components/product/inner-cycle';
 
 /**
  * The product page's «داخل كل جهة» section: each party's internal review and
@@ -8,7 +8,7 @@ import type { InnerCycleContent } from '@/components/product/inner-cycle';
  * All copy is verbatim from `reference/site/product.html`. Ticket 21 moves it
  * into the CMS.
  */
-export const INNER_CYCLE: { readonly ar: InnerCycleContent } = {
+export const INNER_CYCLE: { readonly ar: ProductInnerCycleContent } = {
   ar: {
     eyebrow: 'داخل كل جهة',
     heading: 'ماذا يبقى عندك، وماذا يعبر إلى الطرف الآخر؟',

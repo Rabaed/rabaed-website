@@ -1,4 +1,4 @@
-import type { RolesContent } from '@/components/product/roles';
+import type { ProductRolesContent } from '@/components/product/roles';
 import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
 
 /**
@@ -8,7 +8,7 @@ import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
  * All copy is verbatim from `reference/site/product.html`. Ticket 21 moves it
  * into the CMS.
  */
-export const ROLES: { readonly ar: RolesContent } = {
+export const ROLES: { readonly ar: ProductRolesContent } = {
   ar: {
     eyebrow: 'لكل طرف',
     heading: 'ماذا يرى كل طرف حين يفتح المنصة؟',

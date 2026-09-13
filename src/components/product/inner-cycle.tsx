@@ -18,12 +18,15 @@ export type InnerCycleNote = {
   readonly text: InlineText;
 };
 
-export type InnerCycleContent = {
+export type ProductInnerCycleContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
-  /** In the order the Record travels: from the Contractor, through the Consultant, to the Owner. */
-  readonly cycles: readonly ReviewCycle[];
+  /**
+   * The three parties, no more and no fewer (spec: Content model), in the order
+   * the Record travels: from the Contractor, through the Consultant, to the Owner.
+   */
+  readonly cycles: readonly [ReviewCycle, ReviewCycle, ReviewCycle];
   /** The tag over each party's reviewers. */
   readonly privateTag: string;
   /** The line beside the dashed loop under the reviewers. */
@@ -43,7 +46,7 @@ export type InnerCycleContent = {
  *
  * A server component with no behaviour.
  */
-export function InnerCycle({ content }: { content: InnerCycleContent }) {
+export function InnerCycle({ content }: { content: ProductInnerCycleContent }) {
   return (
     <section id="inner" className="light pad">
       <div className="wrap">

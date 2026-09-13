@@ -1,10 +1,10 @@
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
-import type { CustomStripContent } from '@/components/product/custom-strip';
-import type { InnerCycleContent } from '@/components/product/inner-cycle';
-import type { JourneyContent } from '@/components/product/journey';
-import type { RolesContent } from '@/components/product/roles';
+import type { ProductCustomStripContent } from '@/components/product/custom-strip';
+import type { ProductInnerCycleContent } from '@/components/product/inner-cycle';
+import type { ProductJourneyContent } from '@/components/product/journey';
+import type { ProductRolesContent } from '@/components/product/roles';
 import { CLOSING_SECTION } from '@/content/closing-section';
 import { INNER_CYCLE } from '@/content/inner-cycle';
 import { JOURNEY } from '@/content/journey';
@@ -18,10 +18,10 @@ export type ProductPageContent = {
   readonly hero: PageHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
   /** This page's hero lands here, «ابدأ من الوحدات ↓». */
-  readonly journey: LinkedSection<JourneyContent>;
-  readonly customStrip: Section<CustomStripContent>;
-  readonly roles: Section<RolesContent>;
-  readonly innerCycle: Section<InnerCycleContent>;
+  readonly journey: LinkedSection<ProductJourneyContent>;
+  readonly customStrip: Section<ProductCustomStripContent>;
+  readonly roles: Section<ProductRolesContent>;
+  readonly innerCycle: Section<ProductInnerCycleContent>;
   /** Holds the demo request form, which the header, this page's hero and the custom strip all link to. */
   readonly closing: LinkedSection<ClosingSectionContent>;
 };

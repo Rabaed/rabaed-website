@@ -18,7 +18,7 @@ export type TransactionType = {
   readonly steps: readonly [TransactionStep, TransactionStep, TransactionStep, TransactionStep];
 };
 
-export type RecordSectionContent = {
+export type HomeRecordSectionContent = {
   readonly eyebrow: string;
   /** The heading, a line at a time. */
   readonly heading: readonly string[];
@@ -52,7 +52,7 @@ export type RecordSectionContent = {
  * It is not a `.light` section, though it ends light: the Reference site keeps
  * the header dark over it, until the section after it begins.
  */
-export function RecordSection({ content }: { content: RecordSectionContent }) {
+export function RecordSection({ content }: { content: HomeRecordSectionContent }) {
   // How the section looks before the visitor has scrolled into it.
   const atStart = recordAt(0, content.types.length);
 

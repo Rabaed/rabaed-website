@@ -8,9 +8,9 @@
  *
  * Ticket 21 moves page copy into the CMS.
  */
-import type { ComparisonStep } from '@/components/home/before-after';
+import type { ComparisonSteps } from '@/components/home/before-after';
 
-export const COMPARISON_STEPS: readonly ComparisonStep[] = [
+export const COMPARISON_STEPS: ComparisonSteps = [
   {
     name: 'الطلب',
     usual: { channel: 'ورق', words: 'يُطبع، يُوقَّع باليد، ويُصوَّر بالجوال.' },

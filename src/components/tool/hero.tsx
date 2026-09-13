@@ -1,4 +1,4 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 import { TestStateBadge, type TestState } from '@/components/tool/parts';
 
 /** One of the three counts across the top of the drawing. */
@@ -37,9 +37,9 @@ export type ToolHeroContent = {
   readonly titleAccent: string;
   readonly lead: string;
   /** The filled button. */
-  readonly primary: HeroLink;
+  readonly primary: PageLink;
   /** The outlined one beside it. */
-  readonly secondary: HeroLink;
+  readonly secondary: PageLink;
   /** The ticked promises under the buttons. */
   readonly promises: readonly string[];
   readonly mock: ToolMockContent;

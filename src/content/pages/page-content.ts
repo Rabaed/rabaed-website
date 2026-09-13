@@ -9,9 +9,14 @@ import type { Locale } from '@/lib/locales';
  * what lets ticket 21 move a page's content into the CMS by changing only its
  * module, and ticket 42 give every section English words without touching it.
  *
- * The content is already shaped the way ticket 21 stores it (spec: Content
- * model): a page is a fixed run of sections, in a fixed order, each with its
- * fields, its lists, and whether it shows.
+ * What a module hands its page is the shape an Editor works in (spec: Content
+ * model): a fixed run of sections, in a fixed order, each with its fields, its
+ * lists, and whether it shows — in the one locale asked for. How the CMS stores
+ * that across locales, one list whose items carry their text per locale, is
+ * ticket 21's to decide; the static files behind these modules only hold Arabic.
+ *
+ * A page's hero is neither kind of section below, and always shows: it carries
+ * the page's only `<h1>`, and a page published without one has no heading.
  */
 
 /** A section an Editor may hide. */

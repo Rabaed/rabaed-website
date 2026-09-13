@@ -14,10 +14,11 @@ export type Role = {
   readonly screen: ScreenMockPictureContent;
 };
 
-export type RolesContent = {
+export type ProductRolesContent = {
   readonly eyebrow: string;
   readonly heading: string;
-  readonly roles: readonly Role[];
+  /** The three parties, no more and no fewer (spec: Content model). */
+  readonly roles: readonly [Role, Role, Role];
   /** What every party gets, whichever is chosen. */
   readonly sharedPromises: readonly string[];
 };
@@ -35,7 +36,7 @@ export type RolesContent = {
  * plain buttons are not: a tab list named by the section's heading, each tab
  * saying whether it is selected and which panel it controls.
  */
-export function Roles({ content }: { content: RolesContent }) {
+export function Roles({ content }: { content: ProductRolesContent }) {
   return (
     <section id="roles" className="light pad" data-direction="rtl">
       <div className="wrap">

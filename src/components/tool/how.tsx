@@ -1,7 +1,7 @@
 import { StepCards, type StepCard } from '@/components/step-cards';
 import { TeaserHead } from '@/components/tool/parts';
 
-export type HowContent = {
+export type ToolHowContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -12,7 +12,7 @@ export type HowContent = {
  * «ثلاث خطوات»: from the download to a first pour, in the start page's step
  * cards.
  */
-export function How({ content }: { content: HowContent }) {
+export function How({ content }: { content: ToolHowContent }) {
   return (
     <section id="how" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

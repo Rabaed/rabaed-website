@@ -1,4 +1,4 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 export type PartnershipIdeaContent = {
   readonly eyebrow: string;
@@ -8,7 +8,7 @@ export type PartnershipIdeaContent = {
   readonly referralNote: {
     /** Its trailing space included, before the link. */
     readonly text: string;
-    readonly link: HeroLink;
+    readonly link: PageLink;
   };
 };
 

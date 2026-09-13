@@ -1,4 +1,4 @@
-import type { FlowStep, JourneyContent } from '@/components/product/journey';
+import type { FlowStep, ProductJourneyContent } from '@/components/product/journey';
 import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
 
 /**
@@ -13,7 +13,7 @@ import { SCREEN_MOCK_DESCRIPTIONS } from '@/content/screen-mock-descriptions';
 const TOWARDS: FlowStep = { towards: '←' };
 const THEN: FlowStep = { then: '·' };
 
-export const JOURNEY: { readonly ar: JourneyContent } = {
+export const JOURNEY: { readonly ar: ProductJourneyContent } = {
   ar: {
     eyebrow: 'المنصة',
     heading: 'أربع وحدات. سجل واحد يجمعها.',

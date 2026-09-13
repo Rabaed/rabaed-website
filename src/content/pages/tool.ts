@@ -1,12 +1,12 @@
-import type { DownloadContent } from '@/components/tool/download';
-import type { FeaturesContent } from '@/components/tool/features';
+import type { ToolDownloadContent } from '@/components/tool/download';
+import type { ToolFeaturesContent } from '@/components/tool/features';
 import type { ToolHeroContent } from '@/components/tool/hero';
-import type { HowContent } from '@/components/tool/how';
-import type { PrivacyContent } from '@/components/tool/privacy';
+import type { ToolHowContent } from '@/components/tool/how';
+import type { ToolPrivacyContent } from '@/components/tool/privacy';
 import type { ToolQuestionsContent } from '@/components/tool/questions';
-import type { RequirementsContent } from '@/components/tool/requirements';
-import type { UpsellContent } from '@/components/tool/upsell';
-import type { WhyContent } from '@/components/tool/why';
+import type { ToolRequirementsContent } from '@/components/tool/requirements';
+import type { ToolUpsellContent } from '@/components/tool/upsell';
+import type { ToolWhyContent } from '@/components/tool/why';
 import { TOOL_FAQ } from '@/content/faq';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
@@ -14,16 +14,16 @@ import { inLocale, type LinkedSection, type PageMeta, type Section } from './pag
 export type ToolPageContent = {
   readonly meta: PageMeta;
   readonly hero: ToolHeroContent;
-  readonly why: Section<WhyContent>;
-  readonly features: Section<FeaturesContent>;
+  readonly why: Section<ToolWhyContent>;
+  readonly features: Section<ToolFeaturesContent>;
   /** The hero's «كيف تعمل؟ ↓» lands here. */
-  readonly how: LinkedSection<HowContent>;
-  readonly privacy: Section<PrivacyContent>;
-  readonly requirements: Section<RequirementsContent>;
+  readonly how: LinkedSection<ToolHowContent>;
+  readonly privacy: Section<ToolPrivacyContent>;
+  readonly requirements: Section<ToolRequirementsContent>;
   /** The hero's «حمّل الأداة مجاناً» lands here. */
-  readonly download: LinkedSection<DownloadContent>;
+  readonly download: LinkedSection<ToolDownloadContent>;
   readonly questions: Section<ToolQuestionsContent>;
-  readonly upsell: Section<UpsellContent>;
+  readonly upsell: Section<ToolUpsellContent>;
 };
 
 /** All copy is verbatim from `reference/site/tool.html`. */

@@ -1,4 +1,4 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 /** One stage from a first meeting to a first project. */
 export type PathStage = {
@@ -12,7 +12,7 @@ export type PartnershipPathContent = {
   readonly heading: string;
   readonly lead: string;
   /** To the application form. */
-  readonly link: HeroLink;
+  readonly link: PageLink;
   /** The word before each stage's number. */
   readonly stageLabel: string;
   readonly stages: readonly PathStage[];

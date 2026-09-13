@@ -8,9 +8,9 @@ import {
   type Figure,
 } from '@/components/home/delay-calculator-state';
 import { DelayCalculatorBehaviour } from '@/components/home/delay-calculator-behaviour';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
-export type DelayCalculatorContent = {
+export type HomeDelayCalculatorContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -21,7 +21,7 @@ export type DelayCalculatorContent = {
   /** What the estimate assumes and leaves out, under the cost. */
   readonly assumptions: string;
   /** The button under them. */
-  readonly callToAction: HeroLink;
+  readonly callToAction: PageLink;
   /** The words written around the numbers, here and again in the browser as a slider moves. */
   readonly words: CalculatorWords;
 };
@@ -42,7 +42,7 @@ export type DelayCalculatorContent = {
  * last-resort monospace — the defect the footer and the guarantee pill already
  * fix. Only the number is `.mono` here.
  */
-export function DelayCalculator({ content }: { content: DelayCalculatorContent }) {
+export function DelayCalculator({ content }: { content: HomeDelayCalculatorContent }) {
   const display = calculatorDisplay(STARTING_SETTINGS, content.words);
   const values = settingsAsValues(STARTING_SETTINGS);
 

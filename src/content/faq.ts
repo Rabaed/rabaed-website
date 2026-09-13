@@ -13,7 +13,7 @@
  * into the one text a visitor reads (`plainText`).
  */
 import type { FaqEntry } from '@/components/faq';
-import { REFERRAL_FIGURES } from '@/content/referral-program';
+import { REFERRAL_PROGRAM_VALUES } from '@/content/referral-program';
 
 /** The start page's «قبل أن تسأل»: the full set, which the home page links to. */
 export const START_FAQ: readonly FaqEntry[] = [
@@ -129,7 +129,7 @@ export const REFERRAL_FAQ: readonly FaqEntry[] = [
   },
   {
     question: 'عميلي عنده أكثر من مشروع — كيف تُحتسب؟',
-    answer: `الإحالة بالمشروع. إن استُخدم كودك عند بدء مشروع ثانٍ، تُحتسب إحالة جديدة بـ ${REFERRAL_FIGURES.payout} ريال أخرى.`,
+    answer: `الإحالة بالمشروع. إن استُخدم كودك عند بدء مشروع ثانٍ، تُحتسب إحالة جديدة بـ ${REFERRAL_PROGRAM_VALUES.payout} ريال أخرى.`,
   },
   {
     question: 'ماذا لو استخدم شخصان كودين مختلفين لنفس المشروع؟',

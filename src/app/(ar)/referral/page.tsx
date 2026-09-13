@@ -24,8 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * Its words come from `src/content/pages/referral.ts`.
  *
- * **The amounts — 2,000 SAR a project, 10% off for the client — are held
- * once** (`src/content/referral-program.ts`) and inserted wherever the page
+ * **The Referral Program values — the payout for each project and the client's
+ * discount — are held once** (`src/content/referral-program.ts`) and inserted wherever the page
  * quotes them, its search title and questions included. The Referral Terms
  * keep their own text, which states the same amounts in the lawyer's words
  * (ADR-0008). They are not in the header menu, by the founders' decision

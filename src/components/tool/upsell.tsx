@@ -1,13 +1,13 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
-export type UpsellContent = {
+export type ToolUpsellContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
   /** The filled button: to the start page. */
-  readonly primary: HeroLink;
+  readonly primary: PageLink;
   /** The outlined one beside it: to the product page. */
-  readonly secondary: HeroLink;
+  readonly secondary: PageLink;
   /** What the cloud version adds. */
   readonly adds: readonly string[];
   /** The line that closes the page. */
@@ -18,7 +18,7 @@ export type UpsellContent = {
  * «الخطوة التالية»: the end of the tool page, for a visitor who needs more than
  * one project — what Rabaed adds, and the way to the start and product pages.
  */
-export function Upsell({ content }: { content: UpsellContent }) {
+export function Upsell({ content }: { content: ToolUpsellContent }) {
   return (
     <section id="up" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

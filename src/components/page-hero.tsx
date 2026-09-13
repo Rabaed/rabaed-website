@@ -1,11 +1,7 @@
 import { Inline, type InlineText } from '@/components/inline-text';
+import type { PageLink } from '@/components/page-link';
 
-export type HeroLink = {
-  readonly label: string;
-  readonly href: string;
-};
-
-/** One of the figures under a programme page's hero: «2,000 ريال» over «عن كل مشروع». */
+/** One of the figures under a programme page's hero: a figure over the few words that say what it counts. */
 export type HeroFigure = {
   readonly figure: InlineText;
   readonly label: string;
@@ -16,9 +12,9 @@ export type PageHeroContent = {
   readonly title: string;
   readonly lead: string;
   /** The filled button. */
-  readonly primary: HeroLink;
+  readonly primary: PageLink;
   /** The outlined one beside it. */
-  readonly secondary: HeroLink;
+  readonly secondary: PageLink;
   /** The referral and partnership pages carry three; the product and start pages none. */
   readonly figures?: readonly HeroFigure[];
 };

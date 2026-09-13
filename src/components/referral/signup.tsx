@@ -1,7 +1,7 @@
 import { Inline, type InlineText } from '@/components/inline-text';
 import { ReferralSignupForm } from '@/components/referral/signup-form';
 
-export type SignupContent = {
+export type ReferralSignupContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -19,7 +19,7 @@ export type SignupContent = {
  *
  * The form keeps its own words until ticket 27.
  */
-export function Signup({ content }: { content: SignupContent }) {
+export function Signup({ content }: { content: ReferralSignupContent }) {
   return (
     <section id="signup" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

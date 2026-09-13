@@ -24,7 +24,7 @@ export type JourneyPanel = {
   readonly screen: ScreenMockPictureContent;
 };
 
-export type JourneyContent = {
+export type ProductJourneyContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly panels: readonly JourneyPanel[];
@@ -48,7 +48,7 @@ export type JourneyContent = {
  * a stylesheet cannot tell whether a script runs, which is why these few rules
  * are here rather than in `product.css`.
  */
-export function Journey({ content }: { content: JourneyContent }) {
+export function Journey({ content }: { content: ProductJourneyContent }) {
   return (
     // A plain wrapper, and it is load-bearing. Pinning moves the section into
     // a spacer element GSAP inserts around it, and React removes a page's

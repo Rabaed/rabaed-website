@@ -1,12 +1,12 @@
 import type { ClosingSectionContent } from '@/components/closing-section';
-import type { BeforeAfterContent } from '@/components/home/before-after';
-import type { DelayCalculatorContent } from '@/components/home/delay-calculator';
-import type { FiguresContent } from '@/components/home/figures';
-import type { FourUnitsContent } from '@/components/home/four-units';
+import type { HomeBeforeAfterContent } from '@/components/home/before-after';
+import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
+import type { HomeFiguresContent } from '@/components/home/figures';
+import type { HomeFourUnitsContent } from '@/components/home/four-units';
 import type { HomeHeroContent } from '@/components/home/hero';
 import type { HomeQuestionsContent } from '@/components/home/questions';
-import type { RecordSectionContent } from '@/components/home/record';
-import type { SituationsContent } from '@/components/home/situations';
+import type { HomeRecordSectionContent } from '@/components/home/record';
+import type { HomeSituationsContent } from '@/components/home/situations';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { COMPARISON_STEPS } from '@/content/before-after';
 import { DECK_HINT } from '@/content/card-deck';
@@ -25,12 +25,12 @@ export type HomePageContent = {
   readonly meta: PageMeta;
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
-  readonly situations: Section<SituationsContent>;
-  readonly fourUnits: Section<FourUnitsContent>;
-  readonly record: Section<RecordSectionContent>;
-  readonly beforeAfter: Section<BeforeAfterContent>;
-  readonly calculator: Section<DelayCalculatorContent>;
-  readonly figures: Section<FiguresContent>;
+  readonly situations: Section<HomeSituationsContent>;
+  readonly fourUnits: Section<HomeFourUnitsContent>;
+  readonly record: Section<HomeRecordSectionContent>;
+  readonly beforeAfter: Section<HomeBeforeAfterContent>;
+  readonly calculator: Section<HomeDelayCalculatorContent>;
+  readonly figures: Section<HomeFiguresContent>;
   readonly questions: Section<HomeQuestionsContent>;
   /** Its demo request form (`#demo`) is where this page's hero and calculator buttons, and the header's, land. */
   readonly closing: LinkedSection<ClosingSectionContent>;

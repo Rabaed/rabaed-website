@@ -1,4 +1,4 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 /**
  * One of the eight points: its lead phrase, drawn in bold, and the rest of its
@@ -10,12 +10,12 @@ export type TermsPoint = {
   readonly rest: string;
 };
 
-export type TermsSummaryContent = {
+export type ReferralTermsSummaryContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly terms: readonly TermsPoint[];
   /** To the full Referral Terms. */
-  readonly link: HeroLink;
+  readonly link: PageLink;
 };
 
 /**
@@ -23,7 +23,7 @@ export type TermsSummaryContent = {
  * and a link to the full terms, which are binding where this is a summary
  * (ticket 17).
  */
-export function TermsSummary({ content }: { content: TermsSummaryContent }) {
+export function TermsSummary({ content }: { content: ReferralTermsSummaryContent }) {
   return (
     <section id="terms" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

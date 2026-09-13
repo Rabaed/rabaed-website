@@ -10,7 +10,7 @@
  * verbatim, versioned text, which states the same amounts in the lawyer's
  * words (ADR-0008); changing a value here does not change what the terms say.
  */
-const REFERRAL_PROGRAM = {
+const AMOUNTS = {
   /** Paid to the referrer for each project that starts, in Saudi riyals, net. */
   payoutRiyals: 2000,
   /** Off the referred client's project subscription. */
@@ -18,7 +18,7 @@ const REFERRAL_PROGRAM = {
 } as const;
 
 /** The values as the page writes them: «2,000» and «10%», with Latin numerals. */
-export const REFERRAL_FIGURES = {
-  payout: new Intl.NumberFormat('en-US').format(REFERRAL_PROGRAM.payoutRiyals),
-  clientDiscount: `${REFERRAL_PROGRAM.clientDiscountPercent}%`,
+export const REFERRAL_PROGRAM_VALUES = {
+  payout: new Intl.NumberFormat('en-US').format(AMOUNTS.payoutRiyals),
+  clientDiscount: `${AMOUNTS.clientDiscountPercent}%`,
 } as const;

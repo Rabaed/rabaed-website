@@ -1,5 +1,5 @@
 import { Inline, type InlineText } from '@/components/inline-text';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 /** One kind of person the programme is open to. */
 export type AudienceKind = {
@@ -7,7 +7,7 @@ export type AudienceKind = {
   readonly text: string;
 };
 
-export type AudienceContent = {
+export type ReferralAudienceContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -15,7 +15,7 @@ export type AudienceContent = {
   /** The note that sends a firm to the Partnership Program, and the link that takes it there. */
   readonly partnership: {
     readonly text: InlineText;
-    readonly link: HeroLink;
+    readonly link: PageLink;
   };
 };
 
@@ -25,7 +25,7 @@ export type AudienceContent = {
  * companies to the Partnership Program instead — a different programme for a
  * different audience (CONTEXT.md).
  */
-export function Audience({ content }: { content: AudienceContent }) {
+export function Audience({ content }: { content: ReferralAudienceContent }) {
   return (
     <section id="who" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

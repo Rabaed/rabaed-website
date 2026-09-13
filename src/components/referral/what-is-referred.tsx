@@ -1,10 +1,10 @@
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
-export type WhatIsReferredContent = {
+export type ReferralWhatIsReferredContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly paragraphs: readonly string[];
-  readonly link: HeroLink;
+  readonly link: PageLink;
 };
 
 /**
@@ -12,7 +12,7 @@ export type WhatIsReferredContent = {
  * referrer who has to explain it to someone else, and a link to the product
  * page.
  */
-export function WhatIsReferred({ content }: { content: WhatIsReferredContent }) {
+export function WhatIsReferred({ content }: { content: ReferralWhatIsReferredContent }) {
   return (
     <section id="what" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

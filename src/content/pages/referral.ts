@@ -1,13 +1,13 @@
 import type { PageHeroContent } from '@/components/page-hero';
-import type { AudienceContent } from '@/components/referral/audience';
+import type { ReferralAudienceContent } from '@/components/referral/audience';
 import type { ReferralHowItWorksContent } from '@/components/referral/how-it-works';
-import type { OfferContent } from '@/components/referral/offer';
+import type { ReferralOfferContent } from '@/components/referral/offer';
 import type { ReferralQuestionsContent } from '@/components/referral/questions';
-import type { SignupContent } from '@/components/referral/signup';
-import type { TermsSummaryContent } from '@/components/referral/terms-summary';
-import type { WhatIsReferredContent } from '@/components/referral/what-is-referred';
+import type { ReferralSignupContent } from '@/components/referral/signup';
+import type { ReferralTermsSummaryContent } from '@/components/referral/terms-summary';
+import type { ReferralWhatIsReferredContent } from '@/components/referral/what-is-referred';
 import { REFERRAL_FAQ } from '@/content/faq';
-import { REFERRAL_FIGURES } from '@/content/referral-program';
+import { REFERRAL_PROGRAM_VALUES } from '@/content/referral-program';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -16,16 +16,16 @@ export type ReferralPageContent = {
   readonly hero: PageHeroContent;
   /** The hero's «كيف يعمل البرنامج ↓» lands here. */
   readonly howItWorks: LinkedSection<ReferralHowItWorksContent>;
-  readonly offer: Section<OfferContent>;
-  readonly audience: Section<AudienceContent>;
-  readonly whatIsReferred: Section<WhatIsReferredContent>;
-  readonly termsSummary: Section<TermsSummaryContent>;
+  readonly offer: Section<ReferralOfferContent>;
+  readonly audience: Section<ReferralAudienceContent>;
+  readonly whatIsReferred: Section<ReferralWhatIsReferredContent>;
+  readonly termsSummary: Section<ReferralTermsSummaryContent>;
   readonly questions: Section<ReferralQuestionsContent>;
   /** The hero's «سجّل واحصل على كودك» lands here. */
-  readonly signup: LinkedSection<SignupContent>;
+  readonly signup: LinkedSection<ReferralSignupContent>;
 };
 
-const { payout, clientDiscount } = REFERRAL_FIGURES;
+const { payout, clientDiscount } = REFERRAL_PROGRAM_VALUES;
 
 /**
  * All copy is verbatim from `reference/site/referral.html`. Every amount it

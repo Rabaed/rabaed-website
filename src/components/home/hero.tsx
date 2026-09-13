@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { HeroLoop } from '@/components/home/hero-loop';
 import { HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
 import { Inline, type InlineText } from '@/components/inline-text';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 export type HomeHeroContent = {
   readonly eyebrow: string;
@@ -10,9 +10,9 @@ export type HomeHeroContent = {
   readonly title: { readonly lines: readonly string[]; readonly accent: string };
   readonly lead: string;
   /** The filled button. */
-  readonly primary: HeroLink;
+  readonly primary: PageLink;
   /** The outlined one beside it. */
-  readonly secondary: HeroLink;
+  readonly secondary: PageLink;
   /** The small line under the buttons. */
   readonly trust: string;
   /** The pill under that: the period in bold, then the promise. */

@@ -11,7 +11,7 @@ export type TreeEntry = {
   readonly nested: boolean;
 };
 
-export type PrivacyContent = {
+export type ToolPrivacyContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly points: readonly InlineText[];
@@ -28,7 +28,7 @@ export type PrivacyContent = {
  * folder the tool writes, drawn as a tree. File names are Latin, so each is set
  * left to right.
  */
-export function Privacy({ content }: { content: PrivacyContent }) {
+export function Privacy({ content }: { content: ToolPrivacyContent }) {
   return (
     <section id="data" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">

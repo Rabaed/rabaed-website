@@ -1,5 +1,5 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
-import type { HeroLink } from '@/components/page-hero';
+import type { PageLink } from '@/components/page-link';
 
 export type ClosingStep = {
   /** «01 · إعداد». */
@@ -12,7 +12,7 @@ export type ClosingSectionContent = {
   readonly heading: string;
   readonly steps: readonly ClosingStep[];
   /** The link on to the start page's fuller steps and questions. */
-  readonly more: HeroLink;
+  readonly more: PageLink;
 };
 
 /**

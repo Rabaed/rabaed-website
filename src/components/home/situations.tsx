@@ -7,7 +7,7 @@ export type FieldSituation = {
   readonly cost: string;
 };
 
-export type SituationsContent = {
+export type HomeSituationsContent = {
   readonly eyebrow: string;
   readonly heading: string;
   /**
@@ -31,7 +31,7 @@ export type SituationsContent = {
  * written against it and the class names and ids are load-bearing (spec:
  * Design system). Everywhere a name is ours to choose, it is "situations".
  */
-export function Situations({ content }: { content: SituationsContent }) {
+export function Situations({ content }: { content: HomeSituationsContent }) {
   const { close } = content;
   const total = content.situations.length;
   const cards = content.situations.map((situation, index) => (
