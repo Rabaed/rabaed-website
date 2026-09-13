@@ -179,17 +179,72 @@ test.describe('the hero', () => {
   test('the pulse ring shows where the document landed', async ({ page }) => {
     await page.goto('/');
 
-    // The ring is invisible at rest and expands out of an arrival, so "it
-    // pulses" is: at some point it is both visible and larger than it was.
-    await expect
-      .poll(
-        async () =>
-          page
-            .locator('#h-pulse')
-            .evaluate((ring) => Number(getComputedStyle(ring).opacity) > 0.1),
-        { message: 'the pulse ring never appeared' },
-      )
-      .toBe(true);
+    // The loop's own timings, in seconds, from `hero-loop.tsx`, which keeps
+    // them to itself. The first ring comes one hold and one hop after the loop
+    // starts; a whole round is that hold, three hops each followed by its
+    // hold, and the breath before the next round.
+    const HOP = 1.05;
+    const HOLD = 0.85;
+    const BETWEEN_ROUNDS = 0.35;
+    const firstLanding = HOLD + HOP;
+    const round = HOLD + 3 * (HOP + HOLD) + BETWEEN_ROUNDS;
+
+    // The ring is invisible at rest and flashes out of an arrival. It is
+    // watched every frame, inside the page, for as long as the loop needs —
+    // not with `expect.poll` and its default five seconds, which made this
+    // test flaky on a loaded machine for two reasons:
+    //
+    // - The ring stays above a tenth of its opacity for only the first 0.62
+    //   seconds of each pulse, and `expect.poll` backs off to one look a
+    //   second, so a poll can step straight over a landing.
+    // - The loop starts at hydration, which a busy machine delays, and the
+    //   first ring comes 1.9 seconds after that. Five seconds from `load` left
+    //   too thin a margin.
+    //
+    // So the wait is the first landing plus a whole round: a page that
+    // hydrates late, or drops the frames of the first pulse, still has three
+    // more landings to show a ring at.
+    const seen = await page.evaluate(async (deadline) => {
+      const ring = document.getElementById('h-pulse')!;
+      const doc = document.getElementById('h-doc')!;
+      const art = doc.closest('.hero-art')!;
+
+      // Centres in the art box's own percentages, as elsewhere in this file.
+      // Scaling the ring leaves its centre where it is.
+      const centre = (element: Element) => {
+        const frame = art.getBoundingClientRect();
+        const box = element.getBoundingClientRect();
+        return {
+          left: ((box.left + box.width / 2 - frame.left) / frame.width) * 100,
+          top: ((box.top + box.height / 2 - frame.top) / frame.height) * 100,
+        };
+      };
+
+      type Point = ReturnType<typeof centre>;
+
+      return new Promise<{ ring: Point; doc: Point } | null>((resolve) => {
+        const started = performance.now();
+        const sample = () => {
+          if (Number(getComputedStyle(ring).opacity) > 0.1) {
+            resolve({ ring: centre(ring), doc: centre(doc) });
+          } else if (performance.now() - started < deadline) {
+            requestAnimationFrame(sample);
+          } else {
+            resolve(null);
+          }
+        };
+        requestAnimationFrame(sample);
+      });
+    }, (firstLanding + round) * 1000);
+
+    expect(seen, 'the pulse ring never appeared').not.toBeNull();
+
+    // ...and it appeared on the document, which holds still for longer than
+    // the ring is visible — not on the tower the document had just left.
+    const { ring, doc } = seen!;
+    const elsewhere = 'the ring is not where the document landed';
+    expect(ring.left, elsewhere).toBeCloseTo(doc.left, 0);
+    expect(ring.top, elsewhere).toBeCloseTo(doc.top, 0);
   });
 });
 
