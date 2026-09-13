@@ -35,6 +35,22 @@ const BUCKET_VARIABLES = [
   'S3_SECRET_ACCESS_KEY',
 ] as const;
 
+/**
+ * On a Vercel deployment, every CMS variable that is missing, named in one
+ * error. Checked one at a time, a deployment missing all seven would fail
+ * seven builds in a row, each naming the next — and each fix is a trip to
+ * Vercel's settings and a redeploy for somebody who is not a developer.
+ */
+export function requireDeploymentVariables(): void {
+  if (!isPubliclyDeployed()) return;
+  const missing = ['DATABASE_URL', 'PAYLOAD_SECRET', ...BUCKET_VARIABLES].filter((name) => !process.env[name]);
+  if (missing.length > 0) {
+    throw new Error(
+      `This deployment is missing ${missing.join(', ')}. Add ${missing.length === 1 ? 'it' : 'them'} in Vercel under Settings → Environment Variables, ticked for the "${process.env.VERCEL_ENV}" environment, then redeploy. See "The CMS" in docs/deployment.md.`,
+    );
+  }
+}
+
 export type MediaBucket = {
   bucket: string;
   endpoint: string;

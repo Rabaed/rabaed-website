@@ -16,7 +16,7 @@ import { buildConfig } from 'payload';
 import sharp from 'sharp';
 import { Media } from './cms/collections/media';
 import { Users } from './cms/collections/users';
-import { databaseUrl, mediaBucket, payloadSecret } from './cms/environment';
+import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { SiteSettings } from './cms/globals/site-settings';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,6 +30,9 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 const ADMIN_ROUTE = '/maktab';
 
+// Before anything reads a variable, so a deployment missing several is told
+// about all of them in one failed build.
+requireDeploymentVariables();
 const bucket = mediaBucket();
 
 export default buildConfig({
