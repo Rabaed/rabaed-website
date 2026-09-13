@@ -43,14 +43,8 @@
 @media (min-width: 981px) { .start.four { grid-template-columns: repeat(4, 1fr) } }
 
 /* ---- who the programme is for ---- */
-.rt-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px }
-.rt-c { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; transition: border-color .3s, transform .3s }
-.rt-c:hover { border-color: var(--acc); transform: translateY(-2px) }
-.rt-c .k { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--acc); letter-spacing: .08em; margin-bottom: 10px }
-.rt-c h3 { font-size: 17px; margin: 0 0 6px; font-weight: 600 }
-.rt-c p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75 }
-@media (max-width: 980px) { .rt-row { grid-template-columns: 1fr } }
-/* The link inside a note (`.gain`, in `tokens.css`). */
+/* Its cards are `.rt-row` and `.rt-c`, in `tokens.css`, which the tool page
+   shares. The link inside its note (`.gain`, also in `tokens.css`): */
 .gain .inl { color: var(--acc); font-weight: 600 }
 .gain .inl:hover { text-decoration: underline }
 
@@ -104,7 +98,9 @@
 
 /* ---- the referral page's in-page links ---- */
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small, as `#demo` in
-   `shell.css` and `#faq` in `start.css`: the hero's two links land here. The
-   Reference site's script stops 78px short so the fixed header does not cover
-   the section; this stops in the same place with no script. */
-#how, #signup { scroll-margin-top: 78px }
+   `shell.css` and `#faq` in `start.css`: the hero's «سجّل واحصل على كودك» lands
+   here. The Reference site's script stops 78px short so the fixed header does
+   not cover the section; this stops in the same place with no script. Its
+   other link lands on `#how`, whose margin `tool.css` already sets, the tool
+   page having a `#how` too. */
+#signup { scroll-margin-top: 78px }

@@ -18,7 +18,19 @@ export function FaqEntries({ entries }: { entries: readonly FaqEntry[] }) {
   return entries.map((entry) => (
     <details key={entry.question} className="qa">
       <summary>{entry.question}</summary>
-      <p>{entry.answer}</p>
+      <p>
+        {typeof entry.answer === 'string'
+          ? entry.answer
+          : entry.answer.map((part, index) =>
+              typeof part === 'string' ? (
+                part
+              ) : (
+                <span key={index} className="mono" dir="ltr">
+                  {part.latin}
+                </span>
+              ),
+            )}
+      </p>
     </details>
   ));
 }

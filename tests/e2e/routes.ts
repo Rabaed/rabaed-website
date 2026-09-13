@@ -58,6 +58,18 @@ export const ROUTES = [
     alternates: { ar: '/start', en: '/en/start' },
   },
   {
+    path: '/tool',
+    locale: 'ar',
+    dir: 'rtl',
+    // The hero, the download form's heading, and the last line on the page.
+    text: [
+      'سجّل الصبّة اليوم، واعرف متى يحين اختبار الكسر',
+      'حمّل الأداة الآن',
+      'صُنعت في ربائد لمهندسي المواقع. الأداة مجانية — استخدمها كما تشاء.',
+    ],
+    alternates: { ar: '/tool', en: '/en/tool' },
+  },
+  {
     path: '/referral',
     locale: 'ar',
     dir: 'rtl',

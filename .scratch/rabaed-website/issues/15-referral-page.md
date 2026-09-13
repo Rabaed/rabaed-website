@@ -25,8 +25,8 @@ The sections are server components in `src/components/referral/`; the page hero 
 
 - **The amounts** are written into the copy, as on the Reference site and in the Referral Terms. Ticket 21 moves them into one place that drives both. A test reads the whole header, dropdown and mobile panel included, and finds none of «2,000», «2000», «10%» or «ريال».
 - **The questions** are ticket 11's `Faq`, in a row of cards. The nine are `REFERRAL_FAQ` in `src/content/faq.ts`.
-- **The step cards** are the start page's `.start .s`, four across only at desktop widths. `.start.four` sits inside `@media (min-width: 981px)`, commented in place as HANDOFF §7.4's exception.
-- **`.strip` and `.gain` moved into `tokens.css`**, out of `product.css`'s `#custom` and `#roles`, because the referral page uses both. The product page's comparison still passes.
+- **The step cards** are ticket 14's `StepCards`, which now takes `columns="four"`: four across only at desktop widths. `.start.four` sits inside `@media (min-width: 981px)`, commented in place as HANDOFF §7.4's exception.
+- **`.strip` and `.gain` moved into `tokens.css`**, out of `product.css`'s `#custom` and `#roles`, because the referral page uses both. The product page's comparison still passes. The audience cards are `.rt-row` and `.rt-c`, which ticket 14 had already put there.
 
 ### The form
 
@@ -44,7 +44,7 @@ The sections are server components in `src/components/referral/`; the page hero 
 
 - **Arabic set in DM Mono.** The step labels «01 · سجّل», the figures «2,000 ريال» and «بلا حد», the badges «لك» and «لعميلك», and «7 أيام عمل» in the guarantee pill keep the Arabic face, with only numerals `.mono`. The Reference site sets them wholly in DM Mono, which has no Arabic glyphs. The eyebrows are still `.eyebrow`, waiting on bug 45.
 - **The file inputs are hidden from sight, not from the keyboard.** The Reference site's `hidden` takes them out of the tab order: a visitor without a mouse could not attach the required IBAN certificate, and its own `:focus-within` outline could never show. Here they are clipped to nothing but still take focus.
-- **«كيف يعمل البرنامج ↓» and «سجّل واحصل على كودك»** land on `#how` and `#signup` 78px short, with `scroll-margin-top` instead of the Reference site's script.
+- **«كيف يعمل البرنامج ↓» and «سجّل واحصل على كودك»** land on `#how` and `#signup` 78px short, with `scroll-margin-top` instead of the Reference site's script. `#how`'s margin is `tool.css`'s, which the tool page's `#how` already needed.
 - **The disabled submit button**, as in ticket 11, is 2px taller because of its border.
 - **The header's «احجز عرضاً حياً»** goes nowhere here, as on the Reference site's sub-pages.
 
@@ -115,5 +115,8 @@ Changed:
 Checked and left:
 
 - **«`.form .upl` is a prefix the Reference site does not use».** It does, at `referral.html:810`.
-- **The step-card markup repeats the start page's.** The copy differs, and each card is four lines.
 - **The sections repeat the Reference site's inline top border**, as the start page does.
+
+Resolved by merging main:
+
+- **The step-card markup repeated the start page's.** Ticket 14 had meanwhile made it `StepCards`, and the referral page's steps now use it.
