@@ -66,7 +66,7 @@ Checked and left:
 
 **What the spec review changed.**
 
-- **Restoring a draft could have put it on the site unpublished.** The admin offers a draft version only a plain restore, and a plain restore copies the version, draft status and all, onto the document itself. The page read the document, so its next rebuild would have shown the draft's text with nobody having published it. Visitors' pages now read the **newest published version from the history**, never the document, so only Publish changes what they see, and the date shown is that version's own. The restore test now restores the draft itself, forces every page to rebuild, and checks the published text is still what visitors get.
+- **Restoring a draft could have put it on the site unpublished.** The admin offers a draft version only a plain restore, and a plain restore copies the version, draft status and all, onto the document itself. The page read the document, so its next rebuild would have shown the draft's text with nobody having published it. Visitors' pages now read the **newest published version from the history**, never the document, so only Publish changes what they see, and the date shown is that version's own. The restore test now restores the draft itself, forces every page to rebuild, and checks the published text is still what visitors get. Verified by putting the old reading back: exactly that test failed, finding the draft's «— عنوان معدّل» on the rebuilt Referral Terms.
 - `docs/deployment.md` says what a restore does: a restored draft is a draft; a published version restored straight away is published again.
 
 Checked and left:
@@ -74,6 +74,6 @@ Checked and left:
 - **The date while previewing** is the day the draft was saved, not a published date — there is none yet for a draft. A preview banner already says the page is not what visitors see.
 - **More than the words is editable** — the search title and description, the line under the title, whether a clause is in the contents — and the renderer handles line breaks, new-tab links and unsafe addresses. All of it follows from what the editor allows; none of it reaches visitors except through Publish.
 
-**The full suite** passed, 728 tests, on `TEST_PORT=3225` rather than this ticket's 3125: an earlier run's database left port 5125 listed as listening under a process that no longer exists, and a new database refused to start there.
+**The full suite** passed, 728 tests, on the final code after both reviews' changes, on `TEST_PORT=3225` rather than this ticket's 3125: an earlier run's database left port 5125 listed as listening under a process that no longer exists, and a new database refused to start there.
 
 The unpublish, delete and create refusals, and keeping every version (`maxPerDoc: 0`), are not broken on purpose here beyond the first build: a retention limit of Payload's default 100 would only show after a hundred saves.
