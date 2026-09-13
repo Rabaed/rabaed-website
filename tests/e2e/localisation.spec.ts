@@ -47,12 +47,17 @@ test('each page is its own canonical and names both locales as alternates', asyn
       absolute(baseURL!, route.path),
     );
 
-    // The same page in each locale — not every route in each locale, which
-    // was the same thing only while the site had one page per locale.
+    // The same page in each locale it exists in — not every route in each
+    // locale, which was the same thing only while the site had one page per
+    // locale — and no alternate for a locale it does not exist in, which
+    // would send a search engine to a page that is not there.
     for (const [locale, path] of Object.entries(route.alternates)) {
       await expect(
         page.locator(`link[rel="alternate"][hreflang="${locale}"]`),
       ).toHaveAttribute('href', absolute(baseURL!, path));
     }
+    await expect(page.locator('link[rel="alternate"][hreflang]'), `${route.path}'s alternates`).toHaveCount(
+      Object.keys(route.alternates).length,
+    );
   }
 });

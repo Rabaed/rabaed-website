@@ -143,7 +143,12 @@ function usePartnershipsDropdown() {
 function useHeaderColourToggle() {
   useEffect(() => {
     const nav = document.querySelector<HTMLElement>('.nav');
-    const firstLight = document.querySelector('section.light');
+    // A legal document's pale ground counts as a light section. It is not
+    // `.light`, because its own rules set the colour of every part of it, as
+    // on the Reference site; this is the rule the animated pages follow,
+    // which ticket 17 asks the legal pages to share rather than the listener
+    // of their own the Reference site gave them.
+    const firstLight = document.querySelector('section.light, section.legal');
     if (!nav || !firstLight) return;
 
     gsap.registerPlugin(ScrollTrigger);
