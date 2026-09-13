@@ -30,3 +30,18 @@ export function siteOrigin(): string {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return `http://127.0.0.1:${process.env.PORT ?? 3000}`;
 }
+
+/**
+ * Whether this build is going to be reachable from the public internet: any
+ * Vercel deployment at all — preview, development or production, indexable or
+ * not. Local builds and the test suite are not deployments.
+ *
+ * Wider than `isIndexable`, and on purpose. `noindex` asks search engines not
+ * to list a page; it does not stop anyone who has the address from reading it,
+ * nor an AI assistant fetching a page a user pastes in. Content that may not be
+ * published at all has to stay off every deployment, not only the indexable
+ * one (ticket 47).
+ */
+export function isPubliclyDeployed(): boolean {
+  return Boolean(process.env.VERCEL_ENV);
+}

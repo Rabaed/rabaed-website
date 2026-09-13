@@ -7,6 +7,7 @@
 **Status:** ready-for-agent
 
 - [ ] Updated Privacy Policy from the lawyer published before anything becomes public
+- [ ] Ticket 47 closed — no figure on the page without a recorded source
 - [ ] `noindex` removed from production — and only production
 - [ ] Ticket 39a done first — the site must be deployed on Vercel before a domain can point at it
 - [ ] Domain pointed from GoDaddy to Vercel; HTTPS verified; `www` and bare domain resolve consistently

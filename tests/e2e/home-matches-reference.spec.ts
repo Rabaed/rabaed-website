@@ -25,23 +25,13 @@
  * behaviour is held to the spec.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { openReferencePage, startReferenceSite, type ReferenceSite } from './reference-site';
-
-/**
- * The sixteen viewports the visual baselines were captured at (ticket 02): the
- * eight widths at 900px tall, then the short desktop windows.
- *
- * The short ones are not optional here. The hero's own
- * `(min-width: 981px) and (max-height: 700px)` block is six rules that shrink
- * the headline, the lead, the diagram and the gap between them, and at 900px
- * tall not one of them is exercised — a wrong number in any of them would pass
- * every width. 840 sits just above the query, 700 on it, and 600 and 550 well
- * inside it.
- */
-const VIEWPORTS = [
-  ...[360, 390, 768, 820, 1024, 1280, 1440, 1600].map((width) => ({ width, height: 900 })),
-  ...[1280, 1440].flatMap((width) => [840, 700, 600, 550].map((height) => ({ width, height }))),
-];
+import {
+  BASELINE_VIEWPORTS,
+  freezeTransitions,
+  openReferencePage,
+  startReferenceSite,
+  type ReferenceSite,
+} from './reference-site';
 
 /**
  * Everything the hero is made of. Both documents carry all of it, under the
@@ -87,17 +77,6 @@ const HERO_PARTS = [
  * occupies and the height it takes, and nothing more. See `tokens.css`.
  */
 const DIVERGENT = '.guar';
-
-/**
- * Freezes every transition and CSS animation on both documents alike, for the
- * reason given in the shell comparison: what is being compared is where each
- * rule ends up, not how long it takes to get there.
- */
-async function freezeTransitions(page: Page) {
-  await page.addStyleTag({
-    content: '*, *::before, *::after { transition: none !important; animation: none !important }',
-  });
-}
 
 async function measure(page: Page, parts: readonly string[]) {
   return page.evaluate(
@@ -147,7 +126,11 @@ test.describe('the hero matches the Reference site', () => {
     await new Promise((resolve) => site.server.close(resolve));
   });
 
-  for (const viewport of VIEWPORTS) {
+  // All sixteen, and the short ones are not optional here: the hero's own
+  // `(min-width: 981px) and (max-height: 700px)` block is six rules that shrink
+  // the headline, the lead, the diagram and the gap between them, and at 900px
+  // tall not one of them is exercised.
+  for (const viewport of BASELINE_VIEWPORTS) {
     test(`at ${viewport.width}x${viewport.height}`, async ({ browser, baseURL }) => {
       const options = { viewport, reducedMotion: 'reduce' as const };
       const referenceContext = await browser.newContext(options);

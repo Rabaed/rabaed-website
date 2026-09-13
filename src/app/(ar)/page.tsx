@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Figures } from '@/components/home/figures';
 import { Hero } from '@/components/home/hero';
+import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { localePath } from '@/lib/locales';
@@ -13,12 +15,14 @@ export const metadata: Metadata = pageMetadata({
 });
 
 /**
- * The Arabic home page, in the state ticket 06 leaves it: the full-height hero
- * and the Trust strip below it, then the repeating tail.
+ * The Arabic home page, in the state ticket 07 leaves it: the full-height hero,
+ * the Trust strip, the situations deck, the figures deck, then the repeating
+ * tail.
  *
- * Tickets 07-11 fill in what belongs between the two — the card decks, the
- * four units, the Record section, the before-and-after and the FAQs. The
- * closing section is the tail every page carries; ticket 11 puts the demo form
+ * The gaps are marked where they fall, in the Reference site's order: tickets
+ * 08-10 fill the space between the two decks, and ticket 11 puts the FAQs
+ * before the tail. The closing section is the tail every page carries; ticket
+ * 11 puts the demo form
  * in its second column and ticket 27 makes that form real, which is why it
  * looks half-empty at desktop widths today (bug 44).
  *
@@ -30,6 +34,11 @@ export default function HomePage() {
     <PageShell locale="ar" path="/">
       <Hero />
       <TrustStrip />
+      <Situations />
+      {/* Tickets 08, 09 and 10: the four units, the Record, and the
+          before-and-after with its calculator. */}
+      <Figures />
+      {/* Ticket 11: the FAQs. */}
 
       <section id="tail" className="light pad">
         <div className="wrap tail-grid">

@@ -68,3 +68,27 @@ export async function openReferencePage(page: Page, site: ReferenceSite, file: s
   await page.goto(`${site.origin}/${file}`);
   await page.evaluate(() => document.fonts.ready);
 }
+
+/**
+ * Freezes every transition and CSS animation on a page.
+ *
+ * Without it a comparison photographs a cross-fade rather than the state it
+ * settles in: the header's two wordmarks were once caught at opacity 0.9693
+ * and 0.0307, mid-way through a 350ms fade. What these comparisons measure is
+ * where each rule ends up, not how long it takes to get there.
+ */
+export async function freezeTransitions(page: Page): Promise<void> {
+  await page.addStyleTag({
+    content: '*, *::before, *::after { transition: none !important; animation: none !important }',
+  });
+}
+
+/**
+ * The sixteen viewports the visual baselines were captured at (ticket 02): the
+ * eight widths at 900px tall, then the short desktop windows at 840, 700, 600
+ * and 550px, where the Reference site's height-based rules take over.
+ */
+export const BASELINE_VIEWPORTS: readonly { width: number; height: number }[] = [
+  ...[360, 390, 768, 820, 1024, 1280, 1440, 1600].map((width) => ({ width, height: 900 })),
+  ...[1280, 1440].flatMap((width) => [840, 700, 600, 550].map((height) => ({ width, height }))),
+];

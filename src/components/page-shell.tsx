@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { RevealOnScroll } from '@/components/reveal-on-scroll';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteNav } from '@/components/site-nav';
 import type { Locale } from '@/lib/locales';
@@ -28,6 +29,8 @@ export function PageShell({
       <SiteNav locale={locale} path={path} />
       {children}
       <SiteFooter locale={locale} />
+      {/* Every page's `.reveal` entrances, attached once for the page. */}
+      <RevealOnScroll />
     </>
   );
 }

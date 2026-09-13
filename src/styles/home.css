@@ -1,7 +1,7 @@
 /**
  * The home page's own sections, taken from `reference/site/index.html`: the
- * full-height hero and the Trust strip below it (ticket 06). Tickets 07–11
- * add the rest of the page here.
+ * full-height hero and the Trust strip below it (ticket 06), and the two card
+ * decks (ticket 07). Tickets 08–11 add the rest of the page here.
  *
  * Imported after `shell.css` and before `responsive.css`, which has to stay
  * last for the reason written at the top of it. Nothing here collides with a
@@ -119,6 +119,109 @@
   .logos-row.copy { display: none }
 }
 
+/* ---- the card decks ---- */
+
+/* One deck, two sections: `#pain` is dark and quotes situations from the
+   field, `#proof` is light and states figures. Everything from `.deck-wrap`
+   down is shared; the light deck is `.deck-lt` layered over it
+   (src/components/home/card-deck.tsx). */
+
+/* DELIBERATE EXCEPTION — the pain cards bleed off the canvas (spec: Design
+   system; reference/HANDOFF.md: "not a defect").
+   The resting pile fans each card behind the top one 11px further out and
+   turns it, and a thrown card flies 130% of its own width off the side before
+   the pile closes up. At phone widths both carry the cards past the edge of
+   the screen, on purpose: a pile of paper that stops dead at an invisible wall
+   looks like a widget in a box. `overflow-x: clip` is what makes it safe. It
+   cuts the overhang at the section's edge without making the section a scroll
+   container — `hidden` would, and would force `overflow-y` to `auto` with it,
+   so the fan's upward offset and the cards' shadows would be trimmed or given
+   a scrollbar. Remove it and the page scrolls sideways the first time a card
+   is thrown; tests/e2e/home-card-decks.spec.ts measures exactly that. */
+#pain { padding: var(--sp) 0; overflow-x: clip }
+.pain-2col { display: grid; grid-template-columns: 1.02fr .98fr; gap: 56px; align-items: center }
+.pain-close { margin-top: 34px; font-size: 26px; font-weight: 700 }
+.pain-close span { color: var(--acc) }
+
+.deck-wrap { display: flex; flex-direction: column; align-items: center; gap: 22px }
+/* `touch-action: pan-y` gives vertical swipes to the page and keeps horizontal
+   ones for the card, so a thumb can scroll straight past the deck and still
+   throw a card, without the two fighting over the same gesture. */
+.deck { position: relative; width: 340px; height: 348px; touch-action: pan-y; user-select: none; -webkit-user-select: none }
+.deck:focus { outline: none }
+.deck:focus-visible .pcard.top { box-shadow: 0 0 0 3px var(--acc), 0 30px 70px rgba(0, 0, 0, .55) }
+.pcard { position: absolute; inset: 0; transform-origin: 50% 100%; background: var(--dark2); border: 1px solid var(--dark-line); border-radius: 20px; padding: 30px 28px 26px; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0, 0, 0, .45); overflow: hidden; will-change: transform; backface-visibility: hidden }
+/* The large closing quotation mark behind each quote, at the end of the line. */
+.pcard:before { content: "\201D"; position: absolute; top: -20px; inset-inline-end: 22px; font-size: 130px; color: rgba(249, 87, 56, .15); font-family: serif; line-height: 1 }
+/* The card's number is Latin digits, set left to right so "01 / 06" does not
+   read backwards, and pushed to the right-hand edge where an Arabic line
+   begins. `text-align: right` stays physical on purpose: inside a box forced
+   to left-to-right, `start` would mean the left. The English site revisits it
+   (ticket 42). */
+.pcard .n { font-family: "DM Mono", monospace; font-size: 11.5px; letter-spacing: .1em; color: var(--dark-muted); direction: ltr; unicode-bidi: isolate; text-align: right }
+.pcard q { display: block; font-size: 21px; font-weight: 600; line-height: 1.62; quotes: "\201C" "\201D"; margin: 22px 0 auto }
+.pcard.top { cursor: grab; box-shadow: 0 30px 70px rgba(0, 0, 0, .55) }
+.pcard.top:active { cursor: grabbing }
+.pcard.glide { transition: transform .42s cubic-bezier(.22, .9, .28, 1), opacity .42s ease }
+
+/* What each situation costs, as a boxed alert at the foot of the card. */
+#pain .cost { margin-top: 18px; padding: 12px 14px 13px; background: rgba(249, 87, 56, .075); border: 1px solid rgba(249, 87, 56, .22); border-inline-start: 3px solid var(--acc); border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--dark-muted) }
+#pain .cost .ct { display: flex; align-items: center; gap: 7px; color: var(--acc); font-weight: 600; font-size: 12px; margin-bottom: 5px; letter-spacing: .01em }
+#pain .cost .ct svg { width: 14px; height: 14px; flex: none }
+
+.deck-ui { display: flex; align-items: center; gap: 14px }
+.deck-ui button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--dark-line); background: rgba(255, 255, 255, .05); color: #fff; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s, border-color .2s; font-family: inherit }
+.deck-ui button:hover { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .3) }
+.deck-count { font-family: "DM Mono", monospace; font-size: 13px; color: var(--dark-muted); min-width: 64px; text-align: center; direction: ltr; unicode-bidi: isolate }
+.deck-count b { color: #fff; font-weight: 500 }
+.deck-hint { font-size: 12.5px; color: var(--dark-muted) }
+
+/* ---- the proof deck, light ---- */
+
+/* The Reference site wrote this section's white ground and top rule as an
+   inline style on the markup. They are the section's, so they are here. */
+#proof { background: #fff; border-top: 1px solid var(--line); overflow-x: clip }
+/* Aligned to the top, so the deck starts level with the heading beside it. */
+.proof-2col { display: grid; grid-template-columns: 1.02fr .98fr; gap: 56px; align-items: start }
+#proof .proof-copy .lead { margin-bottom: 0 }
+
+/* The Reference site builds the light card in four passes over the dark one,
+   each overriding the last. What is below is where those passes end up. Rules
+   a later pass erased, and rules for elements this deck's markup never has
+   (`.pcard .n`, `.lbl`), are not carried over. Every value here is held to the
+   Reference site by tests/e2e/home-decks-match-reference.spec.ts. */
+.deck-lt .deck { width: 344px; height: 296px }
+.deck-lt .pcard { background: #fff; border: 1px solid var(--line); color: var(--ink); box-shadow: 0 18px 44px rgba(20, 22, 28, .10); padding: 22px 26px 24px; text-align: start }
+.deck-lt .pcard:before { content: none }
+.deck-lt .pcard.top { box-shadow: 0 24px 56px rgba(20, 22, 28, .16) }
+.deck-lt .deck:focus-visible .pcard.top { box-shadow: 0 0 0 3px var(--acc), 0 24px 56px rgba(20, 22, 28, .16) }
+.deck-lt .phead { display: flex; align-items: center; justify-content: space-between; gap: 12px }
+.deck-lt .topic { font-size: 13px; font-weight: 600; color: var(--acc); background: var(--acc-soft); border-radius: 999px; padding: 5px 13px; line-height: 1.5 }
+.deck-lt .pcard .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; margin: 0; flex: none }
+.deck-lt .pcard .ic svg { width: 22px; height: 22px }
+.deck-lt .chead { font-size: 16.5px; font-weight: 600; line-height: 1.5; color: var(--ink); margin-top: 13px }
+.deck-lt .pbody { flex: 1 1 auto; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 0 }
+.deck-lt .pcard b.big { font-family: "DM Mono", monospace; font-size: 60px; line-height: 1.02; color: var(--ink); font-weight: 500; direction: ltr; unicode-bidi: isolate; display: block; margin-bottom: 0 }
+/* A phrase rather than a number — «أقل من يوم» — so it is set in the Arabic
+   face. `unicode-bidi: isolate` is not an addition: the Reference site gives
+   it to every `b` in the card and nothing on `b.txtnum` takes it away.
+   `direction: rtl` is physical because the phrase is Arabic whichever page it
+   sits on; the English site brings its own (ticket 42). */
+.deck-lt .pcard b.txtnum { font-family: inherit; font-size: 34px; font-weight: 700; direction: rtl; unicode-bidi: isolate; line-height: 1.25; color: var(--ink); display: block; margin-bottom: 0 }
+.deck-lt .mark { display: flex; align-items: flex-end; gap: 16px; height: 78px; flex: none }
+.deck-lt .mark span { width: 28px; border-radius: 6px 6px 3px 3px; background: #E6E3DC; position: relative }
+.deck-lt .mark span.on { background: var(--acc) }
+/* Centred under its bar. `right: 50%` with `translateX(50%)` is symmetric, so
+   it is the same in either direction and is left physical. */
+.deck-lt .mark em { position: absolute; bottom: -18px; right: 50%; transform: translateX(50%); font-size: 10px; font-style: normal; color: var(--muted); white-space: nowrap; font-family: inherit }
+.deck-lt .src { margin-top: auto; border-top: 1px dashed var(--line); padding-top: 11px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; line-height: 1.5 }
+.deck-lt .src svg { width: 14px; height: 14px; flex: none; color: var(--acc) }
+.deck-lt .deck-ui button { border: 1px solid var(--line); background: #fff; color: var(--ink) }
+.deck-lt .deck-ui button:hover { background: var(--soft); border-color: #CFCCC5 }
+.deck-lt .deck-count { color: var(--muted) }
+.deck-lt .deck-count b { color: var(--ink) }
+.deck-lt .deck-hint { color: var(--muted) }
+
 /* ---- narrower and shorter ---- */
 
 @media (max-width: 980px) {
@@ -129,6 +232,25 @@
   .hero-grid { grid-template-columns: 1fr; height: auto; min-height: 0; gap: 26px }
   .hero-copy h1 { font-size: 38px }
   .hero-art { max-width: 520px }
+
+  .pain-2col { grid-template-columns: 1fr; gap: 40px }
+  .pain-close { font-size: 22px }
+  .deck { width: 300px; height: 334px }
+  .pcard q { font-size: 19px }
+
+  /* Only the columns change. The Reference site narrows the gap to 34px here
+     too, but in a rule that `#proof .proof-2col { gap: 56px }` outranks — so
+     what visitors get, and what the baselines recorded, is 56px. That is what
+     is written: the 34px never applied. */
+  .proof-2col { grid-template-columns: 1fr }
+  .deck-lt .topic { font-size: 12px; padding: 4px 11px }
+  .deck-lt .pcard .ic { width: 34px; height: 34px; border-radius: 10px }
+  .deck-lt .chead { font-size: 15px; margin-top: 10px }
+  .deck-lt .pcard b.big { font-size: 46px }
+  .deck-lt .pcard b.txtnum { font-size: 27px }
+  .deck-lt .mark { height: 58px; gap: 13px }
+  .deck-lt .mark span { width: 24px }
+  .deck-lt .src { font-size: 11.5px; padding-top: 9px }
 }
 
 /* A desktop window that is wide but short — a laptop with the browser's own
@@ -141,10 +263,24 @@
   .hero-copy .lead { margin-top: 14px; font-size: 15px }
   .hero-visual { gap: 14px }
   .hero-art { max-width: 452px }
+
+  #pain .cost { margin-top: 14px; padding: 10px 12px 11px; font-size: 12.5px }
+  .deck-lt .deck { width: 324px; height: 268px }
+  .deck-lt .pcard { padding: 18px 22px 20px }
+  .deck-lt .topic { font-size: 12px; padding: 4px 11px }
+  .deck-lt .pcard .ic { width: 34px; height: 34px; border-radius: 10px }
+  .deck-lt .pcard .ic svg { width: 19px; height: 19px }
+  .deck-lt .chead { font-size: 15px; margin-top: 10px }
+  .deck-lt .pcard b.big { font-size: 46px }
+  .deck-lt .pcard b.txtnum { font-size: 27px }
+  .deck-lt .mark { height: 58px; gap: 13px }
+  .deck-lt .mark span { width: 24px }
+  .deck-lt .src { font-size: 11.5px; padding-top: 9px }
 }
 
 @media (max-width: 700px) {
   .hero-copy h1 { font-size: 33px }
+  .pain-close { font-size: 20px }
 
   /* Another consequence of the strip moving rather than wrapping, and so
      another rule the Reference site has no counterpart for. Its label and its
@@ -153,4 +289,20 @@
      logo and a half. It gets the line below instead. */
   .logos .wrap { flex-wrap: wrap; gap: 14px }
   .logos-rail { flex-basis: 100% }
+}
+
+@media (max-width: 640px) {
+  .deck-lt .deck { width: min(300px, 84vw); height: 308px }
+  .deck-lt .pcard b.big { font-size: 50px }
+  .deck-lt .pcard b.txtnum { font-size: 29px }
+  .deck-lt .mark { height: 66px }
+}
+
+@media (max-width: 560px) {
+  .pcard { padding: 26px 22px 22px }
+  .deck-lt .pcard { padding: 20px 20px 22px }
+}
+
+@media (max-width: 400px) {
+  .deck { width: min(280px, 84vw); height: 330px }
 }
