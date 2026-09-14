@@ -1,17 +1,25 @@
 import { RichText } from '@payloadcms/richtext-lexical/react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { BlogFrame, BlogHero, CoverImage, PublishedDate } from '@/components/blog/blog-parts';
-import { allPublishedPosts, coverImage, findPost, publishedLocales } from '@/cms/blog';
+import {
+  EditorialFrame,
+  EditorialHero,
+  MediaImage,
+  OtherLanguageNotice,
+  otherLanguageMetadata,
+  PublishedDate,
+} from '@/components/editorial';
+import { allPublishedPosts, findPost, publishedLocales } from '@/cms/blog';
+import { fetchedMedia } from '@/cms/fetched-media';
 import { BLOG_COPY } from '@/content/blog';
-import { blogPostPath } from '@/lib/blog-paths';
+import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { localePath, type Locale } from '@/lib/locales';
-import { baseMetadata, pageMetadata } from '@/lib/metadata';
+import { pageMetadata } from '@/lib/metadata';
 
 /**
  * The articles published in a language when the site is built. One published
  * later is built on its first visit, and publishing marks the pages stale
- * (`src/cms/collections/posts.ts`).
+ * (`src/cms/editorial-fields.ts`).
  */
 export async function blogPostParams(locale: Locale): Promise<{ slug: string }[]> {
   return (await allPublishedPosts(locale)).map((post) => ({ slug: post.slug }));
@@ -25,15 +33,7 @@ export async function blogPostParams(locale: Locale): Promise<{ slug: string }[]
 export async function blogPostMetadata(locale: Locale, slug: string): Promise<Metadata> {
   const copy = BLOG_COPY[locale];
   const post = await findPost(locale, slug);
-
-  if (!post) {
-    // The notice that an article is in another language only belongs in no
-    // search results, before launch or after. Stated in full rather than as
-    // `index: false`: a page's `robots` replaces the layout's instead of adding
-    // to it (src/lib/metadata.ts), so before launch this keeps the site-wide
-    // block exactly as it is.
-    return { title: copy.metaTitle, robots: baseMetadata().robots ?? { index: false, follow: true } };
-  }
+  if (!post) return otherLanguageMetadata(copy.metaTitle);
 
   return pageMetadata({
     locale,
@@ -59,43 +59,45 @@ export async function blogPostMetadata(locale: Locale, slug: string): Promise<Me
 export async function BlogPostPage({ locale, slug }: { locale: Locale; slug: string }) {
   const copy = BLOG_COPY[locale];
   const post = await findPost(locale, slug);
+  const indexHref = localePath(locale, blogIndexPath());
 
   if (!post) {
     const available = (await publishedLocales(slug)).find((code) => code !== locale);
     if (!available) notFound();
 
     return (
-      <BlogFrame locale={locale}>
-        <BlogHero locale={locale} title={copy.untranslated} linkToIndex>
-          <div className="ctas">
-            <a className="btn p" href={localePath(available, blogPostPath(slug))} hrefLang={available}>
-              {copy.otherLanguage}
-            </a>
-          </div>
-        </BlogHero>
-      </BlogFrame>
+      <OtherLanguageNotice
+        locale={locale}
+        path={blogIndexPath()}
+        eyebrow={copy.eyebrow}
+        indexHref={indexHref}
+        notice={copy.untranslated}
+        linkLabel={copy.otherLanguage}
+        available={available}
+        href={localePath(available, blogPostPath(slug))}
+      />
     );
   }
 
   // A draft being previewed may not have everything yet; a published article does.
-  const image = coverImage(post);
+  const image = fetchedMedia(post.coverImage);
 
   return (
-    <BlogFrame locale={locale}>
-      <BlogHero locale={locale} title={post.title} linkToIndex>
-        <div className="post-meta">
+    <EditorialFrame locale={locale} path={blogIndexPath()}>
+      <EditorialHero eyebrow={copy.eyebrow} indexHref={indexHref} title={post.title}>
+        <div className="entry-meta">
           {post.author && <span>{`${copy.by} ${post.author}`}</span>}
           {post.publishedAt && <PublishedDate locale={locale} date={post.publishedAt} />}
         </div>
-      </BlogHero>
+      </EditorialHero>
 
-      <section className="light post">
+      <section className="light entry">
         <article className="wrap">
-          {image && <CoverImage className="cover" image={image} sizes="(max-width: 884px) 100vw, 820px" />}
+          {image && <MediaImage className="cover" image={image} sizes="(max-width: 884px) 100vw, 820px" />}
           {post.answer && <p className="answer">{post.answer}</p>}
-          {post.body && <RichText className="post-body" data={post.body} />}
+          {post.body && <RichText className="entry-body" data={post.body} />}
         </article>
       </section>
-    </BlogFrame>
+    </EditorialFrame>
   );
 }

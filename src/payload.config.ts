@@ -14,11 +14,13 @@ import { ar } from '@payloadcms/translations/languages/ar';
 import { en } from '@payloadcms/translations/languages/en';
 import { buildConfig } from 'payload';
 import sharp from 'sharp';
+import { CaseStudies } from './cms/collections/case-studies';
+import { Faqs } from './cms/collections/faq-entries';
+import { FormSubmissions } from './cms/collections/form-submissions';
 import { LegalDocuments } from './cms/collections/legal-documents';
 import { Media } from './cms/collections/media';
 import { Posts } from './cms/collections/posts';
 import { Users } from './cms/collections/users';
-import { FormSubmissions } from './cms/collections/form-submissions';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
@@ -65,7 +67,7 @@ export default buildConfig({
     fallbackLanguage: 'ar',
   },
 
-  collections: [Users, Media, Posts, LegalDocuments, FormSubmissions],
+  collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
   // One settings global per form that submits (ticket 27).
   globals: [SiteSettings, ...SUBMITTABLE_FORMS.map(formSettingsGlobal)],
 

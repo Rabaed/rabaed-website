@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { BlogFrame, BlogHero, CoverImage, PublishedDate } from '@/components/blog/blog-parts';
-import { coverImage, publishedPosts } from '@/cms/blog';
+import { EditorialFrame, EditorialHero, MediaImage, PublishedDate } from '@/components/editorial';
+import { publishedPosts } from '@/cms/blog';
+import { fetchedMedia } from '@/cms/fetched-media';
 import { BLOG_COPY } from '@/content/blog';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { localePath, type Locale } from '@/lib/locales';
@@ -46,17 +47,18 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
   const pageHref = (number: number) => localePath(locale, blogIndexPath(number));
 
   return (
-    <BlogFrame locale={locale}>
-      <BlogHero locale={locale} title={copy.title}>
+    // The blog is not in the navigation, so no link in the header is marked.
+    <EditorialFrame locale={locale} path={blogIndexPath()}>
+      <EditorialHero eyebrow={copy.eyebrow} title={copy.title}>
         <p className="lead">{copy.lead}</p>
-      </BlogHero>
+      </EditorialHero>
 
-      <section className="light blog-list">
+      <section className="light entry-list">
         <div className="wrap">
           {listing.posts.length === 0 ? (
-            <p className="blog-empty">{copy.empty}</p>
+            <p className="entry-empty">{copy.empty}</p>
           ) : (
-            <div className="blog-grid">
+            <div className="entry-grid">
               {listing.posts.map((post) => (
                 <PostCard key={post.id} locale={locale} post={post} />
               ))}
@@ -64,7 +66,7 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
           )}
 
           {listing.totalPages > 1 && (
-            <nav className="blog-pages" aria-label={copy.pages}>
+            <nav className="entry-pages" aria-label={copy.pages}>
               {page > 1 ? (
                 <a className="tz-more" href={pageHref(page - 1)} rel="prev">
                   {copy.newer}
@@ -87,23 +89,23 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
           )}
         </div>
       </section>
-    </BlogFrame>
+    </EditorialFrame>
   );
 }
 
 function PostCard({ locale, post }: { locale: Locale; post: Post }) {
   const href = localePath(locale, blogPostPath(post.slug));
-  const image = coverImage(post);
+  const image = fetchedMedia(post.coverImage);
 
   return (
-    <article className="blog-card">
+    <article className="entry-card">
       {image && (
         // The title below links to the same place; this one is for the pointer, not the keyboard.
         <a href={href} tabIndex={-1} aria-hidden="true">
-          <CoverImage image={image} sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 372px" decorative />
+          <MediaImage image={image} sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 372px" decorative />
         </a>
       )}
-      <div className="blog-card-text">
+      <div className="entry-card-text">
         <PublishedDate locale={locale} date={post.publishedAt} />
         <h2>
           <a href={href}>{post.title}</a>

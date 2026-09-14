@@ -70,7 +70,9 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    'case-studies': CaseStudy;
     'legal-documents': LegalDocument;
+    'faq-entries': FaqEntry;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -82,7 +84,9 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
+    'faq-entries': FaqEntriesSelect<false> | FaqEntriesSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -228,16 +232,122 @@ export interface Post {
     [k: string]: unknown;
   };
   /**
-   * A line or two shown under the title on the blog index, and as the article’s description in search results.
+   * A line or two shown under the title on the blog index, and as the description in search results.
    */
   summary: string;
   /**
-   * The end of the article’s address: rabaedapp.com/blog/… — a translation uses the same slug.
+   * The end of the address: rabaedapp.com/blog/… — a translation uses the same slug.
    */
   slug: string;
   locale: 'ar' | 'en';
   /**
-   * The person who wrote the article, not the company.
+   * The person who wrote it, not the company.
+   */
+  author: string;
+  publishedAt: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: number;
+  title: string;
+  /**
+   * The first paragraph under the title: a standalone answer of 30 to 60 words to what the client achieved with Rabaed. It is what search engines and AI assistants quote.
+   */
+  answer: string;
+  /**
+   * The client’s name, as they agreed to have it shown.
+   */
+  client: string;
+  /**
+   * For example: residential, commercial buildings.
+   */
+  sector: string;
+  coverImage?: (number | null) | Media;
+  challenge: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  whatChanged: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  outcome: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Add a figure only if it was actually measured on the client’s project. A case study publishes without any.
+   */
+  figures?:
+    | {
+        value: string;
+        label: string;
+        /**
+         * Shown under the figure: on which project, over what period.
+         */
+        basis: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * In the client’s own words, with their permission. Leave it empty if there is none.
+   */
+  quote?: {
+    text?: string | null;
+    name?: string | null;
+    role?: string | null;
+  };
+  images?: (number | Media)[] | null;
+  /**
+   * A line or two shown under the title on the case studies index, and as the description in search results.
+   */
+  summary: string;
+  /**
+   * The end of the address: rabaedapp.com/case-studies/… — a translation uses the same slug.
+   */
+  slug: string;
+  locale: 'ar' | 'en';
+  /**
+   * The person who wrote it, not the company.
    */
   author: string;
   publishedAt: string;
@@ -338,6 +448,30 @@ export interface LegalDocument {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Drag questions in the list to order them. Each page shows its questions in that order, once published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-entries".
+ */
+export interface FaqEntry {
+  id: number;
+  _order?: string | null;
+  question: string;
+  /**
+   * Put a file name or other English text between backticks to set it left to right, like `concrete_db.json`. Write {payout} for the referral payout and {clientDiscount} for the client discount: the site inserts the current value instead of a typed number.
+   */
+  answer: string;
+  page: 'home' | 'start' | 'tool' | 'referral' | 'partnership';
+  locale: 'ar' | 'en';
+  /**
+   * Untick to hide the question, keeping its words and its place.
+   */
+  shows?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * Every request sent from the site’s forms, newest first.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -402,8 +536,16 @@ export interface PayloadLockedDocument {
         value: number | Post;
       } | null)
     | ({
+        relationTo: 'case-studies';
+        value: number | CaseStudy;
+      } | null)
+    | ({
         relationTo: 'legal-documents';
         value: number | LegalDocument;
+      } | null)
+    | ({
+        relationTo: 'faq-entries';
+        value: number | FaqEntry;
       } | null)
     | ({
         relationTo: 'form-submissions';
@@ -546,6 +688,44 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  title?: T;
+  answer?: T;
+  client?: T;
+  sector?: T;
+  coverImage?: T;
+  challenge?: T;
+  whatChanged?: T;
+  outcome?: T;
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        basis?: T;
+        id?: T;
+      };
+  quote?:
+    | T
+    | {
+        text?: T;
+        name?: T;
+        role?: T;
+      };
+  images?: T;
+  summary?: T;
+  slug?: T;
+  locale?: T;
+  author?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "legal-documents_select".
  */
 export interface LegalDocumentsSelect<T extends boolean = true> {
@@ -566,6 +746,21 @@ export interface LegalDocumentsSelect<T extends boolean = true> {
         id?: T;
       };
   seeAlso?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-entries_select".
+ */
+export interface FaqEntriesSelect<T extends boolean = true> {
+  _order?: T;
+  question?: T;
+  answer?: T;
+  page?: T;
+  locale?: T;
+  shows?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

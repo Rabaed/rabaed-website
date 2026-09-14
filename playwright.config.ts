@@ -18,6 +18,7 @@ import { defineConfig, devices } from '@playwright/test';
  * rasterisation and invalidates the comparison.
  */
 const PORT = testPort(process.env.TEST_PORT);
+const CASE_STUDIES_SUITE = /case-studies\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
 /** Reads `TEST_PORT`, and refuses a value that is not a usable port. */
@@ -43,7 +44,26 @@ export default defineConfig({
     baseURL,
     trace: 'retain-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: CASE_STUDIES_SUITE,
+      teardown: 'case-studies',
+    },
+    // After everything else has finished, never beside it. Publishing a case
+    // study puts a link in the header of every page (ticket 24), and the
+    // suites that hold the header to the Reference site would see it. A
+    // teardown project runs once the project it belongs to is done, whether
+    // or not its tests passed. It is not divided between CI machines: each
+    // runs all of it, against its own server. Running one file of the main
+    // project runs this after it too; `--no-deps` leaves it out.
+    {
+      name: 'case-studies',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: CASE_STUDIES_SUITE,
+    },
+  ],
   webServer: {
     // Starts a throwaway database, migrates it and creates the test editor,
     // then builds the application and starts it (ticket 19).

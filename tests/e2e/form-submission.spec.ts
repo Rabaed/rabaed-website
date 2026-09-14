@@ -19,7 +19,7 @@
  * for the reason `routes.ts` gives.
  */
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, FORM_EDITOR, logIn, logInByApi } from './cms';
+import { ADMIN_PATH, FORM_EDITOR, logInAs, logInByApi } from './cms';
 import { mailTo, submissionsFrom, uniqueApplicant, type StoredSubmission } from './forms';
 
 const DEMO_FORM = 'احجز عرضاً حياً على مشروعك';
@@ -326,7 +326,7 @@ test.describe('mail and wording from the admin', () => {
     const applicant = uniqueApplicant('demo-admin');
     await sendDemoRequest(page, '/start', applicant);
 
-    await logIn(page, FORM_EDITOR);
+    await logInAs(page, FORM_EDITOR);
     await page.goto(`${ADMIN_PATH}/collections/form-submissions`);
     await expect(page.getByRole('link', { name: APPLICANT.name }).first()).toBeVisible();
     await expect(page.getByText(applicant.email)).toBeVisible();

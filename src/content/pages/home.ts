@@ -1,18 +1,18 @@
+import { FAQ_PAGES } from '@/cms/faq-pages';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { HomeBeforeAfterContent } from '@/components/home/before-after';
 import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
 import type { HomeFiguresContent } from '@/components/home/figures';
 import type { HomeFourUnitsContent } from '@/components/home/four-units';
 import type { HomeHeroContent } from '@/components/home/hero';
-import type { HomeQuestionsContent } from '@/components/home/questions';
 import type { HomeRecordSectionContent } from '@/components/home/record';
 import type { HomeSituationsContent } from '@/components/home/situations';
 import type { TrustStripContent } from '@/components/home/trust-strip';
+import type { QuestionsContent } from '@/components/questions';
 import { COMPARISON_STEPS } from '@/content/before-after';
 import { DECK_HINT } from '@/content/card-deck';
 import { CLOSING_SECTION } from '@/content/closing-section';
 import { CALCULATOR_WORDS } from '@/content/delay-calculator';
-import { HOME_FAQ } from '@/content/faq';
 import { FIELD_SITUATIONS } from '@/content/field-situations';
 import { UNIT_TABS } from '@/content/four-units';
 import { PROOF_FIGURES } from '@/content/proof-figures';
@@ -22,7 +22,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type HomePageContent = {
   readonly meta: PageMeta;
@@ -34,7 +34,7 @@ export type HomePageContent = {
   readonly beforeAfter: Section<HomeBeforeAfterContent>;
   readonly calculator: Section<HomeDelayCalculatorContent>;
   readonly figures: Section<HomeFiguresContent>;
-  readonly questions: Section<HomeQuestionsContent>;
+  readonly questions: Section<QuestionsContent>;
   /** Its demo request form (`#demo`) is where this page's hero and calculator buttons, and the header's, land. */
   readonly closing: LinkedSection<ClosingSectionContent>;
   /** The words of the closing section's demo request form: its settings in the CMS. */
@@ -45,7 +45,7 @@ export type HomePageContent = {
  * Verbatim from `reference/site/index.html`. Nothing here is placeholder text,
  * and nothing waits to be reworded.
  */
-const AR: Omit<HomePageContent, 'demoForm'> = {
+const AR: BeforeQuestions<Omit<HomePageContent, 'demoForm'>> = {
   meta: {
     title: 'ربائد · ثلاثة أطراف. سجل واحد.',
     description: 'منصة سعودية تجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
@@ -156,14 +156,20 @@ const AR: Omit<HomePageContent, 'demoForm'> = {
     shows: true,
     eyebrow: 'الأسئلة الشائعة',
     heading: 'قبل أن تسأل',
-    entries: HOME_FAQ,
     // The rest of the questions, beside the form on the start page.
-    more: { label: 'كل الأسئلة', href: `${localePath('ar', '/start')}#faq` },
+    more: {
+      label: 'كل الأسئلة',
+      href: `${localePath('ar', FAQ_PAGES.start.path)}#${FAQ_PAGES.start.sectionId}`,
+    },
   },
   closing: { shows: true, ...CLOSING_SECTION.ar },
 };
 
-/** The home page's content in `locale`, or a refusal (`inLocale`). */
+/** The home page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  return { ...inLocale('home', { ar: AR }, locale), demoForm: await formPageWording(DEMO_REQUEST) };
+  const [page, demoForm] = await Promise.all([
+    withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, inLocale('home', { ar: AR }, locale)),
+    formPageWording(DEMO_REQUEST),
+  ]);
+  return { ...page, demoForm };
 }

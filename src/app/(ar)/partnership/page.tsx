@@ -7,7 +7,7 @@ import { Benefits } from '@/components/partnership/benefits';
 import { Idea } from '@/components/partnership/idea';
 import { Modes } from '@/components/partnership/modes';
 import { Path } from '@/components/partnership/path';
-import { Questions } from '@/components/partnership/questions';
+import { Questions } from '@/components/questions';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { pageMetadata } from '@/lib/metadata';
 
