@@ -5,7 +5,10 @@ import * as migration_20260914_061634_legal_documents from './20260914_061634_le
 import * as migration_20260914_061635_import_legal_documents from './20260914_061635_import_legal_documents';
 import * as migration_20260914_193519_faq_entries from './20260914_193519_faq_entries';
 import * as migration_20260914_193520_import_faq_entries from './20260914_193520_import_faq_entries';
+import * as migration_20260914_194143_form_foundation from './20260914_194143_form_foundation';
+import * as migration_20260914_194144_publish_demo_request_wording from './20260914_194144_publish_demo_request_wording';
 import * as migration_20260914_212631_case_studies from './20260914_212631_case_studies';
+import * as migration_20260914_215019_form_settings_snapshot from './20260914_215019_form_settings_snapshot';
 
 export const migrations = [
   {
@@ -44,8 +47,23 @@ export const migrations = [
     name: '20260914_193520_import_faq_entries',
   },
   {
+    up: migration_20260914_194143_form_foundation.up,
+    down: migration_20260914_194143_form_foundation.down,
+    name: '20260914_194143_form_foundation',
+  },
+  {
+    up: migration_20260914_194144_publish_demo_request_wording.up,
+    down: migration_20260914_194144_publish_demo_request_wording.down,
+    name: '20260914_194144_publish_demo_request_wording',
+  },
+  {
     up: migration_20260914_212631_case_studies.up,
     down: migration_20260914_212631_case_studies.down,
     name: '20260914_212631_case_studies',
+  },
+  {
+    up: migration_20260914_215019_form_settings_snapshot.up,
+    down: migration_20260914_215019_form_settings_snapshot.down,
+    name: '20260914_215019_form_settings_snapshot',
   },
 ];

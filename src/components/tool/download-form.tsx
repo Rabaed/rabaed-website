@@ -1,29 +1,16 @@
 'use client';
 
-import { useState, type ChangeEvent, type FormEvent } from 'react';
-import {
-  DETAIL_ERRORS,
-  isValidDetail,
-  REQUIRED_DETAILS,
-  type RequiredDetail,
-} from '@/components/tool/download-details';
+import type { FormEvent } from 'react';
+import { fieldNames } from '@/forms/definition';
+import { TOOL_DOWNLOAD } from '@/forms/tool-download';
+import { useAnswers } from '@/forms/use-answers';
 
-/** The country codes offered, verbatim. Each label opens with a left-to-right mark, so the + stays before the digits. */
-const COUNTRY_CODES = [
-  { value: '+966', label: '‎+966 السعودية' },
-  { value: '+971', label: '‎+971 الإمارات' },
-  { value: '+965', label: '‎+965 الكويت' },
-  { value: '+974', label: '‎+974 قطر' },
-  { value: '+973', label: '‎+973 البحرين' },
-  { value: '+968', label: '‎+968 عُمان' },
-  { value: '+962', label: '‎+962 الأردن' },
-  { value: '+20', label: '‎+20 مصر' },
-  { value: '+90', label: '‎+90 تركيا' },
-  { value: 'other', label: 'أخرى' },
-] as const;
+const WORDING = TOOL_DOWNLOAD.wording;
+
+/** The four details the button waits for; the country code has a default and the company is optional. */
+const REQUIRED = fieldNames(TOOL_DOWNLOAD).filter((name) => TOOL_DOWNLOAD.fields[name].required);
 
 const LOCKED = 'أكمل البيانات لتفعيل التحميل';
-const UNLOCKED = 'حمّل الأداة الآن';
 
 /**
  * The Pour Tracker download form, as the Reference site behaves: the button
@@ -32,92 +19,66 @@ const UNLOCKED = 'حمّل الأداة الآن';
  * only once the visitor has been into it and out again, then clears as soon as
  * it is put right.
  *
+ * Its fields, rules and words are its definition's (`src/forms/tool-download.ts`),
+ * the same one the server will check a download request against.
+ *
  * A client component, rendered on the server first: the whole form, locked, is
  * in the first response, and with JavaScript off it stays locked.
  *
  * **Once unlocked it sends nothing and delivers nothing — yet.** The Reference
  * site starts the download on submit without keeping the details, and the
  * spec forbids exactly that: "The Pour Tracker download is delivered only
- * after the submission is recorded." Ticket 30 records the submission and
- * delivers the file, and gives this form somewhere to send. Until then a valid
- * submit does nothing a visitor can see, and nothing claims the download
- * started.
- *
- * `method="post"` is set now so that the day it sends, the details travel in
- * the request body rather than the address.
+ * after the submission is recorded." Ticket 30 runs this form through the
+ * submission pipeline and delivers the file. Until then a valid submit does
+ * nothing a visitor can see, and nothing claims the download started.
  */
 export function DownloadForm() {
-  const [details, setDetails] = useState<Record<RequiredDetail, string>>({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    email: '',
-  });
-  /** The fields the visitor has been into and come out of: only those say what is wrong. */
-  const [touched, setTouched] = useState<ReadonlySet<RequiredDetail>>(new Set());
-
-  const validCount = REQUIRED_DETAILS.filter((detail) => isValidDetail(detail, details[detail])).length;
-  const complete = validCount === REQUIRED_DETAILS.length;
-
-  /** A required field's props, and the message shown under it. */
-  const requiredField = (detail: RequiredDetail) => {
-    const wrong = touched.has(detail) && !isValidDetail(detail, details[detail]);
-    const errorId = `er-${detail}`;
-    return {
-      field: {
-        name: detail,
-        // Marked required for assistive technology and for ticket 30; the
-        // form is `noValidate`, so the browser's own bubbles never appear,
-        // only the Arabic messages below (spec: Forms).
-        required: true,
-        value: details[detail],
-        onChange: (event: ChangeEvent<HTMLInputElement>) =>
-          setDetails((previous) => ({ ...previous, [detail]: event.target.value })),
-        onBlur: () => setTouched((previous) => (previous.has(detail) ? previous : new Set(previous).add(detail))),
-        className: wrong ? 'bad' : undefined,
-        'aria-invalid': wrong || undefined,
-        // Only while the message is shown: a description that is always there
-        // would be read out on a field that is fine.
-        'aria-describedby': wrong ? errorId : undefined,
-      },
-      error: (
-        <small className={wrong ? 'er on' : 'er'} id={errorId}>
-          {DETAIL_ERRORS[detail]}
-        </small>
-      ),
-    };
-  };
+  const { acceptable, complete, field, touch } = useAnswers(TOOL_DOWNLOAD, WORDING, { countryCode: '+966' });
+  const validCount = REQUIRED.filter(acceptable).length;
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // As on the Reference site, a submit counts every field as touched.
-    setTouched(new Set(REQUIRED_DETAILS));
+    touch(REQUIRED);
     // Ticket 30: record the details, then deliver the file.
   };
 
-  const firstName = requiredField('firstName');
-  const lastName = requiredField('lastName');
-  const phone = requiredField('phone');
-  const email = requiredField('email');
+  const firstName = field('firstName');
+  const lastName = field('lastName');
+  const countryCode = field('countryCode');
+  const phone = field('phone');
+  const email = field('email');
+  const company = field('company');
+  const words = WORDING.fields;
 
   return (
     <div className="form" id="tl-form-card">
       <div id="tl-form-view">
-        <h3 id="tl-form-title">بيانات التحميل</h3>
-        <small>حقل الشركة اختياري. البقية مطلوبة لتفعيل زر التحميل.</small>
+        <h3 id="tl-form-title">{WORDING.heading}</h3>
+        <small>{WORDING.lead}</small>
         <div className="tl-prog">
-          <i style={{ width: `${Math.round((validCount / REQUIRED_DETAILS.length) * 100)}%` }} />
+          <i style={{ width: `${Math.round((validCount / REQUIRED.length) * 100)}%` }} />
         </div>
 
         <form id="tl-form" method="post" noValidate autoComplete="on" aria-labelledby="tl-form-title" onSubmit={onSubmit}>
           <div className="two">
             <div>
-              <input {...firstName.field} autoComplete="given-name" placeholder="الاسم الأول *" aria-label="الاسم الأول" />
-              {firstName.error}
+              <input
+                {...firstName.props}
+                autoComplete="given-name"
+                placeholder={words.firstName.placeholder}
+                aria-label={words.firstName.label}
+              />
+              {firstName.message}
             </div>
             <div>
-              <input {...lastName.field} autoComplete="family-name" placeholder="اسم العائلة *" aria-label="اسم العائلة" />
-              {lastName.error}
+              <input
+                {...lastName.props}
+                autoComplete="family-name"
+                placeholder={words.lastName.placeholder}
+                aria-label={words.lastName.label}
+              />
+              {lastName.message}
             </div>
           </div>
 
@@ -126,47 +87,45 @@ export function DownloadForm() {
               form — the Reference site's override, kept. */}
           <div>
             <div className="tl-cc">
-              <select name="countryCode" aria-label="مفتاح الدولة" defaultValue="+966">
-                {COUNTRY_CODES.map((code) => (
-                  <option key={code.value} value={code.value}>
-                    {code.label}
+              <select {...countryCode.props} aria-label={words.countryCode.label}>
+                {TOOL_DOWNLOAD.fields.countryCode.options!.map((value) => (
+                  <option key={value} value={value}>
+                    {words.countryCode.options![value]}
                   </option>
                 ))}
               </select>
               <input
-                {...phone.field}
+                {...phone.props}
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel-national"
                 dir="ltr"
                 style={{ textAlign: 'right' }}
-                placeholder="5X XXX XXXX *"
-                aria-label="رقم الجوال"
+                placeholder={words.phone.placeholder}
+                aria-label={words.phone.label}
               />
             </div>
-            {phone.error}
+            {phone.message}
           </div>
           <div>
             <input
-              {...email.field}
+              {...email.props}
               type="email"
               inputMode="email"
               autoComplete="email"
               dir="ltr"
               style={{ textAlign: 'right' }}
-              placeholder="البريد الإلكتروني *"
-              aria-label="البريد الإلكتروني"
+              placeholder={words.email.placeholder}
+              aria-label={words.email.label}
             />
-            {email.error}
+            {email.message}
           </div>
-          <input name="company" autoComplete="organization" placeholder="اسم الشركة (اختياري)" aria-label="اسم الشركة" />
+          <input {...company.props} autoComplete="organization" placeholder={words.company.placeholder} aria-label={words.company.label} />
 
           <button className="btn p" type="submit" disabled={!complete} style={{ justifyContent: 'center' }}>
-            {complete ? UNLOCKED : LOCKED}
+            {complete ? WORDING.submit : LOCKED}
           </button>
-          <small className="fine">
-            بالضغط على زر التحميل توافق على أن نتواصل معك بخصوص الأداة وتحديثاتها. لن نشارك بياناتك مع أي جهة أخرى.
-          </small>
+          <small className="fine">{WORDING.finePrint}</small>
         </form>
       </div>
     </div>

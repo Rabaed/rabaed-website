@@ -73,6 +73,7 @@ export interface Config {
     'case-studies': CaseStudy;
     'legal-documents': LegalDocument;
     'faq-entries': FaqEntry;
+    'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +87,7 @@ export interface Config {
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
     'faq-entries': FaqEntriesSelect<false> | FaqEntriesSelect<true>;
+    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -97,9 +99,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    'demo-request-form': DemoRequestForm;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
   };
   locale: null;
   widgets: {
@@ -468,6 +472,34 @@ export interface FaqEntry {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Every request sent from the site’s forms, newest first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-submissions".
+ */
+export interface FormSubmission {
+  id: number;
+  form: 'demo-request' | 'tool-download';
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  answers?:
+    | {
+        label?: string | null;
+        value?: string | null;
+        option?: string | null;
+        field?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  alert?: ('sent' | 'skipped' | 'failed') | null;
+  confirmation?: ('sent' | 'skipped' | 'failed') | null;
+  token?: string | null;
+  sourceHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -514,6 +546,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'faq-entries';
         value: number | FaqEntry;
+      } | null)
+    | ({
+        relationTo: 'form-submissions';
+        value: number | FormSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -731,6 +767,31 @@ export interface FaqEntriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-submissions_select".
+ */
+export interface FormSubmissionsSelect<T extends boolean = true> {
+  form?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  answers?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        option?: T;
+        field?: T;
+        id?: T;
+      };
+  alert?: T;
+  confirmation?: T;
+  token?: T;
+  sourceHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -799,6 +860,108 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demo-request-form".
+ */
+export interface DemoRequestForm {
+  id: number;
+  /**
+   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   */
+  alertAddress?: string | null;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    name: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    role: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_owner: string;
+        option_consultant: string;
+        option_contractor: string;
+      };
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    company: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    activeProjects: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {الاسم} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -813,6 +976,79 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         facebook?: T;
         instagram?: T;
       };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demo-request-form_select".
+ */
+export interface DemoRequestFormSelect<T extends boolean = true> {
+  alertAddress?: T;
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        name?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        role?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_owner?: T;
+                    option_consultant?: T;
+                    option_contractor?: T;
+                  };
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        activeProjects?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -15,6 +15,8 @@
 
 ## Comments
 
+**Ticket 27 is built (14 September 2026).** `download-details.ts` is now `src/forms/tool-download.ts`, a full definition, and the tool form reads its fields, rules and words from it through `src/forms/use-answers.tsx`. Its replies and confirmation email in that definition are placeholders nobody receives yet; settle them here. How to plug it in is at the end of ticket 27's comments.
+
 **Plugs into ticket 27 (decided 13 September 2026).** `download-details.ts` becomes this form's definition in ticket 27, so this ticket runs it through the shared submission pipeline and adds the delivery after the record is stored. Its wording is editable by Editors; its fields are not (spec: Forms).
 
 **Left for this ticket by ticket 14 (13 September 2026).** The tool page's download form validates as the Reference site does, and unlocks once the details are valid, but a valid submit sends nothing and delivers nothing: the spec delivers the file only after the submission is recorded. Three things wait here:

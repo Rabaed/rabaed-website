@@ -327,31 +327,6 @@ test('the commercial registration is reached from the keyboard, and shows it has
   await expect(registrationField(page)).toHaveCSS('outline-style', 'solid');
 });
 
-test('nothing pretends to send the form', async ({ page }) => {
-  const sent: string[] = [];
-  page.on('request', (request) => {
-    if (request.method() !== 'GET') sent.push(`${request.method()} ${request.url()}`);
-  });
-  await page.goto('/partnership');
-  const address = page.url();
-
-  const form = applicationForm(page);
-  await form.getByLabel('اسم المكتب أو الشركة').fill('مكتب الرياض الهندسي');
-  await form.getByLabel('اسم مقدّم الطلب').fill('سارة القحطاني');
-  await form.getByLabel('رقم الجوال').fill('0500000000');
-  await form.getByLabel('رقم الجوال').press('Enter');
-
-  const button = form.getByRole('button', { name: 'اطلب اجتماع شراكة' });
-  await expect(button).toBeDisabled();
-  await button.click({ force: true });
-  await page.waitForTimeout(500);
-
-  expect(sent, 'the form sent something').toEqual([]);
-  expect(page.url(), 'what was typed went into the address').toBe(address);
-  await expect(page.getByText(FAKE_CONFIRMATION)).toHaveCount(0);
-  // The small print says so, because it is true.
-  await expect(form.locator('.fine')).toHaveText('نموذج أولي — لا يُرسل فعلياً في هذه النسخة.');
-});
 
 for (const { where, link, target } of [
   { where: '.phero', link: 'اطلب اجتماع شراكة', target: 'apply' },

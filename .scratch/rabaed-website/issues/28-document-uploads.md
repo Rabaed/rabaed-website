@@ -28,6 +28,8 @@ The document fields are `src/components/upload-field.tsx`. They already show the
 
 **Moved by ticket 16**, from `src/components/referral/`, because the partnership application's commercial registration is the same field. Progress and rejection added here reach that form too; ticket 29 wires it.
 
+**Ticket 27 is built (14 September 2026).** The pipeline is `src/forms/submission.ts`, and how a form plugs in is at the end of ticket 27's comments. Two things this ticket meets there: the pipeline reads only text entries from the form data (`entry` ignores files), and Next's server action body limit defaults to 1 MB, below the 10 MB cap (`serverActions.bodySizeLimit` in `next.config.ts`). A field definition (`FieldDefinition` in `src/forms/definition.ts`) describes typed text and lists only, and `use-answers.tsx` handles inputs and selects; this ticket gives definitions a way to describe a document and a consent checkbox, and puts the storage adapter inside `submit`.
+
 **Plugs into ticket 27 (decided 13 September 2026).** The signup form becomes a form definition run through ticket 27's submission pipeline; the upload checks and private storage go inside that pipeline, behind a storage adapter, so ticket 29 reuses them. Its wording is editable by Editors; its fields are not (spec: Forms).
 
 **The page promises a referral code «فوراً على جوالك وبريدك», and no ticket issues one.** See ticket 15's note for the founder.

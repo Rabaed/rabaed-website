@@ -44,8 +44,30 @@ export const CASE_STUDIES_EDITOR = {
   password: 'test-editor-password-24',
 } as const;
 
+/**
+ * The form suite's two accounts (ticket 27): one that its side-by-side tests
+ * share to read what they stored (`forms.ts` explains how they share it), and
+ * one for its tests that change the forms' settings, one at a time.
+ */
+export const FORM_READER = {
+  email: 'form-reader@rabaed.test',
+  password: 'test-editor-password-27r',
+} as const;
+
+export const FORM_EDITOR = {
+  email: 'form-editor@rabaed.test',
+  password: 'test-editor-password-27e',
+} as const;
+
 /** Every account the test server creates. */
-export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, FAQ_EDITOR, CASE_STUDIES_EDITOR];
+export const TEST_EDITORS: readonly Editor[] = [
+  TEST_EDITOR,
+  BLOG_EDITOR,
+  FAQ_EDITOR,
+  CASE_STUDIES_EDITOR,
+  FORM_READER,
+  FORM_EDITOR,
+];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
 export function richText(text: string, locale: 'ar' | 'en') {

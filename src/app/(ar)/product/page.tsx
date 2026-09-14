@@ -34,7 +34,7 @@ export default async function ProductPage() {
       {content.customStrip.shows && <CustomStrip content={content.customStrip} />}
       {content.roles.shows && <Roles content={content.roles} />}
       {content.innerCycle.shows && <InnerCycle content={content.innerCycle} />}
-      <ClosingSection content={content.closing} />
+      <ClosingSection content={content.closing} form={content.demoForm} />
     </PageShell>
   );
 }

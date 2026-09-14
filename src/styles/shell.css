@@ -188,6 +188,15 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .form .er { display: none; color: #C0392B; font-size: 12px; margin-top: 6px }
 .form .er.on { display: block }
 .form input.bad, .form select.bad { border-color: rgba(192, 57, 43, .55) }
+/* What the server said back (ticket 27): a request stored, in the Reference
+   site's green for «وصلنا طلبك»; or turned away, in the messages' red. */
+.form .sent { color: var(--green); font-size: 14px; line-height: 1.8 }
+.form .refusal { color: #C0392B; font-size: 13px; line-height: 1.8 }
+/* Each demo field sits in a box of its own, with its message under it. As a
+   grid, the box lays its field out as the Reference site's `.two` does, where
+   the fields are the grid's own items: block, and stretched to the row, so the
+   input beside the taller select is as tall as it. */
+#demo .two > div { display: grid }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate and small. The header's and
    the hero's «احجز عرضاً حياً» jump here. The Reference site scrolls there by
    script, stopping 78px short so the fixed header does not cover the form;

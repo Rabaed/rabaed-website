@@ -20,8 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * request form beside them and the free tool teaser under both.
  *
  * Its words come from `src/content/pages/start.ts`, its questions from the CMS.
- * The form is the one form the home and product pages carry too, so ticket 27
- * wires all three at once.
+ * The form is the one form the home and product pages carry too, with its words
+ * from its settings in the CMS (ticket 27).
  *
  * **Nothing on it moves but the header and the Trust strip**, so it loads no
  * other animation code: the Reference start page carries the whole animation
@@ -37,7 +37,7 @@ export default async function StartPage() {
       <PageHero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {content.steps.shows && <Steps content={content.steps} />}
-      <Questions content={content.questions} beside={<DemoRequestForm />}>
+      <Questions content={content.questions} beside={<DemoRequestForm wording={content.demoForm} />}>
         {content.freeTool.shows && <FreeToolTeaser content={content.freeTool} />}
       </Questions>
     </PageShell>

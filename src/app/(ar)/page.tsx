@@ -43,7 +43,7 @@ export default async function HomePage() {
       {content.questions.shows && (
         <Questions ruled={false} content={content.questions} />
       )}
-      <ClosingSection content={content.closing} />
+      <ClosingSection content={content.closing} form={content.demoForm} />
       {/* The page's `.reveal` entrances, attached once for the page. Here
           rather than in `PageShell`, so pages without any do not load it. */}
       <RevealOnScroll />

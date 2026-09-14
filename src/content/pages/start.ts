@@ -4,6 +4,9 @@ import type { QuestionsContent } from '@/components/questions';
 import type { StartFreeToolTeaserContent } from '@/components/start/free-tool-teaser';
 import type { StartStepsContent } from '@/components/start/steps';
 import { TRUST_STRIP } from '@/content/trust-strip';
+import type { FormPageWording } from '@/forms/definition';
+import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
+import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -16,10 +19,12 @@ export type StartPageContent = {
   readonly questions: LinkedSection<QuestionsContent>;
   /** Under the questions and the form. */
   readonly freeTool: Section<StartFreeToolTeaserContent>;
+  /** The words of the demo request form beside the questions: its settings in the CMS. */
+  readonly demoForm: FormPageWording<DemoRequestField>;
 };
 
 /** Verbatim from `reference/site/start.html`. */
-const AR: BeforeQuestions<StartPageContent> = {
+const AR: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
   meta: {
     title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
     description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
@@ -80,5 +85,9 @@ const AR: BeforeQuestions<StartPageContent> = {
 
 /** The start page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  return withQuestions('start', locale, inLocale('start', { ar: AR }, locale));
+  const [page, demoForm] = await Promise.all([
+    withQuestions<Omit<StartPageContent, 'demoForm'>>('start', locale, inLocale('start', { ar: AR }, locale)),
+    formPageWording(DEMO_REQUEST),
+  ]);
+  return { ...page, demoForm };
 }

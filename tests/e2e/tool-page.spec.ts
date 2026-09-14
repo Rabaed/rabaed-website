@@ -5,9 +5,10 @@
  * What a visitor meets: every section and every answer there to be read, with
  * or without JavaScript; a download form whose button stays locked until the
  * details are valid, saying what is wrong only once a field has been left; a
- * phone number and an email typed left to right inside a right-to-left page;
- * and — until ticket 30 records the details before delivering the file — a
- * button that, once unlocked, neither sends anything nor pretends to.
+ * and a phone number and an email typed left to right inside a right-to-left
+ * page. That the unlocked button neither sends anything nor pretends to, until
+ * ticket 30 records the details before delivering the file, is
+ * `form-submission.spec.ts`'s.
  *
  * Whether it *looks* like the Reference site is asked in
  * `tool-matches-reference.spec.ts`. Console errors and failed requests are
@@ -276,33 +277,6 @@ test('a field says what is wrong once it has been left, not while it is being ty
   await first.fill('أحمد');
   await expect(error).toBeHidden();
   await expect(first).not.toHaveAttribute('aria-invalid', 'true');
-});
-
-test('an unlocked button sends nothing and delivers nothing until ticket 30', async ({ page }) => {
-  // The spec: "The Pour Tracker download is delivered only after the
-  // submission is recorded." Until ticket 30 records it, nothing is sent, no
-  // file arrives, and nothing claims otherwise.
-  const sent: string[] = [];
-  const downloads: string[] = [];
-  page.on('request', (request) => {
-    if (request.method() !== 'GET') sent.push(`${request.method()} ${request.url()}`);
-  });
-  page.on('download', (download) => downloads.push(download.suggestedFilename()));
-
-  await page.goto('/tool');
-  const address = page.url();
-  await fillValid(page);
-  await expect(submit(page)).toBeEnabled();
-
-  await submit(page).click();
-  await field(page, 'البريد الإلكتروني').press('Enter');
-  await page.waitForTimeout(500);
-
-  expect(sent, 'the form sent something').toEqual([]);
-  expect(downloads, 'a file was delivered').toEqual([]);
-  expect(page.url(), 'what was typed went into the address').toBe(address);
-  await expect(page.getByText(FAKE_CONFIRMATION)).toHaveCount(0);
-  await expect(field(page, 'الاسم الأول')).toHaveValue('أحمد');
 });
 
 for (const { link, target } of [

@@ -17,8 +17,9 @@ import type { Part } from './geometry';
  *   in the hero, where the Reference site sets the Arabic word in DM Mono too.
  *   A different face is a different width, so that one line's width and
  *   typeface are not compared; its height and its place in the pill are.
- * - **The submit button is disabled until ticket 27**, and drawn in the
- *   Reference site's own disabled style from its tool page — grey, with a 1px
+ * - **The submit button is disabled until the request is valid** (ticket 27),
+ *   so an empty form draws it in the Reference site's own disabled style from
+ *   its tool page — grey, with a 1px
  *   border the enabled button does not have. So the button's colours and
  *   height are not compared, and neither are the 2px that border adds below
  *   it: the small print's position here, and the height of the form and of

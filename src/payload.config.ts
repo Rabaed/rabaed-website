@@ -16,12 +16,15 @@ import { buildConfig } from 'payload';
 import sharp from 'sharp';
 import { CaseStudies } from './cms/collections/case-studies';
 import { Faqs } from './cms/collections/faq-entries';
+import { FormSubmissions } from './cms/collections/form-submissions';
 import { LegalDocuments } from './cms/collections/legal-documents';
 import { Media } from './cms/collections/media';
 import { Posts } from './cms/collections/posts';
 import { Users } from './cms/collections/users';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
+import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
+import { SUBMITTABLE_FORMS } from './forms/registry';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +35,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
  *
  * The route folder `src/app/(payload)/maktab/` has to carry the same name.
  */
-const ADMIN_ROUTE = '/maktab';
+export const ADMIN_ROUTE = '/maktab';
 
 // Before anything reads a variable, so a deployment missing several is told
 // about all of them in one failed build.
@@ -64,8 +67,9 @@ export default buildConfig({
     fallbackLanguage: 'ar',
   },
 
-  collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs],
-  globals: [SiteSettings],
+  collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
+  // One settings global per form that submits (ticket 27).
+  globals: [SiteSettings, ...SUBMITTABLE_FORMS.map(formSettingsGlobal)],
 
   db: postgresAdapter({
     pool: { connectionString: databaseUrl() },

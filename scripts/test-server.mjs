@@ -15,13 +15,13 @@
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { rm } from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
 import { NEXT_BIN, PAYLOAD_BIN, repoRoot, runNode, startDatabase } from './local-database.mjs';
 import { TEST_EDITORS } from '../tests/e2e/cms.ts';
+import { outboxDirectory, testServerScratch } from '../tests/e2e/forms.ts';
 
 const port = Number(process.env.PORT ?? 3100);
-const scratch = path.join(os.tmpdir(), `rabaed-test-server-${port}`);
+const scratch = testServerScratch(port);
 
 // Left behind by the last run, which ends by being killed.
 await rm(scratch, { recursive: true, force: true });
@@ -33,6 +33,11 @@ const env = {
   DATABASE_URL: database.url,
   PAYLOAD_SECRET: randomBytes(32).toString('hex'),
   MEDIA_DIR: path.join(scratch, 'media'),
+  // Mail is written here instead of sent, for the form suite to read
+  // (`src/forms/mail.ts`). Real credentials on the machine are never used.
+  MAIL_OUTBOX_DIR: outboxDirectory(port),
+  MAIL_USER: '',
+  MAIL_PASSWORD: '',
 };
 
 try {
