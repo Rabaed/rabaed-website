@@ -1,9 +1,10 @@
-import type { DescribedScreenMock } from '@/content/screen-mock-descriptions';
+import type { UnitTab } from '@/components/home/four-units';
+import { SCREEN_MOCK_DESCRIPTIONS, type DescribedScreenMock } from '@/content/screen-mock-descriptions';
 
 /**
- * The home page's «أربع وحدات» section: a tab for each of Rabaed's four units,
- * and a fifth for the Record they produce, each with the Screen mock that shows
- * it.
+ * The tabs of the home page's «أربع وحدات» section: one for each of Rabaed's
+ * four units, and a fifth for the Record they produce, each with the Screen
+ * mock that shows it.
  *
  * What each screen shows, in words — the picture's `alt` and the visible
  * caption under it, both at once, as ADR-0002 asks — is looked up by the mock
@@ -23,20 +24,15 @@ import type { DescribedScreenMock } from '@/content/screen-mock-descriptions';
  * Ticket 21 moves page copy into the CMS.
  */
 
-export type UnitTab = {
-  /** The small line above the title: a unit's number, or the name of what the units produce. */
-  readonly tag: { readonly kind: 'unit'; readonly number: string } | { readonly kind: 'output'; readonly name: string };
-  readonly title: string;
-  /** The Screen mock's id in the registry, which is also what its description is looked up by. */
-  readonly mock: DescribedScreenMock;
-};
-
-export const FOUR_UNITS_HEADING = 'أربع وحدات. سجل واحد يجمعها.';
+/** A tab showing `mock`, with that mock's description. */
+function tab(tag: UnitTab['tag'], title: string, mock: DescribedScreenMock): UnitTab {
+  return { tag, title, mock, description: SCREEN_MOCK_DESCRIPTIONS[mock] };
+}
 
 export const UNIT_TABS: readonly UnitTab[] = [
-  { tag: { kind: 'unit', number: '01' }, title: 'المراسلات الرسمية', mock: 'correspondence' },
-  { tag: { kind: 'unit', number: '02' }, title: 'الاعتمادات والطلبات', mock: 'kanban' },
-  { tag: { kind: 'unit', number: '03' }, title: 'التقرير اليومي للموقع', mock: 'daily-report' },
-  { tag: { kind: 'unit', number: '04' }, title: 'المستندات والإصدارات', mock: 'documents' },
-  { tag: { kind: 'output', name: 'المخرَج' }, title: 'السجل الموثّق', mock: 'stamped-sheet' },
+  tab({ kind: 'unit', number: '01' }, 'المراسلات الرسمية', 'correspondence'),
+  tab({ kind: 'unit', number: '02' }, 'الاعتمادات والطلبات', 'kanban'),
+  tab({ kind: 'unit', number: '03' }, 'التقرير اليومي للموقع', 'daily-report'),
+  tab({ kind: 'unit', number: '04' }, 'المستندات والإصدارات', 'documents'),
+  tab({ kind: 'output', name: 'المخرَج' }, 'السجل الموثّق', 'stamped-sheet'),
 ];

@@ -1,5 +1,35 @@
+import { Fragment } from 'react';
 import { HeroLoop } from '@/components/home/hero-loop';
-import { HERO_JOURNEY, HERO_STATIONS, HERO_START } from '@/components/home/hero-stations';
+import { HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
+import { Inline, type InlineText } from '@/components/inline-text';
+import type { PageLink } from '@/components/page-link';
+
+export type HomeHeroContent = {
+  readonly eyebrow: string;
+  /** The promise: each of `lines` ends in a break, and `accent` after them is set in the brand colour. */
+  readonly title: { readonly lines: readonly string[]; readonly accent: string };
+  readonly lead: string;
+  /** The filled button. */
+  readonly primary: PageLink;
+  /** The outlined one beside it. */
+  readonly secondary: PageLink;
+  /** The small line under the buttons. */
+  readonly trust: string;
+  /** The pill under that: the period in bold, then the promise. */
+  readonly guarantee: { readonly period: InlineText; readonly promise: string };
+  /** Each party's name, under or above its building. */
+  readonly parties: Readonly<Record<StationName, string>>;
+  /** What the diagram shows, stated in words for a screen reader. */
+  readonly diagramDescription: string;
+  /** What the status pill reads at each step of the document's journey. It opens on the first. */
+  readonly statuses: HeroStatuses;
+  /**
+   * What the pill reads when the loop is not going to run. The animated
+   * statuses are moments in a story — "sent at 07:12" means nothing without
+   * the arrival that follows it — so a still hero states the promise instead.
+   */
+  readonly statusAtRest: string;
+};
 
 /**
  * The home page's opening screen: the promise in three lines, and beside it a
@@ -14,7 +44,7 @@ import { HERO_JOURNEY, HERO_STATIONS, HERO_START } from '@/components/home/hero-
  * moving sprite say nothing when read aloud — so the images carry an empty
  * `alt` and the `.vh` line states in words what the picture states in pictures.
  */
-export function Hero() {
+export function Hero({ content }: { content: HomeHeroContent }) {
   return (
     <section id="hero" className="dark">
       <div className="glow" />
@@ -22,40 +52,31 @@ export function Hero() {
       <div className="wrap">
         <div className="hero-grid">
           <div className="hero-copy">
-            <div className="eyebrow">نظام تشغيل مشاريع الإنشاء · ربائد</div>
+            <div className="eyebrow">{content.eyebrow}</div>
             <h1>
-              ثلاثة أطراف.
-              <br />
-              سجل واحد.
-              <br />
-              <span>مسؤولية واضحة.</span>
+              {content.title.lines.map((line, index) => (
+                <Fragment key={index}>
+                  {line}
+                  <br />
+                </Fragment>
+              ))}
+              <span>{content.title.accent}</span>
             </h1>
-            <p className="lead">
-              ربائد تجمع المالك والاستشاري والمقاول على منصة واحدة: مراسلات معتمدة، اعتمادات
-              وطلبات فحص، مستندات بأحدث إصدار، وتقارير يومية من الميدان — وكل خطوة موثّقة ومؤرخة
-              باسم من قام بها.
-            </p>
+            <p className="lead">{content.lead}</p>
             <div className="ctas">
-              {/* The first jumps to the demo request form at the foot of this
-                  page (ticket 11). The second points at `#journey`, which no
-                  section on this page carries yet, so it goes nowhere — as the
-                  Reference site's own anchors do on its sub-pages. */}
-              <a className="btn p" href="#demo">
-                احجز عرضاً حياً
+              <a className="btn p" href={content.primary.href}>
+                {content.primary.label}
               </a>
-              <a className="btn g" href="#journey">
-                استكشف المنصة ↓
+              <a className="btn g" href={content.secondary.href}>
+                {content.secondary.label}
               </a>
             </div>
-            <div className="trust">عرض على مشروع حقيقي · 30 دقيقة · بالعربية</div>
-            {/* Only the numeral is `.mono`: DM Mono has no Arabic glyphs, so
-                setting "يوماً" in it drops the word to a last-resort monospace
-                face (spec: Design system). The Reference site wraps both. */}
+            <div className="trust">{content.trust}</div>
             <div className="guar">
               <b>
-                <span className="mono">60</span> يوماً
+                <Inline text={content.guarantee.period} />
               </b>{' '}
-              ضمان استرجاع كامل المبلغ
+              {content.guarantee.promise}
             </div>
           </div>
 
@@ -111,14 +132,11 @@ export function Hero() {
                   className="party"
                   style={{ left: `${station.left}%`, top: `${station.labelTop}%` }}
                 >
-                  {station.name}
+                  {content.parties[key as StationName]}
                 </span>
               ))}
 
-              <span className="vh">
-                المالك والاستشاري والمقاول على سجل واحد: كل معاملة تنتقل بين الأطراف الثلاثة
-                موثّقة ومؤرخة باسم من قام بها.
-              </span>
+              <span className="vh">{content.diagramDescription}</span>
             </div>
 
             {/* The pill the loop rewrites as the document arrives somewhere.
@@ -126,13 +144,13 @@ export function Hero() {
                 correctly before — and without — any script. */}
             <div className="hero-status">
               <i />
-              <b id="h-status">{HERO_JOURNEY[0].status}</b>
+              <b id="h-status">{content.statuses[0]}</b>
             </div>
           </div>
         </div>
       </div>
 
-      <HeroLoop />
+      <HeroLoop statuses={content.statuses} statusAtRest={content.statusAtRest} />
     </section>
   );
 }

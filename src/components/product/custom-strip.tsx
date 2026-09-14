@@ -1,37 +1,40 @@
+import type { PageLink } from '@/components/page-link';
+
+/** Something Rabaed builds for a project that needs it. */
+export type OnRequestFeature = {
+  readonly title: string;
+  readonly body: string;
+};
+
+export type ProductCustomStripContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly features: readonly OnRequestFeature[];
+  /** The badge on every card. */
+  readonly badge: string;
+  /** The link on every card, to where the feature is asked about. */
+  readonly ask: PageLink;
+};
+
 /**
  * «ومشروعك يحتاج أكثر؟» — the two things Rabaed builds for a project that
  * needs them, each pointing at the demo where they are asked about.
  *
- * A server component with no behaviour. All copy is verbatim from
- * `reference/site/product.html`.
+ * A server component with no behaviour.
  */
-
-const ON_REQUEST = [
-  {
-    title: 'الجداول الزمنية ومتابعة الإنجاز',
-    body: 'استيراد جداول Primavera P6 و MS Project، المسار الحرج، وأثر كل تحديث زمني على موعد التسليم.',
-  },
-  {
-    title: 'جدول الكميات والمستخلصات',
-    body: 'جدول كميات تفاعلي ومستخلصات مبنية على الطلبات المعتمدة فعلاً — لا على ما يُكتب في نهاية الشهر.',
-  },
-];
-
-export function CustomStrip() {
+export function CustomStrip({ content }: { content: ProductCustomStripContent }) {
   return (
     <section id="custom" className="light">
       <div className="wrap">
-        <div className="eyebrow">يُخصَّص حسب المشروع</div>
-        <h2>ومشروعك يحتاج أكثر؟</h2>
+        <div className="eyebrow">{content.eyebrow}</div>
+        <h2>{content.heading}</h2>
         <div className="strip">
-          {ON_REQUEST.map((feature) => (
+          {content.features.map((feature) => (
             <div className="c" key={feature.title}>
-              <span className="badge">حسب المشروع</span>
+              <span className="badge">{content.badge}</span>
               <h3>{feature.title}</h3>
               <p>{feature.body}</p>
-              {/* The demo request form, in the closing section at the foot of
-                  this page. */}
-              <a href="#demo">اسأل عنها في العرض التوضيحي ←</a>
+              <a href={content.ask.href}>{content.ask.label}</a>
             </div>
           ))}
         </div>

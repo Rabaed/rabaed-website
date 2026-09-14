@@ -7,22 +7,13 @@
  * engines and AI assistants read the answers, and what ticket 32's FAQ
  * structured data will be generated from, word for word.
  *
- * Verbatim from `reference/site/`.
+ * Verbatim from `reference/site/`. A Latin file name inside an answer is a
+ * `{ latin }` part, set left to right in DM Mono so its dots and underscores
+ * stay where they belong; ticket 32's FAQ structured data joins the parts back
+ * into the one text a visitor reads (`plainText`).
  */
-
-/**
- * Latin text inside an Arabic answer — a file name — which is set left to
- * right, in DM Mono, so its dots and underscores stay where they belong.
- * Ticket 32's FAQ structured data joins the parts back into one text, which is
- * what a visitor reads.
- */
-export type LatinText = { readonly latin: string };
-
-export type FaqEntry = {
-  readonly question: string;
-  /** Plain text, or text with Latin names inside it. */
-  readonly answer: string | readonly (string | LatinText)[];
-};
+import type { FaqEntry } from '@/components/faq';
+import { REFERRAL_PROGRAM_VALUES } from '@/content/referral-program';
 
 /** The start page's «قبل أن تسأل»: the full set, which the home page links to. */
 export const START_FAQ: readonly FaqEntry[] = [
@@ -138,7 +129,7 @@ export const REFERRAL_FAQ: readonly FaqEntry[] = [
   },
   {
     question: 'عميلي عنده أكثر من مشروع — كيف تُحتسب؟',
-    answer: 'الإحالة بالمشروع. إن استُخدم كودك عند بدء مشروع ثانٍ، تُحتسب إحالة جديدة بـ 2,000 ريال أخرى.',
+    answer: `الإحالة بالمشروع. إن استُخدم كودك عند بدء مشروع ثانٍ، تُحتسب إحالة جديدة بـ ${REFERRAL_PROGRAM_VALUES.payout} ريال أخرى.`,
   },
   {
     question: 'ماذا لو استخدم شخصان كودين مختلفين لنفس المشروع؟',

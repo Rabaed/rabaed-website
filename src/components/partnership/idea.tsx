@@ -1,34 +1,43 @@
-import { localePath } from '@/lib/locales';
+import type { PageLink } from '@/components/page-link';
+
+export type PartnershipIdeaContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly paragraphs: readonly string[];
+  /** The note under them, sending a visitor to the Referral Program. */
+  readonly referralNote: {
+    /** Its trailing space included, before the link. */
+    readonly text: string;
+    readonly link: PageLink;
+  };
+};
 
 /**
  * «الفكرة» on the partnership page: why an office is offered a partnership
  * rather than a referral fee, and the note that sends a visitor who wants the
  * simpler arrangement to the Referral Program.
- *
- * All copy is verbatim from `reference/site/partnership.html`.
  */
-export function Idea() {
+export function Idea({ content }: { content: PartnershipIdeaContent }) {
   return (
     <section id="idea" className="light pad">
       <div className="wrap">
         <div className="tz-head">
-          <div className="eyebrow">الفكرة</div>
-          <h2>لماذا شراكة، لا عمولة؟</h2>
+          <div className="eyebrow">{content.eyebrow}</div>
+          <h2>{content.heading}</h2>
         </div>
         <div className="lead-block">
-          <p>
-            المكتب الذي يشرف على عشرة مشاريع في وقت واحد ليس «مُحيلاً». هو الطرف الذي يعيش على المنصة يومياً، ويُدخل الاعتمادات والملاحظات وتقارير الموقع، وهو من يقنع المالك بأسلوب عمل أفضل.
-          </p>
-          <p>
-            ولذلك لا نعرض على المكاتب عمولة على ترشيح. نجلس معك، ونفهم كيف تبيع خدماتك اليوم وكيف تفوتر عميلك، ثم نبني نموذج تعاون يناسب ذلك — تسعير شريك، رخصة على مستوى المكتب، أو تضمين المنصة في عرضك للمالك.
-          </p>
+          {content.paragraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
         </div>
-        {/* One string, its trailing space included, for the reason the
-            referral page's audience note gives. */}
+        {/* One string, its trailing space included: split in two, the server
+            marks the join with a comment, the browser lays out two runs of
+            text, and the link lands a hundredth of a pixel off the Reference
+            site's. */}
         <div className="gain" style={{ marginTop: '22px' }}>
-          {'تبحث عن ترتيب فردي أبسط — كود تشاركه وتستلم عنه مبلغاً ثابتاً؟ '}
-          <a className="inl" href={localePath('ar', '/referral')}>
-            انتقل إلى برنامج الإحالة ←
+          {content.referralNote.text}
+          <a className="inl" href={content.referralNote.link.href}>
+            {content.referralNote.link.label}
           </a>
         </div>
       </div>

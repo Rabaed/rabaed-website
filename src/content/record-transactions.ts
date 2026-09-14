@@ -1,44 +1,17 @@
 /**
- * The home page's Record section: the five transaction types a project runs
- * through Rabaed, each shown by the trail one transaction of that type leaves
- * in the Record — who raised it, its receipt, who checked it, and how it was
- * decided.
+ * The five transaction types in the home page's Record section, each shown by
+ * the trail one transaction of that type leaves in the Record — who raised it,
+ * its receipt, who checked it, and how it was decided.
  *
- * All copy is verbatim from `reference/site/index.html`. The chip labels are
- * the section's markup; the trails are its script's `REC` list, which is what
- * a visitor actually reads. The markup's own first trail differs from `REC`'s
- * in its last step, and the script overwrites it before the section is in
- * view, so `REC` is the copy.
+ * Verbatim from `reference/site/index.html`. The chip labels are the section's
+ * markup; the trails are its script's `REC` list, which is what a visitor
+ * actually reads. The markup's own first trail differs from `REC`'s in its last
+ * step, and the script overwrites it before the section is in view, so `REC` is
+ * the copy.
  *
  * Ticket 21 moves page copy into the CMS.
  */
-
-/** One step of a trail: what happened, who did it or how, and at what time. */
-export type TransactionStep = {
-  readonly action: string;
-  readonly by: string;
-  readonly time: string;
-};
-
-export type TransactionType = {
-  /** The chip naming the type. */
-  readonly label: string;
-  /** The reference number and subject of the one transaction shown for it. */
-  readonly title: string;
-  /** Its trail, always four steps: raised, received, checked, decided. The last is the decision. */
-  readonly steps: readonly [TransactionStep, TransactionStep, TransactionStep, TransactionStep];
-};
-
-export const RECORD_HEADING = { lines: ['لا نسأل "من اعتمد؟"', 'نفتح المعاملة.'] } as const;
-
-/** The four questions the Record answers, set as one line with dots between. */
-export const RECORD_QUESTIONS = ['من طلب؟', 'من استلم؟', 'من اعتمد؟', 'ومتى؟'] as const;
-
-export const RECORD_LEAD =
-  'ليست ميزة تُفعَّل — بل نتيجة كل خطوة. أي معاملة تمر في ربائد تحمل سجلها كاملاً: خطاب رسمي، اعتماد مادة، طلب تسليم أعمال، تحديث على الجدول الزمني، أو مستخلص مالي. وبعد سنة، أو بعد نهاية المشروع، السجل نفسه ما زال هناك.';
-
-/** The seal the Record earns once the visitor has scrolled through every type. */
-export const RECORD_STAMP = '✓ سجل كامل · 4 خطوات · 3 أطراف';
+import type { TransactionStep, TransactionType } from '@/components/home/record';
 
 const received = (time: string): TransactionStep => ({ action: 'استُلم', by: 'إشعار استلام تلقائي', time });
 

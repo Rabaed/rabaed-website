@@ -1,9 +1,23 @@
 import { TrustStripMarquee } from '@/components/home/trust-strip-marquee';
-import {
-  TRUST_STRIP_CAPTION,
-  TRUST_STRIP_LOGOS,
-  TRUST_STRIP_SECTION_NAME,
-} from '@/content/trust-strip';
+
+export type TrustStripLogo = {
+  /** Stable key, also the image's basename under `public/logos/`. */
+  readonly key: string;
+  /** The company's name, which is the image's `alt` and its text fallback. */
+  readonly name: string;
+  /** Drawn height in CSS pixels. */
+  readonly height: number;
+  /** Intrinsic size of the file, for the aspect ratio. */
+  readonly intrinsic: { readonly width: number; readonly height: number };
+};
+
+export type TrustStripContent = {
+  /** The line printed beside the marks, which a visitor reads. */
+  readonly caption: string;
+  /** The section's own name, which only a screen reader announces. */
+  readonly sectionName: string;
+  readonly logos: readonly TrustStripLogo[];
+};
 
 /**
  * The Trust strip: a bar of the marks of companies already working on Rabaed,
@@ -25,15 +39,15 @@ import {
  * exactly that — the same marks again, hidden from assistive technology, which
  * would otherwise read the client list out twice.
  */
-export function TrustStrip() {
+export function TrustStrip({ content }: { content: TrustStripContent }) {
   return (
-    <section className="logos dark" aria-label={TRUST_STRIP_SECTION_NAME}>
+    <section className="logos dark" aria-label={content.sectionName}>
       <div className="wrap">
-        <span className="lbl">{TRUST_STRIP_CAPTION}</span>
+        <span className="lbl">{content.caption}</span>
         <div className="logos-rail">
           <div className="logos-track">
-            <LogoRow />
-            <LogoRow copy />
+            <LogoRow logos={content.logos} />
+            <LogoRow logos={content.logos} copy />
           </div>
         </div>
       </div>
@@ -42,10 +56,10 @@ export function TrustStrip() {
   );
 }
 
-function LogoRow({ copy = false }: { copy?: boolean }) {
+function LogoRow({ logos, copy = false }: { logos: readonly TrustStripLogo[]; copy?: boolean }) {
   return (
     <div className={copy ? 'logos-row copy' : 'logos-row'} aria-hidden={copy || undefined}>
-      {TRUST_STRIP_LOGOS.map((logo) => (
+      {logos.map((logo) => (
         <span className="slot" key={logo.key}>
           {/* The name is the `alt`, so a browser that cannot fetch the file
               still says whose mark is missing — and the `<b>` beside it is the
