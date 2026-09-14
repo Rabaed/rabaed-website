@@ -74,6 +74,13 @@ Checked and left:
 - **The date while previewing** is the day the draft was saved, not a published date — there is none yet for a draft. A preview banner already says the page is not what visitors see.
 - **More than the words is editable** — the search title and description, the line under the title, whether a clause is in the contents — and the renderer handles line breaks, new-tab links and unsafe addresses. All of it follows from what the editor allows; none of it reaches visitors except through Publish.
 
+**Merged with `main`** while the pull request waited, after ticket 52 (one content module per page) and ticket 23 (the blog) landed:
+
+- **The migrations run after the blog's.** The legal schema migration was generated again on top of the blog's, as `20260914_061634_legal_documents`, followed by `20260914_061635_import_legal_documents`, so each migration's snapshot of the tables holds everything before it. The earlier pair had run on no shared database.
+- **Publishing a legal document rebuilds the whole site** through `main`'s `refreshSite`, as the blog and site settings now do, instead of the document's page alone. The sitemap lists the legal pages, and it is refreshed with them.
+- **The date** is drawn by `main`'s shared `ArabicDate` from `riyadhDay`, fed the published version's timestamp.
+- **The full suite passed on the merged code**, 747 tests with the blog's, on `TEST_PORT=3225`.
+
 **The full suite** passed, 728 tests, on the final code after both reviews' changes, on `TEST_PORT=3225` rather than this ticket's 3125: an earlier run's database left port 5125 listed as listening under a process that no longer exists, and a new database refused to start there.
 
 The unpublish, delete and create refusals, and keeping every version (`maxPerDoc: 0`), are not broken on purpose here beyond the first build: a retention limit of Payload's default 100 would only show after a hundred saves.
