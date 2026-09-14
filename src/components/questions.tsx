@@ -3,6 +3,8 @@ import { Faq, FaqEntries, type FaqEntry } from '@/components/faq';
 import type { PageLink } from '@/components/page-link';
 
 export type QuestionsContent = {
+  /** The id links land on (`src/cms/faq-pages.ts`). */
+  readonly id: string;
   readonly eyebrow: string;
   readonly heading: string;
   /** The page's questions, as published in the CMS (`src/cms/faqs.ts`). */
@@ -25,14 +27,11 @@ export type QuestionsContent = {
  * link to it, and its form stands in it whatever the questions.
  */
 export function Questions({
-  id,
   content,
   ruled = true,
   beside,
   children,
 }: {
-  /** The id links land on (`src/cms/faq-pages.ts`). */
-  id: string;
   content: QuestionsContent;
   /** A rule across the top. The home page's section has none, as on the Reference site. */
   ruled?: boolean;
@@ -44,7 +43,7 @@ export function Questions({
   if (beside === undefined && content.entries.length === 0) return null;
 
   return (
-    <section id={id} className="light pad" style={ruled ? { borderTop: '1px solid var(--line)' } : undefined}>
+    <section id={content.id} className="light pad" style={ruled ? { borderTop: '1px solid var(--line)' } : undefined}>
       <div className="wrap">
         {beside === undefined ? (
           <>

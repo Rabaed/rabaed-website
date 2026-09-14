@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { FAQ_PAGES } from '@/cms/faq-pages';
 import { ClosingSection } from '@/components/closing-section';
 import { BeforeAfter } from '@/components/home/before-after';
 import { DelayCalculator } from '@/components/home/delay-calculator';
@@ -42,7 +41,7 @@ export default async function HomePage() {
       {content.calculator.shows && <DelayCalculator content={content.calculator} />}
       {content.figures.shows && <Figures content={content.figures} />}
       {content.questions.shows && (
-        <Questions id={FAQ_PAGES.home.sectionId} ruled={false} content={content.questions} />
+        <Questions ruled={false} content={content.questions} />
       )}
       <ClosingSection content={content.closing} />
       {/* The page's `.reveal` entrances, attached once for the page. Here

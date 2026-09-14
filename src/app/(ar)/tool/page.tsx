@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { FAQ_PAGES } from '@/cms/faq-pages';
 import { PageShell } from '@/components/page-shell';
 import { Questions } from '@/components/questions';
 import { Download } from '@/components/tool/download';
@@ -41,7 +40,7 @@ export default async function ToolPage() {
       {content.privacy.shows && <Privacy content={content.privacy} />}
       {content.requirements.shows && <Requirements content={content.requirements} />}
       <Download content={content.download} />
-      {content.questions.shows && <Questions id={FAQ_PAGES.tool.sectionId} content={content.questions} />}
+      {content.questions.shows && <Questions content={content.questions} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
     </PageShell>
   );

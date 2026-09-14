@@ -1,4 +1,3 @@
-import { pageQuestions } from '@/cms/faqs';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { QuestionsContent } from '@/components/questions';
 import type { ReferralAudienceContent } from '@/components/referral/audience';
@@ -9,7 +8,7 @@ import type { ReferralTermsSummaryContent } from '@/components/referral/terms-su
 import type { ReferralWhatIsReferredContent } from '@/components/referral/what-is-referred';
 import { REFERRAL_PROGRAM_VALUES } from '@/content/referral-program';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ReferralPageContent = {
   readonly meta: PageMeta;
@@ -178,6 +177,5 @@ const AR: BeforeQuestions<ReferralPageContent> = {
 
 /** The referral page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getReferralPage(locale: Locale): Promise<ReferralPageContent> {
-  const content = inLocale('referral', { ar: AR }, locale);
-  return { ...content, questions: { ...content.questions, entries: await pageQuestions('referral', locale) } };
+  return withQuestions('referral', locale, inLocale('referral', { ar: AR }, locale));
 }

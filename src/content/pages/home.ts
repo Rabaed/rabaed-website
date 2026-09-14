@@ -1,4 +1,4 @@
-import { pageQuestions } from '@/cms/faqs';
+import { FAQ_PAGES } from '@/cms/faq-pages';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { HomeBeforeAfterContent } from '@/components/home/before-after';
 import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
@@ -19,7 +19,7 @@ import { PROOF_FIGURES } from '@/content/proof-figures';
 import { TRANSACTION_TYPES } from '@/content/record-transactions';
 import { TRUST_STRIP } from '@/content/trust-strip';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type HomePageContent = {
   readonly meta: PageMeta;
@@ -152,13 +152,15 @@ const AR: BeforeQuestions<HomePageContent> = {
     eyebrow: 'الأسئلة الشائعة',
     heading: 'قبل أن تسأل',
     // The rest of the questions, beside the form on the start page.
-    more: { label: 'كل الأسئلة', href: `${localePath('ar', '/start')}#faq` },
+    more: {
+      label: 'كل الأسئلة',
+      href: `${localePath('ar', FAQ_PAGES.start.path)}#${FAQ_PAGES.start.sectionId}`,
+    },
   },
   closing: { shows: true, ...CLOSING_SECTION.ar },
 };
 
 /** The home page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const content = inLocale('home', { ar: AR }, locale);
-  return { ...content, questions: { ...content.questions, entries: await pageQuestions('home', locale) } };
+  return withQuestions('home', locale, inLocale('home', { ar: AR }, locale));
 }

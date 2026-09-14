@@ -1,4 +1,3 @@
-import { pageQuestions } from '@/cms/faqs';
 import type { QuestionsContent } from '@/components/questions';
 import type { ToolDownloadContent } from '@/components/tool/download';
 import type { ToolFeaturesContent } from '@/components/tool/features';
@@ -9,7 +8,7 @@ import type { ToolRequirementsContent } from '@/components/tool/requirements';
 import type { ToolUpsellContent } from '@/components/tool/upsell';
 import type { ToolWhyContent } from '@/components/tool/why';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ToolPageContent = {
   readonly meta: PageMeta;
@@ -266,6 +265,5 @@ const AR: BeforeQuestions<ToolPageContent> = {
 
 /** The tool page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getToolPage(locale: Locale): Promise<ToolPageContent> {
-  const content = inLocale('tool', { ar: AR }, locale);
-  return { ...content, questions: { ...content.questions, entries: await pageQuestions('tool', locale) } };
+  return withQuestions('tool', locale, inLocale('tool', { ar: AR }, locale));
 }

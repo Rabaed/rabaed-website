@@ -40,7 +40,7 @@ const refreshOnDelete: CollectionAfterDeleteHook = ({ doc, req }) => {
  * Every page's questions sit closed in native disclosure elements, so a crawler
  * reads every answer (`components/faq.tsx`).
  */
-export const FaqEntries: CollectionConfig = {
+export const Faqs: CollectionConfig = {
   slug: 'faq-entries',
   labels: {
     singular: { ar: 'سؤال شائع', en: 'FAQ entry' },

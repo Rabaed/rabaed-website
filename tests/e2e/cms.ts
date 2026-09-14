@@ -51,11 +51,7 @@ export async function logInAs(page: Page, editor: Editor): Promise<void> {
 
 /** Signs in through the admin's own login form, as Ahmed would. */
 export async function logIn(page: Page): Promise<void> {
-  await page.goto(`${ADMIN_PATH}/login`);
-  await page.getByLabel('Email').fill(TEST_EDITOR.email);
-  await page.getByLabel('Password').fill(TEST_EDITOR.password);
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await logInAs(page, TEST_EDITOR);
 }
 
 /**

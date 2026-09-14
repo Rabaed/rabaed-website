@@ -9,8 +9,9 @@
  *   is inserted from the one place the site holds it, rather than typed
  *   (spec: Content model), so an answer cannot quote an old amount.
  *
- * The visible answer and the text ticket 32's FAQ structured data is built
- * from both come from `answerText`, so the two cannot drift apart.
+ * What a page draws is `answerText`; the plain text of it, which is what ticket
+ * 32's FAQ structured data is to be built from, is `plainText` of the same
+ * result — never the answer as stored, whose marks a visitor never reads.
  *
  * Imported by the CMS configuration, so it imports relatively.
  */
@@ -25,7 +26,11 @@ export const ANSWER_VALUES = {
 
 type ValueName = keyof typeof ANSWER_VALUES;
 
-const VALUE = /\{([^{}]*)\}/g;
+/** A value named in braces, `{payout}`. */
+const VALUE_TOKEN = /\{([^{}]*)\}/g;
+
+/** Arabic letters, which DM Mono has no glyphs for (spec: Design system). */
+const ARABIC = /[؀-ۿ]/;
 
 function isValueName(name: string): name is ValueName {
   return Object.hasOwn(ANSWER_VALUES, name);
@@ -36,7 +41,10 @@ export function answerProblem(answer: string): string | null {
   if ((answer.match(/`/g) ?? []).length % 2 === 1) {
     return 'علامة ` بلا إغلاق. ضع الاسم الإنجليزي بين علامتين، مثل `concrete_db.json`.';
   }
-  for (const [, name] of answer.matchAll(VALUE)) {
+  if (answer.split('`').some((piece, index) => index % 2 === 1 && ARABIC.test(piece))) {
+    return 'ما بين علامتي ` يُكتب بخط إنجليزي لا حروف عربية فيه. اترك النص العربي خارجهما.';
+  }
+  for (const [, name] of answer.matchAll(VALUE_TOKEN)) {
     if (!isValueName(name)) {
       const known = Object.entries(ANSWER_VALUES)
         .map(([each, { meaning }]) => `{${each}} ${meaning}`)
@@ -49,7 +57,7 @@ export function answerProblem(answer: string): string | null {
 
 /** The answer as the page draws it: values inserted, Latin names marked out. */
 export function answerText(answer: string): InlineText {
-  const filled = answer.replace(VALUE, (token, name: string) => (isValueName(name) ? ANSWER_VALUES[name].value : token));
+  const filled = answer.replace(VALUE_TOKEN, (token, name: string) => (isValueName(name) ? ANSWER_VALUES[name].value : token));
   if (!filled.includes('`')) return filled;
 
   // Between backticks is every second piece.

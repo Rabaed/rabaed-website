@@ -1,4 +1,3 @@
-import { pageQuestions } from '@/cms/faqs';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { QuestionsContent } from '@/components/questions';
@@ -6,7 +5,7 @@ import type { StartFreeToolTeaserContent } from '@/components/start/free-tool-te
 import type { StartStepsContent } from '@/components/start/steps';
 import { TRUST_STRIP } from '@/content/trust-strip';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type StartPageContent = {
   readonly meta: PageMeta;
@@ -81,6 +80,5 @@ const AR: BeforeQuestions<StartPageContent> = {
 
 /** The start page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  const content = inLocale('start', { ar: AR }, locale);
-  return { ...content, questions: { ...content.questions, entries: await pageQuestions('start', locale) } };
+  return withQuestions('start', locale, inLocale('start', { ar: AR }, locale));
 }

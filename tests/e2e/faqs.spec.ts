@@ -6,12 +6,15 @@
  * Every page's questions are checked word for word by that page's own suite,
  * and its look by the suites that compare it with the Reference site — all of
  * them running beside this one. So nothing here publishes a change a visitor
- * could see in a way those suites notice. Questions this suite adds are only
- * ever drafts, and are hidden, reordered and removed while still drafts, which
- * the editor's preview shows and visitors never do. The one change published
- * adds words to the end of an answer on the referral page, whose suite checks
- * that each answer is *in* the page, and whose answers sit closed in the
- * pictures.
+ * could see in a way those suites notice. Questions this suite adds are saved
+ * as drafts, and hidden, reordered and removed while still drafts, which the
+ * editor's preview shows and visitors never do; the ones it tries to publish
+ * are ones the CMS refuses. The one change published adds words to the end of
+ * an answer on the referral page, whose suite checks that each answer is *in*
+ * the page, and whose answers sit closed in the pictures.
+ *
+ * The reorder is sent to the endpoint the admin's list calls when a row is
+ * dropped, rather than dragged with the mouse.
  *
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
@@ -150,7 +153,7 @@ test('a question added in the admin is saved as a draft: the editor previews it,
   await expect(previewPage.getByRole('status')).toContainText('معاينة');
   const added = previewPage.locator('#faq details', { hasText: question });
   await expect(added).toHaveCount(1);
-  await expect(added.locator('span.mono[dir="ltr"]')).toHaveText('concrete_db.json');
+  await expect(added.locator('[dir="ltr"]')).toHaveText('concrete_db.json');
   await expect(added.locator('p')).toHaveText('نعم. يُحفظ في ملف concrete_db.json ويُحتسب 2,000 ريال عن كل مشروع.');
 });
 
@@ -224,13 +227,24 @@ test('an answer edited and published in the admin reaches visitors', async ({ pa
   }
 });
 
-test('an answer naming a value the site does not hold, or leaving a Latin name open, is refused', async ({ page }) => {
+test('a question too long for its card, or an answer the page could not draw, is refused', async ({ page }) => {
   await logInByApi(page.request, FAQ_EDITOR);
-  for (const answer of ['يُحتسب {bonus} ريال.', 'يُحفظ في ملف `concrete_db.json ويبقى.']) {
+  const question = `سؤال مرفوض ${runId}`;
+  const refused = [
+    { question: 'س'.repeat(161), answer: 'جواب.' },
+    { question, answer: 'ج'.repeat(801) },
+    // A value the site does not hold.
+    { question, answer: 'يُحتسب {bonus} ريال.' },
+    // A Latin name left open.
+    { question, answer: 'يُحفظ في ملف `concrete_db.json ويبقى.' },
+    // Arabic set in a typeface with no Arabic letters.
+    { question, answer: 'يُحفظ في `ملف البيانات`.' },
+  ];
+  for (const fields of refused) {
     const response = await page.request.post('/api/faq-entries', {
-      data: { page: 'tool', locale: 'ar', question: `سؤال مرفوض ${runId}`, answer, _status: 'published' },
+      data: { page: 'tool', locale: 'ar', ...fields, _status: 'published' },
     });
     if (response.ok()) created.push((await response.json()).doc.id);
-    expect(response.status(), answer).toBe(400);
+    expect(response.status(), fields.answer.slice(0, 40)).toBe(400);
   }
 });

@@ -1,4 +1,3 @@
-import { pageQuestions } from '@/cms/faqs';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { PartnershipApplyContent } from '@/components/partnership/apply';
 import type { PartnershipAudienceContent } from '@/components/partnership/audience';
@@ -8,7 +7,7 @@ import type { PartnershipModesContent } from '@/components/partnership/modes';
 import type { PartnershipPathContent } from '@/components/partnership/path';
 import type { QuestionsContent } from '@/components/questions';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type PartnershipPageContent = {
   readonly meta: PageMeta;
@@ -172,6 +171,5 @@ const AR: BeforeQuestions<PartnershipPageContent> = {
 
 /** The partnership page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
-  const content = inLocale('partnership', { ar: AR }, locale);
-  return { ...content, questions: { ...content.questions, entries: await pageQuestions('partnership', locale) } };
+  return withQuestions('partnership', locale, inLocale('partnership', { ar: AR }, locale));
 }

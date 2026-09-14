@@ -154,7 +154,9 @@ edited under **FAQs** (ticket 22). The migrations import the 31 questions the
 site launched with, word for word.
 
 - Each question belongs to one page, chosen under **Page**. Drag questions up
-  and down the list to order them; each page shows its own in that order.
+  and down the list to order them; each page shows its own in that order. A
+  question with an unpublished draft keeps its old place on the site until
+  that draft is published.
 - Untick **Shows on the page** to hide a question without losing its words or
   its place. Delete it to remove it for good.
 - Like an article, a question is saved as a draft, previewed on its page, and

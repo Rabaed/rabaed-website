@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { FAQ_PAGES } from '@/cms/faq-pages';
 import { DemoRequestForm } from '@/components/demo-request-form';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageHero } from '@/components/page-hero';
@@ -38,7 +37,7 @@ export default async function StartPage() {
       <PageHero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {content.steps.shows && <Steps content={content.steps} />}
-      <Questions id={FAQ_PAGES.start.sectionId} content={content.questions} beside={<DemoRequestForm />}>
+      <Questions content={content.questions} beside={<DemoRequestForm />}>
         {content.freeTool.shows && <FreeToolTeaser content={content.freeTool} />}
       </Questions>
     </PageShell>

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { FAQ_PAGES } from '@/cms/faq-pages';
 import { PageHero } from '@/components/page-hero';
 import { PageShell } from '@/components/page-shell';
 import { Apply } from '@/components/partnership/apply';
@@ -41,7 +40,7 @@ export default async function PartnershipPage() {
       {content.modes.shows && <Modes content={content.modes} />}
       {content.benefits.shows && <Benefits content={content.benefits} />}
       <Path content={content.path} />
-      {content.questions.shows && <Questions id={FAQ_PAGES.partnership.sectionId} content={content.questions} />}
+      {content.questions.shows && <Questions content={content.questions} />}
       <Apply content={content.apply} />
     </PageShell>
   );
