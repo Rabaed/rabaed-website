@@ -2,7 +2,7 @@
 
 **What to build:** All six marketing pages available in English, translated properly rather than mechanically, and reviewed by Ahmed before publishing.
 
-**Blocked by:** 21, 40
+**Blocked by:** 53, 54, 55, 56, 57, 58, 59, 40
 
 **Status:** ready-for-agent
 

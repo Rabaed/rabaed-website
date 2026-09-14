@@ -4,7 +4,7 @@
 
 **Blocked by:** 19, 25, 52, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16
 
-**Status:** ready-for-agent
+**Status:** wontfix — split into tickets 53–59, which are the work; see the last comment
 
 - [ ] Every page's copy is stored as localised content, not hardcoded in the markup: each page's content module (ticket 52) reads from the CMS
 - [ ] Images on every page are replaceable from the admin
@@ -36,3 +36,24 @@
 - The before/after cards' starting state uses `nth-child` for 4 columns (2 on mobile), which is part of why that count stays locked.
 
 **Blocked by 25** because the Referral Terms warning compares the values with the published Referral Terms, which ticket 25 moves into the CMS.
+
+**Split (15 September 2026).** Too wide for one pull request, this ticket is replaced by seven, each one reviewable on its own preview link. Nothing is dropped; its criteria went here:
+
+| Ticket 21's criterion | Now in |
+|---|---|
+| Copy stored localised, each page's content module reads the CMS | 53 (how), 54–58 (each page) |
+| Images replaceable | 53 (how), 54–58 |
+| Lists editable, except the exact counts | 53 (how); 57 the three parties; 58 the hero's buildings, the before/after steps, the calculator's sliders |
+| Grids that only looked right in sets | 53 start steps; 54 tool steps; 56 referral steps, offer and terms summary |
+| Sections switch off, except linked ones | 53 (how) and `#faq`; 54 `#get`, `#how`; 55 `#path`, `#apply`; 56 `#signup`, `#how`; 57 `#journey`, `#demo` |
+| Section order fixed | 53 |
+| Limits where the design cannot carry more | 53 (how), 54–58 with ticket 21's survey |
+| Referral Program values one global | 56 |
+| The Referral Terms warning | 56 |
+| Screen mocks replaceable | 57 |
+| Page lists shared across locales | 53 |
+| Baselines, text with JavaScript off, no substituted locale | every one of 53–59 |
+
+Ticket 59 is new: the header, footer, not-found page and index-page lines, which tickets 04 and 23 expected this ticket to cover but its criteria never named. The code comments that still say "ticket 21 moves this into the CMS" mean these tickets.
+
+Order: 53 alone first; then 54, 55, 56, 57 and 59 side by side; then 58, which uses 57's closing section and Screen mocks.
