@@ -101,14 +101,17 @@ async function markBox(file) {
   const columnHasInk = (x) => Array.from({ length: info.height }, (_, y) => visible(x, y)).some(Boolean);
 
   let right = info.width - 1;
-  while (!columnHasInk(right)) right -= 1;
+  while (right >= 0 && !columnHasInk(right)) right -= 1;
+  if (right < 0) throw new Error(`${path.relative(repoRoot, file)} has no visible pixels to take a brand mark from.`);
   let left = right;
   while (left > 0 && columnHasInk(left - 1)) left -= 1;
 
+  // Within the mark's columns only, so the name beside it cannot stretch the box.
+  const rowHasInk = (y) => Array.from({ length: right - left + 1 }, (_, i) => visible(left + i, y)).some(Boolean);
   let top = 0;
-  while (!Array.from({ length: right - left + 1 }, (_, i) => visible(left + i, top)).some(Boolean)) top += 1;
+  while (!rowHasInk(top)) top += 1;
   let bottom = info.height - 1;
-  while (!Array.from({ length: right - left + 1 }, (_, i) => visible(left + i, bottom)).some(Boolean)) bottom -= 1;
+  while (!rowHasInk(bottom)) bottom -= 1;
 
   return { left, top, width: right - left + 1, height: bottom - top + 1 };
 }
@@ -119,11 +122,13 @@ async function squareMark(file, size, padding, background) {
   const side = Math.round(Math.max(box.width, box.height) * (1 + 2 * padding));
   const mark = await sharp(file).extract(box).toBuffer();
 
-  return sharp({ create: { width: side, height: side, channels: 4, background } })
+  // Composited and resized in two passes: sharp resizes before it composites
+  // within one pipeline, which would place the mark on the full-size square.
+  const square = await sharp({ create: { width: side, height: side, channels: 4, background } })
     .composite([{ input: mark, left: Math.round((side - box.width) / 2), top: Math.round((side - box.height) / 2) }])
     .png()
-    .toBuffer()
-    .then((square) => sharp(square).resize(size, size).png({ compressionLevel: 9 }).toBuffer());
+    .toBuffer();
+  return sharp(square).resize(size, size).png({ compressionLevel: 9 }).toBuffer();
 }
 
 async function exportIcons() {

@@ -11,7 +11,8 @@ import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getStartPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/start', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/start', ...meta });
 }
 
 /**

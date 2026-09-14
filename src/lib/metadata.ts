@@ -25,7 +25,7 @@ export function baseMetadata(): Metadata {
  */
 const SHARING = {
   ar: { siteName: 'ربائد', ogLocale: 'ar_SA', imageAlt: 'ربائد — ثلاثة أطراف. سجل واحد. مسؤولية واضحة.' },
-  en: { siteName: 'Rabaed', ogLocale: 'en_US', imageAlt: 'Rabaed — three parties, one record.' },
+  en: { siteName: 'Rabaed', ogLocale: 'en_US', imageAlt: 'The Rabaed wordmark and, in Arabic, “Three parties. One record. Clear accountability.”' },
 } as const satisfies Record<Locale, unknown>;
 
 /**

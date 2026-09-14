@@ -14,11 +14,14 @@ import { ROUTES } from './routes';
 const absolute = (baseURL: string, path: string) => `${baseURL}${path === '/' ? '' : path}`;
 
 /**
- * `og:locale` per locale, restated rather than imported for the reason
- * `routes.ts` gives. Arabic as written in Saudi Arabia, as the Reference site
- * declares it.
+ * `og:locale` and `og:site_name` per locale, restated rather than imported for
+ * the reason `routes.ts` gives. Arabic as written in Saudi Arabia, and the name
+ * ربائد, as the Reference site declares them.
  */
-const OG_LOCALE = { ar: 'ar_SA', en: 'en_US' } as const;
+const SHARED_AS = {
+  ar: { locale: 'ar_SA', siteName: 'ربائد' },
+  en: { locale: 'en_US', siteName: 'Rabaed' },
+} as const;
 
 async function fetchOk(request: APIRequestContext, url: string) {
   const response = await request.get(url);
@@ -61,9 +64,9 @@ for (const route of ROUTES) {
     await expect(meta('property="og:title"')).toHaveAttribute('content', title);
     await expect(meta('property="og:description"')).toHaveAttribute('content', description!);
     await expect(meta('property="og:url"')).toHaveAttribute('content', absolute(baseURL!, route.path));
-    await expect(meta('property="og:locale"')).toHaveAttribute('content', OG_LOCALE[route.locale]);
+    await expect(meta('property="og:locale"')).toHaveAttribute('content', SHARED_AS[route.locale].locale);
     await expect(meta('property="og:type"')).toHaveAttribute('content', 'website');
-    await expect(meta('property="og:site_name"')).toHaveAttribute('content', /\S/);
+    await expect(meta('property="og:site_name"')).toHaveAttribute('content', SHARED_AS[route.locale].siteName);
 
     await expect(meta('name="twitter:card"')).toHaveAttribute('content', 'summary_large_image');
     await expect(meta('name="twitter:title"')).toHaveAttribute('content', title);
@@ -120,7 +123,7 @@ test('the sitemap lists exactly the site’s pages, each at its own canonical ad
 
   // Articles come and go with what is published, and `blog.spec.ts` publishes
   // and unpublishes its own alongside this test; it holds them to the sitemap.
-  const pages = listed.filter((loc) => !/\/blog\/(?!page\/)[^/]+$/.test(loc));
+  const pages = listed.filter((loc) => !/\/blog\/[^/]+$/.test(loc));
 
   // The Arabic site's pages. `/en` and `/en/blog` wait for English (ticket 40),
   // and the Screen mock studio is never listed (ticket 05). With no case study

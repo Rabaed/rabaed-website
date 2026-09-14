@@ -13,7 +13,9 @@
  * restated for the same reason — the address the page declares for itself in
  * each locale it exists in, and no other. The legal pages exist in Arabic
  * alone: the Arabic is binding, and they are never translated (spec: Out of
- * Scope).
+ * Scope). The product, start, tool, referral and partnership pages exist in
+ * Arabic alone until English is switched on (tickets 40 and 42), which adds
+ * their English addresses here.
  */
 export const ROUTES = [
   {
@@ -41,7 +43,7 @@ export const ROUTES = [
       'ليس ميزة تُفعَّل، بل نتيجة كل خطوة.',
       'ماذا يبقى عندك، وماذا يعبر إلى الطرف الآخر؟',
     ],
-    alternates: { ar: '/product', en: '/en/product' },
+    alternates: { ar: '/product' },
   },
   {
     path: '/start',
@@ -55,7 +57,7 @@ export const ROUTES = [
       'هل يدعم الإنجليزية للفرق غير العربية؟',
       'سجل صبّات الخرسانة ونتائج التكسير',
     ],
-    alternates: { ar: '/start', en: '/en/start' },
+    alternates: { ar: '/start' },
   },
   {
     path: '/tool',
@@ -67,7 +69,7 @@ export const ROUTES = [
       'حمّل الأداة الآن',
       'صُنعت في ربائد لمهندسي المواقع. الأداة مجانية — استخدمها كما تشاء.',
     ],
-    alternates: { ar: '/tool', en: '/en/tool' },
+    alternates: { ar: '/tool' },
   },
   {
     path: '/referral',
@@ -81,7 +83,7 @@ export const ROUTES = [
       'يُوقَّع إلكترونياً عند التسجيل.',
       'سجّل في برنامج الإحالة',
     ],
-    alternates: { ar: '/referral', en: '/en/referral' },
+    alternates: { ar: '/referral' },
   },
   {
     path: '/partnership',
@@ -95,7 +97,7 @@ export const ROUTES = [
       'الإطلاق على أول مشروع',
       'خلّنا نجلس ونصمّم النموذج المناسب لمكتبك',
     ],
-    alternates: { ar: '/partnership', en: '/en/partnership' },
+    alternates: { ar: '/partnership' },
   },
   {
     path: '/blog',
