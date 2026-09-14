@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 import { Fragment } from 'react';
+import { ArabicDate } from '@/components/arabic-date';
 import { PageShell } from '@/components/page-shell';
 import { clauseId, type Block, type LegalDocument, type Line } from '@/content/legal/document';
 import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
-
-/** The Gregorian months, as the approved documents write them. */
-const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
 /** A legal document's title and description, and its one address: it exists in Arabic alone. */
 export function legalMetadata(document: LegalDocument): Metadata {
@@ -52,8 +50,7 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           {/* Only the numerals are `.mono`: DM Mono has no Arabic glyphs
               (spec: Design system). The Reference site sets the whole line in it. */}
           <span className="updated">
-            آخر تحديث: <span className="mono">{document.updated.day}</span> {MONTHS[document.updated.month - 1]}{' '}
-            <span className="mono">{document.updated.year}</span>
+            آخر تحديث: <ArabicDate date={document.updated} />
           </span>
 
           <div className="intro">

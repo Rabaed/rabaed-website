@@ -1,24 +1,14 @@
-import { revalidatePath } from 'next/cache';
 import type { GlobalAfterChangeHook, GlobalConfig } from 'payload';
 import { signedIn } from '../access';
+import { refreshSite } from '../revalidation';
 
 /**
- * Set on `context` by anything that writes site settings outside a request to
- * the running site — a migration, a script — where there is no page cache to
- * refresh and Next refuses to be asked.
- */
-export const SKIP_REVALIDATION = 'skipRevalidation';
-
-/**
- * Pages are built ahead of time, so a published change reaches visitors only
- * when the pages are rebuilt. Site settings appear in every page's footer, so
- * every page is marked stale and rebuilt on its next visit. A saved draft
- * changes nothing a visitor can see, so it leaves the pages alone.
+ * Site settings appear in every page's footer, so publishing them rebuilds
+ * the site (`refreshSite`). A saved draft changes nothing a visitor can see,
+ * so it leaves the pages alone.
  */
 const refreshPagesOnPublish: GlobalAfterChangeHook = ({ doc, req }) => {
-  if (doc._status === 'published' && !req.context[SKIP_REVALIDATION]) {
-    revalidatePath('/', 'layout');
-  }
+  if (doc._status === 'published') refreshSite(req);
   return doc;
 };
 
