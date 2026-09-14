@@ -23,11 +23,15 @@
  *   the Reference site's fallback face differs by operating system, and on
  *   Linux it wraps and widens the figures' cards, so their sizes and places
  *   are left out entirely.
- * - **The submit button is disabled** until ticket 28 gives the form somewhere
- *   to send, drawn in the Reference site's own disabled style, as the demo
- *   request form's is (`demo-request-form.ts`): its colours and height are
- *   left out, and so are the 2px its border adds below it — the small print's
- *   place, and the height of the form, its grid and its section.
+ * - **The submit button is disabled** until the signup is complete (ticket 28),
+ *   so an empty form draws it in the Reference site's own disabled style, as
+ *   the demo request form's is (`demo-request-form.ts`): its colours and
+ *   height are left out, and so are the 2px its border adds below it — the
+ *   small print's place, and the height of the form, its grid and its section.
+ * - **The small print** says what happens to the referrer's documents, where
+ *   the Reference site's said the form was a prototype that sends nothing
+ *   (ticket 28). The words are longer and wrap on narrower screens, so its
+ *   height is left out; its width and place across are not.
  * - **The document fields' file inputs** are hidden from sight but not from the
  *   keyboard, where the Reference site's `hidden` takes them out of the page.
  *   Neither draws anything, so they are not measured; the labels that stand
@@ -155,8 +159,10 @@ const REGIONS: readonly Region[] = [
       '.declar',
       // Disabled, in the Reference site's disabled style.
       { selector: '.btn', omit: ['color', 'background', 'borderColor', 'height'] },
-      // Below the button, so 2px lower.
-      { selector: '.fine', omit: ['top'] },
+      // Below the button, so 2px lower; and saying what happens to the
+      // documents, where the Reference site's said the form sends nothing, so
+      // as many lines as its own words take.
+      { selector: '.fine', omit: ['top', 'height'] },
     ],
   },
 ];

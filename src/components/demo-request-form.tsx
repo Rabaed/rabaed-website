@@ -1,10 +1,9 @@
 'use client';
 
-import { useActionState, useRef } from 'react';
-import { sendForm } from '@/forms/actions';
-import { NOT_SENT, TOKEN_FIELD, TRAP_FIELD, type FormPageWording, type SubmissionOutcome } from '@/forms/definition';
+import { fieldOptions, TRAP_FIELD, type FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { useAnswers } from '@/forms/use-answers';
+import { useSubmission } from '@/forms/use-submission';
 
 /**
  * The demo request form: one form, placed at the end of the home and product
@@ -22,17 +21,7 @@ import { useAnswers } from '@/forms/use-answers';
  */
 export function DemoRequestForm({ wording }: { wording: FormPageWording<DemoRequestField> }) {
   const { complete, field, refuse } = useAnswers(DEMO_REQUEST, wording);
-  const token = useRef<string | null>(null);
-
-  const [outcome, send, sending] = useActionState(async (_previous: SubmissionOutcome, data: FormData) => {
-    // Made up on the first attempt and kept for every retry, so a request
-    // sent twice is stored once.
-    token.current ??= crypto.randomUUID();
-    data.set(TOKEN_FIELD, token.current);
-    const result = await sendForm(DEMO_REQUEST.id, data);
-    if (result.outcome === 'invalid') refuse(result.fields as DemoRequestField[]);
-    return result;
-  }, NOT_SENT);
+  const { outcome, sending, send } = useSubmission(DEMO_REQUEST, refuse);
 
   const name = field('name');
   const email = field('email');
@@ -43,7 +32,16 @@ export function DemoRequestForm({ wording }: { wording: FormPageWording<DemoRequ
   const words = wording.fields;
 
   return (
-    <form className="form" id="demo" action={send} noValidate aria-labelledby="demo-title">
+    <form
+      className="form"
+      id="demo"
+      noValidate
+      aria-labelledby="demo-title"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (complete) void send(event.currentTarget);
+      }}
+    >
       <h3 id="demo-title">{wording.heading}</h3>
       <small>{wording.lead}</small>
       {/* The guarantee is a binding commitment, not the form's wording, so it
@@ -85,7 +83,7 @@ export function DemoRequestForm({ wording }: { wording: FormPageWording<DemoRequ
             <div>
               <select {...role.props} aria-label={words.role.label}>
                 <option value="">{words.role.placeholder}</option>
-                {DEMO_REQUEST.fields.role.options!.map((value) => (
+                {fieldOptions(DEMO_REQUEST.fields.role).map((value) => (
                   <option key={value} value={value}>
                     {words.role.options![value]}
                   </option>

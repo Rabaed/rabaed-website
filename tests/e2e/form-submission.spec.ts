@@ -18,9 +18,19 @@
  * Messages are restated here rather than imported from the form definitions,
  * for the reason `routes.ts` gives.
  */
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, logInAs, logInByApi } from './cms';
-import { mailTo, submissionsFrom, uniqueApplicant, type StoredSubmission } from './forms';
+import {
+  documentsDirectory,
+  mailTo,
+  readerDelete,
+  readerGet,
+  submissionsFrom,
+  uniqueApplicant,
+  type StoredSubmission,
+} from './forms';
 
 const DEMO_FORM = 'احجز عرضاً حياً على مشروعك';
 const DEMO_BUTTON = 'احجز عرضاً حياً';
@@ -338,6 +348,300 @@ test.describe('mail and wording from the admin', () => {
     await expect(page.getByRole('textbox', { name: 'Answer', exact: true }).nth(2)).toHaveValue('owner');
     await expect(page.getByRole('textbox', { name: 'Option shown' }).nth(2)).toHaveValue('مالك / مطوّر');
   });
+
+  test("an editor opens a signup's documents from its record in the admin", async ({ page, request }) => {
+    const applicant = uniqueApplicant('referral-admin');
+    await sendReferral(page, applicant);
+    const [stored] = await submissionsFrom(request, applicant.email);
+
+    await logInAs(page, FORM_EDITOR);
+    await page.goto(`${ADMIN_PATH}/collections/form-submissions/${stored.id}`);
+    const open = page.getByRole('link', { name: 'Open document' });
+    await expect(open).toHaveCount(2);
+
+    const href = await open.first().getAttribute('href');
+    expect(href).toMatch(/^\/api\/form-documents\/\d+\/ibanCertificate\?/);
+    const document = await page.request.get(href!);
+    expect(document.status()).toBe(200);
+    expect(Buffer.compare(await document.body(), IBAN.buffer)).toBe(0);
+  });
+});
+
+/**
+ * The Referral Program signup (ticket 28): the same pipeline, with documents.
+ * The IBAN certificate is required and the two registrations optional; each is
+ * a PDF or an image of at most 10 MB, checked as it is chosen and again, by
+ * its contents, on the server. Documents go to private storage, and are opened
+ * only by a signed-in editor through a link that expires.
+ */
+const REFERRAL_FORM = 'سجّل في برنامج الإحالة';
+const REFERRAL_RECEIVED = 'وصلنا تسجيلك — سنراجع بياناتك ومستنداتك ونتواصل معك لإصدار كودك.';
+
+const REFERRAL_MESSAGES = {
+  'الاسم الكامل': 'اكتب اسمك الكامل (حرفان على الأقل)',
+  'رقم الجوال': 'اكتب رقم جوال صحيح (٦ إلى ١٥ رقماً)',
+  'البريد الإلكتروني': 'اكتب بريداً إلكترونياً صحيحاً',
+  'المدينة': 'اكتب اسم مدينتك',
+  'الصفة المهنية': 'اختر صفتك المهنية',
+  'اسم صاحب الحساب البنكي': 'اكتب اسم صاحب الحساب كما في شهادة الآيبان',
+} as const;
+
+const TERMS_MESSAGE = 'يلزم الموافقة على الشروط والأحكام وسياسة الخصوصية';
+const IBAN_MISSING = 'أرفق شهادة الآيبان';
+const DOCUMENT_TOO_LARGE = 'الملف أكبر من 10 ميجابايت — اختر ملفاً أصغر';
+const DOCUMENT_WRONG_TYPE = 'ارفع ملف PDF أو صورة PNG أو JPG';
+
+const IBAN = {
+  name: 'iban-certificate.pdf',
+  mimeType: 'application/pdf',
+  buffer: Buffer.from('%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n'),
+};
+/** The PNG signature and a few bytes more: an image by its contents, not only its name. */
+const REGISTRATION = {
+  name: 'commercial-registration.png',
+  mimeType: 'image/png',
+  buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52]),
+};
+
+async function openReferralForm(page: Page, ip: string): Promise<Locator> {
+  await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
+  await page.goto('/referral', { waitUntil: 'networkidle' });
+  return page.getByRole('form', { name: REFERRAL_FORM });
+}
+
+const referralButton = (form: Locator) => form.getByRole('button', { name: REFERRAL_FORM });
+
+async function fillReferral(form: Locator, email: string): Promise<void> {
+  await form.getByLabel('الاسم الكامل').fill(APPLICANT.name);
+  await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
+  await form.getByLabel('البريد الإلكتروني').fill(email);
+  await form.getByLabel('المدينة').fill('الرياض');
+  await form.getByLabel('الصفة المهنية').selectOption('engineer');
+  await form.getByLabel('شهادة الآيبان', { exact: true }).setInputFiles(IBAN);
+  await form.getByLabel('اسم صاحب الحساب البنكي').fill(APPLICANT.name);
+  await form.getByLabel('السجل التجاري', { exact: true }).setInputFiles(REGISTRATION);
+  await form.getByRole('checkbox', { name: 'الموافقة على الشروط والأحكام' }).check();
+  await form.getByRole('checkbox', { name: 'إقرار عدم التعارض' }).check();
+}
+
+/** Fills in and sends a valid signup, and waits to be told it arrived. */
+async function sendReferral(page: Page, applicant: { email: string; ip: string }): Promise<void> {
+  const form = await openReferralForm(page, applicant.ip);
+  await fillReferral(form, applicant.email);
+  await referralButton(form).click();
+  await expect(form.getByRole('status')).toHaveText(REFERRAL_RECEIVED);
+}
+
+test.describe('the Referral Program signup', () => {
+  test('says in Arabic what is wrong, and unlocks only with every answer, the IBAN certificate and both consents', async ({
+    page,
+  }) => {
+    const { email, ip } = uniqueApplicant('referral-rules');
+    const form = await openReferralForm(page, ip);
+    await expect(referralButton(form)).toBeDisabled();
+
+    for (const [label, message] of Object.entries(REFERRAL_MESSAGES)) {
+      const field = form.getByLabel(label, { exact: true });
+      await field.focus();
+      await field.blur();
+      await expect(form.getByText(message, { exact: true }), label).toBeVisible();
+    }
+    const terms = form.getByRole('checkbox', { name: 'الموافقة على الشروط والأحكام' });
+    await terms.focus();
+    await terms.blur();
+    await expect(form.getByText(TERMS_MESSAGE, { exact: true })).toBeVisible();
+
+    await fillReferral(form, email);
+    await expect(referralButton(form)).toBeEnabled();
+
+    // The registrations are optional.
+    await form.getByLabel('السجل التجاري', { exact: true }).setInputFiles([]);
+    await expect(referralButton(form)).toBeEnabled();
+
+    // The IBAN certificate is not, and neither is either consent.
+    const certificate = form.getByLabel('شهادة الآيبان', { exact: true });
+    await certificate.setInputFiles([]);
+    await expect(form.getByText(IBAN_MISSING, { exact: true })).toBeVisible();
+    await expect(referralButton(form)).toBeDisabled();
+    await certificate.setInputFiles(IBAN);
+    await expect(referralButton(form)).toBeEnabled();
+    await form.getByRole('checkbox', { name: 'إقرار عدم التعارض' }).uncheck();
+    await expect(referralButton(form)).toBeDisabled();
+  });
+
+  test('a document too large or of the wrong kind is refused as soon as it is chosen, in Arabic', async ({ page }) => {
+    const { email, ip } = uniqueApplicant('referral-chosen');
+    const form = await openReferralForm(page, ip);
+    await fillReferral(form, email);
+    const certificate = form.getByLabel('شهادة الآيبان', { exact: true });
+
+    await certificate.setInputFiles({ name: 'scan.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(10 * 1024 * 1024 + 1, 0x25) });
+    await expect(form.getByText(DOCUMENT_TOO_LARGE, { exact: true })).toBeVisible();
+    await expect(certificate).toHaveAttribute('aria-invalid', 'true');
+    await expect(referralButton(form)).toBeDisabled();
+
+    await certificate.setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('not a certificate') });
+    await expect(form.getByText(DOCUMENT_WRONG_TYPE, { exact: true })).toBeVisible();
+    await expect(form.getByText(DOCUMENT_TOO_LARGE, { exact: true })).toBeHidden();
+    await expect(referralButton(form)).toBeDisabled();
+
+    await certificate.setInputFiles(IBAN);
+    await expect(form.getByText(DOCUMENT_WRONG_TYPE, { exact: true })).toBeHidden();
+    await expect(referralButton(form)).toBeEnabled();
+  });
+
+  test('the server checks each document by what is in it: a file only named like a PDF is refused, and nothing is stored', async ({
+    page,
+    request,
+  }) => {
+    const { email, ip } = uniqueApplicant('referral-disguised');
+    const form = await openReferralForm(page, ip);
+    await fillReferral(form, email);
+    await form
+      .getByLabel('شهادة الآيبان', { exact: true })
+      .setInputFiles({ name: 'iban-certificate.pdf', mimeType: 'application/pdf', buffer: Buffer.from('this is not a PDF') });
+    await referralButton(form).click();
+
+    await expect(form.getByText(DOCUMENT_WRONG_TYPE, { exact: true })).toBeVisible();
+    await expect(form.getByText(REFERRAL_RECEIVED)).toHaveCount(0);
+    expect(await submissionsFrom(request, email)).toEqual([]);
+  });
+
+  test('the server refuses a document over 10 MB and a signup without both consents however they are sent, and a form sent from another site', async ({
+    request,
+    baseURL,
+  }) => {
+    const { email, ip } = uniqueApplicant('referral-direct');
+    const answers = {
+      name: APPLICANT.name,
+      phone: APPLICANT.phone,
+      email,
+      city: 'الرياض',
+      profession: 'engineer',
+      accountHolder: APPLICANT.name,
+      acceptTerms: 'on',
+      declareNoConflict: 'on',
+      submissionToken: '2f1d8c4e-3b6a-4d2e-9f1a-7c5b3e2d1a09',
+    };
+    const oversized = { name: 'scan.pdf', mimeType: 'application/pdf', buffer: Buffer.concat([IBAN.buffer, Buffer.alloc(10 * 1024 * 1024)]) };
+
+    const sent = await request.post('/api/forms/referral-signup', {
+      headers: { origin: baseURL!, 'x-forwarded-for': ip },
+      multipart: { ...answers, ibanCertificate: oversized },
+    });
+    expect(await sent.json()).toMatchObject({ outcome: 'invalid', problems: { ibanCertificate: 'tooLarge' } });
+
+    const { acceptTerms: _terms, declareNoConflict: _declaration, ...withoutConsents } = answers;
+    const unconsented = await request.post('/api/forms/referral-signup', {
+      headers: { origin: baseURL!, 'x-forwarded-for': ip },
+      multipart: { ...withoutConsents, ibanCertificate: IBAN },
+    });
+    expect(await unconsented.json()).toEqual({ outcome: 'invalid', fields: ['acceptTerms', 'declareNoConflict'] });
+
+    const crossSite = await request.post('/api/forms/referral-signup', {
+      headers: { origin: 'https://example.com', 'x-forwarded-for': ip },
+      multipart: { ...answers, ibanCertificate: IBAN },
+    });
+    expect(crossSite.status()).toBe(403);
+
+    expect(await submissionsFrom(request, email)).toEqual([]);
+  });
+
+  test('a valid signup is stored once, with its documents and both consents, and shows its upload on the way', async ({
+    page,
+    request,
+  }) => {
+    const { email, ip } = uniqueApplicant('referral-stored');
+    const form = await openReferralForm(page, ip);
+    await fillReferral(form, email);
+
+    // Held on its way, so the upload can be seen.
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    await page.route('**/api/forms/referral-signup', async (route) => {
+      await held;
+      await route.continue();
+    });
+
+    // Twice, as an impatient visitor would.
+    await referralButton(form).dblclick();
+    // Only that it shows while the signup is on its way: a request held by the
+    // test is not on the network, so the browser reports no progress through
+    // it, and on this machine an unheld upload is over before it can be seen.
+    await expect(form.getByRole('progressbar', { name: 'رفع شهادة الآيبان' })).toBeVisible();
+    await expect(referralButton(form)).toBeDisabled();
+    release();
+
+    await expect(form.getByRole('status')).toHaveText(REFERRAL_RECEIVED);
+    await expect(form.getByRole('progressbar')).toHaveCount(0);
+
+    const stored = await submissionsFrom(request, email);
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({ form: 'referral-signup', name: APPLICANT.name, email, phone: APPLICANT.phone });
+    expect(stored[0].documents.map(({ field, fileName, contentType, size }) => ({ field, fileName, contentType, size }))).toEqual([
+      { field: 'ibanCertificate', fileName: IBAN.name, contentType: 'application/pdf', size: IBAN.buffer.length },
+      { field: 'commercialRegistration', fileName: REGISTRATION.name, contentType: 'image/png', size: REGISTRATION.buffer.length },
+    ]);
+    const consents = stored[0].answers
+      .filter((answer) => answer.field === 'acceptTerms' || answer.field === 'declareNoConflict')
+      .map(({ field, value }) => ({ field, value }));
+    expect(consents).toEqual([
+      { field: 'acceptTerms', value: 'accepted' },
+      { field: 'declareNoConflict', value: 'accepted' },
+    ]);
+  });
+
+  test('a document is not publicly retrievable: only a signed-in editor opens it, through a signed link that expires', async ({
+    page,
+    request,
+    playwright,
+    baseURL,
+  }) => {
+    const applicant = uniqueApplicant('referral-private');
+    await sendReferral(page, applicant);
+    const [stored] = await submissionsFrom(request, applicant.email);
+    const certificate = stored.documents.find((document) => document.field === 'ibanCertificate')!;
+    expect(certificate.link).toMatch(/^\/api\/form-documents\/\d+\/ibanCertificate\?expires=\d+&signature=[0-9a-f]+$/);
+
+    // A signed-in editor with the link: the document, as it was uploaded.
+    const opened = await readerGet(request, certificate.link);
+    expect(opened.status()).toBe(200);
+    expect(opened.headers()['content-type']).toBe('application/pdf');
+    expect(opened.headers()['cache-control']).toContain('no-store');
+    expect(Buffer.compare(await opened.body(), IBAN.buffer)).toBe(0);
+
+    // Anyone else with the very same link: nothing.
+    const stranger = await playwright.request.newContext({ baseURL });
+    expect((await stranger.get(certificate.link)).status()).toBe(401);
+    await stranger.dispose();
+
+    // The editor, with the address guessed or the link altered: nothing.
+    const link = new URL(certificate.link, baseURL);
+    const expired = new URL(link);
+    expired.searchParams.set('expires', String(Math.floor(Date.now() / 1000) - 1));
+    const tampered = new URL(link);
+    tampered.searchParams.set('signature', '0'.repeat(64));
+    const otherField = new URL(link);
+    otherField.pathname = otherField.pathname.replace('ibanCertificate', 'commercialRegistration');
+    for (const attempt of [link.pathname, `${expired.pathname}${expired.search}`, `${tampered.pathname}${tampered.search}`, `${otherField.pathname}${otherField.search}`]) {
+      expect((await readerGet(request, attempt)).status(), attempt).toBe(403);
+    }
+  });
+
+  test("deleting a signup deletes its documents from storage", async ({ page, request }) => {
+    const applicant = uniqueApplicant('referral-deleted');
+    await sendReferral(page, applicant);
+    const [stored] = await submissionsFrom(request, applicant.email);
+    const files = stored.documents.map((document) => path.join(documentsDirectory(), document.key));
+    expect(files).toHaveLength(2);
+    for (const file of files) expect(existsSync(file), file).toBe(true);
+
+    const deleted = await readerDelete(request, `/api/form-submissions/${stored.id}`);
+    expect(deleted.ok()).toBe(true);
+
+    for (const file of files) expect(existsSync(file), file).toBe(false);
+    expect((await readerGet(request, stored.documents[0].link)).status()).toBe(404);
+  });
 });
 
 /**
@@ -346,22 +650,6 @@ test.describe('mail and wording from the admin', () => {
  * confirmations, and not what the visitor typed in the address.
  */
 const NOT_SENDING_YET = [
-  {
-    name: 'the Referral Program signup',
-    ticket: 28,
-    path: '/referral',
-    form: 'سجّل في برنامج الإحالة',
-    fill: async (form: Locator) => {
-      await form.getByLabel('الاسم الكامل').fill(APPLICANT.name);
-      await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
-      await form.getByRole('checkbox', { name: 'الموافقة على الشروط والأحكام' }).check();
-      await form.getByRole('checkbox', { name: 'إقرار عدم التعارض' }).check();
-      return form.getByLabel('رقم الجوال');
-    },
-    fakes: ['تم تسجيلك', 'RB-A47K'],
-    // The small print says so, because it is true.
-    finePrint: 'نموذج أولي — لا يُرسل فعلياً في هذه النسخة.',
-  },
   {
     name: 'the partnership application',
     ticket: 29,

@@ -1,14 +1,17 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { fieldNames } from '@/forms/definition';
+import { fieldNames, fieldOptions, isRequired } from '@/forms/definition';
 import { TOOL_DOWNLOAD } from '@/forms/tool-download';
 import { useAnswers } from '@/forms/use-answers';
 
 const WORDING = TOOL_DOWNLOAD.wording;
 
 /** The four details the button waits for; the country code has a default and the company is optional. */
-const REQUIRED = fieldNames(TOOL_DOWNLOAD).filter((name) => TOOL_DOWNLOAD.fields[name].required);
+const REQUIRED = fieldNames(TOOL_DOWNLOAD).filter((name) => isRequired(TOOL_DOWNLOAD.fields[name]));
+
+/** The country codes, in the Reference site's order. */
+const COUNTRY_CODES = fieldOptions(TOOL_DOWNLOAD.fields.countryCode);
 
 const LOCKED = 'أكمل البيانات لتفعيل التحميل';
 
@@ -88,7 +91,7 @@ export function DownloadForm() {
           <div>
             <div className="tl-cc">
               <select {...countryCode.props} aria-label={words.countryCode.label}>
-                {TOOL_DOWNLOAD.fields.countryCode.options!.map((value) => (
+                {COUNTRY_CODES.map((value) => (
                   <option key={value} value={value}>
                     {words.countryCode.options![value]}
                   </option>

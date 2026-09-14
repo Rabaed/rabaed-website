@@ -38,25 +38,60 @@ function wordingField(name: string, label: Words, maxLength: number, description
   return maxLength > 200 ? { ...common, type: 'textarea' } : { ...common, type: 'text' };
 }
 
-/** One field's wording: what it is called, its placeholder, its message, and the text of each option. */
+/**
+ * One field's wording: what it is called and its message; for typed text its
+ * placeholder and the text of each option; for a document the note under its
+ * name and what it says when a file is refused. A consent's own sentence is
+ * what the applicant agrees to, not wording, and stays in the form.
+ */
 function fieldWording(definition: FormDefinition, name: string): Field {
   const field = definition.fields[name];
   const wording = definition.wording.fields[name];
+  const label = wordingField('label', { ar: 'اسم الحقل', en: 'Label' }, 40, {
+    ar: 'يسمعه من يستخدم قارئ الشاشة، ويظهر في «طلبات النماذج».',
+    en: 'Read out by screen readers, and shown in Form submissions.',
+  });
+
+  if (field.kind === 'consent') {
+    return {
+      name,
+      type: 'group',
+      label: wording.label,
+      fields: [
+        label,
+        wordingField('message', { ar: 'رسالة الخطأ', en: 'Error message' }, 80, {
+          ar: 'تظهر تحت المربع ما دام لم يُعلَّم.',
+          en: 'Shown under the box while it is not ticked.',
+        }),
+      ],
+    };
+  }
+
+  if (field.kind === 'document') {
+    return {
+      name,
+      type: 'group',
+      label: wording.label,
+      fields: [
+        { type: 'row', fields: [label, wordingField('placeholder', { ar: 'الملاحظة تحت اسم المستند', en: 'Note under the name' }, 40)] },
+        wordingField('message', { ar: 'حين لا يُرفق المستند', en: 'When the document is missing' }, 80),
+        {
+          type: 'row',
+          fields: [
+            wordingField('tooLarge', { ar: 'حين يتجاوز الملف 10 ميجابايت', en: 'When the file is over 10 MB' }, 80),
+            wordingField('wrongType', { ar: 'حين لا يكون الملف PDF أو صورة', en: 'When the file is not a PDF or an image' }, 80),
+          ],
+        },
+      ],
+    };
+  }
+
   return {
     name,
     type: 'group',
     label: wording.label,
     fields: [
-      {
-        type: 'row',
-        fields: [
-          wordingField('label', { ar: 'اسم الحقل', en: 'Label' }, 40, {
-            ar: 'يسمعه من يستخدم قارئ الشاشة، ويظهر في «طلبات النماذج».',
-            en: 'Read out by screen readers, and shown in Form submissions.',
-          }),
-          wordingField('placeholder', { ar: 'النص داخل الحقل', en: 'Placeholder' }, 40),
-        ],
-      },
+      { type: 'row', fields: [label, wordingField('placeholder', { ar: 'النص داخل الحقل', en: 'Placeholder' }, 40)] },
       wordingField('message', { ar: 'رسالة الخطأ', en: 'Error message' }, 80, {
         ar: 'تظهر تحت الحقل حين تكون إجابته غير مقبولة.',
         en: 'Shown under the field while its answer is not acceptable.',

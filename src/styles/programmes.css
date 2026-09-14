@@ -110,6 +110,15 @@
 .form .upl.has { border-style: solid; border-color: rgba(29, 158, 117, .45); background: rgba(29, 158, 117, .05) }
 .form .upl.has .ic { background: rgba(29, 158, 117, .14); color: var(--green) }
 .form .upl.has .nm { color: var(--green); font-weight: 600 }
+/* A document refused, as it is chosen or by the server (ticket 28): the red of
+   the forms' messages, where a chosen one is green. Its message sits under the
+   row. */
+.form .upl.bad { border-style: solid; border-color: rgba(192, 57, 43, .55) }
+/* The upload on its way, along the card's foot. Positioned out of the card's
+   flow, so the card is the size it always is. */
+.form .upl { position: relative }
+.form .upl .pg { position: absolute; inset-inline: 12px; bottom: 5px; height: 3px; border-radius: 2px; background: rgba(29, 158, 117, .16); overflow: hidden }
+.form .upl .pg i { display: block; height: 100%; background: var(--green); transition: width .2s }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the Reference site's file
    input is `hidden`, which takes it out of the tab order and leaves the
    `:focus-within` outline above unreachable. Here it is clipped to nothing but

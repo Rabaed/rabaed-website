@@ -7,6 +7,9 @@ import type { ReferralSignupContent } from '@/components/referral/signup';
 import type { ReferralTermsSummaryContent } from '@/components/referral/terms-summary';
 import type { ReferralWhatIsReferredContent } from '@/components/referral/what-is-referred';
 import { REFERRAL_PROGRAM_VALUES } from '@/content/referral-program';
+import type { FormPageWording } from '@/forms/definition';
+import { REFERRAL_SIGNUP, type ReferralSignupField } from '@/forms/referral-signup';
+import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -22,6 +25,8 @@ export type ReferralPageContent = {
   readonly questions: Section<QuestionsContent>;
   /** The hero's «سجّل واحصل على كودك» lands here. */
   readonly signup: LinkedSection<ReferralSignupContent>;
+  /** The words of the signup form: its settings in the CMS. */
+  readonly signupForm: FormPageWording<ReferralSignupField>;
 };
 
 const { payout, clientDiscount } = REFERRAL_PROGRAM_VALUES;
@@ -31,7 +36,7 @@ const { payout, clientDiscount } = REFERRAL_PROGRAM_VALUES;
  * quotes, the payout and the client discount, is inserted from the Referral
  * Program values rather than typed, so the page cannot disagree with itself.
  */
-const AR: BeforeQuestions<ReferralPageContent> = {
+const AR: BeforeQuestions<Omit<ReferralPageContent, 'signupForm'>> = {
   meta: {
     title: `ربائد · برنامج الإحالة — ${payout} ريال عن كل مشروع`,
     description: `أحِل مشروعاً واحداً واكسب ${payout} ريال صافية، ويحصل عميلك على خصم ${clientDiscount} على اشتراك مشروعه.`,
@@ -177,5 +182,9 @@ const AR: BeforeQuestions<ReferralPageContent> = {
 
 /** The referral page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getReferralPage(locale: Locale): Promise<ReferralPageContent> {
-  return withQuestions('referral', locale, inLocale('referral', { ar: AR }, locale));
+  const [page, signupForm] = await Promise.all([
+    withQuestions<Omit<ReferralPageContent, 'signupForm'>>('referral', locale, inLocale('referral', { ar: AR }, locale)),
+    formPageWording(REFERRAL_SIGNUP),
+  ]);
+  return { ...page, signupForm };
 }

@@ -61,6 +61,8 @@ function wordingFrom<Field extends string>(definition: FormDefinition<Field>, se
               Object.entries(fallback.options).map(([value, label]) => [value, text(group(own.options)[optionFieldName(value)], label)]),
             )
           : undefined,
+        tooLarge: fallback.tooLarge === undefined ? undefined : text(own.tooLarge, fallback.tooLarge),
+        wrongType: fallback.wrongType === undefined ? undefined : text(own.wrongType, fallback.wrongType),
       };
       return [name, wording];
     }),
