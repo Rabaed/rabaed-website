@@ -1,0 +1,38 @@
+/**
+ * What a case study (ticket 24) adds to the editorial pages (`editorial.css`):
+ * the client and sector in the hero, the figures, the story's three parts, the
+ * client's quote and the images from the project. Made of the same pieces —
+ * white cards on the pale ground, the accent rule of the opening answer.
+ */
+
+/* ── The hero ── */
+.case-facts { display: flex; flex-wrap: wrap; gap: 8px 30px; margin: 0 0 14px }
+.case-facts div { display: flex; align-items: baseline; gap: 10px }
+.case-facts dt { font-size: 13px; color: var(--dark-muted) }
+.case-facts dd { margin: 0; font-size: 16px; font-weight: 600; color: #fff }
+
+/* ── The index card ── */
+.entry-card .case-card-client { margin-bottom: 6px; color: var(--ink); font-size: 13.5px }
+
+/* ── The page ── */
+.case-figures, .case-part { margin: 0 0 38px }
+.case-figures h2, .case-part h2 { font-size: clamp(21px, 2.3vw, 27px); line-height: 1.45; margin: 0 0 14px; letter-spacing: -.01em }
+
+.case-figures ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none }
+.case-figures li { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; background: #fff; border: 1px solid var(--line); border-radius: 16px }
+.case-figures b { font-size: 28px; line-height: 1.35; font-weight: 700; color: var(--acc) }
+.case-figures span { font-size: 15px; line-height: 1.7; color: var(--ink) }
+.case-figures small { font-size: 12.5px; line-height: 1.7; color: var(--muted) }
+
+.case-quote { margin: 0 0 38px; padding: 22px 26px; background: #fff; border: 1px solid var(--line); border-inline-start: 3px solid var(--acc); border-radius: 16px }
+.case-quote blockquote { margin: 0 0 10px; font-size: 19px; line-height: 1.9; color: var(--ink) }
+.case-quote figcaption { font-size: 14px; color: var(--muted) }
+
+.case-images { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px }
+.case-images img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; background: var(--soft); border: 1px solid var(--line); border-radius: 14px }
+/* Any number of images lays out without a hole: an odd one out takes the whole row. */
+.case-images img:last-child:nth-child(odd) { grid-column: 1 / -1; aspect-ratio: 16 / 9 }
+
+@media (max-width: 640px) {
+  .case-images { grid-template-columns: 1fr }
+}

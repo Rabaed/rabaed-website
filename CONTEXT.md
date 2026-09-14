@@ -49,6 +49,10 @@ The programme for engineering offices (المكاتب الهندسية) and proj
 The two numbers the Referral Program promises: the **referral payout** to the referrer (SAR 2,000 per project) and the **client discount** to the referred client (10%). Held once and shown wherever the Marketing site quotes them; the Referral Terms state them in their own binding text.
 _Avoid_: commission, reward, affiliate fee.
 
+**Case study** (قصة عميل، والقسم: قصص العملاء):
+A real client's story, published with their agreement: the challenge, what changed, the outcome, and optionally figures and a quote. The section is hidden, link and all, until the first one is published.
+_Avoid_: success story, testimonial (a quote is one part of a case study, not the whole), دراسة حالة in the site's Arabic.
+
 **Pour Tracker** (متتبّع الصبّات):
 The free downloadable tool — a single self-contained HTML file for tracking concrete pours and break tests — offered as a lead magnet. Distinct from `tool.html`, the marketing page that describes and delivers it.
 

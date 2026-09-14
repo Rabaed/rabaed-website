@@ -12,7 +12,7 @@ import { draftMode } from 'next/headers';
 import { getPayload, type Where } from 'payload';
 import { cache } from 'react';
 import type { Locale } from '@/lib/locales';
-import type { Media, Post } from '@/payload-types';
+import type { Post } from '@/payload-types';
 
 /** Three rows of the index's three columns. */
 export const POSTS_PER_PAGE = 9;
@@ -81,9 +81,4 @@ export async function allPublishedPosts(locale?: Locale): Promise<Post[]> {
     pagination: false,
   });
   return docs;
-}
-
-/** An article's cover image, when it has one and it was fetched with the article. */
-export function coverImage(post: Post): Media | null {
-  return post.coverImage && typeof post.coverImage === 'object' ? post.coverImage : null;
 }

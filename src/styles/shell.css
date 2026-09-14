@@ -97,11 +97,13 @@
      short screen scrolls rather than hiding the end of the menu.
      It is still a fixed cap because max-height cannot transition to auto. The
      test in tests/e2e/page-shell.spec.ts fails the moment the content outgrows
-     it again, which is what happens the first time a link is added.
+     it again, which is what happens the first time a link is added. The case
+     studies link (ticket 24) did: with it the content is 454px, so the cap is
+     520px, and tests/e2e/case-studies.spec.ts checks the panel with it.
      The 74px is the header at its tallest; below 700px it is 66px, so the
      bound is 8px conservative there, erring towards the panel scrolling
      rather than towards it reaching up under the header. */
-  .nav.open .mnav { max-height: min(440px, calc(100dvh - 74px)); overflow-y: auto }
+  .nav.open .mnav { max-height: min(520px, calc(100dvh - 74px)); overflow-y: auto }
 
   /* DELIBERATE EXCEPTION — the mobile panel's wrap (spec: Design system).
      `.nav .wrap` is a 74px-tall flex row. The panel reuses `.wrap` for its
