@@ -7,6 +7,8 @@
 **Status:** ready-for-agent
 
 - [ ] Page text is stored localised: each page list is one list shared across locales, each item holding its text per locale (spec: Content model). Arabic and English exist; neither is ever filled in from the other
+- [ ] A page is published in a locale only once every item has that locale's text (spec: Content model). Publishing the Arabic never publishes an empty English page — ticket 23 found that Payload's per-field localisation shares one draft and publish state across languages, so this has to be designed for, not assumed
+- [ ] Every grid holding a list an Editor manages lays out any number of items neatly, without changing how today's counts look (spec: Design system)
 - [ ] Each marketing page is one CMS entry holding a fixed run of sections in a fixed order. An Editor cannot add, remove or reorder sections
 - [ ] A section an Editor may hide has a switch for it; a section something links to has none. On the start page that is the questions with the demo request form (`#faq`, where the home page's «كل الأسئلة» and the hero land)
 - [ ] Lists: an Editor adds, removes and reorders items. A list the design builds around an exact count can be locked at it (the page tickets use this)

@@ -26,4 +26,4 @@
 
 **The search title quotes the payout.** Ticket 26 makes search titles editable. Whichever of the two lands second keeps the payout inserted there rather than typed.
 
-**Parallel sessions.** Touches the referral page's module and components, the FAQ answer reader and a migration of its own, so it can run beside tickets 54, 55, 57 and 59 once ticket 53 is merged.
+**Parallel sessions.** Touches the referral page's module and components, the FAQ answer reader and a migration of its own, so it can run beside tickets 54, 55, 57 and 59 once ticket 53 is merged. Every one of tickets 53–59 adds a CMS migration, and two branches' migrations collide: after updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).

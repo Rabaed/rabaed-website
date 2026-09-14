@@ -27,7 +27,7 @@
 
 **Every Editor (ADR-0007).** No restriction was built; `src/cms/access.ts` no longer promises one.
 
-**Not in this ticket:** the warning when the Referral Terms do not state the Referral Program values (ADR-0008) is ticket 21's, which is blocked by this one.
+**Not in this ticket:** the warning when the Referral Terms do not state the Referral Program values (ADR-0008) is ticket 56's (split from ticket 21), which is blocked by this one.
 
 **Tests** (`tests/e2e/cms.spec.ts`, "legal documents"):
 

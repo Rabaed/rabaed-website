@@ -20,4 +20,4 @@
 
 **Split from ticket 21 (15 September 2026).** See ticket 53.
 
-**Parallel sessions.** Touches only the partnership page's module, components and a migration of its own, so it can run beside tickets 54, 56, 57 and 59 once ticket 53 is merged. Expect small conflicts in the migrations list and the generated CMS types when updating from `main`.
+**Parallel sessions.** Touches only the partnership page's module, components and a migration of its own, so it can run beside tickets 54, 56, 57 and 59 once ticket 53 is merged. Every one of tickets 53–59 adds a CMS migration, and two branches' migrations collide: after updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).

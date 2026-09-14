@@ -4,7 +4,7 @@
 
 **Blocked by:** 19, 25, 52, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16
 
-**Status:** wontfix — split into tickets 53–59, which are the work; see the last comment
+**Status:** wontfix — not built as one ticket: replaced by tickets 53–59, which carry all of its work (see the last comment)
 
 - [ ] Every page's copy is stored as localised content, not hardcoded in the markup: each page's content module (ticket 52) reads from the CMS
 - [ ] Images on every page are replaceable from the admin
