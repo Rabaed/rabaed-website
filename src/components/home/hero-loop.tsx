@@ -6,7 +6,7 @@ import {
   HERO_JOURNEY,
   HERO_STATIONS,
   HERO_START,
-  HERO_STATUS_AT_REST,
+  type HeroStatuses,
   type Station,
 } from '@/components/home/hero-stations';
 import { prefersReducedMotion } from '@/lib/motion';
@@ -25,7 +25,8 @@ const BETWEEN_ROUNDS = 0.35;
  * status pill says what just happened.
  *
  * Attached to markup the server already sent, so the diagram is complete
- * before this runs and stays complete if it never does. Renders nothing.
+ * before this runs and stays complete if it never does. Renders nothing. What
+ * the pill reads is handed down by `Hero`, since the words are the page's.
  *
  * **Reduced motion stops it before it starts.** The loop is the whole of this
  * component, and a hero that ran it slowly or once would still be a hero that
@@ -44,7 +45,15 @@ const BETWEEN_ROUNDS = 0.35;
  * and restores them verbatim afterwards. Without it, development's second run
  * starts from whatever the first left behind rather than from the markup.
  */
-export function HeroLoop() {
+export function HeroLoop({
+  statuses,
+  statusAtRest,
+}: {
+  /** What the pill reads at each step of the journey. */
+  statuses: HeroStatuses;
+  /** What it reads when the loop is not going to run. */
+  statusAtRest: string;
+}) {
   useEffect(() => {
     const art = document.getElementById('hero-art');
     const doc = document.getElementById('h-doc');
@@ -65,7 +74,7 @@ export function HeroLoop() {
     };
 
     if (prefersReducedMotion()) {
-      status.textContent = HERO_STATUS_AT_REST;
+      status.textContent = statusAtRest;
       return restore;
     }
 
@@ -76,11 +85,11 @@ export function HeroLoop() {
       const hold = () => timeline.to({}, { duration: HOLD });
 
       let from: Station = HERO_START;
-      timeline.set(status, { textContent: HERO_JOURNEY[0].status });
+      timeline.set(status, { textContent: statuses[0] });
       hold();
 
-      for (const step of HERO_JOURNEY.slice(1)) {
-        const to = HERO_STATIONS[step.at];
+      for (let step = 1; step < HERO_JOURNEY.length; step += 1) {
+        const to = HERO_STATIONS[HERO_JOURNEY[step]];
 
         // `fromTo` rather than `to`: every position is stated outright, so a
         // repeat cannot drift from wherever the last round happened to leave
@@ -114,7 +123,7 @@ export function HeroLoop() {
             { opacity: 0, scale: 1.35, duration: PULSE, ease: 'power2.out', immediateRender: false },
             '<',
           )
-          .set(status, { textContent: step.status }, '<');
+          .set(status, { textContent: statuses[step] }, '<');
 
         hold();
         from = to;
@@ -125,7 +134,7 @@ export function HeroLoop() {
       context.revert();
       restore();
     };
-  }, []);
+  }, [statuses, statusAtRest]);
 
   return null;
 }

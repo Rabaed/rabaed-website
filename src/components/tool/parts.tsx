@@ -1,9 +1,26 @@
-import type { ReactNode } from 'react';
+import { Inline, plainText, type InlineText } from '@/components/inline-text';
 
 /**
  * The pieces the tool page's sections are built from: a section's heading, a
- * card of the three-across row, and a list of ticked lines.
+ * card of the three-across row, a list of ticked lines, and the states a test
+ * can be in.
  */
+
+/** A card of the three-across row: its label, title and text. */
+export type TeaserCard = {
+  readonly label: string;
+  readonly title: string;
+  readonly text: string;
+};
+
+/** Where a test stands, which decides its colour (`tool.css`). */
+export type TestTone = 'idle' | 'warn' | 'bad' | 'info' | 'ok';
+
+/** A test's state as the tool shows it: a coloured dot and the words beside it. */
+export type TestState = {
+  readonly tone: TestTone;
+  readonly label: string;
+};
 
 /** A section's heading, with the line under it. */
 export function TeaserHead({ eyebrow, title, lead }: { eyebrow: string; title: string; lead?: string }) {
@@ -20,8 +37,8 @@ export function TeaserHead({ eyebrow, title, lead }: { eyebrow: string; title: s
   );
 }
 
-/** A card of the three-across row: its label, title and text. */
-export function Card({ label, title, text }: { label: string; title: string; text: string }) {
+/** A card of the three-across row. */
+export function Card({ label, title, text }: TeaserCard) {
   return (
     <div className="rt-c">
       <div className="k">{label}</div>
@@ -31,17 +48,28 @@ export function Card({ label, title, text }: { label: string; title: string; tex
   );
 }
 
-/** A list of ticked lines. */
-export function TickList({ children }: { children: ReactNode }) {
-  return <ul className="tl-tick">{children}</ul>;
+/** A list of ticked lines, each an optional bold opening, then the rest. */
+export function TickList({ lines }: { lines: readonly InlineText[] }) {
+  return (
+    <ul className="tl-tick">
+      {lines.map((line) => (
+        <li key={plainText(line)}>
+          <i>✓</i>
+          <span>
+            <Inline text={line} />
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
-/** A ticked line: an optional bold opening, then the rest. */
-export function Tick({ children }: { children: ReactNode }) {
+/** A test's state: the coloured dot, then its words. */
+export function TestStateBadge({ state, className }: { state: TestState; className: string }) {
   return (
-    <li>
-      <i>✓</i>
-      <span>{children}</span>
-    </li>
+    <span className={`${className} ${state.tone}`}>
+      <i />
+      {state.label}
+    </span>
   );
 }

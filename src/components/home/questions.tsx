@@ -1,29 +1,34 @@
-import { Faq } from '@/components/faq';
-import { HOME_FAQ } from '@/content/faq';
-import { localePath } from '@/lib/locales';
+import { Faq, type FaqEntry } from '@/components/faq';
+import type { PageLink } from '@/components/page-link';
+
+export type HomeQuestionsContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly entries: readonly FaqEntry[];
+  /** The link on to every question, on the start page. */
+  readonly more: PageLink;
+};
 
 /**
  * «قبل أن تسأل» — three questions a visitor asks before booking a demo, and a
  * link to the rest of them on the start page.
- *
- * All copy is verbatim from `reference/site/index.html`.
  */
-export function Questions() {
+export function Questions({ content }: { content: HomeQuestionsContent }) {
   return (
     <section id="fq" className="light pad">
       <div className="wrap">
         <div className="tz-head">
           <div>
-            <div className="eyebrow">الأسئلة الشائعة</div>
-            <h2>قبل أن تسأل</h2>
+            <div className="eyebrow">{content.eyebrow}</div>
+            <h2>{content.heading}</h2>
           </div>
         </div>
 
-        <Faq entries={HOME_FAQ} />
+        <Faq entries={content.entries} />
 
         <div className="tz-foot">
-          <a className="tz-more" href={`${localePath('ar', '/start')}#faq`}>
-            <span>كل الأسئلة</span>
+          <a className="tz-more" href={content.more.href}>
+            <span>{content.more.label}</span>
             <span className="ar">←</span>
           </a>
         </div>

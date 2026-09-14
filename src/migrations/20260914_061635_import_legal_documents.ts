@@ -1,5 +1,5 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/globals/site-settings';
+import { SKIP_REVALIDATION } from '../cms/revalidation';
 import { toLegalDocumentFields } from './legal-import/approved-text';
 import { PRIVACY_POLICY } from './legal-import/privacy';
 import { REFERRAL_TERMS } from './legal-import/referral-terms';

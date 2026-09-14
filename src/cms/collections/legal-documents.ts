@@ -7,7 +7,6 @@ import {
   UnorderedListFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical';
-import { revalidatePath } from 'next/cache';
 import {
   APIError,
   type CollectionAfterChangeHook,
@@ -16,8 +15,8 @@ import {
   type FieldHook,
 } from 'payload';
 import { signedIn } from '../access';
-import { SKIP_REVALIDATION } from '../globals/site-settings';
 import { LEGAL_PAGES, LEGAL_SLUGS, type LegalSlug } from '../legal-pages';
+import { refreshSite } from '../revalidation';
 
 /**
  * What the legal text can be made of: paragraphs, bulleted lists, bold
@@ -96,14 +95,11 @@ const refuseUnpublish: CollectionBeforeOperationHook = ({ args, operation, req }
 };
 
 /**
- * Pages are built ahead of time. Publishing marks the document's page stale,
- * and it is rebuilt from the published version on its next visit; a saved
- * draft leaves it alone.
+ * Publishing rebuilds the site (`refreshSite`), from the published version;
+ * a saved draft leaves it alone.
  */
 const refreshPageOnPublish: CollectionAfterChangeHook = ({ doc, req }) => {
-  if (doc._status === 'published' && !req.context[SKIP_REVALIDATION]) {
-    revalidatePath(LEGAL_PAGES[doc.slug as LegalSlug].path);
-  }
+  if (doc._status === 'published') refreshSite(req);
   return doc;
 };
 

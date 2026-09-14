@@ -16,6 +16,7 @@ import { buildConfig } from 'payload';
 import sharp from 'sharp';
 import { LegalDocuments } from './cms/collections/legal-documents';
 import { Media } from './cms/collections/media';
+import { Posts } from './cms/collections/posts';
 import { Users } from './cms/collections/users';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { SiteSettings } from './cms/globals/site-settings';
@@ -61,7 +62,7 @@ export default buildConfig({
     fallbackLanguage: 'ar',
   },
 
-  collections: [Users, Media, LegalDocuments],
+  collections: [Users, Media, Posts, LegalDocuments],
   globals: [SiteSettings],
 
   db: postgresAdapter({

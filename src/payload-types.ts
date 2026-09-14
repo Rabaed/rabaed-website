@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    posts: Post;
     'legal-documents': LegalDocument;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -193,6 +195,51 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * The first paragraph under the title: a standalone answer of 30 to 60 words to the question the article is about. It is what search engines and AI assistants quote.
+   */
+  answer: string;
+  coverImage: number | Media;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * A line or two shown under the title on the blog index, and as the article’s description in search results.
+   */
+  summary: string;
+  /**
+   * The end of the article’s address: rabaedapp.com/blog/… — a translation uses the same slug.
+   */
+  slug: string;
+  locale: 'ar' | 'en';
+  /**
+   * The person who wrote the article, not the company.
+   */
+  author: string;
+  publishedAt: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * The Arabic text is binding. Every save is kept as a version with its date and who saved it, and reaches the site only when published.
@@ -319,6 +366,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
         relationTo: 'legal-documents';
         value: number | LegalDocument;
       } | null);
@@ -438,6 +489,24 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  answer?: T;
+  coverImage?: T;
+  body?: T;
+  summary?: T;
+  slug?: T;
+  locale?: T;
+  author?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

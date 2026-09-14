@@ -22,45 +22,7 @@
  * Verbatim from `reference/site/index.html`. Ticket 21 moves page copy into the
  * CMS.
  */
-
-/** The drawing in the corner of each card. */
-export type ProofIcon = 'approval' | 'retrieval' | 'time' | 'governance' | 'activation' | 'onboarding';
-
-/** One bar of a before-and-after, drawn to scale out of 70px. */
-type Bar = { readonly label: string; readonly height: number };
-
-/** Everything a figure's card shows around the figure itself. */
-type FigureFrame = {
-  /** The pill at the top of the card. */
-  readonly topic: string;
-  readonly icon: ProofIcon;
-  /** What changes, in a sentence. */
-  readonly claim: string;
-  /** What the figure is measured against, in the card's footer. */
-  readonly basis: string;
-};
-
-export type ProofFigure = FigureFrame &
-  (
-    | {
-        readonly kind: 'comparison';
-        readonly value: string;
-        readonly before: Bar;
-        readonly after: Bar;
-        /**
-         * Where the figure comes from: which project, measured how, by whom,
-         * over what period. `null` until someone can say — and while it is
-         * `null` the card stays off every public deployment (ticket 47).
-         */
-        readonly source: string | null;
-      }
-    | { readonly kind: 'commitment'; readonly value: string }
-  );
-
-/** Whether a card may be shown to the public: a commitment always, a figure only once it is sourced. */
-export function isAttributed(figure: ProofFigure): boolean {
-  return figure.kind === 'commitment' || figure.source !== null;
-}
+import type { ProofFigure } from '@/components/home/figures';
 
 export const PROOF_FIGURES: readonly ProofFigure[] = [
   {

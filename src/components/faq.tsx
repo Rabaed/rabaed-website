@@ -1,4 +1,10 @@
-import type { FaqEntry } from '@/content/faq';
+import { Inline, type InlineText } from '@/components/inline-text';
+
+export type FaqEntry = {
+  readonly question: string;
+  /** Plain text, or text with Latin names inside it. */
+  readonly answer: InlineText;
+};
 
 /**
  * Questions, each opening to its answer.
@@ -19,17 +25,7 @@ export function FaqEntries({ entries }: { entries: readonly FaqEntry[] }) {
     <details key={entry.question} className="qa">
       <summary>{entry.question}</summary>
       <p>
-        {typeof entry.answer === 'string'
-          ? entry.answer
-          : entry.answer.map((part, index) =>
-              typeof part === 'string' ? (
-                part
-              ) : (
-                <span key={index} className="mono" dir="ltr">
-                  {part.latin}
-                </span>
-              ),
-            )}
+        <Inline text={entry.answer} />
       </p>
     </details>
   ));

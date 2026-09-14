@@ -16,26 +16,13 @@
  *
  * `width` and `height` on the file are the intrinsic pixel sizes, so the
  * browser reserves the right box before the image arrives.
+ *
+ * One strip for every page that carries it — home, product and start — as the
+ * spec's Trust strip global is one list.
  */
+import type { TrustStripContent, TrustStripLogo } from '@/components/home/trust-strip';
 
-export type TrustStripLogo = {
-  /** Stable key, also the image's basename under `public/logos/`. */
-  readonly key: string;
-  /** The company's name, which is the image's `alt` and its text fallback. */
-  readonly name: string;
-  /** Drawn height in CSS pixels. */
-  readonly height: number;
-  /** Intrinsic size of the file, for the aspect ratio. */
-  readonly intrinsic: { readonly width: number; readonly height: number };
-};
-
-/** The line printed beside the marks, which a visitor reads. */
-export const TRUST_STRIP_CAPTION = 'أطراف نشطة حالياً تستخدم ربائد';
-
-/** The section's own name, which only a screen reader announces. */
-export const TRUST_STRIP_SECTION_NAME = 'جهات تعمل على ربائد';
-
-export const TRUST_STRIP_LOGOS: readonly TrustStripLogo[] = [
+const LOGOS: readonly TrustStripLogo[] = [
   { key: 'nawah', name: 'نواة للاستثمار العقاري', height: 32, intrinsic: { width: 339, height: 112 } },
   { key: 'staterra', name: 'Staterra', height: 26, intrinsic: { width: 499, height: 112 } },
   { key: 'alsharq', name: 'شركة الشرق للاستشارات الهندسية', height: 42, intrinsic: { width: 209, height: 112 } },
@@ -45,3 +32,11 @@ export const TRUST_STRIP_LOGOS: readonly TrustStripLogo[] = [
   { key: 'smart-directions', name: 'Smart Directions', height: 32, intrinsic: { width: 305, height: 112 } },
   { key: 'sika', name: 'Sika', height: 42, intrinsic: { width: 94, height: 112 } },
 ];
+
+export const TRUST_STRIP: { readonly ar: TrustStripContent } = {
+  ar: {
+    caption: 'أطراف نشطة حالياً تستخدم ربائد',
+    sectionName: 'جهات تعمل على ربائد',
+    logos: LOGOS,
+  },
+};

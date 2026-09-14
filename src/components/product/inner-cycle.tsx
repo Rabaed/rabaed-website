@@ -1,24 +1,61 @@
 import { Fragment } from 'react';
-import { INNER_EYEBROW, INNER_HEADING, INNER_LEAD, REVIEW_CYCLES } from '@/content/inner-cycle';
+import { Inline, type InlineText } from '@/components/inline-text';
+
+/** One party's review, inside its own walls. */
+export type ReviewCycle = {
+  readonly party: string;
+  /** What the party does before anything leaves it. */
+  readonly note: string;
+  /** Who reviews inside the party, in order; the last one decides. */
+  readonly reviewers: readonly string[];
+  /** What crosses to the other parties, officially. */
+  readonly crosses: string;
+};
+
+/** One of the two lines under the parties: a name, then what it covers. */
+export type InnerCycleNote = {
+  readonly label: string;
+  readonly text: InlineText;
+};
+
+export type ProductInnerCycleContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly lead: string;
+  /**
+   * The three parties, no more and no fewer (spec: Content model), in the order
+   * the Record travels: from the Contractor, through the Consultant, to the Owner.
+   */
+  readonly cycles: readonly [ReviewCycle, ReviewCycle, ReviewCycle];
+  /** The tag over each party's reviewers. */
+  readonly privateTag: string;
+  /** The line beside the dashed loop under the reviewers. */
+  readonly reviewAgain: string;
+  /** The label over what crosses. */
+  readonly crossesLabel: string;
+  /** What stays inside a party. */
+  readonly staysInside: InnerCycleNote;
+  /** What crosses to the others. */
+  readonly crossesOut: InnerCycleNote;
+};
 
 /**
  * «ماذا يبقى عندك، وماذا يعبر إلى الطرف الآخر؟» — the three parties side by
  * side, each with the review cycle it runs inside its own walls, and what
  * crosses to the next party once that cycle is done.
  *
- * A server component with no behaviour. All copy is verbatim from
- * `reference/site/product.html`.
+ * A server component with no behaviour.
  */
-export function InnerCycle() {
+export function InnerCycle({ content }: { content: ProductInnerCycleContent }) {
   return (
     <section id="inner" className="light pad">
       <div className="wrap">
-        <div className="eyebrow">{INNER_EYEBROW}</div>
-        <h2>{INNER_HEADING}</h2>
-        <p className="lead">{INNER_LEAD}</p>
+        <div className="eyebrow">{content.eyebrow}</div>
+        <h2>{content.heading}</h2>
+        <p className="lead">{content.lead}</p>
 
         <div className="orgs wired">
-          {REVIEW_CYCLES.map((cycle, index) => (
+          {content.cycles.map((cycle, index) => (
             <Fragment key={cycle.party}>
               {/* The way the Record travels, from one party to the next. The
                   order of the cards already says it to a screen reader. */}
@@ -34,7 +71,7 @@ export function InnerCycle() {
                 </div>
                 <div className="role-note">{cycle.note}</div>
                 <div className="priv">
-                  <span className="priv-tag">دورة داخلية · محجوبة</span>
+                  <span className="priv-tag">{content.privateTag}</span>
                   <ol className="steps-v">
                     {cycle.reviewers.map((reviewer, step) => (
                       <li key={reviewer}>
@@ -45,11 +82,11 @@ export function InnerCycle() {
                   </ol>
                   <div className="reloop">
                     <ReviewAgain />
-                    <span>إعادة ومراجعة داخلية — بلا حد، وبلا أثر خارج الجهة</span>
+                    <span>{content.reviewAgain}</span>
                   </div>
                 </div>
                 <div className="out">
-                  <b>ما يعبر رسمياً</b>
+                  <b>{content.crossesLabel}</b>
                   {cycle.crosses}
                 </div>
               </div>
@@ -58,18 +95,20 @@ export function InnerCycle() {
         </div>
 
         <div className="inner-note">
-          <div>
-            <span className="k">ما يبقى داخل جهتك</span>
-            المسودات، الملاحظات الداخلية، الاعتراضات، وعدد دورات المراجعة.{' '}
-            <b>تعمل بحرية داخل حدودك — ولا يُحسب عليك ما لم تُرسله.</b>
-          </div>
-          <div>
-            <span className="k">ما يعبر إلى الآخرين</span>
-            المعاملة الرسمية فقط، بلحظة إرسالها واسم من أرسلها. <b>ومن تلك اللحظة تصبح جزءاً من السجل الموثّق.</b>
-          </div>
+          <Note note={content.staysInside} />
+          <Note note={content.crossesOut} />
         </div>
       </div>
     </section>
+  );
+}
+
+function Note({ note }: { note: InnerCycleNote }) {
+  return (
+    <div>
+      <span className="k">{note.label}</span>
+      <Inline text={note.text} />
+    </div>
   );
 }
 

@@ -1,7 +1,34 @@
 import { Fragment } from 'react';
 import { JourneyBehaviour } from '@/components/product/journey-behaviour';
-import { ScreenMockPicture } from '@/components/product/screen-mock-picture';
-import { JOURNEY_EYEBROW, JOURNEY_HEADING, JOURNEY_PANELS, type JourneyPanel } from '@/content/journey';
+import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/product/screen-mock-picture';
+
+/** One piece of the row of pills at the foot of a panel. */
+export type FlowStep =
+  /** A party, drawn as a pill. */
+  | { readonly party: string }
+  /** Drawn between two parties as the direction something travels: «←» right to left. */
+  | { readonly towards: string }
+  /** What separates one route from the next. */
+  | { readonly then: string };
+
+export type JourneyPanel = {
+  /** A unit, numbered by its place in the journey; or what the units produce, named. */
+  readonly tag: { readonly kind: 'unit' } | { readonly kind: 'output'; readonly name: string };
+  readonly title: string;
+  /** The one-line promise under the title. */
+  readonly tagline: string;
+  readonly body: string;
+  /** Who the unit passes things between, as the row of pills at the foot of the panel. Empty for a panel with no row. */
+  readonly flow: readonly FlowStep[];
+  /** The Screen mock the panel shows. */
+  readonly screen: ScreenMockPictureContent;
+};
+
+export type ProductJourneyContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly panels: readonly JourneyPanel[];
+};
 
 /**
  * «أربع وحدات. سجل واحد يجمعها.» — five panels, the four units and the Record
@@ -21,7 +48,7 @@ import { JOURNEY_EYEBROW, JOURNEY_HEADING, JOURNEY_PANELS, type JourneyPanel } f
  * a stylesheet cannot tell whether a script runs, which is why these few rules
  * are here rather than in `product.css`.
  */
-export function Journey() {
+export function Journey({ content }: { content: ProductJourneyContent }) {
   return (
     // A plain wrapper, and it is load-bearing. Pinning moves the section into
     // a spacer element GSAP inserts around it, and React removes a page's
@@ -34,25 +61,25 @@ export function Journey() {
         <div className="j-head">
           <div className="wrap">
             <div>
-              <div className="eyebrow">{JOURNEY_EYEBROW}</div>
-              <h2>{JOURNEY_HEADING}</h2>
+              <div className="eyebrow">{content.eyebrow}</div>
+              <h2>{content.heading}</h2>
             </div>
             {/* How far along the journey is. The same thing is said by which
                 panel is in view, so a screen reader is not told it twice. */}
             <div className="dots" aria-hidden="true">
-              {JOURNEY_PANELS.map((panel, index) => (
-                <i key={panel.mock} className={index === 0 ? 'on' : undefined} />
+              {content.panels.map((panel, index) => (
+                <i key={panel.screen.mock} className={index === 0 ? 'on' : undefined} />
               ))}
             </div>
           </div>
         </div>
 
         <div className="track">
-          {JOURNEY_PANELS.map((panel, index) => (
-            <div key={panel.mock} className={panel.tag.kind === 'output' ? 'panel final' : 'panel'}>
+          {content.panels.map((panel, index) => (
+            <div key={panel.screen.mock} className={panel.tag.kind === 'output' ? 'panel final' : 'panel'}>
               <div>
                 {panel.tag.kind === 'unit' ? (
-                  <div className="num">{`${twoDigits(index + 1)} / ${twoDigits(JOURNEY_PANELS.length)}`}</div>
+                  <div className="num">{`${twoDigits(index + 1)} / ${twoDigits(content.panels.length)}`}</div>
                 ) : (
                   <div className="num out">{panel.tag.name}</div>
                 )}
@@ -65,7 +92,10 @@ export function Journey() {
                 {/* Below 700px the screen is shown at 1040px and panned across;
                     stacked, a panel is never wider than 920px; beside the copy,
                     the screen's column is never wider than 720px. */}
-                <ScreenMockPicture mock={panel.mock} sizes="(max-width: 700px) 1040px, (max-width: 980px) 920px, 720px" />
+                <ScreenMockPicture
+                  content={panel.screen}
+                  sizes="(max-width: 700px) 1040px, (max-width: 980px) 920px, 720px"
+                />
               </div>
             </div>
           ))}
@@ -79,17 +109,17 @@ export function Journey() {
   );
 }
 
-/** The row of parties at the foot of a panel — see `JourneyPanel.flow` for the two marks. */
-function Flow({ steps }: { steps: JourneyPanel['flow'] }) {
+/** The row of parties at the foot of a panel. The direction mark is bare text between the pills, as the Reference site draws it. */
+function Flow({ steps }: { steps: readonly FlowStep[] }) {
   return (
     <div className="flow">
       {steps.map((step, index) =>
-        step === '←' ? (
-          <Fragment key={index}>←</Fragment>
-        ) : step === '·' ? (
-          <span key={index}>·</span>
+        'towards' in step ? (
+          <Fragment key={index}>{step.towards}</Fragment>
+        ) : 'then' in step ? (
+          <span key={index}>{step.then}</span>
         ) : (
-          <b key={index}>{step}</b>
+          <b key={index}>{step.party}</b>
         ),
       )}
     </div>

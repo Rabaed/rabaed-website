@@ -1,5 +1,19 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
-import { localePath } from '@/lib/locales';
+import type { PageLink } from '@/components/page-link';
+
+export type ClosingStep = {
+  /** «01 · إعداد». */
+  readonly label: string;
+  readonly text: string;
+};
+
+export type ClosingSectionContent = {
+  readonly eyebrow: string;
+  readonly heading: string;
+  readonly steps: readonly ClosingStep[];
+  /** The link on to the start page's fuller steps and questions. */
+  readonly more: PageLink;
+};
 
 /**
  * «كيف نبدأ معك» — the block the home and product pages end on: the three
@@ -10,37 +24,25 @@ import { localePath } from '@/lib/locales';
  * the block here so the product page can end on the same one. The start page
  * has no such block — its form stands beside its questions instead.
  *
- * All copy is verbatim from `reference/site/index.html`.
+ * The form's own wording is ticket 27's to move, and stays in the form.
  */
-export function ClosingSection() {
+export function ClosingSection({ content }: { content: ClosingSectionContent }) {
   return (
     <section id="tail" className="light pad">
       <div className="wrap tail-grid">
         <div>
-          <div className="eyebrow">كيف نبدأ معك</div>
-          <h2 style={{ fontSize: '29px', lineHeight: 1.4 }}>
-            فريقنا في موقعك. الأطراف الثلاثة على المنصة خلال أيام.
-          </h2>
+          <div className="eyebrow">{content.eyebrow}</div>
+          <h2 style={{ fontSize: '29px', lineHeight: 1.4 }}>{content.heading}</h2>
           <ul className="tail-steps">
-            <li>
-              <b>01 · إعداد</b>
-              <span>
-                نُعدّ المشروع والنماذج، وندعو المالك والاستشاري والمقاول — و15 دقيقة مع كل فريق.
-              </span>
-            </li>
-            <li>
-              <b>02 · تشغيل</b>
-              <span>أقل من يوم، دون توقف للعمل. يبدأ الجميع من حيث وصل المشروع.</span>
-            </li>
-            <li>
-              <b>03 · ضمان</b>
-              <span>
-                60 يوماً من التفعيل — أو نعيد كامل المبلغ، ونسلّمكم نسخة كاملة من السجل.
-              </span>
-            </li>
+            {content.steps.map((step) => (
+              <li key={step.label}>
+                <b>{step.label}</b>
+                <span>{step.text}</span>
+              </li>
+            ))}
           </ul>
-          <a className="tail-more" href={localePath('ar', '/start')}>
-            التفاصيل والأسئلة الشائعة ←
+          <a className="tail-more" href={content.more.href}>
+            {content.more.label}
           </a>
         </div>
 

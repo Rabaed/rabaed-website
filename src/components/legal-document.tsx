@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import { Fragment, type ReactNode } from 'react';
 import { clauseId, LEGAL_PAGES } from '@/cms/legal-pages';
+import { ArabicDate } from '@/components/arabic-date';
 import { PageShell } from '@/components/page-shell';
+import { riyadhDay } from '@/lib/dates';
 import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 import type { LegalDocument } from '@/payload-types';
-
-/** The Gregorian months, as the approved documents write them. */
-const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
 /** A legal document's title and description, and its one address: it exists in Arabic alone. */
 export function legalMetadata(document: LegalDocument): Metadata {
@@ -37,7 +36,6 @@ export function legalMetadata(document: LegalDocument): Metadata {
  * (spec: Out of Scope) — so there is no locale to pass.
  */
 export function LegalDocumentPage({ document }: { document: LegalDocument }) {
-  const updated = riyadhDate(document.updatedAt);
   return (
     <PageShell locale="ar" path={LEGAL_PAGES[document.slug].path}>
       <section className="phero dark">
@@ -55,8 +53,7 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
               `.mono`: DM Mono has no Arabic glyphs (spec: Design system). The
               Reference site sets the whole line in it. */}
           <span className="updated">
-            آخر تحديث: <span className="mono">{updated.day}</span> {MONTHS[updated.month - 1]}{' '}
-            <span className="mono">{updated.year}</span>
+            آخر تحديث: <ArabicDate date={riyadhDay(document.updatedAt)} />
           </span>
 
           <div className="intro">
@@ -97,18 +94,6 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
       </section>
     </PageShell>
   );
-}
-
-/** The day, month and year a moment falls on in Riyadh, where the company is. */
-function riyadhDate(moment: string) {
-  const parts = new Intl.DateTimeFormat('en-u-ca-gregory-nu-latn', {
-    timeZone: 'Asia/Riyadh',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-  }).formatToParts(new Date(moment));
-  const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((each) => each.type === type)!.value);
-  return { year: part('year'), month: part('month'), day: part('day') };
 }
 
 /**

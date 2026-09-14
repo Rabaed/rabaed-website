@@ -98,6 +98,22 @@ export const ROUTES = [
     alternates: { ar: '/partnership', en: '/en/partnership' },
   },
   {
+    path: '/blog',
+    locale: 'ar',
+    dir: 'rtl',
+    // The hero. The articles themselves are CMS content that the test database
+    // starts without; `blog.spec.ts` publishes some and finds them here.
+    text: ['مدونة ربائد'],
+    alternates: { ar: '/blog', en: '/en/blog' },
+  },
+  {
+    path: '/en/blog',
+    locale: 'en',
+    dir: 'ltr',
+    text: ['The Rabaed blog'],
+    alternates: { ar: '/blog', en: '/en/blog' },
+  },
+  {
     path: '/terms',
     locale: 'ar',
     dir: 'rtl',

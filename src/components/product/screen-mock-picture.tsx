@@ -1,6 +1,12 @@
 import Image from 'next/image';
-import { SCREEN_MOCK_DESCRIPTIONS, type DescribedScreenMock } from '@/content/screen-mock-descriptions';
-import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
+import { findScreenMock, screenMockImagePath, type ScreenMock } from '@/screen-mocks/registry';
+
+export type ScreenMockPictureContent = {
+  /** Which Screen mock, by its id in `src/screen-mocks/registry.ts`. */
+  readonly mock: ScreenMock['id'];
+  /** What it shows, in words: the picture's `alt` and the caption under it (ADR-0002). */
+  readonly description: string;
+};
 
 /**
  * A Screen mock on the product page: ticket 05's exported picture in the
@@ -21,10 +27,9 @@ import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
  * fill in while the visitor watched. Low priority keeps them behind everything
  * the first screen needs.
  */
-export function ScreenMockPicture({ mock, sizes }: { mock: DescribedScreenMock; sizes: string }) {
-  const entry = findScreenMock(mock);
-  if (!entry) throw new Error(`No Screen mock called "${mock}" in src/screen-mocks/registry.ts`);
-  const description = SCREEN_MOCK_DESCRIPTIONS[mock];
+export function ScreenMockPicture({ content, sizes }: { content: ScreenMockPictureContent; sizes: string }) {
+  const entry = findScreenMock(content.mock);
+  if (!entry) throw new Error(`No Screen mock called "${content.mock}" in src/screen-mocks/registry.ts`);
 
   return (
     <>
@@ -33,7 +38,7 @@ export function ScreenMockPicture({ mock, sizes }: { mock: DescribedScreenMock; 
           <Image
             className="vs-shot"
             src={screenMockImagePath('ar', entry.id)}
-            alt={description}
+            alt={content.description}
             width={entry.width}
             height={entry.height}
             sizes={sizes}
@@ -43,7 +48,7 @@ export function ScreenMockPicture({ mock, sizes }: { mock: DescribedScreenMock; 
         </div>
       </div>
       <p className="shot-cap" aria-hidden="true">
-        {description}
+        {content.description}
       </p>
     </>
   );
