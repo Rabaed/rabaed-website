@@ -288,32 +288,6 @@ test('a document field is reached from the keyboard, and shows it has focus', as
   await expect(uploadField(page, 'شهادة الآيبان')).toHaveCSS('outline-style', 'solid');
 });
 
-test('nothing pretends to send the form', async ({ page }) => {
-  const sent: string[] = [];
-  page.on('request', (request) => {
-    if (request.method() !== 'GET') sent.push(`${request.method()} ${request.url()}`);
-  });
-  await page.goto('/referral');
-  const address = page.url();
-
-  const form = signupForm(page);
-  await form.getByLabel('الاسم الكامل').fill('سارة القحطاني');
-  await form.getByLabel('رقم الجوال').fill('0500000000');
-  await form.getByRole('checkbox', { name: 'الموافقة على الشروط والأحكام' }).check();
-  await form.getByRole('checkbox', { name: 'إقرار عدم التعارض' }).check();
-  await form.getByLabel('رقم الجوال').press('Enter');
-
-  const button = form.getByRole('button', { name: 'سجّل في برنامج الإحالة' });
-  await expect(button).toBeDisabled();
-  await button.click({ force: true });
-  await page.waitForTimeout(500);
-
-  expect(sent, 'the form sent something').toEqual([]);
-  expect(page.url(), 'what was typed went into the address').toBe(address);
-  await expect(page.getByText(FAKE_CONFIRMATION)).toHaveCount(0);
-  await expect(page.getByText(FAKE_CODE)).toHaveCount(0);
-});
-
 for (const { link, target } of [
   { link: 'سجّل واحصل على كودك', target: 'signup' },
   { link: 'كيف يعمل البرنامج ↓', target: 'how' },

@@ -3,9 +3,9 @@
  * with the demo request form beside them, and the free tool teaser.
  *
  * What a visitor meets: every answer there to be opened, with or without
- * JavaScript; a form whose every field is named and which claims nothing it
- * has not done; the hero's two links landing clear of the header; and a page
- * that does not make them download the home and product pages' animations.
+ * JavaScript; a form whose every field is named; the hero's two links landing
+ * clear of the header; and a page that does not make them download the home and
+ * product pages' animations. Sending the form is `form-submission.spec.ts`'s.
  *
  * Whether it *looks* like the Reference site is asked in
  * `start-matches-reference.spec.ts`. Console errors and failed requests are
@@ -58,7 +58,7 @@ const QUESTIONS = [
   },
 ] as const;
 
-/** The Reference site's fake confirmation. It must not exist anywhere. */
+/** The Reference site's confirmation, shown without sending. Nothing on the page says it before a request is stored. */
 const FAKE_CONFIRMATION = 'وصلنا طلبك';
 
 const questions = (page: Page) => page.locator('#faq .faq-grid > div:first-child');
@@ -127,28 +127,6 @@ test('the demo request form is a real form, with every field named', async ({ pa
     [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select')].map((field) => field.name),
   );
   expect(names).toEqual(['name', 'email', 'role', 'phone', 'company', 'activeProjects']);
-});
-
-test('nothing pretends to send the form', async ({ page }) => {
-  const sent: string[] = [];
-  page.on('request', (request) => {
-    if (request.method() !== 'GET') sent.push(`${request.method()} ${request.url()}`);
-  });
-  await page.goto('/start');
-  const address = page.url();
-
-  const form = demoForm(page);
-  await form.getByLabel('الاسم الكامل').fill('سارة القحطاني');
-  await form.getByLabel('رقم الجوال').fill('0500000000');
-  await form.getByLabel('رقم الجوال').press('Enter');
-  const button = form.getByRole('button', { name: 'احجز عرضاً حياً' });
-  await expect(button).toBeDisabled();
-  await button.click({ force: true });
-  await page.waitForTimeout(500);
-
-  expect(sent, 'the form sent something').toEqual([]);
-  expect(page.url(), 'what was typed went into the address').toBe(address);
-  await expect(page.getByText(FAKE_CONFIRMATION)).toHaveCount(0);
 });
 
 for (const { link, target } of [

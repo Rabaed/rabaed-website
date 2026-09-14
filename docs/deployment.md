@@ -164,9 +164,49 @@ import map and `src/payload-types.ts`. Payload writes the migration's type
 imports as value imports, which this project's compiler settings refuse; mark
 them `type` by hand.
 
+### Forms
+
+Every request sent from a form on the site is kept under **Forms → Form
+submissions**, newest first, whether or not any email went out about it. Each
+record shows what became of its two emails: the alert to the team and the
+confirmation to the applicant.
+
+Each form that sends has its own settings under **Forms**: its heading, button
+and small print, every field's label, placeholder and error message, what the
+visitor is told after sending, the confirmation email, and the **alert
+address**. They follow the same Save Draft, Preview and Publish as the site
+settings. Which fields a form has is fixed: each field is stored and covered by
+the Privacy Policy, so adding one is a developer's change.
+
+- **While a form's alert address is empty, it sends no email at all** — no
+  alert, and no confirmation to the applicant. Requests are still stored. Set
+  the address once the team is ready to answer them.
+- A request with the hidden trap field filled in, or a sixth request from the
+  same network address within an hour, is turned away and not stored.
+
+### Email
+
+The forms send from the company's Microsoft 365 no-reply mailbox, over SMTP
+(`smtp.office365.com`, port 587, TLS).
+
+1. In the Microsoft 365 admin centre, open the no-reply mailbox's account →
+   **Mail → Manage email apps**, and tick **Authenticated SMTP**.
+2. In Vercel, add `MAIL_USER` (the mailbox's address) and `MAIL_PASSWORD` for
+   each environment that should send email. Leave them out of Preview if trying
+   out a pull request should never email anyone.
+3. Set each form's alert address in the admin.
+
+Without the two variables the site works the same and sends no email; each
+submission records its emails as not sent.
+
+> Microsoft has been retiring password sign-in ("basic authentication") for
+> SMTP in Microsoft 365. If the tenant refuses it, the mailbox's emails will
+> show as failed on every submission; the mail adapter (`src/forms/mail.ts`)
+> is the one place to change to a sign-in Microsoft accepts.
+
 ### Not there yet
 
-- **Email.** No mail account is connected (the Microsoft 365 credentials are
-  still awaited), so "forgot password" in the admin sends nothing, and the
-  reset cannot be finished another way. Until then an editor who forgets their
-  password is given a new one by another editor, under **Editors**.
+- **Admin password reset.** The admin's "forgot password" does not use the
+  forms' mailbox, so it sends nothing, and the reset cannot be finished another
+  way. Until then an editor who forgets their password is given a new one by
+  another editor, under **Editors**.

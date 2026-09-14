@@ -1,6 +1,8 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
 import { FaqEntries, type FaqEntry } from '@/components/faq';
 import type { PageLink } from '@/components/page-link';
+import type { FormPageWording } from '@/forms/definition';
+import type { DemoRequestField } from '@/forms/demo-request';
 
 export type StartFreeToolTeaserContent = {
   readonly eyebrow: string;
@@ -22,9 +24,9 @@ export type StartQuestionsContent = {
  *
  * This is where the home page's «كل الأسئلة» link lands (`#faq`), and the
  * hero's «الأسئلة الشائعة ↓». The form is the one form the home and product
- * pages carry too, so ticket 27 wires all three at once.
+ * pages carry too, with its words from the CMS (ticket 27).
  */
-export function Questions({ content }: { content: StartQuestionsContent }) {
+export function Questions({ content, form }: { content: StartQuestionsContent; form: FormPageWording<DemoRequestField> }) {
   return (
     <section id="faq" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
@@ -37,7 +39,7 @@ export function Questions({ content }: { content: StartQuestionsContent }) {
             </div>
           </div>
 
-          <DemoRequestForm />
+          <DemoRequestForm wording={form} />
         </div>
 
         <FreeToolTeaser content={content.freeTool} />

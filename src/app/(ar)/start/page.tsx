@@ -33,7 +33,7 @@ export default async function StartPage() {
       <PageHero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {content.steps.shows && <Steps content={content.steps} />}
-      <Questions content={content.questions} />
+      <Questions content={content.questions} form={content.demoForm} />
     </PageShell>
   );
 }

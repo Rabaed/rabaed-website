@@ -3,8 +3,9 @@
  * with the demo request form — and bug 44, the closing section's empty column.
  *
  * What a visitor meets: an answer that opens, a form whose every field is named,
- * a button that takes them to that form without the header covering it, and —
- * above all — nothing that claims their request was sent when it was not.
+ * and a button that takes them to that form without the header covering it.
+ * Sending the form is `form-submission.spec.ts`'s, which covers it here and in
+ * its other two places.
  *
  * Whether it *looks* like the Reference site is asked in
  * `home-faq-and-closing-match-reference.spec.ts`.
@@ -28,7 +29,7 @@ const QUESTIONS = [
   },
 ] as const;
 
-/** The Reference site's fake confirmation. It must not exist anywhere. */
+/** The Reference site's confirmation, shown without sending. Nothing on the page says it before a request is stored. */
 const FAKE_CONFIRMATION = 'وصلنا طلبك';
 
 const questions = (page: Page) => page.locator('#fq');
@@ -103,34 +104,6 @@ test('the demo request form is a real form, with every field named', async ({ pa
     [...select.options].map((option) => option.value),
   );
   expect(roles).toEqual(['', 'owner', 'consultant', 'contractor']);
-});
-
-test('nothing pretends to send the form', async ({ page }) => {
-  const sent: string[] = [];
-  page.on('request', (request) => {
-    if (request.method() !== 'GET') sent.push(`${request.method()} ${request.url()}`);
-  });
-  await page.goto('/');
-  const address = page.url();
-
-  const form = demoForm(page);
-  await form.getByLabel('الاسم الكامل').fill('سارة القحطاني');
-  await form.getByLabel('البريد الإلكتروني').fill('sara@example.com');
-  await form.getByLabel('دورك في المشروع').selectOption('owner');
-  await form.getByLabel('رقم الجوال').fill('0500000000');
-
-  // Enter in a field, and the button itself.
-  await form.getByLabel('رقم الجوال').press('Enter');
-  const button = form.getByRole('button', { name: 'احجز عرضاً حياً' });
-  await expect(button).toBeDisabled();
-  await button.click({ force: true });
-  await page.waitForTimeout(500);
-
-  expect(sent, 'the form sent something').toEqual([]);
-  expect(page.url(), 'what was typed went into the address').toBe(address);
-  await expect(page.getByText(FAKE_CONFIRMATION)).toHaveCount(0);
-  // And what the visitor typed is still there: nothing was cleared as though sent.
-  await expect(form.getByLabel('الاسم الكامل')).toHaveValue('سارة القحطاني');
 });
 
 test('the call to action lands on the form, clear of the header', async ({ page }) => {

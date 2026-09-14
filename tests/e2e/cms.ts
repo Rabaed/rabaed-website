@@ -31,14 +31,29 @@ export const BLOG_EDITOR = {
   password: 'test-editor-password-23',
 } as const;
 
+/**
+ * The form suite's two accounts (ticket 27): one that its side-by-side tests
+ * share to read what they stored (`forms.ts` explains how they share it), and
+ * one for its tests that change the forms' settings, one at a time.
+ */
+export const FORM_READER = {
+  email: 'form-reader@rabaed.test',
+  password: 'test-editor-password-27r',
+} as const;
+
+export const FORM_EDITOR = {
+  email: 'form-editor@rabaed.test',
+  password: 'test-editor-password-27e',
+} as const;
+
 /** Every account the test server creates. */
-export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR];
+export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, FORM_READER, FORM_EDITOR];
 
 /** Signs in through the admin's own login form, as Ahmed would. */
-export async function logIn(page: Page): Promise<void> {
+export async function logIn(page: Page, editor: Editor = TEST_EDITOR): Promise<void> {
   await page.goto(`${ADMIN_PATH}/login`);
-  await page.getByLabel('Email').fill(TEST_EDITOR.email);
-  await page.getByLabel('Password').fill(TEST_EDITOR.password);
+  await page.getByLabel('Email').fill(editor.email);
+  await page.getByLabel('Password').fill(editor.password);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page).not.toHaveURL(/\/login/);
 }

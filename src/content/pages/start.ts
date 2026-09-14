@@ -4,6 +4,9 @@ import type { StartQuestionsContent } from '@/components/start/questions';
 import type { StartStepsContent } from '@/components/start/steps';
 import { START_FAQ } from '@/content/faq';
 import { TRUST_STRIP } from '@/content/trust-strip';
+import type { FormPageWording } from '@/forms/definition';
+import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
+import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -14,10 +17,12 @@ export type StartPageContent = {
   readonly steps: Section<StartStepsContent>;
   /** The home page's «كل الأسئلة» and this page's hero both land here. */
   readonly questions: LinkedSection<StartQuestionsContent>;
+  /** The words of the demo request form beside the questions: its settings in the CMS. */
+  readonly demoForm: FormPageWording<DemoRequestField>;
 };
 
 /** Verbatim from `reference/site/start.html`. */
-const AR: StartPageContent = {
+const AR: Omit<StartPageContent, 'demoForm'> = {
   meta: {
     title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
     description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
@@ -78,5 +83,5 @@ const AR: StartPageContent = {
 
 /** The start page's content in `locale`, or a refusal (`inLocale`). */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  return inLocale('start', { ar: AR }, locale);
+  return { ...inLocale('start', { ar: AR }, locale), demoForm: await formPageWording(DEMO_REQUEST) };
 }

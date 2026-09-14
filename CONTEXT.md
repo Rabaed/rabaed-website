@@ -52,6 +52,16 @@ _Avoid_: commission, reward, affiliate fee.
 **Pour Tracker** (متتبّع الصبّات):
 The free downloadable tool — a single self-contained HTML file for tracking concrete pours and break tests — offered as a lead magnet. Distinct from `tool.html`, the marketing page that describes and delivers it.
 
+**Form definition**:
+A form described once in code: its fields, what counts as an acceptable answer to each, and the words it starts with. The browser and the server both check answers against it. Which fields exist is fixed there; what they say is an Editor's.
+
+**Submission** (طلب):
+One request sent from a form, stored before anything is emailed about it. Every form's submissions go through the one submission pipeline and are kept together under Form submissions. In visitor-facing Arabic it is a طلب, as in «طلب عرض حي»; in code and docs it is a Submission, never a Request, which is the Record's event.
+_Avoid_: lead, entry, response.
+
+**Alert address**:
+Where a form's alert emails go, set by an Editor per form. While it is empty the form sends no email at all, and still stores every Submission.
+
 ### The CMS
 
 **Editor**:

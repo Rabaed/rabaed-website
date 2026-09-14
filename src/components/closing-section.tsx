@@ -1,5 +1,7 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
 import type { PageLink } from '@/components/page-link';
+import type { FormPageWording } from '@/forms/definition';
+import type { DemoRequestField } from '@/forms/demo-request';
 
 export type ClosingStep = {
   /** «01 · إعداد». */
@@ -24,9 +26,16 @@ export type ClosingSectionContent = {
  * the block here so the product page can end on the same one. The start page
  * has no such block — its form stands beside its questions instead.
  *
- * The form's own wording is ticket 27's to move, and stays in the form.
+ * The form's words are its settings in the CMS (ticket 27), handed down beside
+ * the section's own.
  */
-export function ClosingSection({ content }: { content: ClosingSectionContent }) {
+export function ClosingSection({
+  content,
+  form,
+}: {
+  content: ClosingSectionContent;
+  form: FormPageWording<DemoRequestField>;
+}) {
   return (
     <section id="tail" className="light pad">
       <div className="wrap tail-grid">
@@ -46,7 +55,7 @@ export function ClosingSection({ content }: { content: ClosingSectionContent }) 
           </a>
         </div>
 
-        <DemoRequestForm />
+        <DemoRequestForm wording={form} />
       </div>
     </section>
   );

@@ -18,6 +18,9 @@ import { UNIT_TABS } from '@/content/four-units';
 import { PROOF_FIGURES } from '@/content/proof-figures';
 import { TRANSACTION_TYPES } from '@/content/record-transactions';
 import { TRUST_STRIP } from '@/content/trust-strip';
+import type { FormPageWording } from '@/forms/definition';
+import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
+import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -34,13 +37,15 @@ export type HomePageContent = {
   readonly questions: Section<HomeQuestionsContent>;
   /** Its demo request form (`#demo`) is where this page's hero and calculator buttons, and the header's, land. */
   readonly closing: LinkedSection<ClosingSectionContent>;
+  /** The words of the closing section's demo request form: its settings in the CMS. */
+  readonly demoForm: FormPageWording<DemoRequestField>;
 };
 
 /**
  * Verbatim from `reference/site/index.html`. Nothing here is placeholder text,
  * and nothing waits to be reworded.
  */
-const AR: HomePageContent = {
+const AR: Omit<HomePageContent, 'demoForm'> = {
   meta: {
     title: 'ربائد · ثلاثة أطراف. سجل واحد.',
     description: 'منصة سعودية تجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
@@ -160,5 +165,5 @@ const AR: HomePageContent = {
 
 /** The home page's content in `locale`, or a refusal (`inLocale`). */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  return inLocale('home', { ar: AR }, locale);
+  return { ...inLocale('home', { ar: AR }, locale), demoForm: await formPageWording(DEMO_REQUEST) };
 }

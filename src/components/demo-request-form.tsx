@@ -1,35 +1,54 @@
+'use client';
+
+import { useActionState, useRef } from 'react';
+import { sendForm } from '@/forms/actions';
+import { NOT_SENT, TOKEN_FIELD, TRAP_FIELD, type FormPageWording, type SubmissionOutcome } from '@/forms/definition';
+import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
+import { useAnswers } from '@/forms/use-answers';
+
 /**
- * The demo request form: one form, placed at the end of the home, product and
- * start pages. The handoff asks for it to be built once for all three, and
- * ticket 27 relies on that when it makes the form work.
+ * The demo request form: one form, placed at the end of the home and product
+ * pages and beside the start page's questions, working the same in all three.
  *
- * **It is a real form, and it sends nothing yet.** Every field has a name and
- * the right type, so ticket 27 wires it by giving the form somewhere to send
- * to, not by rebuilding it. Until then the submit button is disabled:
+ * Its fields and rules are its definition's (`src/forms/demo-request.ts`); its
+ * words are the CMS's, handed down by the page. It is sent to the submission
+ * pipeline on the server (ticket 27), and says a request arrived only once the
+ * server has stored it — the Reference site said so without sending anything.
  *
- * - The Reference site's button showed "وصلنا طلبك" — we received your request
- *   — without sending anything. A visitor who believed it would wait for a
- *   call that never came. The spec forbids that outright.
- * - A form with a live button and nowhere to go would put what the visitor
- *   typed — name, email, phone — into the address bar on submit.
- * - A disabled button is where ticket 27 is going anyway: "the submit button
- *   gates on validity".
- *
- * Pressing Enter in a field submits nothing either: a form whose submit button
- * is disabled has no implicit submission.
- *
- * `method="post"` is set now so that the day the button is enabled, the answers
- * travel in the request body rather than the address.
- *
- * All copy is verbatim from `reference/site/index.html`.
+ * The submit button stays disabled until every answer is acceptable, and while
+ * a request is on its way. A client component rendered on the server first:
+ * the whole form is in the first response, and with JavaScript off its button
+ * stays disabled, as the tool page's does.
  */
-export function DemoRequestForm() {
+export function DemoRequestForm({ wording }: { wording: FormPageWording<DemoRequestField> }) {
+  const { complete, field, refuse } = useAnswers(DEMO_REQUEST, wording);
+  const token = useRef<string | null>(null);
+
+  const [outcome, send, sending] = useActionState(async (_previous: SubmissionOutcome, data: FormData) => {
+    // Made up on the first attempt and kept for every retry, so a request
+    // sent twice is stored once.
+    token.current ??= crypto.randomUUID();
+    data.set(TOKEN_FIELD, token.current);
+    const result = await sendForm(DEMO_REQUEST.id, data);
+    if (result.outcome === 'invalid') refuse(result.fields as DemoRequestField[]);
+    return result;
+  }, NOT_SENT);
+
+  const name = field('name');
+  const email = field('email');
+  const role = field('role');
+  const phone = field('phone');
+  const company = field('company');
+  const activeProjects = field('activeProjects');
+  const words = wording.fields;
+
   return (
-    <form className="form" id="demo" method="post" aria-labelledby="demo-title">
-      <h3 id="demo-title">احجز عرضاً حياً على مشروعك</h3>
-      <small>30 دقيقة · بالعربية · على مشروع من مشاريعك</small>
-      {/* Only the numeral is `.mono`: DM Mono has no Arabic glyphs, as in the
-          hero's guarantee pill (spec: Design system). */}
+    <form className="form" id="demo" action={send} noValidate aria-labelledby="demo-title">
+      <h3 id="demo-title">{wording.heading}</h3>
+      <small>{wording.lead}</small>
+      {/* The guarantee is a binding commitment, not the form's wording, so it
+          stays here rather than in the form's settings. Only the numeral is
+          `.mono`: DM Mono has no Arabic glyphs (spec: Design system). */}
       <div className="guar" style={{ marginBottom: '14px' }}>
         <b>
           <span className="mono">60</span> يوماً
@@ -37,42 +56,95 @@ export function DemoRequestForm() {
         ضمان استرجاع كامل المبلغ
       </div>
 
-      {/* Each field is named by its `aria-label`, which says the same as its
-          placeholder, as on the Reference site; visible labels are ticket
-          36's to decide. Which fields are required is ticket 27's. */}
-      <div className="two">
-        <input name="name" placeholder="الاسم الكامل" autoComplete="name" aria-label="الاسم الكامل" />
-        <input
-          name="email"
-          type="email"
-          placeholder="البريد الإلكتروني"
-          autoComplete="email"
-          aria-label="البريد الإلكتروني"
-        />
-      </div>
-      <div className="two">
-        <select name="role" aria-label="دورك في المشروع" defaultValue="">
-          <option value="">دورك في المشروع</option>
-          <option value="owner">مالك / مطوّر</option>
-          <option value="consultant">استشاري</option>
-          <option value="contractor">مقاول</option>
-        </select>
-        <input name="phone" type="tel" placeholder="رقم الجوال" autoComplete="tel" aria-label="رقم الجوال" />
-      </div>
-      <div className="two">
-        <input name="company" placeholder="اسم الشركة" autoComplete="organization" aria-label="اسم الشركة" />
-        <input
-          name="activeProjects"
-          type="number"
-          placeholder="عدد المشاريع النشطة"
-          aria-label="عدد المشاريع النشطة"
-        />
-      </div>
+      {outcome.outcome === 'received' ? (
+        // The fields go with the request, so it cannot be sent again by mistake.
+        <small role="status" className="sent">
+          {outcome.message}
+        </small>
+      ) : (
+        <>
+          {/* Each field is named by its `aria-label`; visible labels are
+              ticket 36's to decide. */}
+          <div className="two">
+            <div>
+              <input {...name.props} placeholder={words.name.placeholder} autoComplete="name" aria-label={words.name.label} />
+              {name.message}
+            </div>
+            <div>
+              <input
+                {...email.props}
+                type="email"
+                placeholder={words.email.placeholder}
+                autoComplete="email"
+                aria-label={words.email.label}
+              />
+              {email.message}
+            </div>
+          </div>
+          <div className="two">
+            <div>
+              <select {...role.props} aria-label={words.role.label}>
+                <option value="">{words.role.placeholder}</option>
+                {DEMO_REQUEST.fields.role.options!.map((value) => (
+                  <option key={value} value={value}>
+                    {words.role.options![value]}
+                  </option>
+                ))}
+              </select>
+              {role.message}
+            </div>
+            <div>
+              <input
+                {...phone.props}
+                type="tel"
+                placeholder={words.phone.placeholder}
+                autoComplete="tel"
+                aria-label={words.phone.label}
+              />
+              {phone.message}
+            </div>
+          </div>
+          <div className="two">
+            <div>
+              <input
+                {...company.props}
+                placeholder={words.company.placeholder}
+                autoComplete="organization"
+                aria-label={words.company.label}
+              />
+              {company.message}
+            </div>
+            <div>
+              <input
+                {...activeProjects.props}
+                type="number"
+                min={0}
+                placeholder={words.activeProjects.placeholder}
+                aria-label={words.activeProjects.label}
+              />
+              {activeProjects.message}
+            </div>
+          </div>
 
-      <button type="submit" className="btn p" disabled style={{ justifyContent: 'center' }}>
-        احجز عرضاً حياً
-      </button>
-      <small className="fine">نستخدم بياناتك لتحديد موعد العرض فقط، ولا نشاركها مع أي طرف ثالث.</small>
+          {/* The trap (`TRAP_FIELD`): out of sight, out of the keyboard order
+              and hidden from screen readers, so only a bot fills it in. A
+              textarea, so that it is not one of the form's inputs. */}
+          <div className="vh" aria-hidden="true">
+            <textarea name={TRAP_FIELD} tabIndex={-1} autoComplete="off" defaultValue="" />
+          </div>
+
+          {(outcome.outcome === 'refused' || outcome.outcome === 'failed') && (
+            <small role="alert" className="refusal">
+              {outcome.message}
+            </small>
+          )}
+
+          <button type="submit" className="btn p" disabled={!complete || sending} style={{ justifyContent: 'center' }}>
+            {wording.submit}
+          </button>
+        </>
+      )}
+      <small className="fine">{wording.finePrint}</small>
     </form>
   );
 }
