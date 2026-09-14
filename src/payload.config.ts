@@ -14,6 +14,7 @@ import { ar } from '@payloadcms/translations/languages/ar';
 import { en } from '@payloadcms/translations/languages/en';
 import { buildConfig } from 'payload';
 import sharp from 'sharp';
+import { LegalDocuments } from './cms/collections/legal-documents';
 import { Media } from './cms/collections/media';
 import { Posts } from './cms/collections/posts';
 import { Users } from './cms/collections/users';
@@ -61,7 +62,7 @@ export default buildConfig({
     fallbackLanguage: 'ar',
   },
 
-  collections: [Users, Media, Posts],
+  collections: [Users, Media, Posts, LegalDocuments],
   globals: [SiteSettings],
 
   db: postgresAdapter({

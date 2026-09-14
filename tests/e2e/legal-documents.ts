@@ -6,6 +6,8 @@ import type { PagePair } from './reference-site';
  * their words, their behaviour and their layout.
  */
 export type LegalPage = PagePair & {
+  /** Which document it is in the CMS. */
+  readonly slug: string;
   /** The page's heading. */
   readonly title: string;
   /** The approved document in `reference/legal-source/`, where there is one. */
@@ -13,9 +15,15 @@ export type LegalPage = PagePair & {
 };
 
 export const LEGAL_PAGES: readonly LegalPage[] = [
-  { rebuilt: '/terms', reference: 'terms.html', title: 'شروط الخدمة', word: 'V.0.0_AR_Terms_of_Service.docx' },
-  { rebuilt: '/privacy', reference: 'privacy.html', title: 'سياسة الخصوصية', word: 'V.0.0_AR_privacy_policy.docx' },
+  { slug: 'terms', rebuilt: '/terms', reference: 'terms.html', title: 'شروط الخدمة', word: 'V.0.0_AR_Terms_of_Service.docx' },
+  { slug: 'privacy', rebuilt: '/privacy', reference: 'privacy.html', title: 'سياسة الخصوصية', word: 'V.0.0_AR_privacy_policy.docx' },
   // The Referral Program Terms have no Word document in `reference/legal-source/`:
   // the Reference page is their only source.
-  { rebuilt: '/referral-terms', reference: 'referral-terms.html', title: 'الشروط والأحكام — برنامج الإحالة', word: null },
+  {
+    slug: 'referral-terms',
+    rebuilt: '/referral-terms',
+    reference: 'referral-terms.html',
+    title: 'الشروط والأحكام — برنامج الإحالة',
+    word: null,
+  },
 ];

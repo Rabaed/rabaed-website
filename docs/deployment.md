@@ -126,6 +126,27 @@ or production deployments stop.
    The second command prints a temporary password once. Hand it over privately;
    Ahmed changes it after signing in. Close the terminal afterwards.
 
+### Legal documents
+
+The Terms, the Privacy Policy and the Referral Program Terms are edited under
+**Legal documents** (ADR-0003). The migrations import them once, word for
+word, as each document's first version, dated 1 September 2026 like the
+approved documents. From then on the CMS is the only place they change; the
+Word files in `reference/legal-source/` stay as the pre-launch archive.
+
+- **Save Draft** keeps an edit without publishing it; **Preview** shows it on
+  the real page. Only **Publish changes** reaches visitors. Nothing saves by
+  itself.
+- Every save is kept under **Versions**, with its date and the Editor who made
+  it, and none is ever deleted. Any version can be opened and restored; a
+  restore is itself a new version. Restoring a draft gives a draft, which
+  visitors see only once it is published. Restoring a published version
+  straight away, rather than as a draft, publishes it again.
+- Visitors always see the newest published version, and the page's
+  «آخر تحديث» is the day it was published.
+- A legal document cannot be unpublished, added or deleted: each is a page of
+  the site. To change one back, restore an earlier version and publish it.
+
 ### When a change adds to the CMS
 
 A change that adds a field or a content type carries a **migration** in

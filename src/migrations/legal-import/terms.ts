@@ -1,19 +1,17 @@
-import type { LegalDocument } from '@/content/legal/document';
+import type { ApprovedDocument } from './approved-text';
 
 /**
  * شروط الخدمة — imported word for word from reference/legal-source/V.0.0_AR_Terms_of_Service.docx, by way of reference/site/terms.html (ticket 17).
  *
- * The approved text, verbatim: do not reword it, and do not correct its
- * spelling here. A change to a legal document is a change to the approved
- * text, which from ticket 25 is edited and versioned in the CMS (ADR-0003).
+ * The approved text, verbatim, as the CMS's first version of the Terms
+ * (ticket 25). Frozen: the Terms are edited and versioned in the CMS, and this
+ * file is only what the import migration reads (`approved-text.ts`).
  */
-export const TERMS: LegalDocument = {
-  path: '/terms',
+export const TERMS: ApprovedDocument = {
   metaTitle: 'ربائد · شروط الخدمة',
   description: 'الشروط التي تحكم وصولك إلى منصة ربائد واستخدامك لخدماتها.',
   title: 'شروط الخدمة',
   lead: 'الشروط التي تحكم وصولك إلى منصة ربائد واستخدامك لخدماتها.',
-  updated: { year: 2026, month: 9, day: 1 },
   intro: [
     ['مرحبًا بك في منصة "ربائد". علاقتنا معك هي أهم أصولنا. نحن نرغب في أن تشعر بالراحة والثقة عند استخدامك لمنصتنا ("المحددة أدناه") والخدمات ("المحددة أدناه"). الهدف من هذه الشروط والأحكام ("الشروط") هو إعلامك بالشروط التي تنطبق على وصولك إلى المنصة والخدمات، وما نتوقعه منك، وما يمكنك أن تتوقعه منا أثناء استخدامك وتفاعلك مع منصتنا والخدمات المقدمة من قبلنا ومن قبل شركائنا الاستراتيجيين ومقدمي الخدمات من الأطراف الثالثة'],
     ['تمثل هذه الضوابط والشروط اتفاق رسمي “عقد” بين "شركة ربائد البناء – رقم الموحد 7050078786 “ ربائد” ومستخدمي الخدمة. تحكم شروط المستخدم هذه استخدامكم لخدمة ربائد والذي هو عبارة عن نظام إلكتروني يوفر للعملاء والمستخدمين تسجيل وحفظ بيانات مشاريعهم و طلبات الاعتمادات و الفحص و تقارير الانجاز في قطاع الانشائات واستخدامها في شكل تقارير.'],
@@ -21,7 +19,6 @@ export const TERMS: LegalDocument = {
     ['إن أي استخدام من قبلك للخدمات التي يوفرها نظام ربائد يشكل موافقة منك على هذا العقد وأحكامه، وتبعاً لذلك يجب عليك عدم استخدام النظام في حال لم تكن موافقاً على الأحكام والشروط الواردة في هذا العقد.'],
     ['تحتفظ ربائد بحق تعديل أو تغيير هذه الأحكام والشروط دون إخطار مسبق، ويكون من مسؤوليتك كمستخدم للنظام مراجعة ضوابط وشروط الاستخدام بشكل دوري لمعرفة التحديثات التي تطرأ على هذه الأحكام والشروط، كما نأمل مراجعة\u00a0سياسة الخصوصية\u00a0لدينا لمعرفة المزيد حول كيفية استخدام ربائد للمعلومات التي تقدم لنا من قبل مستخدمي النظام.'],
   ],
-  clauseIdPrefix: 's',
   clauses: [
     {
       heading: 'أحقية الحصول على الخدمات',
