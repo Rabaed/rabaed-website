@@ -7,7 +7,7 @@
 **Status:** resolved
 
 - [x] The Reference site's mock markup is preserved in the repo behind a studio route, blocked from indexing — unconditionally, unlike the rest of the site
-- [ ] Excluded from the sitemap — **nothing to exclude it from yet**: there is no sitemap until ticket 33, which is cross-referenced to the prefix the registry exports
+- [x] Excluded from the sitemap — the sitemap lists pages by name rather than crawling routes, so the studio is never in it; `tests/e2e/search-foundations.spec.ts` holds it out (ticket 31)
 - [x] A script renders each Screen mock and exports an optimised image at high resolution, with dimensions recorded
 - [x] The export is locale-aware by construction, so an English set can be produced later without rework (ADR-0002)
 - [x] Arabic set exported for every mock used on the Home and Product pages

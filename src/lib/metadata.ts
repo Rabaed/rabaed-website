@@ -19,9 +19,28 @@ export function baseMetadata(): Metadata {
 }
 
 /**
+ * What a shared link is told about the site, per locale: its name, the
+ * `og:locale` spelling of the language, and the words describing the sharing
+ * image to someone who cannot see it.
+ */
+const SHARING = {
+  ar: { siteName: 'ربائد', ogLocale: 'ar_SA', imageAlt: 'ربائد — ثلاثة أطراف. سجل واحد. مسؤولية واضحة.' },
+  en: { siteName: 'Rabaed', ogLocale: 'en_US', imageAlt: 'Rabaed — three parties, one record.' },
+} as const satisfies Record<Locale, unknown>;
+
+/**
+ * The sharing image, drawn by `npm run brand:export`. One image for every page
+ * until ticket 26 lets a page have its own. It is Arabic on the English
+ * placeholder too, as the rest of the site is until English is switched on.
+ */
+const SHARING_IMAGE = { url: '/og-rabaed.png', width: 1200, height: 630 } as const;
+
+/**
  * A page's own metadata: its title and description, the self-referencing
- * canonical URL, and the `hreflang` alternates that keep `/` and `/en` from
- * being read as duplicates of each other.
+ * canonical URL, the `hreflang` alternates that keep `/` and `/en` from
+ * being read as duplicates of each other, and the Open Graph and Twitter tags
+ * a shared link is previewed from — all of them this page's own, where three
+ * of the Reference site's pages carried the home page's.
  *
  * `path` is the locale-independent path — `/` for the home page — from which
  * every locale's real URL is derived, so the alternates stay correct without
@@ -32,8 +51,9 @@ export function baseMetadata(): Metadata {
  * whose Arabic is binding (spec: Out of Scope) — names only its own, so no
  * alternate sends a search engine to a page that is not there.
  *
- * Open Graph, Twitter cards, the 1200×630 sharing image and structured data
- * are ticket 32. Nothing here emits a half-version of them.
+ * The Open Graph and Twitter objects are set here in full, never partly in a
+ * layout, for the shallow-merge reason `baseMetadata` gives. Structured data
+ * is ticket 32.
  */
 export function pageMetadata(options: {
   locale: Locale;
@@ -43,15 +63,34 @@ export function pageMetadata(options: {
   locales?: readonly Locale[];
 }): Metadata {
   const { locale, path = '/', title, description, locales = LOCALE_CODES } = options;
+  const canonical = localePath(locale, path);
+  const sharing = SHARING[locale];
+  const image = { ...SHARING_IMAGE, alt: sharing.imageAlt };
 
   return {
     title,
     description,
     alternates: {
-      canonical: localePath(locale, path),
+      canonical,
       languages: Object.fromEntries(
         locales.map((code) => [code, localePath(code, path)]),
       ),
+    },
+    openGraph: {
+      type: 'website',
+      siteName: sharing.siteName,
+      locale: sharing.ogLocale,
+      alternateLocale: locales.filter((code) => code !== locale).map((code) => SHARING[code].ogLocale),
+      url: canonical,
+      title,
+      description,
+      images: [image],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
     },
   };
 }

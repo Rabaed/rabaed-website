@@ -14,3 +14,5 @@
 - [ ] Both files are reachable and correctly typed
 
 **Note from ticket 05:** the Screen mock studio must be excluded from the sitemap. It is already `noindex` unconditionally, but it should not be listed. `STUDIO_PREFIX` in `src/screen-mocks/registry.ts` is the prefix to filter on, and ticket 05's checklist leaves that box open until this ticket ticks it.
+
+**From ticket 31:** done there — the sitemap never lists the studio, and `search-foundations.spec.ts` checks it. Ticket 31's `src/app/robots.ts` is a single rule for every crawler plus the sitemap line; this ticket replaces the rule with the retrieval/training split. Keep `search-foundations.spec.ts`'s robots test green: nothing may be disallowed that must see a page's `noindex`, and do not name the CMS admin path in the file, which would publish it.
