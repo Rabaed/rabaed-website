@@ -22,11 +22,19 @@ type NavGroup = NavLink & {
   readonly summary: string;
 };
 
-export const PRIMARY_LINKS: readonly NavLink[] = [
-  { path: '/', label: 'الرئيسية' },
-  { path: '/product', label: 'المنتج' },
-  { path: '/start', label: 'ابدأ' },
-];
+/**
+ * The header's own links, in order. Case studies join them only once one is
+ * published in the page's language (ticket 24): until then there is no
+ * section to link to, and the header is the Reference site's.
+ */
+export function primaryLinks({ caseStudies }: { caseStudies: boolean }): readonly NavLink[] {
+  return [
+    { path: '/', label: 'الرئيسية' },
+    { path: '/product', label: 'المنتج' },
+    ...(caseStudies ? [{ path: '/case-studies', label: 'قصص العملاء' }] : []),
+    { path: '/start', label: 'ابدأ' },
+  ];
+}
 
 /** The Partnerships dropdown: two separate programmes, two audiences. */
 export const PARTNERSHIP_LINKS: readonly NavGroup[] = [

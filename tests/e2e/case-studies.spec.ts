@@ -1,0 +1,326 @@
+/**
+ * Case studies (ticket 24): the place Rabaed's first real client story will
+ * live. Until one is published, nothing on the site shows the section or leads
+ * to it — no link, no empty index, no sample client. Publishing the first
+ * reveals it; unpublishing the last hides it again.
+ *
+ * Case studies are created through the CMS's own API as an editor of this
+ * suite's own (`cms.ts`), and deleted after each test. The suite runs after
+ * every other one has finished (`playwright.config.ts`): a published case
+ * study changes the header of every page, which the suites holding the header
+ * to the Reference site would otherwise see. The tests run one at a time, for
+ * the same reason within the suite.
+ */
+import { test, expect, type APIRequestContext } from '@playwright/test';
+import { CASE_STUDIES_EDITOR, logInByApi, richText, uploadImage } from './cms';
+import { ROUTES } from './routes';
+
+test.describe.configure({ mode: 'default' });
+
+/** The header's link to the section, restated rather than imported (see `routes.ts`). */
+const NAV_LABEL = 'قصص العملاء';
+
+/** An opening answer of 41 words: inside the 30 to 60 the spec asks for. */
+const ANSWER =
+  'نقل مكتب هندسي في الرياض اعتمادات مشروع سكني من رسائل واتساب المتفرقة إلى سجل واحد في ربائد، فصار المالك والاستشاري والمقاول يرون كل طلب ومن اعتمده ومتى، وتوقف السؤال المتكرر عن آخر نسخة معتمدة من المخططات في كل اجتماع أسبوعي للموقع.';
+
+type Locale = 'ar' | 'en';
+
+type Figure = { value: string; label: string; basis?: string };
+type Quote = { text: string; name?: string; role?: string };
+
+type CaseStudy = {
+  locale: Locale;
+  title: string;
+  slug: string;
+  summary: string;
+  answer: string;
+  client: string;
+  sector: string;
+  challenge: string;
+  whatChanged: string;
+  outcome: string;
+  author: string;
+  publishedAt: string;
+  figures?: Figure[];
+  quote?: Quote;
+  /** How many further images beside the cover. */
+  images?: number;
+  /** Leave the cover out: a real story may have no photograph cleared for use. */
+  withoutCover?: boolean;
+};
+
+/** Keeps this run's slugs apart from anything an earlier run left behind. */
+const runId = Date.now().toString(36);
+let serial = 0;
+let created: number[] = [];
+let media: number[] = [];
+
+function caseStudy(overrides: Partial<CaseStudy> = {}): CaseStudy {
+  serial += 1;
+  return {
+    locale: 'ar',
+    title: `قصة عميل للاختبار ${runId} رقم ${serial}`,
+    slug: `test-${runId}-${serial}`,
+    summary: `ملخص قصة العميل رقم ${serial}.`,
+    answer: ANSWER,
+    client: `عميل الاختبار ${serial}`,
+    sector: 'مشاريع سكنية',
+    challenge: `كانت الاعتمادات تضيع بين الرسائل في المشروع رقم ${serial}.`,
+    whatChanged: `انتقل الفريق إلى سجل واحد في المشروع رقم ${serial}.`,
+    outcome: `صار كل طرف يعرف ما ينتظره في المشروع رقم ${serial}.`,
+    author: 'كاتب الاختبار',
+    publishedAt: '2026-09-14T12:00:00.000Z',
+    ...overrides,
+  };
+}
+
+async function image(editor: APIRequestContext, alt: string): Promise<number> {
+  const id = await uploadImage(editor, alt);
+  media.push(id);
+  return id;
+}
+
+/** Sends a case study to the CMS as the editor would save it, and returns the response. */
+async function save(editor: APIRequestContext, fields: CaseStudy, status: 'published' | 'draft') {
+  const { images = 0, withoutCover, challenge, whatChanged, outcome, ...rest } = fields;
+  // One at a time: uploads sharing a file name, sent together, race for it.
+  const further: number[] = [];
+  for (let n = 1; n <= images; n += 1) further.push(await image(editor, `صورة من الموقع ${n}`));
+  const response = await editor.post(`/api/case-studies${status === 'draft' ? '?draft=true' : ''}`, {
+    data: {
+      ...rest,
+      challenge: richText(challenge, fields.locale),
+      whatChanged: richText(whatChanged, fields.locale),
+      outcome: richText(outcome, fields.locale),
+      coverImage: withoutCover ? undefined : await image(editor, `صورة غلاف ${fields.slug}`),
+      images: further,
+      _status: status,
+    },
+  });
+  if (response.ok()) created.push((await response.json()).doc.id);
+  return response;
+}
+
+async function create(editor: APIRequestContext, fields: CaseStudy, status: 'published' | 'draft' = 'published') {
+  const response = await save(editor, fields, status);
+  expect(response.ok(), await response.text()).toBe(true);
+  return (await response.json()).doc as { id: number };
+}
+
+/** A page as a visitor with no session receives it: status and HTML. */
+async function visit(request: APIRequestContext, path: string) {
+  const response = await request.get(path);
+  return { status: response.status(), html: await response.text() };
+}
+
+const linksToSection = (html: string) => html.includes('href="/case-studies"');
+
+test.afterEach(async ({ page }) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  for (const id of created) await page.request.delete(`/api/case-studies/${id}`);
+  for (const id of media) await page.request.delete(`/api/media/${id}`);
+  created = [];
+  media = [];
+});
+
+test('while no case study is published, nothing on the site leads to one — not even a saved draft', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const draft = caseStudy();
+  await create(page.request, draft, 'draft');
+
+  for (const route of ROUTES) {
+    const { html } = await visit(request, route.path);
+    expect(linksToSection(html), route.path).toBe(false);
+    expect(html, route.path).not.toContain(NAV_LABEL);
+  }
+  expect((await visit(request, '/case-studies')).status).toBe(404);
+  expect((await visit(request, '/en/case-studies')).status).toBe(404);
+  expect((await visit(request, `/case-studies/${draft.slug}`)).status).toBe(404);
+  expect((await visit(request, '/sitemap.xml')).html).not.toContain('/case-studies');
+
+  // The editor can still preview it at its own address.
+  await page.goto(`/api/preview?path=/case-studies/${draft.slug}`);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(draft.title);
+  await expect(page.getByRole('status')).toContainText('معاينة');
+});
+
+test('publishing the first case study reveals the section and its link; unpublishing the last hides them again', async ({
+  page,
+  request,
+  baseURL,
+}) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  // No figures and no quote: neither is needed to publish.
+  const fields = caseStudy();
+  const { id } = await create(page.request, fields);
+
+  await expect.poll(async () => linksToSection((await visit(request, '/')).html)).toBe(true);
+
+  // In the header, desktop and mobile, on every page — and marked on the section's own pages.
+  await page.goto('/product');
+  await expect(page.locator('.nav .links').getByRole('link', { name: NAV_LABEL, exact: true })).toHaveAttribute(
+    'href',
+    '/case-studies',
+  );
+  // At 981px, the narrowest the desktop row shows at, the extra link still
+  // fits between the brand and the buttons. Loaded at that width: the product
+  // page's journey sizes its track to the window it loads in.
+  await page.setViewportSize({ width: 981, height: 900 });
+  await page.goto('/start');
+  const box = async (selector: string) => (await page.locator(selector).boundingBox())!;
+  const [brand, links, buttons] = [await box('.nav .brand'), await box('.nav .links'), await box('.nav .nav-cta')];
+  const apart = (a: typeof brand, b: typeof brand) => a.x + a.width <= b.x || b.x + b.width <= a.x;
+  expect(apart(brand, links), 'the links run into the brand').toBe(true);
+  expect(apart(links, buttons), 'the links run into the buttons').toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+  await page.setViewportSize({ width: 360, height: 900 });
+  await page.locator('.navtog').click();
+  const panel = page.locator('.mnav');
+  await expect(panel.getByRole('link', { name: NAV_LABEL, exact: true })).toBeVisible();
+  await expect
+    .poll(() => panel.evaluate((el) => el.scrollHeight - el.clientHeight), {
+      message: 'the open panel clips its own content',
+    })
+    .toBeLessThanOrEqual(0);
+  await page.setViewportSize({ width: 1280, height: 900 });
+
+  const index = await visit(request, '/case-studies');
+  expect(index.status).toBe(200);
+  for (const text of [fields.title, fields.summary, fields.client, fields.sector]) expect(index.html).toContain(text);
+  expect(index.html).toContain(`href="/case-studies/${fields.slug}"`);
+
+  await page.goto(`/case-studies/${fields.slug}`);
+  await expect(page.locator('.nav .links a.on')).toHaveText(NAV_LABEL);
+  // Nothing stands in for the figures and the quote it does not have.
+  await expect(page.getByRole('heading', { name: 'بالأرقام' })).toHaveCount(0);
+  await expect(page.locator('blockquote')).toHaveCount(0);
+
+  const sitemap = (await visit(request, '/sitemap.xml')).html;
+  expect(sitemap).toContain(`<loc>${baseURL}/case-studies</loc>`);
+  expect(sitemap).toContain(`<loc>${baseURL}/case-studies/${fields.slug}</loc>`);
+
+  // Each language's section is its own: only an Arabic case study exists, so
+  // the English section stays hidden, and the English address points to the Arabic.
+  expect((await visit(request, '/en/case-studies')).status).toBe(404);
+  await page.goto(`/en/case-studies/${fields.slug}`);
+  await expect(page.getByRole('link', { name: 'Read it in Arabic' })).toHaveAttribute('href', `/case-studies/${fields.slug}`);
+
+  const unpublished = await page.request.patch(`/api/case-studies/${id}`, { data: { _status: 'draft' } });
+  expect(unpublished.ok()).toBe(true);
+
+  await expect.poll(async () => (await visit(request, '/case-studies')).status).toBe(404);
+  await expect.poll(async () => linksToSection((await visit(request, '/')).html)).toBe(false);
+  expect((await visit(request, `/case-studies/${fields.slug}`)).status).toBe(404);
+  expect((await visit(request, '/sitemap.xml')).html).not.toContain('/case-studies');
+});
+
+test('a case study page tells the whole story, whole in the first response', async ({ page, request, browser, baseURL }) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const fields = caseStudy({
+    figures: [
+      { value: '3 أيام', label: 'لاعتماد المخططات بدل أسبوعين', basis: 'متوسط اعتمادات المشروع في الربع الأول' },
+      { value: '120 طلباً', label: 'موثقاً في السجل', basis: 'عدد الطلبات المسجلة حتى التسليم' },
+    ],
+    quote: { text: 'لم نعد نسأل من اعتمد ماذا ومتى.', name: 'مدير مشروع الاختبار', role: 'مدير المشروع' },
+    images: 2,
+  });
+  await create(page.request, fields);
+  await expect.poll(async () => (await visit(request, `/case-studies/${fields.slug}`)).status).toBe(200);
+
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const visitor = await context.newPage();
+  await visitor.goto(`/case-studies/${fields.slug}`);
+  await expect(visitor.locator('html')).toHaveAttribute('lang', 'ar');
+  await expect(visitor.getByRole('heading', { level: 1 })).toHaveText(fields.title);
+  await expect(visitor.locator('footer')).toBeVisible();
+
+  // Opening with the answer.
+  const firstParagraph = await visitor.evaluate(() => {
+    const heading = document.querySelector('h1')!;
+    return [...document.querySelectorAll('p')]
+      .find((p) => heading.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING && p.textContent?.trim())
+      ?.textContent?.trim();
+  });
+  expect(firstParagraph).toBe(fields.answer);
+
+  for (const text of [fields.client, fields.sector, fields.challenge, fields.whatChanged, fields.outcome]) {
+    await expect(visitor.getByText(text, { exact: true }).first()).toBeVisible();
+  }
+  // The author's name sits in a line of its own words («بقلم …»).
+  await expect(visitor.getByText(fields.author)).toBeVisible();
+  for (const heading of ['التحدي', 'ما الذي تغيّر', 'النتيجة', 'بالأرقام']) {
+    await expect(visitor.getByRole('heading', { name: heading })).toBeVisible();
+  }
+  for (const figure of fields.figures!) {
+    for (const text of [figure.value, figure.label, figure.basis!]) {
+      await expect(visitor.getByText(text, { exact: true })).toBeVisible();
+    }
+  }
+  await expect(visitor.locator('blockquote')).toHaveText(fields.quote!.text);
+  await expect(visitor.getByText(fields.quote!.name!)).toBeVisible();
+
+  await expect(visitor.getByRole('img', { name: `صورة غلاف ${fields.slug}` })).toBeVisible();
+  for (const alt of ['صورة من الموقع 1', 'صورة من الموقع 2']) {
+    await expect(visitor.getByRole('img', { name: alt })).toBeAttached();
+  }
+
+  await expect(visitor.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}/case-studies/${fields.slug}`);
+  await expect(visitor).toHaveTitle(new RegExp(fields.title));
+  await expect(visitor.locator('meta[name="description"]')).toHaveAttribute('content', fields.summary);
+  await context.close();
+
+  // Neither page is in `routes.ts` — the test database starts with no case
+  // study — so the checks every page gets there are made here.
+  for (const path of ['/case-studies', `/case-studies/${fields.slug}`]) {
+    const problems: string[] = [];
+    const onConsole = (message: { type(): string; text(): string }) => {
+      if (message.type() === 'error') problems.push(`console: ${message.text()}`);
+    };
+    const onResponse = (response: { status(): number; url(): string }) => {
+      if (response.status() >= 400) problems.push(`${response.status()}: ${response.url()}`);
+    };
+    page.on('console', onConsole);
+    page.on('response', onResponse);
+    await page.setViewportSize({ width: 360, height: 780 });
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    page.off('console', onConsole);
+    page.off('response', onResponse);
+    expect(problems, path).toEqual([]);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+      path,
+    ).toBe(0);
+  }
+});
+
+test('a case study cannot be published missing any part of the story, or with a number or quote nobody stands behind', async ({
+  page,
+}) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const refused = async (fields: CaseStudy) => (await save(page.request, fields, 'published')).status();
+
+  expect(await refused(caseStudy({ answer: 'جواب قصير جداً.' }))).toBe(400);
+  for (const part of ['client', 'sector', 'challenge', 'whatChanged', 'outcome', 'summary', 'author'] as const) {
+    expect(await refused(caseStudy({ [part]: '' })), part).toBe(400);
+  }
+
+  // A figure says how it was measured; a quote says who said it, and a name has a quote to go with it.
+  expect(await refused(caseStudy({ figures: [{ value: '40%', label: 'أسرع في الاعتماد' }] }))).toBe(400);
+  expect(await refused(caseStudy({ quote: { text: 'تجربة ممتازة.' } }))).toBe(400);
+  expect(await refused(caseStudy({ quote: { text: '', name: 'مدير المشروع' } }))).toBe(400);
+
+  // Nothing optional is needed: no cover, no figures, no quote, no further images.
+  await create(page.request, caseStudy({ withoutCover: true }));
+
+  const taken = caseStudy();
+  await create(page.request, taken);
+  expect(await refused(caseStudy({ slug: taken.slug }))).toBe(400);
+
+  // A draft may be unfinished: Ahmed saves as he writes.
+  expect((await save(page.request, caseStudy({ answer: 'مسودة لم تكتمل.', client: '' }), 'draft')).ok()).toBe(true);
+});

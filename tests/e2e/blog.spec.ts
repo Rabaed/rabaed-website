@@ -11,8 +11,7 @@
  * to them (`cms.ts`).
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import sharp from 'sharp';
-import { ADMIN_PATH, BLOG_EDITOR, logInByApi } from './cms';
+import { ADMIN_PATH, BLOG_EDITOR, logInByApi, richText, uploadImage } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -57,41 +56,9 @@ function article(overrides: Partial<Article> = {}): Article {
   };
 }
 
-/** One paragraph, in the shape the CMS's rich text editor saves. */
-function richText(text: string, locale: Locale) {
-  const direction = locale === 'ar' ? 'rtl' : 'ltr';
-  const node = { format: '', indent: 0, version: 1, direction };
-  return {
-    root: {
-      ...node,
-      type: 'root',
-      children: [
-        {
-          ...node,
-          type: 'paragraph',
-          textFormat: 0,
-          textStyle: '',
-          children: [{ type: 'text', text, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }],
-        },
-      ],
-    },
-  };
-}
-
 /** The cover image every article in a test shares, uploaded on first use. */
 async function coverImage(editor: APIRequestContext): Promise<number> {
-  if (cover !== null) return cover;
-  const image = await sharp({ create: { width: 1600, height: 900, channels: 3, background: '#1B1E27' } })
-    .png()
-    .toBuffer();
-  const response = await editor.post('/api/media', {
-    multipart: {
-      file: { name: 'cover.png', mimeType: 'image/png', buffer: image },
-      _payload: JSON.stringify({ alt: 'صورة غلاف للاختبار' }),
-    },
-  });
-  expect(response.ok()).toBe(true);
-  cover = (await response.json()).doc.id as number;
+  cover ??= await uploadImage(editor, 'صورة غلاف للاختبار');
   return cover;
 }
 

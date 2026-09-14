@@ -1,10 +1,11 @@
+import { hasPublishedCaseStudies } from '@/cms/case-studies';
 import { NavBehaviour } from '@/components/nav-behaviour';
 import {
   PARTNERSHIP_LABEL,
   PARTNERSHIP_LINKS,
-  PRIMARY_LINKS,
   SIGN_IN_LABEL,
   SIGN_IN_URL,
+  primaryLinks,
 } from '@/content/navigation';
 import { localePath, type Locale } from '@/lib/locales';
 
@@ -22,9 +23,13 @@ import { localePath, type Locale } from '@/lib/locales';
  * alternative is measuring the viewport in JavaScript, which cannot be done
  * on the server and so would leave one of the two menus missing from the HTML
  * a crawler reads.
+ *
+ * Whether case studies have a link is read from the CMS as the page is built;
+ * publishing or unpublishing one rebuilds every page (`src/cms/revalidation.ts`).
  */
-export function SiteNav({ locale, path }: { locale: Locale; path: string }) {
+export async function SiteNav({ locale, path }: { locale: Locale; path: string }) {
   const href = (to: string) => localePath(locale, to);
+  const links = primaryLinks({ caseStudies: await hasPublishedCaseStudies(locale) });
   const inPartnerships = PARTNERSHIP_LINKS.some((link) => link.path === path);
 
   return (
@@ -39,7 +44,7 @@ export function SiteNav({ locale, path }: { locale: Locale; path: string }) {
         </a>
 
         <div className="links">
-          {PRIMARY_LINKS.map((link) => (
+          {links.map((link) => (
             <a key={link.path} href={href(link.path)} className={link.path === path ? 'on' : undefined}>
               {link.label}
             </a>
@@ -79,7 +84,7 @@ export function SiteNav({ locale, path }: { locale: Locale; path: string }) {
 
       <div className="mnav" id="mnav">
         <div className="wrap">
-          {PRIMARY_LINKS.map((link) => (
+          {links.map((link) => (
             <a key={link.path} href={href(link.path)} className={link.path === path ? 'on' : undefined}>
               {link.label}
             </a>

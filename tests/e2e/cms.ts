@@ -8,6 +8,7 @@
  * under test agrees with that code by construction.
  */
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
+import sharp from 'sharp';
 
 export const ADMIN_PATH = '/maktab';
 
@@ -37,8 +38,50 @@ export const FAQ_EDITOR = {
   password: 'test-editor-password-22',
 } as const;
 
+/** The case studies suite's own account, for the same reason as `BLOG_EDITOR`. */
+export const CASE_STUDIES_EDITOR = {
+  email: 'case-studies-editor@rabaed.test',
+  password: 'test-editor-password-24',
+} as const;
+
 /** Every account the test server creates. */
-export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, FAQ_EDITOR];
+export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, FAQ_EDITOR, CASE_STUDIES_EDITOR];
+
+/** One paragraph, in the shape the CMS's rich text editor saves. */
+export function richText(text: string, locale: 'ar' | 'en') {
+  const direction = locale === 'ar' ? 'rtl' : 'ltr';
+  const node = { format: '', indent: 0, version: 1, direction };
+  return {
+    root: {
+      ...node,
+      type: 'root',
+      children: [
+        {
+          ...node,
+          type: 'paragraph',
+          textFormat: 0,
+          textStyle: '',
+          children: [{ type: 'text', text, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }],
+        },
+      ],
+    },
+  };
+}
+
+/** Uploads a plain 1600×900 image to the CMS's media as the signed-in editor, and returns its id. */
+export async function uploadImage(editor: APIRequestContext, alt: string): Promise<number> {
+  const image = await sharp({ create: { width: 1600, height: 900, channels: 3, background: '#1B1E27' } })
+    .png()
+    .toBuffer();
+  const response = await editor.post('/api/media', {
+    multipart: {
+      file: { name: 'image.png', mimeType: 'image/png', buffer: image },
+      _payload: JSON.stringify({ alt }),
+    },
+  });
+  expect(response.ok()).toBe(true);
+  return (await response.json()).doc.id as number;
+}
 
 /** Signs in through the admin's own login form, as `editor`. */
 export async function logInAs(page: Page, editor: Editor): Promise<void> {
