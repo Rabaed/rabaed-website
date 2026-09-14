@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     posts: Post;
     'legal-documents': LegalDocument;
+    'faq-entries': FaqEntry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
+    'faq-entries': FaqEntriesSelect<false> | FaqEntriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -334,6 +336,30 @@ export interface LegalDocument {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Drag questions in the list to order them. Each page shows its questions in that order, once published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-entries".
+ */
+export interface FaqEntry {
+  id: number;
+  _order?: string | null;
+  question: string;
+  /**
+   * Put a file name or other English text between backticks to set it left to right, like `concrete_db.json`. Write {payout} for the referral payout and {clientDiscount} for the client discount: the site inserts the current value instead of a typed number.
+   */
+  answer: string;
+  page: 'home' | 'start' | 'tool' | 'referral' | 'partnership';
+  locale: 'ar' | 'en';
+  /**
+   * Untick to hide the question, keeping its words and its place.
+   */
+  shows?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -372,6 +398,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'legal-documents';
         value: number | LegalDocument;
+      } | null)
+    | ({
+        relationTo: 'faq-entries';
+        value: number | FaqEntry;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -530,6 +560,21 @@ export interface LegalDocumentsSelect<T extends boolean = true> {
         id?: T;
       };
   seeAlso?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-entries_select".
+ */
+export interface FaqEntriesSelect<T extends boolean = true> {
+  _order?: T;
+  question?: T;
+  answer?: T;
+  page?: T;
+  locale?: T;
+  shows?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

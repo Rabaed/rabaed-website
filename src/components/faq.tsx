@@ -21,8 +21,10 @@ export type FaqEntry = {
  * form.
  */
 export function FaqEntries({ entries }: { entries: readonly FaqEntry[] }) {
-  return entries.map((entry) => (
-    <details key={entry.question} className="qa">
+  // Keyed by place as well as wording: nothing stops an Editor giving two
+  // questions on one page the same words.
+  return entries.map((entry, index) => (
+    <details key={`${index}:${entry.question}`} className="qa">
       <summary>{entry.question}</summary>
       <p>
         <Inline text={entry.answer} />
