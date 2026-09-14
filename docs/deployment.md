@@ -147,6 +147,23 @@ Word files in `reference/legal-source/` stay as the pre-launch archive.
 - A legal document cannot be unpublished, added or deleted: each is a page of
   the site. To change one back, restore an earlier version and publish it.
 
+### FAQs
+
+The questions on the home, start, tool, referral and partnership pages are
+edited under **FAQs** (ticket 22). The migrations import the 31 questions the
+site launched with, word for word.
+
+- Each question belongs to one page, chosen under **Page**. Drag questions up
+  and down the list to order them; each page shows its own in that order.
+- Untick **Shows on the page** to hide a question without losing its words or
+  its place. Delete it to remove it for good.
+- Like an article, a question is saved as a draft, previewed on its page, and
+  reaches visitors only when published.
+- In an answer, put a file name or other English text between backticks —
+  `` `concrete_db.json` `` — to set it left to right. Write `{payout}` and
+  `{clientDiscount}` for the Referral Program values: the site inserts the
+  current amount, so no answer quotes an old one.
+
 ### When a change adds to the CMS
 
 A change that adds a field or a content type carries a **migration** in

@@ -29,6 +29,14 @@ export type Section<T> = T & { readonly shows: boolean };
  */
 export type LinkedSection<T> = T & { readonly shows: true };
 
+/**
+ * A page's content as its module holds it, before the page's questions are
+ * read from the CMS (ticket 22) and added to its Questions section.
+ */
+export type BeforeQuestions<T extends { readonly questions: { readonly entries: unknown } }> = Omit<T, 'questions'> & {
+  readonly questions: Omit<T['questions'], 'entries'>;
+};
+
 /** What a page says about itself to a search engine and a browser tab. */
 export type PageMeta = {
   readonly title: string;

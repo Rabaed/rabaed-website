@@ -1,3 +1,4 @@
+import { pageQuestions } from '@/cms/faqs';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { PartnershipApplyContent } from '@/components/partnership/apply';
 import type { PartnershipAudienceContent } from '@/components/partnership/audience';
@@ -5,10 +6,9 @@ import type { PartnershipBenefitsContent } from '@/components/partnership/benefi
 import type { PartnershipIdeaContent } from '@/components/partnership/idea';
 import type { PartnershipModesContent } from '@/components/partnership/modes';
 import type { PartnershipPathContent } from '@/components/partnership/path';
-import type { PartnershipQuestionsContent } from '@/components/partnership/questions';
-import { PARTNERSHIP_FAQ } from '@/content/faq';
+import type { QuestionsContent } from '@/components/questions';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type PartnershipPageContent = {
   readonly meta: PageMeta;
@@ -19,13 +19,13 @@ export type PartnershipPageContent = {
   readonly benefits: Section<PartnershipBenefitsContent>;
   /** The hero's «كيف نبني الشراكة ↓» lands here. */
   readonly path: LinkedSection<PartnershipPathContent>;
-  readonly questions: Section<PartnershipQuestionsContent>;
+  readonly questions: Section<QuestionsContent>;
   /** The hero's «اطلب اجتماع شراكة» and the path's link both land here. */
   readonly apply: LinkedSection<PartnershipApplyContent>;
 };
 
 /** All copy is verbatim from `reference/site/partnership.html`. */
-const AR: PartnershipPageContent = {
+const AR: BeforeQuestions<PartnershipPageContent> = {
   meta: {
     title: 'ربائد · برنامج الشراكات للمكاتب الهندسية',
     description: 'شراكة تُصمَّم معك: تسعير شريك، أو رخصة على مستوى المكتب، أو تضمين المنصة في عرضك للمالك.',
@@ -155,7 +155,6 @@ const AR: PartnershipPageContent = {
     shows: true,
     eyebrow: 'الأسئلة الشائعة',
     heading: 'قبل الاجتماع الأول',
-    entries: PARTNERSHIP_FAQ,
   },
   apply: {
     shows: true,
@@ -171,7 +170,8 @@ const AR: PartnershipPageContent = {
   },
 };
 
-/** The partnership page's content in `locale`, or a refusal (`inLocale`). */
+/** The partnership page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
-  return inLocale('partnership', { ar: AR }, locale);
+  const content = inLocale('partnership', { ar: AR }, locale);
+  return { ...content, questions: { ...content.questions, entries: await pageQuestions('partnership', locale) } };
 }

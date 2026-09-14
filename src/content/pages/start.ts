@@ -1,23 +1,26 @@
+import { pageQuestions } from '@/cms/faqs';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
-import type { StartQuestionsContent } from '@/components/start/questions';
+import type { QuestionsContent } from '@/components/questions';
+import type { StartFreeToolTeaserContent } from '@/components/start/free-tool-teaser';
 import type { StartStepsContent } from '@/components/start/steps';
-import { START_FAQ } from '@/content/faq';
 import { TRUST_STRIP } from '@/content/trust-strip';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type StartPageContent = {
   readonly meta: PageMeta;
   readonly hero: PageHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
   readonly steps: Section<StartStepsContent>;
-  /** The home page's «كل الأسئلة» and this page's hero both land here. */
-  readonly questions: LinkedSection<StartQuestionsContent>;
+  /** The home page's «كل الأسئلة» and this page's hero both land here, and the demo request form stands in it. */
+  readonly questions: LinkedSection<QuestionsContent>;
+  /** Under the questions and the form. */
+  readonly freeTool: Section<StartFreeToolTeaserContent>;
 };
 
 /** Verbatim from `reference/site/start.html`. */
-const AR: StartPageContent = {
+const AR: BeforeQuestions<StartPageContent> = {
   meta: {
     title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
     description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
@@ -66,17 +69,18 @@ const AR: StartPageContent = {
     shows: true,
     eyebrow: 'الأسئلة الشائعة',
     heading: 'قبل أن تسأل',
-    entries: START_FAQ,
-    freeTool: {
-      eyebrow: 'أداة مجانية',
-      heading: 'سجل صبّات الخرسانة ونتائج التكسير',
-      text: 'أداة مستقلة تعمل بلا حساب وبلا إنترنت — للمهندس في الموقع. من فريق ربائد.',
-      link: { label: 'تحميل الأداة', href: localePath('ar', '/tool') },
-    },
+  },
+  freeTool: {
+    shows: true,
+    eyebrow: 'أداة مجانية',
+    heading: 'سجل صبّات الخرسانة ونتائج التكسير',
+    text: 'أداة مستقلة تعمل بلا حساب وبلا إنترنت — للمهندس في الموقع. من فريق ربائد.',
+    link: { label: 'تحميل الأداة', href: localePath('ar', '/tool') },
   },
 };
 
-/** The start page's content in `locale`, or a refusal (`inLocale`). */
+/** The start page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  return inLocale('start', { ar: AR }, locale);
+  const content = inLocale('start', { ar: AR }, locale);
+  return { ...content, questions: { ...content.questions, entries: await pageQuestions('start', locale) } };
 }

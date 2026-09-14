@@ -31,8 +31,23 @@ export const BLOG_EDITOR = {
   password: 'test-editor-password-23',
 } as const;
 
+/** The FAQ suite's own account, for the same reason. */
+export const FAQ_EDITOR = {
+  email: 'faq-editor@rabaed.test',
+  password: 'test-editor-password-22',
+} as const;
+
 /** Every account the test server creates. */
-export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR];
+export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, FAQ_EDITOR];
+
+/** Signs in through the admin's own login form, as `editor`. */
+export async function logInAs(page: Page, editor: Editor): Promise<void> {
+  await page.goto(`${ADMIN_PATH}/login`);
+  await page.getByLabel('Email').fill(editor.email);
+  await page.getByLabel('Password').fill(editor.password);
+  await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page).not.toHaveURL(/\/login/);
+}
 
 /** Signs in through the admin's own login form, as Ahmed would. */
 export async function logIn(page: Page): Promise<void> {

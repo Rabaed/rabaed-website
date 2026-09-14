@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
+import { FAQ_PAGES } from '@/cms/faq-pages';
 import { PageHero } from '@/components/page-hero';
 import { PageShell } from '@/components/page-shell';
+import { Questions } from '@/components/questions';
 import { Audience } from '@/components/referral/audience';
 import { HowItWorks } from '@/components/referral/how-it-works';
 import { Offer } from '@/components/referral/offer';
-import { Questions } from '@/components/referral/questions';
 import { Signup } from '@/components/referral/signup';
 import { TermsSummary } from '@/components/referral/terms-summary';
 import { WhatIsReferred } from '@/components/referral/what-is-referred';
@@ -46,7 +47,7 @@ export default async function ReferralPage() {
       {content.audience.shows && <Audience content={content.audience} />}
       {content.whatIsReferred.shows && <WhatIsReferred content={content.whatIsReferred} />}
       {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
-      {content.questions.shows && <Questions content={content.questions} />}
+      {content.questions.shows && <Questions id={FAQ_PAGES.referral.sectionId} content={content.questions} />}
       <Signup content={content.signup} />
     </PageShell>
   );

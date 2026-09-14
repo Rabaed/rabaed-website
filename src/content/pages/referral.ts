@@ -1,15 +1,15 @@
+import { pageQuestions } from '@/cms/faqs';
 import type { PageHeroContent } from '@/components/page-hero';
+import type { QuestionsContent } from '@/components/questions';
 import type { ReferralAudienceContent } from '@/components/referral/audience';
 import type { ReferralHowItWorksContent } from '@/components/referral/how-it-works';
 import type { ReferralOfferContent } from '@/components/referral/offer';
-import type { ReferralQuestionsContent } from '@/components/referral/questions';
 import type { ReferralSignupContent } from '@/components/referral/signup';
 import type { ReferralTermsSummaryContent } from '@/components/referral/terms-summary';
 import type { ReferralWhatIsReferredContent } from '@/components/referral/what-is-referred';
-import { REFERRAL_FAQ } from '@/content/faq';
 import { REFERRAL_PROGRAM_VALUES } from '@/content/referral-program';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { inLocale, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ReferralPageContent = {
   readonly meta: PageMeta;
@@ -20,7 +20,7 @@ export type ReferralPageContent = {
   readonly audience: Section<ReferralAudienceContent>;
   readonly whatIsReferred: Section<ReferralWhatIsReferredContent>;
   readonly termsSummary: Section<ReferralTermsSummaryContent>;
-  readonly questions: Section<ReferralQuestionsContent>;
+  readonly questions: Section<QuestionsContent>;
   /** The hero's «سجّل واحصل على كودك» lands here. */
   readonly signup: LinkedSection<ReferralSignupContent>;
 };
@@ -32,7 +32,7 @@ const { payout, clientDiscount } = REFERRAL_PROGRAM_VALUES;
  * quotes, the payout and the client discount, is inserted from the Referral
  * Program values rather than typed, so the page cannot disagree with itself.
  */
-const AR: ReferralPageContent = {
+const AR: BeforeQuestions<ReferralPageContent> = {
   meta: {
     title: `ربائد · برنامج الإحالة — ${payout} ريال عن كل مشروع`,
     description: `أحِل مشروعاً واحداً واكسب ${payout} ريال صافية، ويحصل عميلك على خصم ${clientDiscount} على اشتراك مشروعه.`,
@@ -159,7 +159,6 @@ const AR: ReferralPageContent = {
     shows: true,
     eyebrow: 'الأسئلة الشائعة',
     heading: 'قبل أن تسجّل',
-    entries: REFERRAL_FAQ,
   },
   signup: {
     shows: true,
@@ -177,7 +176,8 @@ const AR: ReferralPageContent = {
   },
 };
 
-/** The referral page's content in `locale`, or a refusal (`inLocale`). */
+/** The referral page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
 export async function getReferralPage(locale: Locale): Promise<ReferralPageContent> {
-  return inLocale('referral', { ar: AR }, locale);
+  const content = inLocale('referral', { ar: AR }, locale);
+  return { ...content, questions: { ...content.questions, entries: await pageQuestions('referral', locale) } };
 }

@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
+import { FAQ_PAGES } from '@/cms/faq-pages';
 import { ClosingSection } from '@/components/closing-section';
 import { BeforeAfter } from '@/components/home/before-after';
 import { DelayCalculator } from '@/components/home/delay-calculator';
 import { Figures } from '@/components/home/figures';
 import { FourUnits } from '@/components/home/four-units';
 import { Hero } from '@/components/home/hero';
-import { Questions } from '@/components/home/questions';
 import { RecordSection } from '@/components/home/record';
 import { Situations } from '@/components/home/situations';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
+import { Questions } from '@/components/questions';
 import { RevealOnScroll } from '@/components/reveal-on-scroll';
 import { getHomePage } from '@/content/pages/home';
 import { pageMetadata } from '@/lib/metadata';
@@ -40,7 +41,9 @@ export default async function HomePage() {
       {content.beforeAfter.shows && <BeforeAfter content={content.beforeAfter} />}
       {content.calculator.shows && <DelayCalculator content={content.calculator} />}
       {content.figures.shows && <Figures content={content.figures} />}
-      {content.questions.shows && <Questions content={content.questions} />}
+      {content.questions.shows && (
+        <Questions id={FAQ_PAGES.home.sectionId} ruled={false} content={content.questions} />
+      )}
       <ClosingSection content={content.closing} />
       {/* The page's `.reveal` entrances, attached once for the page. Here
           rather than in `PageShell`, so pages without any do not load it. */}

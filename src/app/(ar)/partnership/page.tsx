@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { FAQ_PAGES } from '@/cms/faq-pages';
 import { PageHero } from '@/components/page-hero';
 import { PageShell } from '@/components/page-shell';
 import { Apply } from '@/components/partnership/apply';
@@ -7,7 +8,7 @@ import { Benefits } from '@/components/partnership/benefits';
 import { Idea } from '@/components/partnership/idea';
 import { Modes } from '@/components/partnership/modes';
 import { Path } from '@/components/partnership/path';
-import { Questions } from '@/components/partnership/questions';
+import { Questions } from '@/components/questions';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { pageMetadata } from '@/lib/metadata';
 
@@ -40,7 +41,7 @@ export default async function PartnershipPage() {
       {content.modes.shows && <Modes content={content.modes} />}
       {content.benefits.shows && <Benefits content={content.benefits} />}
       <Path content={content.path} />
-      {content.questions.shows && <Questions content={content.questions} />}
+      {content.questions.shows && <Questions id={FAQ_PAGES.partnership.sectionId} content={content.questions} />}
       <Apply content={content.apply} />
     </PageShell>
   );
