@@ -34,7 +34,7 @@
 - **English case studies are in the sitemap,** as English articles are; the English index is not, as `/en/blog` is not.
 - **«قصص العملاء», not «دراسات الحالة».** `CONTEXT.md` now records the term.
 
-**Verified.** Written test-first. The first runs caught the mobile menu clipping its last 14px with the new link, which is what raised the cap. Full suite on port 3124: 751 passed before the review changes, and 751 after them.
+**Verified.** Written test-first. The first runs caught the mobile menu clipping its last 14px with the new link, which is what raised the cap. Full suite on port 3124: 751 passed before the review changes, and 751 after them; 757 after merging `main`, ticket 22's FAQ tests included.
 
 **A clash the full suite ran into.** One run failed before any test started: `FATAL: pre-existing shared memory block is still in use`. A Postgres worker from the previous run on the same port had outlived its server and still held the database's shared memory. Stopping that one process — this checkout's, its parent gone — cleared it. Nothing in the code caused it; the next session to see it can do the same.
 
@@ -45,6 +45,8 @@
 - The index's metadata called the cached "is the section showing" check with extra arguments, so it missed the header's cached answer and asked the database again.
 - The slug rule's message says «مقالة أخرى» or «قصة أخرى» again, instead of a vaguer word the refactor had put in both.
 - Smaller: a clearer name for the published-languages lookup, the sitemap written one kind of entry at a time, test data using the glossary's term.
+
+**Merged with ticket 22.** Ticket 22's FAQ migration reached `main` first, timestamped after this ticket's, so this migration was regenerated on top of it as `20260914_212631_case_studies`, as `docs/agents/parallel-sessions.md` asks. The SQL is unchanged; only the name moved. A database that recorded the first name (`20260914_192933_case_studies`) needs that row renamed, not the tables created again.
 
 **For the founder.**
 

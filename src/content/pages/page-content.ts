@@ -1,3 +1,6 @@
+import { FAQ_PAGES, type FaqPageKey } from '@/cms/faq-pages';
+import { pageQuestions } from '@/cms/faqs';
+import type { QuestionsContent } from '@/components/questions';
 import type { Locale } from '@/lib/locales';
 
 /**
@@ -28,6 +31,29 @@ export type Section<T> = T & { readonly shows: boolean };
  * how-it-works — which cannot be hidden, or the link would lead nowhere.
  */
 export type LinkedSection<T> = T & { readonly shows: true };
+
+/**
+ * A page's content as its module holds it, before its Questions section is
+ * given its id and its page's questions (`withQuestions`).
+ */
+export type BeforeQuestions<T extends { readonly questions: QuestionsContent }> = Omit<T, 'questions'> & {
+  readonly questions: Omit<T['questions'], 'id' | 'entries'>;
+};
+
+/**
+ * A page's content with its Questions section completed: the id links land
+ * on, and the page's questions as the CMS has them (ticket 22).
+ */
+export async function withQuestions<T extends { readonly questions: QuestionsContent }>(
+  page: FaqPageKey,
+  locale: Locale,
+  content: BeforeQuestions<T>,
+): Promise<T> {
+  const questions = { ...content.questions, id: FAQ_PAGES[page].sectionId, entries: await pageQuestions(page, locale) };
+  // `BeforeQuestions<T>` with exactly the two fields it leaves out is `T`,
+  // which TypeScript cannot follow through a generic spread.
+  return { ...content, questions } as unknown as T;
+}
 
 /** What a page says about itself to a search engine and a browser tab. */
 export type PageMeta = {

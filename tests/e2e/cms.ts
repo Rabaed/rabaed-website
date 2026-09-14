@@ -32,6 +32,12 @@ export const BLOG_EDITOR = {
   password: 'test-editor-password-23',
 } as const;
 
+/** The FAQ suite's own account, for the same reason. */
+export const FAQ_EDITOR = {
+  email: 'faq-editor@rabaed.test',
+  password: 'test-editor-password-22',
+} as const;
+
 /** The case studies suite's own account, for the same reason as `BLOG_EDITOR`. */
 export const CASE_STUDIES_EDITOR = {
   email: 'case-studies-editor@rabaed.test',
@@ -39,7 +45,7 @@ export const CASE_STUDIES_EDITOR = {
 } as const;
 
 /** Every account the test server creates. */
-export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, CASE_STUDIES_EDITOR];
+export const TEST_EDITORS: readonly Editor[] = [TEST_EDITOR, BLOG_EDITOR, FAQ_EDITOR, CASE_STUDIES_EDITOR];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
 export function richText(text: string, locale: 'ar' | 'en') {
@@ -77,13 +83,18 @@ export async function uploadImage(editor: APIRequestContext, alt: string): Promi
   return (await response.json()).doc.id as number;
 }
 
-/** Signs in through the admin's own login form, as Ahmed would. */
-export async function logIn(page: Page): Promise<void> {
+/** Signs in through the admin's own login form, as `editor`. */
+export async function logInAs(page: Page, editor: Editor): Promise<void> {
   await page.goto(`${ADMIN_PATH}/login`);
-  await page.getByLabel('Email').fill(TEST_EDITOR.email);
-  await page.getByLabel('Password').fill(TEST_EDITOR.password);
+  await page.getByLabel('Email').fill(editor.email);
+  await page.getByLabel('Password').fill(editor.password);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page).not.toHaveURL(/\/login/);
+}
+
+/** Signs in through the admin's own login form, as Ahmed would. */
+export async function logIn(page: Page): Promise<void> {
+  await logInAs(page, TEST_EDITOR);
 }
 
 /**

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page-shell';
+import { Questions } from '@/components/questions';
 import { Download } from '@/components/tool/download';
 import { Features } from '@/components/tool/features';
 import { ToolHero } from '@/components/tool/hero';
 import { How } from '@/components/tool/how';
 import { Privacy } from '@/components/tool/privacy';
-import { ToolQuestions } from '@/components/tool/questions';
 import { Requirements } from '@/components/tool/requirements';
 import { Upsell } from '@/components/tool/upsell';
 import { Why } from '@/components/tool/why';
@@ -40,7 +40,7 @@ export default async function ToolPage() {
       {content.privacy.shows && <Privacy content={content.privacy} />}
       {content.requirements.shows && <Requirements content={content.requirements} />}
       <Download content={content.download} />
-      {content.questions.shows && <ToolQuestions content={content.questions} />}
+      {content.questions.shows && <Questions content={content.questions} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
     </PageShell>
   );
