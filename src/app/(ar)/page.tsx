@@ -50,7 +50,7 @@ export default async function HomePage() {
       <RevealOnScroll />
       <StructuredData data={websiteData()} />
       <StructuredData data={softwareData()} />
-      <StructuredData data={content.questions.shows ? faqData(content.questions.entries) : null} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

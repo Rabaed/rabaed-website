@@ -37,8 +37,10 @@ export function legalMetadata(document: LegalDocument): Metadata {
  * (spec: Out of Scope) — so there is no locale to pass.
  */
 export function LegalDocumentPage({ document }: { document: LegalDocument }) {
+  const page = LEGAL_PAGES[document.slug];
+
   return (
-    <PageShell locale="ar" path={LEGAL_PAGES[document.slug].path}>
+    <PageShell locale="ar" path={page.path}>
       <section className="phero dark">
         <div className="pglow" />
         <div className="wrap">
@@ -93,9 +95,7 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           </div>
         </div>
       </section>
-      <StructuredData
-        data={breadcrumbData('ar', [{ name: LEGAL_PAGES[document.slug].label.ar, path: LEGAL_PAGES[document.slug].path }])}
-      />
+      <StructuredData data={breadcrumbData('ar', [{ name: page.label.ar, path: page.path }])} />
     </PageShell>
   );
 }

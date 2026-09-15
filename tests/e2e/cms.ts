@@ -218,7 +218,11 @@ export async function lastUpdatedLine(request: APIRequestContext, path: string):
  * rendered page, so that no script has had a chance to change it.
  */
 export async function footerLink(request: APIRequestContext, path: string, label: string): Promise<string | null> {
-  const html = await (await request.get(path)).text();
+  return footerLinkIn(await (await request.get(path)).text(), label);
+}
+
+/** Where the footer icon with this accessible name points, in a page's HTML already fetched. */
+export function footerLinkIn(html: string, label: string): string | null {
   const footer = html.slice(html.indexOf('<footer'));
   const link = footer.match(/<a\b[^>]*>/g)?.find((tag) => tag.includes(`aria-label="${label}"`));
   return link?.match(/\bhref="([^"]*)"/)?.[1] ?? null;

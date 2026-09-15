@@ -50,8 +50,8 @@ export default async function ReferralPage() {
       {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
       {content.questions.shows && <Questions content={content.questions} />}
       <Signup content={content.signup} />
-      <StructuredData data={breadcrumbData('ar', [{ name: 'برنامج الإحالة', path: '/referral' }])} />
-      <StructuredData data={content.questions.shows ? faqData(content.questions.entries) : null} />
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/referral' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

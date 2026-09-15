@@ -269,7 +269,7 @@ test('a published article describes itself in article data, opening with its ans
   expect(nodesOf(nodes, 'Organization')).toHaveLength(1);
 });
 
-test('the index lists articles newest first, a page at a time', async ({ page, request }) => {
+test('the index lists articles newest first, a page at a time', async ({ page, request, baseURL }) => {
   await logInByApi(page.request, BLOG_EDITOR);
   const articles = Array.from({ length: POSTS_PER_PAGE + 1 }, (_, day) =>
     article({ publishedAt: `2026-01-${String(day + 1).padStart(2, '0')}T12:00:00.000Z` }),
@@ -291,6 +291,12 @@ test('the index lists articles newest first, a page at a time', async ({ page, r
   await expect(page).toHaveURL(/\/blog\/page\/2$/);
   // Each page of the index is a page of its own to a search engine (ticket 31).
   await expect(description).not.toHaveAttribute('content', firstPageDescription!);
+  const [breadcrumbs] = nodesOf(structuredData((await visit(request, '/blog/page/2')).html), 'BreadcrumbList');
+  expect(trail(breadcrumbs)).toEqual([
+    ['الرئيسية', baseURL],
+    ['المدونة', `${baseURL}/blog`],
+    ['الصفحة 2', `${baseURL}/blog/page/2`],
+  ]);
   expect(await page.getByRole('article').getByRole('heading').allTextContents()).toEqual(
     newestFirst.slice(POSTS_PER_PAGE),
   );

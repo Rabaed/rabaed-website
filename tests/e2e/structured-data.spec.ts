@@ -8,8 +8,9 @@
  * article data on blog posts is checked by `blog.spec.ts`, which publishes one.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
+import { footerLinkIn } from './cms';
 import { ROUTES } from './routes';
-import { nodesOf, structuredData, trail, type Node } from './structured-data';
+import { nodesOf, structuredData, trail, type JsonLdNode } from './structured-data';
 
 /** The home page's absolute address is the bare origin, as its canonical URL is. */
 const absolute = (baseURL: string, path: string) => `${baseURL}${path === '/' ? '' : path}`;
@@ -61,13 +62,6 @@ async function html(request: APIRequestContext, path: string): Promise<string> {
   return response.text();
 }
 
-/** Where a footer icon points, read from the same HTML as the structured data. */
-function footerHref(page: string, label: string): string | null {
-  const footer = page.slice(page.indexOf('<footer'));
-  const link = footer.match(/<a\b[^>]*>/g)?.find((tag) => tag.includes(`aria-label="${label}"`));
-  return link?.match(/\bhref="([^"]*)"/)?.[1] ?? null;
-}
-
 /** Every key anywhere inside a value. */
 function keysWithin(value: unknown): string[] {
   if (Array.isArray(value)) return value.flatMap(keysWithin);
@@ -94,14 +88,15 @@ for (const route of ROUTES) {
     });
     expect(JSON.stringify(organisation.identifier)).toContain(COMPANY.unifiedNumber);
 
-    // The real accounts only: the ones the footer links to. One nobody has
-    // supplied is `#` there, and absent here.
-    const accounts = SOCIAL_LABELS.map((label) => footerHref(page, label)).filter(
+    // The real accounts only: the ones the footer links to, read from the same
+    // response, because `cms.spec.ts` publishes some while this runs. One
+    // nobody has supplied is `#` there, and absent here.
+    const accounts = SOCIAL_LABELS.map((label) => footerLinkIn(page, label)).filter(
       (href): href is string => href !== null && href !== '#',
     );
     expect(organisation.sameAs ?? []).toEqual(accounts);
 
-    const logo = organisation.logo as string | Node;
+    const logo = organisation.logo as string | JsonLdNode;
     const logoUrl = typeof logo === 'string' ? logo : (logo.url as string);
     const logoResponse = await request.get(logoUrl);
     expect(logoResponse.status(), logoUrl).toBe(200);
@@ -152,8 +147,11 @@ test('the home page describes the site', async ({ request, baseURL }) => {
 const FAQ_PAGES = { '/': '#fq', '/start': '#faq', '/tool': '#faq', '/referral': '#faq', '/partnership': '#faq' };
 
 for (const [path, section] of Object.entries(FAQ_PAGES)) {
-  test(`${path}'s FAQ data is its visible questions and answers, word for word`, async ({ page, request }) => {
-    await page.goto(path);
+  test(`${path}'s FAQ data is its visible questions and answers, word for word`, async ({ page }) => {
+    // Both from one response: `faqs.spec.ts`, running beside this, publishes
+    // an edit to a referral answer, which a second request could see and the
+    // page did not.
+    const response = await page.goto(path);
     const visible = await page.locator(`${section} details`).evaluateAll((entries) =>
       entries.map((entry) => ({
         question: entry.querySelector('summary')!.textContent,
@@ -162,11 +160,11 @@ for (const [path, section] of Object.entries(FAQ_PAGES)) {
     );
     expect(visible.length, 'questions on the page').toBeGreaterThan(0);
 
-    const faqs = nodesOf(structuredData(await html(request, path)), 'FAQPage');
+    const faqs = nodesOf(structuredData(await response!.text()), 'FAQPage');
     expect(faqs).toHaveLength(1);
-    const declared = (faqs[0].mainEntity as Node[]).map((question) => ({
+    const declared = (faqs[0].mainEntity as JsonLdNode[]).map((question) => ({
       question: question.name,
-      answer: (question.acceptedAnswer as Node).text,
+      answer: (question.acceptedAnswer as JsonLdNode).text,
     }));
     expect(declared).toEqual(visible);
   });

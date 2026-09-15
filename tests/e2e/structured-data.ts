@@ -5,10 +5,10 @@
  */
 import { expect } from '@playwright/test';
 
-export type Node = Record<string, unknown> & { '@type': string | string[] };
+export type JsonLdNode = Record<string, unknown> & { '@type': string | string[] };
 
 /** Every `application/ld+json` block in the HTML, as written. */
-export function jsonLdBlocks(html: string): string[] {
+function jsonLdBlocks(html: string): string[] {
   return [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(([, json]) => json);
 }
 
@@ -17,14 +17,14 @@ export function jsonLdBlocks(html: string): string[] {
  * each block held to the shape a validator accepts: JSON that parses, the
  * schema.org context, and a type on every node.
  */
-export function structuredData(html: string): Node[] {
+export function structuredData(html: string): JsonLdNode[] {
   return jsonLdBlocks(html).flatMap((json) => {
     // A `<` left in would let text from the CMS close the script tag early.
     expect(json, 'an unescaped "<" in structured data').not.toContain('<');
     const block = JSON.parse(json) as Record<string, unknown>;
     expect(block['@context'], 'structured data context').toBe('https://schema.org');
 
-    const nodes = (Array.isArray(block['@graph']) ? block['@graph'] : [block]) as Node[];
+    const nodes = (Array.isArray(block['@graph']) ? block['@graph'] : [block]) as JsonLdNode[];
     for (const node of nodes) {
       expect(node['@type'], `a node with no type: ${JSON.stringify(node)}`).toBeTruthy();
       expectRequiredProperties(node);
@@ -34,14 +34,16 @@ export function structuredData(html: string): Node[] {
 }
 
 /** The nodes of one type. */
-export function nodesOf(nodes: Node[], type: string): Node[] {
+export function nodesOf(nodes: JsonLdNode[], type: string): JsonLdNode[] {
   return nodes.filter((node) => [node['@type']].flat().includes(type));
 }
 
 /**
- * What each type must carry to be valid and, where Google reads it, eligible
- * for a rich result. Restated from schema.org and Google Search Central rather
- * than taken from the code, for the reason `routes.ts` gives.
+ * What each type must carry, as schema.org and Google Search Central describe
+ * it — restated rather than taken from the code, for the reason `routes.ts`
+ * gives. Not what earns a rich result: Google shows a software application's
+ * only with a price and a rating, which the site never states (spec: SEO and
+ * GEO).
  */
 const REQUIRED: Record<string, readonly string[]> = {
   Organization: ['name', 'url', 'logo'],
@@ -52,7 +54,7 @@ const REQUIRED: Record<string, readonly string[]> = {
   BlogPosting: ['headline', 'image', 'datePublished', 'author'],
 };
 
-function expectRequiredProperties(node: Node) {
+function expectRequiredProperties(node: JsonLdNode) {
   for (const type of [node['@type']].flat()) {
     for (const property of REQUIRED[type] ?? []) {
       expect(node[property], `${type} without ${property}`).toBeTruthy();
@@ -60,18 +62,18 @@ function expectRequiredProperties(node: Node) {
   }
 
   if (nodesOf([node], 'FAQPage').length) {
-    const questions = node.mainEntity as Node[];
+    const questions = node.mainEntity as JsonLdNode[];
     expect(questions.length, 'an FAQPage with no questions').toBeGreaterThan(0);
     for (const question of questions) {
       expect(question['@type']).toBe('Question');
       expect(question.name).toBeTruthy();
-      expect((question.acceptedAnswer as Node)['@type']).toBe('Answer');
-      expect((question.acceptedAnswer as Node).text).toBeTruthy();
+      expect((question.acceptedAnswer as JsonLdNode)['@type']).toBe('Answer');
+      expect((question.acceptedAnswer as JsonLdNode).text).toBeTruthy();
     }
   }
 
   if (nodesOf([node], 'BreadcrumbList').length) {
-    const items = node.itemListElement as Node[];
+    const items = node.itemListElement as JsonLdNode[];
     expect(items.length, 'a breadcrumb trail of fewer than two steps').toBeGreaterThan(1);
     items.forEach((item, index) => {
       expect(item['@type']).toBe('ListItem');
@@ -83,6 +85,6 @@ function expectRequiredProperties(node: Node) {
 }
 
 /** A breadcrumb trail as its names and absolute addresses, in order. */
-export function trail(node: Node): [string, string][] {
-  return (node.itemListElement as Node[]).map((item) => [item.name as string, item.item as string]);
+export function trail(node: JsonLdNode): [string, string][] {
+  return (node.itemListElement as JsonLdNode[]).map((item) => [item.name as string, item.item as string]);
 }

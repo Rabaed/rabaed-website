@@ -37,7 +37,7 @@ export default async function ProductPage() {
       {content.roles.shows && <Roles content={content.roles} />}
       {content.innerCycle.shows && <InnerCycle content={content.innerCycle} />}
       <ClosingSection content={content.closing} form={content.demoForm} />
-      <StructuredData data={breadcrumbData('ar', [{ name: 'المنتج', path: '/product' }])} />
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/product' }])} />
       <StructuredData data={softwareData()} />
     </PageShell>
   );

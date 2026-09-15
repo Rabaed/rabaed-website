@@ -59,6 +59,15 @@ const organisationId = () => `${siteOrigin()}/#organisation`;
 
 const publisher = (): Organization => ({ '@type': 'Organization', '@id': organisationId(), name: COMPANY.name.ar });
 
+/** What the site and the product have in common: Rabaed's two names, its home, its language and its publisher. */
+const identity = () => ({
+  name: COMPANY.name.ar,
+  alternateName: COMPANY.name.en,
+  url: homeUrl(),
+  inLanguage: 'ar',
+  publisher: publisher(),
+});
+
 /**
  * The company, on every page. Its email, phone and social accounts are those
  * published in the CMS; an account nobody has supplied is left out, where the
@@ -89,11 +98,7 @@ export function websiteData(): WithContext<WebSite> {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: COMPANY.name.ar,
-    alternateName: COMPANY.name.en,
-    url: homeUrl(),
-    inLanguage: 'ar',
-    publisher: publisher(),
+    ...identity(),
   };
 }
 
@@ -102,15 +107,11 @@ export function softwareData(): WithContext<SoftwareApplication> {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: COMPANY.name.ar,
-    alternateName: COMPANY.name.en,
+    ...identity(),
     description: COMPANY.productDescription,
     applicationCategory: 'BusinessApplication',
     applicationSubCategory: 'Construction Management',
     operatingSystem: 'Web',
-    url: homeUrl(),
-    inLanguage: 'ar',
-    publisher: publisher(),
   };
 }
 
@@ -120,15 +121,21 @@ export function softwareData(): WithContext<SoftwareApplication> {
  * draws — never from the answers as the CMS stores them, whose backticks and
  * `{payout}` a visitor never reads (ticket 22). Rewording would make the
  * declared text disagree with the visible text, which search engines treat as
- * a violation. `null` when there are none, or when the section is hidden: a
- * page declares no question it does not show.
+ * a violation.
+ *
+ * Handed the whole Questions section, so that the one rule lives here: `null`
+ * when the section is hidden or has no questions, because a page declares no
+ * question it does not show.
  */
-export function faqData(entries: readonly FaqEntry[]): WithContext<FAQPage> | null {
-  if (entries.length === 0) return null;
+export function faqData(questions: {
+  readonly shows: boolean;
+  readonly entries: readonly FaqEntry[];
+}): WithContext<FAQPage> | null {
+  if (!questions.shows || questions.entries.length === 0) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: entries.map((entry) => ({
+    mainEntity: questions.entries.map((entry) => ({
       '@type': 'Question',
       name: entry.question,
       acceptedAnswer: { '@type': 'Answer', text: plainText(entry.answer) },

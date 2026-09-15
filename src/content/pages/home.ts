@@ -47,6 +47,7 @@ export type HomePageContent = {
  */
 const AR: BeforeQuestions<Omit<HomePageContent, 'demoForm'>> = {
   meta: {
+    name: 'الرئيسية',
     title: 'ربائد · ثلاثة أطراف. سجل واحد.',
     description: 'منصة سعودية تجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
   },
