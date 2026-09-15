@@ -12,6 +12,7 @@
 - [ ] Every grid holding an editable list lays out any number of items neatly, and today's counts still match the baselines
 - [ ] **The closing section** («كيف نبدأ معك» and its steps) is one CMS entry shared by the home and product pages, so the two cannot drift apart; its section with the demo request form (`#demo`) cannot be hidden
 - [ ] **Screen mocks:** each mock's picture, description and caption are replaceable in the CMS, once for every page that shows that mock. A replacement must be 1440×900, and the check that exported images match their markup skips mocks replaced in the admin (spec: Screen mocks)
+- [ ] A picture on a page is replaceable from the admin: a replacement needs its description for screen readers, and keeps the shape its place needs (moved from ticket 53, whose start page has no pictures)
 - [ ] Limits where the design cannot carry more: the journey panels are the height of the window and clip long copy, and the custom strip's badge can overlap a long title
 - [ ] A migration imports the product page's words, the closing section and the mocks' descriptions verbatim, and their static copy goes
 - [ ] The product page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text

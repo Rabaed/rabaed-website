@@ -11,6 +11,7 @@
 - [ ] Two more lists are built around their count in today's code, beyond the spec's list: the hero's four statuses, which follow the document round the three buildings (`src/components/home/hero-stations.ts`), and the Record's four steps (`src/components/home/record.tsx`). Put to the founder before building whether they lock at four or become editable, and record the answer in the spec
 - [ ] Every grid holding an editable list lays out any number of items neatly, and today's counts still match the baselines
 - [ ] The four units' screens use ticket 57's replaceable Screen mocks, and the page ends on ticket 57's shared closing section
+- [ ] The home page's own pictures, such as the hero's three buildings, are replaceable in the way ticket 57 makes pictures replaceable
 - [ ] Limits where the design cannot carry more: the figure cards (344×296, 268px tall on short screens) and the situation cards (340×348); the before/after cards, which are absolutely positioned with a minimum height; the closing steps' labels, which do not wrap
 - [ ] Before the calculator's words move, the readings «1 أيام» and «6 شهراً» are put to the founders, as ticket 10 asked: Arabic would say «يوم واحد» and «6 أشهر», but the words are theirs to change
 - [ ] A figure with no source stays off the live site, as it does today (`isAttributed`, applied when the site is publicly deployed); ticket 47 is where the founders supply the sources

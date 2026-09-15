@@ -171,6 +171,30 @@ site launched with, word for word.
   `{clientDiscount}` for the Referral Program values: the site inserts the
   current amount, so no answer quotes an old one.
 
+### Page text
+
+The start page's words are edited under **Pages → Start page** (ticket 53); the
+other marketing pages follow in tickets 54–59, and until then their words are
+still in code. The migrations import the start page's words once, as they were.
+
+- Each tab is one section of the page, in the page's order. Sections cannot be
+  moved, added or removed.
+- A section with **Shows on the page** can be hidden, keeping its words. A
+  section that links on the site land on has no such switch, and always shows.
+- Every word has an **Arabic** and an **English** field. The Arabic is always
+  needed to publish. The English is needed only once **English** is added under
+  **Published in**; until then the page is in Arabic alone, and nothing is ever
+  filled in from the other language. Once English is listed, every change is
+  published only with its English — a new step included — so write the
+  English, or take English off the list for the time being.
+- A list — the steps — can be added to, taken from and reordered by dragging,
+  within the number the design holds. Steps are numbered by their order.
+- Every field holds only as many characters as its place in the design
+  carries; the admin says so when a text is too long.
+- Like an article, a change is saved as a draft, previewed on the page, and
+  reaches visitors only when published. Where a button leads stays in code: an
+  Editor changes what it says, not where it goes.
+
 ### When a change adds to the CMS
 
 A change that adds a field or a content type carries a **migration** in
