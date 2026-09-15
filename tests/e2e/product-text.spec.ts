@@ -15,7 +15,7 @@
  *
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
-import { test, expect, type APIRequestContext, type APIResponse, type Locator, type Page } from '@playwright/test';
+import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, uploadImage } from './cms';
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
 
@@ -78,17 +78,6 @@ function save(editor: APIRequestContext, global: Global, data: object, status: '
   return editor.post(`/api/globals/${global}${status === 'draft' ? '?draft=true' : ''}`, {
     data: { ...data, _status: status },
   });
-}
-
-/** The fields a refused save names. */
-async function refusedFields(response: APIResponse): Promise<string[]> {
-  const text = await response.text();
-  expect(response.status(), text).toBe(400);
-  const body = JSON.parse(text) as { errors: { data?: { errors?: { path: string }[] } }[] };
-  const named = body.errors.flatMap((error) => (error.data?.errors ?? []).map((each) => each.path));
-  // A refusal that names no field is not the refusal being asked about.
-  expect(named.length, text).toBeGreaterThan(0);
-  return named;
 }
 
 /** Puts an entry's latest version back to what is published, so a test's draft is not left waiting. */
@@ -317,6 +306,7 @@ test('the CMS refuses what the product page, the closing section and the screens
   const otherShape = await uploadImage(page.request, 'صورة بمقاس آخر', { width: 1600, height: 900 });
   const tooSmall = await uploadImage(page.request, 'صورة أصغر من مكانها', { width: 720, height: 450 });
 
+  // What is refused, where it is saved, what is sent, and the field it breaks.
   const refused: [string, Global, object, string | RegExp][] = [
     ['two parties', 'product-page', { ...product, roles: { ...roles, roles: roles.roles.slice(0, 2) } }, 'roles.roles'],
     ['four parties', 'product-page', { ...product, roles: { ...roles, roles: [...roles.roles, roles.roles[0]] } }, 'roles.roles'],
@@ -384,35 +374,46 @@ test('the CMS refuses what the product page, the closing section and the screens
     ],
   ];
   for (const [what, global, data, field] of refused) {
-    const named = await refusedFields(await save(page.request, global, data, 'published'));
-    expect(
-      named.some((path) => (typeof field === 'string' ? path === field : field.test(path))),
-      `${what}: refused for ${named.join(', ')}`,
-    ).toBe(true);
+    const response = await save(page.request, global, data, 'published');
+    expect(response.status(), `${what} (${field}): ${await response.text()}`).toBe(400);
   }
 
   // A picture of the mock's shape, larger, is not what gets refused. Published
-  // beside a fault of its own, so that nothing is saved either way.
+  // beside a fault of its own, so that nothing is saved either way; the refusal
+  // names the one screen at fault, by its tab, and not the one beside it.
   const larger = await uploadImage(page.request, 'صورة بضعف المقاس', { width: 2880, height: 1800 });
-  const named = await refusedFields(
-    await save(
-      page.request,
-      'screen-mocks',
-      {
-        ...mocks,
-        correspondence: { ...mocks.correspondence, picture: larger },
-        kanban: { ...mocks.kanban, description: arabic('') },
-      },
-      'published',
-    ),
+  const beside = await save(
+    page.request,
+    'screen-mocks',
+    {
+      ...mocks,
+      correspondence: { ...mocks.correspondence, picture: larger },
+      kanban: { ...mocks.kanban, description: arabic('') },
+    },
+    'published',
   );
-  expect(named).toContain('kanban.description.ar');
-  expect(named).not.toContain('correspondence.picture');
+  const refusal = await beside.text();
+  expect(beside.status(), refusal).toBe(400);
+  expect(refusal).toContain('لوحة الاعتمادات والطلبات');
+  expect(refusal).not.toContain('المراسلات الرسمية');
 
   // Nothing refused was kept.
   expect(await published(page.request, 'product-page')).toEqual(product);
   expect(await published(page.request, 'closing-section')).toEqual(closing);
   expect(await published(page.request, 'screen-mocks')).toEqual(mocks);
+
+  // And each entry, as published, is accepted: so each refusal above was for
+  // the one thing it changed. Said this way because Payload does not always
+  // send back the list of fields it refused, only its message. Publishing an
+  // entry unchanged changes nothing a visitor or a suite beside this one sees.
+  for (const [global, entry] of [
+    ['product-page', product],
+    ['closing-section', closing],
+    ['screen-mocks', mocks],
+  ] as const) {
+    const response = await save(page.request, global, entry, 'published');
+    expect(response.ok(), `${global} as published: ${await response.text()}`).toBe(true);
+  }
 });
 
 test('the journey and the closing section have no switch to hide them; the custom strip has one', async ({ page }) => {
