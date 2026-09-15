@@ -20,6 +20,7 @@
  */
 import type { Field, PayloadRequest, Tab, TextareaFieldValidation, TextFieldSingleValidation } from 'payload';
 import { text, textarea } from 'payload/shared';
+import { ARABIC, latinNameProblem } from './latin-names';
 
 export type Words = { readonly ar: string; readonly en: string };
 
@@ -53,16 +54,18 @@ type ValidateOptions = Parameters<TextFieldSingleValidation>[1];
 
 /**
  * Payload's own check for the field — required, and its length above all —
- * then `needed`, which says when an empty word is not allowed.
+ * then `needed`, which says when an empty word is not allowed, and, for words
+ * that may name a Latin name, whether its marks are whole (`latin-names.ts`).
  */
 function wordsValidation<Validation extends WordsValidation>(
   base: Validation,
   needed: (options: ValidateOptions) => Words | null,
+  latinNames: boolean,
 ): Validation {
   const validate = async (value: null | string | undefined, options: ValidateOptions) => {
     const checked = await (base as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
     if (checked !== true) return checked;
-    const message = isEmpty(value) ? needed(options) : null;
+    const message = isEmpty(value) ? needed(options) : latinNames ? latinNameProblem(value as string) : null;
     return message ? inAdminLanguage(options.req, message) : true;
   };
   return validate as unknown as Validation;
@@ -72,6 +75,10 @@ function wordsValidation<Validation extends WordsValidation>(
 // empty, and the English only while the page is not published in English.
 const arabicRequired = () => ARABIC_NEEDED;
 const englishRequired = (options: ValidateOptions) => (publishedInEnglish(options.data) ? ENGLISH_NEEDED : null);
+// Words a place may go without need their English only where they have Arabic.
+const arabicOptional = () => null;
+const englishWhereArabic = (options: ValidateOptions) =>
+  isEmpty((options.siblingData as { ar?: unknown } | undefined)?.ar) ? null : englishRequired(options);
 
 /**
  * Words on the page, in Arabic and in English. The Arabic is required, because
@@ -81,6 +88,10 @@ const englishRequired = (options: ValidateOptions) => (publishedInEnglish(option
  * to what their place in the design carries — the visitor's page never breaks
  * (spec: Content model).
  *
+ * `optional` words are for a place drawn without them when empty — a file in
+ * the tool page's folder tree with no description beside it. `latinNames`
+ * words may mark a Latin name between backticks (`latin-names.ts`).
+ *
  * Payload checks all of this only when a page is published: a draft may be
  * unfinished.
  */
@@ -88,24 +99,75 @@ export function wordsField(
   name: string,
   label: Words,
   maxLength: number,
-  options: { readonly multiline?: boolean; readonly description?: Words } = {},
+  options: {
+    readonly multiline?: boolean;
+    readonly description?: Words;
+    readonly optional?: boolean;
+    readonly latinNames?: boolean;
+  } = {},
 ): Field {
-  const { multiline = false, description } = options;
-  const arabicLabel = { ar: 'بالعربية', en: 'Arabic' };
-  const englishLabel = { ar: 'بالإنجليزية', en: 'English' };
-  const arabic: Field = multiline
-    ? { name: 'ar', type: 'textarea', required: true, maxLength, label: arabicLabel, admin: { rows: 3, rtl: true }, validate: wordsValidation<TextareaFieldValidation>(textarea, arabicRequired) }
-    : { name: 'ar', type: 'text', required: true, maxLength, label: arabicLabel, admin: { rtl: true }, validate: wordsValidation<TextFieldSingleValidation>(text, arabicRequired) };
-  const english: Field = multiline
-    ? { name: 'en', type: 'textarea', maxLength, label: englishLabel, admin: { rows: 3, rtl: false }, validate: wordsValidation<TextareaFieldValidation>(textarea, englishRequired) }
-    : { name: 'en', type: 'text', maxLength, label: englishLabel, admin: { rtl: false }, validate: wordsValidation<TextFieldSingleValidation>(text, englishRequired) };
+  const { multiline = false, description, optional = false, latinNames = false } = options;
+  const box = (language: keyof Words, needed: (options: ValidateOptions) => Words | null): Field => {
+    const rtl = language === 'ar';
+    const common = {
+      name: language,
+      required: rtl && !optional,
+      maxLength,
+      label: rtl ? { ar: 'بالعربية', en: 'Arabic' } : { ar: 'بالإنجليزية', en: 'English' },
+    };
+    return multiline
+      ? { ...common, type: 'textarea', admin: { rows: 3, rtl }, validate: wordsValidation<TextareaFieldValidation>(textarea, needed, latinNames) }
+      : { ...common, type: 'text', admin: { rtl }, validate: wordsValidation<TextFieldSingleValidation>(text, needed, latinNames) };
+  };
 
   return {
     name,
     type: 'group',
     label,
     admin: { description },
-    fields: [{ type: 'row', fields: [arabic, english] }],
+    fields: [
+      {
+        type: 'row',
+        fields: [
+          box('ar', optional ? arabicOptional : arabicRequired),
+          box('en', optional ? englishWhereArabic : englishRequired),
+        ],
+      },
+    ],
+  };
+}
+
+const TEXT_NEEDED: Words = {
+  ar: 'اكتب هذا النص: لا تُنشر صفحة بنص فارغ.',
+  en: 'Write this: a page is not published with an empty text.',
+};
+
+const LATIN_ONLY: Words = {
+  ar: 'يُكتب هذا بحروف إنجليزية وأرقام، بلا حروف عربية: خطه لا حروف عربية فيه.',
+  en: 'Write this in Latin letters and figures, with no Arabic: its typeface has none.',
+};
+
+/**
+ * Latin text that is the same in every language — a file name, a reference
+ * like ANT-014, a figure — so one field rather than one per language. Required,
+ * held to what its place carries, and refused with Arabic letters in it: the
+ * page sets it in DM Mono, which has none (spec: Design system).
+ */
+export function latinField(name: string, label: Words, maxLength: number): Field {
+  const validate = async (value: null | string | undefined, options: ValidateOptions) => {
+    const checked = await (text as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
+    if (checked !== true) return checked;
+    const message = isEmpty(value) ? TEXT_NEEDED : ARABIC.test(value as string) ? LATIN_ONLY : null;
+    return message ? inAdminLanguage(options.req, message) : true;
+  };
+  return {
+    name,
+    type: 'text',
+    required: true,
+    maxLength,
+    label,
+    admin: { rtl: false },
+    validate: validate as unknown as TextFieldSingleValidation,
   };
 }
 

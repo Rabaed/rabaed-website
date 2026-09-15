@@ -1,4 +1,6 @@
-import { Inline, plainText, type InlineText } from '@/components/inline-text';
+import type { ReactNode } from 'react';
+import { COLUMN_CLASS, columnsFor } from '@/components/columns';
+import { Inline, type InlineText } from '@/components/inline-text';
 
 /**
  * The pieces the tool page's sections are built from: a section's heading, a
@@ -37,6 +39,17 @@ export function TeaserHead({ eyebrow, title, lead }: { eyebrow: string; title: s
   );
 }
 
+/**
+ * The three-across row, holding however many cards an Editor gives it
+ * (ticket 54), laid out by `columnsFor`. Three is `.rt-row` itself, so today's
+ * rows of three and six keep the markup their baselines were drawn from.
+ */
+export function CardRow({ count, className, children }: { count: number; className?: string; children: ReactNode }) {
+  const across = columnsFor(count, 3);
+  const classes = ['rt-row', className, across === 3 ? undefined : COLUMN_CLASS[across]];
+  return <div className={classes.filter(Boolean).join(' ')}>{children}</div>;
+}
+
 /** A card of the three-across row. */
 export function Card({ label, title, text }: TeaserCard) {
   return (
@@ -52,8 +65,9 @@ export function Card({ label, title, text }: TeaserCard) {
 export function TickList({ lines }: { lines: readonly InlineText[] }) {
   return (
     <ul className="tl-tick">
-      {lines.map((line) => (
-        <li key={plainText(line)}>
+      {/* By place: an Editor may write two lines alike. */}
+      {lines.map((line, index) => (
+        <li key={index}>
           <i>✓</i>
           <span>
             <Inline text={line} />

@@ -81,8 +81,9 @@ export function ToolHero({ content }: { content: ToolHeroContent }) {
               </a>
             </div>
             <div className="tl-chips">
-              {content.promises.map((promise) => (
-                <span key={promise} className="tl-chip">
+              {/* Keyed by place here and in the drawing: an Editor may write two alike. */}
+              {content.promises.map((promise, index) => (
+                <span key={index} className="tl-chip">
                   <i>✓</i>
                   {promise}
                 </span>
@@ -107,20 +108,20 @@ function ToolMock({ content }: { content: ToolMockContent }) {
         <b>{content.project}</b>
       </div>
       <div className="tiles">
-        {content.tiles.map((tile) => (
-          <div key={tile.label} className="tile">
+        {content.tiles.map((tile, index) => (
+          <div key={index} className="tile">
             <b style={tile.tone === undefined ? undefined : { color: TILE_COLOURS[tile.tone] }}>{tile.figure}</b>
             <small>{tile.label}</small>
           </div>
         ))}
       </div>
-      {content.pours.map((pour) => (
-        <div key={pour.reference} className="tl-row">
+      {content.pours.map((pour, index) => (
+        <div key={index} className="tl-row">
           <span className="rf">{pour.reference}</span>
           <span className="rn">{pour.name}</span>
           <div className="rm">
-            {pour.tests.map((test) => (
-              <div key={test.label}>
+            {pour.tests.map((test, index) => (
+              <div key={index}>
                 <span className="mk">{test.label}</span>
                 <TestStateBadge state={test.state} className="tl-s" />
               </div>

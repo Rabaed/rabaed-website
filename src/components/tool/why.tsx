@@ -1,4 +1,4 @@
-import { Card, TeaserHead, type TeaserCard } from '@/components/tool/parts';
+import { Card, CardRow, TeaserHead, type TeaserCard } from '@/components/tool/parts';
 
 export type ToolWhyContent = {
   readonly eyebrow: string;
@@ -7,17 +7,20 @@ export type ToolWhyContent = {
   readonly cards: readonly TeaserCard[];
 };
 
-/** «لماذا هذه الأداة»: the three reasons a concrete file runs late. */
+/**
+ * «لماذا هذه الأداة»: the reasons a concrete file runs late — three on the
+ * Reference site; as many as an Editor gives it (ticket 54).
+ */
 export function Why({ content }: { content: ToolWhyContent }) {
   return (
     <section id="why" className="light pad">
       <div className="wrap">
         <TeaserHead eyebrow={content.eyebrow} title={content.heading} lead={content.lead} />
-        <div className="rt-row">
-          {content.cards.map((card) => (
-            <Card key={card.label} {...card} />
+        <CardRow count={content.cards.length}>
+          {content.cards.map((card, index) => (
+            <Card key={index} {...card} />
           ))}
-        </div>
+        </CardRow>
       </div>
     </section>
   );
