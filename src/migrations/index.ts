@@ -18,6 +18,8 @@ import * as migration_20260915_063743_product_page_closing_section_and_screen_mo
 import * as migration_20260915_063744_import_product_page_closing_section_and_screen_mocks from './20260915_063744_import_product_page_closing_section_and_screen_mocks';
 import * as migration_20260915_064014_tool_page from './20260915_064014_tool_page';
 import * as migration_20260915_064015_import_tool_page from './20260915_064015_import_tool_page';
+import * as migration_20260915_200327_referral_page_and_program_values from './20260915_200327_referral_page_and_program_values';
+import * as migration_20260915_200328_import_referral_page from './20260915_200328_import_referral_page';
 
 export const migrations = [
   {
@@ -119,5 +121,15 @@ export const migrations = [
     up: migration_20260915_064015_import_tool_page.up,
     down: migration_20260915_064015_import_tool_page.down,
     name: '20260915_064015_import_tool_page',
+  },
+  {
+    up: migration_20260915_200327_referral_page_and_program_values.up,
+    down: migration_20260915_200327_referral_page_and_program_values.down,
+    name: '20260915_200327_referral_page_and_program_values',
+  },
+  {
+    up: migration_20260915_200328_import_referral_page.up,
+    down: migration_20260915_200328_import_referral_page.down,
+    name: '20260915_200328_import_referral_page',
   },
 ];

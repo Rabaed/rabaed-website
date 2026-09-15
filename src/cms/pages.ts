@@ -13,11 +13,11 @@ import type { Locale } from '@/lib/locales';
 
 /**
  * The pages whose words are in the CMS so far, and the sections and pictures
- * pages share; tickets 55–59 add theirs.
+ * pages share; tickets 55, 58 and 59 add theirs.
  */
 type PageSlug = Extract<
   GlobalSlug,
-  'start-page' | 'tool-page' | 'product-page' | 'closing-section' | 'screen-mocks'
+  'start-page' | 'tool-page' | 'referral-page' | 'product-page' | 'closing-section' | 'screen-mocks'
 >;
 
 /**

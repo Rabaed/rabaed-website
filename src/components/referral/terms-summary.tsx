@@ -1,9 +1,8 @@
 import type { PageLink } from '@/components/page-link';
 
 /**
- * One of the eight points: its lead phrase, drawn in bold, and the rest of its
- * sentence, which begins with whatever follows the bold on the Reference site
- * — a space or a comma.
+ * One of the points: its lead phrase, drawn in bold, and the rest of its
+ * sentence, which begins with whatever follows the bold — a space or a comma.
  */
 export type TermsPoint = {
   readonly lead: string;
@@ -19,9 +18,9 @@ export type ReferralTermsSummaryContent = {
 };
 
 /**
- * «الشروط باختصار» on the referral page: the Referral Terms in eight points,
- * and a link to the full terms, which are binding where this is a summary
- * (ticket 17).
+ * «الشروط باختصار» on the referral page: the Referral Terms in points, two
+ * columns of however many an Editor gives it, and a link to the full terms,
+ * which are binding where this is a summary (ticket 17).
  */
 export function TermsSummary({ content }: { content: ReferralTermsSummaryContent }) {
   return (
@@ -33,7 +32,7 @@ export function TermsSummary({ content }: { content: ReferralTermsSummaryContent
         </div>
         <ol className="t8">
           {content.terms.map((term, index) => (
-            <li key={term.lead}>
+            <li key={index}>
               <i>{index + 1}</i>
               <span>
                 <b>{term.lead}</b>

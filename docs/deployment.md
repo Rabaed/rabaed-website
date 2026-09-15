@@ -174,11 +174,12 @@ site launched with, word for word.
 ### Page text
 
 Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**
-(ticket 54) and **Product page** (ticket 57), and two entries pages share —
-**Closing section** («كيف نبدأ معك», which the home and product pages both end
-on, changed once for both) and **Screen mocks**. The other marketing pages
-follow in tickets 55, 56, 58 and 59, and until then their words are still in
-code. The migrations import each entry's words once, as they were.
+(ticket 54), **Referral Program page** (ticket 56) and **Product page** (ticket
+57), and two entries pages share — **Closing section** («كيف نبدأ معك», which
+the home and product pages both end on, changed once for both) and **Screen
+mocks**. The other marketing pages follow in tickets 55, 58 and 59, and until
+then their words are still in code. The migrations import each entry's words
+once, as they were.
 
 - Each tab is one section of the page, in the page's order. Sections cannot be
   moved, added or removed.
@@ -199,6 +200,10 @@ code. The migrations import each entry's words once, as they were.
   `` `concrete_db.json` `` — to set it left to right, as in the questions. File
   names, pour references and the drawing's figures are one field for both
   languages, in Latin letters and figures only.
+- On the referral page, never type the payout or the discount: write
+  `{payout}` and `{clientDiscount}`, as in the questions, and the page inserts
+  the **Referral Program values**. A name in braces the site does not hold is
+  refused.
 - **Screen mocks** holds each screen's picture and what it shows in words: read
   out by screen readers and written under the picture, wherever a page shows
   it. With no picture chosen, the page shows the image exported from the
@@ -215,6 +220,24 @@ code. The migrations import each entry's words once, as they were.
 - Like an article, a change is saved as a draft, previewed on the page, and
   reaches visitors only when published. Where a button leads stays in code: an
   Editor changes what it says, not where it goes.
+
+### Referral Program values
+
+The payout for each project and the referred client's discount are set once,
+under **Referral Program values** (ticket 56): a whole number of riyals, and a
+whole percentage. Once published, every mention on the site follows — the
+referral page, its search title, and every FAQ answer that names `{payout}` or
+`{clientDiscount}`. Like a page, a change is saved as a draft and previewed on
+the referral page first.
+
+The Referral Terms state the same amounts in their own words, and changing a
+value never rewrites them (ADR-0008). While the published Referral Terms do not
+state the published values, a warning shows on the dashboard, on the values and
+on the Referral Terms. It stops nothing from being published; it goes once a
+version of the Referral Terms that states both values is published. The terms
+are read for the figures — «2,500» or «٢٬٥٠٠», and «15%» — so an amount written
+out only in words is not recognised, and any «15%» in the terms counts as the
+discount, even one about something else.
 
 ### When a change adds to the CMS
 

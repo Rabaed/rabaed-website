@@ -24,13 +24,15 @@ export async function generateMetadata(): Promise<Metadata> {
  * for, what is referred, the terms in eight points, the questions, and the
  * signup form.
  *
- * Its words come from `src/content/pages/referral.ts`.
+ * Its words come from its entry in the CMS, through
+ * `src/content/pages/referral.ts` (ticket 56).
  *
  * **The Referral Program values — the payout for each project and the client's
- * discount — are held once** (`src/content/referral-program.ts`) and inserted wherever the page
- * quotes them, its search title and questions included. The Referral Terms
- * keep their own text, which states the same amounts in the lawyer's words
- * (ADR-0008). They are not in the header menu, by the founders' decision
+ * discount — are held once**, in the CMS (`src/cms/globals/referral-program.ts`),
+ * and inserted wherever the page quotes them, its search title and questions
+ * included. The Referral Terms keep their own text, which states the same
+ * amounts in the lawyer's words, and the admin warns while they do not
+ * (ADR-0008). The values are not in the header menu, by the founders' decision
  * (HANDOFF §2).
  *
  * Nothing on it moves but the header, so it loads no other animation code
