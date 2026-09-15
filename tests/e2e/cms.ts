@@ -83,6 +83,18 @@ export const PARTNERSHIP_PAGE_EDITOR = {
   password: 'test-editor-password-55',
 } as const;
 
+/** The referral page's text suite's own account (ticket 56), for the same reason as `BLOG_EDITOR`. */
+export const REFERRAL_PAGE_EDITOR = {
+  email: 'referral-page-editor@rabaed.test',
+  password: 'test-editor-password-56p',
+} as const;
+
+/** The Referral Program values suite's own account (ticket 56), for the same reason as `BLOG_EDITOR`. */
+export const REFERRAL_VALUES_EDITOR = {
+  email: 'referral-values-editor@rabaed.test',
+  password: 'test-editor-password-56v',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -95,6 +107,8 @@ export const TEST_EDITORS: readonly Editor[] = [
   TOOL_PAGE_EDITOR,
   PRODUCT_EDITOR,
   PARTNERSHIP_PAGE_EDITOR,
+  REFERRAL_PAGE_EDITOR,
+  REFERRAL_VALUES_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */

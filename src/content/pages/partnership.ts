@@ -1,5 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
-import type { InlinePart, InlineText } from '@/components/inline-text';
+import { numeralsInMono } from '@/components/inline-text';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { PartnershipApplyContent } from '@/components/partnership/apply';
 import type { PartnershipAudienceContent } from '@/components/partnership/audience';
@@ -41,17 +41,6 @@ const META = {
 /** A card or stage numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
 
-/** A figure as the hero draws it: its numerals in DM Mono, which has no Arabic glyphs (spec: Design system). */
-function withNumerals(figure: string): InlineText {
-  if (!/[0-9]/.test(figure)) return figure;
-  // Between the numerals is every second piece.
-  const parts: InlinePart[] = figure
-    .split(/([0-9]+(?:[.,][0-9]+)*%?)/)
-    .map((piece, index) => (index % 2 === 1 ? { mono: piece } : piece))
-    .filter((part) => part !== '');
-  return parts;
-}
-
 /**
  * The partnership page's content in `locale`: its words from its entry in the
  * CMS (ticket 55) — or a refusal, where the page is not published in `locale` —
@@ -73,7 +62,7 @@ export async function getPartnershipPage(locale: Locale): Promise<PartnershipPag
       // Both land further down this page: the application form, and the path.
       primary: { label: words(hero.primaryLabel), href: '#apply' },
       secondary: { label: words(hero.secondaryLabel), href: '#path' },
-      figures: hero.figures.map((figure) => ({ figure: withNumerals(words(figure.figure)), label: words(figure.label) })),
+      figures: hero.figures.map((figure) => ({ figure: numeralsInMono(words(figure.figure)), label: words(figure.label) })),
     },
     idea: {
       shows: idea.shows !== false,

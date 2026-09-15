@@ -27,6 +27,8 @@ import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
 import { PartnershipPage } from './cms/globals/partnership-page';
 import { ProductPage } from './cms/globals/product-page';
+import { ReferralPage } from './cms/globals/referral-page';
+import { ReferralProgram } from './cms/globals/referral-program';
 import { ScreenMocks } from './cms/globals/screen-mocks';
 import { StartPage } from './cms/globals/start-page';
 import { ToolPage } from './cms/globals/tool-page';
@@ -64,6 +66,11 @@ export default buildConfig({
       baseDir: dirname,
       importMapFile: path.resolve(dirname, 'app', '(payload)', 'maktab', 'importMap.js'),
     },
+    components: {
+      // While the Referral Terms do not state the Referral Program values
+      // (ADR-0008); it draws nothing otherwise.
+      beforeDashboard: ['/cms/components/referral-terms-warning#ReferralTermsWarning'],
+    },
   },
 
   // Arabic first: it is what the admin opens in unless an editor chooses
@@ -76,14 +83,17 @@ export default buildConfig({
   // No `localization`: page text holds its Arabic and English side by side in
   // fields of its own (`cms/page-fields.ts` says why).
   collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
-  // One settings global per form that submits (ticket 27), and one entry per
-  // marketing page whose words are in the CMS (ticket 53), with the closing
-  // section and the Screen mocks the pages share (ticket 57).
+  // One settings global per form that submits (ticket 27), the Referral
+  // Program values (ticket 56), and one entry per marketing page whose words
+  // are in the CMS (ticket 53), with the closing section and the Screen mocks
+  // the pages share (ticket 57).
   globals: [
     SiteSettings,
     ...SUBMITTABLE_FORMS.map(formSettingsGlobal),
+    ReferralProgram,
     StartPage,
     ToolPage,
+    ReferralPage,
     ProductPage,
     ClosingSection,
     ScreenMocks,

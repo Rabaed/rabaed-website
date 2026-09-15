@@ -1,3 +1,4 @@
+import { stripClass } from '@/components/columns';
 import { Inline, type InlineText } from '@/components/inline-text';
 
 /** One side of the offer: what the referrer gets, or what their client does. */
@@ -15,8 +16,9 @@ export type ReferralOfferContent = {
 };
 
 /**
- * «المبلغ والخصم» on the referral page: why the amount is fixed, and the two
- * sides of the offer — the referrer's payout and the client's discount.
+ * «المبلغ والخصم» on the referral page: why the amount is fixed, and the sides
+ * of the offer — the referrer's payout and the client's discount, two to a
+ * row however many an Editor gives it (`stripClass`).
  */
 export function Offer({ content }: { content: ReferralOfferContent }) {
   return (
@@ -33,9 +35,10 @@ export function Offer({ content }: { content: ReferralOfferContent }) {
             </p>
           ))}
         </div>
-        <div className="strip">
-          {content.sides.map((side) => (
-            <div key={side.badge} className="c">
+        <div className={stripClass(content.sides.length)}>
+          {/* By place: an Editor may write two badges alike. */}
+          {content.sides.map((side, index) => (
+            <div key={index} className="c">
               <span className="badge">{side.badge}</span>
               <h3>{side.title}</h3>
               <p>{side.text}</p>

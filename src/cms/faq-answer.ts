@@ -8,7 +8,8 @@
  *   (`latin-names.ts`).
  * - **A Referral Program value in braces** — `{payout}`, `{clientDiscount}` —
  *   is inserted from the one place the site holds it, rather than typed
- *   (spec: Content model), so an answer cannot quote an old amount.
+ *   (spec: Content model), so an answer cannot quote an old amount
+ *   (`referral-program-values.ts`).
  *
  * What a page draws is `answerText`; the plain text of it, which is what ticket
  * 32's FAQ structured data is to be built from, is `plainText` of the same
@@ -17,41 +18,15 @@
  * Imported by the CMS configuration, so it imports relatively.
  */
 import type { InlineText } from '../components/inline-text';
-import { REFERRAL_PROGRAM_VALUES } from '../content/referral-program';
 import { latinNameProblem, withLatinNames } from './latin-names';
-
-/** The values an answer may name, and what each stands for, for the Editor. */
-export const ANSWER_VALUES = {
-  payout: { value: REFERRAL_PROGRAM_VALUES.payout, meaning: 'مبلغ الإحالة عن كل مشروع' },
-  clientDiscount: { value: REFERRAL_PROGRAM_VALUES.clientDiscount, meaning: 'خصم العميل المُحال' },
-} as const;
-
-type ValueName = keyof typeof ANSWER_VALUES;
-
-/** A value named in braces, `{payout}`. */
-const VALUE_TOKEN = /\{([^{}]*)\}/g;
-
-function isValueName(name: string): name is ValueName {
-  return Object.hasOwn(ANSWER_VALUES, name);
-}
+import { valueNameProblem, withValues, type ReferralProgramValues } from './referral-program-values';
 
 /** Why an answer cannot be saved as written, in Arabic for the Editor — or `null` when it can. */
 export function answerProblem(answer: string): string | null {
-  const latinNames = latinNameProblem(answer);
-  if (latinNames) return latinNames.ar;
-  for (const [, name] of answer.matchAll(VALUE_TOKEN)) {
-    if (!isValueName(name)) {
-      const known = Object.entries(ANSWER_VALUES)
-        .map(([each, { meaning }]) => `{${each}} ${meaning}`)
-        .join('، ');
-      return `«{${name}}» ليست قيمة يعرفها الموقع. القيم المتاحة: ${known}.`;
-    }
-  }
-  return null;
+  return (latinNameProblem(answer) ?? valueNameProblem(answer))?.ar ?? null;
 }
 
 /** The answer as the page draws it: values inserted, Latin names marked out. */
-export function answerText(answer: string): InlineText {
-  const filled = answer.replace(VALUE_TOKEN, (token, name: string) => (isValueName(name) ? ANSWER_VALUES[name].value : token));
-  return withLatinNames(filled);
+export function answerText(answer: string, values: ReferralProgramValues): InlineText {
+  return withLatinNames(withValues(answer, values));
 }
