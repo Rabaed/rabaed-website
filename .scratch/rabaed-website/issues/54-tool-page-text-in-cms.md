@@ -4,15 +4,15 @@
 
 **Blocked by:** 53
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every section's words on the tool page are read from the CMS, including the words drawn in the hero's picture of the tool and the download section's own heading and lines (that picture is drawn in markup, so the tool page has no image to replace; replaceable pictures are ticket 57's)
-- [ ] Every list is editable: the reasons, the feature cards, the steps, the privacy points and folder tree, the requirement cards, the upsell's list
-- [ ] The how-it-works steps lay out any number neatly (the Reference site's grid only looked right in threes), and three still match the baseline
-- [ ] The download section (`#get`) and how-it-works (`#how`) cannot be hidden: the hero's two buttons land on them. Every other section can be
-- [ ] Wherever a card or a line has a fixed size, the admin enforces its limit
-- [ ] A migration imports the tool page's words verbatim as its first published version, and its static copy goes
-- [ ] The tool page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
+- [x] Every section's words on the tool page are read from the CMS, including the words drawn in the hero's picture of the tool and the download section's own heading and lines (that picture is drawn in markup, so the tool page has no image to replace; replaceable pictures are ticket 57's)
+- [x] Every list is editable: the reasons, the feature cards, the steps, the privacy points and folder tree, the requirement cards, the upsell's list
+- [x] The how-it-works steps lay out any number neatly (the Reference site's grid only looked right in threes), and three still match the baseline
+- [x] The download section (`#get`) and how-it-works (`#how`) cannot be hidden: the hero's two buttons land on them. Every other section can be
+- [x] Wherever a card or a line has a fixed size, the admin enforces its limit
+- [x] A migration imports the tool page's words verbatim as its first published version, and its static copy goes
+- [x] The tool page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
 
 **Not this ticket:** the download form's fields and wording (tickets 27 and 30), the FAQ entries (ticket 22), and the search title and description (ticket 26).
 

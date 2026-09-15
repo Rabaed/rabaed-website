@@ -4,18 +4,18 @@
 
 **Blocked by:** 53
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every section's words and pictures on the product page are read from the CMS: the hero, the journey panels, the custom strip, the roles, the review cycles
-- [ ] Every list is editable, except the three parties: the roles and the review cycles stay locked at three (spec: Content model)
-- [ ] The journey (`#journey`) cannot be hidden: the hero's second button lands on it (found in ticket 52; the spec's and ticket 21's lists of linked sections did not name it). Every other section can be, except the closing section with the demo request form
-- [ ] Every grid holding an editable list lays out any number of items neatly, and today's counts still match the baselines
-- [ ] **The closing section** («كيف نبدأ معك» and its steps) is one CMS entry shared by the home and product pages, so the two cannot drift apart; its section with the demo request form (`#demo`) cannot be hidden
-- [ ] **Screen mocks:** each mock's picture, description and caption are replaceable in the CMS, once for every page that shows that mock. A replacement must be 1440×900, and the check that exported images match their markup skips mocks replaced in the admin (spec: Screen mocks)
-- [ ] A picture on a page is replaceable from the admin: a replacement needs its description for screen readers, and keeps the shape its place needs (moved from ticket 53, whose start page has no pictures)
-- [ ] Limits where the design cannot carry more: the journey panels are the height of the window and clip long copy, and the custom strip's badge can overlap a long title
-- [ ] A migration imports the product page's words, the closing section and the mocks' descriptions verbatim, and their static copy goes
-- [ ] The product page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
+- [x] Every section's words and pictures on the product page are read from the CMS: the hero, the journey panels, the custom strip, the roles, the review cycles
+- [x] Every list is editable, except the three parties: the roles and the review cycles stay locked at three (spec: Content model)
+- [x] The journey (`#journey`) cannot be hidden: the hero's second button lands on it (found in ticket 52; the spec's and ticket 21's lists of linked sections did not name it). Every other section can be, except the closing section with the demo request form
+- [x] Every grid holding an editable list lays out any number of items neatly, and today's counts still match the baselines
+- [x] **The closing section** («كيف نبدأ معك» and its steps) is one CMS entry shared by the home and product pages, so the two cannot drift apart; its section with the demo request form (`#demo`) cannot be hidden
+- [x] **Screen mocks:** each mock's picture, description and caption are replaceable in the CMS, once for every page that shows that mock. A replacement must be 1440×900, and the check that exported images match their markup skips mocks replaced in the admin (spec: Screen mocks)
+- [x] A picture on a page is replaceable from the admin: a replacement needs its description for screen readers, and keeps the shape its place needs (moved from ticket 53, whose start page has no pictures)
+- [x] Limits where the design cannot carry more: the journey panels are the height of the window and clip long copy, and the custom strip's badge can overlap a long title
+- [x] A migration imports the product page's words, the closing section and the mocks' descriptions verbatim, and their static copy goes
+- [x] The product page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
 
 **Not this ticket:** the Trust strip (ticket 20), the home page (ticket 58, which uses this ticket's closing section and mocks), changing what a mock depicts (still a developer's job through the studio), the demo request form's wording (ticket 27), and the search title and description (ticket 26).
 
