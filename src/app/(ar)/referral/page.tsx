@@ -34,8 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * (HANDOFF §2).
  *
  * Nothing on it moves but the header, so it loads no other animation code
- * (spec: Analytics and performance). The document fields in the form are the
- * only other client code: they show the file chosen.
+ * (spec: Analytics and performance). The signup form is the only other client
+ * code: it checks the answers, and sends them with the documents (ticket 28).
  */
 export default async function ReferralPage() {
   const content = await getReferralPage('ar');
@@ -49,7 +49,7 @@ export default async function ReferralPage() {
       {content.whatIsReferred.shows && <WhatIsReferred content={content.whatIsReferred} />}
       {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
       {content.questions.shows && <Questions content={content.questions} />}
-      <Signup content={content.signup} />
+      <Signup content={content.signup} form={content.signupForm} />
       <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/referral' }])} />
       <StructuredData data={faqData(content.questions)} />
     </PageShell>

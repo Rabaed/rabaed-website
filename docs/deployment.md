@@ -102,15 +102,20 @@ or production deployments stop.
    the images on the site are public anyway. Then **Storage → Settings → S3
    connection**: note the endpoint and region, and create an access key. These
    are `S3_BUCKET` (`media`), `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID` and
-   `S3_SECRET_ACCESS_KEY`. Applicant documents do **not** go in this bucket;
-   they get a private one of their own in ticket 28.
-4. **Vercel.** In the project's **Settings → Environment Variables**, add the
-   six values above plus `PAYLOAD_SECRET`, a long random value (for example the
+   `S3_SECRET_ACCESS_KEY`.
+4. **Document storage.** **Storage → New bucket** again, named `documents`, and
+   **not** public: it holds applicants' IBAN certificates and commercial
+   registrations, which nobody may reach by address (ADR-0004). It uses the
+   same S3 connection and key as `media`. Its name is `S3_DOCUMENTS_BUCKET`
+   (`documents`). Without it, the site still builds, but a form that carries
+   documents cannot be sent, and says so.
+5. **Vercel.** In the project's **Settings → Environment Variables**, add the
+   seven values above plus `PAYLOAD_SECRET`, a long random value (for example the
    output of `openssl rand -hex 32`). Recommended: a **second** Supabase project
    for the Preview environment, so that trying out a pull request can never
    change what is on the live site. If there is only one, previews and
    production share the same content.
-5. **Create the database tables and the first account**, from a computer with
+6. **Create the database tables and the first account**, from a computer with
    the repository. Set `DATABASE_URL` and `PAYLOAD_SECRET` to production's
    values **in the terminal, for these commands only** — never in `.env.local`,
    which `npm run dev` also reads and would then point at the live content.
@@ -205,7 +210,7 @@ date. **Production applies them itself**: its build runs the migrations before
 building the pages (`scripts/migrate-production.mjs`). **Preview builds never
 do**, so that trying out a pull request cannot change the tables the live site
 reads. With a separate preview database, run `npm run cms:migrate` against it,
-the same way as step 5, when a pull request that adds a migration needs a
+the same way as step 6, when a pull request that adds a migration needs a
 preview.
 
 For developers: after changing the CMS configuration, `npm run cms:migration --
@@ -233,6 +238,19 @@ the Privacy Policy, so adding one is a developer's change.
   the address once the team is ready to answer them.
 - A request with the hidden trap field filled in, or a sixth request from the
   same network address within an hour, is turned away and not stored.
+
+**Documents.** The Referral Program signup takes an IBAN certificate and, if
+the referrer has them, a commercial registration and a tax registration
+certificate: each a PDF or an image of at most 10 MB. They are checked by what
+is in them, not only by their names, and kept in the private `documents`
+bucket.
+
+- A submission's **Documents** list each one, with an **Open document** link.
+  The link works for 10 minutes and only for a signed-in editor; open the
+  record again for a fresh one. A link copied into an email is no use to the
+  person it is sent to.
+- Deleting a submission deletes its documents from the bucket too.
+- The alert email names the documents but never attaches them.
 
 ### Email
 

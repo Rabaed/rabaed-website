@@ -100,12 +100,14 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     'demo-request-form': DemoRequestForm;
+    'referral-signup-form': ReferralSignupForm;
     'start-page': StartPage;
     'tool-page': ToolPage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
+    'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
   };
@@ -483,7 +485,7 @@ export interface FaqEntry {
  */
 export interface FormSubmission {
   id: number;
-  form: 'demo-request' | 'tool-download';
+  form: 'demo-request' | 'referral-signup' | 'tool-download';
   name?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -493,6 +495,21 @@ export interface FormSubmission {
         value?: string | null;
         option?: string | null;
         field?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Each document opens through a link that lasts 10 minutes, for signed-in editors only. Open the record again if a link has expired.
+   */
+  documents?:
+    | {
+        label?: string | null;
+        fileName?: string | null;
+        link?: string | null;
+        contentType?: string | null;
+        size?: number | null;
+        field?: string | null;
+        key?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -787,6 +804,18 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         field?: T;
         id?: T;
       };
+  documents?:
+    | T
+    | {
+        label?: T;
+        fileName?: T;
+        link?: T;
+        contentType?: T;
+        size?: T;
+        field?: T;
+        key?: T;
+        id?: T;
+      };
   alert?: T;
   confirmation?: T;
   token?: T;
@@ -945,6 +974,173 @@ export interface DemoRequestForm {
       placeholder: string;
       /**
        * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {الاسم} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-signup-form".
+ */
+export interface ReferralSignupForm {
+  id: number;
+  /**
+   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   */
+  alertAddress?: string | null;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    name: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    city: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    profession: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_engineer: string;
+        option_project_manager: string;
+        option_independent_consultant: string;
+        option_contractor: string;
+        option_real_estate_advisor: string;
+        option_content_creator: string;
+        option_other: string;
+      };
+    };
+    employer: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    ibanCertificate: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    accountHolder: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    commercialRegistration: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    taxRegistrationCertificate: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    acceptTerms: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      /**
+       * Shown under the box while it is not ticked.
+       */
+      message: string;
+    };
+    declareNoConflict: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      /**
+       * Shown under the box while it is not ticked.
        */
       message: string;
     };
@@ -1567,6 +1763,129 @@ export interface DemoRequestFormSelect<T extends boolean = true> {
           | {
               label?: T;
               placeholder?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-signup-form_select".
+ */
+export interface ReferralSignupFormSelect<T extends boolean = true> {
+  alertAddress?: T;
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        name?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        city?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        profession?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_engineer?: T;
+                    option_project_manager?: T;
+                    option_independent_consultant?: T;
+                    option_contractor?: T;
+                    option_real_estate_advisor?: T;
+                    option_content_creator?: T;
+                    option_other?: T;
+                  };
+            };
+        employer?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        ibanCertificate?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        accountHolder?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        commercialRegistration?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        taxRegistrationCertificate?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        acceptTerms?:
+          | T
+          | {
+              label?: T;
+              message?: T;
+            };
+        declareNoConflict?:
+          | T
+          | {
+              label?: T;
               message?: T;
             };
       };

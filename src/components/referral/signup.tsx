@@ -1,5 +1,7 @@
 import { Inline, type InlineText } from '@/components/inline-text';
 import { ReferralSignupForm } from '@/components/referral/signup-form';
+import type { FormPageWording } from '@/forms/definition';
+import type { ReferralSignupField } from '@/forms/referral-signup';
 
 export type ReferralSignupContent = {
   readonly eyebrow: string;
@@ -17,9 +19,10 @@ export type ReferralSignupContent = {
  * «التسجيل» on the referral page: what signing up gets the referrer, beside
  * the signup form. The hero's «سجّل واحصل على كودك» lands here.
  *
- * The form keeps its own words until ticket 27.
+ * The form's words are its settings in the CMS (ticket 28), handed down beside
+ * the section's own.
  */
-export function Signup({ content }: { content: ReferralSignupContent }) {
+export function Signup({ content, form }: { content: ReferralSignupContent; form: FormPageWording<ReferralSignupField> }) {
   return (
     <section id="signup" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
@@ -46,7 +49,7 @@ export function Signup({ content }: { content: ReferralSignupContent }) {
             </div>
           </div>
 
-          <ReferralSignupForm />
+          <ReferralSignupForm wording={form} />
         </div>
       </div>
     </section>
