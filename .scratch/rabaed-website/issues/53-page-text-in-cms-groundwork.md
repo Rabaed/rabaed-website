@@ -13,7 +13,6 @@
 - [ ] A section an Editor may hide has a switch for it; a section something links to has none. On the start page that is the questions with the demo request form (`#faq`, where the home page's «كل الأسئلة» and the hero land)
 - [ ] Lists: an Editor adds, removes and reorders items. A list the design builds around an exact count can be locked at it (the page tickets use this)
 - [ ] Every text field carries the length its place in the design can hold, and every list its item limit; the admin refuses more, with a message in Arabic and English, and the visitor's page never breaks
-- [ ] A picture on a page is replaceable from the admin; a replacement needs its description for screen readers, and keeps the shape its place needs
 - [ ] Like an article, a page change is saved as a draft, previewed on the page itself, and reaches visitors only when published; publishing refreshes the site
 - [ ] `src/content/pages/page-content.ts` reads a page from the CMS in the locale asked for, and refuses a locale the page is not published in — never another locale's words (ticket 52's `inLocale`, kept)
 - [ ] **The start page proves it:** its hero, its steps and its free tool teaser, and its Questions section's eyebrow and heading, are read from the CMS. The steps lay out any number neatly (the Reference site's grid only looked right in threes), and three still match the baseline
@@ -35,5 +34,10 @@
 - **Localisation is new to the CMS.** Blog posts, case studies and FAQs keep one entry per language (spec: Content model); turning on per-field localisation for pages must not change their tables or their data. Check the generated migration for exactly that.
 - **Pages read the CMS the way FAQs already do** (`src/cms/faqs.ts`): published content for visitors, the latest draft while an Editor previews.
 - **Preview builds do not migrate.** A pull request adding CMS tables needs `npm run cms:migrate` run from its branch against the preview database before its preview builds (`docs/deployment.md`).
+
+**Decided while building (15 September 2026).**
+
+- **Replaceable pictures moved to tickets 57 and 58.** The start page has no pictures, so the criterion could not be proven here; the product page's Screen mocks and the home page's pictures are where it is first needed.
+- **Each word holds its Arabic and English side by side, in two fields of its own, not Payload's per-field localisation.** Turning localisation on adds columns to the version history of every collection and global with drafts, and the migrations of tickets 19–27 save content through Payload with the configuration of the day they run. On a new database — the test server's, the preview database — they would run before the migration that adds those columns, and fail. Localisation would also have shared one publish state across both languages (as ticket 23 found) unless an experimental switch were on, and fills a missing language from the other by default. With two fields per word, a list is still one list whose items hold both languages, nothing is ever filled in from the other language, and a page lists the languages it is published in: every English field is required to publish while English is listed. `src/cms/page-fields.ts` records this.
 
 **Parallel sessions.** This changes the CMS configuration and `src/content/pages/page-content.ts`, which every page ticket builds on. Take it with no other page ticket open, and merge it before tickets 54–59 start.

@@ -59,6 +59,12 @@ export const FORM_EDITOR = {
   password: 'test-editor-password-27e',
 } as const;
 
+/** The page-text suite's own account (ticket 53), for the same reason as `BLOG_EDITOR`. */
+export const PAGES_EDITOR = {
+  email: 'pages-editor@rabaed.test',
+  password: 'test-editor-password-53',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -67,6 +73,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   CASE_STUDIES_EDITOR,
   FORM_READER,
   FORM_EDITOR,
+  PAGES_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */

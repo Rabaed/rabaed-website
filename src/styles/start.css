@@ -32,6 +32,16 @@
 .start .s p { color: var(--muted); margin: 0; font-size: 14px }
 @media (max-width: 980px) { .start { grid-template-columns: 1fr 1fr } }
 @media (max-width: 640px) { .start { grid-template-columns: 1fr } }
+/* However many steps an Editor gives a section (ticket 53): `StepCards` picks
+   the columns, and these draw them. One card is one column at every width; two
+   across and three across are for desktop widths only, like `.start.four` in
+   `programmes.css`, so below 981px any count falls back to the two across and
+   one above. Three is `.start` itself. */
+.start.one { grid-template-columns: 1fr }
+@media (min-width: 981px) {
+  .start.two { grid-template-columns: repeat(2, 1fr) }
+  .start.three { grid-template-columns: repeat(3, 1fr) }
+}
 
 /* ---- the questions, beside the demo request form ---- */
 .faq-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; margin-top: 28px; align-items: start }

@@ -1,3 +1,5 @@
+import { FAQ_PAGES } from '@/cms/faq-pages';
+import { pageEntry, wordsIn } from '@/cms/pages';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { QuestionsContent } from '@/components/questions';
@@ -23,71 +25,67 @@ export type StartPageContent = {
   readonly demoForm: FormPageWording<DemoRequestField>;
 };
 
-/** Verbatim from `reference/site/start.html`. */
-const AR: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
-  meta: {
+/**
+ * The page's search title and description, which ticket 26 moves into the CMS.
+ * Verbatim from `reference/site/start.html`.
+ */
+const META = {
+  ar: {
     title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
     description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
   },
-  hero: {
-    eyebrow: 'ابدأ',
-    title: 'كيف نبدأ معك — وكل ما قد تسأل عنه.',
-    lead: 'ثلاث خطوات حتى التشغيل، وإجابات صريحة عن الاشتراك والضمان والنماذج والسجل بعد نهاية المشروع.',
-    // Both land further down this page: the form, and the questions.
-    primary: { label: 'احجز عرضاً حياً', href: '#demo' },
-    secondary: { label: 'الأسئلة الشائعة ↓', href: '#faq' },
-  },
-  // The Reference site's start page carries the same strip as its home page,
-  // under the same label.
-  trustStrip: { shows: true, ...TRUST_STRIP.ar },
-  steps: {
-    shows: true,
-    eyebrow: 'كيف نبدأ معك',
-    heading: 'فريقنا في موقعك. الأطراف الثلاثة على المنصة خلال أيام.',
-    steps: [
-      {
-        number: '01',
-        label: 'إعداد',
-        title: 'المشروع، الأطراف، النماذج',
-        text: 'فريقنا يُعدّ المشروع ويدعو المالك والاستشاري والمقاول، ويجلس مع كل فريق 15 دقيقة.',
-        markedOut: false,
-      },
-      {
-        number: '02',
-        label: 'تشغيل',
-        title: 'أقل من يوم — دون توقف للعمل',
-        text: 'يبدأ الجميع من حيث وصل المشروع. لا تدريب، ولا فترة انتقالية.',
-        markedOut: false,
-      },
-      {
-        number: '03',
-        label: 'ضمان',
-        title: '60 يوماً — أو نعيد المبلغ',
-        text: 'شغّلوها على مشروع حقيقي. إن قررتم التوقف خلال 60 يوماً من التفعيل، نعيد كامل المبلغ.',
-        // The guarantee.
-        markedOut: true,
-      },
-    ],
-  },
-  questions: {
-    shows: true,
-    eyebrow: 'الأسئلة الشائعة',
-    heading: 'قبل أن تسأل',
-  },
-  freeTool: {
-    shows: true,
-    eyebrow: 'أداة مجانية',
-    heading: 'سجل صبّات الخرسانة ونتائج التكسير',
-    text: 'أداة مستقلة تعمل بلا حساب وبلا إنترنت — للمهندس في الموقع. من فريق ربائد.',
-    link: { label: 'تحميل الأداة', href: localePath('ar', '/tool') },
-  },
-};
+} as const;
 
-/** The start page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
+/**
+ * The start page's content in `locale`: its words from its entry in the CMS
+ * (ticket 53) — or a refusal, where the page is not published in `locale` —
+ * with its questions and its form's words as the CMS has them.
+ *
+ * Where each button and link leads stays here, in code: an Editor changes what
+ * a button says, never where it goes.
+ */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  const [page, demoForm] = await Promise.all([
-    withQuestions<Omit<StartPageContent, 'demoForm'>>('start', locale, inLocale('start', { ar: AR }, locale)),
-    formPageWording(DEMO_REQUEST),
-  ]);
-  return { ...page, demoForm };
+  const [entry, demoForm] = await Promise.all([pageEntry('start-page', locale), formPageWording(DEMO_REQUEST)]);
+  const words = wordsIn.bind(null, locale);
+
+  const page: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
+    meta: inLocale('start', META, locale),
+    hero: {
+      eyebrow: words(entry.hero.eyebrow),
+      title: words(entry.hero.title),
+      lead: words(entry.hero.lead),
+      // Both land further down this page: the form, and the questions.
+      primary: { label: words(entry.hero.primaryLabel), href: '#demo' },
+      secondary: { label: words(entry.hero.secondaryLabel), href: `#${FAQ_PAGES.start.sectionId}` },
+    },
+    trustStrip: { shows: entry.trustStrip?.shows !== false, ...inLocale('trust strip', TRUST_STRIP, locale) },
+    steps: {
+      shows: entry.steps.shows !== false,
+      eyebrow: words(entry.steps.eyebrow),
+      heading: words(entry.steps.heading),
+      // A step is numbered by its place, so reordering renumbers it.
+      steps: entry.steps.steps.map((step, index) => ({
+        number: String(index + 1).padStart(2, '0'),
+        label: words(step.label),
+        title: words(step.title),
+        text: words(step.text),
+        markedOut: step.markedOut === true,
+      })),
+    },
+    questions: {
+      shows: true,
+      eyebrow: words(entry.questions.eyebrow),
+      heading: words(entry.questions.heading),
+    },
+    freeTool: {
+      shows: entry.freeTool.shows !== false,
+      eyebrow: words(entry.freeTool.eyebrow),
+      heading: words(entry.freeTool.heading),
+      text: words(entry.freeTool.text),
+      link: { label: words(entry.freeTool.linkLabel), href: localePath(locale, '/tool') },
+    },
+  };
+
+  const withEntries = await withQuestions<Omit<StartPageContent, 'demoForm'>>('start', locale, page);
+  return { ...withEntries, demoForm };
 }
