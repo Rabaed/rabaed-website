@@ -4,7 +4,8 @@
  * Plain text, with two marks the page needs and a textarea cannot show:
  *
  * - **A Latin name between backticks** — `` `concrete_db.json` `` — is set left
- *   to right in DM Mono, so its dots and underscores stay where they belong.
+ *   to right in DM Mono, so its dots and underscores stay where they belong
+ *   (`latin-names.ts`).
  * - **A Referral Program value in braces** — `{payout}`, `{clientDiscount}` —
  *   is inserted from the one place the site holds it, rather than typed
  *   (spec: Content model), so an answer cannot quote an old amount.
@@ -15,8 +16,9 @@
  *
  * Imported by the CMS configuration, so it imports relatively.
  */
-import type { InlinePart, InlineText } from '../components/inline-text';
+import type { InlineText } from '../components/inline-text';
 import { REFERRAL_PROGRAM_VALUES } from '../content/referral-program';
+import { latinNameProblem, withLatinNames } from './latin-names';
 
 /** The values an answer may name, and what each stands for, for the Editor. */
 export const ANSWER_VALUES = {
@@ -29,21 +31,14 @@ type ValueName = keyof typeof ANSWER_VALUES;
 /** A value named in braces, `{payout}`. */
 const VALUE_TOKEN = /\{([^{}]*)\}/g;
 
-/** Arabic letters, which DM Mono has no glyphs for (spec: Design system). */
-const ARABIC = /[؀-ۿ]/;
-
 function isValueName(name: string): name is ValueName {
   return Object.hasOwn(ANSWER_VALUES, name);
 }
 
 /** Why an answer cannot be saved as written, in Arabic for the Editor — or `null` when it can. */
 export function answerProblem(answer: string): string | null {
-  if ((answer.match(/`/g) ?? []).length % 2 === 1) {
-    return 'علامة ` بلا إغلاق. ضع الاسم الإنجليزي بين علامتين، مثل `concrete_db.json`.';
-  }
-  if (answer.split('`').some((piece, index) => index % 2 === 1 && ARABIC.test(piece))) {
-    return 'ما بين علامتي ` يُكتب بخط إنجليزي لا حروف عربية فيه. اترك النص العربي خارجهما.';
-  }
+  const latinNames = latinNameProblem(answer);
+  if (latinNames) return latinNames.ar;
   for (const [, name] of answer.matchAll(VALUE_TOKEN)) {
     if (!isValueName(name)) {
       const known = Object.entries(ANSWER_VALUES)
@@ -58,12 +53,5 @@ export function answerProblem(answer: string): string | null {
 /** The answer as the page draws it: values inserted, Latin names marked out. */
 export function answerText(answer: string): InlineText {
   const filled = answer.replace(VALUE_TOKEN, (token, name: string) => (isValueName(name) ? ANSWER_VALUES[name].value : token));
-  if (!filled.includes('`')) return filled;
-
-  // Between backticks is every second piece.
-  const parts: InlinePart[] = filled
-    .split('`')
-    .map((piece, index) => (index % 2 === 1 ? { latin: piece } : piece))
-    .filter((part) => part !== '');
-  return parts;
+  return withLatinNames(filled);
 }

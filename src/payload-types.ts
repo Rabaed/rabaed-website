@@ -102,6 +102,7 @@ export interface Config {
     'demo-request-form': DemoRequestForm;
     'referral-signup-form': ReferralSignupForm;
     'start-page': StartPage;
+    'tool-page': ToolPage;
     'product-page': ProductPage;
     'closing-section': ClosingSection;
     'screen-mocks': ScreenMock;
@@ -111,6 +112,7 @@ export interface Config {
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
     'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
+    'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
     'product-page': ProductPageSelect<false> | ProductPageSelect<true>;
     'closing-section': ClosingSectionSelect<false> | ClosingSectionSelect<true>;
     'screen-mocks': ScreenMocksSelect<false> | ScreenMocksSelect<true>;
@@ -1285,6 +1287,409 @@ export interface StartPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tool-page".
+ */
+export interface ToolPage {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  hero: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Shown in the accent colour after the heading.
+     */
+    titleAccent: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the download section.
+     */
+    primaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to How it works.
+     */
+    secondaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    promises: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * The drawing of the tool’s screen beside the heading. Its rows are fixed: three counts, and two pours of two tests each.
+     */
+    mock: {
+      project: {
+        ar: string;
+        en?: string | null;
+      };
+      tiles: {
+        figure: string;
+        tone: 'plain' | 'warn' | 'bad';
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        id?: string | null;
+      }[];
+      pours: {
+        reference: string;
+        name: {
+          ar: string;
+          en?: string | null;
+        };
+        tests: {
+          label: {
+            ar: string;
+            en?: string | null;
+          };
+          tone: 'idle' | 'warn' | 'bad' | 'info' | 'ok';
+          state: {
+            ar: string;
+            en?: string | null;
+          };
+          id?: string | null;
+        }[];
+        id?: string | null;
+      }[];
+    };
+  };
+  why: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Cards are numbered by their order. Drag them to reorder.
+     */
+    cards: {
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  features: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * It carries the legend of a test’s state colours under its text.
+     */
+    countdown: {
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      legend: {
+        idle: {
+          ar: string;
+          en?: string | null;
+        };
+        warn: {
+          ar: string;
+          en?: string | null;
+        };
+        bad: {
+          ar: string;
+          en?: string | null;
+        };
+        info: {
+          ar: string;
+          en?: string | null;
+        };
+        ok: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+    };
+    /**
+     * Cards are numbered by their order. Drag them to reorder.
+     */
+    cards: {
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    also: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  how: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Steps are numbered by their order. Drag them to reorder.
+     */
+    steps: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * The step the section wants remembered, like choosing the folder.
+       */
+      markedOut?: boolean | null;
+      id?: string | null;
+    }[];
+  };
+  privacy: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    points: {
+      bold: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Put a Latin file name between two ` marks to set it left to right, like `concrete_db.json`.
+       */
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * The folder the tool writes, drawn as a tree.
+     */
+    tree: {
+      project: {
+        ar: string;
+        en?: string | null;
+      };
+      entries: {
+        name: string;
+        description?: {
+          ar?: string | null;
+          en?: string | null;
+        };
+        nested?: boolean | null;
+        id?: string | null;
+      }[];
+      caption: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  requirements: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    cards: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  download: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    ticks: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    promise: {
+      bold: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  questions: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  upsell: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the start page.
+     */
+    primaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the product page.
+     */
+    secondaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    adds: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    signOff: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "product-page".
  */
 export interface ProductPage {
@@ -2093,6 +2498,529 @@ export interface StartPageSelect<T extends boolean = true> {
               en?: T;
             };
         linkLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tool-page_select".
+ */
+export interface ToolPageSelect<T extends boolean = true> {
+  languages?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        titleAccent?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        primaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        secondaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        promises?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        mock?:
+          | T
+          | {
+              project?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              tiles?:
+                | T
+                | {
+                    figure?: T;
+                    tone?: T;
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    id?: T;
+                  };
+              pours?:
+                | T
+                | {
+                    reference?: T;
+                    name?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    tests?:
+                      | T
+                      | {
+                          label?:
+                            | T
+                            | {
+                                ar?: T;
+                                en?: T;
+                              };
+                          tone?: T;
+                          state?:
+                            | T
+                            | {
+                                ar?: T;
+                                en?: T;
+                              };
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+            };
+      };
+  why?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cards?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  features?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        countdown?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              legend?:
+                | T
+                | {
+                    idle?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    warn?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    bad?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    info?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    ok?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+            };
+        cards?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        also?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  how?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        steps?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              markedOut?: T;
+              id?: T;
+            };
+      };
+  privacy?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        points?:
+          | T
+          | {
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        tree?:
+          | T
+          | {
+              project?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              entries?:
+                | T
+                | {
+                    name?: T;
+                    description?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    nested?: T;
+                    id?: T;
+                  };
+              caption?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  requirements?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cards?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  download?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        ticks?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        promise?:
+          | T
+          | {
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  questions?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  upsell?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        primaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        secondaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        adds?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        signOff?:
           | T
           | {
               ar?: T;

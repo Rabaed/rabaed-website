@@ -28,6 +28,7 @@ import { ClosingSection } from './cms/globals/closing-section';
 import { ProductPage } from './cms/globals/product-page';
 import { ScreenMocks } from './cms/globals/screen-mocks';
 import { StartPage } from './cms/globals/start-page';
+import { ToolPage } from './cms/globals/tool-page';
 import { SUBMITTABLE_FORMS } from './forms/registry';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -81,6 +82,7 @@ export default buildConfig({
     SiteSettings,
     ...SUBMITTABLE_FORMS.map(formSettingsGlobal),
     StartPage,
+    ToolPage,
     ProductPage,
     ClosingSection,
     ScreenMocks,

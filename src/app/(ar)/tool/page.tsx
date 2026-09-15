@@ -28,7 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * It describes and delivers the tool (CONTEXT.md). The file itself is ticket
  * 18's; the form that delivers it is ticket 30's to make work.
  *
- * Its words come from `src/content/pages/tool.ts`.
+ * Its words come from its entry in the CMS, through `src/content/pages/tool.ts`
+ * (ticket 54).
  */
 export default async function ToolPage() {
   const content = await getToolPage('ar');

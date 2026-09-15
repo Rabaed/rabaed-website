@@ -65,6 +65,12 @@ export const PAGES_EDITOR = {
   password: 'test-editor-password-53',
 } as const;
 
+/** The tool page's text suite's own account (ticket 54), for the same reason as `BLOG_EDITOR`. */
+export const TOOL_PAGE_EDITOR = {
+  email: 'tool-page-editor@rabaed.test',
+  password: 'test-editor-password-54',
+} as const;
+
 /** The product page suite's own account (ticket 57), for the same reason as `BLOG_EDITOR`. */
 export const PRODUCT_EDITOR = {
   email: 'product-editor@rabaed.test',
@@ -80,6 +86,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   FORM_READER,
   FORM_EDITOR,
   PAGES_EDITOR,
+  TOOL_PAGE_EDITOR,
   PRODUCT_EDITOR,
 ];
 

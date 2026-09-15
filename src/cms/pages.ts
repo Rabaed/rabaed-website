@@ -13,9 +13,12 @@ import type { Locale } from '@/lib/locales';
 
 /**
  * The pages whose words are in the CMS so far, and the sections and pictures
- * pages share; tickets 54–59 add theirs.
+ * pages share; tickets 55–59 add theirs.
  */
-type PageSlug = Extract<GlobalSlug, 'start-page' | 'product-page' | 'closing-section' | 'screen-mocks'>;
+type PageSlug = Extract<
+  GlobalSlug,
+  'start-page' | 'tool-page' | 'product-page' | 'closing-section' | 'screen-mocks'
+>;
 
 /**
  * One level deep, so that a picture comes with the image it names rather than
@@ -37,13 +40,7 @@ type StoredWords = { readonly ar?: string | null; readonly en?: string | null } 
  * published or not, and a page read from the entry would then show it the next
  * time it is rebuilt (`src/cms/legal-documents.ts` found the same).
  */
-export function pageEntry<Slug extends PageSlug>(slug: Slug, locale: Locale): Promise<DataFromGlobalSlug<Slug>> {
-  return readEntry(slug, locale) as Promise<DataFromGlobalSlug<Slug>>;
-}
-
-// Cached by its arguments, which is why the entry's type is given back above
-// rather than here: a cached function is not generic.
-const readEntry = cache(async (slug: PageSlug, locale: Locale) => {
+const cachedEntry = cache(async (slug: PageSlug, locale: Locale) => {
   const { isEnabled: previewing } = await draftMode();
   const payload = await getPayload({ config });
 
@@ -69,6 +66,11 @@ const readEntry = cache(async (slug: PageSlug, locale: Locale) => {
   if (!(entry.languages ?? []).includes(locale)) throw new ContentNotInLocale(slug, locale);
   return entry;
 });
+
+/** The entry of the page asked for, typed as that page's: `cache` keeps one function for every page. */
+export function pageEntry<Slug extends PageSlug>(slug: Slug, locale: Locale): Promise<DataFromGlobalSlug<Slug>> {
+  return cachedEntry(slug, locale) as Promise<DataFromGlobalSlug<Slug>>;
+}
 
 /**
  * A word in the page's language. A page is published in a language only with
