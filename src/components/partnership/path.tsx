@@ -19,9 +19,10 @@ export type PartnershipPathContent = {
 };
 
 /**
- * «مسار الشراكة» on the partnership page: the four stages from a first meeting
- * to a first project, beside a link to the application form. The hero's «كيف
- * نبني الشراكة ↓» lands here.
+ * «مسار الشراكة» on the partnership page: the stages from a first meeting to a
+ * first project — four on the Reference site; as many as an Editor gives it
+ * (ticket 55), one under another — beside a link to the application form. The
+ * hero's «كيف نبني الشراكة ↓» lands here.
  *
  * The stages are the closing section's `.tail-steps` (`shell.css`), with a
  * heading of their own in each — `.ph`, and HANDOFF §7.4's wrapping exception

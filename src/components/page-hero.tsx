@@ -44,8 +44,8 @@ export function PageHero({ content }: { content: PageHeroContent }) {
           // Only the numerals are `.mono`: DM Mono has no Arabic glyphs
           // (spec: Design system). See `programmes.css`.
           <div className="pstats">
-            {content.figures.map((figure) => (
-              <div className="pstat" key={figure.label}>
+            {content.figures.map((figure, index) => (
+              <div className="pstat" key={index}>
                 <b>
                   <Inline text={figure.figure} />
                 </b>

@@ -18,6 +18,8 @@ import * as migration_20260915_063743_product_page_closing_section_and_screen_mo
 import * as migration_20260915_063744_import_product_page_closing_section_and_screen_mocks from './20260915_063744_import_product_page_closing_section_and_screen_mocks';
 import * as migration_20260915_064014_tool_page from './20260915_064014_tool_page';
 import * as migration_20260915_064015_import_tool_page from './20260915_064015_import_tool_page';
+import * as migration_20260915_195429_partnership_page from './20260915_195429_partnership_page';
+import * as migration_20260915_195430_import_partnership_page from './20260915_195430_import_partnership_page';
 
 export const migrations = [
   {
@@ -119,5 +121,15 @@ export const migrations = [
     up: migration_20260915_064015_import_tool_page.up,
     down: migration_20260915_064015_import_tool_page.down,
     name: '20260915_064015_import_tool_page',
+  },
+  {
+    up: migration_20260915_195429_partnership_page.up,
+    down: migration_20260915_195429_partnership_page.down,
+    name: '20260915_195429_partnership_page',
+  },
+  {
+    up: migration_20260915_195430_import_partnership_page.up,
+    down: migration_20260915_195430_import_partnership_page.down,
+    name: '20260915_195430_import_partnership_page',
   },
 ];

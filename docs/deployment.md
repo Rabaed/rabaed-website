@@ -174,11 +174,12 @@ site launched with, word for word.
 ### Page text
 
 Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**
-(ticket 54) and **Product page** (ticket 57), and two entries pages share —
-**Closing section** («كيف نبدأ معك», which the home and product pages both end
-on, changed once for both) and **Screen mocks**. The other marketing pages
-follow in tickets 55, 56, 58 and 59, and until then their words are still in
-code. The migrations import each entry's words once, as they were.
+(ticket 54), **Product page** (ticket 57) and **Partnership page** (ticket 55),
+and two entries pages share — **Closing section** («كيف نبدأ معك», which the
+home and product pages both end on, changed once for both) and **Screen mocks**.
+The other marketing pages follow in tickets 56, 58 and 59, and until then their
+words are still in code. The migrations import each entry's words once, as they
+were.
 
 - Each tab is one section of the page, in the page's order. Sections cannot be
   moved, added or removed.
@@ -199,6 +200,8 @@ code. The migrations import each entry's words once, as they were.
   `` `concrete_db.json` `` — to set it left to right, as in the questions. File
   names, pour references and the drawing's figures are one field for both
   languages, in Latin letters and figures only.
+- In the partnership page's figures, write numerals as 0–9 — «3 أنماط» — and
+  the page sets them in the figures' typeface.
 - **Screen mocks** holds each screen's picture and what it shows in words: read
   out by screen readers and written under the picture, wherever a page shows
   it. With no picture chosen, the page shows the image exported from the

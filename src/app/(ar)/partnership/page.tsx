@@ -22,10 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * The Arabic Partnership Program page, for engineering offices and project
  * management companies — a different programme from the Referral Program, for
  * a different audience (CONTEXT.md). In the Reference site's order: the page
- * hero with its three figures, the idea, who it is for, the three modes, what a
- * partner gets, the path to joining, the questions, and the application form.
+ * hero with its figures, the idea, who it is for, the modes, what a partner
+ * gets, the path to joining, the questions, and the application form.
  *
- * Its words come from `src/content/pages/partnership.ts`.
+ * Its words come from its entry in the CMS, through
+ * `src/content/pages/partnership.ts` (ticket 55).
  *
  * Nothing on it moves but the header, so it loads no other animation code
  * (spec: Analytics and performance). The commercial registration field in the
