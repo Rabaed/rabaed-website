@@ -26,11 +26,13 @@ export type StartPageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS.
- * Verbatim from `reference/site/start.html`.
+ * The page's search title and description, which ticket 26 moves into the CMS,
+ * and the short name its breadcrumb structured data reads (ticket 32), which
+ * travels with them. Verbatim from `reference/site/start.html`.
  */
 const META = {
   ar: {
+    name: 'ابدأ',
     title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
     description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
   },

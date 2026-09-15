@@ -6,6 +6,7 @@ import { PageShell } from '@/components/page-shell';
 import { Questions } from '@/components/questions';
 import { FreeToolTeaser } from '@/components/start/free-tool-teaser';
 import { Steps } from '@/components/start/steps';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { getStartPage } from '@/content/pages/start';
 import { pageMetadata } from '@/lib/metadata';
 
@@ -42,6 +43,8 @@ export default async function StartPage() {
       <Questions content={content.questions} beside={<DemoRequestForm wording={content.demoForm} />}>
         {content.freeTool.shows && <FreeToolTeaser content={content.freeTool} />}
       </Questions>
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/start' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

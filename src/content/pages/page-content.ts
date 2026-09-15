@@ -59,6 +59,8 @@ export async function withQuestions<T extends { readonly questions: QuestionsCon
 
 /** What a page says about itself to a search engine and a browser tab. */
 export type PageMeta = {
+  /** The page's short name, as a breadcrumb trail in its structured data names it: «المنتج». */
+  readonly name: string;
   readonly title: string;
   readonly description: string;
 };

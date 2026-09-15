@@ -6,7 +6,8 @@
  * The site-settings tests edit the real settings of the test server's
  * database, and every page's footer reads them. They therefore run one at a
  * time, touch only the WhatsApp number and the social links — which no other
- * suite asserts on — and put back what they found.
+ * suite asserts on, save `structured-data.spec.ts` comparing them with the
+ * footer of the same response — and put back what they found.
  *
  * The legal-document tests (ticket 25) follow the same rule. What they publish
  * is a search description, which no other suite reads; clause text is only
@@ -31,6 +32,7 @@ import {
   todayInRiyadh,
 } from './cms';
 import { LEGAL_PAGES } from './legal-documents';
+import { nodesOf, structuredData } from './structured-data';
 
 // One at a time, in order, and without the rest being skipped when one fails.
 //
@@ -92,6 +94,14 @@ test.describe('site settings', () => {
       .toBe('https://www.linkedin.com/company/rabaed-test');
     expect(await footerLink(request, '/start', 'إنستجرام')).toBe('https://www.instagram.com/rabaed.test');
     expect(await footerLink(request, '/start', 'إكس')).toBe('#');
+
+    // And they are the company's accounts in its structured data, the empty
+    // ones left out rather than given as `#` (ticket 32).
+    const [organisation] = nodesOf(structuredData(await (await request.get('/start')).text()), 'Organization');
+    expect(organisation.sameAs).toEqual([
+      'https://www.linkedin.com/company/rabaed-test',
+      'https://www.instagram.com/rabaed.test',
+    ]);
   });
 
   test('a saved draft stays off the site until published, and the editor previews it first', async ({ page, request }) => {
