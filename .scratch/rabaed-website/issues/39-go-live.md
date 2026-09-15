@@ -2,7 +2,7 @@
 
 **What to build:** The Arabic site becomes public at `rabaedapp.com`. This is the ticket where the handbrake comes off, and it is deliberate rather than accidental.
 
-**Blocked by:** every preceding ticket except the Stage 2 set (40–43)
+**Blocked by:** every preceding ticket except the Stage 2 set (40–43) and ticket 21, which is replaced by tickets 53–59; and tickets 53–59
 
 **Status:** ready-for-agent
 
