@@ -36,4 +36,6 @@
 - **Pages read the CMS the way FAQs already do** (`src/cms/faqs.ts`): published content for visitors, the latest draft while an Editor previews.
 - **Preview builds do not migrate.** A pull request adding CMS tables needs `npm run cms:migrate` run from its branch against the preview database before its preview builds (`docs/deployment.md`).
 
+**From ticket 32 (15 September 2026).** `PageMeta` in `src/content/pages/page-content.ts` gained a third field, `name` — the page's short name, «ابدأ» for the start page — which its breadcrumb structured data reads (`src/app/(ar)/start/page.tsx`). Search titles and descriptions are ticket 26's, but this name travels with them: keep it when `start.ts`'s static copy goes, whether as page content in the CMS or beside the search fields. `tests/e2e/structured-data.spec.ts` expects «ابدأ» in the start page's trail. The start page also emits FAQ data from its Questions section through `faqData(content.questions)`, so that section's shape must keep `shows` and `entries`.
+
 **Parallel sessions.** This changes the CMS configuration and `src/content/pages/page-content.ts`, which every page ticket builds on. Take it with no other page ticket open, and merge it before tickets 54–59 start.
