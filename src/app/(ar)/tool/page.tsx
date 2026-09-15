@@ -14,7 +14,8 @@ import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getToolPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/tool', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/tool', ...meta });
 }
 
 /**

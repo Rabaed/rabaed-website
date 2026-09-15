@@ -30,7 +30,8 @@ export function blogIndexMetadata(locale: Locale, page: number): Metadata {
     locales: page === 1 ? undefined : [locale],
     path: blogIndexPath(page),
     title: page === 1 ? copy.metaTitle : `${copy.metaTitle} — ${copy.page} ${page}`,
-    description: copy.lead,
+    // Numbered like the title, so no two pages of the index share a description.
+    description: page === 1 ? copy.lead : `${copy.lead} — ${copy.page} ${page}`,
   });
 }
 

@@ -236,9 +236,13 @@ test('the index lists articles newest first, a page at a time', async ({ page, r
   };
 
   await expect.poll(() => titlesOn('/blog')).toEqual(newestFirst.slice(0, POSTS_PER_PAGE));
+  const description = page.locator('meta[name="description"]');
+  const firstPageDescription = await description.getAttribute('content');
 
   await page.getByRole('link', { name: 'المقالات الأقدم' }).click();
   await expect(page).toHaveURL(/\/blog\/page\/2$/);
+  // Each page of the index is a page of its own to a search engine (ticket 31).
+  await expect(description).not.toHaveAttribute('content', firstPageDescription!);
   expect(await page.getByRole('article').getByRole('heading').allTextContents()).toEqual(
     newestFirst.slice(POSTS_PER_PAGE),
   );
