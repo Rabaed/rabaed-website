@@ -18,7 +18,7 @@ import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import { NEXT_BIN, PAYLOAD_BIN, repoRoot, runNode, startDatabase } from './local-database.mjs';
 import { TEST_EDITORS } from '../tests/e2e/cms.ts';
-import { outboxDirectory, testServerScratch } from '../tests/e2e/forms.ts';
+import { documentsDirectory, outboxDirectory, testServerScratch } from '../tests/e2e/forms.ts';
 
 const port = Number(process.env.PORT ?? 3100);
 const scratch = testServerScratch(port);
@@ -36,6 +36,10 @@ const env = {
   // Mail is written here instead of sent, for the form suite to read
   // (`src/forms/mail.ts`). Real credentials on the machine are never used.
   MAIL_OUTBOX_DIR: outboxDirectory(port),
+  // Applicant documents are written here instead of to the private bucket
+  // (`src/forms/documents.ts`), for the form suite to check.
+  DOCUMENTS_DIR: documentsDirectory(port),
+  S3_DOCUMENTS_BUCKET: '',
   MAIL_USER: '',
   MAIL_PASSWORD: '',
 };

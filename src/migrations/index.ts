@@ -9,8 +9,11 @@ import * as migration_20260914_194143_form_foundation from './20260914_194143_fo
 import * as migration_20260914_194144_publish_demo_request_wording from './20260914_194144_publish_demo_request_wording';
 import * as migration_20260914_212631_case_studies from './20260914_212631_case_studies';
 import * as migration_20260914_215019_form_settings_snapshot from './20260914_215019_form_settings_snapshot';
+import * as migration_20260914_222808_referral_signup_documents from './20260914_222808_referral_signup_documents';
+import * as migration_20260914_222809_publish_referral_signup_wording from './20260914_222809_publish_referral_signup_wording';
 import * as migration_20260915_040104_start_page from './20260915_040104_start_page';
 import * as migration_20260915_040105_import_start_page from './20260915_040105_import_start_page';
+import * as migration_20260915_062734_referral_documents_snapshot from './20260915_062734_referral_documents_snapshot';
 
 export const migrations = [
   {
@@ -69,6 +72,16 @@ export const migrations = [
     name: '20260914_215019_form_settings_snapshot',
   },
   {
+    up: migration_20260914_222808_referral_signup_documents.up,
+    down: migration_20260914_222808_referral_signup_documents.down,
+    name: '20260914_222808_referral_signup_documents',
+  },
+  {
+    up: migration_20260914_222809_publish_referral_signup_wording.up,
+    down: migration_20260914_222809_publish_referral_signup_wording.down,
+    name: '20260914_222809_publish_referral_signup_wording',
+  },
+  {
     up: migration_20260915_040104_start_page.up,
     down: migration_20260915_040104_start_page.down,
     name: '20260915_040104_start_page',
@@ -77,5 +90,10 @@ export const migrations = [
     up: migration_20260915_040105_import_start_page.up,
     down: migration_20260915_040105_import_start_page.down,
     name: '20260915_040105_import_start_page',
+  },
+  {
+    up: migration_20260915_062734_referral_documents_snapshot.up,
+    down: migration_20260915_062734_referral_documents_snapshot.down,
+    name: '20260915_062734_referral_documents_snapshot',
   },
 ];
