@@ -30,6 +30,7 @@ import {
 import { text, textarea } from 'payload/shared';
 import { emphasisProblem } from './emphasis';
 import { ARABIC, latinNameProblem } from './latin-names';
+import { valueNameProblem } from './referral-program-values';
 
 export type Words = { readonly ar: string; readonly en: string };
 
@@ -64,8 +65,8 @@ type ValidateOptions = Parameters<TextFieldSingleValidation>[1];
 /**
  * Payload's own check for the field — required, and its length above all —
  * then `needed`, which says when an empty word is not allowed, and `marks`,
- * which says whether the marks written into the words are whole: a Latin name's
- * (`latin-names.ts`), bold's (`emphasis.ts`).
+ * which says what is wrong with the marks written in words that may carry
+ * them: a Latin name's backticks, a value's braces, bold's asterisks.
  */
 function wordsValidation<Validation extends WordsValidation>(
   base: Validation,
@@ -100,8 +101,11 @@ const englishWhereArabic = (options: ValidateOptions) =>
  *
  * `optional` words are for a place drawn without them when empty — a file in
  * the tool page's folder tree with no description beside it. `latinNames`
- * words may mark a Latin name between backticks (`latin-names.ts`), and
- * `emphasis` words a phrase in bold between asterisks (`emphasis.ts`).
+ * words may mark a Latin name between backticks (`latin-names.ts`). `values`
+ * words may name a Referral Program value in braces, `{payout}`, which the
+ * page inserts; a name the site does not hold is refused
+ * (`referral-program-values.ts`). `emphasis` words may mark a phrase in bold
+ * between asterisks, and break a line where a new one starts (`emphasis.ts`).
  *
  * Payload checks all of this only when a page is published: a draft may be
  * unfinished.
@@ -115,11 +119,15 @@ export function wordsField(
     readonly description?: Words;
     readonly optional?: boolean;
     readonly latinNames?: boolean;
+    readonly values?: boolean;
     readonly emphasis?: boolean;
   } = {},
 ): Field {
-  const { multiline = false, description, optional = false, latinNames = false, emphasis = false } = options;
-  const marks = (words: string) => (latinNames ? latinNameProblem(words) : null) ?? (emphasis ? emphasisProblem(words) : null);
+  const { multiline = false, description, optional = false, latinNames = false, values = false, emphasis = false } = options;
+  const marks = (written: string) =>
+    (latinNames ? latinNameProblem(written) : null) ??
+    (values ? valueNameProblem(written) : null) ??
+    (emphasis ? emphasisProblem(written) : null);
   const box = (language: keyof Words, needed: (options: ValidateOptions) => Words | null): Field => {
     const rtl = language === 'ar';
     const common = {

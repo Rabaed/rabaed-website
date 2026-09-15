@@ -11,9 +11,10 @@ export type PartnershipModesContent = {
 };
 
 /**
- * «أنماط التعاون» on the partnership page: the three ways an office can work
- * with Rabaed, each in the start page's step card with a line on who it suits,
- * and the note that the terms of each are agreed, not listed.
+ * «أنماط التعاون» on the partnership page: the ways an office can work with
+ * Rabaed — three on the Reference site; as many as an Editor gives it (ticket
+ * 55) — each in the start page's step card with a line on who it suits, and
+ * the note that the terms of each are agreed, not listed.
  */
 export function Modes({ content }: { content: PartnershipModesContent }) {
   return (

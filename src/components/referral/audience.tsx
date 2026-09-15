@@ -1,5 +1,6 @@
 import { Inline, type InlineText } from '@/components/inline-text';
 import type { PageLink } from '@/components/page-link';
+import { CardRow } from '@/components/tool/parts';
 
 /** One kind of person the programme is open to. */
 export type AudienceKind = {
@@ -20,10 +21,11 @@ export type ReferralAudienceContent = {
 };
 
 /**
- * «لمن هذا البرنامج» on the referral page: the five kinds of people it is open
- * to, and the note that sends engineering offices and project management
- * companies to the Partnership Program instead — a different programme for a
- * different audience (CONTEXT.md).
+ * «لمن هذا البرنامج» on the referral page: the kinds of people it is open to,
+ * in the three-across row however many an Editor gives it (`CardRow`), and the
+ * note that sends engineering offices and project management companies to the
+ * Partnership Program instead — a different programme for a different
+ * audience (CONTEXT.md).
  */
 export function Audience({ content }: { content: ReferralAudienceContent }) {
   return (
@@ -36,15 +38,15 @@ export function Audience({ content }: { content: ReferralAudienceContent }) {
             {content.lead}
           </p>
         </div>
-        <div className="rt-row">
+        <CardRow count={content.kinds.length}>
           {content.kinds.map((kind, index) => (
-            <div key={kind.title} className="rt-c">
+            <div key={index} className="rt-c">
               <div className="k">{String(index + 1).padStart(2, '0')}</div>
               <h3>{kind.title}</h3>
               <p>{kind.text}</p>
             </div>
           ))}
-        </div>
+        </CardRow>
         <div className="gain" style={{ marginTop: '22px' }}>
           <Inline text={content.partnership.text} />
           <a className="inl" href={content.partnership.link.href}>

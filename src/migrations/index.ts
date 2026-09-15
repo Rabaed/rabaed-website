@@ -18,9 +18,12 @@ import * as migration_20260915_063743_product_page_closing_section_and_screen_mo
 import * as migration_20260915_063744_import_product_page_closing_section_and_screen_mocks from './20260915_063744_import_product_page_closing_section_and_screen_mocks';
 import * as migration_20260915_064014_tool_page from './20260915_064014_tool_page';
 import * as migration_20260915_064015_import_tool_page from './20260915_064015_import_tool_page';
-import * as migration_20260915_204815_product_and_tool_pages_snapshot from './20260915_204815_product_and_tool_pages_snapshot';
-import * as migration_20260915_204854_home_page from './20260915_204854_home_page';
-import * as migration_20260915_204855_import_home_page from './20260915_204855_import_home_page';
+import * as migration_20260915_195429_partnership_page from './20260915_195429_partnership_page';
+import * as migration_20260915_195430_import_partnership_page from './20260915_195430_import_partnership_page';
+import * as migration_20260915_200327_referral_page_and_program_values from './20260915_200327_referral_page_and_program_values';
+import * as migration_20260915_200328_import_referral_page from './20260915_200328_import_referral_page';
+import * as migration_20260915_211211_home_page from './20260915_211211_home_page';
+import * as migration_20260915_211212_import_home_page from './20260915_211212_import_home_page';
 
 export const migrations = [
   {
@@ -124,18 +127,33 @@ export const migrations = [
     name: '20260915_064015_import_tool_page',
   },
   {
-    up: migration_20260915_204815_product_and_tool_pages_snapshot.up,
-    down: migration_20260915_204815_product_and_tool_pages_snapshot.down,
-    name: '20260915_204815_product_and_tool_pages_snapshot',
+    up: migration_20260915_195429_partnership_page.up,
+    down: migration_20260915_195429_partnership_page.down,
+    name: '20260915_195429_partnership_page',
   },
   {
-    up: migration_20260915_204854_home_page.up,
-    down: migration_20260915_204854_home_page.down,
-    name: '20260915_204854_home_page',
+    up: migration_20260915_195430_import_partnership_page.up,
+    down: migration_20260915_195430_import_partnership_page.down,
+    name: '20260915_195430_import_partnership_page',
   },
   {
-    up: migration_20260915_204855_import_home_page.up,
-    down: migration_20260915_204855_import_home_page.down,
-    name: '20260915_204855_import_home_page',
+    up: migration_20260915_200327_referral_page_and_program_values.up,
+    down: migration_20260915_200327_referral_page_and_program_values.down,
+    name: '20260915_200327_referral_page_and_program_values',
+  },
+  {
+    up: migration_20260915_200328_import_referral_page.up,
+    down: migration_20260915_200328_import_referral_page.down,
+    name: '20260915_200328_import_referral_page',
+  },
+  {
+    up: migration_20260915_211211_home_page.up,
+    down: migration_20260915_211211_home_page.down,
+    name: '20260915_211211_home_page',
+  },
+  {
+    up: migration_20260915_211212_import_home_page.up,
+    down: migration_20260915_211212_import_home_page.down,
+    name: '20260915_211212_import_home_page',
   },
 ];

@@ -21,8 +21,8 @@ export function WhatIsReferred({ content }: { content: ReferralWhatIsReferredCon
           <h2>{content.heading}</h2>
         </div>
         <div className="lead-block">
-          {content.paragraphs.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
+          {content.paragraphs.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
           ))}
         </div>
         <div className="tz-foot">

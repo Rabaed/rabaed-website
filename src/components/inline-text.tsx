@@ -20,13 +20,18 @@ export type InlinePart =
 
 export type InlineText = string | readonly InlinePart[];
 
-/** Plain words with their numerals set in DM Mono: «60 يوماً» as «60», then « يوماً». */
-export function withNumerals(text: string): InlineText {
-  const parts = text
-    .split(/([0-9]+(?:[.,][0-9]+)*)/)
-    .map((piece, index): InlinePart => (index % 2 === 1 ? { mono: piece } : piece))
-    .filter((part) => part !== '');
-  return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : parts;
+/** A run of Latin numerals, its separators and a percent sign with it: «2,000», «10%». */
+const NUMERALS = /(\d(?:[\d,.]*\d)?%?)/;
+
+/**
+ * Words an Editor wrote, with their Latin numerals set in DM Mono and the
+ * Arabic around them in the page's face: a figure like «2,000 ريال».
+ */
+export function numeralsInMono(text: string): InlineText {
+  const pieces = text.split(NUMERALS);
+  if (pieces.length === 1) return text;
+  // Every second piece is a run of numerals.
+  return pieces.map((piece, index): InlinePart => (index % 2 === 1 ? { mono: piece } : piece)).filter((part) => part !== '');
 }
 
 /** The text alone, as a visitor reads it: for an `alt`, a label, or structured data. */

@@ -1,5 +1,5 @@
 import type { Block, Field } from 'payload';
-import { HERO_STATIONS } from '../../components/home/hero-stations';
+import { HERO_DOCUMENT, HERO_STATIONS } from '../../components/home/hero-stations';
 import { latinField, listField, pictureField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { screenField } from './screen-mocks';
@@ -275,7 +275,7 @@ export const HomePage = pageGlobal({
             drawing('owner', { ar: 'مبنى المالك', en: 'Owner’s building' }, HERO_STATIONS.owner.building.intrinsic),
             drawing('consultant', { ar: 'مبنى الاستشاري', en: 'Consultant’s building' }, HERO_STATIONS.consultant.building.intrinsic),
             drawing('contractor', { ar: 'مبنى المقاول', en: 'Contractor’s building' }, HERO_STATIONS.contractor.building.intrinsic),
-            drawing('document', { ar: 'المستند المتنقل', en: 'The travelling document' }, { width: 107, height: 133 }),
+            drawing('document', { ar: 'المستند المتنقل', en: 'The travelling document' }, HERO_DOCUMENT.intrinsic),
           ],
         },
       ],
@@ -402,7 +402,7 @@ export const HomePage = pageGlobal({
             plural: { ar: 'الأسئلة التي يجيب عنها السجل', en: 'The questions the Record answers' },
           },
           rows: { min: 1, max: 6 },
-          description: { ar: 'على سطر واحد تفصل بينها نقاط.', en: 'Set on one line, with dots between.' },
+          description: { ar: 'متتالية تفصل بينها نقاط.', en: 'Set in a row, with dots between.' },
           fields: [wordsField('question', { ar: 'السؤال', en: 'Question' }, 15)],
         }),
         wordsField('lead', LEAD, 400, { multiline: true }),

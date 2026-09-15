@@ -101,23 +101,29 @@ export interface Config {
     'site-settings': SiteSetting;
     'demo-request-form': DemoRequestForm;
     'referral-signup-form': ReferralSignupForm;
+    'referral-program': ReferralProgram;
     'start-page': StartPage;
     'tool-page': ToolPage;
+    'referral-page': ReferralPage;
     'product-page': ProductPage;
     'home-page': HomePage;
     'closing-section': ClosingSection;
     'screen-mocks': ScreenMock;
+    'partnership-page': PartnershipPage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
     'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
+    'referral-program': ReferralProgramSelect<false> | ReferralProgramSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
+    'referral-page': ReferralPageSelect<false> | ReferralPageSelect<true>;
     'product-page': ProductPageSelect<false> | ProductPageSelect<true>;
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
     'closing-section': ClosingSectionSelect<false> | ClosingSectionSelect<true>;
     'screen-mocks': ScreenMocksSelect<false> | ScreenMocksSelect<true>;
+    'partnership-page': PartnershipPageSelect<false> | PartnershipPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1170,6 +1176,24 @@ export interface ReferralSignupForm {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-program".
+ */
+export interface ReferralProgram {
+  id: number;
+  /**
+   * Net, with no separators: 2000. The page writes it «2,000», wherever words name {payout}.
+   */
+  payoutRiyals: number;
+  /**
+   * With no % sign: 10. The page writes it «10%», wherever words name {clientDiscount}.
+   */
+  clientDiscountPercent: number;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "start-page".
  */
 export interface StartPage {
@@ -1684,6 +1708,323 @@ export interface ToolPage {
     signOff: {
       ar: string;
       en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-page".
+ */
+export interface ReferralPage {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  hero: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Write {payout} for the referral payout and {clientDiscount} for the client discount: the page inserts the value set under Referral Program values.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the signup section.
+     */
+    primaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to How it works.
+     */
+    secondaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Write {payout} for the referral payout and {clientDiscount} for the client discount: the page inserts the value set under Referral Program values.
+     */
+    figures: {
+      /**
+       * Its numerals are set in the figures’ typeface.
+       */
+      figure: {
+        ar: string;
+        en?: string | null;
+      };
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  howItWorks: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Numbered by their order. Drag them to reorder.
+     */
+    steps: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * The step the section wants remembered, like being paid.
+       */
+      markedOut?: boolean | null;
+      id?: string | null;
+    }[];
+  };
+  offer: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    paragraphs: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Optional. A space sets it apart from the words either side.
+       */
+      bold?: {
+        ar?: string | null;
+        en?: string | null;
+      };
+      after?: {
+        ar?: string | null;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * Two cards to a row; the last of an odd number takes the whole row.
+     */
+    sides: {
+      badge: {
+        ar: string;
+        en?: string | null;
+      };
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  audience: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Numbered by their order. Drag them to reorder.
+     */
+    kinds: {
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    partnership: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Optional. A space sets it apart from the words either side.
+       */
+      bold?: {
+        ar?: string | null;
+        en?: string | null;
+      };
+      after?: {
+        ar?: string | null;
+        en?: string | null;
+      };
+      /**
+       * Leads to the Partnership Program page.
+       */
+      linkLabel: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  whatIsReferred: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    paragraphs: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * Leads to the product page.
+     */
+    linkLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  termsSummary: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Numbered by their order. Drag them to reorder.
+     */
+    points: {
+      bold: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * A space sets it after the opening, unless it begins with a comma, a full stop, a colon or a semicolon.
+       */
+      rest: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * Leads to the full Referral Terms.
+     */
+    linkLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  questions: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  signup: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Write {payout} for the referral payout and {clientDiscount} for the client discount: the page inserts the value set under Referral Program values.
+     */
+    benefits: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    guarantee: {
+      /**
+       * Its numerals are set in the figures’ typeface.
+       */
+      figure: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
     };
   };
   _status?: ('draft' | 'published') | null;
@@ -2274,7 +2615,7 @@ export interface HomePage {
       id?: string | null;
     }[];
     /**
-     * Set on one line, with dots between.
+     * Set in a row, with dots between.
      */
     questions: {
       question: {
@@ -2810,6 +3151,286 @@ export interface ScreenMock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnership-page".
+ */
+export interface PartnershipPage {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  hero: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the application form.
+     */
+    primaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the path.
+     */
+    secondaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    figures: {
+      /**
+       * Write numerals as 0–9, like 3 أنماط, to set them in the figures’ typeface.
+       */
+      figure: {
+        ar: string;
+        en?: string | null;
+      };
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  idea: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    paragraphs: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    referralNote: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Leads to the referral page.
+       */
+      linkLabel: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  audience: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Numbered by their order. Drag them to reorder.
+     */
+    kinds: {
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  modes: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Numbered by their order. Drag them to reorder.
+     */
+    modes: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      fit: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * A sentence, then words in bold, then the rest of the line.
+     */
+    note: {
+      before: {
+        ar: string;
+        en?: string | null;
+      };
+      bold: {
+        ar: string;
+        en?: string | null;
+      };
+      after: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  benefits: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    benefits: {
+      bold: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  path: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the application form.
+     */
+    linkLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    stageLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Numbered by their order. Drag them to reorder.
+     */
+    stages: {
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  questions: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  apply: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    reassurances: {
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    responseTime: {
+      bold: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -3020,6 +3641,18 @@ export interface ReferralSignupFormSelect<T extends boolean = true> {
   failed?: T;
   confirmationSubject?: T;
   confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-program_select".
+ */
+export interface ReferralProgramSelect<T extends boolean = true> {
+  payoutRiyals?: T;
+  clientDiscountPercent?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3677,6 +4310,379 @@ export interface ToolPageSelect<T extends boolean = true> {
           | {
               ar?: T;
               en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-page_select".
+ */
+export interface ReferralPageSelect<T extends boolean = true> {
+  languages?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        primaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        secondaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        figures?:
+          | T
+          | {
+              figure?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  howItWorks?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        steps?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              markedOut?: T;
+              id?: T;
+            };
+      };
+  offer?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        paragraphs?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              after?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        sides?:
+          | T
+          | {
+              badge?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  audience?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        kinds?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        partnership?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              after?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              linkLabel?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  whatIsReferred?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        paragraphs?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        linkLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  termsSummary?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        points?:
+          | T
+          | {
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              rest?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        linkLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  questions?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  signup?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        benefits?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        guarantee?:
+          | T
+          | {
+              figure?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
             };
       };
   _status?: T;
@@ -4907,6 +5913,365 @@ export interface ScreenMocksSelect<T extends boolean = true> {
           | {
               ar?: T;
               en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnership-page_select".
+ */
+export interface PartnershipPageSelect<T extends boolean = true> {
+  languages?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        primaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        secondaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        figures?:
+          | T
+          | {
+              figure?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  idea?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        paragraphs?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        referralNote?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              linkLabel?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  audience?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        kinds?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  modes?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        modes?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              fit?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        note?:
+          | T
+          | {
+              before?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              after?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  benefits?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        benefits?:
+          | T
+          | {
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  path?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        linkLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        stageLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        stages?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  questions?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  apply?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        reassurances?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        responseTime?:
+          | T
+          | {
+              bold?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
             };
       };
   _status?: T;

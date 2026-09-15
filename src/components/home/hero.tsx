@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { HeroLoop } from '@/components/home/hero-loop';
-import { HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
+import { HERO_DOCUMENT, HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
 import { Inline, type InlineText } from '@/components/inline-text';
 import type { PageLink } from '@/components/page-link';
 
@@ -123,11 +123,11 @@ export function Hero({ content }: { content: HomeHeroContent }) {
               <img
                 className="spr"
                 id="h-doc"
-                src={content.pictures.document ?? '/hero/hero-doc.webp'}
+                src={content.pictures.document ?? HERO_DOCUMENT.src}
                 alt=""
                 aria-hidden="true"
-                width={107}
-                height={133}
+                width={HERO_DOCUMENT.intrinsic.width}
+                height={HERO_DOCUMENT.intrinsic.height}
                 style={{ left: `${HERO_START.left}%`, top: `${HERO_START.top}%`, width: '7%' }}
               />
 

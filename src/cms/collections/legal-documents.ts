@@ -148,6 +148,15 @@ export const LegalDocuments: CollectionConfig = {
   },
   fields: [
     {
+      name: 'referralTermsWarning',
+      type: 'ui',
+      admin: {
+        // Only the Referral Terms state the Referral Program values (ADR-0008).
+        condition: (data) => data?.slug === 'referral-terms',
+        components: { Field: '/cms/components/referral-terms-warning#ReferralTermsWarning' },
+      },
+    },
+    {
       name: 'slug',
       type: 'select',
       required: true,

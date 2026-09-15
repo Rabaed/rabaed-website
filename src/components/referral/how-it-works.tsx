@@ -7,9 +7,10 @@ export type ReferralHowItWorksContent = {
 };
 
 /**
- * «كيف يعمل» on the referral page: the four steps, each in a card of its own,
- * the payout last and marked out. The cards are the start and tool pages'
- * (`StepCards`), four across rather than three (`programmes.css`).
+ * «كيف يعمل» on the referral page: the steps, each in a card of its own, the
+ * payout marked out. The cards are the start and tool pages' (`StepCards`), up
+ * to four across rather than three (`programmes.css`), however many an Editor
+ * gives it.
  */
 export function HowItWorks({ content }: { content: ReferralHowItWorksContent }) {
   return (

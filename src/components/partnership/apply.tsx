@@ -31,8 +31,8 @@ export function Apply({ content }: { content: PartnershipApplyContent }) {
               {content.lead}
             </p>
             <ul className="ben-row one">
-              {content.reassurances.map((reassurance) => (
-                <li key={reassurance}>
+              {content.reassurances.map((reassurance, index) => (
+                <li key={index}>
                   <i>✓</i>
                   <span>{reassurance}</span>
                 </li>

@@ -11,7 +11,7 @@ import type { HomeHeroContent } from '@/components/home/hero';
 import type { HomeRecordSectionContent, TransactionStep } from '@/components/home/record';
 import type { HomeSituationsContent } from '@/components/home/situations';
 import type { TrustStripContent } from '@/components/home/trust-strip';
-import { withNumerals } from '@/components/inline-text';
+import { numeralsInMono } from '@/components/inline-text';
 import type { QuestionsContent } from '@/components/questions';
 import { getClosingSection } from '@/content/closing-section';
 import { getScreenMocks } from '@/content/screen-mocks';
@@ -57,11 +57,11 @@ const META = {
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
 
 /**
- * A list the design holds at exactly four (spec: Content model). The CMS
- * publishes it only with four; a draft being previewed may have fewer, and its
- * missing places are drawn empty.
+ * A list the design holds at exactly four (spec: Content model), filled out to
+ * four. The CMS publishes it only with four; a draft being previewed may have
+ * fewer, and its missing places are drawn empty.
  */
-function four<T>(items: readonly T[], empty: T): readonly [T, T, T, T] {
+function fillToFour<T>(items: readonly T[], empty: T): readonly [T, T, T, T] {
   const [first = empty, second = empty, third = empty, fourth = empty] = items;
   return [first, second, third, fourth];
 }
@@ -95,8 +95,8 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
     nextLabel: words(nextLabel),
     hint: words(hint),
   });
-  /** A drawing an Editor put in place of the hero's own, or `null` for today's. */
-  const drawing = (value: NonNullable<HomePage['hero']['pictures']>['owner']) => fetchedMedia(value)?.url ?? null;
+  /** Where a drawing an Editor put in place of the hero's own is, or `null` for today's. */
+  const replacementDrawing = (value: NonNullable<HomePage['hero']['pictures']>['owner']) => fetchedMedia(value)?.url ?? null;
   const face = (side: HomePage['beforeAfter']['steps'][number]['usual']): Face => ({
     channel: words(side.channel),
     words: withEmphasis(words(side.words)),
@@ -130,23 +130,23 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
       // Only the numerals are `.mono`: DM Mono has no Arabic glyphs, so setting
       // «يوماً» in it drops the word to a last-resort monospace face (spec:
       // Design system). The Reference site wraps both.
-      guarantee: { period: withNumerals(words(hero.guaranteePeriod)), promise: words(hero.guaranteePromise) },
+      guarantee: { period: numeralsInMono(words(hero.guaranteePeriod)), promise: words(hero.guaranteePromise) },
       parties: {
         owner: words(hero.parties.owner),
         contractor: words(hero.parties.contractor),
         consultant: words(hero.parties.consultant),
       },
       diagramDescription: words(hero.diagramDescription),
-      statuses: four(
+      statuses: fillToFour(
         hero.statuses.map((each) => words(each.status)),
         '',
       ),
       statusAtRest: words(hero.statusAtRest),
       pictures: {
-        owner: drawing(hero.pictures?.owner),
-        contractor: drawing(hero.pictures?.contractor),
-        consultant: drawing(hero.pictures?.consultant),
-        document: drawing(hero.pictures?.document),
+        owner: replacementDrawing(hero.pictures?.owner),
+        contractor: replacementDrawing(hero.pictures?.contractor),
+        consultant: replacementDrawing(hero.pictures?.consultant),
+        document: replacementDrawing(hero.pictures?.document),
       },
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
@@ -181,7 +181,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
       types: record.types.map((type) => ({
         label: words(type.label),
         title: words(type.title),
-        steps: four(
+        steps: fillToFour(
           type.steps.map((step) => ({ action: words(step.action), by: words(step.by), time: step.time })),
           EMPTY_STEP,
         ),
@@ -201,7 +201,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
         rabaed: words(beforeAfter.verdicts.rabaed),
         between: words(beforeAfter.verdicts.between),
       },
-      steps: four(
+      steps: fillToFour(
         beforeAfter.steps.map((step): ComparisonStep => ({ name: words(step.name), usual: face(step.usual), rabaed: face(step.rabaed) })),
         { name: '', usual: EMPTY_FACE, rabaed: EMPTY_FACE },
       ),
@@ -229,8 +229,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
           many: words(calculator.days.many),
         },
         months: { few: words(calculator.months.few), many: words(calculator.months.many) },
-        // Each amount after its name.
-        breakdown: `${words(calculator.breakdown.financing)} {financing} + ${words(calculator.breakdown.siteOverhead)} {siteOverhead}`,
+        breakdown: { financing: words(calculator.breakdown.financing), siteOverhead: words(calculator.breakdown.siteOverhead) },
       },
     },
     figures: {

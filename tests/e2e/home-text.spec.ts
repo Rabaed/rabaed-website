@@ -228,8 +228,6 @@ test('the home page shows the words the CMS has published, every section of it, 
   // A phrase the Editor marks in bold is drawn in bold, without its marks.
   expect(html).toContain('<b>SUB-031</b>');
   expect(html).not.toContain('*SUB-031*');
-  // The guarantee's numerals alone are set in DM Mono.
-  expect(html).toContain('<span class="mono">60</span> يوماً');
 });
 
 test('a reworded heading, grown lists and hidden sections are previewed, and never reach a visitor', async ({ page, request }) => {

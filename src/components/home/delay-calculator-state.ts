@@ -37,11 +37,12 @@ export const STARTING_SETTINGS: DelayCostInputs = {
  * eleven and more each take a word of their own — «1 يوم», «2 يومان», «3 أيام»,
  * «11 يوماً». The founders chose Arabic's rule over the Reference site's, which
  * wrote «1 أيام» and «6 شهراً» (ticket 58). It holds for the sliders' ranges,
- * which stop short of a hundred.
+ * which stop short of a hundred. A count that never reaches one or two has no
+ * word for them.
  */
 export type CountWords = {
-  readonly one: string;
-  readonly two: string;
+  readonly one?: string;
+  readonly two?: string;
   readonly few: string;
   readonly many: string;
 };
@@ -54,17 +55,17 @@ export type CalculatorWords = {
   /** The currency, after an amount. */
   readonly currency: string;
   /** The word after a number of days. */
-  readonly days: CountWords;
+  readonly days: Required<CountWords>;
   /** The word after a number of months. A project's length starts at six, so never one or two. */
   readonly months: Pick<CountWords, 'few' | 'many'>;
-  /** The line under the cost that splits it in two, with `{financing}` and `{siteOverhead}` where the amounts go. */
-  readonly breakdown: string;
+  /** The names the cost's two parts are written after, in the line under it: «تمويل 46,027 + تكاليف عامة للموقع 38,377». */
+  readonly breakdown: { readonly financing: string; readonly siteOverhead: string };
 };
 
-/** The word after `count` of something, from its words for one, two, three to ten, and eleven on. */
-function wordAfter(count: number, words: CountWords | Pick<CountWords, 'few' | 'many'>): string {
-  if (count === 1 && 'one' in words) return words.one;
-  if (count === 2 && 'two' in words) return words.two;
+/** The word after `count` of something. */
+function wordAfter(count: number, words: CountWords): string {
+  if (count === 1 && words.one !== undefined) return words.one;
+  if (count === 2 && words.two !== undefined) return words.two;
   return count <= 10 ? words.few : words.many;
 }
 
@@ -95,10 +96,7 @@ export function calculatorDisplay(settings: DelayCostInputs, words: CalculatorWo
       { number: String(settings.durationMonths), word: wordAfter(settings.durationMonths, words.months) },
     ] satisfies Figure[],
     cost: { number: formatRiyals(cost.total), word: words.currency } satisfies Figure,
-    breakdown: fillIn(words.breakdown, {
-      financing: formatRiyals(cost.financing),
-      siteOverhead: formatRiyals(cost.siteOverhead),
-    }),
+    breakdown: `${words.breakdown.financing} ${formatRiyals(cost.financing)} + ${words.breakdown.siteOverhead} ${formatRiyals(cost.siteOverhead)}`,
     /** Each slider's track, filled in the brand colour up to its thumb — the Reference site's own gradient. */
     tracks: SLIDERS.map((range, index) => {
       const filled = ((values[index] - range.min) / (range.max - range.min)) * 100;
@@ -110,9 +108,4 @@ export function calculatorDisplay(settings: DelayCostInputs, words: CalculatorWo
 /** A figure as one phrase, for a screen reader: «84,405 ر.س». */
 export function figureText(figure: Figure): string {
   return `${figure.number} ${figure.word}`;
-}
-
-/** `template` with each `{name}` in it replaced by that name's value. A name with no value is left as written. */
-function fillIn(template: string, values: Readonly<Record<string, string>>): string {
-  return template.replace(/\{(\w+)\}/g, (placeholder, name: string) => values[name] ?? placeholder);
 }

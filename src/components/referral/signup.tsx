@@ -34,8 +34,8 @@ export function Signup({ content, form }: { content: ReferralSignupContent; form
               {content.lead}
             </p>
             <ul className="ben-row one">
-              {content.benefits.map((benefit) => (
-                <li key={benefit}>
+              {content.benefits.map((benefit, index) => (
+                <li key={index}>
                   <i>✓</i>
                   <span>{benefit}</span>
                 </li>
