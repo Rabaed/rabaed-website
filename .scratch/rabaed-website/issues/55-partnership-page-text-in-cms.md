@@ -4,15 +4,15 @@
 
 **Blocked by:** 53
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every section's words are read from the CMS, including the hero's three figures and the application section's own heading, lead and reassurances
-- [ ] Every list is editable: the hero figures, the audience, the modes, the benefits, the stages of the path, the reassurances
-- [ ] The modes and the path's stages lay out any number neatly, and today's counts still match the baselines
-- [ ] The path (`#path`) and the application (`#apply`) cannot be hidden: the hero's buttons and the path's own link land on them (found in ticket 52; ticket 21's list of linked sections did not name them). Every other section can be
-- [ ] Wherever a card or a line has a fixed size, the admin enforces its limit
-- [ ] A migration imports the partnership page's words verbatim as its first published version, and its static copy goes
-- [ ] The partnership page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
+- [x] Every section's words are read from the CMS, including the hero's three figures and the application section's own heading, lead and reassurances
+- [x] Every list is editable: the hero figures, the audience, the modes, the benefits, the stages of the path, the reassurances
+- [x] The modes and the path's stages lay out any number neatly, and today's counts still match the baselines
+- [x] The path (`#path`) and the application (`#apply`) cannot be hidden: the hero's buttons and the path's own link land on them (found in ticket 52; ticket 21's list of linked sections did not name them). Every other section can be
+- [x] Wherever a card or a line has a fixed size, the admin enforces its limit
+- [x] A migration imports the partnership page's words verbatim as its first published version, and its static copy goes
+- [x] The partnership page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
 
 **Not this ticket:** the application form's fields and wording (ticket 29), the FAQ entries (ticket 22), and the search title and description (ticket 26).
 
