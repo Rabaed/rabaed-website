@@ -24,6 +24,7 @@ import { Users } from './cms/collections/users';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
+import { StartPage } from './cms/globals/start-page';
 import { SUBMITTABLE_FORMS } from './forms/registry';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -67,9 +68,12 @@ export default buildConfig({
     fallbackLanguage: 'ar',
   },
 
+  // No `localization`: page text holds its Arabic and English side by side in
+  // fields of its own (`cms/page-fields.ts` says why).
   collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
-  // One settings global per form that submits (ticket 27).
-  globals: [SiteSettings, ...SUBMITTABLE_FORMS.map(formSettingsGlobal)],
+  // One settings global per form that submits (ticket 27), and one entry per
+  // marketing page whose words are in the CMS (ticket 53).
+  globals: [SiteSettings, ...SUBMITTABLE_FORMS.map(formSettingsGlobal), StartPage],
 
   db: postgresAdapter({
     pool: { connectionString: databaseUrl() },

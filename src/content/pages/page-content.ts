@@ -9,14 +9,16 @@ import type { Locale } from '@/lib/locales';
  * Each marketing page reads its words, lists and pictures through one module
  * in this folder, given a locale, the way the legal pages are handed a
  * document. Its sections draw what they are handed and fetch nothing. That is
- * what lets ticket 21 move a page's content into the CMS by changing only its
- * module, and ticket 42 give every section English words without touching it.
+ * what lets tickets 53–59 move a page's content into the CMS by changing only
+ * its module, and ticket 42 give every section English words without touching
+ * it. The start page's module reads the CMS already (ticket 53); the others
+ * still hold their Arabic here.
  *
  * What a module hands its page is the shape an Editor works in (spec: Content
  * model): a fixed run of sections, in a fixed order, each with its fields, its
- * lists, and whether it shows — in the one locale asked for. How the CMS stores
- * that across locales, one list whose items carry their text per locale, is
- * ticket 21's to decide; the static files behind these modules only hold Arabic.
+ * lists, and whether it shows — in the one locale asked for. In the CMS each
+ * word holds its Arabic and English side by side, and a list is one list whose
+ * items hold both (`src/cms/page-fields.ts`).
  *
  * A page's hero is neither kind of section below, and always shows: it carries
  * the page's only `<h1>`, and a page published without one has no heading.

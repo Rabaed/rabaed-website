@@ -1,7 +1,7 @@
-import type { Field, GlobalAfterChangeHook, GlobalConfig } from 'payload';
+import type { Field, GlobalConfig } from 'payload';
 import { fieldNames, type FormDefinition, type FormId } from '../../forms/definition';
 import { signedIn } from '../access';
-import { refreshSite } from '../revalidation';
+import { refreshSiteWhenPublished } from '../revalidation';
 
 /** Where the forms sit in the admin's menu. */
 export const FORMS_GROUP = { ar: 'النماذج', en: 'Forms' };
@@ -15,15 +15,6 @@ export function formSettingsSlug(id: FormId): string {
 export function optionFieldName(value: string): string {
   return `option_${value.replace(/[^A-Za-z0-9]/g, '_')}`;
 }
-
-/**
- * The wording shows on pages, so publishing it rebuilds the site; a saved
- * draft leaves the pages alone, as for the site settings.
- */
-const refreshPagesOnPublish: GlobalAfterChangeHook = ({ doc, req }) => {
-  if (doc._status === 'published') refreshSite(req);
-  return doc;
-};
 
 type Words = { readonly ar: string; readonly en: string };
 
@@ -102,8 +93,9 @@ export function formSettingsGlobal(definition: FormDefinition): GlobalConfig {
       group: FORMS_GROUP,
       preview: () => `/api/preview?path=${definition.previewPath}`,
     },
+    // The wording shows on pages.
     hooks: {
-      afterChange: [refreshPagesOnPublish],
+      afterChange: [refreshSiteWhenPublished],
     },
     fields: [
       {
