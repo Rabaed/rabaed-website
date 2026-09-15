@@ -27,4 +27,6 @@
 
 **Where the limits bite** is ticket 21's survey of 13 September 2026, re-checked against today's code before setting any limit. The before/after cards' starting state uses `nth-child` for four columns (two on mobile), which is part of why that count stays locked.
 
+**From ticket 57 (15 September 2026).** The home page already reads the closing section and its four units' screens from the CMS: both are entries it shares with the product page, and a shared entry read by one page only would let the two drift apart. `src/content/pages/home.ts` passes the Screen mocks to `unitTabs` in `src/content/four-units.ts` and takes the closing section from `getClosingSection`; the tabs' own words (their titles and tags) are still in code, and are this ticket's. A picture is replaceable through `pictureField` in `src/cms/page-fields.ts`, which holds a replacement to its place's shape; the words a screen reader hears for it are the section's own, in both languages (`src/cms/globals/screen-mocks.ts` is the example).
+
 **Parallel sessions.** Touches only the home page's module, components and data files, and a migration of its own. Take it after ticket 57 is merged. After updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).

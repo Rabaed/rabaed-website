@@ -1,24 +1,26 @@
+import { pageEntry, wordsIn } from '@/cms/pages';
 import type { ClosingSectionContent } from '@/components/closing-section';
-import { localePath } from '@/lib/locales';
+import { localePath, type Locale } from '@/lib/locales';
 
 /**
- * «كيف نبدأ معك», the block the home and product pages both end on — one
- * text, so the two pages cannot drift apart.
+ * «كيف نبدأ معك», the block the home and product pages both end on, in
+ * `locale`: its one entry in the CMS (ticket 57), so the two pages cannot drift
+ * apart — or a refusal, where it is not published in `locale`.
  *
- * Verbatim from `reference/site/index.html`.
+ * A step is numbered by its place, so reordering renumbers it; the link on
+ * leads to the start page, which stays in code.
  */
-export const CLOSING_SECTION: { readonly ar: ClosingSectionContent } = {
-  ar: {
-    eyebrow: 'كيف نبدأ معك',
-    heading: 'فريقنا في موقعك. الأطراف الثلاثة على المنصة خلال أيام.',
-    steps: [
-      {
-        label: '01 · إعداد',
-        text: 'نُعدّ المشروع والنماذج، وندعو المالك والاستشاري والمقاول — و15 دقيقة مع كل فريق.',
-      },
-      { label: '02 · تشغيل', text: 'أقل من يوم، دون توقف للعمل. يبدأ الجميع من حيث وصل المشروع.' },
-      { label: '03 · ضمان', text: '60 يوماً من التفعيل — أو نعيد كامل المبلغ، ونسلّمكم نسخة كاملة من السجل.' },
-    ],
-    more: { label: 'التفاصيل والأسئلة الشائعة ←', href: localePath('ar', '/start') },
-  },
-};
+export async function getClosingSection(locale: Locale): Promise<ClosingSectionContent> {
+  const { closing } = await pageEntry('closing-section', locale);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
+
+  return {
+    eyebrow: words(closing.eyebrow),
+    heading: words(closing.heading),
+    steps: closing.steps.map((step, index) => ({
+      label: `${String(index + 1).padStart(2, '0')} · ${words(step.label)}`,
+      text: words(step.text),
+    })),
+    more: { label: words(closing.moreLabel), href: localePath(locale, '/start') },
+  };
+}

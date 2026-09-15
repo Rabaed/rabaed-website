@@ -15,7 +15,7 @@ import type { Locale } from '../lib/locales.ts';
  *
  * **No `alt` text here, deliberately.** What a mock shows, in words, is copy —
  * the picture's description and the visible caption ADR-0002 requires — and it
- * lives with the copy, in `src/content/screen-mock-descriptions.ts`. This table
+ * lives with the copy, in the CMS's Screen mocks entry (ticket 57). This table
  * says how a mock is drawn, and the export script imports it under plain Node.
  */
 export type ScreenMock = {

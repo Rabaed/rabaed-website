@@ -1,6 +1,6 @@
 import { RolesBehaviour } from '@/components/product/roles-behaviour';
 import { FIRST_ROLE, roleAppearance } from '@/components/product/roles-state';
-import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/product/screen-mock-picture';
+import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
 
 export type Role = {
   /** The tab's label. */
@@ -17,8 +17,8 @@ export type Role = {
 export type ProductRolesContent = {
   readonly eyebrow: string;
   readonly heading: string;
-  /** The three parties, no more and no fewer (spec: Content model). */
-  readonly roles: readonly [Role, Role, Role];
+  /** The three parties, no more and no fewer (spec: Content model), which the CMS holds them to on publishing. */
+  readonly roles: readonly Role[];
   /** What every party gets, whichever is chosen. */
   readonly sharedPromises: readonly string[];
 };
@@ -48,7 +48,7 @@ export function Roles({ content }: { content: ProductRolesContent }) {
             const look = roleAppearance(index, FIRST_ROLE);
             return (
               <button
-                key={role.screen.mock}
+                key={index}
                 type="button"
                 role="tab"
                 id={`role-tab-${index}`}
@@ -64,7 +64,7 @@ export function Roles({ content }: { content: ProductRolesContent }) {
 
         {content.roles.map((role, index) => (
           <div
-            key={role.screen.mock}
+            key={index}
             id={`role-panel-${index}`}
             role="tabpanel"
             aria-labelledby={`role-tab-${index}`}
@@ -90,8 +90,8 @@ export function Roles({ content }: { content: ProductRolesContent }) {
         ))}
 
         <div className="shared">
-          {content.sharedPromises.map((promise) => (
-            <span key={promise}>{promise}</span>
+          {content.sharedPromises.map((promise, index) => (
+            <span key={index}>{promise}</span>
           ))}
         </div>
       </div>

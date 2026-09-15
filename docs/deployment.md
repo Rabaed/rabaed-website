@@ -173,10 +173,12 @@ site launched with, word for word.
 
 ### Page text
 
-The start page's words are edited under **Pages → Start page** (ticket 53), and
-the tool page's under **Pages → Tool page** (ticket 54); the other marketing
-pages follow in tickets 55–59, and until then their words are still in code.
-The migrations import each page's words once, as they were.
+Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**
+(ticket 54) and **Product page** (ticket 57), and two entries pages share —
+**Closing section** («كيف نبدأ معك», which the home and product pages both end
+on, changed once for both) and **Screen mocks**. The other marketing pages
+follow in tickets 55, 56, 58 and 59, and until then their words are still in
+code. The migrations import each entry's words once, as they were.
 
 - Each tab is one section of the page, in the page's order. Sections cannot be
   moved, added or removed.
@@ -188,14 +190,26 @@ The migrations import each page's words once, as they were.
   filled in from the other language. Once English is listed, every change is
   published only with its English — a new step included — so write the
   English, or take English off the list for the time being.
-- A list — steps, cards, lines — can be added to, taken from and reordered by
-  dragging, within the number the design holds. Steps and numbered cards are
-  numbered by their order. A list drawn around an exact number — the drawing of
-  the tool in the tool page's hero — offers no **Add**.
+- A list — steps, panels, cards, lines — can be added to, taken from and
+  reordered by dragging, within the number the design holds. Steps, units and
+  numbered cards are numbered by their order. A list the design is built around
+  an exact count — the drawing of the tool in the tool page's hero, the product
+  page's three parties — offers no **Add** and publishes only with that count.
 - In the tool page's privacy points, put a Latin file name between backticks —
   `` `concrete_db.json` `` — to set it left to right, as in the questions. File
   names, pour references and the drawing's figures are one field for both
   languages, in Latin letters and figures only.
+- **Screen mocks** holds each screen's picture and what it shows in words: read
+  out by screen readers and written under the picture, wherever a page shows
+  it. With no picture chosen, the page shows the image exported from the
+  studio. A replacement must be 1440×900, or larger in the same proportions
+  (2880×1800 is sharpest); describe the new picture when replacing one, and
+  remove it to bring the exported image back. Which screen a panel or a party
+  shows is chosen on the page; what a mock depicts is a developer's to change,
+  through the studio and `npm run mocks:export`.
+- On a window just tall enough for the product page's units to travel
+  sideways, a panel is only as tall as the window, so its title, line and text
+  hold only what fits there.
 - Every field holds only as many characters as its place in the design
   carries; the admin says so when a text is too long.
 - Like an article, a change is saved as a draft, previewed on the page, and

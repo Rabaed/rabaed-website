@@ -11,8 +11,22 @@ import { cache } from 'react';
 import { ContentNotInLocale } from '@/content/pages/page-content';
 import type { Locale } from '@/lib/locales';
 
-/** The pages whose words are in the CMS so far; tickets 54–59 add theirs. */
-type PageSlug = Extract<GlobalSlug, 'start-page' | 'tool-page'>;
+/**
+ * The pages whose words are in the CMS so far, and the sections and pictures
+ * pages share; tickets 55–59 add theirs.
+ */
+type PageSlug = Extract<
+  GlobalSlug,
+  'start-page' | 'tool-page' | 'product-page' | 'closing-section' | 'screen-mocks'
+>;
+
+/**
+ * One level deep, so that a picture comes with the image it names rather than
+ * only its id (ticket 57). One constant for what visitors see and what an
+ * Editor previews, so that a picture the preview shows is the picture
+ * publishing shows: only the preview can be tested without a visitor seeing it.
+ */
+const DEPTH = 1;
 
 /** A word as the CMS stores it: its Arabic and its English, either possibly empty. */
 type StoredWords = { readonly ar?: string | null; readonly en?: string | null } | null | undefined;
@@ -31,7 +45,7 @@ const cachedEntry = cache(async (slug: PageSlug, locale: Locale) => {
   const payload = await getPayload({ config });
 
   const entry = previewing
-    ? await payload.findGlobal({ slug, draft: true, depth: 0 })
+    ? await payload.findGlobal({ slug, draft: true, depth: DEPTH })
     : (
         await payload.findGlobalVersions({
           slug,
@@ -39,7 +53,7 @@ const cachedEntry = cache(async (slug: PageSlug, locale: Locale) => {
           sort: '-updatedAt',
           limit: 1,
           pagination: false,
-          depth: 0,
+          depth: DEPTH,
         })
       ).docs[0]?.version;
 

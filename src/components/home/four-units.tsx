@@ -1,17 +1,17 @@
-import Image from 'next/image';
 import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
 import type { PageLink } from '@/components/page-link';
-import { findScreenMock, screenMockImagePath } from '@/screen-mocks/registry';
+import { ScreenMockImage, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
 
 export type UnitTab = {
   /** The small line above the title: a unit's number, or the name of what the units produce. */
   readonly tag: { readonly kind: 'unit'; readonly number: string } | { readonly kind: 'output'; readonly name: string };
   readonly title: string;
-  /** The Screen mock's id in `src/screen-mocks/registry.ts`, whose exported image the tab shows. */
-  readonly mock: string;
-  /** What the screen shows, in words: the picture's `alt` and the caption under it, both at once (ADR-0002). */
-  readonly description: string;
+  /**
+   * The Screen mock the tab shows, and what it shows in words: the picture's
+   * `alt` and the caption under it, both at once (ADR-0002).
+   */
+  readonly screen: ScreenMockPictureContent;
 };
 
 export type HomeFourUnitsContent = {
@@ -63,7 +63,7 @@ export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
             const look = unitTabAppearance(index, FIRST_CHOSEN);
             return (
               <button
-                key={unit.mock}
+                key={index}
                 type="button"
                 role="tab"
                 id={`jt-tab-${index}`}
@@ -91,33 +91,24 @@ export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
             than under whichever of the two columns is taller. */}
         <div className="jt-view">
           <div className="jt-stage">
-            {content.tabs.map((unit, index) => {
-              const mock = screenMockFor(unit.mock);
-              return (
-                <div
-                  key={unit.mock}
-                  id={`jt-panel-${index}`}
-                  role="tabpanel"
-                  aria-labelledby={`jt-tab-${index}`}
-                  className={unitTabAppearance(index, FIRST_CHOSEN).panelClass}
-                >
-                  <Image
-                    src={screenMockImagePath('ar', mock.id)}
-                    alt={unit.description}
-                    width={mock.width}
-                    height={mock.height}
-                    // Below 700px the screen is shown at 1040px and panned
-                    // across; above it, the stage is never wider than 820px.
-                    sizes="(max-width: 700px) 1040px, 820px"
-                  />
-                </div>
-              );
-            })}
+            {content.tabs.map((unit, index) => (
+              <div
+                key={index}
+                id={`jt-panel-${index}`}
+                role="tabpanel"
+                aria-labelledby={`jt-tab-${index}`}
+                className={unitTabAppearance(index, FIRST_CHOSEN).panelClass}
+              >
+                {/* Below 700px the screen is shown at 1040px and panned
+                    across; above it, the stage is never wider than 820px. */}
+                <ScreenMockImage content={unit.screen} sizes="(max-width: 700px) 1040px, 820px" />
+              </div>
+            ))}
           </div>
           <div className="jt-hints" aria-hidden="true">
             {content.tabs.map((unit, index) => (
-              <p key={unit.mock} className="jt-hint" hidden={unitTabAppearance(index, FIRST_CHOSEN).hintHidden}>
-                {unit.description}
+              <p key={index} className="jt-hint" hidden={unitTabAppearance(index, FIRST_CHOSEN).hintHidden}>
+                {unit.screen.description}
               </p>
             ))}
           </div>
@@ -134,11 +125,4 @@ export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
       <FourUnitsBehaviour />
     </section>
   );
-}
-
-/** The registry entry for a mock named in the content, or a build that stops and says which. */
-function screenMockFor(id: string) {
-  const mock = findScreenMock(id);
-  if (!mock) throw new Error(`No Screen mock called "${id}" in src/screen-mocks/registry.ts`);
-  return mock;
 }

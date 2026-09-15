@@ -14,6 +14,8 @@ import * as migration_20260914_222809_publish_referral_signup_wording from './20
 import * as migration_20260915_040104_start_page from './20260915_040104_start_page';
 import * as migration_20260915_040105_import_start_page from './20260915_040105_import_start_page';
 import * as migration_20260915_062734_referral_documents_snapshot from './20260915_062734_referral_documents_snapshot';
+import * as migration_20260915_063743_product_page_closing_section_and_screen_mocks from './20260915_063743_product_page_closing_section_and_screen_mocks';
+import * as migration_20260915_063744_import_product_page_closing_section_and_screen_mocks from './20260915_063744_import_product_page_closing_section_and_screen_mocks';
 import * as migration_20260915_064014_tool_page from './20260915_064014_tool_page';
 import * as migration_20260915_064015_import_tool_page from './20260915_064015_import_tool_page';
 
@@ -97,6 +99,16 @@ export const migrations = [
     up: migration_20260915_062734_referral_documents_snapshot.up,
     down: migration_20260915_062734_referral_documents_snapshot.down,
     name: '20260915_062734_referral_documents_snapshot',
+  },
+  {
+    up: migration_20260915_063743_product_page_closing_section_and_screen_mocks.up,
+    down: migration_20260915_063743_product_page_closing_section_and_screen_mocks.down,
+    name: '20260915_063743_product_page_closing_section_and_screen_mocks',
+  },
+  {
+    up: migration_20260915_063744_import_product_page_closing_section_and_screen_mocks.up,
+    down: migration_20260915_063744_import_product_page_closing_section_and_screen_mocks.down,
+    name: '20260915_063744_import_product_page_closing_section_and_screen_mocks',
   },
   {
     up: migration_20260915_064014_tool_page.up,

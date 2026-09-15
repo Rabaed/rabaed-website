@@ -21,10 +21,14 @@
  *     produced the image: text rasterises differently on a hosted Linux
  *     runner, which CI demonstrated by failing all eight of them at once.
  *     Those are tagged `@pixel`; CI skips them and `npm test` runs them.
+ *
+ *     Both skip a mock an Editor has replaced in the admin (ticket 57): the
+ *     pages show the replacement, so a stale export harms nothing (spec:
+ *     Screen mocks).
  *  3. The studio is not indexable. It is a private route that exists to be
  *     photographed, and its contents duplicate pages that are meant to rank.
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -35,6 +39,28 @@ import { openReferencePage, startReferenceSite, type ReferenceSite } from './ref
 import { SCREEN_MOCKS, screenMockImagePath, studioPath } from '../../src/screen-mocks/registry';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
+
+/**
+ * Whether an Editor has replaced this mock in the admin (ticket 57): a page
+ * shows it, and shows a picture other than its export. A mock no page shows
+ * just now — its section hidden — is not replaced, and is still checked.
+ *
+ * Read from the pages, as a visitor with no session receives them, rather than
+ * from the CMS: these checks run side by side, and side by side sign-ins to one
+ * account erase each other's sessions (`cms.ts`). Every mock's picture names
+ * its mock (`src/components/screen-mock-picture.tsx`).
+ */
+async function replacedInTheAdmin(request: APIRequestContext, mockId: string): Promise<boolean> {
+  const exported = screenMockImagePath('ar', mockId);
+  for (const page of ['/product', '/']) {
+    const response = await request.get(page);
+    expect(response.ok(), page).toBe(true);
+    const pictures = (await response.text()).match(new RegExp(`<img[^>]*data-screen-mock="${mockId}"[^>]*>`, 'g')) ?? [];
+    // `next/image` names the file inside its own address, encoded.
+    if (pictures.some((tag) => !tag.includes(exported) && !tag.includes(encodeURIComponent(exported)))) return true;
+  }
+  return false;
+}
 
 /** One line of `src/screen-mocks/exported.json`, written by the export script. */
 type ExportRecord = {
@@ -178,7 +204,8 @@ test.describe('screen mocks', () => {
       }
     });
 
-    test(`${mock.id}'s exported image was made from the markup as it stands`, async () => {
+    test(`${mock.id}'s exported image was made from the markup as it stands`, async ({ request }) => {
+      test.skip(await replacedInTheAdmin(request, mock.id), 'replaced in the admin: the site shows the replacement');
       const manifest = JSON.parse(
         await readFile(path.join(repoRoot, 'src', 'screen-mocks', 'exported.json'), 'utf8'),
       ) as { images: ExportRecord[] };
@@ -203,7 +230,9 @@ test.describe('screen mocks', () => {
     test(`@pixel ${mock.id}'s exported image is what the studio renders today`, async ({
       browser,
       baseURL,
+      request,
     }) => {
+      test.skip(await replacedInTheAdmin(request, mock.id), 'replaced in the admin: the site shows the replacement');
       const file = path.join(repoRoot, 'public', screenMockImagePath('ar', mock.id));
       const exported = await sharp(await readFile(file))
         .flatten({ background: { r: BACKDROP[0], g: BACKDROP[1], b: BACKDROP[2] } })

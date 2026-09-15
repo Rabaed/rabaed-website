@@ -43,8 +43,8 @@ export function ClosingSection({
           <div className="eyebrow">{content.eyebrow}</div>
           <h2 style={{ fontSize: '29px', lineHeight: 1.4 }}>{content.heading}</h2>
           <ul className="tail-steps">
-            {content.steps.map((step) => (
-              <li key={step.label}>
+            {content.steps.map((step, index) => (
+              <li key={index}>
                 <b>{step.label}</b>
                 <span>{step.text}</span>
               </li>

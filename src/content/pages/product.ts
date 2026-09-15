@@ -1,19 +1,19 @@
+import { pageEntry, wordsIn } from '@/cms/pages';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { ProductCustomStripContent } from '@/components/product/custom-strip';
-import type { ProductInnerCycleContent } from '@/components/product/inner-cycle';
-import type { ProductJourneyContent } from '@/components/product/journey';
+import type { InnerCycleNote, ProductInnerCycleContent } from '@/components/product/inner-cycle';
+import type { FlowStep, ProductJourneyContent } from '@/components/product/journey';
 import type { ProductRolesContent } from '@/components/product/roles';
-import { CLOSING_SECTION } from '@/content/closing-section';
-import { INNER_CYCLE } from '@/content/inner-cycle';
-import { JOURNEY } from '@/content/journey';
-import { ROLES } from '@/content/roles';
+import { getClosingSection } from '@/content/closing-section';
+import { getScreenMocks } from '@/content/screen-mocks';
 import { TRUST_STRIP } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import type { Locale } from '@/lib/locales';
+import type { ProductPage } from '@/payload-types';
 import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ProductPageContent = {
@@ -32,53 +32,126 @@ export type ProductPageContent = {
 };
 
 /**
- * Verbatim from `reference/site/product.html`. Nothing here is placeholder
- * text, and nothing waits to be reworded.
+ * The page's search title and description, which ticket 26 moves into the CMS,
+ * and the short name its breadcrumb structured data reads (ticket 32), which
+ * travels with them. Verbatim from `reference/site/product.html`.
  */
-const AR: Omit<ProductPageContent, 'demoForm'> = {
-  meta: {
+const META = {
+  ar: {
     name: 'المنتج',
     title: 'ربائد · المنتج — من الطلب إلى الاعتماد',
     description: 'كيف تمر معاملة واحدة من الطلب إلى الاعتماد، وماذا يرى كل طرف حين يفتح المنصة.',
   },
-  hero: {
-    eyebrow: 'المنتج',
-    title: 'وحدات ربائد — وما يراه كل طرف منها.',
-    lead: 'أربع وحدات تغطي كل ما يمر بين الأطراف، ثم ما يراه كل طرف حين يفتح المنصة، ثم ما يبقى داخل جهته ولا يعبر إلى الآخرين.',
-    // The first jumps to the demo request form at the foot of this page, the
-    // second to the journey just below.
-    primary: { label: 'احجز عرضاً حياً', href: '#demo' },
-    secondary: { label: 'ابدأ من الوحدات ↓', href: '#journey' },
-  },
-  // The Reference site's product page carries the same strip as its home page,
-  // under the same label.
-  trustStrip: { shows: true, ...TRUST_STRIP.ar },
-  journey: { shows: true, ...JOURNEY.ar },
-  customStrip: {
-    shows: true,
-    eyebrow: 'يُخصَّص حسب المشروع',
-    heading: 'ومشروعك يحتاج أكثر؟',
-    features: [
-      {
-        title: 'الجداول الزمنية ومتابعة الإنجاز',
-        body: 'استيراد جداول Primavera P6 و MS Project، المسار الحرج، وأثر كل تحديث زمني على موعد التسليم.',
-      },
-      {
-        title: 'جدول الكميات والمستخلصات',
-        body: 'جدول كميات تفاعلي ومستخلصات مبنية على الطلبات المعتمدة فعلاً — لا على ما يُكتب في نهاية الشهر.',
-      },
-    ],
-    badge: 'حسب المشروع',
-    // The demo request form, in the closing section at the foot of this page.
-    ask: { label: 'اسأل عنها في العرض التوضيحي ←', href: '#demo' },
-  },
-  roles: { shows: true, ...ROLES.ar },
-  innerCycle: { shows: true, ...INNER_CYCLE.ar },
-  // The closing section the home page ends on too, ticket 11's.
-  closing: { shows: true, ...CLOSING_SECTION.ar },
-};
+} as const;
 
-/** The product page's content in `locale`, or a refusal (`inLocale`). */
+/** Between two parties, the way something travels: towards the reading's end. */
+const TOWARDS: Readonly<Record<Locale, string>> = { ar: '←', en: '→' };
+/** What separates one route from the next. */
+const THEN = '·';
+
+type Flow = NonNullable<ProductPage['journey']['panels'][number]['flow']>;
+
+/** The row of pills at the foot of a panel: each party, then what the Editor put after it — never after the last. */
+function flowSteps(locale: Locale, flow: Flow): FlowStep[] {
+  return flow.flatMap((item, index): FlowStep[] => {
+    const party: FlowStep = { party: wordsIn(locale, item.party) };
+    if (index === flow.length - 1 || item.after === 'none') return [party];
+    return [party, item.after === 'towards' ? { towards: TOWARDS[locale] } : { then: THEN }];
+  });
+}
+
+/**
+ * The product page's content in `locale`: its words from its entry in the CMS
+ * (ticket 57), its screens from the Screen mocks entry and its closing section
+ * from the entry it shares with the home page — or a refusal, where any of
+ * them is not published in `locale` — with its form's words as the CMS has them.
+ *
+ * Where each button and link leads stays here, in code: an Editor changes what
+ * a button says, never where it goes.
+ */
 export async function getProductPage(locale: Locale): Promise<ProductPageContent> {
-  return { ...inLocale('product', { ar: AR }, locale), demoForm: await formPageWording(DEMO_REQUEST) };
+  const [entry, screenOf, closing, demoForm] = await Promise.all([
+    pageEntry('product-page', locale),
+    getScreenMocks(locale),
+    getClosingSection(locale),
+    formPageWording(DEMO_REQUEST),
+  ]);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
+  const { hero, journey, customStrip, roles, innerCycle } = entry;
+  // The sentence before a bold one, and the space between them.
+  const note = ({ label, text, emphasis }: ProductPage['innerCycle']['staysInside']): InnerCycleNote => ({
+    label: words(label),
+    text: [`${words(text)} `, { strong: words(emphasis) }],
+  });
+
+  return {
+    meta: inLocale('product', META, locale),
+    hero: {
+      eyebrow: words(hero.eyebrow),
+      title: words(hero.title),
+      lead: words(hero.lead),
+      // The first jumps to the demo request form at the foot of this page, the
+      // second to the journey just below.
+      primary: { label: words(hero.primaryLabel), href: '#demo' },
+      secondary: { label: words(hero.secondaryLabel), href: '#journey' },
+    },
+    // The Reference site's product page carries the same strip as its home page.
+    trustStrip: { shows: entry.trustStrip?.shows !== false, ...inLocale('trust strip', TRUST_STRIP, locale) },
+    journey: {
+      shows: true,
+      eyebrow: words(journey.eyebrow),
+      heading: words(journey.heading),
+      // A unit is numbered by its place, so reordering renumbers it.
+      panels: journey.panels.map((panel) => ({
+        tag: panel.final ? { kind: 'output', name: words(journey.outputLabel) } : { kind: 'unit' },
+        title: words(panel.title),
+        tagline: words(panel.tagline),
+        body: words(panel.body),
+        flow: flowSteps(locale, panel.flow ?? []),
+        screen: screenOf(panel.screen),
+      })),
+    },
+    customStrip: {
+      shows: customStrip.shows !== false,
+      eyebrow: words(customStrip.eyebrow),
+      heading: words(customStrip.heading),
+      features: customStrip.features.map((feature) => ({ title: words(feature.title), body: words(feature.body) })),
+      badge: words(customStrip.badge),
+      // The demo request form, in the closing section at the foot of this page.
+      ask: { label: words(customStrip.askLabel), href: '#demo' },
+    },
+    roles: {
+      shows: roles.shows !== false,
+      eyebrow: words(roles.eyebrow),
+      heading: words(roles.heading),
+      roles: roles.roles.map((role) => ({
+        party: words(role.party),
+        promise: words(role.promise),
+        body: words(role.body),
+        objection: words(role.objection),
+        answer: words(role.answer),
+        screen: screenOf(role.screen),
+      })),
+      sharedPromises: roles.sharedPromises.map((shared) => words(shared.promise)),
+    },
+    innerCycle: {
+      shows: innerCycle.shows !== false,
+      eyebrow: words(innerCycle.eyebrow),
+      heading: words(innerCycle.heading),
+      lead: words(innerCycle.lead),
+      cycles: innerCycle.cycles.map((cycle) => ({
+        party: words(cycle.party),
+        note: words(cycle.note),
+        reviewers: cycle.reviewers.map((reviewer) => words(reviewer.reviewer)),
+        crosses: words(cycle.crosses),
+      })),
+      privateTag: words(innerCycle.privateTag),
+      reviewAgain: words(innerCycle.reviewAgain),
+      crossesLabel: words(innerCycle.crossesLabel),
+      staysInside: note(innerCycle.staysInside),
+      crossesOut: note(innerCycle.crossesOut),
+    },
+    closing: { shows: true, ...closing },
+    demoForm,
+  };
 }

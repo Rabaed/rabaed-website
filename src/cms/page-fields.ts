@@ -18,7 +18,15 @@
  *
  * Imported by the CMS configuration, so it imports relatively.
  */
-import type { Field, PayloadRequest, Tab, TextareaFieldValidation, TextFieldSingleValidation } from 'payload';
+import {
+  validations,
+  type Field,
+  type PayloadRequest,
+  type Tab,
+  type TextareaFieldValidation,
+  type TextFieldSingleValidation,
+  type UploadFieldSingleValidation,
+} from 'payload';
 import { text, textarea } from 'payload/shared';
 import { ARABIC, latinNameProblem } from './latin-names';
 
@@ -171,12 +179,63 @@ export function latinField(name: string, label: Words, maxLength: number): Field
   };
 }
 
+/** Whether an image is `size`, or larger in the same proportions. */
+function isSizeOrLargerInProportion(image: { width?: number | null; height?: number | null }, size: { width: number; height: number }) {
+  const { width, height } = image;
+  return !!width && !!height && width * size.height === height * size.width && width >= size.width;
+}
+
+/**
+ * A picture on the page, chosen from the CMS's images (ticket 57). Every image
+ * there was given its description for screen readers when it was uploaded
+ * (`collections/media.ts`). A picture keeps the shape its place needs: one of a
+ * different shape, or smaller, is refused on publishing, so a replacement never
+ * leaves its box stretched, cropped or blurred.
+ *
+ * `required: false` is a picture with a stand-in of its own, drawn when none is
+ * chosen: a Screen mock's exported image.
+ */
+export function pictureField(options: {
+  readonly name: string;
+  readonly label: Words;
+  /** The picture's shape, and the smallest it may be. */
+  readonly size: { readonly width: number; readonly height: number };
+  readonly required: boolean;
+  readonly description?: Words;
+}): Field {
+  const { name, label, size, required, description } = options;
+  return {
+    name,
+    type: 'upload',
+    relationTo: 'media',
+    required,
+    label,
+    admin: { description },
+    validate: async (value: unknown, options: Parameters<UploadFieldSingleValidation>[1]) => {
+      // Payload's own check first: required, and an image that exists.
+      const checked = await validations.upload(value, options);
+      if (checked !== true) return checked;
+      const { req } = options;
+      const id = value && typeof value === 'object' ? (value as { id?: unknown }).id : value;
+      if (id === null || id === undefined || id === '') return true;
+      const image = await req.payload
+        .findByID({ collection: 'media', id: id as number, depth: 0, req })
+        .catch(() => null);
+      if (image && isSizeOrLargerInProportion(image, size)) return true;
+      return inAdminLanguage(req, {
+        ar: `الصورة يجب أن تكون بمقاس ${size.width}×${size.height}، أو أكبر بالنسبة نفسها، ليبقى مكانها في الصفحة بشكله.`,
+        en: `The picture must be ${size.width}×${size.height}, or larger in the same proportions, so its place on the page keeps its shape.`,
+      });
+    },
+  } as Field;
+}
+
 /**
  * A list on the page: one list for both languages, each item holding its words
  * in each (spec: Content model). A page is published only with between `min`
  * and `max` rows. A list the design is built around an exact count sets `min`
  * equal to `max`: the admin then offers no Add, and refuses to publish any
- * other count.
+ * other count. A `min` of 0 is a list that may be left empty.
  */
 export function listField(options: {
   readonly name: string;
@@ -184,15 +243,21 @@ export function listField(options: {
   readonly rows: { readonly min: number; readonly max: number };
   readonly fields: Field[];
   readonly description?: Words;
+  /**
+   * The list's own table name, for a list nested so deep that the one Payload
+   * makes of the names above it would be longer than Postgres allows.
+   */
+  readonly dbName?: string;
 }): Field {
-  const { name, labels, rows, fields, description } = options;
+  const { name, labels, rows, fields, description, dbName } = options;
   return {
     name,
+    dbName,
     type: 'array',
     labels,
     // `minRows` alone lets an empty list through; `required` is what stops it.
-    required: true,
-    minRows: rows.min,
+    required: rows.min > 0,
+    minRows: rows.min > 0 ? rows.min : undefined,
     maxRows: rows.max,
     fields,
     admin: description ? { description } : undefined,

@@ -22,7 +22,7 @@
 
 /* ---- a Screen mock and its caption ---- */
 
-/* The exported picture fills its window (src/components/product/screen-mock-picture.tsx);
+/* The exported picture fills its window (src/components/screen-mock-picture.tsx);
    `contain` keeps its proportions when the window is given less height than
    they would need.
    The proportions are the mock's stage, 1440 by 900, stated outright. The
