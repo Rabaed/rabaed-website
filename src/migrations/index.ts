@@ -11,6 +11,8 @@ import * as migration_20260914_212631_case_studies from './20260914_212631_case_
 import * as migration_20260914_215019_form_settings_snapshot from './20260914_215019_form_settings_snapshot';
 import * as migration_20260915_040104_start_page from './20260915_040104_start_page';
 import * as migration_20260915_040105_import_start_page from './20260915_040105_import_start_page';
+import * as migration_20260915_063743_product_page_closing_section_and_screen_mocks from './20260915_063743_product_page_closing_section_and_screen_mocks';
+import * as migration_20260915_063744_import_product_page_closing_section_and_screen_mocks from './20260915_063744_import_product_page_closing_section_and_screen_mocks';
 
 export const migrations = [
   {
@@ -77,5 +79,15 @@ export const migrations = [
     up: migration_20260915_040105_import_start_page.up,
     down: migration_20260915_040105_import_start_page.down,
     name: '20260915_040105_import_start_page',
+  },
+  {
+    up: migration_20260915_063743_product_page_closing_section_and_screen_mocks.up,
+    down: migration_20260915_063743_product_page_closing_section_and_screen_mocks.down,
+    name: '20260915_063743_product_page_closing_section_and_screen_mocks',
+  },
+  {
+    up: migration_20260915_063744_import_product_page_closing_section_and_screen_mocks.up,
+    down: migration_20260915_063744_import_product_page_closing_section_and_screen_mocks.down,
+    name: '20260915_063744_import_product_page_closing_section_and_screen_mocks',
   },
 ];

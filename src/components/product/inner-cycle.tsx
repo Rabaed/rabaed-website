@@ -23,10 +23,11 @@ export type ProductInnerCycleContent = {
   readonly heading: string;
   readonly lead: string;
   /**
-   * The three parties, no more and no fewer (spec: Content model), in the order
-   * the Record travels: from the Contractor, through the Consultant, to the Owner.
+   * The three parties, no more and no fewer (spec: Content model), which the CMS
+   * holds them to on publishing, in the order the Record travels: from the
+   * Contractor, through the Consultant, to the Owner.
    */
-  readonly cycles: readonly [ReviewCycle, ReviewCycle, ReviewCycle];
+  readonly cycles: readonly ReviewCycle[];
   /** The tag over each party's reviewers. */
   readonly privateTag: string;
   /** The line beside the dashed loop under the reviewers. */
@@ -56,7 +57,7 @@ export function InnerCycle({ content }: { content: ProductInnerCycleContent }) {
 
         <div className="orgs wired">
           {content.cycles.map((cycle, index) => (
-            <Fragment key={cycle.party}>
+            <Fragment key={index}>
               {/* The way the Record travels, from one party to the next. The
                   order of the cards already says it to a screen reader. */}
               {index > 0 && (
@@ -74,7 +75,7 @@ export function InnerCycle({ content }: { content: ProductInnerCycleContent }) {
                   <span className="priv-tag">{content.privateTag}</span>
                   <ol className="steps-v">
                     {cycle.reviewers.map((reviewer, step) => (
-                      <li key={reviewer}>
+                      <li key={step}>
                         <i>{step + 1}</i>
                         {reviewer}
                       </li>

@@ -11,12 +11,13 @@ import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { QuestionsContent } from '@/components/questions';
 import { COMPARISON_STEPS } from '@/content/before-after';
 import { DECK_HINT } from '@/content/card-deck';
-import { CLOSING_SECTION } from '@/content/closing-section';
+import { getClosingSection } from '@/content/closing-section';
 import { CALCULATOR_WORDS } from '@/content/delay-calculator';
 import { FIELD_SITUATIONS } from '@/content/field-situations';
-import { UNIT_TABS } from '@/content/four-units';
+import { unitTabs } from '@/content/four-units';
 import { PROOF_FIGURES } from '@/content/proof-figures';
 import { TRANSACTION_TYPES } from '@/content/record-transactions';
+import { getScreenMocks } from '@/content/screen-mocks';
 import { TRUST_STRIP } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
@@ -42,10 +43,19 @@ export type HomePageContent = {
 };
 
 /**
+ * The page's words still in code, until ticket 58: all of it but the closing
+ * section and the four units' screens, which are the CMS entries this page
+ * shares with the product page (ticket 57).
+ */
+type HomeWords = BeforeQuestions<Omit<HomePageContent, 'demoForm' | 'closing' | 'fourUnits'>> & {
+  readonly fourUnits: Omit<HomePageContent['fourUnits'], 'tabs'>;
+};
+
+/**
  * Verbatim from `reference/site/index.html`. Nothing here is placeholder text,
  * and nothing waits to be reworded.
  */
-const AR: BeforeQuestions<Omit<HomePageContent, 'demoForm'>> = {
+const AR: HomeWords = {
   meta: {
     name: 'الرئيسية',
     title: 'ربائد · ثلاثة أطراف. سجل واحد.',
@@ -96,7 +106,6 @@ const AR: BeforeQuestions<Omit<HomePageContent, 'demoForm'>> = {
     eyebrow: 'المنصة',
     heading: 'أربع وحدات. سجل واحد يجمعها.',
     tabsLabel: 'وحدات ربائد',
-    tabs: UNIT_TABS,
     more: { label: 'شاهد الوحدات كاملة بالتفصيل', href: localePath('ar', '/product') },
   },
   record: {
@@ -163,14 +172,23 @@ const AR: BeforeQuestions<Omit<HomePageContent, 'demoForm'>> = {
       href: `${localePath('ar', FAQ_PAGES.start.path)}#${FAQ_PAGES.start.sectionId}`,
     },
   },
-  closing: { shows: true, ...CLOSING_SECTION.ar },
 };
 
-/** The home page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
+/**
+ * The home page's content in `locale`, or a refusal (`inLocale`), with its
+ * questions, its closing section and its screens as the CMS has them.
+ */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const [page, demoForm] = await Promise.all([
-    withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, inLocale('home', { ar: AR }, locale)),
+  const words = inLocale('home', { ar: AR }, locale);
+  const [screenOf, closing, demoForm] = await Promise.all([
+    getScreenMocks(locale),
+    getClosingSection(locale),
     formPageWording(DEMO_REQUEST),
   ]);
+  const page = await withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, {
+    ...words,
+    fourUnits: { ...words.fourUnits, tabs: unitTabs(screenOf) },
+    closing: { shows: true, ...closing },
+  });
   return { ...page, demoForm };
 }

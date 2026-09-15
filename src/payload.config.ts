@@ -24,6 +24,9 @@ import { Users } from './cms/collections/users';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
+import { ClosingSection } from './cms/globals/closing-section';
+import { ProductPage } from './cms/globals/product-page';
+import { ScreenMocks } from './cms/globals/screen-mocks';
 import { StartPage } from './cms/globals/start-page';
 import { SUBMITTABLE_FORMS } from './forms/registry';
 
@@ -72,8 +75,16 @@ export default buildConfig({
   // fields of its own (`cms/page-fields.ts` says why).
   collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
   // One settings global per form that submits (ticket 27), and one entry per
-  // marketing page whose words are in the CMS (ticket 53).
-  globals: [SiteSettings, ...SUBMITTABLE_FORMS.map(formSettingsGlobal), StartPage],
+  // marketing page whose words are in the CMS (ticket 53), with the closing
+  // section and the Screen mocks the pages share (ticket 57).
+  globals: [
+    SiteSettings,
+    ...SUBMITTABLE_FORMS.map(formSettingsGlobal),
+    StartPage,
+    ProductPage,
+    ClosingSection,
+    ScreenMocks,
+  ],
 
   db: postgresAdapter({
     pool: { connectionString: databaseUrl() },

@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { JourneyBehaviour } from '@/components/product/journey-behaviour';
-import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/product/screen-mock-picture';
+import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
 
 /** One piece of the row of pills at the foot of a panel. */
 export type FlowStep =
@@ -31,15 +31,16 @@ export type ProductJourneyContent = {
 };
 
 /**
- * «أربع وحدات. سجل واحد يجمعها.» — five panels, the four units and the Record
- * they produce, each beside the screen that shows it. On a window at least
+ * «أربع وحدات. سجل واحد يجمعها.» — a panel for each unit, and one for the
+ * Record they produce, each beside the screen that shows it; an Editor adds
+ * and removes panels (ticket 57). On a window at least
  * 981px wide and 551px tall the section holds still and the panels travel
  * sideways as the visitor scrolls; on anything smaller they stand one above
  * another. `JourneyBehaviour` does the travelling; this draws everything it
  * moves.
  *
- * A server component. All five panels, their screens' descriptions and their
- * captions are in the first response.
+ * A server component. Every panel, its screen's description and its caption
+ * are in the first response.
  *
  * **With JavaScript off, a wide window stacks the panels too** — a deliberate
  * difference from the Reference site, which leaves panels two to five out of
@@ -68,7 +69,7 @@ export function Journey({ content }: { content: ProductJourneyContent }) {
                 panel is in view, so a screen reader is not told it twice. */}
             <div className="dots" aria-hidden="true">
               {content.panels.map((panel, index) => (
-                <i key={panel.screen.mock} className={index === 0 ? 'on' : undefined} />
+                <i key={index} className={index === 0 ? 'on' : undefined} />
               ))}
             </div>
           </div>
@@ -76,7 +77,7 @@ export function Journey({ content }: { content: ProductJourneyContent }) {
 
         <div className="track">
           {content.panels.map((panel, index) => (
-            <div key={panel.screen.mock} className={panel.tag.kind === 'output' ? 'panel final' : 'panel'}>
+            <div key={index} className={panel.tag.kind === 'output' ? 'panel final' : 'panel'}>
               <div>
                 {panel.tag.kind === 'unit' ? (
                   <div className="num">{`${twoDigits(index + 1)} / ${twoDigits(content.panels.length)}`}</div>

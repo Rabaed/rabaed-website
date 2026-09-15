@@ -65,6 +65,12 @@ export const PAGES_EDITOR = {
   password: 'test-editor-password-53',
 } as const;
 
+/** The product page suite's own account (ticket 57), for the same reason as `BLOG_EDITOR`. */
+export const PRODUCT_EDITOR = {
+  email: 'product-editor@rabaed.test',
+  password: 'test-editor-password-57',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -74,6 +80,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   FORM_READER,
   FORM_EDITOR,
   PAGES_EDITOR,
+  PRODUCT_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
@@ -97,9 +104,13 @@ export function richText(text: string, locale: 'ar' | 'en') {
   };
 }
 
-/** Uploads a plain 1600×900 image to the CMS's media as the signed-in editor, and returns its id. */
-export async function uploadImage(editor: APIRequestContext, alt: string): Promise<number> {
-  const image = await sharp({ create: { width: 1600, height: 900, channels: 3, background: '#1B1E27' } })
+/** Uploads a plain image, 1600×900 unless told otherwise, to the CMS's media as the signed-in editor, and returns its id. */
+export async function uploadImage(
+  editor: APIRequestContext,
+  alt: string,
+  size: { width: number; height: number } = { width: 1600, height: 900 },
+): Promise<number> {
+  const image = await sharp({ create: { ...size, channels: 3, background: '#1B1E27' } })
     .png()
     .toBuffer();
   const response = await editor.post('/api/media', {

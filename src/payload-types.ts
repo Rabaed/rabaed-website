@@ -101,11 +101,17 @@ export interface Config {
     'site-settings': SiteSetting;
     'demo-request-form': DemoRequestForm;
     'start-page': StartPage;
+    'product-page': ProductPage;
+    'closing-section': ClosingSection;
+    'screen-mocks': ScreenMock;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
+    'product-page': ProductPageSelect<false> | ProductPageSelect<true>;
+    'closing-section': ClosingSectionSelect<false> | ClosingSectionSelect<true>;
+    'screen-mocks': ScreenMocksSelect<false> | ScreenMocksSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1083,6 +1089,474 @@ export interface StartPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-page".
+ */
+export interface ProductPage {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  hero: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the demo request form.
+     */
+    primaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the units.
+     */
+    secondaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  trustStrip?: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+  };
+  journey: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * On one line: the panels start under it.
+     */
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Shows in place of the number on the marked-out panel, like «المخرَج».
+     */
+    outputLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Units are numbered by their order. Drag them to reorder.
+     */
+    panels: {
+      /**
+       * A marked-out panel carrying the name above instead of a number, like the Record.
+       */
+      final?: boolean | null;
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      tagline: {
+        ar: string;
+        en?: string | null;
+      };
+      body: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Who the unit passes things between, right to left. Leave it empty to show none.
+       */
+      flow?:
+        | {
+            party: {
+              ar: string;
+              en?: string | null;
+            };
+            /**
+             * Nothing is drawn after the last party.
+             */
+            after: 'towards' | 'then' | 'none';
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Its picture and description are under Screen mocks.
+       */
+      screen:
+        | 'correspondence'
+        | 'kanban'
+        | 'daily-report'
+        | 'documents'
+        | 'stamped-sheet'
+        | 'overview'
+        | 'approvals-table'
+        | 'submittal';
+      id?: string | null;
+    }[];
+  };
+  customStrip: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    badge: {
+      ar: string;
+      en?: string | null;
+    };
+    features: {
+      /**
+       * Short: the badge sits in the card’s corner, over where it runs.
+       */
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      body: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * Leads to the demo request form.
+     */
+    askLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  roles: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three: the Owner, the Consultant and the Contractor. Drag them to reorder.
+     */
+    roles: {
+      party: {
+        ar: string;
+        en?: string | null;
+      };
+      promise: {
+        ar: string;
+        en?: string | null;
+      };
+      body: {
+        ar: string;
+        en?: string | null;
+      };
+      objection: {
+        ar: string;
+        en?: string | null;
+      };
+      answer: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Its picture and description are under Screen mocks.
+       */
+      screen:
+        | 'correspondence'
+        | 'kanban'
+        | 'daily-report'
+        | 'documents'
+        | 'stamped-sheet'
+        | 'overview'
+        | 'approvals-table'
+        | 'submittal';
+      id?: string | null;
+    }[];
+    sharedPromises: {
+      promise: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  innerCycle: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three, in the order a transaction travels: from the Contractor, to the Consultant, to the Owner.
+     */
+    cycles: {
+      party: {
+        ar: string;
+        en?: string | null;
+      };
+      note: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * The last one decides.
+       */
+      reviewers: {
+        reviewer: {
+          ar: string;
+          en?: string | null;
+        };
+        id?: string | null;
+      }[];
+      crosses: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    privateTag: {
+      ar: string;
+      en?: string | null;
+    };
+    crossesLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    reviewAgain: {
+      ar: string;
+      en?: string | null;
+    };
+    staysInside: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      emphasis: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    crossesOut: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      emphasis: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "closing-section".
+ */
+export interface ClosingSection {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  closing: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Steps are numbered by their order. Drag them to reorder.
+     */
+    steps: {
+      /**
+       * On one line, beside the text.
+       */
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * Leads to the start page.
+     */
+    moreLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screen-mocks".
+ */
+export interface ScreenMock {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  correspondence: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  kanban: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  dailyReport: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  documents: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  stampedSheet: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  overview: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  approvalsTable: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  submittal: {
+    /**
+     * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
+     */
+    picture?: (number | null) | Media;
+    /**
+     * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1300,6 +1774,493 @@ export interface StartPageSelect<T extends boolean = true> {
               en?: T;
             };
         linkLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-page_select".
+ */
+export interface ProductPageSelect<T extends boolean = true> {
+  languages?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        primaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        secondaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  trustStrip?:
+    | T
+    | {
+        shows?: T;
+      };
+  journey?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        outputLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        panels?:
+          | T
+          | {
+              final?: T;
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              tagline?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              body?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              flow?:
+                | T
+                | {
+                    party?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?: T;
+                    id?: T;
+                  };
+              screen?: T;
+              id?: T;
+            };
+      };
+  customStrip?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        badge?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        features?:
+          | T
+          | {
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              body?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        askLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  roles?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        roles?:
+          | T
+          | {
+              party?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              promise?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              body?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              objection?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              answer?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              screen?: T;
+              id?: T;
+            };
+        sharedPromises?:
+          | T
+          | {
+              promise?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  innerCycle?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cycles?:
+          | T
+          | {
+              party?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              note?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              reviewers?:
+                | T
+                | {
+                    reviewer?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    id?: T;
+                  };
+              crosses?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        privateTag?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        crossesLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        reviewAgain?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        staysInside?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              emphasis?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        crossesOut?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              emphasis?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "closing-section_select".
+ */
+export interface ClosingSectionSelect<T extends boolean = true> {
+  languages?: T;
+  closing?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        steps?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        moreLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screen-mocks_select".
+ */
+export interface ScreenMocksSelect<T extends boolean = true> {
+  languages?: T;
+  correspondence?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  kanban?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  dailyReport?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  documents?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  stampedSheet?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  overview?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  approvalsTable?:
+    | T
+    | {
+        picture?: T;
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  submittal?:
+    | T
+    | {
+        picture?: T;
+        description?:
           | T
           | {
               ar?: T;

@@ -6,13 +6,24 @@
  */
 import config from '@payload-config';
 import { draftMode } from 'next/headers';
-import { getPayload, type GlobalSlug } from 'payload';
+import { getPayload, type DataFromGlobalSlug, type GlobalSlug } from 'payload';
 import { cache } from 'react';
 import { ContentNotInLocale } from '@/content/pages/page-content';
 import type { Locale } from '@/lib/locales';
 
-/** The pages whose words are in the CMS so far; tickets 54–59 add theirs. */
-type PageSlug = Extract<GlobalSlug, 'start-page'>;
+/**
+ * The pages whose words are in the CMS so far, and the sections and pictures
+ * pages share; tickets 54–59 add theirs.
+ */
+type PageSlug = Extract<GlobalSlug, 'start-page' | 'product-page' | 'closing-section' | 'screen-mocks'>;
+
+/**
+ * One level deep, so that a picture comes with the image it names rather than
+ * only its id (ticket 57). One constant for what visitors see and what an
+ * Editor previews, so that a picture the preview shows is the picture
+ * publishing shows: only the preview can be tested without a visitor seeing it.
+ */
+const DEPTH = 1;
 
 /** A word as the CMS stores it: its Arabic and its English, either possibly empty. */
 type StoredWords = { readonly ar?: string | null; readonly en?: string | null } | null | undefined;
@@ -26,12 +37,18 @@ type StoredWords = { readonly ar?: string | null; readonly en?: string | null } 
  * published or not, and a page read from the entry would then show it the next
  * time it is rebuilt (`src/cms/legal-documents.ts` found the same).
  */
-export const pageEntry = cache(async (slug: PageSlug, locale: Locale) => {
+export function pageEntry<Slug extends PageSlug>(slug: Slug, locale: Locale): Promise<DataFromGlobalSlug<Slug>> {
+  return readEntry(slug, locale) as Promise<DataFromGlobalSlug<Slug>>;
+}
+
+// Cached by its arguments, which is why the entry's type is given back above
+// rather than here: a cached function is not generic.
+const readEntry = cache(async (slug: PageSlug, locale: Locale) => {
   const { isEnabled: previewing } = await draftMode();
   const payload = await getPayload({ config });
 
   const entry = previewing
-    ? await payload.findGlobal({ slug, draft: true, depth: 0 })
+    ? await payload.findGlobal({ slug, draft: true, depth: DEPTH })
     : (
         await payload.findGlobalVersions({
           slug,
@@ -39,7 +56,7 @@ export const pageEntry = cache(async (slug: PageSlug, locale: Locale) => {
           sort: '-updatedAt',
           limit: 1,
           pagination: false,
-          depth: 0,
+          depth: DEPTH,
         })
       ).docs[0]?.version;
 

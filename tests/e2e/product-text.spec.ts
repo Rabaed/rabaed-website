@@ -1,0 +1,551 @@
+/**
+ * The product page's text, the closing section it shares with the home page,
+ * and the Screen mocks, in the CMS (ticket 57): Ahmed rewords the closing
+ * section once for both pages, adds a panel and a card, hides sections,
+ * replaces a screen — and the CMS refuses what the design cannot carry, and
+ * the page still holds what it allows at its longest.
+ *
+ * The product and home pages' words and pictures are checked by their own
+ * suites running beside this one, so nothing here publishes a change they
+ * could notice (ticket 22's rule, as `page-text.spec.ts` keeps it). Changes
+ * are saved as drafts and checked in the editor's preview, which visitors never
+ * see; the one change published is a space at the end of the hero's paragraph,
+ * which no screenshot shows and no suite reads; refused changes are never
+ * saved at all.
+ *
+ * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ */
+import { test, expect, type APIRequestContext, type APIResponse, type Locator, type Page } from '@playwright/test';
+import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, uploadImage } from './cms';
+import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
+
+test.describe.configure({ mode: 'default' });
+
+type Global = 'product-page' | 'closing-section' | 'screen-mocks';
+
+/** A word as the CMS holds it: its Arabic and its English. */
+type Words = { ar: string; en?: string | null };
+type FlowItem = { party: Words; after: 'towards' | 'then' | 'none' };
+type Panel = { final: boolean; title: Words; tagline: Words; body: Words; flow: FlowItem[]; screen: string };
+type Feature = { title: Words; body: Words };
+type ProductEntry = {
+  languages: string[];
+  hero: { eyebrow: Words; title: Words; lead: Words; primaryLabel: Words; secondaryLabel: Words };
+  trustStrip: { shows: boolean };
+  journey: { eyebrow: Words; heading: Words; outputLabel: Words; panels: Panel[] };
+  customStrip: { shows: boolean; eyebrow: Words; heading: Words; badge: Words; features: Feature[]; askLabel: Words };
+  roles: { shows: boolean; heading: Words; roles: { party: Words; promise: Words; screen: string }[] };
+  innerCycle: { shows: boolean; cycles: { party: Words }[] };
+};
+type ClosingEntry = {
+  languages: string[];
+  closing: { eyebrow: Words; heading: Words; steps: { label: Words; text: Words }[]; moreLabel: Words };
+};
+type MockFields = { picture: number | null; description: Words };
+type MocksEntry = { languages: string[] } & { [mock: string]: MockFields };
+
+const arabic = (words: string): Words => ({ ar: words, en: null });
+
+const SENTENCE = 'نجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد ';
+
+/** Arabic words exactly `length` characters long. */
+function wordsOfLength(length: number): string {
+  return SENTENCE.repeat(Math.ceil(length / SENTENCE.length)).slice(0, length).trimEnd().padEnd(length, 'ع');
+}
+
+const LEFT_OUT = new Set(['id', 'createdAt', 'updatedAt', 'globalType', '_status']);
+
+/** An entry's fields alone, ready to be sent back: no ids, no dates. */
+function fields<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(fields) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).filter(([key]) => !LEFT_OUT.has(key)).map(([key, each]) => [key, fields(each)]),
+    ) as T;
+  }
+  return value;
+}
+
+/** An entry as published. */
+async function published<T>(editor: APIRequestContext, global: Global): Promise<T> {
+  const response = await editor.get(`/api/globals/${global}?depth=0`);
+  expect(response.ok(), await response.text()).toBe(true);
+  return fields(await response.json());
+}
+
+/** Saves an entry as the admin's Save Draft or Publish changes would. */
+function save(editor: APIRequestContext, global: Global, data: object, status: 'draft' | 'published') {
+  return editor.post(`/api/globals/${global}${status === 'draft' ? '?draft=true' : ''}`, {
+    data: { ...data, _status: status },
+  });
+}
+
+/** The fields a refused save names. */
+async function refusedFields(response: APIResponse): Promise<string[]> {
+  const text = await response.text();
+  expect(response.status(), text).toBe(400);
+  const body = JSON.parse(text) as { errors: { data?: { errors?: { path: string }[] } }[] };
+  const named = body.errors.flatMap((error) => (error.data?.errors ?? []).map((each) => each.path));
+  // A refusal that names no field is not the refusal being asked about.
+  expect(named.length, text).toBeGreaterThan(0);
+  return named;
+}
+
+/** Puts an entry's latest version back to what is published, so a test's draft is not left waiting. */
+async function discardDraft(editor: APIRequestContext, global: Global): Promise<void> {
+  const response = await editor.get(
+    `/api/globals/${global}/versions?where[version._status][equals]=published&sort=-updatedAt&limit=1&depth=0`,
+  );
+  expect(response.ok()).toBe(true);
+  const [latest] = (await response.json()).docs;
+  const restored = await editor.post(`/api/globals/${global}/versions/${latest.id}?draft=true`);
+  expect(restored.ok(), await restored.text()).toBe(true);
+}
+
+async function visitorHtml(request: APIRequestContext, path: string): Promise<string> {
+  return (await request.get(path)).text();
+}
+
+/** Opens the site in preview at `path`, as the admin's Preview button does. */
+async function preview(page: Page, path: string): Promise<void> {
+  await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+  await expect(page.getByRole('status')).toContainText('معاينة');
+}
+
+async function boxesOf(locator: Locator) {
+  return locator.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
+}
+
+test.afterEach(async ({ page }) => {
+  await page.request.get('/api/preview/exit');
+});
+
+test('the product page, and the closing section and screens it shares with the home page, show what the CMS has published', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const product = await published<ProductEntry>(page.request, 'product-page');
+  const { closing, languages } = await published<ClosingEntry>(page.request, 'closing-section');
+  const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+  const productHtml = await visitorHtml(request, '/product');
+  const homeHtml = await visitorHtml(request, '/');
+
+  for (const each of [product.languages, languages, mocks.languages]) expect(each).toEqual(['ar']);
+  for (const words of [
+    product.hero.title,
+    product.journey.heading,
+    product.customStrip.heading,
+    ...product.journey.panels.map((panel) => panel.title),
+    ...product.roles.roles.map((role) => role.promise),
+    ...product.innerCycle.cycles.map((cycle) => cycle.party),
+  ]) {
+    expect(productHtml).toContain(words.ar);
+  }
+
+  for (const html of [productHtml, homeHtml]) {
+    expect(html).toContain(closing.heading.ar);
+    for (const step of closing.steps) expect(html).toContain(step.text.ar);
+    // Both pages show the kanban screen, described in the CMS's words.
+    expect(html).toContain(`alt="${mocks.kanban.description.ar}"`);
+  }
+
+  // No screen is replaced until an Editor replaces one: each is its export.
+  for (const panel of product.journey.panels) expect(mocks[screenMockFieldName(panel.screen)].picture).toBeNull();
+});
+
+test('the closing section is reworded once for both pages that end on it, previewed, and never reaches a visitor', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ClosingEntry>(page.request, 'closing-section');
+  const heading = `${entry.closing.heading.ar} — مسودة`;
+  const step = { label: arabic('متابعة'), text: arabic('نراجع مع الأطراف الثلاثة ما تغيّر بعد الشهر الأول.') };
+
+  try {
+    const saved = await save(
+      page.request,
+      'closing-section',
+      {
+        ...entry,
+        closing: { ...entry.closing, heading: arabic(heading), steps: [...entry.closing.steps, step] },
+      },
+      'draft',
+    );
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    for (const path of ['/product', '/']) {
+      await preview(page, path);
+      await expect(page.locator('#tail h2'), path).toHaveText(heading);
+      // Numbered by their place.
+      await expect(page.locator('.tail-steps b'), path).toHaveText([
+        ...entry.closing.steps.map((each, index) => `0${index + 1} · ${each.label.ar}`),
+        `04 · ${step.label.ar}`,
+      ]);
+    }
+
+    for (const path of ['/product', '/']) expect(await visitorHtml(request, path)).not.toContain(heading);
+  } finally {
+    await discardDraft(page.request, 'closing-section');
+  }
+});
+
+test("the product page's lists grow, its sections hide, and its grids stay neat", async ({ page, request }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  const added: Panel = {
+    final: false,
+    title: arabic('تنبيهات المهل'),
+    tagline: arabic('كل مهلة تقترب من نهايتها، عند من ينتظرها.'),
+    body: arabic('يُرفع الجدول المحدَّث ويراه المالك والاستشاري بتاريخه ومن رفعه.'),
+    flow: [
+      { party: arabic('المقاول'), after: 'towards' },
+      { party: arabic('المالك'), after: 'none' },
+    ],
+    screen: 'overview',
+  };
+  // Before the Record, which stays last.
+  const panels = [...entry.journey.panels.slice(0, -1), added, ...entry.journey.panels.slice(-1)];
+  const feature: Feature = { title: arabic('سجل المخاطر'), body: arabic('مخاطر المشروع بأصحابها ومواعيد مراجعتها.') };
+
+  try {
+    const saved = await save(
+      page.request,
+      'product-page',
+      {
+        ...entry,
+        journey: { ...entry.journey, panels },
+        customStrip: { ...entry.customStrip, features: [...entry.customStrip.features, feature] },
+        roles: { ...entry.roles, shows: false },
+        innerCycle: { ...entry.innerCycle, shows: false },
+      },
+      'draft',
+    );
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await preview(page, '/product');
+    const journey = page.locator('#journey');
+    await expect(journey.locator('.panel h3')).toHaveText(panels.map((panel) => panel.title.ar));
+    // Units numbered by their place, out of every panel; one progress mark each.
+    await expect(journey.locator('.panel .num:not(.out)')).toHaveText(['01 / 06', '02 / 06', '03 / 06', '04 / 06', '05 / 06']);
+    await expect(journey.locator('.dots i')).toHaveCount(6);
+    await expect(journey.locator('.panel').nth(4).locator('.flow')).toHaveText('المقاول←المالك');
+    await expect(page.locator('#roles')).toHaveCount(0);
+    await expect(page.locator('#inner')).toHaveCount(0);
+
+    // Three cards at desktop widths: two side by side as today, and the third
+    // under them across the whole row, rather than one left beside a gap.
+    const cards = page.locator('#custom .strip .c');
+    await expect(cards.locator('h3')).toHaveText([...entry.customStrip.features, feature].map((each) => each.title.ar));
+    const wide = await boxesOf(cards);
+    const row = (await page.locator('#custom .strip').boundingBox())!;
+    expect(wide[0].y).toBe(wide[1].y);
+    expect(wide[0].width).toBeCloseTo(wide[1].width, 0);
+    expect(wide[2].y).toBeGreaterThan(wide[0].y);
+    expect(wide[2].width).toBeCloseTo(row.width, 0);
+
+    // On a phone they stand one under another, as two do today.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const narrow = await boxesOf(cards);
+    expect(new Set(narrow.map((box) => Math.round(box.x))).size).toBe(1);
+    for (let index = 1; index < narrow.length; index += 1) expect(narrow[index].y).toBeGreaterThan(narrow[index - 1].y);
+
+    const html = await visitorHtml(request, '/product');
+    expect(html).not.toContain(added.title.ar);
+    expect(html).not.toContain(feature.title.ar);
+    expect(html).toContain('id="roles"');
+  } finally {
+    await discardDraft(page.request, 'product-page');
+  }
+});
+
+test('a replaced screen shows, described in its own words, on every page that shows it', async ({ page, request }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+  // Twice the mock's size, as sharp on a dense screen as its export.
+  const picture = await uploadImage(page.request, 'شاشة مراسلات بديلة', { width: 2880, height: 1800 });
+  const description = 'شاشة المراسلات بعد التحديث: الخطابات وحالة الرد على كل منها';
+
+  try {
+    const saved = await save(
+      page.request,
+      'screen-mocks',
+      { ...mocks, correspondence: { picture, description: arabic(description) } },
+      'draft',
+    );
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    // The journey's first panel and the home page's first tab both show it.
+    for (const [path, section] of [
+      ['/product', '#journey'],
+      ['/', '#jt'],
+    ]) {
+      await preview(page, path);
+      const image = page.locator(section).getByRole('img', { name: description, exact: true });
+      await expect(image, path).toHaveAttribute('src', /\/api\/media\/file\//);
+      // In the mock's own box.
+      await expect(image, path).toHaveAttribute('width', '1440');
+      await expect(image, path).toHaveAttribute('height', '900');
+      await expect
+        .poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0), {
+          message: `the replacement never loaded on ${path}`,
+        })
+        .toBe(true);
+      await expect(page.locator(section).getByText(description, { exact: true }), path).toHaveCount(1);
+    }
+
+    const html = await visitorHtml(request, '/product');
+    expect(html).not.toContain(description);
+    expect(html).toContain(`alt="${mocks.correspondence.description.ar}"`);
+  } finally {
+    await discardDraft(page.request, 'screen-mocks');
+  }
+});
+
+test('the CMS refuses what the product page, the closing section and the screens cannot carry', async ({ page }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const product = await published<ProductEntry>(page.request, 'product-page');
+  const closing = await published<ClosingEntry>(page.request, 'closing-section');
+  const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+  const { journey, customStrip, roles, innerCycle } = product;
+  const [panel, ...otherPanels] = journey.panels;
+  const [card, ...otherCards] = customStrip.features;
+  const [step, ...otherSteps] = closing.closing.steps;
+  const party: FlowItem = { party: arabic('المالك'), after: 'towards' };
+  const otherShape = await uploadImage(page.request, 'صورة بمقاس آخر', { width: 1600, height: 900 });
+  const tooSmall = await uploadImage(page.request, 'صورة أصغر من مكانها', { width: 720, height: 450 });
+
+  const refused: [string, Global, object, string | RegExp][] = [
+    ['two parties', 'product-page', { ...product, roles: { ...roles, roles: roles.roles.slice(0, 2) } }, 'roles.roles'],
+    ['four parties', 'product-page', { ...product, roles: { ...roles, roles: [...roles.roles, roles.roles[0]] } }, 'roles.roles'],
+    [
+      'four review cycles',
+      'product-page',
+      { ...product, innerCycle: { ...innerCycle, cycles: [...innerCycle.cycles, innerCycle.cycles[0]] } },
+      'innerCycle.cycles',
+    ],
+    ['no panels', 'product-page', { ...product, journey: { ...journey, panels: [] } }, 'journey.panels'],
+    [
+      'a panel title longer than a panel holds',
+      'product-page',
+      { ...product, journey: { ...journey, panels: [{ ...panel, title: arabic(wordsOfLength(41)) }, ...otherPanels] } },
+      'journey.panels.0.title.ar',
+    ],
+    [
+      'five parties under a panel',
+      'product-page',
+      { ...product, journey: { ...journey, panels: [{ ...panel, flow: Array(5).fill(party) }, ...otherPanels] } },
+      'journey.panels.0.flow',
+    ],
+    [
+      "a journey heading longer than its line",
+      'product-page',
+      { ...product, journey: { ...journey, heading: arabic(wordsOfLength(41)) } },
+      'journey.heading.ar',
+    ],
+    [
+      'a card title that would run under the badge',
+      'product-page',
+      { ...product, customStrip: { ...customStrip, features: [{ ...card, title: arabic(wordsOfLength(33)) }, ...otherCards] } },
+      'customStrip.features.0.title.ar',
+    ],
+    ['English with no English words', 'product-page', { ...product, languages: ['ar', 'en'] }, /\.en$/],
+    [
+      'six closing steps',
+      'closing-section',
+      { ...closing, closing: { ...closing.closing, steps: Array(6).fill(step) } },
+      'closing.steps',
+    ],
+    [
+      'a closing step label too long for its line',
+      'closing-section',
+      { ...closing, closing: { ...closing.closing, steps: [{ ...step, label: arabic(wordsOfLength(11)) }, ...otherSteps] } },
+      'closing.steps.0.label.ar',
+    ],
+    [
+      'a replacement of another shape',
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, picture: otherShape } },
+      'correspondence.picture',
+    ],
+    [
+      'a replacement smaller than its place',
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, picture: tooSmall } },
+      'correspondence.picture',
+    ],
+    [
+      'a screen with no description',
+      'screen-mocks',
+      { ...mocks, kanban: { ...mocks.kanban, description: arabic('') } },
+      'kanban.description.ar',
+    ],
+  ];
+  for (const [what, global, data, field] of refused) {
+    const named = await refusedFields(await save(page.request, global, data, 'published'));
+    expect(
+      named.some((path) => (typeof field === 'string' ? path === field : field.test(path))),
+      `${what}: refused for ${named.join(', ')}`,
+    ).toBe(true);
+  }
+
+  // A picture of the mock's shape, larger, is not what gets refused. Published
+  // beside a fault of its own, so that nothing is saved either way.
+  const larger = await uploadImage(page.request, 'صورة بضعف المقاس', { width: 2880, height: 1800 });
+  const named = await refusedFields(
+    await save(
+      page.request,
+      'screen-mocks',
+      {
+        ...mocks,
+        correspondence: { ...mocks.correspondence, picture: larger },
+        kanban: { ...mocks.kanban, description: arabic('') },
+      },
+      'published',
+    ),
+  );
+  expect(named).toContain('kanban.description.ar');
+  expect(named).not.toContain('correspondence.picture');
+
+  // Nothing refused was kept.
+  expect(await published(page.request, 'product-page')).toEqual(product);
+  expect(await published(page.request, 'closing-section')).toEqual(closing);
+  expect(await published(page.request, 'screen-mocks')).toEqual(mocks);
+});
+
+test('the journey and the closing section have no switch to hide them; the custom strip has one', async ({ page }) => {
+  await logInAs(page, PRODUCT_EDITOR);
+  const tab = (name: string) => page.getByRole('button', { name, exact: true });
+
+  await page.goto(`${ADMIN_PATH}/globals/product-page`);
+  await tab('Custom strip').click();
+  await expect(page.getByLabel('Shows on the page')).toBeVisible();
+  await tab('Units').click();
+  await expect(page.getByText(/Always shows/)).toBeVisible();
+  await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
+
+  await page.goto(`${ADMIN_PATH}/globals/closing-section`);
+  await expect(page.getByText(/Always shows/)).toBeVisible();
+  await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
+});
+
+test('on the smallest windows that pin the journey, every panel holds its words at their longest', async ({ page }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  // Every panel at every limit: the longest title, line and text, and four
+  // parties with an arrow and a break between them.
+  const panels = entry.journey.panels.map((panel): Panel => ({
+    ...panel,
+    title: arabic(wordsOfLength(40)),
+    tagline: arabic(wordsOfLength(80)),
+    body: arabic(wordsOfLength(200)),
+    flow: [0, 1, 2, 3].map((index) => ({
+      party: arabic(wordsOfLength(16)),
+      after: index === 1 ? 'then' : 'towards',
+    })),
+  }));
+
+  try {
+    const saved = await save(
+      page.request,
+      'product-page',
+      { ...entry, journey: { ...entry.journey, heading: arabic(wordsOfLength(40)), panels } },
+      'draft',
+    );
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    for (const viewport of [
+      { width: 981, height: 551 },
+      { width: 1280, height: 551 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await preview(page, '/product');
+      await page.evaluate(() => document.fonts.ready);
+
+      // Polled: the room under the heading is measured once the fonts have
+      // settled its height.
+      await expect
+        .poll(
+          () =>
+            page.locator('#journey').evaluate((section) => {
+              const heading = section.querySelector('h2')!.getBoundingClientRect();
+              return [...section.querySelectorAll('.panel')].map((panel) => {
+                const box = panel.getBoundingClientRect();
+                const inner = box.bottom - parseFloat(getComputedStyle(panel).paddingBottom);
+                const words = [...panel.querySelector(':scope > div:first-child')!.children].at(-1)!;
+                return {
+                  clearOfHeading: heading.bottom <= box.top,
+                  // A panel sized to the window it pins in, wherever the page is scrolled.
+                  asTallAsTheWindowAllows: box.height <= window.innerHeight,
+                  wordsInside: words.getBoundingClientRect().bottom <= inner + 0.5,
+                };
+              });
+            }),
+          { message: `at ${viewport.width}x${viewport.height}` },
+        )
+        .toEqual(panels.map(() => ({ clearOfHeading: true, asTallAsTheWindowAllows: true, wordsInside: true })));
+    }
+  } finally {
+    await discardDraft(page.request, 'product-page');
+  }
+});
+
+test('a custom strip card title at its longest stays clear of the badge at desktop widths', async ({ page }) => {
+  // On a phone the Reference site's badge already sits over today's titles;
+  // the limit keeps a card as clear as it is today where it is clear today.
+  // Three cards: two side by side, the narrowest a card gets, and one across
+  // the row.
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  const features = [...entry.customStrip.features, entry.customStrip.features[0]].map((feature) => ({
+    ...feature,
+    title: arabic(wordsOfLength(32)),
+  }));
+
+  try {
+    const saved = await save(page.request, 'product-page', { ...entry, customStrip: { ...entry.customStrip, features } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    for (const width of [981, 1024, 1280, 1440, 1600]) {
+      await page.setViewportSize({ width, height: 900 });
+      await preview(page, '/product');
+      await page.evaluate(() => document.fonts.ready);
+      const underBadge = await page.locator('#custom .strip .c').evaluateAll((cards) =>
+        cards.map((card) => {
+          const badge = card.querySelector('.badge')!.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(card.querySelector('h3')!);
+          return [...range.getClientRects()].some(
+            (line) => line.left < badge.right && line.right > badge.left && line.top < badge.bottom && line.bottom > badge.top,
+          );
+        }),
+      );
+      expect(underBadge, `at ${width}px`).toEqual(features.map(() => false));
+    }
+  } finally {
+    await discardDraft(page.request, 'product-page');
+  }
+});
+
+test('a change to the product page published reaches visitors', async ({ page, request }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  // A space at the end of the paragraph: in the HTML, but drawn nowhere.
+  const lead = `${entry.hero.lead.ar} `;
+
+  try {
+    const response = await save(
+      page.request,
+      'product-page',
+      { ...entry, hero: { ...entry.hero, lead: { ...entry.hero.lead, ar: lead } } },
+      'published',
+    );
+    expect(response.ok(), await response.text()).toBe(true);
+    await expect.poll(async () => visitorHtml(request, '/product')).toContain(`${lead}</p>`);
+  } finally {
+    const restored = await save(page.request, 'product-page', entry, 'published');
+    expect(restored.ok(), await restored.text()).toBe(true);
+  }
+});

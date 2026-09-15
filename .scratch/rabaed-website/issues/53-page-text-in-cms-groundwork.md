@@ -4,7 +4,7 @@
 
 **Blocked by:** 19, 22, 52
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Page text is stored localised: each page list is one list shared across locales, each item holding its text per locale (spec: Content model). Arabic and English exist; neither is ever filled in from the other
 - [ ] A page is published in a locale only once every item has that locale's text (spec: Content model). Publishing the Arabic never publishes an empty English page — ticket 23 found that Payload's per-field localisation shares one draft and publish state across languages, so this has to be designed for, not assumed
