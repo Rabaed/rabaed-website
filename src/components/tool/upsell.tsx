@@ -39,8 +39,8 @@ export function Upsell({ content }: { content: ToolUpsellContent }) {
             </div>
           </div>
           <ul className="tl-up-list">
-            {content.adds.map((line) => (
-              <li key={line}>
+            {content.adds.map((line, index) => (
+              <li key={index}>
                 <i>✦</i>
                 <span>{line}</span>
               </li>

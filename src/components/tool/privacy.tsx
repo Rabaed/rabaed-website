@@ -44,8 +44,8 @@ export function Privacy({ content }: { content: ToolPrivacyContent }) {
                 <span className="fo" />
                 {content.tree.project}
               </div>
-              {content.tree.entries.map((entry) => (
-                <div key={entry.name} className={entry.nested ? 'ln sub' : 'ln'}>
+              {content.tree.entries.map((entry, index) => (
+                <div key={index} className={entry.nested ? 'ln sub' : 'ln'}>
                   <span className="fn mono" dir="ltr">
                     {entry.name}
                   </span>

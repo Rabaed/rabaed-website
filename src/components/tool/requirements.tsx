@@ -1,4 +1,4 @@
-import { Card, TeaserHead, type TeaserCard } from '@/components/tool/parts';
+import { Card, CardRow, TeaserHead, type TeaserCard } from '@/components/tool/parts';
 
 export type ToolRequirementsContent = {
   readonly eyebrow: string;
@@ -15,11 +15,11 @@ export function Requirements({ content }: { content: ToolRequirementsContent }) 
     <section id="req" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
         <TeaserHead eyebrow={content.eyebrow} title={content.heading} />
-        <div className="rt-row">
-          {content.cards.map((card) => (
-            <Card key={card.label} {...card} />
+        <CardRow count={content.cards.length}>
+          {content.cards.map((card, index) => (
+            <Card key={index} {...card} />
           ))}
-        </div>
+        </CardRow>
       </div>
     </section>
   );

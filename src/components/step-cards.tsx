@@ -1,3 +1,5 @@
+import { COLUMN_CLASS, columnsFor } from '@/components/columns';
+
 /**
  * Steps, each in a card of its own, one of them marked out — the start page's
  * steps to going live, the tool page's steps to a first pour, the referral
@@ -15,20 +17,7 @@ export type StepCard = {
   readonly fit?: string;
 };
 
-/** Class names for the number of columns at desktop widths (`start.css`, `programmes.css`). */
-const COLUMN_CLASS = { 1: 'one', 2: 'two', 3: 'three', 4: 'four' } as const;
-
-/**
- * How many columns `count` cards take at desktop widths, at most `maxColumns`: all
- * in one row while they fit, and otherwise as few rows as possible, filled as
- * evenly as they go — four in two rows of two rather than three and one alone.
- * An Editor adds and removes steps (spec: Design system).
- */
-function columnsFor(count: number, maxColumns: 3 | 4): 1 | 2 | 3 | 4 {
-  if (count <= maxColumns) return Math.max(count, 1) as 1 | 2 | 3 | 4;
-  return Math.ceil(count / Math.ceil(count / maxColumns)) as 1 | 2 | 3 | 4;
-}
-
+/** However many steps an Editor gives it, laid out by `columnsFor`. */
 export function StepCards({
   steps,
   maxColumns = 3,

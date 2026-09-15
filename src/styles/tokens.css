@@ -152,6 +152,12 @@ h2 { font-size: 38px; margin-bottom: 12px }
 .rt-c h3 { font-size: 17px; margin: 0 0 6px; font-weight: 600 }
 .rt-c p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75 }
 @media (max-width: 980px) { .rt-row { grid-template-columns: 1fr } }
+/* However many cards an Editor gives a row (ticket 54): `CardRow`
+   (src/components/tool/parts.tsx) picks the columns, and these draw them.
+   Three across is `.rt-row` itself; a single card takes the whole width; two
+   across is `.rt-row.two`, for desktop widths only, in `programmes.css`. Below
+   981px every count is one card to a row, as above. */
+.rt-row.one { grid-template-columns: 1fr }
 
 /* section treatments */
 section { position: relative }

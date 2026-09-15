@@ -51,7 +51,8 @@
 .gain .inl { color: var(--acc); font-weight: 600 }
 .gain .inl:hover { text-decoration: underline }
 /* DELIBERATE EXCEPTION (HANDOFF §7.4): the partnership page's four audiences,
-   two to a row — at desktop widths only. Below 981px `.rt-row` is one to a
+   two to a row — at desktop widths only. The tool page's rows of cards take it
+   too, holding four (`tokens.css`). Below 981px `.rt-row` is one to a
    row (`tokens.css`); written without the media query, this would outrank that
    and hold two columns on a phone. */
 @media (min-width: 981px) { .rt-row.two { grid-template-columns: 1fr 1fr } }

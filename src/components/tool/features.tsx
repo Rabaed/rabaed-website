@@ -1,4 +1,4 @@
-import { Card, TeaserHead, TestStateBadge, type TeaserCard, type TestState } from '@/components/tool/parts';
+import { Card, CardRow, TeaserHead, TestStateBadge, type TeaserCard, type TestState } from '@/components/tool/parts';
 
 export type ToolFeaturesContent = {
   readonly eyebrow: string;
@@ -13,15 +13,16 @@ export type ToolFeaturesContent = {
 };
 
 /**
- * «ما الذي تفعله»: six cards, the first with the legend of a test's states,
- * and four more things it does under them.
+ * «ما الذي تفعله»: cards, the first with the legend of a test's states, and
+ * more things it does under them — six cards and four lines on the Reference
+ * site; as many as an Editor gives it (ticket 54).
  */
 export function Features({ content }: { content: ToolFeaturesContent }) {
   return (
     <section id="features" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
         <TeaserHead eyebrow={content.eyebrow} title={content.heading} lead={content.lead} />
-        <div className="rt-row tl-feat">
+        <CardRow count={content.cards.length + 1} className="tl-feat">
           <div className="rt-c">
             <div className="k">{content.countdown.label}</div>
             <h3>{content.countdown.title}</h3>
@@ -32,13 +33,13 @@ export function Features({ content }: { content: ToolFeaturesContent }) {
               ))}
             </div>
           </div>
-          {content.cards.map((card) => (
-            <Card key={card.label} {...card} />
+          {content.cards.map((card, index) => (
+            <Card key={index} {...card} />
           ))}
-        </div>
+        </CardRow>
         <ul className="tl-also">
-          {content.also.map((also) => (
-            <li key={also}>
+          {content.also.map((also, index) => (
+            <li key={index}>
               <i>+</i>
               <span>{also}</span>
             </li>
