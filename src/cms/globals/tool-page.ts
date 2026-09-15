@@ -15,7 +15,8 @@ import { pageGlobal } from '../page-globals';
 
 const eyebrow = () => wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40);
 const heading = (maxLength: number) => wordsField('heading', { ar: 'العنوان', en: 'Heading' }, maxLength);
-const lead = () => wordsField('lead', { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' }, 200, { multiline: true });
+const lead = (maxLength = 200) =>
+  wordsField('lead', { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' }, maxLength, { multiline: true });
 
 /** A list whose rows are each one line of words. */
 function linesField(name: string, labels: { singular: Words; plural: Words }, rows: { min: number; max: number }, maxLength: number): Field {
@@ -61,7 +62,7 @@ export const ToolPage = pageGlobal({
         wordsField('titleAccent', { ar: 'كلمات العنوان الأخيرة', en: 'The heading’s last words' }, 30, {
           description: { ar: 'تظهر بلون مميّز بعد العنوان.', en: 'Shown in the accent colour after the heading.' },
         }),
-        wordsField('lead', { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' }, 320, { multiline: true }),
+        lead(320),
         {
           type: 'row',
           fields: [
@@ -101,7 +102,11 @@ export const ToolPage = pageGlobal({
                       required: true,
                       defaultValue: 'plain',
                       label: { ar: 'لون الرقم', en: 'Figure colour' },
-                      options: [{ value: 'plain', label: { ar: 'عادي', en: 'Plain' } }, TEST_STATES[1], TEST_STATES[2]],
+                      options: [
+                        { value: 'plain', label: { ar: 'عادي', en: 'Plain' } },
+                        { value: 'warn', label: { ar: 'ذهبي: اختبارات قريبة', en: 'Gold: tests due soon' } },
+                        { value: 'bad', label: { ar: 'أحمر: اختبارات متأخرة', en: 'Red: tests late' } },
+                      ],
                     },
                   ],
                 },
