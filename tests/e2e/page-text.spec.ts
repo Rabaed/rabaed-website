@@ -185,7 +185,12 @@ test('a change published in the admin reaches visitors', async ({ page, request 
 
   try {
     await page.goto(`${ADMIN_PATH}/globals/start-page`);
-    await page.locator('#field-hero__lead__ar').fill(lead);
+    // The admin reopens the tab an editor last had open, so the hero's is chosen.
+    await page.locator('.tabs-field__tab-button', { hasText: 'Hero' }).click();
+    const paragraph = page.locator('.group-field', {
+      has: page.getByRole('heading', { name: 'Paragraph under the heading', exact: true }),
+    });
+    await paragraph.getByRole('textbox', { name: /^Arabic/ }).fill(lead);
     await page.getByRole('button', { name: 'Publish changes' }).click();
     await expect(page.getByText(/successfully/).first()).toBeVisible();
 
