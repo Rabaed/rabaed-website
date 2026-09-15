@@ -1,8 +1,36 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionAfterDeleteHook, CollectionConfig, FieldHook } from 'payload';
 import { FORM_IDS } from '../../forms/definition';
+import { DOCUMENT_LINK_MINUTES, documentLink } from '../../forms/document-links';
+import { documentStore } from '../../forms/documents';
 import { FORMS } from '../../forms/registry';
 import { signedIn } from '../access';
 import { FORMS_GROUP } from '../globals/form-settings';
+
+/**
+ * A fresh signed link to a document each time its record is read, which only a
+ * signed-in editor can do (ADR-0004). Nothing stores it.
+ */
+const linkToDocument: FieldHook = ({ originalDoc, data, siblingData }) => {
+  const id = ((originalDoc ?? data) as { id?: unknown } | undefined)?.id;
+  const field = (siblingData as { field?: unknown } | undefined)?.field;
+  return typeof id === 'number' && typeof field === 'string' ? documentLink(id, field) : null;
+};
+
+/**
+ * A submission deleted takes its documents with it: a person who asks for their
+ * details to be removed means the certificates too.
+ */
+const removeDocuments: CollectionAfterDeleteHook = async ({ doc }) => {
+  const keys = ((doc as { documents?: { key?: string | null }[] | null }).documents ?? [])
+    .map((document) => document.key)
+    .filter((key): key is string => Boolean(key));
+  if (keys.length === 0) return;
+  try {
+    await documentStore()?.remove(keys);
+  } catch (error) {
+    console.error(`Submission ${String(doc.id)} was deleted, but its documents could not be:`, keys, error);
+  }
+};
 
 /** What became of one of a submission's emails. */
 const MAIL_OUTCOMES = [
@@ -40,6 +68,9 @@ export const FormSubmissions: CollectionConfig = {
     delete: signedIn,
   },
   defaultSort: '-createdAt',
+  hooks: {
+    afterDelete: [removeDocuments],
+  },
   admin: {
     group: FORMS_GROUP,
     useAsTitle: 'name',
@@ -84,6 +115,48 @@ export const FormSubmissions: CollectionConfig = {
           ],
         },
         { name: 'field', type: 'text', label: { ar: 'اسم الحقل في النظام', en: 'Field name' } },
+      ],
+    },
+    {
+      // Documents are kept in private storage (`src/forms/documents.ts`); the
+      // record holds where, and what each is.
+      name: 'documents',
+      type: 'array',
+      label: { ar: 'المستندات', en: 'Documents' },
+      labels: { singular: { ar: 'مستند', en: 'Document' }, plural: { ar: 'المستندات', en: 'Documents' } },
+      admin: {
+        readOnly: true,
+        description: {
+          ar: `يُفتح كل مستند برابط صالح لـ${DOCUMENT_LINK_MINUTES} دقائق، ولمن سجّل الدخول فقط. أعد فتح الطلب إن انتهت صلاحية الرابط.`,
+          en: `Each document opens through a link that lasts ${DOCUMENT_LINK_MINUTES} minutes, for signed-in editors only. Open the record again if a link has expired.`,
+        },
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'label', type: 'text', label: { ar: 'المستند', en: 'Document' } },
+            { name: 'fileName', type: 'text', label: { ar: 'اسم الملف', en: 'File name' } },
+            {
+              name: 'link',
+              type: 'text',
+              virtual: true,
+              label: { ar: 'الرابط', en: 'Link' },
+              admin: { components: { Field: '/cms/components/document-link#DocumentLink' } },
+              hooks: { afterRead: [linkToDocument] },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'contentType', type: 'text', label: { ar: 'النوع', en: 'Type' } },
+            { name: 'size', type: 'number', label: { ar: 'الحجم بالبايت', en: 'Size in bytes' } },
+            { name: 'field', type: 'text', label: { ar: 'اسم الحقل في النظام', en: 'Field name' } },
+          ],
+        },
+        // Where it is kept, in private storage.
+        { name: 'key', type: 'text', admin: { hidden: true } },
       ],
     },
     {

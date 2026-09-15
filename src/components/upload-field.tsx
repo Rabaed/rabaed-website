@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
-/** What a document field accepts, as on the Reference site. Ticket 28 checks it again on the server. */
-const DOCUMENT_TYPES = '.pdf,.png,.jpg,.jpeg';
+import { DOCUMENTS } from '@/forms/definition';
 
 /**
  * A document field: a card that opens the file picker, and once a file is
@@ -22,32 +20,56 @@ const DOCUMENT_TYPES = '.pdf,.png,.jpg,.jpeg';
  * and the stylesheet's own `:focus-within` outline could never show. Here it
  * stays in the page, clipped to nothing (`programmes.css`).
  *
- * Choosing a file only shows it. Uploading, progress and rejection are ticket
- * 28's.
+ * A form that sends it (ticket 28) is told of each file chosen (`onFile`), and
+ * tells the field when its answer is wrong and how far its upload has got. A
+ * refused file is drawn in red rather than green; a missing one keeps the
+ * empty card. The message is the form's to place. The progress runs along the
+ * card's foot while the form is sending.
  */
 export function UploadField({
   name,
   label,
   note,
   required = false,
+  onFile,
+  invalid = false,
+  rejected = false,
+  describedBy,
+  progress = null,
 }: {
   name: string;
   /** The document's name: the field's accessible name, and its visible one with the Reference site's star where it is required. */
   label: string;
   note: string;
   required?: boolean;
+  onFile?: (file: File | null) => void;
+  /** Whether the field's answer is wrong: missing, or refused. */
+  invalid?: boolean;
+  /** Whether the file chosen was refused, as too large or not a document. */
+  rejected?: boolean;
+  /** The id of the message saying what is wrong, while one is shown. */
+  describedBy?: string;
+  /** From 0 to 1 while the form is sending; `null` otherwise. */
+  progress?: number | null;
 }) {
   const [fileName, setFileName] = useState<string | null>(null);
+  const className = rejected ? 'upl bad' : fileName === null ? 'upl' : 'upl has';
 
   return (
-    <label className={fileName === null ? 'upl' : 'upl has'}>
+    <label className={className}>
       <input
         type="file"
         name={name}
-        accept={DOCUMENT_TYPES}
+        accept={DOCUMENTS.accept}
         aria-label={label}
         required={required}
-        onChange={(event) => setFileName(event.currentTarget.files?.[0]?.name ?? null)}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0] ?? null;
+          setFileName(file?.name ?? null);
+          onFile?.(file);
+        }}
       />
       <span className="ic">↑</span>
       <span className="tx">
@@ -55,6 +77,18 @@ export function UploadField({
         <small>{note}</small>
       </span>
       <span className="nm">{fileName ?? 'اختر ملفاً'}</span>
+      {progress !== null && fileName !== null && (
+        <span
+          className="pg"
+          role="progressbar"
+          aria-label={`رفع ${label}`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+        >
+          <i style={{ width: `${Math.round(progress * 100)}%` }} />
+        </span>
+      )}
     </label>
   );
 }

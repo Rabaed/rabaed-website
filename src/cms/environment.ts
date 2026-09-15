@@ -98,3 +98,33 @@ export function mediaBucket(): MediaBucket | null {
 export function localMediaDirectory(): string {
   return process.env.MEDIA_DIR ?? path.resolve(process.cwd(), '.data', 'media');
 }
+
+/**
+ * The private Supabase Storage bucket applicant documents go to (ticket 28),
+ * reached through the same S3 connection and keys as the media bucket — or
+ * `null` where `S3_DOCUMENTS_BUCKET` is not set.
+ *
+ * It may not be the media bucket, which is public: no public bucket may ever
+ * hold applicant documents (ADR-0004).
+ */
+export function documentsBucket(): MediaBucket | null {
+  const name = process.env.S3_DOCUMENTS_BUCKET;
+  if (!name) return null;
+  const media = mediaBucket();
+  if (!media) {
+    throw new Error(
+      `S3_DOCUMENTS_BUCKET is set, but the S3 connection is not: set ${BUCKET_VARIABLES.join(', ')} too. See "The CMS" in docs/deployment.md.`,
+    );
+  }
+  if (name === media.bucket) {
+    throw new Error(
+      'S3_DOCUMENTS_BUCKET names the media bucket, which is public. Applicant documents need a private bucket of their own. See "The CMS" in docs/deployment.md.',
+    );
+  }
+  return { ...media, bucket: name };
+}
+
+/** Where applicant documents go when there is no bucket: a local machine only. */
+export function localDocumentsDirectory(): string {
+  return process.env.DOCUMENTS_DIR || path.resolve(process.cwd(), '.data', 'documents');
+}

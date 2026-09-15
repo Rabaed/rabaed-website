@@ -16,7 +16,7 @@
  * Server-only: it reads secrets.
  */
 import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { isPubliclyDeployed } from '../lib/environment';
@@ -52,7 +52,11 @@ function outboxMailer(directory: string): Mailer {
   return {
     async send(mail) {
       await mkdir(directory, { recursive: true });
-      await writeFile(path.join(directory, `${Date.now()}-${randomUUID()}.json`), JSON.stringify(mail, null, 2));
+      // Written whole under another name, then renamed into place: a test
+      // reading the outbox never finds a message half written.
+      const file = path.join(directory, `${Date.now()}-${randomUUID()}.json`);
+      await writeFile(`${file}.partial`, JSON.stringify(mail, null, 2));
+      await rename(`${file}.partial`, file);
     },
   };
 }

@@ -15,11 +15,13 @@
  */
 
 /** Every form the site has a definition for. */
-export const FORM_IDS = ['demo-request', 'tool-download'] as const;
+export const FORM_IDS = ['demo-request', 'referral-signup', 'tool-download'] as const;
 
 export type FormId = (typeof FORM_IDS)[number];
 
-export type FieldDefinition = {
+/** Typed text, or a choice from a list. */
+export type TextFieldDefinition = {
+  readonly kind?: 'text';
   readonly required: boolean;
   /** The longest answer taken. A longer one is refused, not cut short. */
   readonly maxLength: number;
@@ -29,14 +31,32 @@ export type FieldDefinition = {
   readonly accepts?: (answer: string) => boolean;
 };
 
+/** A document the applicant attaches: a PDF or an image, of at most `DOCUMENTS.maxBytes`. */
+export type DocumentFieldDefinition = {
+  readonly kind: 'document';
+  readonly required: boolean;
+};
+
+/** A box the applicant has to tick. Always required: a consent that may be left out is not one. */
+export type ConsentFieldDefinition = {
+  readonly kind: 'consent';
+};
+
+export type FieldDefinition = TextFieldDefinition | DocumentFieldDefinition | ConsentFieldDefinition;
+
 export type FieldWording = {
   /** What the field is called, to a screen reader and in the admin. */
   readonly label: string;
+  /** For a document: the note under its name. For a consent: unused. */
   readonly placeholder: string;
-  /** Shown under the field while its answer is not acceptable. */
+  /** Shown under the field while its answer is not acceptable — for a document, while it is missing. */
   readonly message: string;
   /** For a list: the text of each option, by its value. */
   readonly options?: Readonly<Record<string, string>>;
+  /** For a document: shown when the file is over the size limit. */
+  readonly tooLarge?: string;
+  /** For a document: shown when the file is not a PDF or an image. */
+  readonly wrongType?: string;
 };
 
 /** The words the page shows with the form. */
@@ -64,6 +84,10 @@ export type FormReplyWording = {
 
 export type FormWording<Field extends string = string> = FormPageWording<Field> & FormReplyWording;
 
+/**
+ * Every answer as text: typed text as typed, a consent as `on` when ticked,
+ * and a document as the chosen file's name — its contents travel beside.
+ */
 export type Answers<Field extends string = string> = Readonly<Record<Field, string>>;
 
 /** Who is asking, as the submissions list shows it. */
@@ -81,13 +105,20 @@ export type FormDefinition<Field extends string = string> = {
   readonly wording: FormWording<Field>;
 };
 
+/** What is wrong with an attached document. A missing one is the field's own message. */
+export type DocumentProblem = 'tooLarge' | 'wrongType';
+
 /** What a form is told back once it has been sent. */
 export type SubmissionOutcome =
   | { readonly outcome: 'idle' }
   /** Stored. */
   | { readonly outcome: 'received'; readonly message: string }
-  /** Answers the server would not take, by field. */
-  | { readonly outcome: 'invalid'; readonly fields: readonly string[] }
+  /** Answers the server would not take, by field, and what was wrong with each document among them. */
+  | {
+      readonly outcome: 'invalid';
+      readonly fields: readonly string[];
+      readonly problems?: Readonly<Record<string, DocumentProblem>>;
+    }
   /** Turned away: a bot-shaped request, or too many from one address. */
   | { readonly outcome: 'refused'; readonly message: string }
   /** Something broke on our side, and nothing was stored. */
@@ -111,11 +142,45 @@ export const TOKEN_FIELD = 'submissionToken';
 /** The placeholder in a confirmation email that stands for the applicant's name. */
 export const NAME_PLACEHOLDER = '{الاسم}';
 
+/** What a ticked consent sends. */
+export const CONSENT_GIVEN = 'on';
+
+/**
+ * What an attached document may be (spec: Forms): a PDF or an image, of at
+ * most 10 MB. The browser judges a file by its name and size as it is chosen;
+ * the server judges it again by its contents (`documents.ts`).
+ */
+export const DOCUMENTS = {
+  maxBytes: 10 * 1024 * 1024,
+  /** What the file picker offers. */
+  accept: '.pdf,.png,.jpg,.jpeg',
+  extensions: ['pdf', 'png', 'jpg', 'jpeg'],
+} as const;
+
+/** What is wrong with a file, by its name and size. */
+export function documentProblem(file: { readonly name: string; readonly size: number }): DocumentProblem | null {
+  const extension = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+  if (!(DOCUMENTS.extensions as readonly string[]).includes(extension)) return 'wrongType';
+  if (file.size > DOCUMENTS.maxBytes) return 'tooLarge';
+  return null;
+}
+
 export function fieldNames<Field extends string>(definition: FormDefinition<Field>): Field[] {
   return Object.keys(definition.fields) as Field[];
 }
 
+/** The values a list offers, in order; none for any other field. */
+export function fieldOptions(field: FieldDefinition): readonly string[] {
+  return field.kind === undefined || field.kind === 'text' ? (field.options ?? []) : [];
+}
+
+export function isRequired(field: FieldDefinition): boolean {
+  return field.kind === 'consent' ? true : field.required;
+}
+
 export function isAcceptable(field: FieldDefinition, value: string): boolean {
+  if (field.kind === 'consent') return value === CONSENT_GIVEN;
+  if (field.kind === 'document') return !field.required || value !== '';
   const answer = value.trim();
   if (answer === '') return !field.required;
   if (answer.length > field.maxLength) return false;
