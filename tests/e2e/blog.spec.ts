@@ -12,6 +12,7 @@
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { ADMIN_PATH, BLOG_EDITOR, logInByApi, richText, uploadImage } from './cms';
+import { nodesOf, structuredData, trail } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
 
@@ -219,6 +220,53 @@ test('a draft saved over a published article reaches the editor’s preview, nev
   await page.goto(`/api/preview?path=/blog/${fields.slug}`);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(draft.title);
   await expect(page.getByText(draft.body)).toBeVisible();
+});
+
+test('a published article describes itself in article data, opening with its answer', async ({
+  page,
+  request,
+  baseURL,
+}) => {
+  await logInByApi(page.request, BLOG_EDITOR);
+  const fields = article();
+  await createPost(page.request, fields);
+  const address = `${baseURL}/blog/${fields.slug}`;
+
+  await expect.poll(async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
+  const nodes = structuredData((await visit(request, `/blog/${fields.slug}`)).html);
+
+  const articles = nodesOf(nodes, 'BlogPosting');
+  expect(articles).toHaveLength(1);
+  const [posting] = articles;
+  expect(posting).toMatchObject({
+    headline: fields.title,
+    // The answer-first opening paragraph, which the spec asks to serve both
+    // the page and its structured data.
+    description: fields.answer,
+    author: { '@type': 'Person', name: fields.author },
+    datePublished: fields.publishedAt,
+    inLanguage: 'ar',
+    url: address,
+    mainEntityOfPage: address,
+    publisher: { name: 'ربائد' },
+  });
+  expect(Date.parse(posting.dateModified as string)).not.toBeNaN();
+
+  // The cover, which exists and is an image.
+  const images = [posting.image].flat() as string[];
+  for (const image of images) {
+    const response = await request.get(image);
+    expect(response.status(), image).toBe(200);
+    expect(response.headers()['content-type']).toMatch(/^image\//);
+  }
+
+  const [breadcrumbs] = nodesOf(nodes, 'BreadcrumbList');
+  expect(trail(breadcrumbs)).toEqual([
+    ['الرئيسية', baseURL],
+    ['المدونة', `${baseURL}/blog`],
+    [fields.title, address],
+  ]);
+  expect(nodesOf(nodes, 'Organization')).toHaveLength(1);
 });
 
 test('the index lists articles newest first, a page at a time', async ({ page, request }) => {

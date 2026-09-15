@@ -11,6 +11,7 @@ import {
 } from '@/components/editorial';
 import { allPublishedPosts, findPost, publishedLocales } from '@/cms/blog';
 import { fetchedMedia } from '@/cms/fetched-media';
+import { blogPostingData, breadcrumbData, StructuredData } from '@/components/structured-data';
 import { BLOG_COPY } from '@/content/blog';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { localePath, type Locale } from '@/lib/locales';
@@ -98,6 +99,13 @@ export async function BlogPostPage({ locale, slug }: { locale: Locale; slug: str
           {post.body && <RichText className="entry-body" data={post.body} />}
         </article>
       </section>
+      <StructuredData
+        data={breadcrumbData(locale, [
+          { name: copy.eyebrow, path: blogIndexPath() },
+          { name: post.title, path: blogPostPath(slug) },
+        ])}
+      />
+      <StructuredData data={blogPostingData(locale, post)} />
     </EditorialFrame>
   );
 }

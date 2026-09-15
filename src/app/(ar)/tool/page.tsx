@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page-shell';
 import { Questions } from '@/components/questions';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { Download } from '@/components/tool/download';
 import { Features } from '@/components/tool/features';
 import { ToolHero } from '@/components/tool/hero';
@@ -43,6 +44,8 @@ export default async function ToolPage() {
       <Download content={content.download} />
       {content.questions.shows && <Questions content={content.questions} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
+      <StructuredData data={breadcrumbData('ar', [{ name: 'متتبّع الصبّات', path: '/tool' }])} />
+      <StructuredData data={content.questions.shows ? faqData(content.questions.entries) : null} />
     </PageShell>
   );
 }

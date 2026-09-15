@@ -3,6 +3,7 @@ import { Fragment, type ReactNode } from 'react';
 import { clauseId, LEGAL_PAGES } from '@/cms/legal-pages';
 import { ArabicDate } from '@/components/arabic-date';
 import { PageShell } from '@/components/page-shell';
+import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import { riyadhDay } from '@/lib/dates';
 import { localePath } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
@@ -92,6 +93,9 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           </div>
         </div>
       </section>
+      <StructuredData
+        data={breadcrumbData('ar', [{ name: LEGAL_PAGES[document.slug].label.ar, path: LEGAL_PAGES[document.slug].path }])}
+      />
     </PageShell>
   );
 }

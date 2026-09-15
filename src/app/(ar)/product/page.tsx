@@ -7,6 +7,7 @@ import { CustomStrip } from '@/components/product/custom-strip';
 import { InnerCycle } from '@/components/product/inner-cycle';
 import { Journey } from '@/components/product/journey';
 import { Roles } from '@/components/product/roles';
+import { breadcrumbData, softwareData, StructuredData } from '@/components/structured-data';
 import { getProductPage } from '@/content/pages/product';
 import { pageMetadata } from '@/lib/metadata';
 
@@ -36,6 +37,8 @@ export default async function ProductPage() {
       {content.roles.shows && <Roles content={content.roles} />}
       {content.innerCycle.shows && <InnerCycle content={content.innerCycle} />}
       <ClosingSection content={content.closing} form={content.demoForm} />
+      <StructuredData data={breadcrumbData('ar', [{ name: 'المنتج', path: '/product' }])} />
+      <StructuredData data={softwareData()} />
     </PageShell>
   );
 }

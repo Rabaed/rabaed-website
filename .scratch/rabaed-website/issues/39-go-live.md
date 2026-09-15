@@ -19,3 +19,7 @@
 - [ ] Analytics confirmed recording real visits
 
 **Note:** the Reference site's six `noindex` tags were correct while it was a prototype. This ticket is the one place they are removed, so the site cannot launch invisible by accident.
+
+## Comments
+
+**From ticket 32 (15 September 2026).** "Structured data validated live" means pasting the live home, product, start and one blog post address into Google's Rich Results Test (https://search.google.com/test/rich-results) and the Schema Markup Validator (https://validator.schema.org/). The suite checks the same things offline, but only a live check sees what Google sees. The company's social accounts in its structured data are the ones published in site settings, so publishing the real accounts before launch fills both the footer icons and the structured data at once.

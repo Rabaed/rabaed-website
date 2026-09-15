@@ -8,6 +8,7 @@ import { Idea } from '@/components/partnership/idea';
 import { Modes } from '@/components/partnership/modes';
 import { Path } from '@/components/partnership/path';
 import { Questions } from '@/components/questions';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { pageMetadata } from '@/lib/metadata';
 
@@ -43,6 +44,8 @@ export default async function PartnershipPage() {
       <Path content={content.path} />
       {content.questions.shows && <Questions content={content.questions} />}
       <Apply content={content.apply} />
+      <StructuredData data={breadcrumbData('ar', [{ name: 'برنامج الشراكات', path: '/partnership' }])} />
+      <StructuredData data={content.questions.shows ? faqData(content.questions.entries) : null} />
     </PageShell>
   );
 }
