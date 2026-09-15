@@ -25,6 +25,7 @@ import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } f
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
+import { PartnershipPage } from './cms/globals/partnership-page';
 import { ProductPage } from './cms/globals/product-page';
 import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
@@ -96,6 +97,7 @@ export default buildConfig({
     ProductPage,
     ClosingSection,
     ScreenMocks,
+    PartnershipPage,
   ],
 
   db: postgresAdapter({

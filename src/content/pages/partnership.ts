@@ -1,3 +1,5 @@
+import { pageEntry, wordsIn } from '@/cms/pages';
+import { numeralsInMono } from '@/components/inline-text';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { PartnershipApplyContent } from '@/components/partnership/apply';
 import type { PartnershipAudienceContent } from '@/components/partnership/audience';
@@ -23,154 +25,107 @@ export type PartnershipPageContent = {
   readonly apply: LinkedSection<PartnershipApplyContent>;
 };
 
-/** All copy is verbatim from `reference/site/partnership.html`. */
-const AR: BeforeQuestions<PartnershipPageContent> = {
-  meta: {
+/**
+ * The page's search title and description, which ticket 26 moves into the CMS,
+ * and the short name its breadcrumb structured data reads (ticket 32), which
+ * travels with them. Verbatim from `reference/site/partnership.html`.
+ */
+const META = {
+  ar: {
     name: 'برنامج الشراكات',
     title: 'ربائد · برنامج الشراكات للمكاتب الهندسية',
     description: 'شراكة تُصمَّم معك: تسعير شريك، أو رخصة على مستوى المكتب، أو تضمين المنصة في عرضك للمالك.',
   },
-  hero: {
-    eyebrow: 'برنامج الشراكات',
-    title: 'منصّة إدارة المشروع… ضمن عرضك أنت',
-    lead: 'شراكة ربائد للمكاتب الهندسية وشركات إدارة المشاريع ومجموعات المقاولات — نموذج تعاون يُصمَّم معك، لا باقة جاهزة تُعرض عليك.',
-    // Both land further down this page: the application form, and the path.
-    primary: { label: 'اطلب اجتماع شراكة', href: '#apply' },
-    secondary: { label: 'كيف نبني الشراكة ↓', href: '#path' },
-    figures: [
-      { figure: [{ mono: '3' }, ' أنماط'], label: 'للتعاون، تختار معنا الأنسب' },
-      { figure: [{ mono: '4' }, ' مراحل'], label: 'من أول اجتماع إلى أول مشروع' },
-      { figure: 'بلا رسوم', label: 'لا رسوم انضمام للبرنامج' },
-    ],
-  },
-  idea: {
-    shows: true,
-    eyebrow: 'الفكرة',
-    heading: 'لماذا شراكة، لا عمولة؟',
-    paragraphs: [
-      'المكتب الذي يشرف على عشرة مشاريع في وقت واحد ليس «مُحيلاً». هو الطرف الذي يعيش على المنصة يومياً، ويُدخل الاعتمادات والملاحظات وتقارير الموقع، وهو من يقنع المالك بأسلوب عمل أفضل.',
-      'ولذلك لا نعرض على المكاتب عمولة على ترشيح. نجلس معك، ونفهم كيف تبيع خدماتك اليوم وكيف تفوتر عميلك، ثم نبني نموذج تعاون يناسب ذلك — تسعير شريك، رخصة على مستوى المكتب، أو تضمين المنصة في عرضك للمالك.',
-    ],
-    referralNote: {
-      // Its trailing space included: the link follows it.
-      text: 'تبحث عن ترتيب فردي أبسط — كود تشاركه وتستلم عنه مبلغاً ثابتاً؟ ',
-      link: { label: 'انتقل إلى برنامج الإحالة ←', href: localePath('ar', '/referral') },
-    },
-  },
-  audience: {
-    shows: true,
-    eyebrow: 'لمن هذا البرنامج',
-    heading: 'لمن هذا البرنامج',
-    kinds: [
-      { title: 'المكاتب الهندسية الاستشارية', text: 'التي تشرف على مشاريع مطوّرين من القطاع الخاص.' },
-      { title: 'شركات إدارة المشاريع (PMC)', text: 'التي تدير محافظ مشاريع لعملاء متعددين.' },
-      { title: 'مجموعات المقاولات', text: 'التي تنفّذ عدة مشاريع بالتوازي وتحتاج سجلاً موحّداً مع الاستشاري.' },
-      { title: 'مطوّرون عقاريون متعددو المشاريع', text: 'الذين يريدون ترتيباً على مستوى المحفظة لا المشروع الواحد.' },
-    ],
-  },
-  modes: {
-    shows: true,
-    eyebrow: 'أنماط التعاون',
-    heading: 'ثلاثة أنماط — ونختار معك ما يناسب طريقة عملك',
-    modes: [
-      {
-        number: '01',
-        label: 'التضمين في العرض',
-        title: 'المنصة ضمن نطاق خدماتك',
-        text: 'تُدرج المنصة ضمن نطاق خدماتك في العرض الذي تقدّمه للمالك، وتفوترها ضمن أتعابك. يحصل المكتب على تسعير شريك، وتبقى علاقة العميل التعاقدية معك.',
-        markedOut: false,
-        fit: 'مناسب لـ: المكاتب التي تريد تمييز عرضها الفني وإضافة مصدر دخل ضمن الأتعاب.',
-      },
-      {
-        number: '02',
-        label: 'رخصة المكتب',
-        title: 'اشتراك على مستوى المكتب',
-        text: 'يغطي مشاريعه القائمة والجديدة تحت مظلة واحدة، بلوحة إشراف موحّدة على كل المشاريع.',
-        markedOut: false,
-        fit: 'مناسب لـ: المكاتب التي تدير عدداً ثابتاً من المشاريع وتريد توحيد أسلوب العمل عليها كلها.',
-      },
-      {
-        number: '03',
-        label: 'الترشيح المعتمد',
-        title: 'نتعاقد نحن مع المالك',
-        text: 'ترشّح المنصة للمالك ونتعاقد نحن معه مباشرة، مع ترتيب متفق عليه للمكتب وأولوية في الدعم على مشاريعه.',
-        markedOut: false,
-        fit: 'مناسب لـ: المكاتب التي تفضّل ألا تدخل المنصة في فوترتها مع العميل.',
-      },
-    ],
-    // Each run of text one string, so the bold lands where the Reference
-    // site's does.
-    note: [
-      'شروط كل نمط — التسعير، مدى الحصرية، حدود الجغرافيا أو نوع العميل — تُحدَّد في اتفاقية الشراكة بعد اجتماع تصميم النموذج. ',
-      { strong: 'لا نضع تسعيراً موحّداً' },
-      ' لأن المكاتب تختلف في حجمها وطبيعة عملائها.',
-    ],
-  },
-  benefits: {
-    shows: true,
-    eyebrow: 'ما يحصل عليه الشريك',
-    heading: 'ثمانية التزامات من طرفنا، مكتوبة في الاتفاقية',
-    benefits: [
-      { lead: 'تسعير شريك', rest: 'متفق عليه في الاتفاقية' },
-      { lead: 'مدير حساب مخصص', rest: 'ونقطة تواصل واحدة' },
-      { lead: 'تأهيل فريقك', rest: 'على المنصة، وإعادة التأهيل عند انضمام موظفين جدد' },
-      { lead: 'دعم فني بأولوية', rest: 'لمشاريعك ولعملائك' },
-      { lead: 'إعداد المشروع نيابةً عنك', rest: 'عند الإطلاق: هيكل المستندات، الصلاحيات، أرقام المرجع' },
-      { lead: 'لوحة شريك', rest: 'تعرض مشاريعك النشطة وحالة كل منها' },
-      { lead: 'تسويق مشترك', rest: '— ورش عمل، محتوى، وظهور مشترك في فعاليات القطاع' },
-      { lead: 'أولوية في خارطة الطريق', rest: 'لطلبات التطوير المتكررة من مشاريعك' },
-    ],
-  },
-  path: {
-    shows: true,
-    eyebrow: 'مسار الشراكة',
-    heading: 'من أول اجتماع إلى أول مشروع',
-    lead: 'أربع مراحل واضحة، ولا شيء منها يحتاج قراراً نهائياً منك قبل أن ترى المنصة كما يستخدمها الاستشاري فعلياً.',
-    link: { label: 'اطلب اجتماع شراكة', href: '#apply' },
-    stageLabel: 'المرحلة',
-    stages: [
-      {
-        number: '01',
-        title: 'اجتماع تعارف',
-        text: 'جلسة نفهم فيها حجم مكتبك، طبيعة عملائك، وكيف تُبنى عروضك اليوم. ونعرض المنصة كما يستخدمها الاستشاري فعلياً.',
-      },
-      {
-        number: '02',
-        title: 'تصميم نموذج التعاون',
-        text: 'نتفق على النمط، وآليات التسعير، والالتزامات المتبادلة، ومؤشرات النجاح.',
-      },
-      {
-        number: '03',
-        title: 'الاتفاقية والتأهيل',
-        text: 'توقيع اتفاقية الشراكة، وتأهيل فريقك، وتجهيز المواد التي تحتاجها لعرض المنصة على عملائك.',
-      },
-      {
-        number: '04',
-        title: 'الإطلاق على أول مشروع',
-        text: 'نُطلق معك على مشروع واحد كنموذج، ونتابع معك أولاً بأول حتى يستقر العمل.',
-      },
-    ],
-  },
-  questions: {
-    shows: true,
-    eyebrow: 'الأسئلة الشائعة',
-    heading: 'قبل الاجتماع الأول',
-  },
-  apply: {
-    shows: true,
-    eyebrow: 'طلب شراكة',
-    heading: 'خلّنا نجلس ونصمّم النموذج المناسب لمكتبك',
-    lead: 'املأ النموذج، ويتواصل معك فريق الشراكات خلال يومي عمل.',
-    reassurances: [
-      'لا رسوم انضمام، ولا التزام قبل اجتماع التعارف',
-      'الاجتماع الأول يشمل عرض المنصة',
-      'نموذج التعاون يُكتب في اتفاقية، لا في وعد شفهي',
-    ],
-    responseTime: { figure: 'يوما عمل', label: 'مدة الرد على طلبك' },
-  },
-};
+} as const;
 
-/** The partnership page's content in `locale`, or a refusal (`inLocale`), with its questions as the CMS has them. */
+/** A card or stage numbered by its place, so reordering renumbers it: «01». */
+const numbered = (index: number) => String(index + 1).padStart(2, '0');
+
+/**
+ * The partnership page's content in `locale`: its words from its entry in the
+ * CMS (ticket 55) — or a refusal, where the page is not published in `locale` —
+ * with its questions as the CMS has them.
+ *
+ * Where each link leads stays here, in code: an Editor changes what a link
+ * says, never where it goes.
+ */
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
-  return withQuestions('partnership', locale, inLocale('partnership', { ar: AR }, locale));
+  const { hero, idea, audience, modes, benefits, path, questions, apply } = await pageEntry('partnership-page', locale);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
+
+  const page: BeforeQuestions<PartnershipPageContent> = {
+    meta: inLocale('partnership', META, locale),
+    hero: {
+      eyebrow: words(hero.eyebrow),
+      title: words(hero.title),
+      lead: words(hero.lead),
+      // Both land further down this page: the application form, and the path.
+      primary: { label: words(hero.primaryLabel), href: '#apply' },
+      secondary: { label: words(hero.secondaryLabel), href: '#path' },
+      figures: hero.figures.map((figure) => ({ figure: numeralsInMono(words(figure.figure)), label: words(figure.label) })),
+    },
+    idea: {
+      shows: idea.shows !== false,
+      eyebrow: words(idea.eyebrow),
+      heading: words(idea.heading),
+      paragraphs: idea.paragraphs.map((paragraph) => words(paragraph.text)),
+      referralNote: {
+        // With the space before the link that follows it.
+        text: `${words(idea.referralNote.text)} `,
+        link: { label: words(idea.referralNote.linkLabel), href: localePath(locale, '/referral') },
+      },
+    },
+    audience: {
+      shows: audience.shows !== false,
+      eyebrow: words(audience.eyebrow),
+      heading: words(audience.heading),
+      kinds: audience.kinds.map((kind) => ({ title: words(kind.title), text: words(kind.text) })),
+    },
+    modes: {
+      shows: modes.shows !== false,
+      eyebrow: words(modes.eyebrow),
+      heading: words(modes.heading),
+      modes: modes.modes.map((mode, index) => ({
+        number: numbered(index),
+        label: words(mode.label),
+        title: words(mode.title),
+        text: words(mode.text),
+        markedOut: false,
+        fit: words(mode.fit),
+      })),
+      // Each run of text one string, so the bold lands where the Reference
+      // site's does.
+      note: [`${words(modes.note.before)} `, { strong: words(modes.note.bold) }, ` ${words(modes.note.after)}`],
+    },
+    benefits: {
+      shows: benefits.shows !== false,
+      eyebrow: words(benefits.eyebrow),
+      heading: words(benefits.heading),
+      benefits: benefits.benefits.map((benefit) => ({ lead: words(benefit.bold), rest: words(benefit.text) })),
+    },
+    path: {
+      shows: true,
+      eyebrow: words(path.eyebrow),
+      heading: words(path.heading),
+      lead: words(path.lead),
+      link: { label: words(path.linkLabel), href: '#apply' },
+      stageLabel: words(path.stageLabel),
+      stages: path.stages.map((stage, index) => ({ number: numbered(index), title: words(stage.title), text: words(stage.text) })),
+    },
+    questions: {
+      shows: questions.shows !== false,
+      eyebrow: words(questions.eyebrow),
+      heading: words(questions.heading),
+    },
+    apply: {
+      shows: true,
+      eyebrow: words(apply.eyebrow),
+      heading: words(apply.heading),
+      lead: words(apply.lead),
+      reassurances: apply.reassurances.map((line) => words(line.text)),
+      responseTime: { figure: words(apply.responseTime.bold), label: words(apply.responseTime.text) },
+    },
+  };
+
+  return withQuestions('partnership', locale, page);
 }

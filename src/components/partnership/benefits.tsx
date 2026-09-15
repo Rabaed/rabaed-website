@@ -11,8 +11,9 @@ export type PartnershipBenefitsContent = {
 };
 
 /**
- * «ما يحصل عليه الشريك» on the partnership page: Rabaed's eight commitments to
- * a partner, two columns at desktop widths.
+ * «ما يحصل عليه الشريك» on the partnership page: Rabaed's commitments to a
+ * partner — eight on the Reference site; as many as an Editor gives it (ticket
+ * 55) — two columns at desktop widths.
  */
 export function Benefits({ content }: { content: PartnershipBenefitsContent }) {
   return (
@@ -23,8 +24,8 @@ export function Benefits({ content }: { content: PartnershipBenefitsContent }) {
           <h2>{content.heading}</h2>
         </div>
         <ul className="ben-row">
-          {content.benefits.map((benefit) => (
-            <li key={benefit.lead}>
+          {content.benefits.map((benefit, index) => (
+            <li key={index}>
               <i>✓</i>
               <span>
                 <b>{benefit.lead}</b>

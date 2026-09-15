@@ -21,3 +21,11 @@
 **Split from ticket 21 (15 September 2026).** See ticket 53.
 
 **Parallel sessions.** Touches only the partnership page's module, components and a migration of its own, so it can run beside tickets 54, 56, 57 and 59 once ticket 53 is merged. Every one of tickets 53–59 adds a CMS migration, and two branches' migrations collide: after updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).
+
+**Decided while building (15 September 2026).**
+
+- **The generated migration re-created ticket 57's tables.** Payload writes a migration against the newest snapshot by name, and on `main` that is `20260915_064014_tool_page.json`, generated on ticket 54's branch before ticket 57's product page, closing section and Screen mocks were merged. So `npm run cms:migration` wrote those tables again beside the partnership page's, which would fail on every database. Only the partnership page's statements were kept in `20260915_195429_partnership_page.ts`; its snapshot holds the whole schema as it now is, so migrations generated after this one merges are written against the right tables. Tickets 56, 58 and 59 generating theirs before then will meet the same thing: keep only their own statements.
+- **The hero has no switch either**, as on the tool page: it holds the page's only heading.
+- **The hero's figures are words, not a figure and a unit.** An Editor writes «3 أنماط» or «بلا رسوم» as one line; the page sets whatever numerals it holds, written 0–9, in DM Mono, as the Reference site's markup did by hand (`src/content/pages/partnership.ts`).
+- **The modes' note is three fields** — the sentence, the words in bold, the rest of the line — and the page draws the spaces between them, as the tool page does with its bold openings.
+- **The audience stays two to a row** at desktop widths, whatever its count, as the design builds it; a single kind of firm takes the whole width. The stages are one under another, so any number already lays out.

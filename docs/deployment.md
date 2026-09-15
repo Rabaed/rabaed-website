@@ -174,12 +174,12 @@ site launched with, word for word.
 ### Page text
 
 Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**
-(ticket 54), **Referral Program page** (ticket 56) and **Product page** (ticket
-57), and two entries pages share — **Closing section** («كيف نبدأ معك», which
-the home and product pages both end on, changed once for both) and **Screen
-mocks**. The other marketing pages follow in tickets 55, 58 and 59, and until
-then their words are still in code. The migrations import each entry's words
-once, as they were.
+(ticket 54), **Product page** (ticket 57), **Partnership page** (ticket 55) and
+**Referral Program page** (ticket 56), and two entries pages share — **Closing
+section** («كيف نبدأ معك», which the home and product pages both end on,
+changed once for both) and **Screen mocks**. The home page follows in ticket 58
+and the header, footer and index pages in ticket 59, and until then their words
+are still in code. The migrations import each entry's words once, as they were.
 
 - Each tab is one section of the page, in the page's order. Sections cannot be
   moved, added or removed.
@@ -200,6 +200,8 @@ once, as they were.
   `` `concrete_db.json` `` — to set it left to right, as in the questions. File
   names, pour references and the drawing's figures are one field for both
   languages, in Latin letters and figures only.
+- In the partnership page's figures, write numerals as 0–9 — «3 أنماط» — and
+  the page sets them in the figures' typeface.
 - On the referral page, never type the payout or the discount: write
   `{payout}` and `{clientDiscount}`, as in the questions, and the page inserts
   the **Referral Program values**. A name in braces the site does not hold is

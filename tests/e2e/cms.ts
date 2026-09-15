@@ -77,6 +77,12 @@ export const PRODUCT_EDITOR = {
   password: 'test-editor-password-57',
 } as const;
 
+/** The partnership page's text suite's own account (ticket 55), for the same reason as `BLOG_EDITOR`. */
+export const PARTNERSHIP_PAGE_EDITOR = {
+  email: 'partnership-page-editor@rabaed.test',
+  password: 'test-editor-password-55',
+} as const;
+
 /** The referral page's text suite's own account (ticket 56), for the same reason as `BLOG_EDITOR`. */
 export const REFERRAL_PAGE_EDITOR = {
   email: 'referral-page-editor@rabaed.test',
@@ -100,6 +106,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   PAGES_EDITOR,
   TOOL_PAGE_EDITOR,
   PRODUCT_EDITOR,
+  PARTNERSHIP_PAGE_EDITOR,
   REFERRAL_PAGE_EDITOR,
   REFERRAL_VALUES_EDITOR,
 ];
