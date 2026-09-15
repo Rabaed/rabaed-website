@@ -1,29 +1,27 @@
+import { withEmphasis } from '@/cms/emphasis';
 import { FAQ_PAGES } from '@/cms/faq-pages';
+import { fetchedMedia } from '@/cms/fetched-media';
+import { pageEntry, wordsIn } from '@/cms/pages';
 import type { ClosingSectionContent } from '@/components/closing-section';
-import type { HomeBeforeAfterContent } from '@/components/home/before-after';
+import type { ComparisonStep, Face, HomeBeforeAfterContent } from '@/components/home/before-after';
 import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
-import type { HomeFiguresContent } from '@/components/home/figures';
-import type { HomeFourUnitsContent } from '@/components/home/four-units';
+import type { HomeFiguresContent, ProofFigure } from '@/components/home/figures';
+import type { HomeFourUnitsContent, UnitTab } from '@/components/home/four-units';
 import type { HomeHeroContent } from '@/components/home/hero';
-import type { HomeRecordSectionContent } from '@/components/home/record';
+import type { HomeRecordSectionContent, TransactionStep } from '@/components/home/record';
 import type { HomeSituationsContent } from '@/components/home/situations';
 import type { TrustStripContent } from '@/components/home/trust-strip';
+import { withNumerals } from '@/components/inline-text';
 import type { QuestionsContent } from '@/components/questions';
-import { COMPARISON_STEPS } from '@/content/before-after';
-import { DECK_HINT } from '@/content/card-deck';
 import { getClosingSection } from '@/content/closing-section';
-import { CALCULATOR_WORDS } from '@/content/delay-calculator';
-import { FIELD_SITUATIONS } from '@/content/field-situations';
-import { unitTabs } from '@/content/four-units';
-import { PROOF_FIGURES } from '@/content/proof-figures';
-import { TRANSACTION_TYPES } from '@/content/record-transactions';
 import { getScreenMocks } from '@/content/screen-mocks';
 import { TRUST_STRIP } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import type { HomePage } from '@/payload-types';
+import { inLocale, withQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type HomePageContent = {
   readonly meta: PageMeta;
@@ -43,151 +41,228 @@ export type HomePageContent = {
 };
 
 /**
- * The page's words still in code, until ticket 58: all of it but the closing
- * section and the four units' screens, which are the CMS entries this page
- * shares with the product page (ticket 57).
+ * The page's search title and description, which ticket 26 moves into the CMS,
+ * and the short name its breadcrumb structured data reads (ticket 32), which
+ * travels with them. Verbatim from `reference/site/index.html`.
  */
-type HomeWords = BeforeQuestions<Omit<HomePageContent, 'demoForm' | 'closing' | 'fourUnits'>> & {
-  readonly fourUnits: Omit<HomePageContent['fourUnits'], 'tabs'>;
-};
-
-/**
- * Verbatim from `reference/site/index.html`. Nothing here is placeholder text,
- * and nothing waits to be reworded.
- */
-const AR: HomeWords = {
-  meta: {
+const META = {
+  ar: {
     name: 'الرئيسية',
     title: 'ربائد · ثلاثة أطراف. سجل واحد.',
     description: 'منصة سعودية تجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
   },
-  hero: {
-    eyebrow: 'نظام تشغيل مشاريع الإنشاء · ربائد',
-    title: { lines: ['ثلاثة أطراف.', 'سجل واحد.'], accent: 'مسؤولية واضحة.' },
-    lead: 'ربائد تجمع المالك والاستشاري والمقاول على منصة واحدة: مراسلات معتمدة، اعتمادات وطلبات فحص، مستندات بأحدث إصدار، وتقارير يومية من الميدان — وكل خطوة موثّقة ومؤرخة باسم من قام بها.',
-    // The first jumps to the demo request form at the foot of this page
-    // (ticket 11). The second points at `#journey`, which no section on this
-    // page carries yet, so it goes nowhere — as the Reference site's own
-    // anchors do on its sub-pages.
-    primary: { label: 'احجز عرضاً حياً', href: '#demo' },
-    secondary: { label: 'استكشف المنصة ↓', href: '#journey' },
-    trust: 'عرض على مشروع حقيقي · 30 دقيقة · بالعربية',
-    // Only the numeral is `.mono`: DM Mono has no Arabic glyphs, so setting
-    // «يوماً» in it drops the word to a last-resort monospace face (spec:
-    // Design system). The Reference site wraps both.
-    guarantee: { period: [{ mono: '60' }, ' يوماً'], promise: 'ضمان استرجاع كامل المبلغ' },
-    parties: { owner: 'المالك', contractor: 'المقاول', consultant: 'الاستشاري' },
-    diagramDescription:
-      'المالك والاستشاري والمقاول على سجل واحد: كل معاملة تنتقل بين الأطراف الثلاثة موثّقة ومؤرخة باسم من قام بها.',
-    statuses: ['أُرسل · 07:12', 'روجع · 09:20', 'اعتُمد · 12:05', 'وصل السجل للأطراف الثلاثة'],
-    statusAtRest: 'موثّق ومؤرخ',
-  },
-  trustStrip: { shows: true, ...TRUST_STRIP.ar },
-  situations: {
-    shows: true,
-    eyebrow: 'مواقف من الميدان',
-    heading: 'تعرف هذه المواقف؟',
-    close: {
-      first: 'المشكلة ليست البريد الإلكتروني ولا الإكسل.',
-      second: 'المشكلة أن الإجراء تحتها',
-      accent: 'يدوي، ومشتّت.',
-    },
-    situations: FIELD_SITUATIONS,
-    costLabel: 'الثمن',
-    deck: {
-      label: 'مواقف من الميدان — اسحب البطاقة أو استخدم الأسهم',
-      previousLabel: 'الموقف السابق',
-      nextLabel: 'الموقف التالي',
-      hint: DECK_HINT,
-    },
-  },
-  fourUnits: {
-    shows: true,
-    eyebrow: 'المنصة',
-    heading: 'أربع وحدات. سجل واحد يجمعها.',
-    tabsLabel: 'وحدات ربائد',
-    more: { label: 'شاهد الوحدات كاملة بالتفصيل', href: localePath('ar', '/product') },
-  },
-  record: {
-    shows: true,
-    eyebrow: 'السجل الموثّق',
-    heading: ['لا نسأل "من اعتمد؟"', 'نفتح المعاملة.'],
-    questions: ['من طلب؟', 'من استلم؟', 'من اعتمد؟', 'ومتى؟'],
-    lead: 'ليست ميزة تُفعَّل — بل نتيجة كل خطوة. أي معاملة تمر في ربائد تحمل سجلها كاملاً: خطاب رسمي، اعتماد مادة، طلب تسليم أعمال، تحديث على الجدول الزمني، أو مستخلص مالي. وبعد سنة، أو بعد نهاية المشروع، السجل نفسه ما زال هناك.',
-    types: TRANSACTION_TYPES,
-    stamp: '✓ سجل كامل · 4 خطوات · 3 أطراف',
-  },
-  beforeAfter: {
-    shows: true,
-    eyebrow: 'قبل وبعد ربائد',
-    heading: 'نفس الاعتماد… بطريقتين.',
-    lead: [
-      'أربع لحظات في اعتماد مادة واحد. ',
-      { strong: 'اسحب المقبض' },
-      ' ليمرّ على الخطوات — كل خطوة تتحول أمامك من الطريقة المعتادة إلى ربائد.',
-    ],
-    usualTag: 'الطريقة المعتادة',
-    rabaedTag: 'مع ربائد',
-    handleLabel: 'اسحب للمقارنة بين الطريقتين',
-    verdicts: {
-      usual: 'النتيجة: نزاع بلا مرجع، وكل طرف معه نسخته.',
-      rabaed: 'النتيجة: لا سؤال "من اعتمد؟" — الإجابة داخل المستند.',
-      between: 'اسحب المقبض حتى النهاية لترى الخطوات الأربع في ربائد.',
-    },
-    steps: COMPARISON_STEPS,
-  },
-  calculator: {
-    shows: true,
-    eyebrow: 'حاسبة تكلفة التأخير',
-    heading: 'كم يكلفك أسبوع تأخير اعتماد واحد؟',
-    lead: 'تقدير محافظ يشمل تكلفة التمويل والتكاليف العامة للموقع فقط — قبل أي مطالبة من المقاول.',
-    sliderLabels: ['قيمة المشروع', 'أيام التأخير', 'مدة المشروع'],
-    resultLabel: 'التكلفة التقديرية للتأخير',
-    assumptions:
-      'الافتراضات: تكلفة تمويل 8% سنوياً · تكاليف عامة للموقع 10% من قيمة المشروع موزعة على مدته. لا تشمل مطالبات المقاول ولا الغرامات.',
-    // To the demo request form at the foot of this page.
-    callToAction: { label: 'احجز عرضاً لترى كيف نمنعه', href: '#demo' },
-    words: CALCULATOR_WORDS,
-  },
-  figures: {
-    shows: true,
-    eyebrow: 'الأثر',
-    heading: 'ماذا يتغيّر بعد التشغيل؟',
-    lead: 'الفرق بين إجراء يدوي مشتّت وإجراء واحد موثّق — على مشروع يعمل فيه المالك والاستشاري والمقاول على المنصة نفسها.',
-    figures: PROOF_FIGURES,
-    deck: {
-      label: 'أرقام الأثر — اسحب البطاقة أو استخدم الأسهم',
-      previousLabel: 'الرقم السابق',
-      nextLabel: 'الرقم التالي',
-      hint: DECK_HINT,
-    },
-  },
-  questions: {
-    shows: true,
-    eyebrow: 'الأسئلة الشائعة',
-    heading: 'قبل أن تسأل',
-    // The rest of the questions, beside the form on the start page.
-    more: {
-      label: 'كل الأسئلة',
-      href: `${localePath('ar', FAQ_PAGES.start.path)}#${FAQ_PAGES.start.sectionId}`,
-    },
-  },
-};
+} as const;
+
+/** A unit numbered by its place: «01». */
+const numbered = (index: number) => String(index + 1).padStart(2, '0');
 
 /**
- * The home page's content in `locale`, or a refusal (`inLocale`), with its
- * questions, its closing section and its screens as the CMS has them.
+ * A list the design holds at exactly four (spec: Content model). The CMS
+ * publishes it only with four; a draft being previewed may have fewer, and its
+ * missing places are drawn empty.
+ */
+function four<T>(items: readonly T[], empty: T): readonly [T, T, T, T] {
+  const [first = empty, second = empty, third = empty, fourth = empty] = items;
+  return [first, second, third, fourth];
+}
+
+const EMPTY_FACE: Face = { channel: '', words: '' };
+const EMPTY_STEP: TransactionStep = { action: '', by: '', time: '' };
+
+/**
+ * The home page's content in `locale`: its words and pictures from its entry
+ * in the CMS (ticket 58), its screens from the Screen mocks entry and its
+ * closing section from the entry it shares with the product page — or a
+ * refusal, where any of them is not published in `locale` — with its questions
+ * and its form's words as the CMS has them.
+ *
+ * Where each button and link leads stays here, in code: an Editor changes what
+ * a button says, never where it goes.
  */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const words = inLocale('home', { ar: AR }, locale);
-  const [screenOf, closing, demoForm] = await Promise.all([
+  const [entry, screenOf, closing, demoForm] = await Promise.all([
+    pageEntry('home-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST),
   ]);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
+  const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;
+
+  const deck = ({ label, previousLabel, nextLabel, hint }: HomePage['situations']['deck']) => ({
+    label: words(label),
+    previousLabel: words(previousLabel),
+    nextLabel: words(nextLabel),
+    hint: words(hint),
+  });
+  /** A drawing an Editor put in place of the hero's own, or `null` for today's. */
+  const drawing = (value: NonNullable<HomePage['hero']['pictures']>['owner']) => fetchedMedia(value)?.url ?? null;
+  const face = (side: HomePage['beforeAfter']['steps'][number]['usual']): Face => ({
+    channel: words(side.channel),
+    words: withEmphasis(words(side.words)),
+  });
+
+  const tabs = fourUnits.tabs.map(
+    (tab, index): UnitTab => ({
+      // A unit is numbered by its place among the units; what they produce
+      // carries a name instead, so reordering renumbers them.
+      tag: tab.final
+        ? { kind: 'output', name: words(fourUnits.outputLabel) }
+        : { kind: 'unit', number: numbered(fourUnits.tabs.slice(0, index).filter((each) => !each.final).length) },
+      title: words(tab.title),
+      screen: screenOf(tab.screen),
+    }),
+  );
+
   const page = await withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, {
-    ...words,
-    fourUnits: { ...words.fourUnits, tabs: unitTabs(screenOf) },
+    meta: inLocale('home', META, locale),
+    hero: {
+      eyebrow: words(hero.eyebrow),
+      title: { lines: hero.titleLines.map((each) => words(each.line)), accent: words(hero.titleAccent) },
+      lead: words(hero.lead),
+      // The first jumps to the demo request form at the foot of this page. The
+      // second points at `#journey`, which no section on this page carries, so
+      // it goes nowhere — as the Reference site's own anchors do on its
+      // sub-pages.
+      primary: { label: words(hero.primaryLabel), href: '#demo' },
+      secondary: { label: words(hero.secondaryLabel), href: '#journey' },
+      trust: words(hero.trust),
+      // Only the numerals are `.mono`: DM Mono has no Arabic glyphs, so setting
+      // «يوماً» in it drops the word to a last-resort monospace face (spec:
+      // Design system). The Reference site wraps both.
+      guarantee: { period: withNumerals(words(hero.guaranteePeriod)), promise: words(hero.guaranteePromise) },
+      parties: {
+        owner: words(hero.parties.owner),
+        contractor: words(hero.parties.contractor),
+        consultant: words(hero.parties.consultant),
+      },
+      diagramDescription: words(hero.diagramDescription),
+      statuses: four(
+        hero.statuses.map((each) => words(each.status)),
+        '',
+      ),
+      statusAtRest: words(hero.statusAtRest),
+      pictures: {
+        owner: drawing(hero.pictures?.owner),
+        contractor: drawing(hero.pictures?.contractor),
+        consultant: drawing(hero.pictures?.consultant),
+        document: drawing(hero.pictures?.document),
+      },
+    },
+    // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
+    trustStrip: { shows: entry.trustStrip?.shows !== false, ...inLocale('trust strip', TRUST_STRIP, locale) },
+    situations: {
+      shows: situations.shows !== false,
+      eyebrow: words(situations.eyebrow),
+      heading: words(situations.heading),
+      close: {
+        first: words(situations.close.first),
+        second: words(situations.close.second),
+        accent: words(situations.close.accent),
+      },
+      situations: situations.situations.map((situation) => ({ quote: words(situation.quote), cost: words(situation.cost) })),
+      costLabel: words(situations.costLabel),
+      deck: deck(situations.deck),
+    },
+    fourUnits: {
+      shows: fourUnits.shows !== false,
+      eyebrow: words(fourUnits.eyebrow),
+      heading: words(fourUnits.heading),
+      tabsLabel: words(fourUnits.tabsLabel),
+      tabs,
+      more: { label: words(fourUnits.moreLabel), href: localePath(locale, '/product') },
+    },
+    record: {
+      shows: record.shows !== false,
+      eyebrow: words(record.eyebrow),
+      heading: record.headingLines.map((each) => words(each.line)),
+      questions: record.questions.map((each) => words(each.question)),
+      lead: words(record.lead),
+      types: record.types.map((type) => ({
+        label: words(type.label),
+        title: words(type.title),
+        steps: four(
+          type.steps.map((step) => ({ action: words(step.action), by: words(step.by), time: step.time })),
+          EMPTY_STEP,
+        ),
+      })),
+      stamp: words(record.stamp),
+    },
+    beforeAfter: {
+      shows: beforeAfter.shows !== false,
+      eyebrow: words(beforeAfter.eyebrow),
+      heading: words(beforeAfter.heading),
+      lead: withEmphasis(words(beforeAfter.lead)),
+      usualTag: words(beforeAfter.usualTag),
+      rabaedTag: words(beforeAfter.rabaedTag),
+      handleLabel: words(beforeAfter.handleLabel),
+      verdicts: {
+        usual: words(beforeAfter.verdicts.usual),
+        rabaed: words(beforeAfter.verdicts.rabaed),
+        between: words(beforeAfter.verdicts.between),
+      },
+      steps: four(
+        beforeAfter.steps.map((step): ComparisonStep => ({ name: words(step.name), usual: face(step.usual), rabaed: face(step.rabaed) })),
+        { name: '', usual: EMPTY_FACE, rabaed: EMPTY_FACE },
+      ),
+    },
+    calculator: {
+      shows: calculator.shows !== false,
+      eyebrow: words(calculator.eyebrow),
+      heading: words(calculator.heading),
+      lead: words(calculator.lead),
+      sliderLabels: [
+        words(calculator.sliderLabels.projectValue),
+        words(calculator.sliderLabels.delayDays),
+        words(calculator.sliderLabels.durationMonths),
+      ],
+      resultLabel: words(calculator.resultLabel),
+      assumptions: words(calculator.assumptions),
+      // To the demo request form at the foot of this page.
+      callToAction: { label: words(calculator.callToActionLabel), href: '#demo' },
+      words: {
+        currency: words(calculator.currency),
+        days: {
+          one: words(calculator.days.one),
+          two: words(calculator.days.two),
+          few: words(calculator.days.few),
+          many: words(calculator.days.many),
+        },
+        months: { few: words(calculator.months.few), many: words(calculator.months.many) },
+        // Each amount after its name.
+        breakdown: `${words(calculator.breakdown.financing)} {financing} + ${words(calculator.breakdown.siteOverhead)} {siteOverhead}`,
+      },
+    },
+    figures: {
+      shows: figures.shows !== false,
+      eyebrow: words(figures.eyebrow),
+      heading: words(figures.heading),
+      lead: words(figures.lead),
+      figures: figures.figures.map((figure): ProofFigure => {
+        const frame = { topic: words(figure.topic), icon: figure.icon, claim: words(figure.claim), basis: words(figure.basis) };
+        return figure.blockType === 'comparison'
+          ? {
+              ...frame,
+              kind: 'comparison',
+              value: figure.figure,
+              before: { label: words(figure.before.label), height: figure.before.height },
+              after: { label: words(figure.after.label), height: figure.after.height },
+              source: figure.source?.trim() ?? '',
+            }
+          : { ...frame, kind: 'commitment', value: words(figure.value) };
+      }),
+      deck: deck(figures.deck),
+    },
+    questions: {
+      shows: questions.shows !== false,
+      eyebrow: words(questions.eyebrow),
+      heading: words(questions.heading),
+      // The rest of the questions, beside the form on the start page.
+      more: {
+        label: words(questions.moreLabel),
+        href: `${localePath(locale, FAQ_PAGES.start.path)}#${FAQ_PAGES.start.sectionId}`,
+      },
+    },
     closing: { shows: true, ...closing },
   });
   return { ...page, demoForm };

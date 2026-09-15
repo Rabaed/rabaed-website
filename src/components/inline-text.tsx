@@ -20,6 +20,15 @@ export type InlinePart =
 
 export type InlineText = string | readonly InlinePart[];
 
+/** Plain words with their numerals set in DM Mono: «60 يوماً» as «60», then « يوماً». */
+export function withNumerals(text: string): InlineText {
+  const parts = text
+    .split(/([0-9]+(?:[.,][0-9]+)*)/)
+    .map((piece, index): InlinePart => (index % 2 === 1 ? { mono: piece } : piece))
+    .filter((part) => part !== '');
+  return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : parts;
+}
+
 /** The text alone, as a visitor reads it: for an `alt`, a label, or structured data. */
 export function plainText(text: InlineText): string {
   if (typeof text === 'string') return text;

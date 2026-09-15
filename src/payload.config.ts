@@ -25,6 +25,7 @@ import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } f
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
+import { HomePage } from './cms/globals/home-page';
 import { ProductPage } from './cms/globals/product-page';
 import { ScreenMocks } from './cms/globals/screen-mocks';
 import { StartPage } from './cms/globals/start-page';
@@ -84,6 +85,7 @@ export default buildConfig({
     StartPage,
     ToolPage,
     ProductPage,
+    HomePage,
     ClosingSection,
     ScreenMocks,
   ],

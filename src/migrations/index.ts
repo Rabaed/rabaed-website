@@ -18,6 +18,9 @@ import * as migration_20260915_063743_product_page_closing_section_and_screen_mo
 import * as migration_20260915_063744_import_product_page_closing_section_and_screen_mocks from './20260915_063744_import_product_page_closing_section_and_screen_mocks';
 import * as migration_20260915_064014_tool_page from './20260915_064014_tool_page';
 import * as migration_20260915_064015_import_tool_page from './20260915_064015_import_tool_page';
+import * as migration_20260915_204815_product_and_tool_pages_snapshot from './20260915_204815_product_and_tool_pages_snapshot';
+import * as migration_20260915_204854_home_page from './20260915_204854_home_page';
+import * as migration_20260915_204855_import_home_page from './20260915_204855_import_home_page';
 
 export const migrations = [
   {
@@ -119,5 +122,20 @@ export const migrations = [
     up: migration_20260915_064015_import_tool_page.up,
     down: migration_20260915_064015_import_tool_page.down,
     name: '20260915_064015_import_tool_page',
+  },
+  {
+    up: migration_20260915_204815_product_and_tool_pages_snapshot.up,
+    down: migration_20260915_204815_product_and_tool_pages_snapshot.down,
+    name: '20260915_204815_product_and_tool_pages_snapshot',
+  },
+  {
+    up: migration_20260915_204854_home_page.up,
+    down: migration_20260915_204854_home_page.down,
+    name: '20260915_204854_home_page',
+  },
+  {
+    up: migration_20260915_204855_import_home_page.up,
+    down: migration_20260915_204855_import_home_page.down,
+    name: '20260915_204855_import_home_page',
   },
 ];

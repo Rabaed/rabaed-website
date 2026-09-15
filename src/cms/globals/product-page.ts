@@ -1,24 +1,9 @@
 import type { Field } from 'payload';
-import { SCREEN_MOCKS } from '../../screen-mocks/registry';
 import { listField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
+import { screenField } from './screen-mocks';
 
 const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 30);
-
-/** Which Screen mock a panel or a party shows; its picture and words are in the Screen mocks entry, once for every page. */
-const screenField: Field = {
-  name: 'screen',
-  type: 'select',
-  required: true,
-  options: SCREEN_MOCKS.map((mock) => ({ value: mock.id, label: mock.title })),
-  label: { ar: 'الشاشة', en: 'Screen' },
-  admin: {
-    description: {
-      ar: 'صورتها ووصفها في «شاشات المنصة».',
-      en: 'Its picture and description are under Screen mocks.',
-    },
-  },
-};
 
 /**
  * The product page's words, section by section, in the page's order (ticket

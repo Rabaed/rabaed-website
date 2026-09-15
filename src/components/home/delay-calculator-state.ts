@@ -33,19 +33,40 @@ export const STARTING_SETTINGS: DelayCostInputs = {
 };
 
 /**
+ * The words that follow a count, as Arabic counts: one, two, three to ten, and
+ * eleven and more each take a word of their own — «1 يوم», «2 يومان», «3 أيام»,
+ * «11 يوماً». The founders chose Arabic's rule over the Reference site's, which
+ * wrote «1 أيام» and «6 شهراً» (ticket 58). It holds for the sliders' ranges,
+ * which stop short of a hundred.
+ */
+export type CountWords = {
+  readonly one: string;
+  readonly two: string;
+  readonly few: string;
+  readonly many: string;
+};
+
+/**
  * The words the calculator writes around its numbers. Data rather than
  * functions, so the server can hand them to the browser.
  */
 export type CalculatorWords = {
   /** The currency, after an amount. */
   readonly currency: string;
-  /** The word after a number of days: `few` up to `fewUpTo` days, `many` beyond. */
-  readonly days: { readonly few: string; readonly fewUpTo: number; readonly many: string };
-  /** The word after a number of months, whatever the number. */
-  readonly months: string;
+  /** The word after a number of days. */
+  readonly days: CountWords;
+  /** The word after a number of months. A project's length starts at six, so never one or two. */
+  readonly months: Pick<CountWords, 'few' | 'many'>;
   /** The line under the cost that splits it in two, with `{financing}` and `{siteOverhead}` where the amounts go. */
   readonly breakdown: string;
 };
+
+/** The word after `count` of something, from its words for one, two, three to ten, and eleven on. */
+function wordAfter(count: number, words: CountWords | Pick<CountWords, 'few' | 'many'>): string {
+  if (count === 1 && 'one' in words) return words.one;
+  if (count === 2 && 'two' in words) return words.two;
+  return count <= 10 ? words.few : words.many;
+}
 
 /** A setting of the sliders as their three values, in the sliders' order. */
 export function settingsAsValues(settings: DelayCostInputs): [number, number, number] {
@@ -67,12 +88,11 @@ export type Figure = { readonly number: string; readonly word: string };
 export function calculatorDisplay(settings: DelayCostInputs, words: CalculatorWords) {
   const cost = delayCost(settings);
   const values = settingsAsValues(settings);
-  const days = settings.delayDays <= words.days.fewUpTo ? words.days.few : words.days.many;
   return {
     readings: [
       { number: formatRiyals(settings.projectValue), word: words.currency },
-      { number: String(settings.delayDays), word: days },
-      { number: String(settings.durationMonths), word: words.months },
+      { number: String(settings.delayDays), word: wordAfter(settings.delayDays, words.days) },
+      { number: String(settings.durationMonths), word: wordAfter(settings.durationMonths, words.months) },
     ] satisfies Figure[],
     cost: { number: formatRiyals(cost.total), word: words.currency } satisfies Figure,
     breakdown: fillIn(words.breakdown, {

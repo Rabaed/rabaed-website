@@ -17,7 +17,7 @@ import type { Locale } from '@/lib/locales';
  */
 type PageSlug = Extract<
   GlobalSlug,
-  'start-page' | 'tool-page' | 'product-page' | 'closing-section' | 'screen-mocks'
+  'start-page' | 'tool-page' | 'product-page' | 'home-page' | 'closing-section' | 'screen-mocks'
 >;
 
 /**

@@ -77,6 +77,12 @@ export const PRODUCT_EDITOR = {
   password: 'test-editor-password-57',
 } as const;
 
+/** The home page's text suite's own account (ticket 58), for the same reason as `BLOG_EDITOR`. */
+export const HOME_EDITOR = {
+  email: 'home-editor@rabaed.test',
+  password: 'test-editor-password-58',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -88,6 +94,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   PAGES_EDITOR,
   TOOL_PAGE_EDITOR,
   PRODUCT_EDITOR,
+  HOME_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
@@ -122,11 +129,13 @@ export async function uploadImage(
     .toBuffer();
   const response = await editor.post('/api/media', {
     multipart: {
-      file: { name: 'image.png', mimeType: 'image/png', buffer: image },
+      // A name of its own: suites running side by side upload at the same
+      // moment, and two files arriving under one name race for it.
+      file: { name: `image-${Date.now()}-${Math.random().toString(36).slice(2)}.png`, mimeType: 'image/png', buffer: image },
       _payload: JSON.stringify({ alt }),
     },
   });
-  expect(response.ok()).toBe(true);
+  expect(response.ok(), await response.text()).toBe(true);
   return (await response.json()).doc.id as number;
 }
 

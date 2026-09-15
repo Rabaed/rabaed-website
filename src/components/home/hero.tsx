@@ -29,6 +29,11 @@ export type HomeHeroContent = {
    * the arrival that follows it — so a still hero states the promise instead.
    */
   readonly statusAtRest: string;
+  /**
+   * A drawing an Editor put in place of a building's or the document's own,
+   * in its shape (ticket 58), or `null` for the drawing the page ships with.
+   */
+  readonly pictures: Readonly<Record<StationName | 'document', string | null>>;
 };
 
 /**
@@ -101,7 +106,7 @@ export function Hero({ content }: { content: HomeHeroContent }) {
                 <img
                   key={key}
                   className="bld"
-                  src={station.building.src}
+                  src={content.pictures[key as StationName] ?? station.building.src}
                   alt=""
                   aria-hidden="true"
                   width={station.building.intrinsic.width}
@@ -118,7 +123,7 @@ export function Hero({ content }: { content: HomeHeroContent }) {
               <img
                 className="spr"
                 id="h-doc"
-                src="/hero/hero-doc.webp"
+                src={content.pictures.document ?? '/hero/hero-doc.webp'}
                 alt=""
                 aria-hidden="true"
                 width={107}

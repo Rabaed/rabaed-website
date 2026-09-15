@@ -104,6 +104,7 @@ export interface Config {
     'start-page': StartPage;
     'tool-page': ToolPage;
     'product-page': ProductPage;
+    'home-page': HomePage;
     'closing-section': ClosingSection;
     'screen-mocks': ScreenMock;
   };
@@ -114,6 +115,7 @@ export interface Config {
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
     'product-page': ProductPageSelect<false> | ProductPageSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
     'closing-section': ClosingSectionSelect<false> | ClosingSectionSelect<true>;
     'screen-mocks': ScreenMocksSelect<false> | ScreenMocksSelect<true>;
   };
@@ -1992,6 +1994,656 @@ export interface ProductPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  hero: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A line at a time, then the line in colour under them.
+     */
+    titleLines: {
+      line: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    titleAccent: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the demo request form.
+     */
+    primaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The outlined button beside the first.
+     */
+    secondaryLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    trust: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * In bold, like «60 يوماً».
+     */
+    guaranteePeriod: {
+      ar: string;
+      en?: string | null;
+    };
+    guaranteePromise: {
+      ar: string;
+      en?: string | null;
+    };
+    parties: {
+      owner: {
+        ar: string;
+        en?: string | null;
+      };
+      consultant: {
+        ar: string;
+        en?: string | null;
+      };
+      contractor: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    /**
+     * Read out by screen readers in place of the drawing.
+     */
+    diagramDescription: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always four, in the order the document travels: at the Contractor, then the Consultant, then the Owner, then back to all three. Each shows as the document arrives.
+     */
+    statuses: {
+      status: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * For visitors whose device asks for less motion.
+     */
+    statusAtRest: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * With no picture chosen, today’s drawing shows.
+     */
+    pictures?: {
+      /**
+       * 369×303, or larger in the same proportions, on a transparent background. Remove it to bring back today’s drawing.
+       */
+      owner?: (number | null) | Media;
+      /**
+       * 400×394, or larger in the same proportions, on a transparent background. Remove it to bring back today’s drawing.
+       */
+      consultant?: (number | null) | Media;
+      /**
+       * 424×387, or larger in the same proportions, on a transparent background. Remove it to bring back today’s drawing.
+       */
+      contractor?: (number | null) | Media;
+      /**
+       * 107×133, or larger in the same proportions, on a transparent background. Remove it to bring back today’s drawing.
+       */
+      document?: (number | null) | Media;
+    };
+  };
+  trustStrip?: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+  };
+  situations: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    close: {
+      first: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Runs on into the words in colour after it.
+       */
+      second: {
+        ar: string;
+        en?: string | null;
+      };
+      accent: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    /**
+     * A card each, numbered by its order. Drag them to reorder. A card is a fixed size, so its words are held to what fits.
+     */
+    situations: {
+      quote: {
+        ar: string;
+        en?: string | null;
+      };
+      cost: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    costLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    deck: {
+      /**
+       * Read out by screen readers.
+       */
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Read out by screen readers.
+       */
+      previousLabel: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Read out by screen readers.
+       */
+      nextLabel: {
+        ar: string;
+        en?: string | null;
+      };
+      hint: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  fourUnits: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Read out by screen readers.
+     */
+    tabsLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Shows in place of the number on the marked-out tab, like «المخرَج».
+     */
+    outputLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Units are numbered by their order. Drag them to reorder.
+     */
+    tabs: {
+      /**
+       * A marked-out tab carrying the name above instead of a number, like the Record.
+       */
+      final?: boolean | null;
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Its picture and description are under Screen mocks.
+       */
+      screen:
+        | 'correspondence'
+        | 'kanban'
+        | 'daily-report'
+        | 'documents'
+        | 'stamped-sheet'
+        | 'overview'
+        | 'approvals-table'
+        | 'submittal';
+      id?: string | null;
+    }[];
+    /**
+     * Leads to the product page.
+     */
+    moreLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  record: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    headingLines: {
+      line: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * Set on one line, with dots between.
+     */
+    questions: {
+      question: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The card works through them in order as the visitor scrolls, showing the trail one transaction of each type leaves.
+     */
+    types: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      title: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Always four: raised, received, checked, and the decision, last. The seal counts them as four steps.
+       */
+      steps: {
+        action: {
+          ar: string;
+          en?: string | null;
+        };
+        by: {
+          ar: string;
+          en?: string | null;
+        };
+        time: string;
+        id?: string | null;
+      }[];
+      id?: string | null;
+    }[];
+    /**
+     * Shows once the visitor reaches the last type.
+     */
+    stamp: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  beforeAfter: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    usualTag: {
+      ar: string;
+      en?: string | null;
+    };
+    rabaedTag: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Read out by screen readers.
+     */
+    handleLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    verdicts: {
+      usual: {
+        ar: string;
+        en?: string | null;
+      };
+      rabaed: {
+        ar: string;
+        en?: string | null;
+      };
+      between: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    /**
+     * Always four: the comparison is built on four columns. A card is a fixed height, so its words are held to what fits.
+     */
+    steps: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      usual: {
+        channel: {
+          ar: string;
+          en?: string | null;
+        };
+        words: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      rabaed: {
+        channel: {
+          ar: string;
+          en?: string | null;
+        };
+        words: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      id?: string | null;
+    }[];
+  };
+  calculator: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    sliderLabels: {
+      projectValue: {
+        ar: string;
+        en?: string | null;
+      };
+      delayDays: {
+        ar: string;
+        en?: string | null;
+      };
+      durationMonths: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    resultLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Each amount is written after its name.
+     */
+    breakdown: {
+      financing: {
+        ar: string;
+        en?: string | null;
+      };
+      siteOverhead: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    assumptions: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the demo request form.
+     */
+    callToActionLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    currency: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * As Arabic counts: after 1, after 2, from 3 to 10, and from 11 on.
+     */
+    days: {
+      one: {
+        ar: string;
+        en?: string | null;
+      };
+      two: {
+        ar: string;
+        en?: string | null;
+      };
+      few: {
+        ar: string;
+        en?: string | null;
+      };
+      many: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    /**
+     * A project’s length starts at 6 months.
+     */
+    months: {
+      few: {
+        ar: string;
+        en?: string | null;
+      };
+      many: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  figures: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A before-and-after figure stays off the live site until its source is written. A card is a fixed size, so its words are held to what fits. Drag them to reorder.
+     */
+    figures: (
+      | {
+          topic: {
+            ar: string;
+            en?: string | null;
+          };
+          icon: 'approval' | 'retrieval' | 'time' | 'governance' | 'activation' | 'onboarding';
+          claim: {
+            ar: string;
+            en?: string | null;
+          };
+          figure: string;
+          before: {
+            label: {
+              ar: string;
+              en?: string | null;
+            };
+            /**
+             * From 1 to 70.
+             */
+            height: number;
+          };
+          after: {
+            label: {
+              ar: string;
+              en?: string | null;
+            };
+            /**
+             * From 1 to 70.
+             */
+            height: number;
+          };
+          basis: {
+            ar: string;
+            en?: string | null;
+          };
+          /**
+           * Which project, measured how, by whom, over what period. Visitors never see it, and the card stays off the live site until it is written.
+           */
+          source?: string | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'comparison';
+        }
+      | {
+          topic: {
+            ar: string;
+            en?: string | null;
+          };
+          icon: 'approval' | 'retrieval' | 'time' | 'governance' | 'activation' | 'onboarding';
+          claim: {
+            ar: string;
+            en?: string | null;
+          };
+          /**
+           * Like «أقل من يوم». Always shows: a promise, not a figure needing a source.
+           */
+          value: {
+            ar: string;
+            en?: string | null;
+          };
+          basis: {
+            ar: string;
+            en?: string | null;
+          };
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'commitment';
+        }
+    )[];
+    deck: {
+      /**
+       * Read out by screen readers.
+       */
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Read out by screen readers.
+       */
+      previousLabel: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * Read out by screen readers.
+       */
+      nextLabel: {
+        ar: string;
+        en?: string | null;
+      };
+      hint: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+  };
+  questions: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the rest of the questions, on the start page.
+     */
+    moreLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "closing-section".
  */
 export interface ClosingSection {
@@ -3363,6 +4015,749 @@ export interface ProductPageSelect<T extends boolean = true> {
                     ar?: T;
                     en?: T;
                   };
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  languages?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        titleLines?:
+          | T
+          | {
+              line?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        titleAccent?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        primaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        secondaryLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        trust?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        guaranteePeriod?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        guaranteePromise?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        parties?:
+          | T
+          | {
+              owner?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              consultant?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              contractor?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        diagramDescription?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        statuses?:
+          | T
+          | {
+              status?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        statusAtRest?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        pictures?:
+          | T
+          | {
+              owner?: T;
+              consultant?: T;
+              contractor?: T;
+              document?: T;
+            };
+      };
+  trustStrip?:
+    | T
+    | {
+        shows?: T;
+      };
+  situations?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        close?:
+          | T
+          | {
+              first?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              second?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              accent?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        situations?:
+          | T
+          | {
+              quote?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              cost?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        costLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        deck?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              previousLabel?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              nextLabel?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              hint?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  fourUnits?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        tabsLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        outputLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        tabs?:
+          | T
+          | {
+              final?: T;
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              screen?: T;
+              id?: T;
+            };
+        moreLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  record?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        headingLines?:
+          | T
+          | {
+              line?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        questions?:
+          | T
+          | {
+              question?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        types?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              title?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              steps?:
+                | T
+                | {
+                    action?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    by?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    time?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        stamp?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  beforeAfter?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        usualTag?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        rabaedTag?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        handleLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        verdicts?:
+          | T
+          | {
+              usual?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              rabaed?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              between?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        steps?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              usual?:
+                | T
+                | {
+                    channel?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    words?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              rabaed?:
+                | T
+                | {
+                    channel?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    words?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              id?: T;
+            };
+      };
+  calculator?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sliderLabels?:
+          | T
+          | {
+              projectValue?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              delayDays?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              durationMonths?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        resultLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        breakdown?:
+          | T
+          | {
+              financing?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              siteOverhead?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        assumptions?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        callToActionLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        currency?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        days?:
+          | T
+          | {
+              one?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              two?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              few?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              many?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        months?:
+          | T
+          | {
+              few?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              many?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  figures?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        figures?:
+          | T
+          | {
+              comparison?:
+                | T
+                | {
+                    topic?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    icon?: T;
+                    claim?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    figure?: T;
+                    before?:
+                      | T
+                      | {
+                          label?:
+                            | T
+                            | {
+                                ar?: T;
+                                en?: T;
+                              };
+                          height?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          label?:
+                            | T
+                            | {
+                                ar?: T;
+                                en?: T;
+                              };
+                          height?: T;
+                        };
+                    basis?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    source?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              commitment?:
+                | T
+                | {
+                    topic?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    icon?: T;
+                    claim?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    value?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    basis?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        deck?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              previousLabel?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              nextLabel?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              hint?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+      };
+  questions?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        moreLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
             };
       };
   _status?: T;

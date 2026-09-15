@@ -28,6 +28,7 @@ import {
   type UploadFieldSingleValidation,
 } from 'payload';
 import { text, textarea } from 'payload/shared';
+import { emphasisProblem } from './emphasis';
 import { ARABIC, latinNameProblem } from './latin-names';
 
 export type Words = { readonly ar: string; readonly en: string };
@@ -62,18 +63,19 @@ type ValidateOptions = Parameters<TextFieldSingleValidation>[1];
 
 /**
  * Payload's own check for the field — required, and its length above all —
- * then `needed`, which says when an empty word is not allowed, and, for words
- * that may name a Latin name, whether its marks are whole (`latin-names.ts`).
+ * then `needed`, which says when an empty word is not allowed, and `marks`,
+ * which says whether the marks written into the words are whole: a Latin name's
+ * (`latin-names.ts`), bold's (`emphasis.ts`).
  */
 function wordsValidation<Validation extends WordsValidation>(
   base: Validation,
   needed: (options: ValidateOptions) => Words | null,
-  latinNames: boolean,
+  marks: (text: string) => Words | null,
 ): Validation {
   const validate = async (value: null | string | undefined, options: ValidateOptions) => {
     const checked = await (base as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
     if (checked !== true) return checked;
-    const message = isEmpty(value) ? needed(options) : latinNames ? latinNameProblem(value as string) : null;
+    const message = isEmpty(value) ? needed(options) : marks(value as string);
     return message ? inAdminLanguage(options.req, message) : true;
   };
   return validate as unknown as Validation;
@@ -98,7 +100,8 @@ const englishWhereArabic = (options: ValidateOptions) =>
  *
  * `optional` words are for a place drawn without them when empty — a file in
  * the tool page's folder tree with no description beside it. `latinNames`
- * words may mark a Latin name between backticks (`latin-names.ts`).
+ * words may mark a Latin name between backticks (`latin-names.ts`), and
+ * `emphasis` words a phrase in bold between asterisks (`emphasis.ts`).
  *
  * Payload checks all of this only when a page is published: a draft may be
  * unfinished.
@@ -112,9 +115,11 @@ export function wordsField(
     readonly description?: Words;
     readonly optional?: boolean;
     readonly latinNames?: boolean;
+    readonly emphasis?: boolean;
   } = {},
 ): Field {
-  const { multiline = false, description, optional = false, latinNames = false } = options;
+  const { multiline = false, description, optional = false, latinNames = false, emphasis = false } = options;
+  const marks = (words: string) => (latinNames ? latinNameProblem(words) : null) ?? (emphasis ? emphasisProblem(words) : null);
   const box = (language: keyof Words, needed: (options: ValidateOptions) => Words | null): Field => {
     const rtl = language === 'ar';
     const common = {
@@ -124,8 +129,8 @@ export function wordsField(
       label: rtl ? { ar: 'بالعربية', en: 'Arabic' } : { ar: 'بالإنجليزية', en: 'English' },
     };
     return multiline
-      ? { ...common, type: 'textarea', admin: { rows: 3, rtl }, validate: wordsValidation<TextareaFieldValidation>(textarea, needed, latinNames) }
-      : { ...common, type: 'text', admin: { rtl }, validate: wordsValidation<TextFieldSingleValidation>(text, needed, latinNames) };
+      ? { ...common, type: 'textarea', admin: { rows: 3, rtl }, validate: wordsValidation<TextareaFieldValidation>(textarea, needed, marks) }
+      : { ...common, type: 'text', admin: { rtl }, validate: wordsValidation<TextFieldSingleValidation>(text, needed, marks) };
   };
 
   return {
