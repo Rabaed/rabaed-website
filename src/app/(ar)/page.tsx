@@ -11,6 +11,7 @@ import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { Questions } from '@/components/questions';
 import { RevealOnScroll } from '@/components/reveal-on-scroll';
+import { faqData, softwareData, StructuredData, websiteData } from '@/components/structured-data';
 import { getHomePage } from '@/content/pages/home';
 import { pageMetadata } from '@/lib/metadata';
 
@@ -47,6 +48,9 @@ export default async function HomePage() {
       {/* The page's `.reveal` entrances, attached once for the page. Here
           rather than in `PageShell`, so pages without any do not load it. */}
       <RevealOnScroll />
+      <StructuredData data={websiteData()} />
+      <StructuredData data={softwareData()} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

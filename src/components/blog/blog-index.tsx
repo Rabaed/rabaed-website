@@ -6,6 +6,7 @@ import { fetchedMedia } from '@/cms/fetched-media';
 import { BLOG_COPY } from '@/content/blog';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { localePath, type Locale } from '@/lib/locales';
+import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import { pageMetadata } from '@/lib/metadata';
 import type { Post } from '@/payload-types';
 
@@ -90,6 +91,12 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
           )}
         </div>
       </section>
+      <StructuredData
+        data={breadcrumbData(locale, [
+          { name: copy.eyebrow, path: blogIndexPath() },
+          ...(page === 1 ? [] : [{ name: `${copy.page} ${page}`, path: blogIndexPath(page) }]),
+        ])}
+      />
     </EditorialFrame>
   );
 }

@@ -14,6 +14,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { CASE_STUDIES_EDITOR, logInByApi, richText, uploadImage } from './cms';
 import { ROUTES } from './routes';
+import { nodesOf, structuredData, trail } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
 
@@ -272,6 +273,19 @@ test('a case study page tells the whole story, whole in the first response', asy
   await expect(visitor).toHaveTitle(new RegExp(fields.title));
   await expect(visitor.locator('meta[name="description"]')).toHaveAttribute('content', fields.summary);
   await context.close();
+
+  // Its place in the site, and the index's, in breadcrumb data (ticket 32).
+  const breadcrumbsOn = async (path: string) =>
+    trail(nodesOf(structuredData((await visit(request, path)).html), 'BreadcrumbList')[0]);
+  expect(await breadcrumbsOn(`/case-studies/${fields.slug}`)).toEqual([
+    ['الرئيسية', baseURL],
+    ['قصص العملاء', `${baseURL}/case-studies`],
+    [fields.title, `${baseURL}/case-studies/${fields.slug}`],
+  ]);
+  expect(await breadcrumbsOn('/case-studies')).toEqual([
+    ['الرئيسية', baseURL],
+    ['قصص العملاء', `${baseURL}/case-studies`],
+  ]);
 
   // Neither page is in `routes.ts` — the test database starts with no case
   // study — so the checks every page gets there are made here.

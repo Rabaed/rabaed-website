@@ -37,6 +37,7 @@ export type ProductPageContent = {
  */
 const AR: Omit<ProductPageContent, 'demoForm'> = {
   meta: {
+    name: 'المنتج',
     title: 'ربائد · المنتج — من الطلب إلى الاعتماد',
     description: 'كيف تمر معاملة واحدة من الطلب إلى الاعتماد، وماذا يرى كل طرف حين يفتح المنصة.',
   },

@@ -8,6 +8,7 @@ import { Offer } from '@/components/referral/offer';
 import { Signup } from '@/components/referral/signup';
 import { TermsSummary } from '@/components/referral/terms-summary';
 import { WhatIsReferred } from '@/components/referral/what-is-referred';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { getReferralPage } from '@/content/pages/referral';
 import { pageMetadata } from '@/lib/metadata';
 
@@ -49,6 +50,8 @@ export default async function ReferralPage() {
       {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
       {content.questions.shows && <Questions content={content.questions} />}
       <Signup content={content.signup} />
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/referral' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }
