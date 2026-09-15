@@ -24,4 +24,4 @@
 - No ratings, reviews or offers anywhere; the test scans every page for them.
 - `tests/e2e/structured-data.spec.ts` and `structured-data.ts` check it from each page's first response: parses, has the schema.org context and a type, carries what each type requires, and the FAQ data equals the visible questions and answers word for word. `blog.spec.ts` checks an article's.
 
-**Left for later.** Case study pages carry the organisation only: the ticket names article data for blog posts. Breadcrumb names are written at each page (`'المنتج'`, `'ابدأ'` …) rather than read from the navigation, which ticket 21 moves into the CMS.
+**Left for later.** Case study pages carry the organisation only: the ticket names article data for blog posts. Breadcrumb names are written at each page (`'المنتج'`, `'ابدأ'` …) rather than read from the navigation; when ticket 59 moves the navigation's words into the CMS, the trails should read their names from there, or an Editor renaming a page in the menu leaves its breadcrumb behind.
