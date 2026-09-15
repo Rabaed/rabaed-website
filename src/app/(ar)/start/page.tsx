@@ -17,10 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * The Arabic start page, in the Reference site's order: the page hero, the
- * Trust strip, the three steps to going live, and the questions with the demo
+ * Trust strip, the steps to going live, and the questions with the demo
  * request form beside them and the free tool teaser under both.
  *
- * Its words come from `src/content/pages/start.ts`, its questions from the CMS.
+ * Its words are its entry in the CMS (ticket 53) and its questions the FAQs,
+ * both read through `src/content/pages/start.ts`.
  * The form is the one form the home and product pages carry too, with its words
  * from its settings in the CMS (ticket 27).
  *

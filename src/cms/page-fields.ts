@@ -18,10 +18,15 @@
  *
  * Imported by the CMS configuration, so it imports relatively.
  */
-import type { Field, Tab, TextareaFieldValidation, TextFieldSingleValidation } from 'payload';
+import type { Field, PayloadRequest, Tab, TextareaFieldValidation, TextFieldSingleValidation } from 'payload';
 import { text, textarea } from 'payload/shared';
 
 export type Words = { readonly ar: string; readonly en: string };
+
+/** A message in the language the Editor has the admin in. */
+export function inAdminLanguage(req: PayloadRequest | undefined, message: Words): string {
+  return req?.i18n?.language === 'en' ? message.en : message.ar;
+}
 
 function isEmpty(value: unknown): boolean {
   return typeof value !== 'string' || value.trim() === '';
@@ -33,19 +38,40 @@ function publishedInEnglish(data: unknown): boolean {
   return Array.isArray(languages) && languages.includes('en');
 }
 
-const ENGLISH_NEEDED = 'الصفحة منشورة بالإنجليزية، فهذا النص مطلوب بالإنجليزية. اكتبه، أو احذف الإنجليزية من «منشورة باللغات».';
-
-const englishText: TextFieldSingleValidation = async (value, options) => {
-  const base = await text(value, options);
-  if (base !== true) return base;
-  return publishedInEnglish(options.data) && isEmpty(value) ? ENGLISH_NEEDED : true;
+const ARABIC_NEEDED: Words = {
+  ar: 'اكتب هذا النص بالعربية: لا تُنشر صفحة بنص فارغ.',
+  en: 'Write this in Arabic: a page is not published with an empty text.',
 };
 
-const englishTextarea: TextareaFieldValidation = async (value, options) => {
-  const base = await textarea(value, options);
-  if (base !== true) return base;
-  return publishedInEnglish(options.data) && isEmpty(value) ? ENGLISH_NEEDED : true;
+const ENGLISH_NEEDED: Words = {
+  ar: 'الصفحة منشورة بالإنجليزية، فهذا النص مطلوب بالإنجليزية. اكتبه، أو احذف الإنجليزية من «منشورة باللغات».',
+  en: 'The page is published in English, so this needs its English. Write it, or remove English from Published in.',
 };
+
+type WordsValidation = TextFieldSingleValidation | TextareaFieldValidation;
+type ValidateOptions = Parameters<TextFieldSingleValidation>[1];
+
+/**
+ * Payload's own check for the field — required, and its length above all —
+ * then `needed`, which says when an empty word is not allowed.
+ */
+function wordsValidation<Validation extends WordsValidation>(
+  base: Validation,
+  needed: (options: ValidateOptions) => Words | null,
+): Validation {
+  const validate = async (value: null | string | undefined, options: ValidateOptions) => {
+    const checked = await (base as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
+    if (checked !== true) return checked;
+    const message = isEmpty(value) ? needed(options) : null;
+    return message ? inAdminLanguage(options.req, message) : true;
+  };
+  return validate as unknown as Validation;
+}
+
+// Payload's `required` lets a word of spaces through; the Arabic may never be
+// empty, and the English only while the page is not published in English.
+const arabicRequired = () => ARABIC_NEEDED;
+const englishRequired = (options: ValidateOptions) => (publishedInEnglish(options.data) ? ENGLISH_NEEDED : null);
 
 /**
  * Words on the page, in Arabic and in English. The Arabic is required, because
@@ -65,12 +91,14 @@ export function wordsField(
   options: { readonly multiline?: boolean; readonly description?: Words } = {},
 ): Field {
   const { multiline = false, description } = options;
+  const arabicLabel = { ar: 'بالعربية', en: 'Arabic' };
+  const englishLabel = { ar: 'بالإنجليزية', en: 'English' };
   const arabic: Field = multiline
-    ? { name: 'ar', type: 'textarea', required: true, maxLength, label: { ar: 'بالعربية', en: 'Arabic' }, admin: { rows: 3, rtl: true } }
-    : { name: 'ar', type: 'text', required: true, maxLength, label: { ar: 'بالعربية', en: 'Arabic' }, admin: { rtl: true } };
+    ? { name: 'ar', type: 'textarea', required: true, maxLength, label: arabicLabel, admin: { rows: 3, rtl: true }, validate: wordsValidation<TextareaFieldValidation>(textarea, arabicRequired) }
+    : { name: 'ar', type: 'text', required: true, maxLength, label: arabicLabel, admin: { rtl: true }, validate: wordsValidation<TextFieldSingleValidation>(text, arabicRequired) };
   const english: Field = multiline
-    ? { name: 'en', type: 'textarea', maxLength, label: { ar: 'بالإنجليزية', en: 'English' }, admin: { rows: 3, rtl: false }, validate: englishTextarea }
-    : { name: 'en', type: 'text', maxLength, label: { ar: 'بالإنجليزية', en: 'English' }, admin: { rtl: false }, validate: englishText };
+    ? { name: 'en', type: 'textarea', maxLength, label: englishLabel, admin: { rows: 3, rtl: false }, validate: wordsValidation<TextareaFieldValidation>(textarea, englishRequired) }
+    : { name: 'en', type: 'text', maxLength, label: englishLabel, admin: { rtl: false }, validate: wordsValidation<TextFieldSingleValidation>(text, englishRequired) };
 
   return {
     name,
@@ -83,9 +111,10 @@ export function wordsField(
 
 /**
  * A list on the page: one list for both languages, each item holding its words
- * in each (spec: Content model). Its rows are held between `min` and `max`; a
- * list the design is built around an exact count has `min` equal to `max`, and
- * cannot be added to or taken from.
+ * in each (spec: Content model). A page is published only with between `min`
+ * and `max` rows. A list the design is built around an exact count sets `min`
+ * equal to `max`: the admin then offers no Add, and refuses to publish any
+ * other count.
  */
 export function listField(options: {
   readonly name: string;

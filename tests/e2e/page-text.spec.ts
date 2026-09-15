@@ -131,6 +131,12 @@ test('a reworded heading, a fourth step and a hidden section are previewed, and 
     expect(boxes[2].y).toBeGreaterThan(boxes[0].y);
     expect(boxes[0].width).toBeCloseTo(boxes[2].width, 0);
 
+    // On a phone they stand one under another, as three do today.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const narrow = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
+    expect(new Set(narrow.map((box) => Math.round(box.x))).size).toBe(1);
+    for (let index = 1; index < narrow.length; index += 1) expect(narrow[index].y).toBeGreaterThan(narrow[index - 1].y);
+
     const html = await visitorHtml(request);
     expect(html).not.toContain(title);
     expect(html).not.toContain(fourth.title.ar);
@@ -143,7 +149,7 @@ test('a reworded heading, a fourth step and a hidden section are previewed, and 
 test('a section links land on has no switch to hide it; a section that can hide has one', async ({ page }) => {
   await logInAs(page, PAGES_EDITOR);
   await page.goto(`${ADMIN_PATH}/globals/start-page`);
-  const tab = (name: string) => page.locator('.tabs-field__tab-button', { hasText: name });
+  const tab = (name: string) => page.getByRole('button', { name, exact: true });
 
   await tab('Steps').click();
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
@@ -167,6 +173,7 @@ test('words too long for their place, a list too long or empty, and an English p
     'published in English with no English words': { ...entry, languages: ['ar', 'en'] },
     'no Arabic': { ...entry, languages: ['en'] },
     'an empty Arabic heading': { ...entry, hero: { ...entry.hero, title: arabic('') } },
+    'an Arabic heading of spaces': { ...entry, hero: { ...entry.hero, title: arabic('   ') } },
   };
   for (const [what, data] of Object.entries(refused)) {
     const response = await save(page.request, data, 'published');
@@ -175,6 +182,38 @@ test('words too long for their place, a list too long or empty, and an English p
 
   // Nothing refused was kept.
   expect(fields(await published(page.request))).toEqual(entry);
+});
+
+/** Every word of an entry given English of its own. */
+function withEnglish<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(withEnglish) as T;
+  if (value && typeof value === 'object') {
+    if ('ar' in value) return { ...value, en: 'English' };
+    return Object.fromEntries(Object.entries(value).map(([key, each]) => [key, withEnglish(each)])) as T;
+  }
+  return value;
+}
+
+test('a page with every word written in English is published in English, and its Arabic page is unchanged', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, PAGES_EDITOR);
+  const entry = await published(page.request);
+
+  try {
+    const response = await save(page.request, { ...withEnglish(fields(entry)), languages: ['ar', 'en'] }, 'published');
+    expect(response.ok(), await response.text()).toBe(true);
+    const now = await published(page.request);
+    expect(now.languages).toEqual(['ar', 'en']);
+    expect(now.hero.title).toEqual({ ar: entry.hero.title.ar, en: 'English' });
+
+    await expect.poll(async () => visitorHtml(request)).toContain(entry.hero.title.ar);
+    expect(await visitorHtml(request)).not.toContain('>English<');
+  } finally {
+    const restored = await save(page.request, fields(entry), 'published');
+    expect(restored.ok(), await restored.text()).toBe(true);
+  }
 });
 
 test('a change published in the admin reaches visitors', async ({ page, request }) => {
@@ -186,11 +225,10 @@ test('a change published in the admin reaches visitors', async ({ page, request 
   try {
     await page.goto(`${ADMIN_PATH}/globals/start-page`);
     // The admin reopens the tab an editor last had open, so the hero's is chosen.
-    await page.locator('.tabs-field__tab-button', { hasText: 'Hero' }).click();
-    const paragraph = page.locator('.group-field', {
-      has: page.getByRole('heading', { name: 'Paragraph under the heading', exact: true }),
-    });
-    await paragraph.getByRole('textbox', { name: /^Arabic/ }).fill(lead);
+    await page.getByRole('button', { name: 'Hero', exact: true }).click();
+    // The Arabic box is the first one after the paragraph's heading.
+    const heading = page.getByRole('heading', { name: 'Paragraph under the heading', exact: true });
+    await heading.locator('xpath=following::textarea[1]').fill(lead);
     await page.getByRole('button', { name: 'Publish changes' }).click();
     await expect(page.getByText(/successfully/).first()).toBeVisible();
 

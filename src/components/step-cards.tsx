@@ -19,29 +19,28 @@ export type StepCard = {
 const COLUMN_CLASS = { 1: 'one', 2: 'two', 3: 'three', 4: 'four' } as const;
 
 /**
- * How many columns `count` cards take at desktop widths, at most `most`: all
+ * How many columns `count` cards take at desktop widths, at most `maxColumns`: all
  * in one row while they fit, and otherwise as few rows as possible, filled as
  * evenly as they go — four in two rows of two rather than three and one alone.
  * An Editor adds and removes steps (spec: Design system).
  */
-function columnsFor(count: number, most: 3 | 4): 1 | 2 | 3 | 4 {
-  if (count <= most) return Math.max(count, 1) as 1 | 2 | 3 | 4;
-  return Math.ceil(count / Math.ceil(count / most)) as 1 | 2 | 3 | 4;
+function columnsFor(count: number, maxColumns: 3 | 4): 1 | 2 | 3 | 4 {
+  if (count <= maxColumns) return Math.max(count, 1) as 1 | 2 | 3 | 4;
+  return Math.ceil(count / Math.ceil(count / maxColumns)) as 1 | 2 | 3 | 4;
 }
 
 export function StepCards({
   steps,
-  columns = 'three',
+  maxColumns = 3,
 }: {
   steps: readonly StepCard[];
   /** At most three across, or four — at desktop widths only (`programmes.css`). */
-  columns?: 'three' | 'four';
+  maxColumns?: 3 | 4;
 }) {
-  const most = columns === 'four' ? 4 : 3;
-  const across = columnsFor(steps.length, most);
+  const across = columnsFor(steps.length, maxColumns);
   // Three is `.start` itself, so the start and tool pages' three steps keep
   // the markup their baselines were drawn from; four is the referral page's.
-  const layout = across === 3 && most === 3 ? 'start' : `start ${COLUMN_CLASS[across]}`;
+  const layout = across === 3 && maxColumns === 3 ? 'start' : `start ${COLUMN_CLASS[across]}`;
 
   return (
     <div className={layout}>

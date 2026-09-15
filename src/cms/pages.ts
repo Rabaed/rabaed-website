@@ -8,15 +8,14 @@ import config from '@payload-config';
 import { draftMode } from 'next/headers';
 import { getPayload, type GlobalSlug } from 'payload';
 import { cache } from 'react';
-import type { Words } from '@/cms/page-fields';
 import { ContentNotInLocale } from '@/content/pages/page-content';
 import type { Locale } from '@/lib/locales';
 
-/** The pages whose words are in the CMS so far. */
-export type PageSlug = Extract<GlobalSlug, 'start-page'>;
+/** The pages whose words are in the CMS so far; tickets 54–59 add theirs. */
+type PageSlug = Extract<GlobalSlug, 'start-page'>;
 
 /** A word as the CMS stores it: its Arabic and its English, either possibly empty. */
-export type StoredWords = { readonly ar?: string | null; readonly en?: string | null } | null | undefined;
+type StoredWords = { readonly ar?: string | null; readonly en?: string | null } | null | undefined;
 
 /**
  * Once per request, per page and language, though the page and its metadata
@@ -27,7 +26,7 @@ export type StoredWords = { readonly ar?: string | null; readonly en?: string | 
  * published or not, and a page read from the entry would then show it the next
  * time it is rebuilt (`src/cms/legal-documents.ts` found the same).
  */
-export const pageEntry = cache(async <Slug extends PageSlug>(slug: Slug, locale: Locale) => {
+export const pageEntry = cache(async (slug: PageSlug, locale: Locale) => {
   const { isEnabled: previewing } = await draftMode();
   const payload = await getPayload({ config });
 
@@ -50,8 +49,7 @@ export const pageEntry = cache(async <Slug extends PageSlug>(slug: Slug, locale:
 
   // Never another language's words in its place (spec: Routing and
   // localisation): a page is shown only in the languages it is published in.
-  const languages = (entry as { languages?: readonly string[] | null }).languages ?? [];
-  if (!languages.includes(locale)) throw new ContentNotInLocale(slug, locale);
+  if (!(entry.languages ?? []).includes(locale)) throw new ContentNotInLocale(slug, locale);
   return entry;
 });
 
@@ -64,5 +62,3 @@ export const pageEntry = cache(async <Slug extends PageSlug>(slug: Slug, locale:
 export function wordsIn(locale: Locale, words: StoredWords): string {
   return words?.[locale] ?? '';
 }
-
-export type { Words };

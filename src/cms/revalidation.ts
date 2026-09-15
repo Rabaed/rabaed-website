@@ -1,5 +1,5 @@
 import { revalidatePath } from 'next/cache';
-import type { PayloadRequest } from 'payload';
+import type { GlobalAfterChangeHook, PayloadRequest } from 'payload';
 
 /**
  * Set on `context` by anything that writes CMS content outside a request to
@@ -23,3 +23,13 @@ export function refreshSite(req: PayloadRequest): void {
   revalidatePath('/', 'layout');
   revalidatePath('/sitemap.xml');
 }
+
+/**
+ * For a global whose words show on pages — the site settings, a form's
+ * settings, a page's entry: publishing it rebuilds the site; a saved draft
+ * changes nothing a visitor can see, so it leaves the pages alone.
+ */
+export const refreshSiteWhenPublished: GlobalAfterChangeHook = ({ doc, req }) => {
+  if (doc._status === 'published') refreshSite(req);
+  return doc;
+};

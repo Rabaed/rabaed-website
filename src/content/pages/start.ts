@@ -46,7 +46,7 @@ const META = {
  */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
   const [entry, demoForm] = await Promise.all([pageEntry('start-page', locale), formPageWording(DEMO_REQUEST)]);
-  const words = wordsIn.bind(null, locale);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
     meta: inLocale('start', META, locale),

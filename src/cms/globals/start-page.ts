@@ -42,7 +42,7 @@ export const StartPage = pageGlobal({
     }),
     sectionTab({
       name: 'trustStrip',
-      label: { ar: 'شريط الشعارات', en: 'Trust strip' },
+      label: { ar: 'شريط الثقة', en: 'Trust strip' },
       hideable: true,
       description: {
         ar: 'شعارات الجهات التي تعمل على ربائد. هنا يُختار ظهوره في هذه الصفحة فقط.',

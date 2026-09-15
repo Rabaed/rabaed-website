@@ -19,7 +19,7 @@ export function HowItWorks({ content }: { content: ReferralHowItWorksContent }) 
           <div className="eyebrow">{content.eyebrow}</div>
           <h2>{content.heading}</h2>
         </div>
-        <StepCards steps={content.steps} columns="four" />
+        <StepCards steps={content.steps} maxColumns={4} />
       </div>
     </section>
   );

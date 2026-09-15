@@ -7,8 +7,9 @@ export type StartStepsContent = {
 };
 
 /**
- * «كيف نبدأ معك» on the start page: the three steps to going live, the
- * guarantee last and marked out.
+ * «كيف نبدأ معك» on the start page: the steps to going live — three on the
+ * Reference site, the guarantee last and marked out; as many as an Editor
+ * gives it (ticket 53).
  *
  * The home and product pages say the same three steps in a shorter list beside
  * the demo request form (`src/components/closing-section.tsx`); the Reference

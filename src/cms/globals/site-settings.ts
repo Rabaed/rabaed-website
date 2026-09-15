@@ -1,16 +1,6 @@
-import type { GlobalAfterChangeHook, GlobalConfig } from 'payload';
+import type { GlobalConfig } from 'payload';
 import { signedIn } from '../access';
-import { refreshSite } from '../revalidation';
-
-/**
- * Site settings appear in every page's footer, so publishing them rebuilds
- * the site (`refreshSite`). A saved draft changes nothing a visitor can see,
- * so it leaves the pages alone.
- */
-const refreshPagesOnPublish: GlobalAfterChangeHook = ({ doc, req }) => {
-  if (doc._status === 'published') refreshSite(req);
-  return doc;
-};
+import { refreshSiteWhenPublished } from '../revalidation';
 
 function internationalNumber(value: null | string | undefined): string | true {
   if (!value || /^[1-9]\d{7,14}$/.test(value)) return true;
@@ -52,8 +42,9 @@ export const SiteSettings: GlobalConfig = {
     // Every page shows these, so the home page previews them as well as any.
     preview: () => '/api/preview?path=/',
   },
+  // Every page's footer shows them.
   hooks: {
-    afterChange: [refreshPagesOnPublish],
+    afterChange: [refreshSiteWhenPublished],
   },
   fields: [
     {

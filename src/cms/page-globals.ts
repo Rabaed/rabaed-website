@@ -4,13 +4,13 @@
  *
  * Imported by the CMS configuration, so it imports relatively.
  */
-import type { Field, GlobalAfterChangeHook, GlobalConfig, Tab } from 'payload';
+import type { Field, GlobalConfig, Tab } from 'payload';
 import { signedIn } from './access';
-import type { Words } from './page-fields';
-import { refreshSite } from './revalidation';
+import { inAdminLanguage, type Words } from './page-fields';
+import { refreshSiteWhenPublished } from './revalidation';
 
 /** Where the pages sit in the admin's menu. */
-export const PAGES_GROUP: Words = { ar: 'الصفحات', en: 'Pages' };
+const PAGES_GROUP: Words = { ar: 'الصفحات', en: 'Pages' };
 
 /**
  * The languages a page is published in. Arabic always: it is the site. English
@@ -37,14 +37,13 @@ const languagesField: Field = {
       en: 'Arabic always. Add English once every word of the page is written in English.',
     },
   },
-  validate: (value: unknown) =>
-    Array.isArray(value) && value.includes('ar') ? true : 'العربية لغة الموقع، ولا تُنشر صفحة من دونها.',
-};
-
-/** A page is on the site, so publishing it rebuilds the site; a saved draft leaves the pages alone. */
-const refreshOnPublish: GlobalAfterChangeHook = ({ doc, req }) => {
-  if (doc._status === 'published') refreshSite(req);
-  return doc;
+  validate: (value: unknown, { req }: { req?: Parameters<typeof inAdminLanguage>[0] }) =>
+    Array.isArray(value) && value.includes('ar')
+      ? true
+      : inAdminLanguage(req, {
+          ar: 'العربية لغة الموقع، ولا تُنشر صفحة من دونها.',
+          en: 'Arabic is the site’s language; a page is not published without it.',
+        }),
 };
 
 /**
@@ -79,7 +78,7 @@ export function pageGlobal(options: {
       preview: () => `/api/preview?path=${encodeURIComponent(path)}`,
     },
     hooks: {
-      afterChange: [refreshOnPublish],
+      afterChange: [refreshSiteWhenPublished],
     },
     fields: [languagesField, { type: 'tabs', tabs: sections }],
   };

@@ -179,7 +179,9 @@ still in code. The migrations import the start page's words once, as they were.
 - Every word has an **Arabic** and an **English** field. The Arabic is always
   needed to publish. The English is needed only once **English** is added under
   **Published in**; until then the page is in Arabic alone, and nothing is ever
-  filled in from the other language.
+  filled in from the other language. Once English is listed, every change is
+  published only with its English — a new step included — so write the
+  English, or take English off the list for the time being.
 - A list — the steps — can be added to, taken from and reordered by dragging,
   within the number the design holds. Steps are numbered by their order.
 - Every field holds only as many characters as its place in the design

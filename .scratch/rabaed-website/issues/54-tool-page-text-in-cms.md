@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Every section's words and pictures on the tool page are read from the CMS, including the words drawn in the hero's picture of the tool and the download section's own heading and lines
+- [ ] Every section's words on the tool page are read from the CMS, including the words drawn in the hero's picture of the tool and the download section's own heading and lines (that picture is drawn in markup, so the tool page has no image to replace; replaceable pictures are ticket 57's)
 - [ ] Every list is editable: the reasons, the feature cards, the steps, the privacy points and folder tree, the requirement cards, the upsell's list
 - [ ] The how-it-works steps lay out any number neatly (the Reference site's grid only looked right in threes), and three still match the baseline
 - [ ] The download section (`#get`) and how-it-works (`#how`) cannot be hidden: the hero's two buttons land on them. Every other section can be
