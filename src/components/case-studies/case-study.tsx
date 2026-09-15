@@ -14,6 +14,7 @@ import { fetchedMedia } from '@/cms/fetched-media';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { localePath, type Locale } from '@/lib/locales';
+import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import { pageMetadata } from '@/lib/metadata';
 import type { CaseStudy } from '@/payload-types';
 
@@ -149,6 +150,12 @@ export async function CaseStudyPage({ locale, slug }: { locale: Locale; slug: st
           )}
         </article>
       </section>
+      <StructuredData
+        data={breadcrumbData(locale, [
+          { name: copy.eyebrow, path: CASE_STUDIES_PATH },
+          { name: caseStudy.title, path: caseStudyPath(slug) },
+        ])}
+      />
     </EditorialFrame>
   );
 }

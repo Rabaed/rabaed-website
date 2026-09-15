@@ -8,12 +8,14 @@ import { Idea } from '@/components/partnership/idea';
 import { Modes } from '@/components/partnership/modes';
 import { Path } from '@/components/partnership/path';
 import { Questions } from '@/components/questions';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getPartnershipPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/partnership', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/partnership', ...meta });
 }
 
 /**
@@ -42,6 +44,8 @@ export default async function PartnershipPage() {
       <Path content={content.path} />
       {content.questions.shows && <Questions content={content.questions} />}
       <Apply content={content.apply} />
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/partnership' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

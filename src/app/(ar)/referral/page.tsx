@@ -8,12 +8,14 @@ import { Offer } from '@/components/referral/offer';
 import { Signup } from '@/components/referral/signup';
 import { TermsSummary } from '@/components/referral/terms-summary';
 import { WhatIsReferred } from '@/components/referral/what-is-referred';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { getReferralPage } from '@/content/pages/referral';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getReferralPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/referral', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/referral', ...meta });
 }
 
 /**
@@ -48,6 +50,8 @@ export default async function ReferralPage() {
       {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
       {content.questions.shows && <Questions content={content.questions} />}
       <Signup content={content.signup} form={content.signupForm} />
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/referral' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

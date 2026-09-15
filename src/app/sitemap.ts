@@ -18,7 +18,9 @@ const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', 
  * listed, and an entry leaves when it is unpublished: publishing and
  * unpublishing mark this stale along with the pages (`src/cms/revalidation.ts`).
  *
- * Ticket 31 owns the sitemap as a whole, and decides what else it carries.
+ * Pages are listed by name, not found by walking the routes, so nothing that
+ * is not a page of the site can reach it: not the Screen mock studio, the CMS
+ * admin, or the English placeholder (ticket 31).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const origin = siteOrigin();

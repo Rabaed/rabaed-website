@@ -2,7 +2,7 @@
 
 **What to build:** The Arabic site becomes public at `rabaedapp.com`. This is the ticket where the handbrake comes off, and it is deliberate rather than accidental.
 
-**Blocked by:** every preceding ticket except the Stage 2 set (40–43)
+**Blocked by:** every preceding ticket except the Stage 2 set (40–43) and ticket 21, which is replaced by tickets 53–59; and tickets 53–59
 
 **Status:** ready-for-agent
 
@@ -19,3 +19,7 @@
 - [ ] Analytics confirmed recording real visits
 
 **Note:** the Reference site's six `noindex` tags were correct while it was a prototype. This ticket is the one place they are removed, so the site cannot launch invisible by accident.
+
+## Comments
+
+**From ticket 32 (15 September 2026).** "Structured data validated live" means pasting the live home, product, start and one blog post address into Google's Rich Results Test (https://search.google.com/test/rich-results) and the Schema Markup Validator (https://validator.schema.org/). The suite checks the same things offline, but only a live check sees what Google sees. Expect the Rich Results Test to call the software application data ineligible for a rich result: Google shows one only with a price and a rating, which the site deliberately never states (spec: SEO and GEO). That is not an error; the Schema Markup Validator should report none. The company's social accounts in its structured data are the ones published in site settings, so publishing the real accounts before launch fills both the footer icons and the structured data at once.

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page-shell';
 import { Questions } from '@/components/questions';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { Download } from '@/components/tool/download';
 import { Features } from '@/components/tool/features';
 import { ToolHero } from '@/components/tool/hero';
@@ -14,7 +15,8 @@ import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getToolPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/tool', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/tool', ...meta });
 }
 
 /**
@@ -42,6 +44,8 @@ export default async function ToolPage() {
       <Download content={content.download} />
       {content.questions.shows && <Questions content={content.questions} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/tool' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

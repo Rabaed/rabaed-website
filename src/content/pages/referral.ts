@@ -38,6 +38,7 @@ const { payout, clientDiscount } = REFERRAL_PROGRAM_VALUES;
  */
 const AR: BeforeQuestions<Omit<ReferralPageContent, 'signupForm'>> = {
   meta: {
+    name: 'برنامج الإحالة',
     title: `ربائد · برنامج الإحالة — ${payout} ريال عن كل مشروع`,
     description: `أحِل مشروعاً واحداً واكسب ${payout} ريال صافية، ويحصل عميلك على خصم ${clientDiscount} على اشتراك مشروعه.`,
   },

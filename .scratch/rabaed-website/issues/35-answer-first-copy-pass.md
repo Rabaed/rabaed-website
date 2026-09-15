@@ -2,7 +2,7 @@
 
 **What to build:** The first sentence under every major heading becomes a standalone answer that an AI assistant can lift and quote directly, without changing what the page says or how it looks.
 
-**Blocked by:** 21
+**Blocked by:** 53, 54, 55, 56, 57, 58
 
 **Status:** ready-for-agent
 

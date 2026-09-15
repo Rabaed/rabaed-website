@@ -28,6 +28,7 @@ export type ToolPageContent = {
 /** All copy is verbatim from `reference/site/tool.html`. */
 const AR: BeforeQuestions<ToolPageContent> = {
   meta: {
+    name: 'متتبّع الصبّات',
     title: 'ربائد · متتبّع الصبّات واختبارات الكسر — أداة مجانية',
     description:
       'ملف HTML واحد يفتح بنقرتين. سجّل الصبّة واعرف موعد اختبار الكسر ٧ و ٢٨ يوماً قبل أن يتأخر. بدون حساب، بدون سيرفر، بياناتك تبقى على جهازك.',

@@ -7,12 +7,14 @@ import { CustomStrip } from '@/components/product/custom-strip';
 import { InnerCycle } from '@/components/product/inner-cycle';
 import { Journey } from '@/components/product/journey';
 import { Roles } from '@/components/product/roles';
+import { breadcrumbData, softwareData, StructuredData } from '@/components/structured-data';
 import { getProductPage } from '@/content/pages/product';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getProductPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/product', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/product', ...meta });
 }
 
 /**
@@ -35,6 +37,8 @@ export default async function ProductPage() {
       {content.roles.shows && <Roles content={content.roles} />}
       {content.innerCycle.shows && <InnerCycle content={content.innerCycle} />}
       <ClosingSection content={content.closing} form={content.demoForm} />
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/product' }])} />
+      <StructuredData data={softwareData()} />
     </PageShell>
   );
 }

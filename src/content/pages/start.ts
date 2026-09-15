@@ -26,6 +26,7 @@ export type StartPageContent = {
 /** Verbatim from `reference/site/start.html`. */
 const AR: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
   meta: {
+    name: 'ابدأ',
     title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
     description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
   },

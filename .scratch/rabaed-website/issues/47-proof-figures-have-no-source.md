@@ -64,5 +64,5 @@ The Reference site's section carries a testimonial slot under the lead: a play b
 ## Done when
 
 - [ ] Every figure on the proof deck has a recorded `source`, has been replaced by something attributable, or has been removed
-- [ ] The decision is written into `src/content/proof-figures.ts` (or the CMS entry, if ticket 21 has landed), so the next person to edit a card sees it
+- [ ] The decision is written into `src/content/proof-figures.ts` (or the CMS entry, if ticket 58 has landed), so the next person to edit a card sees it
 - [ ] `tests/e2e/home-card-decks.spec.ts` and `tests/e2e/home-decks-match-reference.spec.ts` updated if the deck's cards change

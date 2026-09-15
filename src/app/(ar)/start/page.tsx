@@ -6,12 +6,14 @@ import { PageShell } from '@/components/page-shell';
 import { Questions } from '@/components/questions';
 import { FreeToolTeaser } from '@/components/start/free-tool-teaser';
 import { Steps } from '@/components/start/steps';
+import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import { getStartPage } from '@/content/pages/start';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getStartPage('ar');
-  return pageMetadata({ locale: 'ar', path: '/start', ...meta });
+  // Arabic alone until English is switched on (tickets 40 and 42).
+  return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/start', ...meta });
 }
 
 /**
@@ -40,6 +42,8 @@ export default async function StartPage() {
       <Questions content={content.questions} beside={<DemoRequestForm wording={content.demoForm} />}>
         {content.freeTool.shows && <FreeToolTeaser content={content.freeTool} />}
       </Questions>
+      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/start' }])} />
+      <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
 }

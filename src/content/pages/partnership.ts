@@ -26,6 +26,7 @@ export type PartnershipPageContent = {
 /** All copy is verbatim from `reference/site/partnership.html`. */
 const AR: BeforeQuestions<PartnershipPageContent> = {
   meta: {
+    name: 'برنامج الشراكات',
     title: 'ربائد · برنامج الشراكات للمكاتب الهندسية',
     description: 'شراكة تُصمَّم معك: تسعير شريك، أو رخصة على مستوى المكتب، أو تضمين المنصة في عرضك للمالك.',
   },

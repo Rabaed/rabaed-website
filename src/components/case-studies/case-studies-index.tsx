@@ -6,6 +6,7 @@ import { fetchedMedia } from '@/cms/fetched-media';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
+import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import { pageMetadata } from '@/lib/metadata';
 import type { CaseStudy } from '@/payload-types';
 
@@ -48,6 +49,7 @@ export async function CaseStudiesIndexPage({ locale }: { locale: Locale }) {
           </div>
         </div>
       </section>
+      <StructuredData data={breadcrumbData(locale, [{ name: copy.eyebrow, path: CASE_STUDIES_PATH }])} />
     </EditorialFrame>
   );
 }
