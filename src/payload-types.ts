@@ -1956,7 +1956,7 @@ export interface ReferralPage {
         en?: string | null;
       };
       /**
-       * A space sets it after the opening, unless it begins with a comma.
+       * A space sets it after the opening, unless it begins with a comma, a full stop, a colon or a semicolon.
        */
       rest: {
         ar: string;
