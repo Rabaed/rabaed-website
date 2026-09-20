@@ -18,10 +18,18 @@
 # exists for it.
 name: CI
 
+# Pull requests only. A merge into `main` re-ran everything the pull request
+# had just run on the same code, for about half of this repository's monthly
+# runner minutes; the ruleset requires a branch to be up to date before it
+# merges, so the pull request's run is a run of what lands.
+#
+# While a pull request is a draft, the machines that matter stay off: a draft
+# gets the typecheck, and marking it ready for review is what starts the
+# suite. The suite runs on the author's own machine in about five minutes
+# (`npm test`), which is where work in progress belongs.
 on:
   pull_request:
-  push:
-    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 # A new push supersedes the run in flight for the same branch.
 concurrency:
@@ -52,6 +60,8 @@ jobs:
 
   e2e:
     name: e2e (${{ matrix.shard }})
+    # Not while the pull request is a draft.
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -129,4 +139,8 @@ jobs:
           echo "typecheck: ${{ needs.typecheck.result }}"
           echo "e2e: ${{ needs.e2e.result }}"
           test "${{ needs.typecheck.result }}" = success
-          test "${{ needs.e2e.result }}" = success
+          # `skipped` is the suite left off while the pull request is a draft.
+          # A draft cannot merge, so this check going green on one does not
+          # let untested code through; marking it ready runs the suite.
+          test "${{ needs.e2e.result }}" = success ||
+            test "${{ needs.e2e.result }}" = skipped
