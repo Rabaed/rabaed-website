@@ -113,6 +113,7 @@ export interface Config {
     'partnership-page': PartnershipPage;
     'site-words': SiteWord;
     'index-leads': IndexLead;
+    'trust-strip': TrustStrip;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -130,6 +131,7 @@ export interface Config {
     'partnership-page': PartnershipPageSelect<false> | PartnershipPageSelect<true>;
     'site-words': SiteWordsSelect<false> | SiteWordsSelect<true>;
     'index-leads': IndexLeadsSelect<false> | IndexLeadsSelect<true>;
+    'trust-strip': TrustStripSelect<false> | TrustStripSelect<true>;
   };
   locale: null;
   widgets: {
@@ -3769,6 +3771,62 @@ export interface IndexLead {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trust-strip".
+ */
+export interface TrustStrip {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  strip: {
+    caption: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Not drawn on the page; a screen reader announces it to name this section.
+     */
+    sectionName: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * In the order they travel past. Drag them to reorder.
+     */
+    logos: {
+      /**
+       * Untick to hide this mark while keeping it in the list — for a client whose contract has ended.
+       */
+      shows?: boolean | null;
+      /**
+       * Read by anyone the image does not reach, and by a screen reader. It stands in the mark’s place if the file fails to load.
+       */
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * A PNG with a transparent background, 88 pixels tall or more, or an SVG. The strip draws every mark in white.
+       */
+      mark: number | Media;
+      /**
+       * Between 16 and 44. A wide wordmark needs a smaller height to look the same weight as its neighbours; a compact mark needs more. 44 is the height of the bar itself.
+       */
+      height: number;
+      /**
+       * Leave empty for a mark that is a picture rather than a link. The company’s own site, usually.
+       */
+      link?: string | null;
+      id?: string | null;
+    }[];
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -6913,6 +6971,48 @@ export interface IndexLeadsSelect<T extends boolean = true> {
           | {
               ar?: T;
               en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trust-strip_select".
+ */
+export interface TrustStripSelect<T extends boolean = true> {
+  languages?: T;
+  strip?:
+    | T
+    | {
+        caption?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sectionName?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        logos?:
+          | T
+          | {
+              shows?: T;
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              mark?: T;
+              height?: T;
+              link?: T;
+              id?: T;
             };
       };
   _status?: T;

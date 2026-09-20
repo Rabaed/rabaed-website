@@ -1,42 +1,46 @@
+import { fetchedMedia } from '@/cms/fetched-media';
+import { pageEntry, wordsIn } from '@/cms/pages';
+import type { TrustStripContent, TrustStripLogo } from '@/components/home/trust-strip';
+import type { Locale } from '@/lib/locales';
+
 /**
  * The Trust strip: the companies already working on Rabaed, in the order the
- * Reference site lists them (CONTEXT.md).
+ * CMS lists them (CONTEXT.md, ticket 20). One entry for the three pages that
+ * carry the strip, so a client signed today appears on all three at once;
+ * each page keeps its own switch for whether the strip shows there.
  *
  * Permission to show these marks is cleared by the founders, covered by the
- * existing contracts (spec: Further Notes). Ticket 20 moves this list into the
- * CMS so Ahmed can add a client the day one signs, with a link on each mark;
- * until then it is here, and adding one means a deploy.
+ * existing contracts (spec: Further Notes).
  *
- * `height` is the drawn height each mark needs to look the same weight as its
- * neighbours — a wordmark set in small type has to stand taller than a compact
- * monogram to read at all. These are the Reference site's own per-logo
- * overrides, which it wrote as eight CSS rules keyed on `data-k`; carrying the
- * number with the logo instead means a new one arrives complete rather than
- * needing a stylesheet edit as well.
- *
- * `width` and `height` on the file are the intrinsic pixel sizes, so the
- * browser reserves the right box before the image arrives.
- *
- * One strip for every page that carries it — home, product and start — as the
- * spec's Trust strip global is one list.
+ * A mark an Editor has unticked is left out here rather than hidden in the
+ * page: what the bar travels past is the list a visitor sees, and the marquee
+ * measures it.
  */
-import type { TrustStripContent, TrustStripLogo } from '@/components/home/trust-strip';
+export async function getTrustStrip(locale: Locale): Promise<TrustStripContent> {
+  const { strip } = await pageEntry('trust-strip', locale);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
-const LOGOS: readonly TrustStripLogo[] = [
-  { key: 'nawah', name: 'نواة للاستثمار العقاري', height: 32, intrinsic: { width: 339, height: 112 } },
-  { key: 'staterra', name: 'Staterra', height: 26, intrinsic: { width: 499, height: 112 } },
-  { key: 'alsharq', name: 'شركة الشرق للاستشارات الهندسية', height: 42, intrinsic: { width: 209, height: 112 } },
-  { key: 'shaheen', name: 'شاهين للاستشارات الهندسية', height: 42, intrinsic: { width: 103, height: 112 } },
-  { key: 'north-injazat', name: 'North Injazat', height: 42, intrinsic: { width: 171, height: 112 } },
-  { key: 'amak', name: 'شركة أماك بيلد', height: 38, intrinsic: { width: 151, height: 112 } },
-  { key: 'smart-directions', name: 'Smart Directions', height: 32, intrinsic: { width: 305, height: 112 } },
-  { key: 'sika', name: 'Sika', height: 42, intrinsic: { width: 94, height: 112 } },
-];
+  const logos = strip.logos
+    .filter((logo) => logo.shows !== false)
+    .map((logo, index): TrustStripLogo | null => {
+      const mark = fetchedMedia(logo.mark);
+      if (!mark?.url) return null;
 
-export const TRUST_STRIP: { readonly ar: TrustStripContent } = {
-  ar: {
-    caption: 'أطراف نشطة حالياً تستخدم ربائد',
-    sectionName: 'جهات تعمل على ربائد',
-    logos: LOGOS,
-  },
-};
+      return {
+        // The row is rendered twice, so a key of its own rather than the
+        // file's: the same mark may be listed twice, for two companies of one
+        // group.
+        key: `${index}-${mark.id}`,
+        name: words(logo.name),
+        height: logo.height,
+        source: mark.url,
+        // An SVG carries no pixel size; the strip draws it at its height and
+        // lets the width follow (ADR-0010).
+        intrinsic: mark.width && mark.height ? { width: mark.width, height: mark.height } : null,
+        href: logo.link ?? null,
+      };
+    })
+    .filter((logo): logo is TrustStripLogo => logo !== null);
+
+  return { caption: words(strip.caption), sectionName: words(strip.sectionName), logos };
+}

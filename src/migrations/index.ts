@@ -28,6 +28,8 @@ import * as migration_20260920_170916_partnership_application_form from './20260
 import * as migration_20260920_170917_publish_partnership_application_wording from './20260920_170917_publish_partnership_application_wording';
 import * as migration_20260920_182913_site_words_and_index_leads from './20260920_182913_site_words_and_index_leads';
 import * as migration_20260920_182914_import_site_words_and_index_leads from './20260920_182914_import_site_words_and_index_leads';
+import * as migration_20260920_193840_trust_strip from './20260920_193840_trust_strip';
+import * as migration_20260920_193841_import_trust_strip from './20260920_193841_import_trust_strip';
 
 export const migrations = [
   {
@@ -179,5 +181,15 @@ export const migrations = [
     up: migration_20260920_182914_import_site_words_and_index_leads.up,
     down: migration_20260920_182914_import_site_words_and_index_leads.down,
     name: '20260920_182914_import_site_words_and_index_leads',
+  },
+  {
+    up: migration_20260920_193840_trust_strip.up,
+    down: migration_20260920_193840_trust_strip.down,
+    name: '20260920_193840_trust_strip',
+  },
+  {
+    up: migration_20260920_193841_import_trust_strip.up,
+    down: migration_20260920_193841_import_trust_strip.down,
+    name: '20260920_193841_import_trust_strip',
   },
 ];

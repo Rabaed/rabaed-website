@@ -28,6 +28,7 @@ type PageSlug = Extract<
   | 'partnership-page'
   | 'site-words'
   | 'index-leads'
+  | 'trust-strip'
 >;
 
 /**

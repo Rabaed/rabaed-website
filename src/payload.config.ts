@@ -33,6 +33,7 @@ import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
 import { ScreenMocks } from './cms/globals/screen-mocks';
 import { SiteWords } from './cms/globals/site-words';
+import { TrustStripLogos } from './cms/globals/trust-strip';
 import { StartPage } from './cms/globals/start-page';
 import { ToolPage } from './cms/globals/tool-page';
 import { SUBMITTABLE_FORMS } from './forms/registry';
@@ -105,6 +106,7 @@ export default buildConfig({
     PartnershipPage,
     SiteWords,
     IndexLeads,
+    TrustStripLogos,
   ],
 
   db: postgresAdapter({
