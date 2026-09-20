@@ -94,3 +94,18 @@ Verified as CI runs it: `npx playwright test --grep-invert @pixel --shard=1/4` i
 `expect.poll` allows five seconds by default, and what it is waiting for is a rebuild: publishing marks the page stale, and the next visit builds it again. The home page is much the biggest to build — every section's words and pictures, the site-wide words ticket 59 added, the closing section — and on a loaded runner that overran. Raised to twenty seconds, with the reason written beside it. The five other pages keep the default, because they did not fail and are smaller; if one of them starts to, the answer is the same.
 
 Not this ticket's doing, but worth being sure rather than assuming: the change here adds `revalidatePath` calls for `llms.txt` and `robots.txt` *after* the one that marks the pages stale, so nothing about the home page's own invalidation moved, and a publish that threw would have failed the assertion above it instead.
+
+### The preview was stranded by a rename, not by this branch
+
+After the founder ran `npm run cms:migrate` against the preview database, the deployment still failed. The migrate output said why, and it was not this ticket's migration:
+
+```
+Error running migration 20260920_182913_site_words_and_index_leads
+caused by: error: type "enum_site_words_languages" already exists
+```
+
+Ticket 59 migrated that database at 21:21 with `20260920_170608_site_words_and_index_leads`, then at 21:34 regenerated the same migration as `20260920_182913_…` while merging ticket 29. The two files are byte-identical apart from the timestamp in the name — but Payload matches applied migrations **by name**, so the database saw a migration it had never run, tried to create types it already had, and stopped. Everything after it was blocked, this ticket's migration included: it never ran at all.
+
+Renaming the two rows in `payload_migrations` to the new names lets the migrate finish, and needs no DDL, because the objects are already right.
+
+`docs/agents/parallel-sessions.md` now carries the rule that was missing: before regenerating a migration, ask whether any database has already applied the old one, and if so give the regenerated file its original name. If none has — the ordinary case, and this branch's — the new name is the better one, because it sorts last and its snapshot is the whole schema. The two rules pull in opposite directions and the doc now says which wins when.
