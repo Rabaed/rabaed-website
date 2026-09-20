@@ -426,6 +426,8 @@ test('the journey and the closing section have no switch to hide them; the custo
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
 
+  // Its own entry, and the one page global of a single section: with no other
+  // tab there is no click for the admin to undo, so it needs no `openPageEntry`.
   await page.goto(`${ADMIN_PATH}/globals/closing-section`);
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);

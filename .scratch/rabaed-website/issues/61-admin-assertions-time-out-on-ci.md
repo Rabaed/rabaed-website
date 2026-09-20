@@ -79,7 +79,7 @@ Both read `expect(locator).toBeVisible() failed … Timeout: 20000ms … Error: 
 
 The third failure in that run was the `/blog` media-file 500 already noted above. Ticket 60's own eleven waits passed in that run, as in every other.
 
-## Reopened, and what the admin is doing with the click
+### Reopened, and what the admin is doing with the click
 
 **Built on 21 September 2026**, on the question the note above left open. The answer is not a number, so the twenty seconds in `playwright.config.ts` stay exactly as they were.
 
@@ -95,7 +95,9 @@ That is the CI failure exactly, including the part of it that read as a contradi
     1881ms  the open tab is Trust strip
     2271ms  the GET let through
     2283ms  <- 200
-    3900ms  the open tab is Hero
+    3900ms  the open tab is Hero        (the next time it was looked at)
+
+The last line is where the tab was *seen* to have gone back, not when it went: that run looked every two seconds. Measured properly — the same seeded restore, watched every ten milliseconds, twelve times on an idle machine — the admin acts **15 to 44 milliseconds** after the answer arrives, a median of 31. That gap matters below.
 
 **So no bound could have covered it.** `toBeVisible` was waiting for a switch the admin had already taken away, and would have gone on waiting; twenty seconds failed for the same reason five did. What is wrong is the order of two things, not the time allowed for either — which is why the note above was right that this needed reopening rather than a bigger number.
 
@@ -103,7 +105,7 @@ That is the CI failure exactly, including the part of it that read as a contradi
 
 **The fix is in the tests, and it is the order.** Two helpers in `tests/e2e/cms.ts`, used by the six page-text suites:
 
-- `openPageEntry(page, slug)` goes to the entry and does not hand it back until the admin has had its answer. The restore happens once and the admin keeps the preference for the life of the page, so every click after that is the editor's own and there is nothing left to undo it.
+- `openPageEntry(page, slug)` goes to the entry and does not hand it back until the restore has happened. Waiting for the admin's *answer* is not enough — that leaves the 15 to 44 milliseconds above, which is exactly the kind of work a stall stretches, and this ticket has underestimated that window twice already. So the helper makes the restore visible instead: before going there it tells the admin, through the same preference, that the second section is the one this editor last had open. The entry opens on its first section and moves to its second, and that move *is* the restore, finished. The restore happens once, and from then on the admin answers its own question out of what the clicks themselves have written, so nothing can undo a click afterwards.
 - `openSection(page, name)` clicks the tab and waits for it to be the open one — `tabs-field__tab-button--active`, which is how Payload marks it. A failure there says «the Situations section did not open» instead of leaving a later assertion to report a missing switch it cannot account for.
 
 **`openSection` also closes a way for these tests to pass wrongly.** Clicking a tab and reading the panel took for granted that the panel was that tab's. It need not be: the restore can put another section there, and the section it remembers is whichever the last test left open, which is not the first. A run in which the admin reopened some other hideable section would have found a switch and agreed that the section under test had one — whatever that section actually has. All twenty-eight tabs these six suites open were read that way.
@@ -114,9 +116,10 @@ That is the CI failure exactly, including the part of it that read as a contradi
 
 All on `TEST_PORT=3161`, on the machine this was written on: 20 cores.
 
-- **The guard is real.** `home-text.spec.ts` now holds that request up for two seconds and asserts that the section it opens stays open. With the wait inside `openPageEntry` skipped, it fails where it should — «the test was given the entry before the admin had asked which tab to reopen» — and passes with it. The first reproduction, before any fix, ended with the Hero's fields in the panel and no switch anywhere, which is the CI failure to the letter.
+- **The guard is real.** `home-text.spec.ts` now holds that request up for two seconds and asserts that the section it then opens stays open. With the wait inside `openPageEntry` skipped it fails where it should — «the entry was handed back while the admin was still waiting to hear which tab to reopen» — and passes with it. The first reproduction, before any fix, ended with the Hero's fields in the panel and no switch anywhere, which is the CI failure to the letter.
+- **The gap between the answer and the restore**, twelve samples on an idle machine: 15, 28, 28, 29, 29, 31, 31, 32, 36, 37, 38, 44 milliseconds. That is the window a wait on the answer alone would have left open.
 - **The six suites together:** 43 passed, every tab loop among them.
-- **The full suite:** 922 passed at eight workers, green. Four more runs at twenty workers — about 145 tabs opened under load in all — never failed a tab assertion, and failed nothing this changed.
+- **The full suite:** 922 passed at eight workers, green. Four earlier runs at twenty workers — about 145 tabs opened under load in all — never failed a tab assertion, and failed nothing this changed.
 
 ### Seen in those twenty-worker runs, and not this ticket's
 
