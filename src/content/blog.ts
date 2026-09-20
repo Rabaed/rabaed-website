@@ -2,15 +2,15 @@
  * The words the blog's own pages carry around the articles, per locale. The
  * articles themselves are written in the CMS (ticket 23).
  *
- * The Reference site has no blog, so none of this is its copy. The index's
- * lead is for Ahmed to approve or reword; ticket 21 moves page text into the
- * CMS, where he can.
+ * The Reference site has no blog, so none of this is its copy. The line under
+ * the index's heading is in the CMS (ticket 59, `src/content/index-leads.ts`);
+ * what is left here labels the page's parts rather than speaking to a reader,
+ * and moves with the English site (ticket 42).
  */
 export const BLOG_COPY = {
   ar: {
     eyebrow: 'المدونة',
     title: 'مدونة ربائد',
-    lead: 'مقالات عن إدارة مشاريع الإنشاء في السعودية: المراسلات والطلبات والاعتمادات، وكيف يبقى سجل المشروع واحداً بين المالك والاستشاري والمقاول.',
     metaTitle: 'ربائد · المدونة',
     siteName: 'ربائد',
     empty: 'لم تُنشر مقالات بعد.',
@@ -26,7 +26,6 @@ export const BLOG_COPY = {
   en: {
     eyebrow: 'Blog',
     title: 'The Rabaed blog',
-    lead: 'Articles on running construction projects in Saudi Arabia: correspondence, requests and approvals, and keeping one project record between owner, consultant and contractor.',
     metaTitle: 'Rabaed · Blog',
     siteName: 'Rabaed',
     empty: 'No articles have been published yet.',

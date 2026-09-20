@@ -13,6 +13,7 @@ import { fetchedMedia } from '@/cms/fetched-media';
 import type { FaqEntry } from '@/components/faq';
 import { plainText } from '@/components/inline-text';
 import { COMPANY } from '@/content/company';
+import { menuName } from '@/content/site-words';
 import { blogPostPath } from '@/lib/blog-paths';
 import { siteOrigin } from '@/lib/environment';
 import { localePath, type Locale } from '@/lib/locales';
@@ -143,24 +144,38 @@ export function faqData(questions: {
   };
 }
 
-/** The home page's name at the head of every trail. */
+/**
+ * The home page's name at the head of every trail, where the menu does not
+ * give it one: an English page, whose menu is ticket 40's.
+ */
 const HOME_NAME: Record<Locale, string> = { ar: 'الرئيسية', en: 'Home' };
 
 /** A step in a trail: its name, and its locale-independent path. */
 export type BreadcrumbStep = { readonly name: string; readonly path: string };
 
-/** An inner page's place in the site, from the home page down to the page itself. */
-export function breadcrumbData(locale: Locale, steps: readonly BreadcrumbStep[]): WithContext<BreadcrumbList> {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [{ name: HOME_NAME[locale], path: '/' }, ...steps].map((step, index) => ({
-      '@type': 'ListItem',
+/**
+ * An inner page's place in the site, from the home page down to the page
+ * itself.
+ *
+ * A step the header's menu names is named here the same way, read from the
+ * menu (ticket 59): renaming «المنتج» in the CMS renames it in the trail too,
+ * so the two can never disagree. A step the menu does not name — the tool
+ * page, an article, a legal document — keeps the name its own words give it.
+ */
+export async function breadcrumbData(
+  locale: Locale,
+  steps: readonly BreadcrumbStep[],
+): Promise<WithContext<BreadcrumbList>> {
+  const trail = await Promise.all(
+    [{ name: HOME_NAME[locale], path: '/' }, ...steps].map(async (step, index) => ({
+      '@type': 'ListItem' as const,
       position: index + 1,
-      name: step.name,
+      name: (await menuName(locale, step.path)) ?? step.name,
       item: pageUrl(locale, step.path),
     })),
-  };
+  );
+
+  return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: trail };
 }
 
 /**

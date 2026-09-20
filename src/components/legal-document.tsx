@@ -36,7 +36,7 @@ export function legalMetadata(document: LegalDocument): Metadata {
  * Arabic only. The legal documents are not translated — the Arabic is binding
  * (spec: Out of Scope) — so there is no locale to pass.
  */
-export function LegalDocumentPage({ document }: { document: LegalDocument }) {
+export async function LegalDocumentPage({ document }: { document: LegalDocument }) {
   const page = LEGAL_PAGES[document.slug];
 
   return (
@@ -95,7 +95,7 @@ export function LegalDocumentPage({ document }: { document: LegalDocument }) {
           </div>
         </div>
       </section>
-      <StructuredData data={breadcrumbData('ar', [{ name: page.label.ar, path: page.path }])} />
+      <StructuredData data={await breadcrumbData('ar', [{ name: page.label.ar, path: page.path }])} />
     </PageShell>
   );
 }
