@@ -16,7 +16,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, reachesVisitors, uploadImage } from './cms';
+import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage } from './cms';
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
 
 test.describe.configure({ mode: 'default' });
@@ -418,12 +418,11 @@ test('the CMS refuses what the product page, the closing section and the screens
 
 test('the journey and the closing section have no switch to hide them; the custom strip has one', async ({ page }) => {
   await logInAs(page, PRODUCT_EDITOR);
-  const tab = (name: string) => page.getByRole('button', { name, exact: true });
 
-  await page.goto(`${ADMIN_PATH}/globals/product-page`);
-  await tab('Custom strip').click();
+  await openPageEntry(page, 'product-page');
+  await openSection(page, 'Custom strip');
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
-  await tab('Units').click();
+  await openSection(page, 'Units');
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
 

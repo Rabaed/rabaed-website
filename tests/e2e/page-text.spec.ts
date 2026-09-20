@@ -14,7 +14,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, PAGES_EDITOR, logInAs, logInByApi, reachesVisitors } from './cms';
+import { PAGES_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -148,13 +148,12 @@ test('a reworded heading, a fourth step and a hidden section are previewed, and 
 
 test('a section links land on has no switch to hide it; a section that can hide has one', async ({ page }) => {
   await logInAs(page, PAGES_EDITOR);
-  await page.goto(`${ADMIN_PATH}/globals/start-page`);
-  const tab = (name: string) => page.getByRole('button', { name, exact: true });
+  await openPageEntry(page, 'start-page');
 
-  await tab('Steps').click();
+  await openSection(page, 'Steps');
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
 
-  await tab('Questions').click();
+  await openSection(page, 'Questions');
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
 });
@@ -236,9 +235,9 @@ test('a change published in the admin reaches visitors', async ({ page, request 
   const lead = `${entry.hero.lead.ar} `;
 
   try {
-    await page.goto(`${ADMIN_PATH}/globals/start-page`);
+    await openPageEntry(page, 'start-page');
     // The admin reopens the tab an editor last had open, so the hero's is chosen.
-    await page.getByRole('button', { name: 'Hero', exact: true }).click();
+    await openSection(page, 'Hero');
     // The Arabic box is the first one after the paragraph's heading.
     const heading = page.getByRole('heading', { name: 'Paragraph under the heading', exact: true });
     await heading.locator('xpath=following::textarea[1]').fill(lead);

@@ -35,3 +35,13 @@ Every one of these waits is as long as it is because a publish anywhere marks th
 - [ ] Each of the twenty-one waits as long as what it waits for can take, from the same measured budget as ticket 60's, wherever ticket 61's twenty seconds is not enough for it
 - [ ] A change that genuinely never arrives still fails, and says so in words
 - [ ] The full suite is green under load, repeatedly
+
+## Comments
+
+**A twenty-second one of these fails on this machine, 21 September 2026 (from the ticket 61 lane).** `case-studies.spec.ts:133` › "publishing the first case study reveals the section and its link; unpublishing the last hides them again" failed twice in four full local runs at twenty workers (`TEST_PORT=3161 npm test -- --grep-invert @pixel --workers=20`), and passed at eight:
+
+    tests/e2e/case-studies.spec.ts:166
+    expect(locator).toHaveAttribute('href', '/case-studies') failed
+    Timeout: 20000ms, element(s) not found
+
+That is the header of `/product` still being the one built before the case study was published — the same wait as the rest of this ticket's, on ticket 61's twenty seconds rather than a budget of its own. **Line 166 is not on the list above**, which has 162 from the same test: it is a `toHaveAttribute` rather than an `expect.poll`, so a sweep for polls would miss it, and so may other assertions in these suites that wait for a publish without looking like a wait.

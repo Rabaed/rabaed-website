@@ -8,7 +8,7 @@ Nothing in `playwright.config.ts` sets an `expect` timeout, so every assertion i
 
 **Blocked by:** nothing. Ticket 60 is the same root cause — Playwright's defaults against a two-core runner — in the eleven waits for a published change to reach a visitor, and fixes those with a budget of their own; this is what is left once those are done.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 ## Why it happens
 
@@ -78,3 +78,48 @@ So the reporter numbers a `test()` by something other than the source line, and 
 Both read `expect(locator).toBeVisible() failed … Timeout: 20000ms … Error: element(s) not found`, so the panel had not rendered the switch after twenty whole seconds. That does not look like the stall this ticket measured at 4–99ms: something the admin does after a tab is clicked sometimes does not happen at all, and a longer bound cannot cover that. Worth reopening as its own question — what the admin is doing with the click, not how long it is given — before the number here is raised again.
 
 The third failure in that run was the `/blog` media-file 500 already noted above. Ticket 60's own eleven waits passed in that run, as in every other.
+
+## Reopened, and what the admin is doing with the click
+
+**Built on 21 September 2026**, on the question the note above left open. The answer is not a number, so the twenty seconds in `playwright.config.ts` stay exactly as they were.
+
+**The admin undoes the click.** A page entry's tabs are Payload's (`@payloadcms/ui/dist/fields/Tabs`), and Payload remembers which tab an editor last had open. When the form mounts it fetches that preference — one `GET /api/payload-preferences/global-<slug>` — and when the answer lands it sets the open tab to the remembered one, whenever that is. A tab clicked while the request is still in flight is therefore set, and then unset: the button keeps the focus the click gave it, the panel beside it goes back to the remembered section's fields, and on a first visit the remembered section is the first tab — the Hero. Nothing retries, because from the admin's point of view nothing failed.
+
+That is the CI failure exactly, including the part of it that read as a contradiction. The trace from run 35529201175 showed `button "Trust strip" [active]` beside the Hero's fields: `[active]` in an accessibility snapshot is the focused element, not the open tab. The click was never lost; its effect was.
+
+**Held up on purpose, it happens every time.** Delaying that one request with `page.route` reproduces it at will. The timeline below is one local run, and the shape is the same however long the hold:
+
+    262ms   GET  /api/payload-preferences/global-home-page   (held)
+    282ms   the entry has loaded
+    352ms   Trust strip clicked; the open tab is Trust strip
+    1881ms  the open tab is Trust strip
+    2271ms  the GET let through
+    2283ms  <- 200
+    3900ms  the open tab is Hero
+
+**So no bound could have covered it.** `toBeVisible` was waiting for a switch the admin had already taken away, and would have gone on waiting; twenty seconds failed for the same reason five did. What is wrong is the order of two things, not the time allowed for either — which is why the note above was right that this needed reopening rather than a bigger number.
+
+**A stall is still the trigger, which is why only CI sees it.** The window is the length of that one request. On a machine nobody is squeezing it closes in tens of milliseconds and a test never gets inside it; on a two-core runner that is also serving the page and driving the browser it is occasionally long enough — twice, in two suites, in the one twenty-worker run recorded above. Both of those tests are among the ones changed here.
+
+**The fix is in the tests, and it is the order.** Two helpers in `tests/e2e/cms.ts`, used by the six page-text suites:
+
+- `openPageEntry(page, slug)` goes to the entry and does not hand it back until the admin has had its answer. The restore happens once and the admin keeps the preference for the life of the page, so every click after that is the editor's own and there is nothing left to undo it.
+- `openSection(page, name)` clicks the tab and waits for it to be the open one — `tabs-field__tab-button--active`, which is how Payload marks it. A failure there says «the Situations section did not open» instead of leaving a later assertion to report a missing switch it cannot account for.
+
+**`openSection` also closes a way for these tests to pass wrongly.** Clicking a tab and reading the panel took for granted that the panel was that tab's. It need not be: the restore can put another section there, and the section it remembers is whichever the last test left open, which is not the first. A run in which the admin reopened some other hideable section would have found a switch and agreed that the section under test had one — whatever that section actually has. All twenty-eight tabs these six suites open were read that way.
+
+**Why not fix the admin instead.** It is a real defect for an editor too — open a page entry, click a section in the moment before the admin has heard back, and it bounces to the one that was open last — but it is Payload's, in a component of theirs, and every way of reaching it from here is worse than the bug. A field's own `admin.components.Field` replaces the whole tabs field, and Payload's `TabContent` reads that same custom component back through `useField` and renders it, which by the look of the code is a loop. A custom provider cannot reach the preferences context, which Payload does not export. Patching `node_modules` would add a dependency and a postinstall step to the site, against a file compiled by the React compiler whose memo slots are numbered. What is left is worth saying rather than building: an editor who meets this clicks the tab again.
+
+### Verified
+
+All on `TEST_PORT=3161`, on the machine this was written on: 20 cores.
+
+- **The guard is real.** `home-text.spec.ts` now holds that request up for two seconds and asserts that the section it opens stays open. With the wait inside `openPageEntry` skipped, it fails where it should — «the test was given the entry before the admin had asked which tab to reopen» — and passes with it. The first reproduction, before any fix, ended with the Hero's fields in the panel and no switch anywhere, which is the CI failure to the letter.
+- **The six suites together:** 43 passed, every tab loop among them.
+- **The full suite:** 922 passed at eight workers, green. Four more runs at twenty workers — about 145 tabs opened under load in all — never failed a tab assertion, and failed nothing this changed.
+
+### Seen in those twenty-worker runs, and not this ticket's
+
+- **The server dropped connections**, `apiRequestContext.get: read ECONNRESET`, once in each of three runs and in a different test each time: `cms.spec.ts` on `GET /`, `start-page.spec.ts` on `GET /start`, `page-text.spec.ts` on an API read before it had done anything. Never at eight workers. It is the machine at twenty workers rather than anything a test does, which is why it is written down here rather than filed.
+- **`case-studies.spec.ts:133`** twice, waiting for a published case study to put its link in the header of `/product` and giving up at twenty seconds. That is ticket 62's shape — a publish wait on a budget sized for a re-render — and its line is noted on that ticket.
+- The two failures recorded further up as seen while measuring were not looked at again: the `/blog` 500 from a resized image another test has removed, and the drag in `home-before-after-and-calculator-match-reference.spec.ts` that ran out of its deadline under load. Neither recurred here.

@@ -240,6 +240,68 @@ export async function logIn(page: Page): Promise<void> {
 }
 
 /**
+ * How long the admin is given to ask which section of a page entry was last
+ * open. It is one request for one small record, and the whole of the admin's
+ * first paint has to happen before it: measured on a hosted runner while
+ * ticket 61 was being built, that paint was 242 to 410 milliseconds. Twenty
+ * seconds is the same headroom for a stall that `playwright.config.ts` gives
+ * a retrying assertion, and for the same reason — a passing run waits only as
+ * long as the request takes.
+ */
+const TABS_RESTORED_IN = 20_000;
+
+/**
+ * Opens a page entry in the admin, with its section tabs ready to be clicked.
+ *
+ * Going there is not enough. The admin remembers which tab an editor had open
+ * and restores it from a preference it fetches when the form mounts
+ * (`@payloadcms/ui/fields/Tabs`, `global-<slug>`): the fetch's answer, whenever
+ * it lands, sets the open tab to the remembered one — so a tab clicked while
+ * it is still in flight is simply undone, and the panel beside the tabs goes
+ * back to being another section's. That is what failed twice on CI as an
+ * assertion that never found a switch (ticket 61), and it is reproducible at
+ * will by holding that one request up; `home-text.spec.ts` does.
+ *
+ * So this waits for the answer before letting the test click anything. The
+ * restore happens once, and the admin keeps the preference for the life of the
+ * page afterwards, so every click from here on is the editor's own.
+ */
+export async function openPageEntry(page: Page, globalSlug: string): Promise<void> {
+  const restored = page
+    .waitForResponse((response) => response.url().includes(`/api/payload-preferences/global-${globalSlug}`), { timeout: TABS_RESTORED_IN })
+    .then(
+      () => true,
+      () => false,
+    );
+  await page.goto(`${ADMIN_PATH}/globals/${globalSlug}`);
+  expect(
+    await restored,
+    `the admin never asked which section of ${globalSlug} was last open, in ${TABS_RESTORED_IN}ms, so a tab clicked now could still be undone by the answer`,
+  ).toBe(true);
+}
+
+/**
+ * Opens one section of a page entry, and leaves that section's own fields in
+ * the panel beside the tabs.
+ *
+ * Clicking the tab is what an editor does; waiting for the panel to be this
+ * section's is what tells the test it may read it. Without that, a test reads
+ * whichever panel is there — the section it asked for, or the one the admin
+ * put back (`openPageEntry`), or one it opened earlier — and an assertion
+ * about a section can pass on another section's fields.
+ *
+ * The panel itself is unnamed in the markup — every section's is
+ * `tabs-field__tab` — so what is waited for is the tab whose panel it is:
+ * Payload marks the open tab's button `tabs-field__tab-button--active`, and
+ * draws the panel of that one tab and no other.
+ */
+export async function openSection(page: Page, name: string): Promise<void> {
+  const tab = page.getByRole('button', { name, exact: true });
+  await tab.click();
+  await expect(tab, `the ${name} section did not open`).toHaveClass(/tabs-field__tab-button--active/);
+}
+
+/**
  * Signs in through the API rather than the form. For putting things back
  * after a test, which must work whether or not the test got as far as signing
  * in — the form redirects away when there is already a session.

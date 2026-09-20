@@ -16,7 +16,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, HOME_EDITOR, logInAs, logInByApi, reachesVisitors, uploadImage } from './cms';
+import { HOME_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -357,16 +357,49 @@ test('a replaced building, and words marked in bold and broken onto a new line, 
 
 test('the hero has no switch to hide it; every other section of the home page has one', async ({ page }) => {
   await logInAs(page, HOME_EDITOR);
-  await page.goto(`${ADMIN_PATH}/globals/home-page`);
-  const tab = (name: string) => page.getByRole('button', { name, exact: true });
+  await openPageEntry(page, 'home-page');
 
   for (const section of ['Trust strip', 'Situations', 'Units', 'Record', 'Before and after', 'Delay calculator', 'Figures', 'Questions']) {
-    await tab(section).click();
+    await openSection(page, section);
     await expect(page.getByLabel('Shows on the page'), section).toBeVisible();
   }
-  await tab('Hero').click();
+  await openSection(page, 'Hero');
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
+});
+
+/**
+ * What `openPageEntry` is for (ticket 61). The admin reopens the tab an editor
+ * last had open, and asks the server which one that was; the answer undoes a
+ * tab clicked while it is still in flight, and the test above then reads
+ * another section's panel — on CI, twice, as a switch that was never found.
+ * That window is milliseconds on a machine nobody is squeezing, so here the
+ * request is held up and the window is the whole of it.
+ */
+test('a section opened while the admin is still asking which tab was last open stays open', async ({ page }) => {
+  await logInAs(page, HOME_EDITOR);
+  // Held up until the test has been given the entry, which is the whole of
+  // the window: the request is only sent on to the server here.
+  let asked = false;
+  await page.route('**/api/payload-preferences/global-home-page*', async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    await route.fallback();
+    asked = true;
+  });
+
+  await openPageEntry(page, 'home-page');
+  expect(asked, 'the test was given the entry before the admin had asked which tab to reopen').toBe(true);
+
+  await openSection(page, 'Trust strip');
+  await expect(page.getByLabel('Shows on the page')).toBeVisible();
+
+  // Waiting for nothing to happen is the point of this one: the answer the
+  // admin was held up for is in, and with the tab clicked after it rather
+  // than before, nothing is left to put the Hero back.
+  await page.waitForTimeout(1_000);
+  await expect(page.getByRole('button', { name: 'Trust strip', exact: true })).toHaveClass(/tabs-field__tab-button--active/);
+  await expect(page.getByLabel('Shows on the page')).toBeVisible();
 });
 
 test('the CMS refuses what the home page cannot carry', async ({ page }) => {
