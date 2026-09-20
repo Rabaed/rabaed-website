@@ -151,7 +151,7 @@ export async function CaseStudyPage({ locale, slug }: { locale: Locale; slug: st
         </article>
       </section>
       <StructuredData
-        data={breadcrumbData(locale, [
+        data={await breadcrumbData(locale, [
           { name: copy.eyebrow, path: CASE_STUDIES_PATH },
           { name: caseStudy.title, path: caseStudyPath(slug) },
         ])}

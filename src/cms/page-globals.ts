@@ -57,8 +57,14 @@ export function pageGlobal(options: {
   /** The page's path in the Arabic locale, where Preview opens it. */
   readonly path: string;
   readonly sections: Tab[];
+  /**
+   * Where the entry sits in the admin's menu. The pages' own group by default;
+   * `null` stands it beside site settings, for words that belong to no one
+   * page (ticket 59).
+   */
+  readonly group?: Words | null;
 }): GlobalConfig {
-  const { slug, label, path, sections } = options;
+  const { slug, label, path, sections, group = PAGES_GROUP } = options;
   return {
     slug,
     label,
@@ -72,7 +78,7 @@ export function pageGlobal(options: {
       max: 100,
     },
     admin: {
-      group: PAGES_GROUP,
+      group: group ?? undefined,
       // English pages are not switched on yet (ticket 40), so a page is
       // previewed in Arabic.
       preview: () => `/api/preview?path=${encodeURIComponent(path)}`,

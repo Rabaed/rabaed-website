@@ -27,11 +27,13 @@ import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
 import { HomePage } from './cms/globals/home-page';
+import { IndexLeads } from './cms/globals/index-leads';
 import { PartnershipPage } from './cms/globals/partnership-page';
 import { ProductPage } from './cms/globals/product-page';
 import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
 import { ScreenMocks } from './cms/globals/screen-mocks';
+import { SiteWords } from './cms/globals/site-words';
 import { StartPage } from './cms/globals/start-page';
 import { ToolPage } from './cms/globals/tool-page';
 import { SUBMITTABLE_FORMS } from './forms/registry';
@@ -88,7 +90,8 @@ export default buildConfig({
   // One settings global per form that submits (ticket 27), the Referral
   // Program values (ticket 56), and one entry per marketing page whose words
   // are in the CMS (ticket 53), with the closing section and the Screen mocks
-  // the pages share (ticket 57).
+  // the pages share (ticket 57), the words every page shares and the two
+  // index leads (ticket 59).
   globals: [
     SiteSettings,
     AiCrawlers,
@@ -102,6 +105,8 @@ export default buildConfig({
     ClosingSection,
     ScreenMocks,
     PartnershipPage,
+    SiteWords,
+    IndexLeads,
   ],
 
   db: postgresAdapter({

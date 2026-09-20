@@ -5,6 +5,7 @@ import { LEGAL_PAGES, LEGAL_SLUGS } from '@/cms/legal-pages';
 import { BLOG_COPY } from '@/content/blog';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { COMPANY } from '@/content/company';
+import { getIndexLead } from '@/content/index-leads';
 import type { PageMeta } from '@/content/pages/page-content';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { getProductPage } from '@/content/pages/product';
@@ -72,12 +73,16 @@ function section(heading: string, entries: readonly Entry[]): string[] {
  * page of its own until a story is published (ticket 24).
  */
 async function pageEntries(caseStudies: readonly CaseStudy[]): Promise<Entry[]> {
-  const [product, start, tool, referral, partnership] = await Promise.all([
+  const [product, start, tool, referral, partnership, blogLead, caseStudiesLead] = await Promise.all([
     getProductPage(LOCALE),
     getStartPage(LOCALE),
     getToolPage(LOCALE),
     getReferralPage(LOCALE),
     getPartnershipPage(LOCALE),
+    // The line under each index's heading, which is also its search
+    // description — in the CMS since ticket 59.
+    getIndexLead(LOCALE, 'blog'),
+    getIndexLead(LOCALE, 'caseStudies'),
   ]);
   const page = ({ name, description }: PageMeta, path: string): Entry => ({ label: name, description, path });
 
@@ -87,9 +92,9 @@ async function pageEntries(caseStudies: readonly CaseStudy[]): Promise<Entry[]> 
     page(tool.meta, '/tool'),
     page(referral.meta, '/referral'),
     page(partnership.meta, '/partnership'),
-    { label: BLOG_COPY[LOCALE].title, path: blogIndexPath(), description: BLOG_COPY[LOCALE].lead },
+    { label: BLOG_COPY[LOCALE].title, path: blogIndexPath(), description: blogLead },
     ...(caseStudies.length > 0
-      ? [{ label: CASE_STUDIES_COPY[LOCALE].title, path: CASE_STUDIES_PATH, description: CASE_STUDIES_COPY[LOCALE].lead }]
+      ? [{ label: CASE_STUDIES_COPY[LOCALE].title, path: CASE_STUDIES_PATH, description: caseStudiesLead }]
       : []),
   ];
 }

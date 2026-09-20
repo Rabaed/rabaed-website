@@ -8,9 +8,8 @@ import { type MigrateUpArgs, type MigrateDownArgs, sql } from '@payloadcms/db-po
  * crawlers are allowed — so a database nobody has touched answers the same as
  * one saved with the box ticked, and `src/cms/crawler-policy.ts` reads either.
  *
- * Regenerated after merging ticket 29, so that it is written against the
- * schema `main` now has and its snapshot is the whole of it
- * (docs/agents/parallel-sessions.md).
+ * Written again on top of tickets 29 and 59, so that it is the newest and its
+ * snapshot is the whole schema (docs/agents/parallel-sessions.md).
  */
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
