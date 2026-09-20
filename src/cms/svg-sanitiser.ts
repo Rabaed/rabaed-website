@@ -11,8 +11,15 @@
  *
  * So what is stored is not what was uploaded: it is what survives this. The
  * rule is an allowed list, not a forbidden one — DOMPurify's SVG profile,
- * narrowed further here — because a forbidden list is a list of the attacks
- * somebody has already thought of.
+ * narrowed here — because a forbidden list is a list of the attacks somebody
+ * has already thought of.
+ *
+ * **Nothing here parses CSS.** A stylesheet can load another file in ways a
+ * regular expression finds and in ways it does not — `@import`, and `\75 rl(…)`
+ * among them. So a logo carries no stylesheet at all: neither a `<style>`
+ * element nor a `style` attribute, both of which a drawing program writes as
+ * an alternative to the `fill` and `stroke` attributes kept here. The strip
+ * draws every mark in one colour in any case.
  *
  * `tests/unit/svg-sanitiser.spec.ts` states case by case what must not
  * survive.
@@ -33,13 +40,16 @@ import type { Words } from './page-fields';
 const { window } = new JSDOM('');
 const purify = createDOMPurify(window);
 
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+
 /** The drawing must still be there afterwards: an empty picture is a refusal, not an upload. */
 const DRAWS = ['path', 'rect', 'circle', 'ellipse', 'polygon', 'polyline', 'line', 'text', 'image', 'use'];
 
 /**
  * Elements a logo never needs, and each a way in: script and handler run code;
  * `foreignObject` opens a window onto an HTML document; the animation elements
- * can rewrite another element's attribute after the sanitiser has read it.
+ * can rewrite another element's attribute after the sanitiser has read it; and
+ * `style` is a stylesheet, which is a second language to sanitise.
  */
 const NEVER = [
   'script',
@@ -54,6 +64,7 @@ const NEVER = [
   'set',
   'audio',
   'video',
+  'style',
 ];
 
 const NOT_AN_SVG: Words = {
@@ -67,27 +78,29 @@ const DECLARES_ENTITIES: Words = {
 };
 
 const NOTHING_LEFT: Words = {
-  ar: 'لم يبق من هذا الملف رسمة بعد إزالة ما لا يُقبل فيه. صدّره مرة أخرى رسمةً وحدها.',
-  en: 'Nothing was left of this file once what it may not carry was taken out. Export it again as a drawing alone.',
+  ar: 'لم يبق من هذا الملف رسمة بعد إزالة ما لا يُقبل فيه. صدّره مرة أخرى رسمةً وحدها، بألوانها على الأشكال نفسها لا في ورقة أنماط.',
+  en: 'Nothing was left of this file once what it may not carry was taken out. Export it again as a drawing alone, with its colours on the shapes themselves rather than in a stylesheet.',
 };
 
 export type SanitisedSvg = { readonly ok: true; readonly svg: string } | { readonly ok: false; readonly problem: Words };
 
 /**
- * A reference this file may keep: its own, by name. Anything else — another
- * file, another site — is a file that fetches on the visitor's behalf, which
- * is how a static logo becomes a tracker.
+ * Whether a value points anywhere but into this same file. A gradient, a
+ * filter or a mask the file declares is named `url(#id)` and stays; a
+ * reference to another file — by `href`, or inside `url(…)` on `fill`,
+ * `filter`, `mask` or `clip-path` — is a file that fetches on the visitor's
+ * behalf, which is how a static logo becomes a tracker.
  */
-function isOwnReference(value: string | null): boolean {
-  return typeof value === 'string' && value.trim().startsWith('#');
+function leavesTheFile(value: string): boolean {
+  for (const [, reference] of value.matchAll(/url\(\s*['"]?([^'")]*)['"]?\s*\)/gi)) {
+    if (!reference.trim().startsWith('#')) return true;
+  }
+  return false;
 }
 
-/**
- * Whatever a stylesheet loads from elsewhere, dropped. A gradient or a filter
- * this file declares is named `url(#id)` and stays.
- */
-function withoutLoadedStyles(css: string): string {
-  return css.replace(/url\(\s*(['"]?)(?!#)[^)]*\1\s*\)/gi, 'none');
+/** Whether an attribute names somewhere to go, which must be this file. */
+function isReference(name: string): boolean {
+  return name === 'href' || name === 'xlink:href';
 }
 
 export function sanitisedSvg(source: string): SanitisedSvg {
@@ -99,35 +112,39 @@ export function sanitisedSvg(source: string): SanitisedSvg {
   // already be sitting in the text.
   if (/<!DOCTYPE|<!ENTITY/i.test(written)) return { ok: false, problem: DECLARES_ENTITIES };
 
-  const purified = purify.sanitize(written, {
+  // The DOM DOMPurify itself produced, rather than its markup parsed a second
+  // time: re-parsing a sanitiser's own output is the shape that has carried
+  // attacks past sanitisers before.
+  // `RETURN_DOM` hands back the element DOMPurify built; it is typed as a
+  // `Node`, and what it always is here is an element with the drawing inside.
+  const holder = purify.sanitize(written, {
     USE_PROFILES: { svg: true, svgFilters: true },
     FORBID_TAGS: NEVER,
-    // Every handler, whatever it is called: `onload`, `onclick`, and the ones
-    // this list would not have thought of.
+    FORBID_ATTR: ['style'],
     ALLOW_DATA_ATTR: false,
-  });
+    RETURN_DOM: true,
+  }) as unknown as Element;
 
-  const holder = window.document.createElement('div');
-  holder.innerHTML = purified;
   const root = holder.querySelector('svg');
   if (!root) return { ok: false, problem: NOTHING_LEFT };
 
   for (const element of [root, ...Array.from(root.querySelectorAll('*'))]) {
-    for (const attribute of Array.from(element.attributes)) {
+    for (const attribute of Array.from(element.attributes) as Attr[]) {
       const name = attribute.name.toLowerCase();
-      if (name.startsWith('on')) element.removeAttribute(attribute.name);
-      if ((name === 'href' || name === 'xlink:href') && !isOwnReference(attribute.value)) {
-        element.removeAttribute(attribute.name);
-      }
-      if (name === 'style') element.setAttribute('style', withoutLoadedStyles(attribute.value ?? ''));
-    }
-    if (element.tagName.toLowerCase() === 'style') {
-      element.textContent = withoutLoadedStyles(element.textContent ?? '');
+      const value = attribute.value ?? '';
+      const away = isReference(name) ? !value.trim().startsWith('#') : leavesTheFile(value);
+      // A handler under a name DOMPurify did not know, and anything pointing
+      // out of this file, whatever attribute carries it.
+      if (name.startsWith('on') || away) element.removeAttribute(attribute.name);
     }
   }
 
-  const draws = DRAWS.some((tag) => root.querySelector(tag) !== null);
-  if (!draws) return { ok: false, problem: NOTHING_LEFT };
+  if (!DRAWS.some((tag) => root.querySelector(tag) !== null)) return { ok: false, problem: NOTHING_LEFT };
 
-  return { ok: true, svg: root.outerHTML };
+  // The namespace is declared, because the file is served as XML and a
+  // drawing without it is a broken image; and it is serialised as XML for the
+  // same reason, so that a non-breaking space is stored as the character
+  // rather than as an HTML name no XML parser knows.
+  if (root.getAttribute('xmlns') !== SVG_NAMESPACE) root.setAttribute('xmlns', SVG_NAMESPACE);
+  return { ok: true, svg: new window.XMLSerializer().serializeToString(root) };
 }

@@ -56,13 +56,22 @@ export const Media: CollectionConfig = {
      * survives the sanitiser, and one with nothing left — or one carrying a
      * document declaration — is refused with the reason, in the Editor's own
      * language. A PNG or a JPEG passes straight through.
+     *
+     * Payload runs this before it writes anything (`generateFileData`), so a
+     * refusal leaves no file behind. Were `useTempFiles` ever turned on, the
+     * file would be on disk before this and the buffer this changes ignored:
+     * the sanitiser would then have to read and write that file instead.
      */
     beforeOperation: [
       async ({ operation, req }) => {
         const file = req.file;
-        if ((operation !== 'create' && operation !== 'update') || file?.mimetype !== 'image/svg+xml') return;
+        if ((operation !== 'create' && operation !== 'update') || !file?.data) return;
+        // What the file *is*, not what the upload said it was: a drawing sent
+        // under a photograph's type would otherwise go by untouched.
+        const written = file.data.toString('utf8');
+        if (file.mimetype !== 'image/svg+xml' && !/^\s*(<\?xml|<!--|<svg[\s>])/i.test(written)) return;
 
-        const result = sanitisedSvg(file.data.toString('utf8'));
+        const result = sanitisedSvg(written);
         if (!result.ok) throw new APIError(inAdminLanguage(req, result.problem), 400, undefined, true);
 
         file.data = Buffer.from(result.svg, 'utf8');

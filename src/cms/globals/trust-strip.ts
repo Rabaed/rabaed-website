@@ -1,4 +1,4 @@
-import { addressField, listField, logoField, sectionTab, wordsField } from '../page-fields';
+import { BAR_HEIGHT, addressField, listField, logoField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 
 /**
@@ -75,7 +75,7 @@ export const TrustStripLogos = pageGlobal({
               type: 'number',
               required: true,
               min: 16,
-              max: 44,
+              max: BAR_HEIGHT,
               defaultValue: 32,
               label: { ar: 'ارتفاع الشعار (بكسل)', en: 'Drawn height (pixels)' },
               admin: {

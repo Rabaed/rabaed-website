@@ -98,14 +98,51 @@ test('a file that fetches another file is taken out', () => {
   expect(svg).not.toContain('https://example.test');
 });
 
-test('a style that loads or runs something is taken out, and plain styling stays', () => {
+test('a stylesheet is taken out whole, and colour on the shape itself stays', () => {
+  // Not sanitised, removed: CSS is a second language, and it loads another
+  // file in ways a regular expression finds and ways it does not — `@import`,
+  // and `= rl(…)`, which spells `url(` in escapes. A drawing program writes
+  // `fill` on the shape instead, which is what the strip keeps.
   const svg = cleaned(
-    '<svg xmlns="http://www.w3.org/2000/svg"><style>.a{fill:red} .b{background:url(https://example.test/x.png)}</style>' +
-      '<rect class="a" style="fill:#fff"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg">' +
+      '<style>@import "https://example.test/x.css"; .a{fill:red}</style>' +
+      '<rect class="a" style="fill:\\75 rl(https://example.test/x.png)" fill="#FFFFFF"/></svg>',
   );
 
   expect(svg).not.toContain('example.test');
-  expect(svg).toContain('fill:red');
+  expect(svg.toLowerCase()).not.toContain('<style');
+  expect(svg.toLowerCase()).not.toContain('@import');
+  expect(svg.toLowerCase()).not.toContain('style=');
+  expect(svg).toContain('fill="#FFFFFF"');
+});
+
+test('a shape painted from another file loses the paint, whatever attribute carries it', () => {
+  // `fill`, `filter`, `mask` and `clip-path` all take `url(…)`, and none of
+  // them is a link, so none was checked as one until the review of 20
+  // September 2026 found them.
+  const svg = cleaned(
+    '<svg xmlns="http://www.w3.org/2000/svg">' +
+      '<defs><linearGradient id="own"><stop offset="0" stop-color="#fff"/></linearGradient></defs>' +
+      '<path d="M0 0h1v1H0z" fill="url(https://example.test/paint.svg#g)"/>' +
+      '<path d="M0 0h1v1H0z" filter="url(https://example.test/f.svg#f)"/>' +
+      '<path d="M0 0h1v1H0z" mask="url(https://example.test/m.svg#m)"/>' +
+      '<path d="M0 0h1v1H0z" clip-path="url(https://example.test/c.svg#c)"/>' +
+      '<path d="M0 0h1v1H0z" fill="url(#own)"/></svg>',
+  );
+
+  expect(svg).not.toContain('example.test');
+  // Its own gradient, named in the same file, is untouched.
+  expect(svg).toContain('url(#own)');
+  expect(svg).toContain('<linearGradient');
+});
+
+test('what is stored is XML a browser can parse: its namespace declared, its characters its own', () => {
+  const svg = cleaned('<svg viewBox="0 0 10 10"><text> Rabaed</text><path d="M0 0h1v1H0z"/></svg>');
+
+  expect(svg).toContain('xmlns="http://www.w3.org/2000/svg"');
+  // `&nbsp;` is an HTML name; an XML parser does not know it, and a file
+  // carrying one is a broken image.
+  expect(svg).not.toContain('&nbsp;');
 });
 
 test('a document type declaration, which can read files off the server, is refused', () => {
