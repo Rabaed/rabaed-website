@@ -116,9 +116,26 @@ or production deployments stop.
    change what is on the live site. If there is only one, previews and
    production share the same content.
 6. **Create the database tables and the first account**, from a computer with
-   the repository. Set `DATABASE_URL` and `PAYLOAD_SECRET` to production's
-   values **in the terminal, for these commands only** — never in `.env.local`,
-   which `npm run dev` also reads and would then point at the live content.
+   the repository. These two commands need `DATABASE_URL` and `PAYLOAD_SECRET`
+   set to production's values — and neither value should ever be typed into a
+   terminal, pasted into a chat window or written into `.env.local`, which
+   `npm run dev` also reads and would then point at the live content.
+
+   Keep them in a file **outside the repository**, one `NAME=value` per line,
+   and pass them from there for the command only:
+
+   ```bash
+   env $(grep -v '^#' ~/rabaed-production.env | xargs) npm run cms:migrate
+   ```
+
+   ```powershell
+   Get-Content ~abaed-production.env | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$n" $v }; npm run cms:migrate
+   ```
+
+   A value typed on a command line is kept in the shell's history, where it
+   outlives the task by months. One pasted into a chat window is worse: it is
+   somewhere neither of you controls. If either happens, rotate both — the
+   steps are in ticket 39a part 3.
 
    ```bash
    npm run cms:migrate
@@ -294,8 +311,12 @@ date. **Production applies them itself**: its build runs the migrations before
 building the pages (`scripts/migrate-production.mjs`). **Preview builds never
 do**, so that trying out a pull request cannot change the tables the live site
 reads. With a separate preview database, run `npm run cms:migrate` against it,
-the same way as step 6, when a pull request that adds a migration needs a
-preview.
+the same way as step 6 — from a file, not from the command line — when a pull
+request that adds a migration needs a preview.
+
+**A migration regenerated after a merge takes a new name** (see the parallel
+sessions note below), so a preview database that was migrated before the
+rebase has the old one and needs migrating again.
 
 **Until that is done, the pull request's Vercel check goes red, and the red is
 expected.** The build fails on the first page that reads a table the preview
