@@ -166,19 +166,16 @@ export async function breadcrumbData(
   locale: Locale,
   steps: readonly BreadcrumbStep[],
 ): Promise<WithContext<BreadcrumbList>> {
-  const trail = [{ name: HOME_NAME[locale], path: '/' }, ...steps];
-  const named = await Promise.all(trail.map(async (step) => (await menuName(locale, step.path)) ?? step.name));
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: trail.map((step, index) => ({
-      '@type': 'ListItem',
+  const trail = await Promise.all(
+    [{ name: HOME_NAME[locale], path: '/' }, ...steps].map(async (step, index) => ({
+      '@type': 'ListItem' as const,
       position: index + 1,
-      name: named[index],
+      name: (await menuName(locale, step.path)) ?? step.name,
       item: pageUrl(locale, step.path),
     })),
-  };
+  );
+
+  return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: trail };
 }
 
 /**

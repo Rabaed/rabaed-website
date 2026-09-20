@@ -7,9 +7,10 @@ import type { Locale } from '@/lib/locales';
  * why it is one component here.
  *
  * Its lines and the labels on its links are read from the CMS (ticket 59);
- * the WhatsApp number and the social accounts are site settings (ticket 19). An account nobody has supplied yet keeps the Reference
- * site's `#`, rather than losing its icon: the accounts are awaiting the
- * founders, and ticket 39 will not let the site go public with them empty.
+ * the WhatsApp number and the social accounts are site settings (ticket 19).
+ * An account nobody has supplied yet keeps the Reference site's `#`, rather
+ * than losing its icon: the accounts are awaiting the founders, and ticket 39
+ * will not let the site go public with them empty.
  */
 export async function SiteFooter({ locale }: { locale: Locale }) {
   const [contact, { tagline, legalLinks, rights }] = await Promise.all([getContactPoints(), getFooter(locale)]);

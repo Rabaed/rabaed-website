@@ -2,7 +2,9 @@
  * The words every page shares, in the CMS (ticket 59): Ahmed rewords the
  * header's menu, changes where a link goes, rewrites the footer and the
  * not-found page and the line under each index — and the CMS refuses a label
- * the header cannot carry and an address that leads nowhere.
+ * the header cannot carry and an address that is not an address. An address
+ * that matches no page is allowed: the founder asked for a link that can be
+ * written before the page it names (spec: Content model).
  *
  * Every other suite reads these words on every page, so almost nothing here is
  * published. Rewording is saved as a draft and checked in the editor's
@@ -226,7 +228,7 @@ test('a menu of the longest labels the CMS allows still sits on one line', async
   }
 });
 
-test('a label longer than the header carries, an address that leads nowhere, and an empty menu are refused', async ({
+test('a label longer than the header carries, an address that is not an address, and an empty menu are refused', async ({
   page,
 }) => {
   await logInByApi(page.request, SITE_WORDS_EDITOR);

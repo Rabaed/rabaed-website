@@ -38,4 +38,9 @@
 - **An English page shows no header or footer at all**, as before this ticket: `EditorialFrame` gives an English page a bare `<main>` until ticket 40. Where the trail needs the home page's name in English it uses its own, because the menu has no English to give.
 - **The not-found page reads the CMS**, which makes it a page that can fail: every database is given these words by a migration, and one without them says so, as every other page in the CMS does.
 
+**Found in review (20 September 2026).**
+
+- **Preview opens one page per entry, not one per tab.** `pageGlobal` takes a single path, so previewing the not-found tab opens the home page and previewing the case studies lead opens the blog index. Each tab's words are still previewed on some page, and giving a tab a preview of its own is a change to ticket 53's groundwork rather than this ticket's.
+- **A page's own name is still passed to the trail** on the four pages the menu names, and is still what stands if an Editor removes that page from the menu. It reads as though it were inert; it is the fallback.
+
 **Parallel sessions.** Touches the header and footer, which every page renders, so every page's baselines re-run. Run it beside tickets 54–57 once ticket 53 is merged. No page ticket touches the header or footer, but every one of tickets 53–59 adds a CMS migration, and two branches' migrations collide: after updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).

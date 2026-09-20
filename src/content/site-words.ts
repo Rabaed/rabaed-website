@@ -1,6 +1,7 @@
 import { hasPublishedCaseStudies } from '@/cms/case-studies';
 import { pageEntry, wordsIn } from '@/cms/pages';
 import { ContentNotInLocale } from '@/content/pages/page-content';
+import { CASE_STUDIES_PATH } from '@/lib/case-study-paths';
 import { localePath, type Locale } from '@/lib/locales';
 
 /**
@@ -16,7 +17,11 @@ import { localePath, type Locale } from '@/lib/locales';
 
 /** A link in the menu or the footer: where it goes, and the words on it. */
 export type NavLink = {
-  /** Its destination in the Arabic locale, which is what marks the page it is on. */
+  /**
+   * Where the CMS says it goes: a path on the site in the Arabic locale, which
+   * is what marks the page a visitor is on — or an address of its own, for the
+   * product app, which is not a page of this site.
+   */
   readonly path: string;
   /** Where it actually leads: the path in this locale, or an address as written. */
   readonly href: string;
@@ -55,9 +60,6 @@ function href(locale: Locale, destination: string): string {
   return destination.startsWith('/') ? localePath(locale, destination) : destination;
 }
 
-/** The section a link leads to, once case studies have one to show (ticket 24). */
-const CASE_STUDIES = '/case-studies';
-
 /**
  * The header's menu in `locale`. The case studies link waits for its first
  * published story: until then the section it names is not there, and the
@@ -73,7 +75,7 @@ export async function getHeader(locale: Locale): Promise<HeaderContent> {
 
   return {
     links: header.links
-      .filter((link) => caseStudies || link.path !== CASE_STUDIES)
+      .filter((link) => caseStudies || link.path !== CASE_STUDIES_PATH)
       .map((link) => ({ path: link.path, href: href(locale, link.path), label: words(link.label) })),
     partnershipsLabel: words(header.partnershipsLabel),
     partnerships: header.partnerships.map((link) => ({

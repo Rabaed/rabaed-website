@@ -81,6 +81,9 @@ export const SiteWords = pageGlobal({
             singular: { ar: 'برنامج', en: 'Programme' },
             plural: { ar: 'القائمة المنسدلة', en: 'Dropdown' },
           },
+          // The panel hangs below the header rather than sitting in its row,
+          // so it carries longer words than a menu label: about twice the two
+          // programmes' own, which are 15 and 38 characters.
           rows: { min: 1, max: 4 },
           fields: [
             wordsField('label', { ar: 'الكلمة', en: 'Label' }, 28),
@@ -111,6 +114,9 @@ export const SiteWords = pageGlobal({
         ar: 'أسفل كل صفحة. أرقام التواصل وحسابات التواصل الاجتماعي في «إعدادات الموقع».',
         en: 'The bottom of every page. Contact numbers and social accounts are in Site settings.',
       },
+      // The footer stacks its lines and wraps them, so these are about twice
+      // today's words rather than a measured edge: the tagline is 50
+      // characters, the rights line 26, and the longest link label 15.
       fields: [
         wordsField('tagline', { ar: 'السطر تحت الشعار', en: 'Line under the logo' }, 70),
         listField({

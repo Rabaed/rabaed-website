@@ -63,6 +63,16 @@ type WordsValidation = TextFieldSingleValidation | TextareaFieldValidation;
 type ValidateOptions = Parameters<TextFieldSingleValidation>[1];
 
 /**
+ * Payload's own validator for a field, run before anything of ours: it is what
+ * enforces `required` and `maxLength`. It is typed for the admin rather than
+ * for a caller here, hence the cast, in one place rather than at each field
+ * that needs it.
+ */
+function checkedByPayload(base: WordsValidation, value: unknown, options: ValidateOptions): Promise<string | true> {
+  return (base as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
+}
+
+/**
  * Payload's own check for the field — required, and its length above all —
  * then `needed`, which says when an empty word is not allowed, and `marks`,
  * which says what is wrong with the marks written in words that may carry
@@ -74,7 +84,7 @@ function wordsValidation<Validation extends WordsValidation>(
   marks: (text: string) => Words | null,
 ): Validation {
   const validate = async (value: null | string | undefined, options: ValidateOptions) => {
-    const checked = await (base as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
+    const checked = await checkedByPayload(base, value, options);
     if (checked !== true) return checked;
     const message = isEmpty(value) ? needed(options) : marks(value as string);
     return message ? inAdminLanguage(options.req, message) : true;
@@ -176,7 +186,7 @@ const LATIN_ONLY: Words = {
  */
 export function latinField(name: string, label: Words, maxLength: number): Field {
   const validate = async (value: null | string | undefined, options: ValidateOptions) => {
-    const checked = await (text as (value: unknown, options: unknown) => Promise<string | true>)(value, options);
+    const checked = await checkedByPayload(text, value, options);
     if (checked !== true) return checked;
     const message = isEmpty(value) ? TEXT_NEEDED : ARABIC.test(value as string) ? LATIN_ONLY : null;
     return message ? inAdminLanguage(options.req, message) : true;
@@ -215,7 +225,7 @@ const SITE_PATH = /^\/[a-z0-9\-/]*$/;
  */
 export function addressField(name: string, label: Words, options: { readonly description?: Words } = {}): Field {
   const validate = async (value: null | string | undefined, validateOptions: ValidateOptions) => {
-    const checked = await (text as (value: unknown, options: unknown) => Promise<string | true>)(value, validateOptions);
+    const checked = await checkedByPayload(text, value, validateOptions);
     if (checked !== true) return checked;
     const written = typeof value === 'string' ? value.trim() : '';
     const shaped = SITE_PATH.test(written) || /^https:\/\/[^\s]+$/.test(written);
@@ -225,6 +235,10 @@ export function addressField(name: string, label: Words, options: { readonly des
     name,
     type: 'text',
     required: true,
+    // Longer than any address the site has — the longest is the product app's
+    // sign-in, at 44 — and short of the point where a pasted address is a
+    // mistake rather than a link.
+    maxLength: 200,
     label,
     admin: { rtl: false, description: options.description },
     validate: validate as unknown as TextFieldSingleValidation,

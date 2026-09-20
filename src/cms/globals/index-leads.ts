@@ -12,13 +12,15 @@ import { pageGlobal } from '../page-globals';
  * A page is published in a language only with all of its words in it
  * (`page-fields.ts`), so the two cannot live in one entry.
  *
- * 180 characters: the longest of the two lines today is 171, and a search
- * result shows about 160 before it cuts the rest off, so a line much longer
- * than this is written for a reader who never sees its end.
- *
  * The rest of each index's words — its eyebrow, its heading, the labels on its
  * pagination — stay in `src/content/blog.ts` and `src/content/case-studies.ts`:
  * this ticket names the lead line alone.
+ */
+
+/**
+ * 180 characters: the longest of the two lines today is 171, and a search
+ * result shows about 160 before it cuts the rest off, so a line much longer
+ * than this is written for a reader who never sees its end.
  */
 const LEAD = 180;
 
