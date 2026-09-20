@@ -25,7 +25,36 @@ Whichever is chosen, a number in the config wants the same thing ticket 60's wan
 
 ## Done when
 
-- [ ] The eight tab assertions pass on a hosted runner, repeatedly
-- [ ] The number they wait for is measured rather than guessed, and says where it comes from
-- [ ] A switch that genuinely never appears still fails the test, in words
-- [ ] The full suite is green
+- [x] The eight tab assertions pass on a hosted runner, repeatedly
+- [x] The number they wait for is measured rather than guessed, and says where it comes from
+- [x] A switch that genuinely never appears still fails the test, in words
+- [x] The full suite is green
+
+## Comments
+
+**Built on 20 September 2026.** The measurement changed what this ticket was about, so the reasoning matters more than the diff.
+
+**The click was never lost.** The Playwright trace from run 35529201175 (artifact `playwright-report-1`, job 106127627178) shows, at the moment of failure, `button "Trust strip" [active]` while the panel beside it still held the Hero's fields — "Line above the heading", "Title Lines*", and the Hero's own description. So the tab did switch; what lagged was the panel's re-render. That ruled out the other reading worth ruling out, a click landing before the admin had hydrated, which no timeout would have fixed.
+
+**The runner is not slow, which is the surprise.** A temporary spec timed the same re-render on the hosted runner, inside the shard that fails: **4ms at its fastest, 22ms median, 51ms at p90, 99ms at its slowest** over 32 samples, with the global's first paint 242–410ms. Idle on a twenty-core developer machine it is 4–45ms. So the runner is about twice as slow, not a thousand times — and a re-render that takes 99ms at its worst does not take five seconds because of arithmetic. The failure is an occasional **stall**, and no distribution of 32 samples can size one.
+
+That is what decided the number. Twenty seconds is not an allowance for slow work — it is headroom for a stall, and it costs a passing assertion nothing, because a retrying assertion returns the moment it is true.
+
+**One number in the config, not eight in a test.** The remedy this ticket framed as a choice resolved itself once the cause was known: a stall can hit any retrying assertion, and the eight tabs on the home page are simply where it was seen first. The same loop is in `partnership-page-text.spec.ts` and `page-text.spec.ts`, and ticket 60's session reproduced it in the partnership one locally under load. Fixing eight assertions would have left the rest on a default that would trip the next one, which is what this ticket warned about.
+
+**The test deadline had to move with it.** `playwright.config.ts` set no `timeout` either, so a test got Playwright's default thirty seconds. These tests walk a row of tabs and assert after each — eight on the home page, five on the partnership page — and under a full suite at twenty workers those assertions *pass*, but slowly, and their sum reaches the deadline: ticket 60's session recorded thirty seconds crossed across five of them with none of them failing. A bigger `expect` budget without a bigger deadline only converts an assertion's message into «Test timeout of 30000ms exceeded», which says nothing about what was expected.
+
+**Ticket 60's budget is thirty seconds and this one is twenty, on purpose.** Those waits are a whole server render of a page that publishing has marked stale, measured at 10.4 seconds under load; they carry their own timeout and are not covered by this one. This number is sized against a re-render measured at 99ms. Where an assertion should fail fast it still says so itself — the two `{ timeout: 500 }` checks in the reference comparisons.
+
+### Verified
+
+- **It still fails when the thing never appears.** With the locator changed to one that matches nothing, the test failed in words: «Trust strip / expect(locator).toBeVisible() failed / Timeout: 20000ms / element(s) not found», named by its section and reported as the assertion rather than as a test timeout. The change was reverted.
+- **Under load.** The full suite at twenty workers on a twenty-core machine: 886 passed. Every admin tab loop passed, including the partnership one that ticket 60's session had seen fail this way.
+- **On the runner.** The measurement itself ran green in shard 2/4, the shard that had been failing.
+
+### Seen while measuring, and not fixed here
+
+Two other failures under twenty-worker load, neither an assertion budget and neither this ticket's:
+
+- `health.spec.ts` › «/blog loads with no console errors and no failed requests», from a 500 on `/api/media/file/image-…-480x270.webp` — the server logged «File … for collection media is missing on the disk». A media file is being removed while another test renders a page that wants it. Ticket 60's session saw the same. Worth a ticket of its own.
+- `home-before-after-and-calculator-match-reference.spec.ts:139` › «dragged, at 1024x900», a bare thirty-second test timeout under load. The deadline raised here may well settle it; if it recurs, it needs its own look rather than a bigger number.
