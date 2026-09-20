@@ -16,7 +16,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, uploadImage } from './cms';
+import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, reachesVisitors, uploadImage } from './cms';
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
 
 test.describe.configure({ mode: 'default' });
@@ -544,7 +544,7 @@ test('a change to the product page published reaches visitors', async ({ page, r
       'published',
     );
     expect(response.ok(), await response.text()).toBe(true);
-    await expect.poll(async () => visitorHtml(request, '/product')).toContain(`${lead}</p>`);
+    await reachesVisitors(request, '/product', `${lead}</p>`, "the product page's reworded paragraph");
   } finally {
     const restored = await save(page.request, 'product-page', entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);
