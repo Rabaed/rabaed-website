@@ -6,10 +6,11 @@
  * They are imported as **drafts** by `20260921_101500_import_launch_articles`,
  * so on a fresh database they are already there and no visitor can reach one.
  * What this suite holds them to is what the ticket asks: that all six exist,
- * that each answers the kind of question it claims to, that each opens with a
- * standalone answer of 30 to 60 words, that none states a figure nobody can
- * source — and that publishing one is refused until it carries a real
- * person's name and a cover, which is the approval the ticket requires.
+ * complete with the Screen mock each opens with, that each answers the kind of
+ * question it claims to, that each opens with a standalone answer of 30 to 60
+ * words, that none states a figure nobody can source — and that publishing one
+ * is refused until a real person's name is on it, which is the approval the
+ * ticket requires.
  *
  * Every expectation is restated here rather than imported from
  * `src/migrations/launch-articles/`, for the reason `routes.ts` gives: a test
@@ -21,7 +22,7 @@
  * which other suites read — and unpublishes it again afterwards.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { LAUNCH_ARTICLES_EDITOR, logInByApi, uploadImage } from './cms';
+import { LAUNCH_ARTICLES_EDITOR, logInByApi } from './cms';
 import { nodesOf, structuredData } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
@@ -73,6 +74,13 @@ async function draftArticle(editor: APIRequestContext, slug: string) {
   };
 }
 
+/** One article's cover, as the CMS holds it. */
+async function coverImage(editor: APIRequestContext, id: number) {
+  const response = await editor.get(`/api/media/${id}`);
+  expect(response.ok(), await response.text()).toBe(true);
+  return (await response.json()) as { alt: string; url: string; mimeType: string };
+}
+
 /** Words as both Arabic and English count them: what stands between the spaces. */
 const words = (text: string) => text.trim().split(/\s+/).length;
 
@@ -92,14 +100,22 @@ test('the six launch articles are in the CMS as drafts, and no visitor can reach
   for (const { slug } of EXPECTED_ARTICLES) {
     const article = await draftArticle(page.request, slug);
 
-    // Written, but not Ahmed's yet: the two fields that are his are the two
-    // Payload requires to publish, so they are the approval gate.
+    // Complete but for the byline, which is Ahmed's, and which Payload
+    // requires to publish — so it is the approval gate.
     expect(article._status, slug).toBe('draft');
     expect(article.author, slug).toBe('');
-    expect(article.coverImage, slug).toBeNull();
     expect(article.title.length, slug).toBeGreaterThan(0);
     expect(article.summary.length, slug).toBeGreaterThan(0);
     expect(article.publishedAt, slug).toBeTruthy();
+
+    // A cover it arrived with: the Screen mock of the screen it is about,
+    // served as an image and described for a screen reader.
+    expect(article.coverImage, slug).toEqual(expect.any(Number));
+    const cover = await coverImage(page.request, article.coverImage!);
+    expect(cover.alt, slug).toContain('ربائد');
+    const served = await request.get(cover.url);
+    expect(served.status(), `${slug}: ${cover.url}`).toBe(200);
+    expect(served.headers()['content-type'], slug).toMatch(/^image\//);
 
     // Nowhere a visitor, a search engine or an assistant can find it.
     expect((await visit(request, `/blog/${slug}`)).status, slug).toBe(404);
@@ -146,7 +162,7 @@ test('each article answers its own kind of question, opening with a standalone a
   }
 });
 
-test('an article is published only once it carries a real person’s name and a cover — and then it is found', async ({
+test('an article is published only once a real person’s name is on it — and then it is found', async ({
   page,
   request,
   baseURL,
@@ -156,30 +172,25 @@ test('an article is published only once it carries a real person’s name and a 
   const article = await draftArticle(page.request, slug);
   const address = `${baseURL}/blog/${slug}`;
   const author = 'كاتب الاختبار';
-  let cover: number | null = null;
 
   try {
-    // As it arrives, publishing is refused: the byline is the founder's to
-    // give, and so is the picture (ticket 38).
+    // As it arrives, publishing is refused. The cover is already there; the
+    // byline is the founder's to give (ticket 38).
     const asImported = await page.request.patch(`/api/posts/${article.id}`, { data: { _status: 'published' } });
     expect(asImported.status(), await asImported.text()).toBe(400);
-
-    cover = await uploadImage(page.request, 'صورة غلاف لاختبار مقالات الإطلاق');
-    const withoutCover = await page.request.patch(`/api/posts/${article.id}`, { data: { author, _status: 'published' } });
-    expect(withoutCover.status(), await withoutCover.text()).toBe(400);
 
     // «Author attribution is a real person, not the company» (ticket 38). No
     // validator can prove a name is a person's, but the company's own names
     // are the one wrong answer worth refusing outright.
     for (const company of ['ربائد', 'Rabaed', 'شركة ربائد البناء']) {
       const asCompany = await page.request.patch(`/api/posts/${article.id}`, {
-        data: { author: company, coverImage: cover, _status: 'published' },
+        data: { author: company, _status: 'published' },
       });
       expect(asCompany.status(), `${company}: ${await asCompany.text()}`).toBe(400);
     }
 
     const published = await page.request.patch(`/api/posts/${article.id}`, {
-      data: { author, coverImage: cover, _status: 'published' },
+      data: { author, _status: 'published' },
     });
     expect(published.ok(), await published.text()).toBe(true);
 
@@ -211,13 +222,14 @@ test('an article is published only once it carries a real person’s name and a 
     // it would refuse a save that both clears them and stays published.
     await page.request.patch(`/api/posts/${article.id}`, { data: { _status: 'draft' } });
     await page.request.patch(`/api/posts/${article.id}?draft=true`, {
-      data: { author: '', coverImage: null, _status: 'draft' },
+      data: { author: '', _status: 'draft' },
     });
-    if (cover !== null) await page.request.delete(`/api/media/${cover}`);
   }
 
   await expect.poll(async () => (await visit(request, `/blog/${slug}`)).status).toBe(404);
   expect((await visit(request, '/sitemap.xml')).html).not.toContain(`<loc>${address}</loc>`);
   const restored = await draftArticle(page.request, slug);
-  expect(restored).toMatchObject({ _status: 'draft', author: '', coverImage: null });
+  expect(restored).toMatchObject({ _status: 'draft', author: '' });
+  // The cover it arrived with is untouched: nothing here uploaded one.
+  expect(restored.coverImage).toBe(article.coverImage);
 });

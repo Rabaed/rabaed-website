@@ -8,13 +8,16 @@
  * read this file: once imported, an article is read, edited and published in
  * the CMS. Changing a word here changes nothing anyone sees.
  *
- * **Drafts, not publications.** Every article arrives unpublished, and two
- * fields are deliberately left empty — the author and the cover image. Both
- * are required to publish, so the CMS itself refuses to put any of this in
- * front of a visitor until Ahmed has read it and put his own name on it. The
- * expertise is his and so is the byline; see «The blog, and the six articles
- * waiting in it» in `docs/deployment.md`, which also asks him to date each
- * article the day he publishes it.
+ * **Drafts, not publications.** Every article arrives unpublished with its
+ * author deliberately left empty. The author is required to publish, and
+ * `authorField` refuses the company's name in its place, so the CMS itself
+ * refuses to put any of this in front of a visitor until Ahmed has read it and
+ * put his own name on it. The expertise is his and so is the byline; see
+ * «The blog, and the six articles waiting in it» in `docs/deployment.md`,
+ * which also asks him to date each article the day he publishes it.
+ *
+ * Each article names the Screen mock it opens with, and the migration uploads
+ * it, so a draft is complete but for that one field.
  *
  * **Nothing here is new knowledge, and nothing here is his own account.**
  * Every claim is one the site already makes — the Reference site's pages as
@@ -32,6 +35,7 @@
  * other half is answered, in the articles below and in the FAQ entry
  * «كم يحتاج التشغيل؟».
  */
+import type { ScreenMockId } from '../../screen-mocks/registry';
 import type { Block, Inline } from './body';
 
 /**
@@ -55,6 +59,13 @@ export type QuestionKind =
 export type LaunchArticle = {
   /** The page's heading, and the first half of its tab. */
   readonly title: string;
+  /**
+   * The Screen mock this article opens with, by its id in
+   * `src/screen-mocks/registry.ts`. A depiction of the screen the article is
+   * about, which is the one picture of Rabaed that exists (ADR-0002) — and one
+   * Ahmed replaces from the CMS like any other.
+   */
+  readonly cover: ScreenMockId;
   readonly slug: string;
   /** Shown under the title on the blog index, and as the page's search description. */
   readonly summary: string;
@@ -82,8 +93,9 @@ const WORK_INSPECTION_REQUEST: readonly Inline[][] = [
  * left out. `Object.values` keeps the order they are written in, which is the
  * order they are created in, and so the order they sit in the admin's list.
  */
-const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
+export const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
   definition: {
+    cover: 'stamped-sheet',
     title: 'ما هي منصة ربائد؟',
     slug: 'what-is-rabaed',
     summary:
@@ -157,6 +169,7 @@ const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
     ],
   },
   comparison: {
+    cover: 'correspondence',
     title: 'ربائد مقابل واتساب والبريد الإلكتروني والإكسل',
     slug: 'rabaed-vs-whatsapp-email-excel',
     summary:
@@ -219,6 +232,7 @@ const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
     ],
   },
   how: {
+    cover: 'kanban',
     title: 'كيف تمر المعاملة من الطلب إلى الاعتماد؟',
     slug: 'from-request-to-approval',
     summary:
@@ -257,6 +271,7 @@ const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
     ],
   },
   useCase: {
+    cover: 'approvals-table',
     title: 'مكتب هندسي يشرف على خمسة مشاريع: كيف يبدو الأسبوع على ربائد؟',
     slug: 'engineering-office-five-projects',
     summary:
@@ -292,6 +307,7 @@ const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
     ],
   },
   objection: {
+    cover: 'submittal',
     title: 'ماذا لو رفض المقاول استخدام المنصة؟ وماذا عن بياناتنا؟',
     slug: 'what-if-the-contractor-refuses',
     summary:
@@ -333,6 +349,7 @@ const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
     ],
   },
   entity: {
+    cover: 'overview',
     title: 'من يقف خلف ربائد؟ ومن أين تعمل؟',
     slug: 'who-is-behind-rabaed',
     summary:
@@ -377,5 +394,3 @@ const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
     ],
   },
 };
-
-export const LAUNCH_ARTICLES: readonly LaunchArticle[] = Object.values(ARTICLE_PER_QUESTION_KIND);

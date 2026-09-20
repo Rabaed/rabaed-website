@@ -208,6 +208,12 @@ not an AI assistant. Every word in them is already somewhere on the site: they
 were written from the pages, the FAQ answers and the company's own details, and
 they state no figure or percentage that nobody can source. Nothing was invented.
 
+Each one also **arrives with a cover picture**: the Screen mock of the screen
+that article is about — the stamped approval sheet on «ما هي منصة ربائد؟», the
+correspondence screen on the comparison, and so on. Change any of them for
+another image if you would rather; they are there so that no article is waiting
+on a picture.
+
 **To publish one:**
 
 1. Open it under **Blog** and read it through. Change anything you disagree
@@ -215,15 +221,14 @@ they state no figure or percentage that nobody can source. Nothing was invented.
    you correct them first.
 2. Fill in **الكاتب** with the name of the person who wrote it. A real person,
    not «ربائد» and not the company: an article a reader can attribute to
-   somebody is worth more than one signed by a logo.
-3. Choose a **صورة الغلاف**.
-4. Set **تاريخ النشر** to the day you are publishing. Each draft arrives dated
+   somebody is worth more than one signed by a logo. The CMS refuses the
+   company's name here.
+3. Set **تاريخ النشر** to the day you are publishing. Each draft arrives dated
    21 September 2026, the day it was written.
-5. **Preview** it, then **Publish changes**.
+4. **Preview** it, then **Publish changes**.
 
-Steps 2 and 3 are not optional: the CMS refuses to publish an article with no
-author or no cover, which is what keeps any of this from reaching a visitor
-before you have seen it.
+Step 2 is not optional: the CMS refuses to publish an article with no author,
+which is what keeps any of this from reaching a visitor before you have seen it.
 
 Once published, an article appears on `/blog`, at its own address, in
 `sitemap.xml` and in `llms.txt`, and describes itself to search engines and AI
