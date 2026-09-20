@@ -45,7 +45,7 @@ export default async function ToolPage() {
       <Download content={content.download} />
       {content.questions.shows && <Questions content={content.questions} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
-      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/tool' }])} />
+      <StructuredData data={await breadcrumbData('ar', [{ name: content.meta.name, path: '/tool' }])} />
       <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );

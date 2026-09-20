@@ -110,6 +110,8 @@ export interface Config {
     'closing-section': ClosingSection;
     'screen-mocks': ScreenMock;
     'partnership-page': PartnershipPage;
+    'site-words': SiteWord;
+    'index-leads': IndexLead;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -124,6 +126,8 @@ export interface Config {
     'closing-section': ClosingSectionSelect<false> | ClosingSectionSelect<true>;
     'screen-mocks': ScreenMocksSelect<false> | ScreenMocksSelect<true>;
     'partnership-page': PartnershipPageSelect<false> | PartnershipPageSelect<true>;
+    'site-words': SiteWordsSelect<false> | SiteWordsSelect<true>;
+    'index-leads': IndexLeadsSelect<false> | IndexLeadsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -3431,6 +3435,134 @@ export interface PartnershipPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-words".
+ */
+export interface SiteWord {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  header: {
+    /**
+     * In the order they show. Drag them to reorder.
+     */
+    links: {
+      /**
+       * On one line in the header.
+       */
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      path: string;
+      id?: string | null;
+    }[];
+    /**
+     * The word that opens the dropdown. Not a link itself.
+     */
+    partnershipsLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    partnerships: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      summary: {
+        ar: string;
+        en?: string | null;
+      };
+      path: string;
+      id?: string | null;
+    }[];
+    signInLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The Rabaed app, a separate system outside this site.
+     */
+    signInUrl: string;
+    /**
+     * Lands on the demo form in the page, so where it goes is not an editable address.
+     */
+    demoLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  footer: {
+    tagline: {
+      ar: string;
+      en?: string | null;
+    };
+    legalLinks: {
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      path: string;
+      id?: string | null;
+    }[];
+    /**
+     * Shows after the © mark and the year, which are in the code.
+     */
+    rights: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  notFound: {
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the home page.
+     */
+    homeLabel: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "index-leads".
+ */
+export interface IndexLead {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  blog: {
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  caseStudies: {
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -6272,6 +6404,151 @@ export interface PartnershipPageSelect<T extends boolean = true> {
                     ar?: T;
                     en?: T;
                   };
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-words_select".
+ */
+export interface SiteWordsSelect<T extends boolean = true> {
+  languages?: T;
+  header?:
+    | T
+    | {
+        links?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              path?: T;
+              id?: T;
+            };
+        partnershipsLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        partnerships?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              summary?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              path?: T;
+              id?: T;
+            };
+        signInLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        signInUrl?: T;
+        demoLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  footer?:
+    | T
+    | {
+        tagline?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        legalLinks?:
+          | T
+          | {
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              path?: T;
+              id?: T;
+            };
+        rights?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  notFound?:
+    | T
+    | {
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        homeLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "index-leads_select".
+ */
+export interface IndexLeadsSelect<T extends boolean = true> {
+  languages?: T;
+  blog?:
+    | T
+    | {
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  caseStudies?:
+    | T
+    | {
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
             };
       };
   _status?: T;

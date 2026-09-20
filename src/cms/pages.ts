@@ -12,8 +12,9 @@ import { ContentNotInLocale } from '@/content/pages/page-content';
 import type { Locale } from '@/lib/locales';
 
 /**
- * The pages whose words are in the CMS so far, and the sections and pictures
- * pages share; ticket 59 adds the words every page shares.
+ * The pages whose words are in the CMS, and the entries pages share: the
+ * sections and pictures of tickets 53–58, and the words every page shares
+ * (ticket 59).
  */
 type PageSlug = Extract<
   GlobalSlug,
@@ -25,6 +26,8 @@ type PageSlug = Extract<
   | 'closing-section'
   | 'screen-mocks'
   | 'partnership-page'
+  | 'site-words'
+  | 'index-leads'
 >;
 
 /**

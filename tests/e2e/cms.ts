@@ -101,6 +101,12 @@ export const HOME_EDITOR = {
   password: 'test-editor-password-58',
 } as const;
 
+/** The site-wide words suite's own account (ticket 59), for the same reason as `BLOG_EDITOR`. */
+export const SITE_WORDS_EDITOR = {
+  email: 'site-words-editor@rabaed.test',
+  password: 'test-editor-password-59',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -116,6 +122,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   REFERRAL_PAGE_EDITOR,
   REFERRAL_VALUES_EDITOR,
   HOME_EDITOR,
+  SITE_WORDS_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */

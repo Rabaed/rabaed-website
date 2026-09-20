@@ -1,18 +1,18 @@
 import { getContactPoints } from '@/cms/contact-points';
-import { FOOTER_LEGAL_LINKS } from '@/content/navigation';
-import { localePath, type Locale } from '@/lib/locales';
+import { getFooter } from '@/content/site-words';
+import type { Locale } from '@/lib/locales';
 
 /**
  * The site footer. Byte-identical across all nine Reference pages, which is
  * why it is one component here.
  *
- * The WhatsApp number and the social accounts come from site settings in the
- * CMS (ticket 19). An account nobody has supplied yet keeps the Reference
+ * Its lines and the labels on its links are read from the CMS (ticket 59);
+ * the WhatsApp number and the social accounts are site settings (ticket 19). An account nobody has supplied yet keeps the Reference
  * site's `#`, rather than losing its icon: the accounts are awaiting the
  * founders, and ticket 39 will not let the site go public with them empty.
  */
 export async function SiteFooter({ locale }: { locale: Locale }) {
-  const contact = await getContactPoints();
+  const [contact, { tagline, legalLinks, rights }] = await Promise.all([getContactPoints(), getFooter(locale)]);
 
   return (
     <footer>
@@ -20,7 +20,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
         <div className="brand foot">
           <img className="lg" src="/brand/rabaed-wordmark-on-dark.png" alt="ربائد" width={563} height={210} />
         </div>
-        <div>نظام تشغيل مشاريع الإنشاء · الرياض · rabaedapp.com</div>
+        <div>{tagline}</div>
         <div className="social">
           <a href={contact.social.linkedin ?? '#'} aria-label="لينكدإن" target="_blank" rel="noopener">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -54,8 +54,8 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
       </div>
       <div className="wrap foot-bar">
         <div className="foot-legal">
-          {FOOTER_LEGAL_LINKS.map((link) => (
-            <a key={link.path} href={localePath(locale, link.path)}>
+          {legalLinks.map((link) => (
+            <a key={link.path} href={link.href}>
               {link.label}
             </a>
           ))}
@@ -68,7 +68,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
             forbids: "DM Mono for Latin numerals only ... must never be applied
             to Arabic text". Only the year is Latin, so only the year is mono. */}
         <div>
-          © <span className="mono">2026</span> ربائد · جميع الحقوق محفوظة
+          © <span className="mono">2026</span> {rights}
         </div>
       </div>
     </footer>

@@ -192,6 +192,45 @@ export function latinField(name: string, label: Words, maxLength: number): Field
   };
 }
 
+const ADDRESS_NEEDED: Words = {
+  ar: 'اكتب وجهة هذا الرابط: مساراً في الموقع يبدأ بشرطة مائلة مثل ‎/product، أو رابطاً كاملاً يبدأ بـ https://',
+  en: 'Write where this link goes: a path on the site beginning with a slash, such as /product, or a full address beginning with https://',
+};
+
+/**
+ * A path on the site, in the Arabic locale — `/`, `/product`, `/blog` — which
+ * `localePath` prefixes for another language. Latin letters, figures, hyphens
+ * and slashes, since that is what the site's routes are made of.
+ */
+const SITE_PATH = /^\/[a-z0-9\-/]*$/;
+
+/**
+ * Where a link goes (ticket 59). An Editor sets this as well as the words on
+ * the link, so a page added later can be linked to without a developer.
+ *
+ * The shape is checked, not the destination: a path that matches no page
+ * reaches the site's own not-found page, which is the ordinary state of a link
+ * written before the page it names. Checking it against the site's routes
+ * would refuse exactly the link this field exists to allow.
+ */
+export function addressField(name: string, label: Words, options: { readonly description?: Words } = {}): Field {
+  const validate = async (value: null | string | undefined, validateOptions: ValidateOptions) => {
+    const checked = await (text as (value: unknown, options: unknown) => Promise<string | true>)(value, validateOptions);
+    if (checked !== true) return checked;
+    const written = typeof value === 'string' ? value.trim() : '';
+    const shaped = SITE_PATH.test(written) || /^https:\/\/[^\s]+$/.test(written);
+    return shaped ? true : inAdminLanguage(validateOptions.req, ADDRESS_NEEDED);
+  };
+  return {
+    name,
+    type: 'text',
+    required: true,
+    label,
+    admin: { rtl: false, description: options.description },
+    validate: validate as unknown as TextFieldSingleValidation,
+  };
+}
+
 /** Whether an image is `size`, or larger in the same proportions. */
 function isSizeOrLargerInProportion(image: { width?: number | null; height?: number | null }, size: { width: number; height: number }) {
   const { width, height } = image;

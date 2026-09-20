@@ -100,7 +100,7 @@ export async function BlogPostPage({ locale, slug }: { locale: Locale; slug: str
         </article>
       </section>
       <StructuredData
-        data={breadcrumbData(locale, [
+        data={await breadcrumbData(locale, [
           { name: copy.eyebrow, path: blogIndexPath() },
           { name: post.title, path: blogPostPath(slug) },
         ])}

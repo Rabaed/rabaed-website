@@ -45,7 +45,7 @@ export default async function PartnershipPage() {
       <Path content={content.path} />
       {content.questions.shows && <Questions content={content.questions} />}
       <Apply content={content.apply} />
-      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/partnership' }])} />
+      <StructuredData data={await breadcrumbData('ar', [{ name: content.meta.name, path: '/partnership' }])} />
       <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );
