@@ -223,18 +223,26 @@ const SITE_PATH = /^\/[a-z0-9\-/]*$/;
  * written before the page it names. Checking it against the site's routes
  * would refuse exactly the link this field exists to allow.
  */
-export function addressField(name: string, label: Words, options: { readonly description?: Words } = {}): Field {
+export function addressField(
+  name: string,
+  label: Words,
+  options: { readonly description?: Words; readonly optional?: boolean } = {},
+): Field {
+  const optional = options.optional ?? false;
   const validate = async (value: null | string | undefined, validateOptions: ValidateOptions) => {
     const checked = await checkedByPayload(text, value, validateOptions);
     if (checked !== true) return checked;
     const written = typeof value === 'string' ? value.trim() : '';
+    // An empty box where a link is one thing a place may go without: a mark
+    // with nowhere to lead is drawn as a picture rather than as a link.
+    if (written === '') return optional ? true : inAdminLanguage(validateOptions.req, ADDRESS_NEEDED);
     const shaped = SITE_PATH.test(written) || /^https:\/\/[^\s]+$/.test(written);
     return shaped ? true : inAdminLanguage(validateOptions.req, ADDRESS_NEEDED);
   };
   return {
     name,
     type: 'text',
-    required: true,
+    required: !optional,
     // Longer than any address the site has — the longest is the product app's
     // sign-in, at 44 — and short of the point where a pasted address is a
     // mistake rather than a link.
@@ -244,6 +252,76 @@ export function addressField(name: string, label: Words, options: { readonly des
     validate: validate as unknown as TextFieldSingleValidation,
   };
 }
+
+/**
+ * Whether no image has been chosen at all — which a field that does not
+ * require one is allowed. Payload hands the value as an id or as the document
+ * itself, depending on where the check runs from.
+ */
+function chosenNothing(value: unknown): boolean {
+  const id = value && typeof value === 'object' ? (value as { id?: unknown }).id : value;
+  return id === null || id === undefined || id === '';
+}
+
+/**
+ * The image a picture or logo field has been given, read back from the CMS to
+ * be measured, or nothing where it cannot be read. Only ever called once
+ * `chosenNothing` says there is one.
+ */
+async function chosenImage(value: unknown, options: Parameters<UploadFieldSingleValidation>[1]) {
+  const id = value && typeof value === 'object' ? (value as { id?: unknown }).id : value;
+  return options.req.payload.findByID({ collection: 'media', id: id as number, depth: 0, req: options.req }).catch(() => null);
+}
+
+/**
+ * A company's mark for the Trust strip (ticket 20). Unlike a picture on a
+ * page, a logo has no shape of its own to hold to: a wordmark is wide, a
+ * monogram square, and the strip draws each at its own height. What is asked
+ * of it is that it be tall enough to stay sharp — twice the tallest height the
+ * bar draws, so a high-resolution screen has pixels to spare.
+ *
+ * A vector is exempt: it carries no pixel height, and has none to run short
+ * of. What it must not carry is checked when it is uploaded (ADR-0010).
+ */
+export function logoField(name: string, options: { readonly description?: Words } = {}): Field {
+  return {
+    name,
+    type: 'upload',
+    relationTo: 'media',
+    required: true,
+    label: { ar: 'الشعار', en: 'Mark' },
+    admin: {
+      description: options.description ?? {
+        ar: 'صورة PNG بخلفية شفافة، ارتفاعها ٨٨ بكسل فأكثر، أو ملف SVG. الشريط يرسم الشعار باللون الأبيض.',
+        en: 'A PNG with a transparent background, 88 pixels tall or more, or an SVG. The strip draws every mark in white.',
+      },
+    },
+    validate: async (value: unknown, options: Parameters<UploadFieldSingleValidation>[1]) => {
+      const checked = await validations.upload(value, options);
+      if (checked !== true) return checked;
+      if (chosenNothing(value)) return true;
+      const image = await chosenImage(value, options);
+      if (!image) return true;
+      // A vector: no height to measure, and none needed.
+      if (image.mimeType === 'image/svg+xml') return true;
+      if ((image.height ?? 0) >= LOGO_HEIGHT) return true;
+      return inAdminLanguage(options.req, {
+        ar: `الشعار يجب أن يكون بارتفاع ${LOGO_HEIGHT} بكسل فأكثر ليبقى واضحاً على الشاشات عالية الدقة، أو ملف SVG.`,
+        en: `A mark must be ${LOGO_HEIGHT} pixels tall or more to stay sharp on a high-resolution screen, or an SVG.`,
+      });
+    },
+  } as Field;
+}
+
+/**
+ * The height of the bar a mark sits in (`.logos .slot` in
+ * `src/styles/home.css`), which is the tallest a mark is ever drawn, and the
+ * height a file must have: twice that, so a high-resolution screen has pixels
+ * to spare. `src/cms/globals/trust-strip.ts` holds an Editor's chosen height
+ * to the same bar.
+ */
+export const BAR_HEIGHT = 44;
+const LOGO_HEIGHT = BAR_HEIGHT * 2;
 
 /** Whether an image is `size`, or larger in the same proportions. */
 function isSizeOrLargerInProportion(image: { width?: number | null; height?: number | null }, size: { width: number; height: number }) {
@@ -281,14 +359,11 @@ export function pictureField(options: {
       // Payload's own check first: required, and an image that exists.
       const checked = await validations.upload(value, options);
       if (checked !== true) return checked;
-      const { req } = options;
-      const id = value && typeof value === 'object' ? (value as { id?: unknown }).id : value;
-      if (id === null || id === undefined || id === '') return true;
-      const image = await req.payload
-        .findByID({ collection: 'media', id: id as number, depth: 0, req })
-        .catch(() => null);
+      // A place a picture is optional in, left empty, is not a wrong shape.
+      if (chosenNothing(value)) return true;
+      const image = await chosenImage(value, options);
       if (image && isSizeOrLargerInProportion(image, size)) return true;
-      return inAdminLanguage(req, {
+      return inAdminLanguage(options.req, {
         ar: `الصورة يجب أن تكون بمقاس ${size.width}×${size.height}، أو أكبر بالنسبة نفسها، ليبقى مكانها في الصفحة بشكله.`,
         en: `The picture must be ${size.width}×${size.height}, or larger in the same proportions, so its place on the page keeps its shape.`,
       });

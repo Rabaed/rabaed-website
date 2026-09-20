@@ -18,6 +18,15 @@
 - [ ] All nine pages reachable, every internal link resolving, the tool downloading
 - [ ] Analytics confirmed recording real visits
 
+## Waiting on the founders
+
+Gathered here on 20 September 2026 because each of these is on the critical path to launch and none of them can be finished by a developer. They are tickets of their own; this is the list that says the site cannot go live while any is open.
+
+- [ ] **Ticket 47 — the four proof figures have no source.** Each figure's card stays off the public site until the founders say what it is measured against. The site enforces this itself: a figure with no source is not shown on a public deployment.
+- [ ] **Ticket 49 — the real Pour Tracker file** from the co-founder. Until then the download is ticket 18's placeholder, which advertises the tool rather than being it.
+- [ ] **Ticket 45 — the Arabic eyebrows set in DM Mono**, a design decision about a typeface with no Arabic glyphs.
+- [ ] **Ticket 39a part 2 — how a failing test blocks a merge**, and **part 3 — the database password**, the one item here with a security consequence.
+
 **Note:** the Reference site's six `noindex` tags were correct while it was a prototype. This ticket is the one place they are removed, so the site cannot launch invisible by accident.
 
 ## Comments

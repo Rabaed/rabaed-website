@@ -248,6 +248,23 @@ test.describe('the hero', () => {
   });
 });
 
+/**
+ * Loads the page, then stops the browser fetching the strip's marks — the
+ * ones drawn on this page, whatever the CMS serves them from (ticket 20), and
+ * nothing else on it. `only` narrows that to one mark's file.
+ */
+async function withoutMarks(page: Page, only?: string): Promise<void> {
+  await page.goto('/');
+  const slots = page.locator('.logos-row:not(.copy) .slot');
+  const wanted = only === undefined ? slots : slots.filter({ has: page.getByText(only, { exact: true }) });
+  const sources = await wanted
+    .locator('img')
+    .evaluateAll((images) => images.map((image) => (image as HTMLImageElement).getAttribute('src') ?? ''));
+
+  for (const source of sources.filter(Boolean)) await page.route(`**${source}`, (route) => route.abort());
+  await page.reload();
+}
+
 test.describe('the Trust strip', () => {
   test('names every company in the server response', async ({ request }) => {
     const html = await (await request.get('/')).text();
@@ -297,8 +314,7 @@ test.describe('the Trust strip', () => {
   });
 
   test('shows the company name as text when its mark is missing', async ({ page }) => {
-    await page.route('**/logos/sika.png', (route) => route.abort());
-    await page.goto('/');
+    await withoutMarks(page, 'Sika');
 
     const slot = page.locator('.logos-row:not(.copy) .slot').last();
     await expect(slot.locator('b')).toHaveText('Sika');
@@ -315,9 +331,8 @@ test.describe('the Trust strip', () => {
     // narrowest phone is the width where that tells. The overflow test in
     // `page-shell.spec.ts` only ever sees the strip with all eight images
     // loading, so this is the case it cannot reach.
-    await page.route('**/logos/*.png', (route) => route.abort());
     await page.setViewportSize({ width: 360, height: 900 });
-    await page.goto('/');
+    await withoutMarks(page);
 
     await expect(page.locator('.logos-row:not(.copy) .slot b').first()).toBeVisible();
 
@@ -372,9 +387,8 @@ test.describe('with reduced motion', () => {
     // names in text instead — the longest of them thirty characters against
     // the 320px a 360px phone leaves inside the gutters. Neither the overflow
     // sweep in `page-shell.spec.ts` nor the two tests above reach this corner.
-    await page.route('**/logos/*.png', (route) => route.abort());
     await page.setViewportSize({ width: 360, height: 900 });
-    await page.goto('/');
+    await withoutMarks(page);
     await page.evaluate(() => document.fonts.ready);
 
     const names = page.locator('.logos-row:not(.copy) .slot b');

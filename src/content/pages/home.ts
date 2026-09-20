@@ -15,7 +15,7 @@ import { numeralsInMono } from '@/components/inline-text';
 import type { QuestionsContent } from '@/components/questions';
 import { getClosingSection } from '@/content/closing-section';
 import { getScreenMocks } from '@/content/screen-mocks';
-import { TRUST_STRIP } from '@/content/trust-strip';
+import { getTrustStrip } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
@@ -80,11 +80,12 @@ const EMPTY_STEP: TransactionStep = { action: '', by: '', time: '' };
  * a button says, never where it goes.
  */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const [entry, screenOf, closing, demoForm] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
     pageEntry('home-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST),
+    getTrustStrip(locale),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;
@@ -150,7 +151,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
       },
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
-    trustStrip: { shows: entry.trustStrip?.shows !== false, ...inLocale('trust strip', TRUST_STRIP, locale) },
+    trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
     situations: {
       shows: situations.shows !== false,
       eyebrow: words(situations.eyebrow),

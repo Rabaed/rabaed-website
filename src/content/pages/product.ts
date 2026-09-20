@@ -8,7 +8,7 @@ import type { FlowStep, ProductJourneyContent } from '@/components/product/journ
 import type { ProductRolesContent } from '@/components/product/roles';
 import { getClosingSection } from '@/content/closing-section';
 import { getScreenMocks } from '@/content/screen-mocks';
-import { TRUST_STRIP } from '@/content/trust-strip';
+import { getTrustStrip } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
@@ -70,11 +70,12 @@ function flowSteps(locale: Locale, flow: Flow): FlowStep[] {
  * a button says, never where it goes.
  */
 export async function getProductPage(locale: Locale): Promise<ProductPageContent> {
-  const [entry, screenOf, closing, demoForm] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
     pageEntry('product-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST),
+    getTrustStrip(locale),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, journey, customStrip, roles, innerCycle } = entry;
@@ -96,7 +97,7 @@ export async function getProductPage(locale: Locale): Promise<ProductPageContent
       secondary: { label: words(hero.secondaryLabel), href: '#journey' },
     },
     // The Reference site's product page carries the same strip as its home page.
-    trustStrip: { shows: entry.trustStrip?.shows !== false, ...inLocale('trust strip', TRUST_STRIP, locale) },
+    trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
     journey: {
       shows: true,
       eyebrow: words(journey.eyebrow),
