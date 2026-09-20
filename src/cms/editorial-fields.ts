@@ -37,6 +37,7 @@ import type {
   TextFieldSingleValidation,
 } from 'payload';
 import { text, textarea } from 'payload/shared';
+import { COMPANY } from '../content/company';
 import { localePath } from '../lib/locales';
 import { signedIn } from './access';
 import { refreshSite } from './revalidation';
@@ -250,6 +251,31 @@ export const localeField: Field = {
   admin: { position: 'sidebar' },
 };
 
+/**
+ * The company's own names, which an author is not. Read from
+ * `src/content/company.ts` rather than written out again: one form of the name
+ * everywhere is what keeps an answer engine reading one entity (HANDOFF §6.7),
+ * and a second copy here would be the first to drift.
+ */
+const COMPANY_NAMES = [COMPANY.name.ar, COMPANY.name.en, COMPANY.legalName];
+
+/**
+ * An author is a person. No validator can prove that, but it can refuse the
+ * one wrong answer that is actually likely — the company — which tickets 23,
+ * 24 and 38 all ask for in words and nothing until now enforced. A byline a
+ * reader can attribute to somebody is worth more than one signed by a logo,
+ * and it is what an engine reads as an author at all.
+ */
+const authorValidation: TextFieldSingleValidation = async (value, options) => {
+  const base = await text(value, options);
+  if (base !== true || !value) return base;
+
+  const written = value.trim();
+  return COMPANY_NAMES.some((name) => written.localeCompare(name, undefined, { sensitivity: 'base' }) === 0)
+    ? 'اكتب اسم الشخص الذي كتب النص، لا اسم الشركة.'
+    : true;
+};
+
 export const authorField: Field = {
   name: 'author',
   type: 'text',
@@ -262,6 +288,7 @@ export const authorField: Field = {
       en: 'The person who wrote it, not the company.',
     },
   },
+  validate: authorValidation,
 };
 
 export const publishedAtField: Field = {

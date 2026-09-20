@@ -32,7 +32,7 @@ test.describe.configure({ mode: 'default' });
  * against WhatsApp, email and spreadsheets», the gap the handoff calls the
  * weakest and the most asked for.
  */
-const LAUNCH_ARTICLES = [
+const EXPECTED_ARTICLES = [
   { kind: 'تعريف', slug: 'what-is-rabaed', phrases: ['ربائد منصة سعودية', 'المالك والاستشاري والمقاول'] },
   { kind: 'مقارنة', slug: 'rabaed-vs-whatsapp-email-excel', phrases: ['واتساب', 'البريد الإلكتروني', 'الإكسل'] },
   { kind: 'كيف', slug: 'from-request-to-approval', phrases: ['من الطلب إلى الاعتماد', 'إشعار الاستلام'] },
@@ -89,7 +89,7 @@ function openingParagraph(page: Page): Promise<string | undefined> {
 test('the six launch articles are in the CMS as drafts, and no visitor can reach one', async ({ page, request }) => {
   await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
 
-  for (const { slug } of LAUNCH_ARTICLES) {
+  for (const { slug } of EXPECTED_ARTICLES) {
     const article = await draftArticle(page.request, slug);
 
     // Written, but not Ahmed's yet: the two fields that are his are the two
@@ -108,7 +108,7 @@ test('the six launch articles are in the CMS as drafts, and no visitor can reach
   const index = await visit(request, '/blog');
   const sitemap = await visit(request, '/sitemap.xml');
   const llms = await visit(request, '/llms.txt');
-  for (const { slug } of LAUNCH_ARTICLES) {
+  for (const { slug } of EXPECTED_ARTICLES) {
     expect(index.html, slug).not.toContain(`/blog/${slug}`);
     expect(sitemap.html, slug).not.toContain(`/blog/${slug}`);
     expect(llms.html, slug).not.toContain(`/blog/${slug}`);
@@ -120,7 +120,7 @@ test('each article answers its own kind of question, opening with a standalone a
 }) => {
   await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
 
-  for (const { kind, slug, phrases } of LAUNCH_ARTICLES) {
+  for (const { kind, slug, phrases } of EXPECTED_ARTICLES) {
     const article = await draftArticle(page.request, slug);
 
     // The spec's rule for the paragraph an engine quotes, which the CMS
@@ -134,12 +134,15 @@ test('each article answers its own kind of question, opening with a standalone a
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(article.title);
     expect(await openingParagraph(page), `${kind} · ${slug}`).toBe(article.answer);
 
-    const body = await page.locator('.entry-body').innerText();
-    for (const phrase of phrases) expect(body + article.answer + article.title, `${kind} · ${slug}`).toContain(phrase);
-    // Written as an article, not as one long paragraph: an engine reads by
-    // heading, and the spec asks every section to open with its own answer.
-    expect(await page.locator('.entry-body h2').count(), `${kind} · ${slug}`).toBeGreaterThanOrEqual(3);
-    for (const figure of UNSOURCED_FIGURES) expect(body, `${kind} · ${slug}`).not.toContain(figure);
+    // Everything the article puts in front of a reader, the parts an engine
+    // lifts first — the title, the summary and the opening answer — included.
+    const written = [article.title, article.summary, article.answer, await page.getByRole('article').innerText()];
+    const somewhere = (phrase: string) => written.some((part) => part.includes(phrase));
+    for (const phrase of phrases) expect(somewhere(phrase), `${kind} · ${slug} · ${phrase}`).toBe(true);
+    for (const figure of UNSOURCED_FIGURES) expect(somewhere(figure), `${kind} · ${slug} · ${figure}`).toBe(false);
+    // Written as an article rather than as one long paragraph, so that an
+    // engine reading by heading finds more than one place to read.
+    expect(await page.getByRole('heading', { level: 2 }).count(), `${kind} · ${slug}`).toBeGreaterThanOrEqual(3);
   }
 });
 
@@ -149,7 +152,7 @@ test('an article is published only once it carries a real person’s name and a 
   baseURL,
 }) => {
   await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
-  const { slug } = LAUNCH_ARTICLES[1];
+  const { slug } = EXPECTED_ARTICLES[1];
   const article = await draftArticle(page.request, slug);
   const address = `${baseURL}/blog/${slug}`;
   const author = 'كاتب الاختبار';
@@ -164,6 +167,16 @@ test('an article is published only once it carries a real person’s name and a 
     cover = await uploadImage(page.request, 'صورة غلاف لاختبار مقالات الإطلاق');
     const withoutCover = await page.request.patch(`/api/posts/${article.id}`, { data: { author, _status: 'published' } });
     expect(withoutCover.status(), await withoutCover.text()).toBe(400);
+
+    // «Author attribution is a real person, not the company» (ticket 38). No
+    // validator can prove a name is a person's, but the company's own names
+    // are the one wrong answer worth refusing outright.
+    for (const company of ['ربائد', 'Rabaed', 'شركة ربائد البناء']) {
+      const asCompany = await page.request.patch(`/api/posts/${article.id}`, {
+        data: { author: company, coverImage: cover, _status: 'published' },
+      });
+      expect(asCompany.status(), `${company}: ${await asCompany.text()}`).toBe(400);
+    }
 
     const published = await page.request.patch(`/api/posts/${article.id}`, {
       data: { author, coverImage: cover, _status: 'published' },

@@ -24,8 +24,11 @@ export type Inline = string | { readonly strong: string } | { readonly link: str
 export type Line = readonly Inline[];
 
 export type Block =
-  /** A section heading. The title is the page's first level, so an article's own start at the second. */
-  | { readonly kind: 'heading'; readonly level: 2 | 3; readonly text: Line }
+  /**
+   * A section heading. The title is the page's first level, so an article's
+   * own are the second — the editor offers a third, and no article needs one.
+   */
+  | { readonly kind: 'heading'; readonly text: Line }
   | { readonly kind: 'paragraph'; readonly text: Line }
   | { readonly kind: 'list'; readonly items: readonly Line[] }
   | { readonly kind: 'quote'; readonly text: Line };
@@ -57,7 +60,7 @@ const inline = (piece: Inline) => {
 
 const paragraph = (line: Line) => ({ ...RTL, type: 'paragraph', textFormat: 0, textStyle: '', children: line.map(inline) });
 
-const heading = (level: 2 | 3, line: Line) => ({ ...RTL, type: 'heading', tag: `h${level}`, children: line.map(inline) });
+const heading = (line: Line) => ({ ...RTL, type: 'heading', tag: 'h2', children: line.map(inline) });
 
 const quote = (line: Line) => ({ ...RTL, type: 'quote', children: line.map(inline) });
 
@@ -73,7 +76,7 @@ const list = (items: readonly Line[]) => ({
 function node(block: Block) {
   switch (block.kind) {
     case 'heading':
-      return heading(block.level, block.text);
+      return heading(block.text);
     case 'paragraph':
       return paragraph(block.text);
     case 'list':

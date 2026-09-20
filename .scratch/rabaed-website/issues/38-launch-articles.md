@@ -4,7 +4,7 @@
 
 **Blocked by:** 23
 
-**Status:** the six articles are written and waiting in the CMS as drafts; publishing them is `ready-for-human` — see below
+**Status:** ready-for-human — the six articles are written and waiting in the CMS as drafts; publishing them needs the founder, see below
 
 - [x] Articles cover the question types the handoff identifies: definition, comparison, how-to, use case, objection and entity expansion
 - [x] Comparison content included — Rabaed against WhatsApp, email and spreadsheets — as the biggest gap and the most-demanded in AI answers

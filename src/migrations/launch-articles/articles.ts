@@ -8,22 +8,29 @@
  * read this file: once imported, an article is read, edited and published in
  * the CMS. Changing a word here changes nothing anyone sees.
  *
- * **Drafts, not publications.** Every article arrives unpublished, and three
- * fields are deliberately left empty — the author, the cover image and the
- * published date. All three are required to publish, so the CMS itself refuses
- * to put any of this in front of a visitor until Ahmed has read it, put his
- * own name on it and chosen its date. The expertise is his and so is the
- * byline; see «Launch articles» in `docs/deployment.md`.
+ * **Drafts, not publications.** Every article arrives unpublished, and two
+ * fields are deliberately left empty — the author and the cover image. Both
+ * are required to publish, so the CMS itself refuses to put any of this in
+ * front of a visitor until Ahmed has read it and put his own name on it. The
+ * expertise is his and so is the byline; see «The blog, and the six articles
+ * waiting in it» in `docs/deployment.md`, which also asks him to date each
+ * article the day he publishes it.
  *
- * **Nothing here is new knowledge.** Every claim is one the site already
- * makes — the Reference site's pages as the CMS now holds them, its FAQ
- * answers, and `src/content/company.ts`. No figure, percentage, client count
- * or testimonial appears, because none is sourced (spec: SEO and GEO; ticket
- * 47). That is what rules out the seventh kind of question, «رقم» — how much
- * does it cost, how many projects — which cannot be answered from cleared
- * facts; the cleared numbers that do exist (the sixty-day guarantee,
- * activation in under a day, fifteen minutes a team) are stated inside the
- * six articles below instead.
+ * **Nothing here is new knowledge, and nothing here is his own account.**
+ * Every claim is one the site already makes — the Reference site's pages as
+ * the CMS now holds them, its FAQ answers, and `src/content/company.ts` —
+ * which are his words, but drafted from the site rather than from him. No
+ * figure, percentage, client count or testimonial appears that the site cannot
+ * source (spec: SEO and GEO; ticket 47), and a figure the site publishes is
+ * written the way the site publishes it: «60 يوماً», «15 دقيقة», «30 دقيقة»,
+ * never spelled out, because one form of a fact is what makes it quotable
+ * (HANDOFF §6.7).
+ *
+ * **The seventh kind of question, «رقم», is not one of the six**, as the
+ * ticket's own list of six is not the handoff's seven. Half of it — what it
+ * costs — has no answer the site may give, since no price is published; the
+ * other half is answered, in the articles below and in the FAQ entry
+ * «كم يحتاج التشغيل؟».
  */
 import type { Block, Inline } from './body';
 
@@ -46,7 +53,6 @@ export type QuestionKind =
   | 'entity';
 
 export type LaunchArticle = {
-  readonly kind: QuestionKind;
   /** The page's heading, and the first half of its tab. */
   readonly title: string;
   readonly slug: string;
@@ -57,7 +63,7 @@ export type LaunchArticle = {
   readonly body: readonly Block[];
 };
 
-const h2 = (text: string): Block => ({ kind: 'heading', level: 2, text: [text] });
+const h2 = (text: string): Block => ({ kind: 'heading', text: [text] });
 const p = (...text: Inline[]): Block => ({ kind: 'paragraph', text });
 const ul = (...items: readonly Inline[][]): Block => ({ kind: 'list', items });
 const quote = (text: string): Block => ({ kind: 'quote', text: [text] });
@@ -66,13 +72,18 @@ const quote = (text: string): Block => ({ kind: 'quote', text: [text] });
 const WORK_INSPECTION_REQUEST: readonly Inline[][] = [
   ['أُرسل — م. فهد، المقاول · 07:50'],
   ['استُلم — إشعار استلام تلقائي · 07:50'],
-  ['فُحص في الموقع — م. سارة، الاستشاري · أربع صور · 11:20'],
+  ['فُحص في الموقع — م. سارة، الاستشاري · 4 صور · 11:20'],
   ['اعتُمد — مطابق، يُسمح بالصب · 12:05'],
 ];
 
-export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
-  {
-    kind: 'definition',
+/**
+ * One article per kind of question, keyed by the kind, so that the compiler
+ * holds what the ticket asks for: every kind answered, none twice, and none
+ * left out. `Object.values` keeps the order they are written in, which is the
+ * order they are created in, and so the order they sit in the admin's list.
+ */
+const ARTICLE_PER_QUESTION_KIND: Record<QuestionKind, LaunchArticle> = {
+  definition: {
     title: 'ما هي منصة ربائد؟',
     slug: 'what-is-rabaed',
     summary:
@@ -136,17 +147,16 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       ),
       h2('كيف تبدأ؟'),
       p(
-        'التشغيل أيام لا شهور. فريق ربائد يأتي إلى الموقع، ويُعدّ المشروع والنماذج والأطراف، ويجلس خمس عشرة دقيقة مع كل فريق، ثم يبدأ الجميع من حيث وصل المشروع. والتفعيل نفسه يستغرق أقل من يوم، دون توقف للعمل ودون فترة انتقالية.',
+        'التشغيل أيام لا شهور. فريق ربائد يأتي إلى الموقع، ويُعدّ المشروع والنماذج والأطراف، ويجلس 15 دقيقة مع كل فريق، ثم يبدأ الجميع من حيث وصل المشروع. والتفعيل نفسه يستغرق أقل من يوم، دون توقف للعمل ودون فترة انتقالية.',
       ),
       p(
-        'وهناك ضمان ستين يوماً من تاريخ التفعيل: إن قررتم التوقف خلالها نعيد كامل المبلغ المدفوع، ونسلّمكم نسخة كاملة من سجل مشروعكم. التفاصيل والأسئلة الشائعة في ',
+        'وهناك ضمان 60 يوماً من تاريخ التفعيل: إن قررتم التوقف خلالها نعيد كامل المبلغ المدفوع، ونسلّمكم نسخة كاملة من سجل مشروعكم. التفاصيل والأسئلة الشائعة في ',
         { link: 'صفحة ابدأ', href: '/start' },
         '.',
       ),
     ],
   },
-  {
-    kind: 'comparison',
+  comparison: {
     title: 'ربائد مقابل واتساب والبريد الإلكتروني والإكسل',
     slug: 'rabaed-vs-whatsapp-email-excel',
     summary:
@@ -208,8 +218,7 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       p('الوحدات الأربع وما يراه كل طرف منها في ', { link: 'صفحة المنتج', href: '/product' }, '.'),
     ],
   },
-  {
-    kind: 'how',
+  how: {
     title: 'كيف تمر المعاملة من الطلب إلى الاعتماد؟',
     slug: 'from-request-to-approval',
     summary:
@@ -242,13 +251,12 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       p(
         'تبقى المعاملة نفسها حاملة خطواتها الأربع بأسمائها وأوقاتها وملاحظاتها، فلا يُسأل في المشروع من اعتمد بل تُفتح المعاملة. وبعد سنة، أو بعد نهاية المشروع والاشتراك، السجل نفسه ما زال هناك — وهو ملك صاحب المشروع في كل الأحوال.',
       ),
-      p('مثال على طلب تسليم أعمال لحديد سقف الدور الثالث، بدأ وانتهى في اليوم نفسه:'),
+      p('مثال على طلب تسليم أعمال لحديد سقف الدور 3، بدأ وانتهى في اليوم نفسه:'),
       ul(...WORK_INSPECTION_REQUEST),
       p('الوحدة التي يمر بها هذا المسار موصوفة في ', { link: 'صفحة المنتج', href: '/product' }, '.'),
     ],
   },
-  {
-    kind: 'useCase',
+  useCase: {
     title: 'مكتب هندسي يشرف على خمسة مشاريع: كيف يبدو الأسبوع على ربائد؟',
     slug: 'engineering-office-five-projects',
     summary:
@@ -283,8 +291,7 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       p('تفاصيل الأنماط الثلاثة ومسار الشراكة في ', { link: 'صفحة برنامج الشراكات', href: '/partnership' }, '.'),
     ],
   },
-  {
-    kind: 'objection',
+  objection: {
     title: 'ماذا لو رفض المقاول استخدام المنصة؟ وماذا عن بياناتنا؟',
     slug: 'what-if-the-contractor-refuses',
     summary:
@@ -303,7 +310,7 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       ),
       h2('وماذا لو رفض أحد الأطراف؟'),
       p(
-        'الاشتراك سنوي لكل مشروع ويغطي جميع أطرافه ومستخدميه بلا تكلفة إضافية عليهم، فالرفض نادراً ما يكون بسبب الكلفة. وحين يحدث يكون سببه الوقت: فريق مشغول يخشى نظاماً جديداً. ولهذا التفعيل أقل من يوم دون توقف للعمل، وجلسة تعريفية واحدة مدتها خمس عشرة دقيقة لكل فريق.',
+        'الاشتراك سنوي لكل مشروع ويغطي جميع أطرافه ومستخدميه بلا تكلفة إضافية عليهم، فالرفض نادراً ما يكون بسبب الكلفة. وحين يحدث يكون سببه الوقت: فريق مشغول يخشى نظاماً جديداً. ولهذا التفعيل أقل من يوم دون توقف للعمل، وجلسة تعريفية واحدة مدتها 15 دقيقة لكل فريق.',
       ),
       p(
         'والفريق لا يبدأ من الصفر: يبدأ الجميع من حيث وصل المشروع، وتُرفع المستندات المعتمدة الحالية، وتبدأ الطلبات الجديدة من اليوم الأول — فمشروع قائم منذ سنة ينفع تماماً كمشروع يبدأ غداً.',
@@ -314,13 +321,18 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       ),
       h2('وإن لم يناسبنا بعد التشغيل؟'),
       p(
-        'ضمان ستين يوماً من تاريخ التفعيل: إن قررتم التوقف خلالها نعيد كامل المبلغ المدفوع، ونسلّمكم نسخة كاملة من سجل مشروعكم. الشرط الوحيد أن تُشغَّل على مشروع حقيقي لا على تجربة جانبية، لأن ما يُختبر هنا أسلوب عمل بين ثلاثة أطراف، لا واجهة برنامج.',
+        'ضمان 60 يوماً من تاريخ التفعيل: إن قررتم التوقف خلالها نعيد كامل المبلغ المدفوع، ونسلّمكم نسخة كاملة من سجل مشروعكم. وندعوكم أن تشغّلوها على مشروع حقيقي لا على تجربة جانبية، لأن ما يُختبر هنا أسلوب عمل بين ثلاثة أطراف لا واجهة برنامج.',
       ),
-      p('بقية الأسئلة قبل التشغيل في ', { link: 'صفحة ابدأ', href: '/start' }, '.'),
+      p(
+        'بقية الأسئلة قبل التشغيل في ',
+        { link: 'صفحة ابدأ', href: '/start' },
+        '، وشروط الضمان نفسها في ',
+        { link: 'الشروط والأحكام', href: '/terms' },
+        '.',
+      ),
     ],
   },
-  {
-    kind: 'entity',
+  entity: {
     title: 'من يقف خلف ربائد؟ ومن أين تعمل؟',
     slug: 'who-is-behind-rabaed',
     summary:
@@ -359,9 +371,11 @@ export const LAUNCH_ARTICLES: readonly LaunchArticle[] = [
       ),
       h2('كيف تتواصل معنا؟'),
       p(
-        'أوضح طريق هو حجز عرض حي على مشروع حقيقي: ثلاثون دقيقة بالعربية، يعرض فيها الفريق المنصة كما يستخدمها الاستشاري والمقاول فعلاً، لا شرائح عرض. وللمكاتب التي تريد ترتيباً على مستوى المحفظة، طلب اجتماع شراكة يرد عليه فريق الشراكات خلال يومي عمل.',
+        'أوضح طريق هو حجز عرض حي على مشروع حقيقي: 30 دقيقة بالعربية، يعرض فيها الفريق المنصة كما يستخدمها الاستشاري والمقاول فعلاً. وللمكاتب التي تريد ترتيباً على مستوى المحفظة، هناك طلب اجتماع شراكة يرد عليه فريق الشراكات خلال يومي عمل، ويشمل الاجتماع الأول عرض المنصة.',
       ),
       p('ابدأ من ', { link: 'صفحة ابدأ', href: '/start' }, '.'),
     ],
   },
-];
+};
+
+export const LAUNCH_ARTICLES: readonly LaunchArticle[] = Object.values(ARTICLE_PER_QUESTION_KIND);
