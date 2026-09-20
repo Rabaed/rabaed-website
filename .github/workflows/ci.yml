@@ -32,6 +32,10 @@ name: CI
 # and the check was claiming more than it knew.
 on:
   pull_request:
+    # Spelled out rather than left to the default: the bare `pull_request:`
+    # was tried on 20 September 2026 and GitHub created no run for a push to
+    # an open pull request at all, which is worse than any verdict.
+    types: [opened, synchronize, reopened, ready_for_review]
 
 # A new push supersedes the run in flight for the same branch.
 concurrency:
