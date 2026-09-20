@@ -15,7 +15,7 @@ import { plainText } from '@/components/inline-text';
 import { COMPANY } from '@/content/company';
 import { menuName } from '@/content/site-words';
 import { blogPostPath } from '@/lib/blog-paths';
-import { siteOrigin } from '@/lib/environment';
+import { absoluteUrl, siteOrigin } from '@/lib/environment';
 import { localePath, type Locale } from '@/lib/locales';
 import type { Post } from '@/payload-types';
 
@@ -46,11 +46,8 @@ export function StructuredData({ data }: { data: WithContext<Thing> | null }) {
   );
 }
 
-/** A page's absolute address, as its canonical URL gives it: the home page is the bare origin. */
-function pageUrl(locale: Locale, path: string): string {
-  const local = localePath(locale, path);
-  return `${siteOrigin()}${local === '/' ? '' : local}`;
-}
+/** A page's absolute address, as its canonical URL gives it. */
+const pageUrl = (locale: Locale, path: string) => absoluteUrl(localePath(locale, path));
 
 /** The company's home, as schema.org conventionally writes a site's root. */
 const homeUrl = () => `${siteOrigin()}/`;

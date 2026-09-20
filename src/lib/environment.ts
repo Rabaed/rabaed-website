@@ -32,6 +32,17 @@ export function siteOrigin(): string {
 }
 
 /**
+ * A page's absolute address, from the path it has in its locale
+ * (`localePath`). The home page is the bare origin, as its canonical URL is —
+ * one rule, because the sitemap, the structured data and `llms.txt` all write
+ * addresses out and a site whose pages have two spellings has to undo it in
+ * canonical tags forever (`src/lib/locales.ts` says the same of `/ar`).
+ */
+export function absoluteUrl(localePath: string): string {
+  return `${siteOrigin()}${localePath === '/' ? '' : localePath}`;
+}
+
+/**
  * Whether this build is going to be reachable from the public internet: any
  * Vercel deployment at all — preview, development or production, indexable or
  * not. Local builds and the test suite are not deployments.
