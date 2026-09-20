@@ -297,6 +297,15 @@ reads. With a separate preview database, run `npm run cms:migrate` against it,
 the same way as step 6, when a pull request that adds a migration needs a
 preview.
 
+**Until that is done, the pull request's Vercel check goes red, and the red is
+expected.** The build fails on the first page that reads a table the preview
+database has not got yet — `column … does not exist`, or `relation … does not
+exist`. It does not mean the change is broken: the same commit builds on
+production, which migrates first. Migrate the preview database and redeploy
+that deployment from Vercel, and the check goes green without a new commit.
+Adding a table early is safe even where previews and production share one
+database, because nothing reads it until the code that uses it is merged.
+
 For developers: after changing the CMS configuration, `npm run cms:migration --
 <name>` writes the migration, and `npm run cms:generate` refreshes the admin's
 import map and `src/payload-types.ts`. Payload writes the migration's type

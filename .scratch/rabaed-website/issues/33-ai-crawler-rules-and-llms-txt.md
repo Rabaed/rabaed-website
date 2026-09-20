@@ -62,3 +62,13 @@ Two findings worth recording, both acted on.
 Also folded in: the write-up moved under the one `## Comments` heading the tracker's conventions ask for; `refreshSiteWhenSaved` named beside `refreshSiteWhenPublished` rather than inlined, as every other global does it; and `absoluteUrl` in `src/lib/environment.ts`, because "the home page is the bare origin" was written out three times — in the sitemap, in the structured data, and here.
 
 Run on `TEST_PORT=3133`.
+
+### The preview deployment's red check
+
+PR #42's Vercel check failed, and the cause is this ticket's first build-time CMS read that no earlier deployment has a table for.
+
+Reproduced locally by dropping `ai_crawlers` and its `payload_migrations` row and building against that database, which is what a preview build sees: Postgres `42P01` at `src/cms/crawler-policy.ts`, and `Export encountered an error on /robots.txt/route: /robots.txt, exiting the build`.
+
+It is the documented situation rather than a defect — preview builds never migrate, on purpose, so that trying out a pull request cannot alter the tables the live site reads. The preview database needs `npm run cms:migrate` run against it and the deployment redeploying; no commit changes it. `docs/deployment.md` now says that the red check is expected and what clears it, because a red cross that means "nobody has migrated the preview yet" reads exactly like a red cross that means "this change is broken".
+
+`robots.txt` was deliberately not made to tolerate the missing table. The permissive default covers a row nobody has written; a table nobody has created means the deployment was never migrated, and on production that cannot coexist with a build at all, since `scripts/migrate-production.mjs` runs first. Special-casing it here would only move the same failure onto whichever page a future migration touches.
