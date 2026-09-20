@@ -72,3 +72,17 @@ Reproduced locally by dropping `ai_crawlers` and its `payload_migrations` row an
 It is the documented situation rather than a defect — preview builds never migrate, on purpose, so that trying out a pull request cannot alter the tables the live site reads. The preview database needs `npm run cms:migrate` run against it and the deployment redeploying; no commit changes it. `docs/deployment.md` now says that the red check is expected and what clears it, because a red cross that means "nobody has migrated the preview yet" reads exactly like a red cross that means "this change is broken".
 
 `robots.txt` was deliberately not made to tolerate the missing table. The permissive default covers a row nobody has written; a table nobody has created means the deployment was never migrated, and on production that cannot coexist with a build at all, since `scripts/migrate-production.mjs` runs first. Special-casing it here would only move the same failure onto whichever page a future migration touches.
+
+### The stage was wrong, and CI said so
+
+`e2e (1/4)` failed on PR #42 with the eight `@pixel` screen-mock comparisons — the ones ticket 05 tags so that CI skips them, because they can only pass on the machine that produced the images. They ran anyway, and the shard's own log says why: `Running 889 tests using 2 workers, shard 1 of 4`. One shard ran the entire suite.
+
+The cause was the `reads-the-whole-site` project introduced above. **Playwright applies neither `--grep` nor `--shard` to a project's dependencies** — a dependency must run whole for the dependent to mean anything — so the shard that happened to carry that project ran all of `chromium` unfiltered, `@pixel` and all. Sharding had bought ticket 51 half the runner minutes; this gave them back and turned CI red for a reason that had nothing to do with the change.
+
+So the ordering stage is gone. `ai-crawlers.spec.ts` is the third file in `runs-last`, the teardown, which is not expanded that way. That puts it beside the two suites it was moved away from, so the two `llms.txt` tests now say what they tolerate: a case study published into the file while they read it, and the moment after a Referral Program value is published when the page carries the new amount and the file does not yet. The first is left out of the comparison; the second is polled, re-reading both sides, so a mismatch that is real still fails and reports both.
+
+The conflict that first argued for a stage of its own — the switch flipping `Disallow: /` under `search-foundations.spec.ts` — had already gone away, because the review fixed that test to look only at the rule unnamed crawlers follow.
+
+Verified as CI runs it: `npx playwright test --grep-invert @pixel --shard=1/4` is 232 tests in 1.7 minutes with no `@pixel` among them, and all three `runs-last` suites side by side.
+
+**Three ways to order a Playwright project, and only one works here.** A second teardown chained to the first: neither runs. A dependency on the main project: the shard carrying it runs everything, unfiltered. A file in the existing teardown: correct, at the price of tolerating what runs beside it.

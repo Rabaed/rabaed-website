@@ -8,10 +8,14 @@
  * block itself is `indexing.spec.ts`.
  *
  * The switch test changes what `robots.txt` says for everyone, and `llms.txt`
- * follows what the other suites publish, so this suite runs after everything
- * else (`playwright.config.ts`) and puts the switch back whether it passes or
- * not. Its tests sign in as an editor of their own (`cms.ts`) and run one at a
- * time.
+ * follows what every other suite publishes, so this suite runs after the rest
+ * (`playwright.config.ts`) and puts the switch back whether it passes or not.
+ * Its tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ *
+ * It runs beside the other two suites in that stage, which is why the two
+ * `llms.txt` tests say in their comments what they tolerate: a case study
+ * published into the file, and the moment after a Referral Program value is
+ * published when the page carries it and the file does not yet.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { CRAWLERS_EDITOR, logInByApi, richText, uploadImage } from './cms';
@@ -161,10 +165,8 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   const listed = [...llms.matchAll(/^- \[[^\]]+\]\(([^)]+)\):/gm)].map(([, url]) => url);
 
   // The Arabic site's pages, each once. The home page is the file's own
-  // heading rather than an entry; `/en` waits for English (ticket 40); with no
-  // case study published, their section has no page (ticket 24); and the
-  // Screen mock studio is never listed (ticket 05). Articles and case studies
-  // come and go with what is published, as they do in the sitemap.
+  // heading rather than an entry; `/en` waits for English (ticket 40); and the
+  // Screen mock studio is never listed (ticket 05).
   const expected = [
     '/product',
     '/start',
@@ -176,7 +178,11 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
     '/privacy',
     '/referral-terms',
   ];
-  const pages = listed.filter((url) => !/\/(blog|case-studies)\/[^/]+$/.test(url));
+  // What `case-studies.spec.ts` publishes beside this suite is left out of the
+  // comparison rather than asserted against: an article, a case study, and the
+  // case studies index that appears with the first of them (ticket 24). What
+  // stays is the fixed set, which nothing published can add to or take from.
+  const pages = listed.filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'));
   expect([...pages].sort()).toEqual(expected.map((path) => absolute(baseURL!, path)).sort());
   expect(listed.filter((url) => url.includes('/studio'))).toEqual([]);
 });
@@ -186,20 +192,31 @@ test('every page llms.txt lists answers, and is described in the words that page
   page,
   baseURL,
 }) => {
-  const llms = await (await fetchOk(request, '/llms.txt')).text();
-  const entries = [...llms.matchAll(/^- \[[^\]]+\]\(([^)]+)\): (.+)$/gm)].map(([, url, description]) => ({
-    url,
-    description,
-  }));
-  expect(entries.length).toBeGreaterThan(0);
+  // Polled as one whole, and re-read each time. `referral-program-values.spec.ts`
+  // runs beside this one and publishes an amount the referral page's
+  // description quotes; for the moment between the page being rebuilt with it
+  // and the file being rebuilt with it, the two disagree honestly. Everything
+  // else here is fixed, so the poll settles rather than hides a mismatch — and
+  // a mismatch that outlasts it is reported with both sides.
+  let entries: { url: string; description: string }[] = [];
+  await expect
+    .poll(async () => {
+      const llms = await (await fetchOk(request, '/llms.txt')).text();
+      entries = [...llms.matchAll(/^- \[[^\]]+\]\(([^)]+)\): (.+)$/gm)].map(([, url, description]) => ({ url, description }));
+      expect(entries.length).toBeGreaterThan(0);
 
-  for (const entry of entries) {
-    const visit = await page.goto(entry.url);
-    expect(visit?.status(), entry.url).toBe(200);
-    // Generated from the page's own description rather than written out
-    // beside it, which is how a file like this goes stale.
-    await expect(page.locator('meta[name="description"]'), entry.url).toHaveAttribute('content', entry.description);
-  }
+      const disagreed: string[] = [];
+      for (const entry of entries) {
+        const visit = await page.goto(entry.url);
+        expect(visit?.status(), entry.url).toBe(200);
+        // Generated from the page's own description rather than written out
+        // beside it, which is how a file like this goes stale.
+        const declared = await page.locator('meta[name="description"]').getAttribute('content');
+        if (declared !== entry.description) disagreed.push(`${entry.url}\n  file: ${entry.description}\n  page: ${declared}`);
+      }
+      return disagreed;
+    })
+    .toEqual([]);
 
   // Every Arabic route of the site is in it, the home page aside.
   const pathsListed = entries.map((entry) => entry.url.replace(baseURL!, '') || '/');
