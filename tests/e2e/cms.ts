@@ -59,6 +59,17 @@ export const FORM_EDITOR = {
   password: 'test-editor-password-27e',
 } as const;
 
+/**
+ * The partnership application's settings account (ticket 29). Its test
+ * changes that form's alert address while the tests above change the demo
+ * request form's, so the two run side by side — and they need accounts of
+ * their own, or one login would erase the other's session.
+ */
+export const PARTNERSHIP_FORM_EDITOR = {
+  email: 'partnership-form-editor@rabaed.test',
+  password: 'test-editor-password-29',
+} as const;
+
 /** The page-text suite's own account (ticket 53), for the same reason as `BLOG_EDITOR`. */
 export const PAGES_EDITOR = {
   email: 'pages-editor@rabaed.test',
@@ -109,6 +120,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   CASE_STUDIES_EDITOR,
   FORM_READER,
   FORM_EDITOR,
+  PARTNERSHIP_FORM_EDITOR,
   PAGES_EDITOR,
   TOOL_PAGE_EDITOR,
   PRODUCT_EDITOR,

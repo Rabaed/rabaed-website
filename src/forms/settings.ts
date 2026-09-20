@@ -9,7 +9,7 @@ import config from '@payload-config';
 import { draftMode } from 'next/headers';
 import { getPayload, type GlobalSlug } from 'payload';
 import { formSettingsSlug, optionFieldName } from '@/cms/globals/form-settings';
-import { fieldNames, type FieldWording, type FormDefinition, type FormPageWording, type FormWording } from './definition';
+import { fieldNames, fieldOptions, type FieldWording, type FormDefinition, type FormPageWording, type FormWording } from './definition';
 
 export type FormSettings<Field extends string> = FormWording<Field> & {
   /** Where alerts go, or `null` while none is set. */
@@ -38,6 +38,15 @@ async function saved(definition: FormDefinition, draft: boolean): Promise<Saved>
   return (await payload.findGlobal({ slug, draft, depth: 0 })) as unknown as Saved;
 }
 
+/**
+ * A list's options, each as the CMS has it under its own field name, or the
+ * definition's own. Named from the definition's list of values, the same one
+ * the CMS built its fields from, so that both name them alike.
+ */
+function optionsFrom(field: string, values: readonly string[], fallback: Readonly<Record<string, string>>, stored: Saved): Record<string, string> {
+  return Object.fromEntries(values.map((value) => [value, text(stored[optionFieldName(field, value, values)], fallback[value])]));
+}
+
 function text(value: unknown, fallback: string): string {
   return typeof value === 'string' && value.trim() !== '' ? value : fallback;
 }
@@ -56,11 +65,7 @@ function wordingFrom<Field extends string>(definition: FormDefinition<Field>, se
         label: text(own.label, fallback.label),
         placeholder: text(own.placeholder, fallback.placeholder),
         message: text(own.message, fallback.message),
-        options: fallback.options
-          ? Object.fromEntries(
-              Object.entries(fallback.options).map(([value, label]) => [value, text(group(own.options)[optionFieldName(value)], label)]),
-            )
-          : undefined,
+        options: fallback.options ? optionsFrom(name, fieldOptions(definition.fields[name]), fallback.options, group(own.options)) : undefined,
         tooLarge: fallback.tooLarge === undefined ? undefined : text(own.tooLarge, fallback.tooLarge),
         wrongType: fallback.wrongType === undefined ? undefined : text(own.wrongType, fallback.wrongType),
       };

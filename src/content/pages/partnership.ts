@@ -8,6 +8,9 @@ import type { PartnershipIdeaContent } from '@/components/partnership/idea';
 import type { PartnershipModesContent } from '@/components/partnership/modes';
 import type { PartnershipPathContent } from '@/components/partnership/path';
 import type { QuestionsContent } from '@/components/questions';
+import type { FormPageWording } from '@/forms/definition';
+import { PARTNERSHIP_APPLICATION, type PartnershipApplicationField } from '@/forms/partnership-application';
+import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
 import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -23,6 +26,8 @@ export type PartnershipPageContent = {
   readonly questions: Section<QuestionsContent>;
   /** The hero's «اطلب اجتماع شراكة» and the path's link both land here. */
   readonly apply: LinkedSection<PartnershipApplyContent>;
+  /** The words of the application form: its settings in the CMS. */
+  readonly applicationForm: FormPageWording<PartnershipApplicationField>;
 };
 
 /**
@@ -44,16 +49,21 @@ const numbered = (index: number) => String(index + 1).padStart(2, '0');
 /**
  * The partnership page's content in `locale`: its words from its entry in the
  * CMS (ticket 55) — or a refusal, where the page is not published in `locale` —
- * with its questions as the CMS has them.
+ * with its questions as the CMS has them, and the application form's own
+ * settings beside them (ticket 29).
  *
  * Where each link leads stays here, in code: an Editor changes what a link
  * says, never where it goes.
  */
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
-  const { hero, idea, audience, modes, benefits, path, questions, apply } = await pageEntry('partnership-page', locale);
+  const [entry, applicationForm] = await Promise.all([
+    pageEntry('partnership-page', locale),
+    formPageWording(PARTNERSHIP_APPLICATION),
+  ]);
+  const { hero, idea, audience, modes, benefits, path, questions, apply } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
-  const page: BeforeQuestions<PartnershipPageContent> = {
+  const page: BeforeQuestions<Omit<PartnershipPageContent, 'applicationForm'>> = {
     meta: inLocale('partnership', META, locale),
     hero: {
       eyebrow: words(hero.eyebrow),
@@ -127,5 +137,5 @@ export async function getPartnershipPage(locale: Locale): Promise<PartnershipPag
     },
   };
 
-  return withQuestions('partnership', locale, page);
+  return { ...(await withQuestions('partnership', locale, page)), applicationForm };
 }
