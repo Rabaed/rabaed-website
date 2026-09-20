@@ -58,3 +58,14 @@ Two other failures under twenty-worker load, neither an assertion budget and nei
 
 - `health.spec.ts` › «/blog loads with no console errors and no failed requests», from a 500 on `/api/media/file/image-…-480x270.webp` — the server logged «File … for collection media is missing on the disk». A media file is being removed while another test renders a page that wants it. Ticket 60's session saw the same. Worth a ticket of its own.
 - `home-before-after-and-calculator-match-reference.spec.ts:139` › «dragged, at 1024x900», a bare thirty-second test timeout under load. The deadline raised here may well settle it; if it recurs, it needs its own look rather than a bigger number.
+
+### Two things found while bringing `main` in
+
+**Ticket 33's raised bound could not have been reached.** `home-text.spec.ts`'s revalidation poll was given `{ timeout: 60_000 }` on that branch, inside a test whose deadline was still Playwright's default thirty seconds — so the poll would have been cut off at thirty with «Test timeout of 30000ms exceeded», which says nothing about the publish it was waiting for, and the extra thirty seconds it asked for were unreachable. The deadline raised here is what lets that bound mean what it says. It is the same trap this ticket's own budget had to avoid, found in someone else's fix.
+
+**The line number in the CI logs is the reporter's, not a phantom file.** Ticket 33's notes leave it open, «worth a moment's suspicion from whoever next reads a line number in these logs»: CI reported the failing test at `home-text.spec.ts:628` while every commit has it at 540. It is not a mystery and nothing is out of step — Playwright's own `--list` prints 628 for that test on an ordinary checkout:
+
+    npx playwright test --grep-invert @pixel --shard=2/4 --list
+    [chromium] › e2e\home-text.spec.ts:628:1 › a change to the home page published reaches visitors
+
+So the reporter numbers a `test()` by something other than the source line, and a line number from these logs should be matched to a test by **name**, not by counting lines.
