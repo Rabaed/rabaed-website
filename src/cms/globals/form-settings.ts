@@ -11,9 +11,34 @@ export function formSettingsSlug(id: FormId): string {
   return `${id}-form`;
 }
 
-/** A list option's value as a field name, since `+966` cannot be one. */
-export function optionFieldName(value: string): string {
-  return `option_${value.replace(/[^A-Za-z0-9]/g, '_')}`;
+/** What Postgres allows an identifier: it cuts a longer one short without saying so. */
+const IDENTIFIER_LIMIT = 63;
+
+/**
+ * A list option's value as a field name, since `+966` cannot be one — and so
+ * as a column name, since Payload names a group's columns after its fields
+ * (`dbName` reaches only the tables it makes, not these).
+ *
+ * The longest column a form's wording makes is one of these in the versions
+ * table. Where `option_` would push it past what Postgres allows, the whole
+ * list takes the shorter `o_` — the whole list, so that one list never names
+ * its options two ways. A list too long even for that is Payload's own warning
+ * when the CMS starts, and would need shorter values.
+ *
+ * `options` is the definition's own list of values, so that this file and
+ * `src/forms/settings.ts`, which reads what the CMS stored, always agree on
+ * which prefix a list took.
+ */
+export function optionFieldName(field: string, value: string, options: readonly string[]): string {
+  const identifier = (each: string) => each.replace(/[^A-Za-z0-9]/g, '_');
+  const column = (name: string) => `version_fields_${columnName(field)}_options_${name}`;
+  const prefix = options.some((each) => column(`option_${identifier(each)}`).length > IDENTIFIER_LIMIT) ? 'o_' : 'option_';
+  return `${prefix}${identifier(value)}`;
+}
+
+/** A field name as Payload names its column. */
+function columnName(field: string): string {
+  return field.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
 }
 
 type Words = { readonly ar: string; readonly en: string };
@@ -82,7 +107,10 @@ function fieldWording(definition: FormDefinition, name: string): Field {
     type: 'group',
     label: wording.label,
     fields: [
-      { type: 'row', fields: [label, wordingField('placeholder', { ar: 'النص داخل الحقل', en: 'Placeholder' }, 40)] },
+      // 60 rather than 40, because the Reference site's own placeholder for
+      // the partnership application's free text — a whole question — is 41
+      // characters, and a form must be able to carry its words as written.
+      { type: 'row', fields: [label, wordingField('placeholder', { ar: 'النص داخل الحقل', en: 'Placeholder' }, 60)] },
       wordingField('message', { ar: 'رسالة الخطأ', en: 'Error message' }, 80, {
         ar: 'تظهر تحت الحقل حين تكون إجابته غير مقبولة.',
         en: 'Shown under the field while its answer is not acceptable.',
@@ -93,7 +121,7 @@ function fieldWording(definition: FormDefinition, name: string): Field {
               name: 'options',
               type: 'group',
               label: { ar: 'الخيارات', en: 'Options' },
-              fields: field.options.map((value) => wordingField(optionFieldName(value), { ar: value, en: value }, 40)),
+              fields: field.options.map((value) => wordingField(optionFieldName(name, value, field.options!), { ar: value, en: value }, 40)),
             } satisfies Field,
           ]
         : []),

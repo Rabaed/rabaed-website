@@ -12,8 +12,12 @@
  * requests from one address, and sends no mail at all while nobody has said
  * where alerts go.
  *
- * **The other three forms do not send yet**, and must not pretend to: each is
- * wired by its own ticket, which moves it from the second list to the first.
+ * **The Referral Program signup** (ticket 28) and **the partnership
+ * application** (ticket 29) run through the same pipeline with their
+ * documents.
+ *
+ * **The tool page's download form does not send yet**, and must not pretend
+ * to: ticket 30 wires it, and moves it out of the last list here.
  *
  * Messages are restated here rather than imported from the form definitions,
  * for the reason `routes.ts` gives.
@@ -21,7 +25,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, FORM_EDITOR, logInAs, logInByApi } from './cms';
+import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi } from './cms';
 import {
   documentsDirectory,
   mailTo,
@@ -645,25 +649,285 @@ test.describe('the Referral Program signup', () => {
 });
 
 /**
- * The forms whose tickets have not wired them yet. Until then each sends
- * nothing, delivers nothing, and claims nothing — not the Reference site's fake
- * confirmations, and not what the visitor typed in the address.
+ * The Partnership Program application (ticket 29): the same pipeline again,
+ * with one document. Every field the Reference site asks for is stored, the
+ * five lists by their values with the Arabic the office saw beside them, the
+ * commercial registration in private storage, and the record says which form
+ * it came from, so an application is never taken for a referral or a demo
+ * request.
+ */
+const PARTNERSHIP_FORM = 'اطلب اجتماع شراكة';
+const PARTNERSHIP_RECEIVED = 'وصلنا طلبك. يتواصل معك فريق الشراكات خلال يومي عمل لترتيب اجتماع التعارف.';
+const PARTNERSHIP_REFUSED = 'تعذّر استلام طلبك الآن. حاول مرة أخرى بعد قليل، أو راسلنا على واتساب.';
+
+/** What each starred field says when it is left wrong. */
+const PARTNERSHIP_MESSAGES = {
+  'اسم المكتب أو الشركة': 'اكتب اسم المكتب أو الشركة',
+  'المدينة': 'اكتب اسم مدينتك',
+  'اسم مقدّم الطلب': 'اكتب اسمك الكامل (حرفان على الأقل)',
+  'المنصب': 'اكتب منصبك في المكتب',
+  'رقم الجوال': 'اكتب رقم جوال صحيح (٦ إلى ١٥ رقماً)',
+  'البريد الإلكتروني': 'اكتب بريداً إلكترونياً صحيحاً',
+  'نوع النشاط': 'اختر نوع نشاط المكتب',
+  'عدد المشاريع تحت الإشراف حالياً': 'اختر عدد المشاريع تحت الإشراف',
+  'نوع العملاء الغالب': 'اختر نوع العملاء الغالب',
+  'متوسط مساحة المشروع': 'اختر متوسط مساحة المشروع',
+  'نمط التعاون المبدئي': 'اختر نمط التعاون المبدئي',
+} as const;
+
+const REGISTRATION_MISSING = 'أرفق السجل التجاري';
+
+/** The office applying, and what it wants: the free text is optional, and is kept when it is given. */
+const OFFICE = {
+  company: 'مكتب الرياض الهندسي',
+  city: 'الرياض',
+  jobTitle: 'مدير المكتب',
+  goals: 'نريد تضمين المنصة في عروضنا للملاك، ونبدأ بمشروعين.',
+} as const;
+
+/** One choice from each of the five lists: the value sent, and the Arabic shown beside it. */
+const CHOICES = [
+  { field: 'activity', label: 'نوع النشاط', value: 'consulting-office', option: 'مكتب استشاري' },
+  { field: 'activeProjects', label: 'عدد المشاريع تحت الإشراف حالياً', value: 'over-25', option: 'أكثر من 25' },
+  { field: 'clientType', label: 'نوع العملاء الغالب', value: 'mixed', option: 'مزيج' },
+  { field: 'projectArea', label: 'متوسط مساحة المشروع', value: 'under-5000', option: 'أقل من 5,000 م²' },
+  { field: 'partnershipMode', label: 'نمط التعاون المبدئي', value: 'embedded-in-proposal', option: 'التضمين في العرض' },
+] as const;
+
+async function openPartnershipForm(page: Page, ip: string): Promise<Locator> {
+  await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
+  await page.goto('/partnership', { waitUntil: 'networkidle' });
+  return page.getByRole('form', { name: PARTNERSHIP_FORM });
+}
+
+const partnershipButton = (form: Locator) => form.getByRole('button', { name: PARTNERSHIP_FORM });
+
+async function fillPartnership(form: Locator, email: string): Promise<void> {
+  await form.getByLabel('اسم المكتب أو الشركة').fill(OFFICE.company);
+  await form.getByLabel('السجل التجاري', { exact: true }).setInputFiles(REGISTRATION);
+  await form.getByLabel('المدينة').fill(OFFICE.city);
+  await form.getByLabel('اسم مقدّم الطلب').fill(APPLICANT.name);
+  await form.getByLabel('المنصب', { exact: true }).fill(OFFICE.jobTitle);
+  await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
+  await form.getByLabel('البريد الإلكتروني').fill(email);
+  for (const choice of CHOICES) await form.getByLabel(choice.label, { exact: true }).selectOption(choice.value);
+  await form.getByLabel('ما الذي تريد تحقيقه من الشراكة').fill(OFFICE.goals);
+}
+
+/** Fills in and sends a valid application, and waits to be told it arrived. */
+async function sendPartnership(page: Page, applicant: { email: string; ip: string }): Promise<void> {
+  const form = await openPartnershipForm(page, applicant.ip);
+  await fillPartnership(form, applicant.email);
+  await partnershipButton(form).click();
+  await expect(form.getByRole('status')).toHaveText(PARTNERSHIP_RECEIVED);
+}
+
+test.describe('the partnership application', () => {
+  test('says in Arabic what is wrong, and unlocks only with every starred answer and the commercial registration', async ({
+    page,
+  }) => {
+    const { email, ip } = uniqueApplicant('partnership-rules');
+    const form = await openPartnershipForm(page, ip);
+    await expect(partnershipButton(form)).toBeDisabled();
+
+    for (const [label, message] of Object.entries(PARTNERSHIP_MESSAGES)) {
+      const field = form.getByLabel(label, { exact: true });
+      await field.focus();
+      await field.blur();
+      await expect(form.getByText(message, { exact: true }), label).toBeVisible();
+      await expect(field, label).toHaveAttribute('aria-invalid', 'true');
+    }
+
+    await fillPartnership(form, email);
+    for (const message of Object.values(PARTNERSHIP_MESSAGES)) {
+      await expect(form.getByText(message, { exact: true })).toBeHidden();
+    }
+    await expect(partnershipButton(form)).toBeEnabled();
+
+    // The free text may be left out, as the Reference site marks it.
+    await form.getByLabel('ما الذي تريد تحقيقه من الشراكة').fill('');
+    await expect(partnershipButton(form)).toBeEnabled();
+
+    // The commercial registration may not.
+    const registration = form.getByLabel('السجل التجاري', { exact: true });
+    await registration.setInputFiles([]);
+    await expect(form.getByText(REGISTRATION_MISSING, { exact: true })).toBeVisible();
+    await expect(partnershipButton(form)).toBeDisabled();
+    await registration.setInputFiles(REGISTRATION);
+    await expect(partnershipButton(form)).toBeEnabled();
+
+    // And it locks again the moment an answer stops being valid.
+    await form.getByLabel('البريد الإلكتروني').fill('office@example');
+    await expect(partnershipButton(form)).toBeDisabled();
+  });
+
+  test('a valid application is stored once, with every answer, the free text and the registration', async ({
+    page,
+    request,
+  }) => {
+    const { email, ip } = uniqueApplicant('partnership-stored');
+    const form = await openPartnershipForm(page, ip);
+    const address = page.url();
+    await fillPartnership(form, email);
+
+    // Twice, as an impatient office would.
+    await partnershipButton(form).dblclick();
+
+    await expect(form.getByRole('status')).toHaveText(PARTNERSHIP_RECEIVED);
+    // The application is gone from the page, so it cannot be sent again by mistake.
+    await expect(form.getByLabel('اسم المكتب أو الشركة')).toHaveCount(0);
+    expect(page.url(), 'what was typed went into the address').toBe(address);
+
+    const stored = await submissionsFrom(request, email);
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({ form: 'partnership-application', name: APPLICANT.name, email, phone: APPLICANT.phone });
+
+    // Every answer, in the Reference site's order, under the words the office
+    // saw; each choice keeps its value and the Arabic beside it.
+    expect(stored[0].answers.map(({ field, label, value, option }) => ({ field, label, value, option }))).toEqual([
+      { field: 'company', label: 'اسم المكتب أو الشركة', value: OFFICE.company, option: null },
+      { field: 'commercialRegistration', label: 'السجل التجاري', value: REGISTRATION.name, option: null },
+      { field: 'city', label: 'المدينة', value: OFFICE.city, option: null },
+      { field: 'name', label: 'اسم مقدّم الطلب', value: APPLICANT.name, option: null },
+      { field: 'jobTitle', label: 'المنصب', value: OFFICE.jobTitle, option: null },
+      { field: 'phone', label: 'رقم الجوال', value: APPLICANT.phone, option: null },
+      { field: 'email', label: 'البريد الإلكتروني', value: email, option: null },
+      ...CHOICES.map((choice) => ({ field: choice.field, label: choice.label, value: choice.value, option: choice.option })),
+      { field: 'goals', label: 'ما الذي تريد تحقيقه من الشراكة', value: OFFICE.goals, option: null },
+    ]);
+
+    expect(stored[0].documents.map(({ field, fileName, contentType, size }) => ({ field, fileName, contentType, size }))).toEqual([
+      { field: 'commercialRegistration', fileName: REGISTRATION.name, contentType: 'image/png', size: REGISTRATION.buffer.length },
+    ]);
+  });
+
+  test('the registration is kept where only a signed-in editor reaches it, through a link that expires', async ({
+    page,
+    request,
+    playwright,
+    baseURL,
+  }) => {
+    const applicant = uniqueApplicant('partnership-private');
+    await sendPartnership(page, applicant);
+    const [stored] = await submissionsFrom(request, applicant.email);
+    const [registration] = stored.documents;
+    expect(registration.link).toMatch(/^\/api\/form-documents\/\d+\/commercialRegistration\?expires=\d+&signature=[0-9a-f]+$/);
+
+    const opened = await readerGet(request, registration.link);
+    expect(opened.status()).toBe(200);
+    expect(Buffer.compare(await opened.body(), REGISTRATION.buffer)).toBe(0);
+
+    // Anyone else with the very same link: nothing.
+    const stranger = await playwright.request.newContext({ baseURL });
+    expect((await stranger.get(registration.link)).status()).toBe(401);
+    await stranger.dispose();
+  });
+
+  test('the server checks the answers and the registration itself, and stores nothing it refuses', async ({
+    page,
+    request,
+  }) => {
+    const { email, ip } = uniqueApplicant('partnership-server-check');
+    const form = await openPartnershipForm(page, ip);
+    await fillPartnership(form, email);
+
+    // A mode the form does not offer, as an application made by hand could send.
+    await form.getByLabel('نمط التعاون المبدئي', { exact: true }).evaluate((select: HTMLSelectElement) => {
+      select.selectedOptions[0].value = 'joint-venture';
+    });
+    // And a file only named like a PDF.
+    await form
+      .getByLabel('السجل التجاري', { exact: true })
+      .setInputFiles({ name: 'registration.pdf', mimeType: 'application/pdf', buffer: Buffer.from('this is not a PDF') });
+    await partnershipButton(form).click();
+
+    await expect(form.getByText(PARTNERSHIP_MESSAGES['نمط التعاون المبدئي'], { exact: true })).toBeVisible();
+    await expect(form.getByText(DOCUMENT_WRONG_TYPE, { exact: true })).toBeVisible();
+    await expect(form.getByText(PARTNERSHIP_RECEIVED)).toHaveCount(0);
+    expect(await submissionsFrom(request, email)).toEqual([]);
+  });
+
+  test('an application with the hidden trap field filled in is refused and stored nowhere', async ({ page, request }) => {
+    const { email, ip } = uniqueApplicant('partnership-trap');
+    const form = await openPartnershipForm(page, ip);
+    await fillPartnership(form, email);
+
+    const trap = form.locator('textarea[name="website"]');
+    await expect(trap).toHaveAttribute('tabindex', '-1');
+    await trap.fill('https://spam.example', { force: true });
+    await partnershipButton(form).click();
+
+    await expect(form.getByRole('alert')).toHaveText(PARTNERSHIP_REFUSED);
+    await expect(form.getByText(PARTNERSHIP_RECEIVED)).toHaveCount(0);
+    expect(await submissionsFrom(request, email)).toEqual([]);
+  });
+});
+
+/**
+ * The partnership application's own alert address, which only this test
+ * changes and which it puts back, for the reason the demo request form's
+ * settings tests give. It signs in as an editor of its own (`cms.ts`), since
+ * it runs beside those and they would erase each other's session.
+ */
+test.describe('the partnership application, alerted and confirmed', () => {
+  const SETTINGS = '/api/globals/partnership-application-form';
+
+  test('with an alert address set, the team is alerted and the office gets an Arabic confirmation', async ({
+    page,
+    request,
+  }) => {
+    await logInByApi(request, PARTNERSHIP_FORM_EDITOR);
+    const read = await request.get(`${SETTINGS}?depth=0`);
+    expect(read.ok()).toBe(true);
+    const { id, globalType, createdAt, updatedAt, ...original } = await read.json();
+    expect(original.alertAddress ?? '', 'no alert address has been supplied yet').toBe('');
+    const team = uniqueApplicant('team').email;
+
+    const publish = async (settings: Record<string, unknown>) => {
+      const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
+      expect(response.ok(), await response.text()).toBe(true);
+    };
+
+    try {
+      await publish({ ...original, alertAddress: team });
+      const applicant = uniqueApplicant('partnership-addressed');
+      await sendPartnership(page, applicant);
+
+      // Other suites' requests are alerted to their own addresses; this one's
+      // answers to this office.
+      const alertsFor = async () => (await mailTo(team)).filter((mail) => mail.replyTo === applicant.email);
+      await expect.poll(alertsFor).toHaveLength(1);
+      const [alert] = await alertsFor();
+      expect(alert.subject).toContain(APPLICANT.name);
+      // Every answer under the words the office saw, each choice in Arabic,
+      // and the registration named rather than attached.
+      for (const answer of [OFFICE.company, OFFICE.city, OFFICE.jobTitle, OFFICE.goals, REGISTRATION.name, APPLICANT.phone]) {
+        expect(alert.text).toContain(answer);
+      }
+      for (const choice of CHOICES) expect(alert.text).toContain(choice.option);
+
+      const stored = await settledSubmission(request, applicant.email);
+      expect(alert.text).toContain(`${ADMIN_PATH}/collections/form-submissions/${stored.id}`);
+
+      await expect.poll(() => mailTo(applicant.email)).toHaveLength(1);
+      const [confirmation] = await mailTo(applicant.email);
+      expect(confirmation.subject).toBe('ربائد — وصلنا طلب الشراكة');
+      expect(confirmation.text).toContain(`مرحباً ${APPLICANT.name}،`);
+      expect(confirmation.text).toContain('ويتواصل معكم خلال يومي عمل لترتيب اجتماع التعارف.');
+
+      expect(stored).toMatchObject({ alert: 'sent', confirmation: 'sent' });
+    } finally {
+      await publish(original);
+    }
+  });
+});
+
+/**
+ * The form whose ticket has not wired it yet. Until then it sends nothing,
+ * delivers nothing, and claims nothing — not the Reference site's fake
+ * confirmation, and not what the visitor typed in the address.
  */
 const NOT_SENDING_YET = [
-  {
-    name: 'the partnership application',
-    ticket: 29,
-    path: '/partnership',
-    form: 'اطلب اجتماع شراكة',
-    fill: async (form: Locator) => {
-      await form.getByLabel('اسم المكتب أو الشركة').fill('مكتب الرياض الهندسي');
-      await form.getByLabel('اسم مقدّم الطلب').fill(APPLICANT.name);
-      await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
-      return form.getByLabel('رقم الجوال');
-    },
-    fakes: ['وصلنا طلبك'],
-    finePrint: 'نموذج أولي — لا يُرسل فعلياً في هذه النسخة.',
-  },
   {
     // Unlocked once its details are valid, as the Reference site's is, but the
     // file is delivered only after the details are recorded (spec: Forms).

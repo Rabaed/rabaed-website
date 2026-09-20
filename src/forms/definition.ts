@@ -15,7 +15,7 @@
  */
 
 /** Every form the site has a definition for. */
-export const FORM_IDS = ['demo-request', 'referral-signup', 'tool-download'] as const;
+export const FORM_IDS = ['demo-request', 'referral-signup', 'tool-download', 'partnership-application'] as const;
 
 export type FormId = (typeof FORM_IDS)[number];
 

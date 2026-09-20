@@ -1,4 +1,6 @@
 import { PartnershipApplicationForm } from '@/components/partnership/application-form';
+import type { FormPageWording } from '@/forms/definition';
+import type { PartnershipApplicationField } from '@/forms/partnership-application';
 
 export type PartnershipApplyContent = {
   readonly eyebrow: string;
@@ -17,9 +19,10 @@ export type PartnershipApplyContent = {
  * nothing before the first meeting — beside the application form. The hero's
  * «اطلب اجتماع شراكة» and the path's link land here.
  *
- * The form keeps its own words until ticket 27.
+ * The form's words are its settings in the CMS (ticket 29), handed down beside
+ * the section's own.
  */
-export function Apply({ content }: { content: PartnershipApplyContent }) {
+export function Apply({ content, form }: { content: PartnershipApplyContent; form: FormPageWording<PartnershipApplicationField> }) {
   return (
     <section id="apply" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
@@ -47,7 +50,7 @@ export function Apply({ content }: { content: PartnershipApplyContent }) {
             </div>
           </div>
 
-          <PartnershipApplicationForm />
+          <PartnershipApplicationForm wording={form} />
         </div>
       </div>
     </section>

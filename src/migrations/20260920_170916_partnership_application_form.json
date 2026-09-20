@@ -5919,6 +5919,1045 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.partnership_application_form": {
+      "name": "partnership_application_form",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "alert_address": {
+          "name": "alert_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "heading": {
+          "name": "heading",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lead": {
+          "name": "lead",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "submit": {
+          "name": "submit",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fine_print": {
+          "name": "fine_print",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_company_label": {
+          "name": "fields_company_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_company_placeholder": {
+          "name": "fields_company_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_company_message": {
+          "name": "fields_company_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_label": {
+          "name": "fields_commercial_registration_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_placeholder": {
+          "name": "fields_commercial_registration_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_message": {
+          "name": "fields_commercial_registration_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_too_large": {
+          "name": "fields_commercial_registration_too_large",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_wrong_type": {
+          "name": "fields_commercial_registration_wrong_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_city_label": {
+          "name": "fields_city_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_city_placeholder": {
+          "name": "fields_city_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_city_message": {
+          "name": "fields_city_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_name_label": {
+          "name": "fields_name_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_name_placeholder": {
+          "name": "fields_name_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_name_message": {
+          "name": "fields_name_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_job_title_label": {
+          "name": "fields_job_title_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_job_title_placeholder": {
+          "name": "fields_job_title_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_job_title_message": {
+          "name": "fields_job_title_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_phone_label": {
+          "name": "fields_phone_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_phone_placeholder": {
+          "name": "fields_phone_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_phone_message": {
+          "name": "fields_phone_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_email_label": {
+          "name": "fields_email_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_email_placeholder": {
+          "name": "fields_email_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_email_message": {
+          "name": "fields_email_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_label": {
+          "name": "fields_activity_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_placeholder": {
+          "name": "fields_activity_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_message": {
+          "name": "fields_activity_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_consulting_office": {
+          "name": "fields_activity_options_option_consulting_office",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_project_management": {
+          "name": "fields_activity_options_option_project_management",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_contracting": {
+          "name": "fields_activity_options_option_contracting",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_real_estate_development": {
+          "name": "fields_activity_options_option_real_estate_development",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_other": {
+          "name": "fields_activity_options_option_other",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_label": {
+          "name": "fields_active_projects_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_placeholder": {
+          "name": "fields_active_projects_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_message": {
+          "name": "fields_active_projects_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_1_3": {
+          "name": "fields_active_projects_options_option_1_3",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_4_10": {
+          "name": "fields_active_projects_options_option_4_10",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_11_25": {
+          "name": "fields_active_projects_options_option_11_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_over_25": {
+          "name": "fields_active_projects_options_option_over_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_label": {
+          "name": "fields_client_type_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_placeholder": {
+          "name": "fields_client_type_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_message": {
+          "name": "fields_client_type_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_individual_developers": {
+          "name": "fields_client_type_options_option_individual_developers",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_development_companies": {
+          "name": "fields_client_type_options_option_development_companies",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_government": {
+          "name": "fields_client_type_options_option_government",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_mixed": {
+          "name": "fields_client_type_options_option_mixed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_label": {
+          "name": "fields_project_area_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_placeholder": {
+          "name": "fields_project_area_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_message": {
+          "name": "fields_project_area_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_under_5000": {
+          "name": "fields_project_area_options_option_under_5000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_5000_20000": {
+          "name": "fields_project_area_options_option_5000_20000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_20000_50000": {
+          "name": "fields_project_area_options_option_20000_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_over_50000": {
+          "name": "fields_project_area_options_option_over_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_label": {
+          "name": "fields_partnership_mode_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_placeholder": {
+          "name": "fields_partnership_mode_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_message": {
+          "name": "fields_partnership_mode_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_embedded_in_proposal": {
+          "name": "fields_partnership_mode_options_o_embedded_in_proposal",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_office_licence": {
+          "name": "fields_partnership_mode_options_o_office_licence",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_approved_referral": {
+          "name": "fields_partnership_mode_options_o_approved_referral",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_undecided": {
+          "name": "fields_partnership_mode_options_o_undecided",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_goals_label": {
+          "name": "fields_goals_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_goals_placeholder": {
+          "name": "fields_goals_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_goals_message": {
+          "name": "fields_goals_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "received": {
+          "name": "received",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refused": {
+          "name": "refused",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failed": {
+          "name": "failed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmation_subject": {
+          "name": "confirmation_subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmation_body": {
+          "name": "confirmation_body",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_status": {
+          "name": "_status",
+          "type": "enum_partnership_application_form_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "partnership_application_form__status_idx": {
+          "name": "partnership_application_form__status_idx",
+          "columns": [
+            {
+              "expression": "_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._partnership_application_form_v": {
+      "name": "_partnership_application_form_v",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "version_alert_address": {
+          "name": "version_alert_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_heading": {
+          "name": "version_heading",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_lead": {
+          "name": "version_lead",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_submit": {
+          "name": "version_submit",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fine_print": {
+          "name": "version_fine_print",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_company_label": {
+          "name": "version_fields_company_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_company_placeholder": {
+          "name": "version_fields_company_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_company_message": {
+          "name": "version_fields_company_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_label": {
+          "name": "version_fields_commercial_registration_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_placeholder": {
+          "name": "version_fields_commercial_registration_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_message": {
+          "name": "version_fields_commercial_registration_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_too_large": {
+          "name": "version_fields_commercial_registration_too_large",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_wrong_type": {
+          "name": "version_fields_commercial_registration_wrong_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_city_label": {
+          "name": "version_fields_city_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_city_placeholder": {
+          "name": "version_fields_city_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_city_message": {
+          "name": "version_fields_city_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_name_label": {
+          "name": "version_fields_name_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_name_placeholder": {
+          "name": "version_fields_name_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_name_message": {
+          "name": "version_fields_name_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_job_title_label": {
+          "name": "version_fields_job_title_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_job_title_placeholder": {
+          "name": "version_fields_job_title_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_job_title_message": {
+          "name": "version_fields_job_title_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_phone_label": {
+          "name": "version_fields_phone_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_phone_placeholder": {
+          "name": "version_fields_phone_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_phone_message": {
+          "name": "version_fields_phone_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_email_label": {
+          "name": "version_fields_email_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_email_placeholder": {
+          "name": "version_fields_email_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_email_message": {
+          "name": "version_fields_email_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_label": {
+          "name": "version_fields_activity_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_placeholder": {
+          "name": "version_fields_activity_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_message": {
+          "name": "version_fields_activity_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_consulting_office": {
+          "name": "version_fields_activity_options_option_consulting_office",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_project_management": {
+          "name": "version_fields_activity_options_option_project_management",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_contracting": {
+          "name": "version_fields_activity_options_option_contracting",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_real_estate_development": {
+          "name": "version_fields_activity_options_option_real_estate_development",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_other": {
+          "name": "version_fields_activity_options_option_other",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_label": {
+          "name": "version_fields_active_projects_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_placeholder": {
+          "name": "version_fields_active_projects_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_message": {
+          "name": "version_fields_active_projects_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_1_3": {
+          "name": "version_fields_active_projects_options_option_1_3",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_4_10": {
+          "name": "version_fields_active_projects_options_option_4_10",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_11_25": {
+          "name": "version_fields_active_projects_options_option_11_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_over_25": {
+          "name": "version_fields_active_projects_options_option_over_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_label": {
+          "name": "version_fields_client_type_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_placeholder": {
+          "name": "version_fields_client_type_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_message": {
+          "name": "version_fields_client_type_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_individual_developers": {
+          "name": "version_fields_client_type_options_option_individual_developers",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_development_companies": {
+          "name": "version_fields_client_type_options_option_development_companies",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_government": {
+          "name": "version_fields_client_type_options_option_government",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_mixed": {
+          "name": "version_fields_client_type_options_option_mixed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_label": {
+          "name": "version_fields_project_area_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_placeholder": {
+          "name": "version_fields_project_area_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_message": {
+          "name": "version_fields_project_area_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_under_5000": {
+          "name": "version_fields_project_area_options_option_under_5000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_5000_20000": {
+          "name": "version_fields_project_area_options_option_5000_20000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_20000_50000": {
+          "name": "version_fields_project_area_options_option_20000_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_over_50000": {
+          "name": "version_fields_project_area_options_option_over_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_label": {
+          "name": "version_fields_partnership_mode_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_placeholder": {
+          "name": "version_fields_partnership_mode_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_message": {
+          "name": "version_fields_partnership_mode_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_embedded_in_proposal": {
+          "name": "version_fields_partnership_mode_options_o_embedded_in_proposal",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_office_licence": {
+          "name": "version_fields_partnership_mode_options_o_office_licence",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_approved_referral": {
+          "name": "version_fields_partnership_mode_options_o_approved_referral",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_undecided": {
+          "name": "version_fields_partnership_mode_options_o_undecided",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_goals_label": {
+          "name": "version_fields_goals_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_goals_placeholder": {
+          "name": "version_fields_goals_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_goals_message": {
+          "name": "version_fields_goals_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_received": {
+          "name": "version_received",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_refused": {
+          "name": "version_refused",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_failed": {
+          "name": "version_failed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_confirmation_subject": {
+          "name": "version_confirmation_subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_confirmation_body": {
+          "name": "version_confirmation_body",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version__status": {
+          "name": "version__status",
+          "type": "enum__partnership_application_form_v_version_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "version_updated_at": {
+          "name": "version_updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_created_at": {
+          "name": "version_created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "latest": {
+          "name": "latest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_partnership_application_form_v_version_version__status_idx": {
+          "name": "_partnership_application_form_v_version_version__status_idx",
+          "columns": [
+            {
+              "expression": "version__status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_partnership_application_form_v_created_at_idx": {
+          "name": "_partnership_application_form_v_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_partnership_application_form_v_updated_at_idx": {
+          "name": "_partnership_application_form_v_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_partnership_application_form_v_latest_idx": {
+          "name": "_partnership_application_form_v_latest_idx",
+          "columns": [
+            {
+              "expression": "latest",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.referral_program": {
       "name": "referral_program",
       "schema": "",
@@ -25697,1546 +26736,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.site_words_languages": {
-      "name": "site_words_languages",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum_site_words_languages",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "site_words_languages_order_idx": {
-          "name": "site_words_languages_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "site_words_languages_parent_idx": {
-          "name": "site_words_languages_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "site_words_languages_parent_fk": {
-          "name": "site_words_languages_parent_fk",
-          "tableFrom": "site_words_languages",
-          "tableTo": "site_words",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.site_words_header_links": {
-      "name": "site_words_header_links",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label_ar": {
-          "name": "label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "label_en": {
-          "name": "label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "site_words_header_links_order_idx": {
-          "name": "site_words_header_links_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "site_words_header_links_parent_id_idx": {
-          "name": "site_words_header_links_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "site_words_header_links_parent_id_fk": {
-          "name": "site_words_header_links_parent_id_fk",
-          "tableFrom": "site_words_header_links",
-          "tableTo": "site_words",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.site_words_header_partnerships": {
-      "name": "site_words_header_partnerships",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label_ar": {
-          "name": "label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "label_en": {
-          "name": "label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "summary_ar": {
-          "name": "summary_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "summary_en": {
-          "name": "summary_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "site_words_header_partnerships_order_idx": {
-          "name": "site_words_header_partnerships_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "site_words_header_partnerships_parent_id_idx": {
-          "name": "site_words_header_partnerships_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "site_words_header_partnerships_parent_id_fk": {
-          "name": "site_words_header_partnerships_parent_id_fk",
-          "tableFrom": "site_words_header_partnerships",
-          "tableTo": "site_words",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.site_words_footer_legal_links": {
-      "name": "site_words_footer_legal_links",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label_ar": {
-          "name": "label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "label_en": {
-          "name": "label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "site_words_footer_legal_links_order_idx": {
-          "name": "site_words_footer_legal_links_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "site_words_footer_legal_links_parent_id_idx": {
-          "name": "site_words_footer_legal_links_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "site_words_footer_legal_links_parent_id_fk": {
-          "name": "site_words_footer_legal_links_parent_id_fk",
-          "tableFrom": "site_words_footer_legal_links",
-          "tableTo": "site_words",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.site_words": {
-      "name": "site_words",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "header_partnerships_label_ar": {
-          "name": "header_partnerships_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "header_partnerships_label_en": {
-          "name": "header_partnerships_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "header_sign_in_label_ar": {
-          "name": "header_sign_in_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "header_sign_in_label_en": {
-          "name": "header_sign_in_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "header_sign_in_url": {
-          "name": "header_sign_in_url",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "header_demo_label_ar": {
-          "name": "header_demo_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "header_demo_label_en": {
-          "name": "header_demo_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "footer_tagline_ar": {
-          "name": "footer_tagline_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "footer_tagline_en": {
-          "name": "footer_tagline_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "footer_rights_ar": {
-          "name": "footer_rights_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "footer_rights_en": {
-          "name": "footer_rights_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "not_found_heading_ar": {
-          "name": "not_found_heading_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "not_found_heading_en": {
-          "name": "not_found_heading_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "not_found_lead_ar": {
-          "name": "not_found_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "not_found_lead_en": {
-          "name": "not_found_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "not_found_home_label_ar": {
-          "name": "not_found_home_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "not_found_home_label_en": {
-          "name": "not_found_home_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "_status": {
-          "name": "_status",
-          "type": "enum_site_words_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'draft'"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "site_words__status_idx": {
-          "name": "site_words__status_idx",
-          "columns": [
-            {
-              "expression": "_status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._site_words_v_version_languages": {
-      "name": "_site_words_v_version_languages",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum__site_words_v_version_languages",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "_site_words_v_version_languages_order_idx": {
-          "name": "_site_words_v_version_languages_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_version_languages_parent_idx": {
-          "name": "_site_words_v_version_languages_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_site_words_v_version_languages_parent_fk": {
-          "name": "_site_words_v_version_languages_parent_fk",
-          "tableFrom": "_site_words_v_version_languages",
-          "tableTo": "_site_words_v",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._site_words_v_version_header_links": {
-      "name": "_site_words_v_version_header_links",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label_ar": {
-          "name": "label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "label_en": {
-          "name": "label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "_uuid": {
-          "name": "_uuid",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "_site_words_v_version_header_links_order_idx": {
-          "name": "_site_words_v_version_header_links_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_version_header_links_parent_id_idx": {
-          "name": "_site_words_v_version_header_links_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_site_words_v_version_header_links_parent_id_fk": {
-          "name": "_site_words_v_version_header_links_parent_id_fk",
-          "tableFrom": "_site_words_v_version_header_links",
-          "tableTo": "_site_words_v",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._site_words_v_version_header_partnerships": {
-      "name": "_site_words_v_version_header_partnerships",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label_ar": {
-          "name": "label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "label_en": {
-          "name": "label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "summary_ar": {
-          "name": "summary_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "summary_en": {
-          "name": "summary_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "_uuid": {
-          "name": "_uuid",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "_site_words_v_version_header_partnerships_order_idx": {
-          "name": "_site_words_v_version_header_partnerships_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_version_header_partnerships_parent_id_idx": {
-          "name": "_site_words_v_version_header_partnerships_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_site_words_v_version_header_partnerships_parent_id_fk": {
-          "name": "_site_words_v_version_header_partnerships_parent_id_fk",
-          "tableFrom": "_site_words_v_version_header_partnerships",
-          "tableTo": "_site_words_v",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._site_words_v_version_footer_legal_links": {
-      "name": "_site_words_v_version_footer_legal_links",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "label_ar": {
-          "name": "label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "label_en": {
-          "name": "label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "_uuid": {
-          "name": "_uuid",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "_site_words_v_version_footer_legal_links_order_idx": {
-          "name": "_site_words_v_version_footer_legal_links_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_version_footer_legal_links_parent_id_idx": {
-          "name": "_site_words_v_version_footer_legal_links_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_site_words_v_version_footer_legal_links_parent_id_fk": {
-          "name": "_site_words_v_version_footer_legal_links_parent_id_fk",
-          "tableFrom": "_site_words_v_version_footer_legal_links",
-          "tableTo": "_site_words_v",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._site_words_v": {
-      "name": "_site_words_v",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "version_header_partnerships_label_ar": {
-          "name": "version_header_partnerships_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_header_partnerships_label_en": {
-          "name": "version_header_partnerships_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_header_sign_in_label_ar": {
-          "name": "version_header_sign_in_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_header_sign_in_label_en": {
-          "name": "version_header_sign_in_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_header_sign_in_url": {
-          "name": "version_header_sign_in_url",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_header_demo_label_ar": {
-          "name": "version_header_demo_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_header_demo_label_en": {
-          "name": "version_header_demo_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_footer_tagline_ar": {
-          "name": "version_footer_tagline_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_footer_tagline_en": {
-          "name": "version_footer_tagline_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_footer_rights_ar": {
-          "name": "version_footer_rights_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_footer_rights_en": {
-          "name": "version_footer_rights_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_not_found_heading_ar": {
-          "name": "version_not_found_heading_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_not_found_heading_en": {
-          "name": "version_not_found_heading_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_not_found_lead_ar": {
-          "name": "version_not_found_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_not_found_lead_en": {
-          "name": "version_not_found_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_not_found_home_label_ar": {
-          "name": "version_not_found_home_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_not_found_home_label_en": {
-          "name": "version_not_found_home_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version__status": {
-          "name": "version__status",
-          "type": "enum__site_words_v_version_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'draft'"
-        },
-        "version_updated_at": {
-          "name": "version_updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_created_at": {
-          "name": "version_created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "latest": {
-          "name": "latest",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "_site_words_v_version_version__status_idx": {
-          "name": "_site_words_v_version_version__status_idx",
-          "columns": [
-            {
-              "expression": "version__status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_created_at_idx": {
-          "name": "_site_words_v_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_updated_at_idx": {
-          "name": "_site_words_v_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_site_words_v_latest_idx": {
-          "name": "_site_words_v_latest_idx",
-          "columns": [
-            {
-              "expression": "latest",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.index_leads_languages": {
-      "name": "index_leads_languages",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum_index_leads_languages",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "index_leads_languages_order_idx": {
-          "name": "index_leads_languages_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "index_leads_languages_parent_idx": {
-          "name": "index_leads_languages_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "index_leads_languages_parent_fk": {
-          "name": "index_leads_languages_parent_fk",
-          "tableFrom": "index_leads_languages",
-          "tableTo": "index_leads",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.index_leads": {
-      "name": "index_leads",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "blog_lead_ar": {
-          "name": "blog_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "blog_lead_en": {
-          "name": "blog_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "case_studies_lead_ar": {
-          "name": "case_studies_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "case_studies_lead_en": {
-          "name": "case_studies_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "_status": {
-          "name": "_status",
-          "type": "enum_index_leads_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'draft'"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "index_leads__status_idx": {
-          "name": "index_leads__status_idx",
-          "columns": [
-            {
-              "expression": "_status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._index_leads_v_version_languages": {
-      "name": "_index_leads_v_version_languages",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum__index_leads_v_version_languages",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "_index_leads_v_version_languages_order_idx": {
-          "name": "_index_leads_v_version_languages_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_index_leads_v_version_languages_parent_idx": {
-          "name": "_index_leads_v_version_languages_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_index_leads_v_version_languages_parent_fk": {
-          "name": "_index_leads_v_version_languages_parent_fk",
-          "tableFrom": "_index_leads_v_version_languages",
-          "tableTo": "_index_leads_v",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._index_leads_v": {
-      "name": "_index_leads_v",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "version_blog_lead_ar": {
-          "name": "version_blog_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_blog_lead_en": {
-          "name": "version_blog_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_case_studies_lead_ar": {
-          "name": "version_case_studies_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_case_studies_lead_en": {
-          "name": "version_case_studies_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version__status": {
-          "name": "version__status",
-          "type": "enum__index_leads_v_version_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'draft'"
-        },
-        "version_updated_at": {
-          "name": "version_updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_created_at": {
-          "name": "version_created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "latest": {
-          "name": "latest",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "_index_leads_v_version_version__status_idx": {
-          "name": "_index_leads_v_version_version__status_idx",
-          "columns": [
-            {
-              "expression": "version__status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_index_leads_v_created_at_idx": {
-          "name": "_index_leads_v_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_index_leads_v_updated_at_idx": {
-          "name": "_index_leads_v_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_index_leads_v_latest_idx": {
-          "name": "_index_leads_v_latest_idx",
-          "columns": [
-            {
-              "expression": "latest",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -27398,7 +26897,8 @@
       "values": [
         "demo-request",
         "referral-signup",
-        "tool-download"
+        "tool-download",
+        "partnership-application"
       ]
     },
     "public.enum_form_submissions_alert": {
@@ -27461,6 +26961,22 @@
     },
     "public.enum__referral_signup_form_v_version_status": {
       "name": "enum__referral_signup_form_v_version_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
+    "public.enum_partnership_application_form_status": {
+      "name": "enum_partnership_application_form_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
+    "public.enum__partnership_application_form_v_version_status": {
+      "name": "enum__partnership_application_form_v_version_status",
       "schema": "public",
       "values": [
         "draft",
@@ -27928,70 +27444,6 @@
         "draft",
         "published"
       ]
-    },
-    "public.enum_site_words_languages": {
-      "name": "enum_site_words_languages",
-      "schema": "public",
-      "values": [
-        "ar",
-        "en"
-      ]
-    },
-    "public.enum_site_words_status": {
-      "name": "enum_site_words_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
-    },
-    "public.enum__site_words_v_version_languages": {
-      "name": "enum__site_words_v_version_languages",
-      "schema": "public",
-      "values": [
-        "ar",
-        "en"
-      ]
-    },
-    "public.enum__site_words_v_version_status": {
-      "name": "enum__site_words_v_version_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
-    },
-    "public.enum_index_leads_languages": {
-      "name": "enum_index_leads_languages",
-      "schema": "public",
-      "values": [
-        "ar",
-        "en"
-      ]
-    },
-    "public.enum_index_leads_status": {
-      "name": "enum_index_leads_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
-    },
-    "public.enum__index_leads_v_version_languages": {
-      "name": "enum__index_leads_v_version_languages",
-      "schema": "public",
-      "values": [
-        "ar",
-        "en"
-      ]
-    },
-    "public.enum__index_leads_v_version_status": {
-      "name": "enum__index_leads_v_version_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "published"
-      ]
     }
   },
   "schemas": {},
@@ -28004,6 +27456,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "b38d7fec-6da4-48f5-aa74-d06c7fad07cb",
+  "id": "5baa1e54-f556-4e72-a76a-d8697067cc46",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
