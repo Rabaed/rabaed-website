@@ -4,17 +4,17 @@
 
 **Blocked by:** 53, 25
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every section's words are read from the CMS, including the hero's three figures and the signup section's own heading, lead, benefits and guarantee
-- [ ] Every list is editable: the hero figures, the how-it-works steps, the offer's sides, the audience, the terms summary, the signup benefits
-- [ ] The how-it-works steps lay out any number neatly (the Reference site's grid only looked right in fours), and so do the offer's sides and the terms summary (twos); today's counts still match the baselines
-- [ ] The signup (`#signup`) and how-it-works (`#how`) cannot be hidden: the hero's buttons land on them. Every other section can be
-- [ ] The Referral Program values — the payout and the client discount — are one CMS setting. Page text that quotes them inserts the value rather than typing the number, and changing a value changes every mention: this page, and the FAQ answers that name `{payout}` or `{clientDiscount}` (`src/cms/faq-answer.ts`)
-- [ ] While the published Referral Terms do not state the current values, the admin warns on the values, on the Referral Terms and on the dashboard. Publishing is not blocked, and the terms are never rewritten (ADR-0008)
-- [ ] Wherever a card or a line has a fixed size, the admin enforces its limit
-- [ ] A migration imports the referral page's words and today's values verbatim, and the static copy and `src/content/referral-program.ts` go
-- [ ] The referral page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
+- [x] Every section's words are read from the CMS, including the hero's three figures and the signup section's own heading, lead, benefits and guarantee
+- [x] Every list is editable: the hero figures, the how-it-works steps, the offer's sides, the audience, the terms summary, the signup benefits
+- [x] The how-it-works steps lay out any number neatly (the Reference site's grid only looked right in fours), and so do the offer's sides and the terms summary (twos); today's counts still match the baselines
+- [x] The signup (`#signup`) and how-it-works (`#how`) cannot be hidden: the hero's buttons land on them. Every other section can be
+- [x] The Referral Program values — the payout and the client discount — are one CMS setting. Page text that quotes them inserts the value rather than typing the number, and changing a value changes every mention: this page, and the FAQ answers that name `{payout}` or `{clientDiscount}` (`src/cms/faq-answer.ts`)
+- [x] While the published Referral Terms do not state the current values, the admin warns on the values, on the Referral Terms and on the dashboard. Publishing is not blocked, and the terms are never rewritten (ADR-0008)
+- [x] Wherever a card or a line has a fixed size, the admin enforces its limit
+- [x] A migration imports the referral page's words and today's values verbatim, and the static copy and `src/content/referral-program.ts` go
+- [x] The referral page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
 
 **Not this ticket:** the signup form's fields and wording (tickets 27 and 28), the Referral Terms' own text (ticket 25), the FAQ entries (ticket 22), and the search title and description (ticket 26).
 
@@ -38,3 +38,9 @@
 - **The schema migration was trimmed by hand.** The newest schema snapshot on `main` was the tool page's, generated before ticket 57 merged, so `cms:migration` also wrote the product page's, the closing section's and the Screen mocks' tables again. Those statements were removed from `20260915_200327_referral_page_and_program_values.ts`; its snapshot is the whole schema, so the next ticket's migration starts from a complete one.
 
 **Parallel sessions.** Touches the referral page's module and components, the FAQ answer reader and a migration of its own, so it can run beside tickets 54, 55, 57 and 59 once ticket 53 is merged. Every one of tickets 53–59 adds a CMS migration, and two branches' migrations collide: after updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).
+
+**Marked resolved on 20 September 2026, after the fact.** The work merged in pull request #38 on 15 September, but this file was never updated: the branch carried the code and not the bookkeeping, and the tracker went on saying `ready-for-agent` for five days. Ticket 35 is blocked by this one, so on paper it could not start.
+
+Checked against `main` before ticking, one box at a time: `src/cms/globals/referral-page.ts` and `referral-program.ts`, the content module `src/content/pages/referral.ts`, the values inserted into FAQ answers through `src/cms/faq-answer.ts`, the admin's warning in `src/cms/components/referral-terms-warning.tsx`, the migrations `20260915_200327` and `20260915_200328`, and the two suites `referral-page-text.spec.ts` and `referral-program-values.spec.ts`. `src/content/referral-program.ts` is gone, as the last box asked.
+
+**Worth doing differently:** a ticket's boxes are ticked in the branch that does the work, as tickets 20, 58 and 59 did, rather than in a pull request of their own afterwards.

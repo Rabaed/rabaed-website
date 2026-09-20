@@ -1,12 +1,12 @@
 # 39a: Founder account actions
 
-**What to do:** The two things in Stage 1 that need somebody with the company accounts. Ticket 03 raised them and nothing waits on them.
+**What to do:** The things in Stage 1 that need somebody with the company accounts. Ticket 03 raised the first two; the third arrived on 20 September 2026.
 
 **Blocked by:** nothing technical.
 
 **When:** the founder decided on 12 September 2026 to do **part 1, connecting Vercel, once ticket 04 is merged** — bringing it forward from the end of Stage 1, so that preview links exist for the page-by-page rebuild in tickets 05 onward. Part 2, the GitHub plan decision, stays at the end of Stage 1 alongside ticket 39.
 
-**Status:** part 1 done (12 September 2026); part 2 outstanding
+**Status:** parts 1 and 3 done (12 and 20 September 2026); part 2 outstanding
 
 Full instructions, in plain language, are in [`docs/deployment.md`](../../../docs/deployment.md).
 
@@ -42,3 +42,17 @@ gh api -X POST repos/Rabaed/rabaed-website/rulesets --input docs/github-ruleset.
 ```
 
 Until one or the other is settled, CI still runs on every pull request and still shows a red cross when it fails. What is missing is only the enforcement.
+
+
+## 3. Rotate the two secrets that were exposed
+
+On 20 September 2026 the preview database's connection string and `PAYLOAD_SECRET` were pasted into a chat window while running a migration by hand. Both are live credentials: `PAYLOAD_SECRET` signs Editors' sessions, so anyone holding it can forge one, and the connection string reaches the content directly.
+
+- [x] **`PAYLOAD_SECRET` rotated** (20 September 2026)
+- [x] **Database password reset** in Supabase, and `DATABASE_URL` updated in Vercel (20 September 2026)
+- [x] **Redeployed** afterwards: an environment variable only takes effect on a new build, and the build that carried this ticket's own change is the one that proved both values — it migrates production's database before it builds the pages
+- [ ] **Clear the command from the shell history** on the machine it was typed on
+
+**Nothing in the CMS is encrypted with `PAYLOAD_SECRET`**, so rotating it loses no content and no password: Editors sign in again with the same passwords. It does sign out everyone, invalidate any document link already opened from a form submission (they last ten minutes anyway), and reset the few-minute window the forms use to refuse repeat submissions.
+
+**So this does not happen again:** a `.env` file in the checkout holds both values (it is git-ignored), and `npm run cms:migrate` reads them from there, so no secret is ever typed on a command line. `docs/deployment.md` says so at step 6.

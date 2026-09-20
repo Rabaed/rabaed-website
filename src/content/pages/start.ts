@@ -5,7 +5,7 @@ import type { PageHeroContent } from '@/components/page-hero';
 import type { QuestionsContent } from '@/components/questions';
 import type { StartFreeToolTeaserContent } from '@/components/start/free-tool-teaser';
 import type { StartStepsContent } from '@/components/start/steps';
-import { TRUST_STRIP } from '@/content/trust-strip';
+import { getTrustStrip } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
@@ -47,7 +47,11 @@ const META = {
  * a button says, never where it goes.
  */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  const [entry, demoForm] = await Promise.all([pageEntry('start-page', locale), formPageWording(DEMO_REQUEST)]);
+  const [entry, demoForm, trustStrip] = await Promise.all([
+    pageEntry('start-page', locale),
+    formPageWording(DEMO_REQUEST),
+    getTrustStrip(locale),
+  ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
@@ -60,7 +64,7 @@ export async function getStartPage(locale: Locale): Promise<StartPageContent> {
       primary: { label: words(entry.hero.primaryLabel), href: '#demo' },
       secondary: { label: words(entry.hero.secondaryLabel), href: `#${FAQ_PAGES.start.sectionId}` },
     },
-    trustStrip: { shows: entry.trustStrip?.shows !== false, ...inLocale('trust strip', TRUST_STRIP, locale) },
+    trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
     steps: {
       shows: entry.steps.shows !== false,
       eyebrow: words(entry.steps.eyebrow),
