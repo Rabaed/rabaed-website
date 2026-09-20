@@ -33,7 +33,7 @@ export type ScreenMock = {
 
 const STAGE = { width: 1440, height: 900, scale: 2 } as const;
 
-export const SCREEN_MOCKS: readonly ScreenMock[] = [
+export const SCREEN_MOCKS = [
   { id: 'correspondence', title: 'المراسلات الرسمية', referencePage: 'index.html', ...STAGE },
   { id: 'kanban', title: 'لوحة الاعتمادات والطلبات', referencePage: 'index.html', ...STAGE },
   { id: 'daily-report', title: 'التقرير اليومي للموقع', referencePage: 'index.html', ...STAGE },
@@ -42,7 +42,15 @@ export const SCREEN_MOCKS: readonly ScreenMock[] = [
   { id: 'overview', title: 'لوحة المشروع للمالك', referencePage: 'product.html', ...STAGE },
   { id: 'approvals-table', title: 'جدول الاعتمادات للاستشاري', referencePage: 'product.html', ...STAGE },
   { id: 'submittal', title: 'تفاصيل الطلب للمقاول', referencePage: 'product.html', ...STAGE },
-];
+] as const satisfies readonly ScreenMock[];
+
+/**
+ * A mock's id as a type rather than any string, so that naming one that does
+ * not exist fails the typecheck instead of exporting a blank. `as const
+ * satisfies` above is what keeps the ids literal while the table is still held
+ * to `ScreenMock`.
+ */
+export type ScreenMockId = (typeof SCREEN_MOCKS)[number]['id'];
 
 export function findScreenMock(id: string): ScreenMock | undefined {
   return SCREEN_MOCKS.find((mock) => mock.id === id);

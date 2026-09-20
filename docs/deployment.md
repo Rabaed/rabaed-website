@@ -116,9 +116,26 @@ or production deployments stop.
    change what is on the live site. If there is only one, previews and
    production share the same content.
 6. **Create the database tables and the first account**, from a computer with
-   the repository. Set `DATABASE_URL` and `PAYLOAD_SECRET` to production's
-   values **in the terminal, for these commands only** — never in `.env.local`,
-   which `npm run dev` also reads and would then point at the live content.
+   the repository. These two commands need `DATABASE_URL` and `PAYLOAD_SECRET`
+   set to production's values — and neither value should ever be typed into a
+   terminal, pasted into a chat window or written into `.env.local`, which
+   `npm run dev` also reads and would then point at the live content.
+
+   Keep them in a file **outside the repository**, one `NAME=value` per line,
+   and pass them from there for the command only:
+
+   ```bash
+   env $(grep -v '^#' ~/rabaed-production.env | xargs) npm run cms:migrate
+   ```
+
+   ```powershell
+   Get-Content ~abaed-production.env | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$n" $v }; npm run cms:migrate
+   ```
+
+   A value typed on a command line is kept in the shell's history, where it
+   outlives the task by months. One pasted into a chat window is worse: it is
+   somewhere neither of you controls. If either happens, rotate both — the
+   steps are in ticket 39a part 3.
 
    ```bash
    npm run cms:migrate
@@ -170,6 +187,57 @@ site launched with, word for word.
   `` `concrete_db.json` `` — to set it left to right. Write `{payout}` and
   `{clientDiscount}` for the Referral Program values: the site inserts the
   current amount, so no answer quotes an old one.
+
+### The blog, and the six articles waiting in it
+
+Articles are written under **Blog**. **Six Arabic drafts are already there**,
+imported with the site (ticket 38) so that the blog is not empty on the day it
+launches. Each answers one kind of question a buyer actually asks:
+
+| Article | The question it answers |
+| --- | --- |
+| ما هي منصة ربائد؟ | what Rabaed is |
+| ربائد مقابل واتساب والبريد الإلكتروني والإكسل | Rabaed against the tools a project uses today |
+| كيف تمر المعاملة من الطلب إلى الاعتماد؟ | how a transaction actually works |
+| مكتب هندسي يشرف على خمسة مشاريع… | what it looks like for one kind of customer |
+| ماذا لو رفض المقاول استخدام المنصة؟ وماذا عن بياناتنا؟ | the objections that come up before signing |
+| من يقف خلف ربائد؟ ومن أين تعمل؟ | who the company is |
+
+**They are drafts, so nobody can read them yet** — not a visitor, not Google,
+not an AI assistant. Every word in them is already somewhere on the site: they
+were written from the pages, the FAQ answers and the company's own details, and
+they state no figure or percentage that nobody can source. Nothing was invented.
+
+Each one also **arrives with a cover picture**: the Screen mock of the screen
+that article is about — the stamped approval sheet on «ما هي منصة ربائد؟», the
+correspondence screen on the comparison, and so on. Change any of them for
+another image if you would rather; they are there so that no article is waiting
+on a picture.
+
+**To publish one:**
+
+1. Open it under **Blog** and read it through. Change anything you disagree
+   with — the words are yours, and the point of them arriving as drafts is that
+   you correct them first.
+2. Fill in **الكاتب** with the name of the person who wrote it. A real person,
+   not «ربائد» and not the company: an article a reader can attribute to
+   somebody is worth more than one signed by a logo. The CMS refuses the
+   company's name here.
+3. Set **تاريخ النشر** to the day you are publishing. Each draft arrives dated
+   21 September 2026, the day it was written.
+4. **Preview** it, then **Publish changes**.
+
+Step 2 is not optional: the CMS refuses to publish an article with no author,
+which is what keeps any of this from reaching a visitor before you have seen it.
+
+Once published, an article appears on `/blog`, at its own address, in
+`sitemap.xml` and in `llms.txt`, and describes itself to search engines and AI
+assistants as an article by its named author. Unpublishing it takes it out of
+all of them again.
+
+You do not have to publish all six, or any of them. Publish the ones you stand
+behind, leave the rest as drafts, and delete any you do not want. Nothing on the
+site depends on a particular article existing.
 
 ### Page text
 
@@ -294,8 +362,12 @@ date. **Production applies them itself**: its build runs the migrations before
 building the pages (`scripts/migrate-production.mjs`). **Preview builds never
 do**, so that trying out a pull request cannot change the tables the live site
 reads. With a separate preview database, run `npm run cms:migrate` against it,
-the same way as step 6, when a pull request that adds a migration needs a
-preview.
+the same way as step 6 — from a file, not from the command line — when a pull
+request that adds a migration needs a preview.
+
+**A migration regenerated after a merge takes a new name** (see the parallel
+sessions note below), so a preview database that was migrated before the
+rebase has the old one and needs migrating again.
 
 **Until that is done, the pull request's Vercel check goes red, and the red is
 expected.** The build fails on the first page that reads a table the preview

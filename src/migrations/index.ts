@@ -33,6 +33,7 @@ import * as migration_20260920_204225_trust_strip from './20260920_204225_trust_
 import * as migration_20260920_204226_import_trust_strip from './20260920_204226_import_trust_strip';
 import * as migration_20260920_211935_search_settings from './20260920_211935_search_settings';
 import * as migration_20260920_211936_import_search_settings from './20260920_211936_import_search_settings';
+import * as migration_20260921_101500_import_launch_articles from './20260921_101500_import_launch_articles';
 
 export const migrations = [
   {
@@ -209,5 +210,10 @@ export const migrations = [
     up: migration_20260920_211936_import_search_settings.up,
     down: migration_20260920_211936_import_search_settings.down,
     name: '20260920_211936_import_search_settings',
+  },
+  {
+    up: migration_20260921_101500_import_launch_articles.up,
+    down: migration_20260921_101500_import_launch_articles.down,
+    name: '20260921_101500_import_launch_articles',
   },
 ];

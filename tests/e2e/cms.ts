@@ -136,6 +136,12 @@ export const SEARCH_EDITOR = {
   password: 'test-editor-password-26',
 } as const;
 
+/** The launch articles' suite's own account (ticket 38), for the same reason as `BLOG_EDITOR`. */
+export const LAUNCH_ARTICLES_EDITOR = {
+  email: 'launch-articles-editor@rabaed.test',
+  password: 'test-editor-password-38',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -156,6 +162,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   TRUST_STRIP_EDITOR,
   CRAWLERS_EDITOR,
   SEARCH_EDITOR,
+  LAUNCH_ARTICLES_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
