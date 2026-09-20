@@ -4,6 +4,7 @@ import { EditorialFrame, EditorialHero, MediaImage, PublishedDate } from '@/comp
 import { publishedPosts } from '@/cms/blog';
 import { fetchedMedia } from '@/cms/fetched-media';
 import { BLOG_COPY } from '@/content/blog';
+import { getIndexLead } from '@/content/index-leads';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { localePath, type Locale } from '@/lib/locales';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
@@ -24,15 +25,16 @@ export function laterPageNumber(value: string): number | null {
  * exists in every locale; a later one only where there are articles enough to
  * fill it, so it names no alternate it cannot vouch for.
  */
-export function blogIndexMetadata(locale: Locale, page: number): Metadata {
+export async function blogIndexMetadata(locale: Locale, page: number): Promise<Metadata> {
   const copy = BLOG_COPY[locale];
+  const lead = await getIndexLead(locale, 'blog');
   return pageMetadata({
     locale,
     locales: page === 1 ? undefined : [locale],
     path: blogIndexPath(page),
     title: page === 1 ? copy.metaTitle : `${copy.metaTitle} — ${copy.page} ${page}`,
     // Numbered like the title, so no two pages of the index share a description.
-    description: page === 1 ? copy.lead : `${copy.lead} — ${copy.page} ${page}`,
+    description: page === 1 ? lead : `${lead} — ${copy.page} ${page}`,
   });
 }
 
@@ -43,7 +45,7 @@ export function blogIndexMetadata(locale: Locale, page: number): Metadata {
  */
 export async function BlogIndexPage({ locale, page }: { locale: Locale; page: number }) {
   const copy = BLOG_COPY[locale];
-  const listing = await publishedPosts(locale, page);
+  const [listing, lead] = await Promise.all([publishedPosts(locale, page), getIndexLead(locale, 'blog')]);
   if (!listing) notFound();
 
   const pageHref = (number: number) => localePath(locale, blogIndexPath(number));
@@ -52,7 +54,7 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
     // The blog is not in the navigation, so no link in the header is marked.
     <EditorialFrame locale={locale} path={blogIndexPath()}>
       <EditorialHero eyebrow={copy.eyebrow} title={copy.title}>
-        <p className="lead">{copy.lead}</p>
+        <p className="lead">{lead}</p>
       </EditorialHero>
 
       <section className="light entry-list">
@@ -92,7 +94,7 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
         </div>
       </section>
       <StructuredData
-        data={breadcrumbData(locale, [
+        data={await breadcrumbData(locale, [
           { name: copy.eyebrow, path: blogIndexPath() },
           ...(page === 1 ? [] : [{ name: `${copy.page} ${page}`, path: blogIndexPath(page) }]),
         ])}

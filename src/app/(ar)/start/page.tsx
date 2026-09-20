@@ -43,7 +43,7 @@ export default async function StartPage() {
       <Questions content={content.questions} beside={<DemoRequestForm wording={content.demoForm} />}>
         {content.freeTool.shows && <FreeToolTeaser content={content.freeTool} />}
       </Questions>
-      <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/start' }])} />
+      <StructuredData data={await breadcrumbData('ar', [{ name: content.meta.name, path: '/start' }])} />
       <StructuredData data={faqData(content.questions)} />
     </PageShell>
   );

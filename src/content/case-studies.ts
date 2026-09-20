@@ -3,14 +3,15 @@
  * The stories themselves are written in the CMS (ticket 24).
  *
  * The Reference site has no case studies, so none of this is its copy. The
- * index's lead is for Ahmed to approve or reword; ticket 21 moves page text
- * into the CMS, where he can.
+ * line under the index's heading is in the CMS (ticket 59,
+ * `src/content/index-leads.ts`); what is left here labels the page's parts
+ * rather than speaking to a reader, and moves with the English site
+ * (ticket 42).
  */
 export const CASE_STUDIES_COPY = {
   ar: {
     eyebrow: 'قصص العملاء',
     title: 'قصص عملاء ربائد',
-    lead: 'مشاريع إنشاء حقيقية انتقلت فيها الطلبات والاعتمادات إلى سجل واحد بين المالك والاستشاري والمقاول — ما كان التحدي، وما الذي تغيّر، وما النتيجة.',
     metaTitle: 'ربائد · قصص العملاء',
     siteName: 'ربائد',
     client: 'العميل',
@@ -27,7 +28,6 @@ export const CASE_STUDIES_COPY = {
   en: {
     eyebrow: 'Case studies',
     title: 'Rabaed case studies',
-    lead: 'Real construction projects that moved their requests and approvals onto one record between owner, consultant and contractor — the challenge, what changed, and the outcome.',
     metaTitle: 'Rabaed · Case studies',
     siteName: 'Rabaed',
     client: 'Client',

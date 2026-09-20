@@ -1,4 +1,5 @@
-import { DEFAULT_LOCALE, LOCALES } from '@/lib/locales';
+import { getNotFound } from '@/content/site-words';
+import { DEFAULT_LOCALE, LOCALES, localePath } from '@/lib/locales';
 import '@/styles/globals.css';
 
 /**
@@ -21,14 +22,20 @@ import '@/styles/globals.css';
  * and the bidirectional algorithm read for that subtree, so the page is
  * correct to a visitor. What is missing is the document-level `lang`, on a
  * page that is `noindex` and has no design of its own yet.
+ *
+ * Its words are in the CMS (ticket 59), in Arabic: the address that reached
+ * here matched no route, so it names no language to answer in, and the site's
+ * own language answers.
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const { heading, lead, homeLabel } = await getNotFound(DEFAULT_LOCALE);
+
   return (
     <main className="phero" lang={DEFAULT_LOCALE} dir={LOCALES[DEFAULT_LOCALE].dir}>
       <div className="wrap">
-        <h1>الصفحة غير موجودة</h1>
+        <h1>{heading}</h1>
         <p className="lead">
-          الرابط الذي طلبته غير متاح. <a href="/">العودة إلى الصفحة الرئيسية</a>
+          {lead} <a href={localePath(DEFAULT_LOCALE, '/')}>{homeLabel}</a>
         </p>
       </div>
     </main>

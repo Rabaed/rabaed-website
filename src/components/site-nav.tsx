@@ -1,12 +1,5 @@
-import { hasPublishedCaseStudies } from '@/cms/case-studies';
 import { NavBehaviour } from '@/components/nav-behaviour';
-import {
-  PARTNERSHIP_LABEL,
-  PARTNERSHIP_LINKS,
-  SIGN_IN_LABEL,
-  SIGN_IN_URL,
-  primaryLinks,
-} from '@/content/navigation';
+import { getHeader } from '@/content/site-words';
 import { localePath, type Locale } from '@/lib/locales';
 
 /**
@@ -24,18 +17,20 @@ import { localePath, type Locale } from '@/lib/locales';
  * on the server and so would leave one of the two menus missing from the HTML
  * a crawler reads.
  *
- * Whether case studies have a link is read from the CMS as the page is built;
- * publishing or unpublishing one rebuilds every page (`src/cms/revalidation.ts`).
+ * Every label, and where every link goes, is read from the CMS (ticket 59),
+ * as is whether case studies have a link yet; publishing anything rebuilds
+ * every page (`src/cms/revalidation.ts`).
  */
 export async function SiteNav({ locale, path }: { locale: Locale; path: string }) {
-  const href = (to: string) => localePath(locale, to);
-  const links = primaryLinks({ caseStudies: await hasPublishedCaseStudies(locale) });
-  const inPartnerships = PARTNERSHIP_LINKS.some((link) => link.path === path);
+  const { links, partnershipsLabel, partnerships, signIn, demoLabel } = await getHeader(locale);
+  const inPartnerships = partnerships.some((link) => link.path === path);
 
   return (
     <nav className="nav">
       <div className="wrap">
-        <a className="brand" href={href('/')}>
+        {/* The wordmark leads home whatever the menu says: it is the site's
+            own mark, not one of the links an Editor orders. */}
+        <a className="brand" href={localePath(locale, '/')}>
           {/* Two wordmarks, cross-faded by `.nav.on-light`: one legible on the
               dark sections, one on the light. The second is decorative — the
               first already names the site. */}
@@ -45,19 +40,19 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
 
         <div className="links">
           {links.map((link) => (
-            <a key={link.path} href={href(link.path)} className={link.path === path ? 'on' : undefined}>
+            <a key={link.path} href={link.href} className={link.path === path ? 'on' : undefined}>
               {link.label}
             </a>
           ))}
 
           <div className={inPartnerships ? 'nsub on' : 'nsub'}>
             <button className="nsub-t" type="button" aria-expanded="false" aria-haspopup="true">
-              {PARTNERSHIP_LABEL}
+              {partnershipsLabel}
               <span className="ar">▾</span>
             </button>
             <div className="nsub-p">
-              {PARTNERSHIP_LINKS.map((link) => (
-                <a key={link.path} href={href(link.path)} className={link.path === path ? 'on' : undefined}>
+              {partnerships.map((link) => (
+                <a key={link.path} href={link.href} className={link.path === path ? 'on' : undefined}>
                   <b>{link.label}</b>
                   <span>{link.summary}</span>
                 </a>
@@ -67,14 +62,14 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
         </div>
 
         <div className="nav-cta">
-          <a className="login" href={SIGN_IN_URL} target="_blank" rel="noopener">
-            {SIGN_IN_LABEL}
+          <a className="login" href={signIn.href} target="_blank" rel="noopener">
+            {signIn.label}
           </a>
           {/* On the home page this jumps to the demo request form (ticket 11).
               On a page without the form it goes nowhere, which is what the
               Reference site does on its sub-pages too. */}
           <a className="btn p" href="#demo">
-            احجز عرضاً حياً
+            {demoLabel}
           </a>
           <button className="navtog" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="mnav">
             <i />
@@ -85,20 +80,20 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
       <div className="mnav" id="mnav">
         <div className="wrap">
           {links.map((link) => (
-            <a key={link.path} href={href(link.path)} className={link.path === path ? 'on' : undefined}>
+            <a key={link.path} href={link.href} className={link.path === path ? 'on' : undefined}>
               {link.label}
             </a>
           ))}
           <div className="msub">
-            <span className="msub-t">{PARTNERSHIP_LABEL}</span>
-            {PARTNERSHIP_LINKS.map((link) => (
-              <a key={link.path} href={href(link.path)} className={link.path === path ? 'on' : undefined}>
+            <span className="msub-t">{partnershipsLabel}</span>
+            {partnerships.map((link) => (
+              <a key={link.path} href={link.href} className={link.path === path ? 'on' : undefined}>
                 {link.label}
               </a>
             ))}
           </div>
-          <a className="mlogin" href={SIGN_IN_URL} target="_blank" rel="noopener">
-            {SIGN_IN_LABEL}
+          <a className="mlogin" href={signIn.href} target="_blank" rel="noopener">
+            {signIn.label}
           </a>
         </div>
       </div>

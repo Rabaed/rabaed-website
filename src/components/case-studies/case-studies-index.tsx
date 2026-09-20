@@ -4,6 +4,7 @@ import { EditorialFrame, EditorialHero, MediaImage, PublishedDate } from '@/comp
 import { hasPublishedCaseStudies, publishedCaseStudies } from '@/cms/case-studies';
 import { fetchedMedia } from '@/cms/fetched-media';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
+import { getIndexLead } from '@/content/index-leads';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
@@ -14,13 +15,16 @@ import type { CaseStudy } from '@/payload-types';
 export async function caseStudiesIndexMetadata(locale: Locale): Promise<Metadata> {
   const copy = CASE_STUDIES_COPY[locale];
   // One argument each, as the header asks, so the per-request cache answers both.
-  const showing = await Promise.all(LOCALE_CODES.map((code) => hasPublishedCaseStudies(code)));
+  const [showing, lead] = await Promise.all([
+    Promise.all(LOCALE_CODES.map((code) => hasPublishedCaseStudies(code))),
+    getIndexLead(locale, 'caseStudies'),
+  ]);
   return pageMetadata({
     locale,
     locales: LOCALE_CODES.filter((_, index) => showing[index]),
     path: CASE_STUDIES_PATH,
     title: copy.metaTitle,
-    description: copy.lead,
+    description: lead,
   });
 }
 
@@ -31,13 +35,13 @@ export async function caseStudiesIndexMetadata(locale: Locale): Promise<Metadata
  */
 export async function CaseStudiesIndexPage({ locale }: { locale: Locale }) {
   const copy = CASE_STUDIES_COPY[locale];
-  const caseStudies = await publishedCaseStudies(locale);
+  const [caseStudies, lead] = await Promise.all([publishedCaseStudies(locale), getIndexLead(locale, 'caseStudies')]);
   if (caseStudies.length === 0) notFound();
 
   return (
     <EditorialFrame locale={locale} path={CASE_STUDIES_PATH}>
       <EditorialHero eyebrow={copy.eyebrow} title={copy.title}>
-        <p className="lead">{copy.lead}</p>
+        <p className="lead">{lead}</p>
       </EditorialHero>
 
       <section className="light entry-list">
@@ -49,7 +53,7 @@ export async function CaseStudiesIndexPage({ locale }: { locale: Locale }) {
           </div>
         </div>
       </section>
-      <StructuredData data={breadcrumbData(locale, [{ name: copy.eyebrow, path: CASE_STUDIES_PATH }])} />
+      <StructuredData data={await breadcrumbData(locale, [{ name: copy.eyebrow, path: CASE_STUDIES_PATH }])} />
     </EditorialFrame>
   );
 }

@@ -23,7 +23,7 @@ export function PageShell({
   children,
 }: {
   locale: Locale;
-  /** This page's locale-independent path, as it appears in `src/content/navigation.ts`. */
+  /** This page's locale-independent path, as the menu's links name it (`src/content/site-words.ts`). */
   path: string;
   children: ReactNode;
 }) {
