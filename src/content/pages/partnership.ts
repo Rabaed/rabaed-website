@@ -1,4 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { getSearchSettings } from '@/content/search-settings';
 import { numeralsInMono } from '@/components/inline-text';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { PartnershipApplyContent } from '@/components/partnership/apply';
@@ -31,17 +32,11 @@ export type PartnershipPageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS,
- * and the short name its breadcrumb structured data reads (ticket 32), which
- * travels with them. Verbatim from `reference/site/partnership.html`.
+ * The page's short name, as its breadcrumb structured data reads it
+ * (ticket 32). Its search title and description are an Editor's, in the CMS
+ * (ticket 26, `src/content/search-settings.ts`).
  */
-const META = {
-  ar: {
-    name: 'برنامج الشراكات',
-    title: 'ربائد · برنامج الشراكات للمكاتب الهندسية',
-    description: 'شراكة تُصمَّم معك: تسعير شريك، أو رخصة على مستوى المكتب، أو تضمين المنصة في عرضك للمالك.',
-  },
-} as const;
+const NAME = 'برنامج الشراكات';
 
 /** A card or stage numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -56,15 +51,16 @@ const numbered = (index: number) => String(index + 1).padStart(2, '0');
  * says, never where it goes.
  */
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
-  const [entry, applicationForm] = await Promise.all([
+  const [entry, applicationForm, meta] = await Promise.all([
     pageEntry('partnership-page', locale),
     formPageWording(PARTNERSHIP_APPLICATION),
+    getSearchSettings(locale, 'partnership', { name: NAME }),
   ]);
   const { hero, idea, audience, modes, benefits, path, questions, apply } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<PartnershipPageContent, 'applicationForm'>> = {
-    meta: inLocale('partnership', META, locale),
+    meta,
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

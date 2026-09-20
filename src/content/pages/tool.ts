@@ -1,5 +1,6 @@
 import { withLatinNames } from '@/cms/latin-names';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { getSearchSettings } from '@/content/search-settings';
 import type { InlinePart, InlineText } from '@/components/inline-text';
 import type { QuestionsContent } from '@/components/questions';
 import type { ToolDownloadContent } from '@/components/tool/download';
@@ -29,18 +30,11 @@ export type ToolPageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS,
- * and the short name its breadcrumb structured data reads (ticket 32), which
- * travels with them. Verbatim from `reference/site/tool.html`.
+ * The page's short name, as its breadcrumb structured data reads it
+ * (ticket 32). Its search title and description are an Editor's, in the CMS
+ * (ticket 26, `src/content/search-settings.ts`).
  */
-const META = {
-  ar: {
-    name: 'متتبّع الصبّات',
-    title: 'ربائد · متتبّع الصبّات واختبارات الكسر — أداة مجانية',
-    description:
-      'ملف HTML واحد يفتح بنقرتين. سجّل الصبّة واعرف موعد اختبار الكسر ٧ و ٢٨ يوماً قبل أن يتأخر. بدون حساب، بدون سيرفر، بياناتك تبقى على جهازك.',
-  },
-} as const;
+const NAME = 'متتبّع الصبّات';
 
 /** A test's states, in the order the legend lists them. */
 const LEGEND = ['idle', 'warn', 'bad', 'info', 'ok'] as const;
@@ -64,11 +58,15 @@ function boldThen(bold: string, rest: InlineText): InlinePart[] {
  * says, never where it goes.
  */
 export async function getToolPage(locale: Locale): Promise<ToolPageContent> {
-  const { hero, why, features, how, privacy, requirements, download, questions, upsell } = await pageEntry('tool-page', locale);
+  const [entry, meta] = await Promise.all([
+    pageEntry('tool-page', locale),
+    getSearchSettings(locale, 'tool', { name: NAME }),
+  ]);
+  const { hero, why, features, how, privacy, requirements, download, questions, upsell } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<ToolPageContent> = {
-    meta: inLocale('tool', META, locale),
+    meta,
     hero: {
       eyebrow: words(hero.eyebrow),
       // With the space before its last words, which are drawn apart.

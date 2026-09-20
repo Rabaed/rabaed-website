@@ -19,6 +19,7 @@ import { Faqs } from './cms/collections/faq-entries';
 import { FormSubmissions } from './cms/collections/form-submissions';
 import { LegalDocuments } from './cms/collections/legal-documents';
 import { Media } from './cms/collections/media';
+import { SharingImages } from './cms/collections/sharing-images';
 import { Posts } from './cms/collections/posts';
 import { Users } from './cms/collections/users';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
@@ -33,6 +34,7 @@ import { ProductPage } from './cms/globals/product-page';
 import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
 import { ScreenMocks } from './cms/globals/screen-mocks';
+import { SearchSettings } from './cms/globals/search-settings';
 import { SiteWords } from './cms/globals/site-words';
 import { TrustStripLogos } from './cms/globals/trust-strip';
 import { StartPage } from './cms/globals/start-page';
@@ -87,7 +89,7 @@ export default buildConfig({
 
   // No `localization`: page text holds its Arabic and English side by side in
   // fields of its own (`cms/page-fields.ts` says why).
-  collections: [Users, Media, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
+  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
   // One settings global per form that submits (ticket 27), the Referral
   // Program values (ticket 56), and one entry per marketing page whose words
   // are in the CMS (ticket 53), with the closing section and the Screen mocks
@@ -109,6 +111,7 @@ export default buildConfig({
     SiteWords,
     IndexLeads,
     TrustStripLogos,
+    SearchSettings,
   ],
 
   db: postgresAdapter({
@@ -128,7 +131,7 @@ export default buildConfig({
   plugins: [
     s3Storage({
       enabled: bucket !== null,
-      collections: { media: true },
+      collections: { media: true, 'sharing-images': true },
       bucket: bucket?.bucket ?? '',
       config: {
         endpoint: bucket?.endpoint,

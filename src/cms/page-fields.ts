@@ -273,6 +273,29 @@ async function chosenImage(value: unknown, options: Parameters<UploadFieldSingle
   return options.req.payload.findByID({ collection: 'media', id: id as number, depth: 0, req: options.req }).catch(() => null);
 }
 
+const SHARING_IMAGE_DESCRIPTION: Words = {
+  ar: 'اختياري: تظهر حين يُشارك الرابط على واتساب أو لينكدإن. ١٢٠٠×٦٣٠ بكسل بصيغة PNG. من دونها تُستخدم صورة الموقع العامة.',
+  en: 'Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.',
+};
+
+/**
+ * The picture a page's link unfurls as, where it has one of its own
+ * (ticket 26). Its size and its kind are held by the collection it points at,
+ * which takes nothing but a 1200×630 PNG and stores it as it arrived — see
+ * `src/cms/collections/sharing-images.ts` for why that is a collection of its
+ * own rather than a picture in `media`.
+ */
+export function sharingImageField(): Field {
+  return {
+    name: 'sharingImage',
+    type: 'upload',
+    relationTo: 'sharing-images',
+    required: false,
+    label: { ar: 'صورة المشاركة', en: 'Sharing image' },
+    admin: { description: SHARING_IMAGE_DESCRIPTION },
+  };
+}
+
 /**
  * A company's mark for the Trust strip (ticket 20). Unlike a picture on a
  * page, a logo has no shape of its own to hold to: a wordmark is wide, a

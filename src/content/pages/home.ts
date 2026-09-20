@@ -2,6 +2,7 @@ import { withEmphasis } from '@/cms/emphasis';
 import { FAQ_PAGES } from '@/cms/faq-pages';
 import { fetchedMedia } from '@/cms/fetched-media';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { getSearchSettings } from '@/content/search-settings';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { ComparisonStep, Face, HomeBeforeAfterContent } from '@/components/home/before-after';
 import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
@@ -41,17 +42,11 @@ export type HomePageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS,
- * and the short name its breadcrumb structured data reads (ticket 32), which
- * travels with them. Verbatim from `reference/site/index.html`.
+ * The page's short name, as its breadcrumb structured data reads it
+ * (ticket 32). Its search title and description are an Editor's, in the CMS
+ * (ticket 26, `src/content/search-settings.ts`).
  */
-const META = {
-  ar: {
-    name: 'الرئيسية',
-    title: 'ربائد · ثلاثة أطراف. سجل واحد.',
-    description: 'منصة سعودية تجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
-  },
-} as const;
+const NAME = 'الرئيسية';
 
 /** A unit numbered by its place: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -80,12 +75,13 @@ const EMPTY_STEP: TransactionStep = { action: '', by: '', time: '' };
  * a button says, never where it goes.
  */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip, meta] = await Promise.all([
     pageEntry('home-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST),
     getTrustStrip(locale),
+    getSearchSettings(locale, 'home', { name: NAME }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;
@@ -116,7 +112,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
   );
 
   const page = await withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, {
-    meta: inLocale('home', META, locale),
+    meta,
     hero: {
       eyebrow: words(hero.eyebrow),
       title: { lines: hero.titleLines.map((each) => words(each.line)), accent: words(hero.titleAccent) },

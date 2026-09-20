@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'sharing-images': SharingImage;
     posts: Post;
     'case-studies': CaseStudy;
     'legal-documents': LegalDocument;
@@ -83,6 +84,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'sharing-images': SharingImagesSelect<false> | SharingImagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
@@ -115,6 +117,7 @@ export interface Config {
     'site-words': SiteWord;
     'index-leads': IndexLead;
     'trust-strip': TrustStrip;
+    'search-settings': SearchSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -134,6 +137,7 @@ export interface Config {
     'site-words': SiteWordsSelect<false> | SiteWordsSelect<true>;
     'index-leads': IndexLeadsSelect<false> | IndexLeadsSelect<true>;
     'trust-strip': TrustStripSelect<false> | TrustStripSelect<true>;
+    'search-settings': SearchSettingsSelect<false> | SearchSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -236,6 +240,28 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sharing-images".
+ */
+export interface SharingImage {
+  id: number;
+  /**
+   * What the picture says, for anyone who hears the link rather than sees it.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -265,6 +291,10 @@ export interface Post {
    * A line or two shown under the title on the blog index, and as the description in search results.
    */
   summary: string;
+  /**
+   * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+   */
+  sharingImage?: (number | null) | SharingImage;
   /**
    * The end of the address: rabaedapp.com/blog/… — a translation uses the same slug.
    */
@@ -371,6 +401,10 @@ export interface CaseStudy {
    * A line or two shown under the title on the case studies index, and as the description in search results.
    */
   summary: string;
+  /**
+   * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+   */
+  sharingImage?: (number | null) | SharingImage;
   /**
    * The end of the address: rabaedapp.com/case-studies/… — a translation uses the same slug.
    */
@@ -577,6 +611,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'sharing-images';
+        value: number | SharingImage;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
@@ -715,6 +753,24 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sharing-images_select".
+ */
+export interface SharingImagesSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -723,6 +779,7 @@ export interface PostsSelect<T extends boolean = true> {
   coverImage?: T;
   body?: T;
   summary?: T;
+  sharingImage?: T;
   slug?: T;
   locale?: T;
   author?: T;
@@ -761,6 +818,7 @@ export interface CaseStudiesSelect<T extends boolean = true> {
       };
   images?: T;
   summary?: T;
+  sharingImage?: T;
   slug?: T;
   locale?: T;
   author?: T;
@@ -3835,6 +3893,140 @@ export interface TrustStrip {
       link?: string | null;
       id?: string | null;
     }[];
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-settings".
+ */
+export interface SearchSetting {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  home: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
+  product: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
+  start: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
+  tool: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
+  referral: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
+  partnership: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
   };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -7039,6 +7231,119 @@ export interface TrustStripSelect<T extends boolean = true> {
               link?: T;
               id?: T;
             };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-settings_select".
+ */
+export interface SearchSettingsSelect<T extends boolean = true> {
+  languages?: T;
+  home?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
+  product?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
+  start?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
+  tool?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
+  referral?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
+  partnership?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
       };
   _status?: T;
   updatedAt?: T;

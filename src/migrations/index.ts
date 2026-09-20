@@ -31,6 +31,8 @@ import * as migration_20260920_182914_import_site_words_and_index_leads from './
 import * as migration_20260920_184810_ai_crawler_rules from './20260920_184810_ai_crawler_rules';
 import * as migration_20260920_204225_trust_strip from './20260920_204225_trust_strip';
 import * as migration_20260920_204226_import_trust_strip from './20260920_204226_import_trust_strip';
+import * as migration_20260920_211935_search_settings from './20260920_211935_search_settings';
+import * as migration_20260920_211936_import_search_settings from './20260920_211936_import_search_settings';
 
 export const migrations = [
   {
@@ -197,5 +199,15 @@ export const migrations = [
     up: migration_20260920_204226_import_trust_strip.up,
     down: migration_20260920_204226_import_trust_strip.down,
     name: '20260920_204226_import_trust_strip',
+  },
+  {
+    up: migration_20260920_211935_search_settings.up,
+    down: migration_20260920_211935_search_settings.down,
+    name: '20260920_211935_search_settings',
+  },
+  {
+    up: migration_20260920_211936_import_search_settings.up,
+    down: migration_20260920_211936_import_search_settings.down,
+    name: '20260920_211936_import_search_settings',
   },
 ];
