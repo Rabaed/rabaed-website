@@ -220,7 +220,7 @@ Rebuild the Reference site as the official Marketing site at `rabaedapp.com`: sa
 
 **What makes a good test here:** it asserts what a visitor or editor can observe — text on the page, a file downloaded, a row stored, a layout that does not overflow. It never asserts component internals, class names as such, or CMS implementation details. The Reference site is the oracle for appearance; the spec is the oracle for behaviour.
 
-**One seam, at the highest point: the running application, driven by Playwright.** Everything below it — components, CMS queries, form handlers, image pipeline — is exercised through that seam rather than tested directly. A second, narrow seam is permitted only for pure calculation with no I/O, currently the delay-cost formula, where a direct unit test is cheaper and sharper than driving three sliders.
+**One seam, at the highest point: the running application, driven by Playwright.** Everything below it — components, CMS queries, form handlers, image pipeline — is exercised through that seam rather than tested directly. A second, narrow seam is permitted only for pure calculation with no I/O, currently the delay-cost formula, where a direct unit test is cheaper and sharper than driving three sliders. A third holds one file in the repository to another — the screen mock registry to the mocks on disk, the privacy inventory to the form definitions — where what is asserted is the repository's own consistency and no running application can observe it.
 
 Tests run against the built application with a seeded test database and test storage bucket, so CMS-driven content is real content, not fixtures injected at render time.
 

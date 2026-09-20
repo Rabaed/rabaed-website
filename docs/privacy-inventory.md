@@ -1,6 +1,6 @@
 # What the Rabaed website collects
 
-**An inventory for the lawyer.** Prepared by the build team of شركة ربائد البناء (unified number 7050078786, Riyadh) on 20 September 2026, so that the Arabic Privacy Policy can be rewritten to describe the site as it actually is, before launch.
+**An inventory for the lawyer.** Prepared by the build team of شركة ربائد البناء (unified number 7050078786, Riyadh) on 21 September 2026, so that the Arabic Privacy Policy can be rewritten to describe the site as it actually is, before launch.
 
 The Arabic version of this document is [`privacy-inventory.ar.md`](privacy-inventory.ar.md), and it says the same thing. Arabic is the binding language of the policy; this English version is for the team.
 
@@ -17,7 +17,7 @@ The site has **four forms**; three of them are live today and one is not yet con
 Worth reading before the rewrite. The policy in force was written for the company in general, not for this website, and it describes collection that does not happen here:
 
 - It says **credit card details** may be collected. The site never asks for a payment method, anywhere.
-- It says data may be shared with **partners, affiliates, advertisers and sponsors**. Nothing on this site shares anything with any of them. The only outside companies involved are the three service providers in section 8, which hold the data on Rabaed's behalf and do nothing else with it.
+- It says data may be shared with **partners, affiliates and advertisers**. Nothing on this site shares anything with any of them. The only outside companies involved are the three service providers in section 8, which hold the data on Rabaed's behalf and do nothing else with it.
 - It describes a **mailing list** with an unsubscribe link at the bottom of each message. The site has no mailing list and sends no marketing email. It sends exactly two kinds of message, both in section 6.
 - It says nothing about **uploaded documents**, which are the most sensitive thing the site now holds (section 4).
 - It says nothing about **how long anything is kept**. Nothing is deleted automatically today; see section 5 and the decisions in section 11.
@@ -113,7 +113,7 @@ The same few things are recorded with each one, whichever form it came from:
 - **The applicant's name, email and phone** a second time, in columns of their own, so that the team can search its list of submissions by them.
 - **What became of each of the two emails** described in section 6 — sent, not sent, or failed.
 - **A one-time reference** the form generates for the submission, so that a double click or a retry on a dropped connection does not create a second copy of the same request.
-- **A one-way fingerprint of the sender's internet address.** The address itself is *not* stored. What is stored is a scrambled value computed from it, which cannot be turned back into an address; it exists only so the site can tell that five requests came from the same place within an hour and refuse a sixth. This is the site's protection against automated abuse, along with a hidden field that a person never sees and only an automated script would fill in. A submission refused for either reason is not stored at all.
+- **A one-way fingerprint of the sender's internet address.** The address itself is *not* stored. What is stored is a scrambled value computed from it, which cannot be turned back into an address; it exists only so that the site can count how many submissions it has already stored from the same place in the past hour, and refuse a sixth. It caps how much one sender can store; it is not a count of how often they tried. A request turned away before anything is stored — one with the hidden trap field filled in, which a person never sees and only an automated script would complete, or one without the form's own one-time reference — leaves no record at all, and is not counted.
 
 ## 4. Uploaded documents, and the private `documents` store
 
@@ -125,7 +125,7 @@ This is the part of the site that most needs describing in the policy.
 
 **Who can open one.** Only a signed-in member of the Rabaed team, from the submission's record in the admin. Opening it produces a fresh link that stops working after **10 minutes**, so a link that is copied, forwarded or left in an email is of no use to anyone. Beyond the team, the people holding the Supabase account credentials — the founders — can reach the store directly, as the owners of the account.
 
-**Where they are never sent.** The alert email to the team (section 6) *names* the documents that came with a submission but never attaches them. A document therefore never travels through email, and never leaves the private store except as a 10-minute link opened by a signed-in editor.
+**Where they are never sent.** The alert email to the team (section 6) *names* the documents that came with a submission but never attaches them. A document therefore never travels through email, and never leaves the private store except as a 10-minute link opened by a signed-in Editor.
 
 **Deletion.** Deleting a submission in the admin deletes its uploaded documents from the store at the same time, deliberately: someone who asks for their details to be removed means the certificates too.
 
@@ -133,9 +133,9 @@ This is the part of the site that most needs describing in the policy.
 
 | What | Where it is kept | Who can reach it | How long it is kept |
 | --- | --- | --- | --- |
-| Form submissions and their answers | A Supabase Postgres database | Any signed-in Rabaed editor; plus whoever holds the database credentials (the founders) | **Kept until someone deletes it by hand. There is no automatic deletion today** — a decision is needed (section 11) |
-| Uploaded documents (section 4) | The private `documents` store at Supabase | Any signed-in Rabaed editor, through a 10-minute link; plus whoever holds the storage credentials | As above, and deleted together with their submission |
-| Editor accounts (the team's own logins) | The same Supabase database | Any signed-in editor can see, invite and remove editors — there is one level of access, not several (ADR-0007) | Until the account is removed. The number of accounts is the control: access is given only to people who edit the site |
+| Form submissions and their answers | A Supabase Postgres database | Any signed-in Rabaed Editor; plus whoever holds the database credentials (the founders) | **Kept until someone deletes it by hand. There is no automatic deletion today** — a decision is needed (section 11) |
+| Uploaded documents (section 4) | The private `documents` store at Supabase | Any signed-in Rabaed Editor, through a 10-minute link; plus whoever holds the storage credentials | As above, and deleted together with their submission |
+| Editor accounts (the team's own logins) | The same Supabase database | Any signed-in Editor can see, invite and remove Editors — there is one level of access, not several (ADR-0007) | Until the account is removed. The number of accounts is the control: access is given only to people who edit the site |
 | Alert and confirmation emails | The company's Microsoft 365 mailbox, and the recipient's own inbox | Whoever has access to that mailbox | Whatever the Microsoft 365 mailbox is set to keep — **to be confirmed by the founders** (section 11) |
 | Ordinary server records of requests to the site | Vercel, the hosting company | The Vercel team account | Vercel's own retention — **to be confirmed** (section 11) |
 | Visitor analytics | Not installed yet — section 7 | — | — |
@@ -143,7 +143,9 @@ This is the part of the site that most needs describing in the policy.
 
 **One category in that last row deserves a line in the policy.** Published case studies name a real client and can carry a quotation attributed to a named person in a stated role. Those are published deliberately and, by the team's own rule, only with the client's agreement — but they are personal data about someone who is not the visitor, and a reader may ask about them.
 
-**Access is drawn along one line only: signed in, or not.** Every editor can reach everything the CMS holds, submissions and uploaded documents included. Accounts are invitation-only — nobody can sign themselves up — and sessions last a working day.
+**And a published entry keeps its history.** The CMS retains up to 50 earlier versions of each article and case study, so a client's name or an attributed quotation taken off the live page is still in the database until those versions age out. Form submissions are not versioned: a submission deleted is gone, with its documents.
+
+**Access is drawn along one line only: signed in, or not.** Every Editor can reach everything the CMS holds, submissions and uploaded documents included. Accounts are invitation-only — nobody can sign themselves up — and sessions last a working day.
 
 ## 6. Email: what the site sends, and through what
 
@@ -158,7 +160,7 @@ Exactly two messages may go out, both triggered by a form submission and neither
 
 ## 7. Analytics, cookies, and what the visitor's browser keeps
 
-**The site sets no cookie on a visitor's browser, and no cookie banner is needed.** There is one cookie in the whole system and it is not a visitor's: the login session of a Rabaed editor signed in to the admin at `/maktab`. The site stores nothing in the browser's own storage either, and loads no script from any other company — no advertising pixel, no social media embed, no third-party fonts; the fonts are served from the site itself.
+**The site sets no cookie on a visitor's browser, and no cookie banner is needed.** There is one cookie in the whole system and it is not a visitor's: the login session of a Rabaed Editor signed in to the admin at `/maktab`. The site stores nothing in the browser's own storage either, and loads no script from any other company — no advertising pixel, no social media embed, no third-party fonts; the fonts are served from the site itself.
 
 **Analytics is decided but not yet installed.** The build has not switched it on; when it does, it will be **cookie-free by requirement**, which is why no consent banner is planned. What it is intended to collect:
 
