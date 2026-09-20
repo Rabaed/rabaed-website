@@ -3,7 +3,7 @@ import { allPublishedPosts } from '@/cms/blog';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
 import { blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
-import { siteOrigin } from '@/lib/environment';
+import { absoluteUrl } from '@/lib/environment';
 import { localePath } from '@/lib/locales';
 
 /**
@@ -23,23 +23,19 @@ const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', 
  * admin, or the English placeholder (ticket 31).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const origin = siteOrigin();
-  // The home page is the bare origin, as its canonical URL is.
-  const url = (path: string) => `${origin}${path === '/' ? '' : path}`;
-
   const [posts, caseStudies] = await Promise.all([allPublishedPosts(), allPublishedCaseStudies()]);
 
   return [
-    ...PAGES.map((path) => ({ url: url(path) })),
+    ...PAGES.map((path) => ({ url: absoluteUrl(path) })),
     // The case studies index is one of the Arabic site's pages once the section
     // shows there. Like `/en/blog`, the English index waits for English.
-    ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar') ? [{ url: url(CASE_STUDIES_PATH) }] : []),
+    ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar') ? [{ url: absoluteUrl(CASE_STUDIES_PATH) }] : []),
     ...posts.map((post) => ({
-      url: url(localePath(post.locale, blogPostPath(post.slug))),
+      url: absoluteUrl(localePath(post.locale, blogPostPath(post.slug))),
       lastModified: post.updatedAt,
     })),
     ...caseStudies.map((caseStudy) => ({
-      url: url(localePath(caseStudy.locale, caseStudyPath(caseStudy.slug))),
+      url: absoluteUrl(localePath(caseStudy.locale, caseStudyPath(caseStudy.slug))),
       lastModified: caseStudy.updatedAt,
     })),
   ];

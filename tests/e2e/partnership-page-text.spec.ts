@@ -14,7 +14,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, PARTNERSHIP_PAGE_EDITOR, logInAs, logInByApi } from './cms';
+import { ADMIN_PATH, PARTNERSHIP_PAGE_EDITOR, logInAs, logInByApi, reachesVisitors } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -282,12 +282,25 @@ test('the partnership page is published in English once every word it has is wri
   const entry = fields(await published(page.request));
 
   try {
-    const response = await save(page.request, { ...withEnglish(entry), languages: ['ar', 'en'] }, 'published');
+    // A visitor's Arabic page is meant to come back exactly as it was, which
+    // leaves nothing in it to wait for — and a publish is in nobody's page the
+    // moment it is saved (`cms.ts`). So the English is published together with a
+    // space at the end of the application's paragraph, which is in the HTML and drawn
+    // nowhere, and the page waited for is the one that space arrives in: built
+    // from this publish, not from before it.
+    const english = withEnglish(entry);
+    const lead = `${entry.apply.lead.ar} `;
+    const response = await save(
+      page.request,
+      { ...english, apply: { ...english.apply, lead: { ...english.apply.lead, ar: lead } }, languages: ['ar', 'en'] },
+      'published',
+    );
     expect(response.ok(), await response.text()).toBe(true);
     expect((await published(page.request)).languages).toEqual(['ar', 'en']);
 
-    await expect.poll(async () => visitorHtml(request)).toContain(entry.hero.title.ar);
-    expect(await visitorHtml(request)).not.toContain('>English<');
+    const html = await reachesVisitors(request, '/partnership', `${lead}</p>`, 'the partnership page published in English');
+    expect(html).toContain(entry.hero.title.ar);
+    expect(html).not.toContain('>English<');
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);
@@ -303,7 +316,7 @@ test('a change published reaches visitors', async ({ page, request }) => {
   try {
     const response = await save(page.request, { ...entry, apply: { ...entry.apply, lead: arabic(lead) } }, 'published');
     expect(response.ok(), await response.text()).toBe(true);
-    await expect.poll(async () => visitorHtml(request)).toContain(`${lead}</p>`);
+    await reachesVisitors(request, '/partnership', `${lead}</p>`, "the partnership page's reworded paragraph");
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);

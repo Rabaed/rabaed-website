@@ -107,8 +107,15 @@ test('robots.txt is served, lets crawlers reach the pages, and names the sitemap
   expect(robots).toContain(`Sitemap: ${baseURL}/sitemap.xml`);
   // A crawler kept out by robots.txt never reads the `noindex` on a page, and
   // can still list its address from a link elsewhere. Before launch the block
-  // is `noindex`, so nothing may be disallowed here that it has to see.
-  expect(robots).not.toMatch(/^Disallow:\s*\/\s*$/m);
+  // is `noindex`, so nothing that has to see one may be shut out here: the
+  // rule every crawler not named in the file follows allows the site whole.
+  //
+  // Scoped to that rule rather than to any `Disallow: /` in the file, because
+  // one is legitimate — the founders may refuse the AI training crawlers, and
+  // those are named. What the named groups say is `ai-crawlers.spec.ts`'s
+  // (ticket 33).
+  const everyOtherCrawler = robots.split(/\n\s*\n/).find((group) => group.startsWith('User-Agent: *'));
+  expect(everyOtherCrawler?.split('\n').slice(1)).toEqual(['Allow: /']);
 
   await fetchOk(request, `${baseURL}/sitemap.xml`);
 });

@@ -99,6 +99,7 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    'ai-crawlers': AiCrawler;
     'demo-request-form': DemoRequestForm;
     'referral-signup-form': ReferralSignupForm;
     'partnership-application-form': PartnershipApplicationForm;
@@ -117,6 +118,7 @@ export interface Config {
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'ai-crawlers': AiCrawlersSelect<false> | AiCrawlersSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
     'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
     'partnership-application-form': PartnershipApplicationFormSelect<false> | PartnershipApplicationFormSelect<true>;
@@ -910,6 +912,19 @@ export interface SiteSetting {
     instagram?: string | null;
   };
   _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-crawlers".
+ */
+export interface AiCrawler {
+  id: number;
+  /**
+   * Training crawlers — GPTBot, ClaudeBot, CCBot and Meta-ExternalAgent — copy the site to train AI models. Allowing them makes the models themselves know Rabaed in a year or two, with no citation, visit or link; refusing them keeps the writing from being copied and costs nothing today, because the retrieval and citation crawlers — the ones that fetch a page at the moment somebody asks, and name the source — are always allowed and this switch does not touch them. Allowed by default.
+   */
+  allowTraining?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -3842,6 +3857,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         instagram?: T;
       };
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-crawlers_select".
+ */
+export interface AiCrawlersSelect<T extends boolean = true> {
+  allowTraining?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
