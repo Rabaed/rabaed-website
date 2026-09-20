@@ -86,3 +86,11 @@ The conflict that first argued for a stage of its own — the switch flipping `D
 Verified as CI runs it: `npx playwright test --grep-invert @pixel --shard=1/4` is 232 tests in 1.7 minutes with no `@pixel` among them, and all three `runs-last` suites side by side.
 
 **Three ways to order a Playwright project, and only one works here.** A second teardown chained to the first: neither runs. A dependency on the main project: the shard carrying it runs everything, unfiltered. A file in the existing teardown: correct, at the price of tolerating what runs beside it.
+
+### A shard failed on somebody else's five seconds
+
+`e2e (2/4)` failed on `home-text.spec.ts`'s "a change to the home page published reaches visitors" — the test that publishes a word, then polls the page until the word arrives. It passes on its own, here and on CI's other shards.
+
+`expect.poll` allows five seconds by default, and what it is waiting for is a rebuild: publishing marks the page stale, and the next visit builds it again. The home page is much the biggest to build — every section's words and pictures, the site-wide words ticket 59 added, the closing section — and on a loaded runner that overran. Raised to twenty seconds, with the reason written beside it. The five other pages keep the default, because they did not fail and are smaller; if one of them starts to, the answer is the same.
+
+Not this ticket's doing, but worth being sure rather than assuming: the change here adds `revalidatePath` calls for `llms.txt` and `robots.txt` *after* the one that marks the pages stale, so nothing about the home page's own invalidation moved, and a publish that threw would have failed the assertion above it instead.

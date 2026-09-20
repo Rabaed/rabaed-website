@@ -550,7 +550,15 @@ test('a change to the home page published reaches visitors', async ({ page, requ
       'published',
     );
     expect(response.ok(), await response.text()).toBe(true);
-    await expect.poll(async () => visitorHtml(request)).toContain(`${lead}</p>`);
+    // Longer than the five seconds `expect.poll` allows by default, which the
+    // five other pages' versions of this test keep. Publishing marks the page
+    // stale and the next visit rebuilds it, so what is being waited for is a
+    // rebuild — and the home page is much the biggest, reading every section's
+    // words, its pictures, the site-wide words and the closing section. On a
+    // loaded CI runner that overran five seconds and failed the shard, while
+    // passing everywhere else. The bound is arbitrary either way: what the
+    // test asserts is that the change arrives, not how quickly.
+    await expect.poll(async () => visitorHtml(request), { timeout: 20_000 }).toContain(`${lead}</p>`);
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);
