@@ -22,6 +22,7 @@ import { Media } from './cms/collections/media';
 import { Posts } from './cms/collections/posts';
 import { Users } from './cms/collections/users';
 import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
+import { AiCrawlers } from './cms/globals/ai-crawlers';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
@@ -90,6 +91,7 @@ export default buildConfig({
   // the pages share (ticket 57).
   globals: [
     SiteSettings,
+    AiCrawlers,
     ...SUBMITTABLE_FORMS.map(formSettingsGlobal),
     ReferralProgram,
     StartPage,

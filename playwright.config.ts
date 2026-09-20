@@ -20,6 +20,8 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = testPort(process.env.TEST_PORT);
 /** The suites that publish what every other suite would notice, run once those are done (below). */
 const RUNS_LAST = /(case-studies|referral-program-values)\.spec\.ts$/;
+/** The suite that reads the whole site at once, run between the two (below). */
+const READS_THE_WHOLE_SITE = /ai-crawlers\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
 /** Reads `TEST_PORT`, and refuses a value that is not a usable port. */
@@ -49,8 +51,34 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: RUNS_LAST,
+      testIgnore: [RUNS_LAST, READS_THE_WHOLE_SITE],
       teardown: 'runs-last',
+    },
+    // Between the two, alone. The AI crawler rules suite reads `llms.txt`,
+    // which describes the whole site at once — every page, with the
+    // description that page declares — so it needs the site as the other
+    // suites leave it: after them, and before the two below publish a case
+    // study into it or change an amount one of its descriptions quotes. It
+    // publishes in its turn, a `robots.txt` rule every other robots test
+    // would see (ticket 33).
+    //
+    // A dependency, not a second teardown. A teardown project waits for
+    // everything that depends on the project it belongs to, so chaining one
+    // teardown to another makes each wait for the other and neither ever
+    // runs — which Playwright reports only as tests that "did not run", with
+    // no error. Playwright has one trailing stage, and `runs-last` has it.
+    //
+    // Two things follow from being a dependent instead. This project is
+    // skipped when the main project fails, where a teardown would still run;
+    // and running its file alone runs the whole main project first, unless
+    // `--no-deps` is passed. Both are worth an exact reading of a file that
+    // describes the site: the alternative is asserting it only loosely,
+    // because a suite beside it may have changed the site underneath.
+    {
+      name: 'reads-the-whole-site',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: READS_THE_WHOLE_SITE,
+      dependencies: ['chromium'],
     },
     // After everything else has finished, never beside it. Publishing a case
     // study puts a link in the header of every page (ticket 24), and the
@@ -58,10 +86,10 @@ export default defineConfig({
     // publishing a Referral Program value changes the amounts the referral
     // page's and the FAQs' suites read (ticket 56). Neither touches what the
     // other reads, so the two run side by side. A teardown project runs once
-    // the project it belongs to is done, whether or not its tests passed. It
-    // is not divided between CI machines: each runs all of it, against its own
-    // server. Running one file of the main project runs this after it too;
-    // `--no-deps` leaves it out.
+    // the project it belongs to is done, and once everything depending on it
+    // is done, whether or not their tests passed. It is not divided between CI
+    // machines: each runs all of it, against its own server. Running one file
+    // of the main project runs this after it too; `--no-deps` leaves it out.
     {
       name: 'runs-last',
       use: { ...devices['Desktop Chrome'] },
