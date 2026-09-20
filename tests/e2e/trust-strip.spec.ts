@@ -109,6 +109,76 @@ test('a client signed today joins the bar, in the place Ahmed puts it, and the b
   }
 });
 
+test('a strip of two marks fills the bar, rather than dragging a band of empty bar behind it', async ({ page }) => {
+  await logInByApi(page.request, TRUST_STRIP_EDITOR);
+  const entry = fields(await published(page.request));
+
+  try {
+    const saved = await save(page.request, { ...entry, strip: { ...entry.strip, logos: entry.strip.logos.slice(0, 2) } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await preview(page);
+    await expect(marks(page)).toHaveCount(2);
+
+    // Two marks are a row far narrower than the rail, so the rail is covered
+    // by copies of it — enough to reach across and one more to follow the
+    // last off the end.
+    const covered = await page.locator('.logos-rail').evaluate((rail) => {
+      const track = rail.querySelector('.logos-track') as HTMLElement;
+      const row = track.querySelector('.logos-row') as HTMLElement;
+      return {
+        rail: rail.getBoundingClientRect().width,
+        row: row.getBoundingClientRect().width,
+        rows: track.querySelectorAll('.logos-row').length,
+      };
+    });
+    expect(covered.row).toBeLessThan(covered.rail);
+    expect(covered.rows * covered.row, 'the copies do not reach across the bar').toBeGreaterThan(covered.rail + covered.row);
+
+    // And it still travels.
+    const offset = () =>
+      page.locator('.logos-track').evaluate((track) => new DOMMatrixReadOnly(getComputedStyle(track).transform).m41);
+    const started = await offset();
+    await expect.poll(offset, { message: 'a short strip never moved' }).not.toBe(started);
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
+test('a mark whose file has gone leaves the company standing in the bar as text', async ({ page }) => {
+  await logInByApi(page.request, TRUST_STRIP_EDITOR);
+  const entry = fields(await published(page.request));
+  const mark = await uploadFile(
+    page.request,
+    { name: 'about-to-go.png', mimeType: 'image/png', buffer: await transparentMark({ width: 200, height: 112 }) },
+    'شركة يختفي شعارها',
+  );
+  const vanishing = { shows: true, name: { ar: 'شركة يختفي شعارها', en: null }, mark: mark.id, height: 30, link: null };
+
+  try {
+    const saved = await save(page.request, { ...entry, strip: { ...entry.strip, logos: [vanishing, ...entry.strip.logos] } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    // The file goes from under the entry, as it does when an Editor deletes an
+    // image the strip still points at.
+    const deleted = await page.request.delete(`/api/media/${mark.id}`);
+    expect(deleted.ok(), await deleted.text()).toBe(true);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await preview(page);
+
+    const first = marks(page).first();
+    await expect(first.locator('b')).toHaveText(vanishing.name.ar);
+    await expect(first.locator('b')).toBeVisible();
+    await expect(first.locator('img')).toHaveCount(0);
+    // Every other mark still draws, and the company is still in the bar.
+    await expect(marks(page)).toHaveCount(entry.strip.logos.length + 1);
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
 test('a client whose contract has ended is hidden without losing its place in the list', async ({ page }) => {
   await logInByApi(page.request, TRUST_STRIP_EDITOR);
   const entry = fields(await published(page.request));

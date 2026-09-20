@@ -14,7 +14,9 @@ import type { Locale } from '@/lib/locales';
  *
  * A mark an Editor has unticked is left out here rather than hidden in the
  * page: what the bar travels past is the list a visitor sees, and the marquee
- * measures it.
+ * measures it. A mark whose file has gone missing is not left out — the
+ * company's name stands in its place, which is what the strip already does
+ * for a file that fails to reach a visitor.
  */
 export async function getTrustStrip(locale: Locale): Promise<TrustStripContent> {
   const { strip } = await pageEntry('trust-strip', locale);
@@ -22,25 +24,23 @@ export async function getTrustStrip(locale: Locale): Promise<TrustStripContent> 
 
   const logos = strip.logos
     .filter((logo) => logo.shows !== false)
-    .map((logo, index): TrustStripLogo | null => {
+    .map((logo, index): TrustStripLogo => {
       const mark = fetchedMedia(logo.mark);
-      if (!mark?.url) return null;
 
       return {
         // The row is rendered twice, so a key of its own rather than the
         // file's: the same mark may be listed twice, for two companies of one
         // group.
-        key: `${index}-${mark.id}`,
+        key: `${index}-${mark?.id ?? 'missing'}`,
         name: words(logo.name),
         height: logo.height,
-        source: mark.url,
+        source: mark?.url ?? null,
         // An SVG carries no pixel size; the strip draws it at its height and
         // lets the width follow (ADR-0010).
-        intrinsic: mark.width && mark.height ? { width: mark.width, height: mark.height } : null,
+        intrinsic: mark?.width && mark.height ? { width: mark.width, height: mark.height } : null,
         href: logo.link ?? null,
       };
-    })
-    .filter((logo): logo is TrustStripLogo => logo !== null);
+    });
 
   return { caption: words(strip.caption), sectionName: words(strip.sectionName), logos };
 }

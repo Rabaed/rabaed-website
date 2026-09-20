@@ -7,8 +7,8 @@ export type TrustStripLogo = {
   readonly name: string;
   /** Drawn height in CSS pixels. */
   readonly height: number;
-  /** Where the file is, as the CMS serves it. */
-  readonly source: string;
+  /** Where the file is, as the CMS serves it — or nothing, where it has gone. */
+  readonly source: string | null;
   /** Intrinsic size of the file, for the aspect ratio — a vector has none. */
   readonly intrinsic: { readonly width: number; readonly height: number } | null;
   /** The company's own site, where an Editor has given one. */
@@ -72,15 +72,18 @@ function Slot({ logo, copy }: { logo: TrustStripLogo; copy: boolean }) {
       {/* The name is the `alt`, so a browser that cannot fetch the file still
           says whose mark is missing — and the `<b>` beside it is the same
           name, drawn the way the strip draws text, for when a mark fails after
-          the page has already been laid out. */}
-      <img
-        src={logo.source}
-        alt={copy ? '' : logo.name}
-        width={logo.intrinsic?.width}
-        height={logo.intrinsic?.height}
-        style={{ height: `${logo.height}px` }}
-      />
-      <b hidden>{logo.name}</b>
+          the page has already been laid out. With no file at all, the name is
+          all there is, and it is drawn from the first response. */}
+      {logo.source !== null && (
+        <img
+          src={logo.source}
+          alt={copy ? '' : logo.name}
+          width={logo.intrinsic?.width}
+          height={logo.intrinsic?.height}
+          style={{ height: `${logo.height}px` }}
+        />
+      )}
+      <b hidden={logo.source !== null}>{logo.name}</b>
     </>
   );
 

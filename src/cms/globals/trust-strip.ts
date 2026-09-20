@@ -80,8 +80,8 @@ export const TrustStripLogos = pageGlobal({
               label: { ar: 'ارتفاع الشعار (بكسل)', en: 'Drawn height (pixels)' },
               admin: {
                 description: {
-                  ar: 'بين ١٦ و٤٤. الشعار العريض يحتاج ارتفاعاً أقل ليبدو بوزن جيرانه؛ الشعار المربّع يحتاج أكثر. ٤٤ هو ارتفاع الشريط.',
-                  en: 'Between 16 and 44. A wide wordmark needs a smaller height to look the same weight as its neighbours; a compact mark needs more. 44 is the height of the bar itself.',
+                  ar: 'بين ١٦ و٤٤. الشعار العريض يحتاج ارتفاعاً أقل ليبدو بوزن جيرانه؛ الشعار المربّع يحتاج أكثر. ٤٤ هو ارتفاع الشريط. الشعار الذي يزيد عرضه على نحو أربعة أضعاف ارتفاعه يُضبط على عرض ١١٨ بكسل، فيُرسم أقصر من الرقم المكتوب هنا.',
+                  en: 'Between 16 and 44. A wide wordmark needs a smaller height to look the same weight as its neighbours; a compact mark needs more. 44 is the height of the bar itself. A mark more than about four times as wide as it is tall is held to 118 pixels wide, and so draws shorter than the number written here.',
                 },
               },
             },
