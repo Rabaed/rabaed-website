@@ -4,14 +4,14 @@
 
 **Blocked by:** 53
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The header menu's labels and the footer's text and link labels are read from the CMS, localised, and shared by every page
-- [ ] The not-found page's words, and the lead lines of the blog index and the case studies index, are read from the CMS
-- [ ] A menu label is limited to what fits on one line of the header at desktop width
-- [ ] A migration imports today's words verbatim, and their static copy in `src/content/navigation.ts`, `src/content/blog.ts` and `src/content/case-studies.ts` goes
-- [ ] Every page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
-- [ ] An English page never shows the Arabic header or footer in place of missing English words
+- [x] The header menu's labels and the footer's text and link labels are read from the CMS, localised, and shared by every page
+- [x] The not-found page's words, and the lead lines of the blog index and the case studies index, are read from the CMS
+- [x] A menu label is limited to what fits on one line of the header at desktop width
+- [x] A migration imports today's words verbatim, and their static copy in `src/content/navigation.ts`, `src/content/blog.ts` and `src/content/case-studies.ts` goes
+- [x] Every page still matches its baselines at all eight widths, its text is in the server response with JavaScript disabled, and the existing suite passes without rewriting its expected text
+- [x] An English page never shows the Arabic header or footer in place of missing English words
 
 **Not this ticket:** the contact details and social links (site settings, ticket 19, done), and search titles and descriptions (ticket 26).
 
@@ -42,5 +42,7 @@
 
 - **Preview opens one page per entry, not one per tab.** `pageGlobal` takes a single path, so previewing the not-found tab opens the home page and previewing the case studies lead opens the blog index. Each tab's words are still previewed on some page, and giving a tab a preview of its own is a change to ticket 53's groundwork rather than this ticket's.
 - **A page's own name is still passed to the trail** on the four pages the menu names, and is still what stands if an Editor removes that page from the menu. It reads as though it were inert; it is the fallback.
+
+**Merged on top of ticket 29 (20 September 2026).** Ticket 29 reached `main` while this ticket's suite was running, so main was merged in: the partnership page keeps ticket 29's form and this ticket's awaited trail, and these migrations were generated again against the schema main then had, as `docs/agents/parallel-sessions.md` asks. The new migration creates none of ticket 29's tables, and the whole suite passes against a fresh database.
 
 **Parallel sessions.** Touches the header and footer, which every page renders, so every page's baselines re-run. Run it beside tickets 54–57 once ticket 53 is merged. No page ticket touches the header or footer, but every one of tickets 53–59 adds a CMS migration, and two branches' migrations collide: after updating from `origin/main`, keep main's migrations, delete your own, and run `npm run cms:migration -- <name>` again (`docs/agents/parallel-sessions.md`).
