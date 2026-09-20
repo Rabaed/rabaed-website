@@ -69,3 +69,12 @@ Two other failures under twenty-worker load, neither an assertion budget and nei
     [chromium] › e2e\home-text.spec.ts:628:1 › a change to the home page published reaches visitors
 
 So the reporter numbers a `test()` by something other than the source line, and a line number from these logs should be matched to a test by **name**, not by counting lines.
+
+**Twenty seconds did not settle it, from the ticket 60 lane (20 September 2026).** A full local run of ticket 60's branch with this ticket's `playwright.config.ts` already in it — `TEST_PORT=3160 npm test -- --grep-invert @pixel --workers=20`, 891 passed, 3 failed — failed twice on this shape, in two files in the one run:
+
+- `home-text.spec.ts` › "the hero has no switch to hide it; every other section of the home page has one", on the Situations tab
+- `referral-page-text.spec.ts` › "the sections the hero lands on have no switch to hide them; a section that can hide has one"
+
+Both read `expect(locator).toBeVisible() failed … Timeout: 20000ms … Error: element(s) not found`, so the panel had not rendered the switch after twenty whole seconds. That does not look like the stall this ticket measured at 4–99ms: something the admin does after a tab is clicked sometimes does not happen at all, and a longer bound cannot cover that. Worth reopening as its own question — what the admin is doing with the click, not how long it is given — before the number here is raised again.
+
+The third failure in that run was the `/blog` media-file 500 already noted above. Ticket 60's own eleven waits passed in that run, as in every other.
