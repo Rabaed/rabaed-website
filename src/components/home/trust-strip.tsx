@@ -1,14 +1,18 @@
 import { TrustStripMarquee } from '@/components/home/trust-strip-marquee';
 
 export type TrustStripLogo = {
-  /** Stable key, also the image's basename under `public/logos/`. */
+  /** Its place in the list, which is what tells two marks of one group apart. */
   readonly key: string;
   /** The company's name, which is the image's `alt` and its text fallback. */
   readonly name: string;
   /** Drawn height in CSS pixels. */
   readonly height: number;
-  /** Intrinsic size of the file, for the aspect ratio. */
-  readonly intrinsic: { readonly width: number; readonly height: number };
+  /** Where the file is, as the CMS serves it — or nothing, where it has gone. */
+  readonly source: string | null;
+  /** Intrinsic size of the file, for the aspect ratio — a vector has none. */
+  readonly intrinsic: { readonly width: number; readonly height: number } | null;
+  /** The company's own site, where an Editor has given one. */
+  readonly href: string | null;
 };
 
 export type TrustStripContent = {
@@ -56,24 +60,51 @@ export function TrustStrip({ content }: { content: TrustStripContent }) {
   );
 }
 
+/**
+ * One mark. A company that gave its address is a link; one that did not is a
+ * picture, as every mark was before ticket 20. The copy row's links are out of
+ * the tab order as well as hidden from assistive technology: the same eight
+ * companies are already reachable a row above.
+ */
+function Slot({ logo, copy }: { logo: TrustStripLogo; copy: boolean }) {
+  const mark = (
+    <>
+      {/* The name is the `alt`, so a browser that cannot fetch the file still
+          says whose mark is missing — and the `<b>` beside it is the same
+          name, drawn the way the strip draws text, for when a mark fails after
+          the page has already been laid out. With no file at all, the name is
+          all there is, and it is drawn from the first response. */}
+      {logo.source !== null && (
+        <img
+          src={logo.source}
+          alt={copy ? '' : logo.name}
+          width={logo.intrinsic?.width}
+          height={logo.intrinsic?.height}
+          style={{ height: `${logo.height}px` }}
+        />
+      )}
+      <b hidden={logo.source !== null}>{logo.name}</b>
+    </>
+  );
+
+  return (
+    <span className="slot">
+      {logo.href ? (
+        <a href={logo.href} target="_blank" rel="noopener noreferrer" tabIndex={copy ? -1 : undefined}>
+          {mark}
+        </a>
+      ) : (
+        mark
+      )}
+    </span>
+  );
+}
+
 function LogoRow({ logos, copy = false }: { logos: readonly TrustStripLogo[]; copy?: boolean }) {
   return (
     <div className={copy ? 'logos-row copy' : 'logos-row'} aria-hidden={copy || undefined}>
       {logos.map((logo) => (
-        <span className="slot" key={logo.key}>
-          {/* The name is the `alt`, so a browser that cannot fetch the file
-              still says whose mark is missing — and the `<b>` beside it is the
-              same name, drawn the way the strip draws text, for when a mark
-              fails after the page has already been laid out. */}
-          <img
-            src={`/logos/${logo.key}.png`}
-            alt={copy ? '' : logo.name}
-            width={logo.intrinsic.width}
-            height={logo.intrinsic.height}
-            style={{ height: `${logo.height}px` }}
-          />
-          <b hidden>{logo.name}</b>
-        </span>
+        <Slot key={logo.key} logo={logo} copy={copy} />
       ))}
     </div>
   );

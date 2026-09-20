@@ -139,8 +139,12 @@ jobs:
           echo "typecheck: ${{ needs.typecheck.result }}"
           echo "e2e: ${{ needs.e2e.result }}"
           test "${{ needs.typecheck.result }}" = success
-          # `skipped` is the suite left off while the pull request is a draft.
-          # A draft cannot merge, so this check going green on one does not
-          # let untested code through; marking it ready runs the suite.
+          # `skipped` is the suite left off while the pull request is a draft,
+          # and it passes here only while it still is one. A run that started
+          # on a draft keeps its verdict after the pull request is marked
+          # ready — so without this, a branch could merge on a green check
+          # whose suite never ran. Marking one ready starts a run of its own,
+          # and that is the run this check speaks for.
+          echo "draft: ${{ github.event.pull_request.draft }}"
           test "${{ needs.e2e.result }}" = success ||
-            test "${{ needs.e2e.result }}" = skipped
+            { test "${{ needs.e2e.result }}" = skipped && test "${{ github.event.pull_request.draft }}" = true; }

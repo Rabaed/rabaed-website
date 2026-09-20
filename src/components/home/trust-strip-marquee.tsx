@@ -44,6 +44,24 @@ function useTravel() {
     const width = row.getBoundingClientRect().width;
     if (width === 0) return;
 
+    // Enough copies of the row to cover the rail and one more to follow the
+    // last off the end. Two were enough for the eight marks the strip shipped
+    // with, whose row is wider than any rail; a strip of two marks (ticket 20
+    // lets an Editor keep as few as one) is a short row that would otherwise
+    // drag a band of empty bar across the screen behind it.
+    const rows = () => track.querySelectorAll<HTMLElement>('.logos-row');
+    const needed = Math.max(2, Math.ceil(rail.getBoundingClientRect().width / width) + 1);
+    for (let index = rows().length; index < needed; index += 1) {
+      const copy = row.cloneNode(true) as HTMLElement;
+      copy.classList.add('copy');
+      copy.setAttribute('aria-hidden', 'true');
+      // The marks in a copy are decoration, and its links are already in the
+      // tab order once, a row above.
+      for (const mark of copy.querySelectorAll('img')) mark.setAttribute('alt', '');
+      for (const link of copy.querySelectorAll('a')) link.setAttribute('tabindex', '-1');
+      track.append(copy);
+    }
+
     // Right-to-left lays the second copy out to the *left* of the first, so
     // the track has to travel right to bring it into view; left-to-right is
     // the mirror of that. Getting the sign wrong does not look like a bug —
@@ -51,8 +69,12 @@ function useTravel() {
     const towards = getComputedStyle(document.documentElement).direction === 'rtl' ? 1 : -1;
 
     const context = gsap.context(() => {
+      // One row's width, whatever the track holds: the copy behind the first
+      // arrives exactly where the first began, which is the seam. Measured in
+      // pixels rather than as a share of the track, so adding a copy above
+      // cannot change where the loop closes.
       const travel = gsap.to(track, {
-        xPercent: 50 * towards,
+        x: width * towards,
         duration: width / TRAVEL_SPEED,
         ease: 'none',
         repeat: -1,
