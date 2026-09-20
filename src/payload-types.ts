@@ -3811,7 +3811,7 @@ export interface TrustStrip {
        */
       mark: number | Media;
       /**
-       * Between 16 and 44. A wide wordmark needs a smaller height to look the same weight as its neighbours; a compact mark needs more. 44 is the height of the bar itself.
+       * Between 16 and 44. A wide wordmark needs a smaller height to look the same weight as its neighbours; a compact mark needs more. 44 is the height of the bar itself. A mark more than about four times as wide as it is tall is held to 118 pixels wide, and so draws shorter than the number written here.
        */
       height: number;
       /**
