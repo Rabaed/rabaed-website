@@ -40,6 +40,46 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
+  /**
+   * How long an assertion that retries — `toBeVisible`, `toHaveText`, an
+   * `expect.poll` that names no timeout of its own — may go on retrying
+   * (ticket 61).
+   *
+   * Playwright's own default is five seconds, and that number is Playwright's,
+   * not this suite's. It was what decided whether CI was green: a hosted
+   * runner stalled once while the admin was re-rendering a tab's panel, the
+   * assertion gave up at five seconds, and a pull request whose whole diff was
+   * one line of a markdown file went red.
+   *
+   * **Twenty seconds is headroom for a stall, not an allowance for slow work.**
+   * Measured on the hosted runner itself, that same re-render takes 4ms at its
+   * fastest, 22ms at the median and 99ms at its slowest over 32 samples — so
+   * the runner is not slow, and waiting longer costs a passing assertion
+   * nothing, because it returns the moment it is true. What it buys is riding
+   * out the occasional stall that no distribution of 32 samples can size.
+   *
+   * What it costs is that an assertion which will never be true now takes
+   * twenty seconds to say so instead of five. That is the trade, and it is
+   * worth it while a green run means something and a red one has to be
+   * re-run. An assertion that should fail fast says so itself — the two
+   * `{ timeout: 500 }` checks in the reference comparisons do.
+   */
+  expect: { timeout: 20_000 },
+  /**
+   * How long one test may take. Playwright's default is thirty seconds, and a
+   * test that runs out of it reports "Test timeout of 30000ms exceeded",
+   * which says nothing about what was expected — so the deadline has to leave
+   * room for an assertion to fail in its own words on the budget above.
+   *
+   * Two minutes rather than one, because the tests this was raised for walk a
+   * row of tabs and assert after each: eight on the home page, five on the
+   * partnership page. Those assertions pass, but under a full suite at twenty
+   * workers they pass *slowly*, and it is their sum that reaches the
+   * deadline — a run on 20 September 2026 hit thirty seconds across five of
+   * them without any one of them failing. `test.slow()` still multiplies this
+   * by three.
+   */
+  timeout: 120_000,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL,
