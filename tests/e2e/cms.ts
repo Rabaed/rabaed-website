@@ -7,7 +7,7 @@
  * reason `routes.ts` gives: a test that reads its expectation out of the code
  * under test agrees with that code by construction.
  */
-import { expect, type APIRequestContext, type Page } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import sharp from 'sharp';
 
 export const ADMIN_PATH = '/maktab';
@@ -261,6 +261,94 @@ export async function discardLegalDraft(request: APIRequestContext, id: number):
   const published = await latestPublishedVersion(request, id);
   const restored = await request.post(`/api/legal-documents/versions/${published.id}?draft=true`);
   expect(restored.ok()).toBe(true);
+}
+
+/**
+ * How long a published change is given to reach a visitor, and where the number
+ * comes from.
+ *
+ * Publishing marks every page of the site for rebuilding
+ * (`src/cms/revalidation.ts`); the next visit to a marked page renders it again
+ * and is answered from that render. So what a wait here waits for is one whole
+ * server render — set going by its own first request, and queueing behind every
+ * other page of the site that the same publish marked and something else has
+ * since asked for.
+ *
+ * Five seconds, `expect.poll`'s default, was Playwright's number rather than
+ * that render's. What the render actually costs, measured on the machine this
+ * was written on: 19 to 307 milliseconds with nothing else running, and 19
+ * milliseconds to 10.4 seconds over three full-suite runs at twenty workers on
+ * twenty cores — a median around a third of a second, and a tail five times
+ * worse than the second-worst wait in the same run.
+ *
+ * A hosted runner has two cores and one Playwright worker
+ * (`.github/workflows/ci.yml`) and shares them with the server doing the
+ * rendering. The home page's wait, the heaviest, failed there at five seconds
+ * three times in two days on commits that changed nothing the site builds, and
+ * then once more at a twenty-second bound, having passed at that bound on all
+ * four shards twice in between (commit `d7aceb9`, which put the home page's
+ * poll alone on a minute). A runner is therefore slower than anything
+ * measurable here by more than an order of magnitude, and unevenly so.
+ *
+ * A minute keeps that observed worst case — over twenty seconds — at about
+ * three times over, and costs a passing run nothing, since every wait returns
+ * as soon as the words arrive. It is longer than the twenty seconds
+ * `playwright.config.ts` now allows a retrying assertion (ticket 61), because
+ * that number is sized for riding out a stall in work that takes milliseconds,
+ * and this wait's own work is a render that has been seen to take longer than
+ * the whole of it.
+ */
+const REBUILT_IN = 60_000;
+
+/** How often the page is asked for while waiting. Short enough to add nothing of its own to the wait. */
+const ASKED_EVERY = 250;
+
+/**
+ * A wait longer than this is said out loud. It is the default these tests used
+ * to take, so a run with a line in its log is a run that would have failed
+ * before — a runner drifting towards the bound, in a green run rather than a
+ * red one.
+ */
+const WORTH_SAYING = 5_000;
+
+/**
+ * The page a visitor receives at `path` once `words` published in the CMS have
+ * reached it — which is what the test then reads, rather than asking for the
+ * page again.
+ *
+ * `what` names the change in the failure a change that never arrives earns,
+ * which says how long the wait was and what Next said of the page it last sent:
+ * `MISS` where it rendered the page for that request, `STALE` where it was
+ * still rendering it, `HIT` where it answered from what it had built before.
+ *
+ * The test's own deadline is lengthened by the budget here, so that the bound
+ * is reachable whatever `playwright.config.ts` allows a test (two minutes as
+ * this is written, ticket 61) and however many waits one test makes. A bound a
+ * test cannot outlive is not a bound: it ends as "Test timeout exceeded", which
+ * says nothing about what never arrived.
+ */
+export async function reachesVisitors(request: APIRequestContext, path: string, words: string, what: string): Promise<string> {
+  const info = test.info();
+  info.setTimeout(info.timeout + REBUILT_IN);
+
+  const started = Date.now();
+  for (;;) {
+    const response = await request.get(path);
+    const html = await response.text();
+    const waited = Date.now() - started;
+    if (html.includes(words)) {
+      if (waited > WORTH_SAYING) {
+        console.log(`${path} took ${waited}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
+      }
+      return html;
+    }
+    if (waited >= REBUILT_IN) {
+      const cache = response.headers()['x-nextjs-cache'] ?? 'nothing';
+      expect(html, `${what} never reached a visitor at ${path} in ${waited}ms; Next said ${cache} of the page it last sent`).toContain(words);
+      return html;
+    }
+    await new Promise((resolve) => setTimeout(resolve, ASKED_EVERY));
+  }
 }
 
 /** A page's search description, as a visitor with no session receives it. */
