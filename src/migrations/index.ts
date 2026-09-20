@@ -26,6 +26,8 @@ import * as migration_20260915_211211_home_page from './20260915_211211_home_pag
 import * as migration_20260915_211212_import_home_page from './20260915_211212_import_home_page';
 import * as migration_20260920_170916_partnership_application_form from './20260920_170916_partnership_application_form';
 import * as migration_20260920_170917_publish_partnership_application_wording from './20260920_170917_publish_partnership_application_wording';
+import * as migration_20260920_182913_site_words_and_index_leads from './20260920_182913_site_words_and_index_leads';
+import * as migration_20260920_182914_import_site_words_and_index_leads from './20260920_182914_import_site_words_and_index_leads';
 
 export const migrations = [
   {
@@ -167,5 +169,15 @@ export const migrations = [
     up: migration_20260920_170917_publish_partnership_application_wording.up,
     down: migration_20260920_170917_publish_partnership_application_wording.down,
     name: '20260920_170917_publish_partnership_application_wording',
+  },
+  {
+    up: migration_20260920_182913_site_words_and_index_leads.up,
+    down: migration_20260920_182913_site_words_and_index_leads.down,
+    name: '20260920_182913_site_words_and_index_leads',
+  },
+  {
+    up: migration_20260920_182914_import_site_words_and_index_leads.up,
+    down: migration_20260920_182914_import_site_words_and_index_leads.down,
+    name: '20260920_182914_import_site_words_and_index_leads',
   },
 ];
