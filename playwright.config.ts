@@ -19,7 +19,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 const PORT = testPort(process.env.TEST_PORT);
 /** The suites that publish, or read, what every other suite would notice — run once those are done (below). */
-const RUNS_LAST = /(case-studies|referral-program-values|ai-crawlers)\.spec\.ts$/;
+const RUNS_LAST = /(case-studies|referral-program-values|ai-crawlers|launch-articles)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
 /** Reads `TEST_PORT`, and refuses a value that is not a usable port. */
@@ -98,9 +98,10 @@ export default defineConfig({
     // publishing a Referral Program value changes the amounts the referral
     // page's and the FAQs' suites read (ticket 56); and the AI crawler rules
     // suite reads `llms.txt`, which describes every page of the site at once,
-    // and publishes a `robots.txt` rule (ticket 33). None reads what another
-    // writes — what the first two publish, the third tolerates and says so —
-    // so the three run side by side.
+    // and publishes a `robots.txt` rule (ticket 33); and publishing a launch
+    // article puts it on the blog index, in the sitemap and in `llms.txt`
+    // (ticket 38). None reads what another writes — what the others publish,
+    // the crawler suite tolerates and says so — so the four run side by side.
     //
     // A teardown project runs once the project it belongs to is done, whether
     // or not its tests passed. It is not divided between CI machines: each
