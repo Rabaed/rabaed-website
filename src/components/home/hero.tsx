@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { HeroLoop } from '@/components/home/hero-loop';
-import { HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
+import { HERO_DOCUMENT, HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
 import { Inline, type InlineText } from '@/components/inline-text';
 import type { PageLink } from '@/components/page-link';
 
@@ -29,6 +29,11 @@ export type HomeHeroContent = {
    * the arrival that follows it — so a still hero states the promise instead.
    */
   readonly statusAtRest: string;
+  /**
+   * A drawing an Editor put in place of a building's or the document's own,
+   * in its shape (ticket 58), or `null` for the drawing the page ships with.
+   */
+  readonly pictures: Readonly<Record<StationName | 'document', string | null>>;
 };
 
 /**
@@ -101,7 +106,7 @@ export function Hero({ content }: { content: HomeHeroContent }) {
                 <img
                   key={key}
                   className="bld"
-                  src={station.building.src}
+                  src={content.pictures[key as StationName] ?? station.building.src}
                   alt=""
                   aria-hidden="true"
                   width={station.building.intrinsic.width}
@@ -118,11 +123,11 @@ export function Hero({ content }: { content: HomeHeroContent }) {
               <img
                 className="spr"
                 id="h-doc"
-                src="/hero/hero-doc.webp"
+                src={content.pictures.document ?? HERO_DOCUMENT.src}
                 alt=""
                 aria-hidden="true"
-                width={107}
-                height={133}
+                width={HERO_DOCUMENT.intrinsic.width}
+                height={HERO_DOCUMENT.intrinsic.height}
                 style={{ left: `${HERO_START.left}%`, top: `${HERO_START.top}%`, width: '7%' }}
               />
 

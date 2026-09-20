@@ -174,11 +174,11 @@ site launched with, word for word.
 ### Page text
 
 Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**
-(ticket 54), **Product page** (ticket 57), **Partnership page** (ticket 55) and
-**Referral Program page** (ticket 56), and two entries pages share — **Closing
-section** («كيف نبدأ معك», which the home and product pages both end on,
-changed once for both) and **Screen mocks**. The home page follows in ticket 58
-and the header, footer and index pages in ticket 59, and until then their words
+(ticket 54), **Product page** (ticket 57), **Partnership page** (ticket 55),
+**Referral Program page** (ticket 56) and **Home page** (ticket 58), and two
+entries pages share — **Closing section** («كيف نبدأ معك», which the home and
+product pages both end on, changed once for both) and **Screen mocks**. The
+header, footer and index pages follow in ticket 59, and until then their words
 are still in code. The migrations import each entry's words once, as they were.
 
 - Each tab is one section of the page, in the page's order. Sections cannot be
@@ -195,7 +195,9 @@ are still in code. The migrations import each entry's words once, as they were.
   reordered by dragging, within the number the design holds. Steps, units and
   numbered cards are numbered by their order. A list the design is built around
   an exact count — the drawing of the tool in the tool page's hero, the product
-  page's three parties — offers no **Add** and publishes only with that count.
+  page's three parties, the home page's four hero statuses, four steps in each
+  Record trail and four before-and-after steps — offers no **Add** and
+  publishes only with that count.
 - In the tool page's privacy points, put a Latin file name between backticks —
   `` `concrete_db.json` `` — to set it left to right, as in the questions. File
   names, pour references and the drawing's figures are one field for both
@@ -206,6 +208,19 @@ are still in code. The migrations import each entry's words once, as they were.
   `{payout}` and `{clientDiscount}`, as in the questions, and the page inserts
   the **Referral Program values**. A name in braces the site does not hold is
   refused.
+- In the home page's before-and-after, put what is set in bold between
+  asterisks — `*اسحب المقبض*`, as in WhatsApp — and start a new line where the
+  card breaks its line.
+- A before-and-after figure on the home page stays off the live site until its
+  **Where the figure comes from** is filled in; visitors never see that field.
+  A commitment, such as «أقل من يوم», always shows.
+- The home page's hero drawings — the three buildings and the travelling
+  document — can each be replaced by a picture of the same shape, or larger in
+  the same proportions, on a transparent background. Remove it to bring the
+  drawing back.
+- The calculator's word after a number follows Arabic's counting: one word
+  after 1, one after 2, one from 3 to 10, and one from 11 on («1 يوم»،
+  «2 يومان»، «3 أيام»، «11 يوماً»).
 - **Screen mocks** holds each screen's picture and what it shows in words: read
   out by screen readers and written under the picture, wherever a page shows
   it. With no picture chosen, the page shows the image exported from the

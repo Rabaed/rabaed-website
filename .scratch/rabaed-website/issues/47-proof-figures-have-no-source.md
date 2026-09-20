@@ -27,9 +27,9 @@ The founders' list of cleared commitments covers the Trust strip logos, the 60-d
 
 ## They cannot reach a visitor in the meantime
 
-Ticket 07 built the deck with all six cards, verbatim, because that is the only way to test it and hold it to the Reference site. Each figure carries a `source` in `src/content/proof-figures.ts`, and the four above are `null`.
+Ticket 07 built the deck with all six cards, verbatim, because that is the only way to test it and hold it to the Reference site. Each figure carries a source — since ticket 58, the **Where the figure comes from** field of each before-and-after figure in the CMS's Home page entry — and the four above have none.
 
-**A card whose source is `null` is left off every public deployment** — preview, development and production, indexable or not. Local builds and the test suite still draw all six. The check is `isPubliclyDeployed()` in `src/lib/environment.ts`, which is true for any Vercel deployment.
+**A card with no source is left off every public deployment** — preview, development and production, indexable or not. Local builds and the test suite still draw all six. The check is `isPubliclyDeployed()` in `src/lib/environment.ts`, which is true for any Vercel deployment.
 
 It is deliberately wider than the launch switch. `noindex` asks search engines not to list a page; it does not stop anyone with a preview address from reading it, nor an AI assistant fetching a page a user pastes in. Ticket 39a puts the site on public Vercel addresses before ticket 39 launches it, so a guard tied to launch would have been too late.
 
@@ -64,5 +64,5 @@ The Reference site's section carries a testimonial slot under the lead: a play b
 ## Done when
 
 - [ ] Every figure on the proof deck has a recorded `source`, has been replaced by something attributable, or has been removed
-- [ ] The decision is written into `src/content/proof-figures.ts` (or the CMS entry, if ticket 58 has landed), so the next person to edit a card sees it
+- [ ] The decision is written into each figure's **Where the figure comes from** field in the CMS's Home page entry (ticket 58), so the next person to edit a card sees it
 - [ ] `tests/e2e/home-card-decks.spec.ts` and `tests/e2e/home-decks-match-reference.spec.ts` updated if the deck's cards change

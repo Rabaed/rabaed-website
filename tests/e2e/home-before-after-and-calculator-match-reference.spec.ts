@@ -200,7 +200,16 @@ test('the calculator gives the Reference site\'s figures, and colours its tracks
         const sliders = page.locator('#calc .rng');
         for (const [index, value] of settings.entries()) await sliders.nth(index).fill(value);
       }
-      expect(await readCalculator(pages.rebuilt), settings.join(' / ')).toEqual(await readCalculator(pages.reference));
+      // A reading by its number alone: the founders chose Arabic's words after a
+      // count over the Reference site's «1 أيام» and «6 شهراً» (ticket 58), which
+      // `home-calculator.spec.ts` holds.
+      const byNumbers = ({ readings, ...rest }: Awaited<ReturnType<typeof readCalculator>>) => ({
+        ...rest,
+        readings: readings.map((reading) => reading.split(' ')[0]),
+      });
+      expect(byNumbers(await readCalculator(pages.rebuilt)), settings.join(' / ')).toEqual(
+        byNumbers(await readCalculator(pages.reference)),
+      );
     }
   } finally {
     await pages.close();

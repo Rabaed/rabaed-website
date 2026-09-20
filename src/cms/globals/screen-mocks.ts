@@ -1,7 +1,27 @@
+import type { Field } from 'payload';
 import { SCREEN_MOCKS } from '../../screen-mocks/registry';
 import { pictureField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { screenMockFieldName } from '../screen-mock-fields';
+
+/**
+ * Which Screen mock a page's panel, party or tab shows — its picture and words
+ * are in this entry, once for every page. The product and home pages both
+ * choose screens with it.
+ */
+export const screenField: Field = {
+  name: 'screen',
+  type: 'select',
+  required: true,
+  options: SCREEN_MOCKS.map((mock) => ({ value: mock.id, label: mock.title })),
+  label: { ar: 'الشاشة', en: 'Screen' },
+  admin: {
+    description: {
+      ar: 'صورتها ووصفها في «شاشات المنصة».',
+      en: 'Its picture and description are under Screen mocks.',
+    },
+  },
+};
 
 /**
  * Each mock's name in an admin opened in English; the registry names them in

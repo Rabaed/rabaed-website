@@ -11,8 +11,8 @@ import type { Locale } from '@/lib/locales';
  * document. Its sections draw what they are handed and fetch nothing. That is
  * what lets tickets 53–59 move a page's content into the CMS by changing only
  * its module, and ticket 42 give every section English words without touching
- * it. The start, tool, product and partnership pages' modules read the CMS
- * already (tickets 53, 54, 57 and 55); the others still hold their Arabic here.
+ * it. Every marketing page's module reads its words from the CMS (tickets
+ * 53–58).
  *
  * What a module hands its page is the shape an Editor works in (spec: Content
  * model): a fixed run of sections, in a fixed order, each with its fields, its

@@ -126,10 +126,37 @@ test('the sliders can be moved from the keyboard', async ({ page }) => {
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowRight');
-  // Ten days is still «أيام»; eleven is «يوماً», as on the Reference site.
   expect((await readFigures(page)).readings[1]).toBe('10 أيام');
   await page.keyboard.press('ArrowRight');
   expect((await readFigures(page)).readings[1]).toBe('11 يوماً');
+});
+
+test('the words after the days and the months follow how Arabic counts', async ({ page }) => {
+  await page.goto('/');
+
+  // One, two, three to ten, and eleven and more each take their own word. The
+  // founders chose Arabic's rule over the Reference site's «1 أيام» and
+  // «6 شهراً» (ticket 58).
+  for (const [days, reading] of [
+    ['1', '1 يوم'],
+    ['2', '2 يومان'],
+    ['3', '3 أيام'],
+    ['10', '10 أيام'],
+    ['11', '11 يوماً'],
+    ['60', '60 يوماً'],
+  ] as const) {
+    await delayDays(page).fill(days);
+    expect((await readFigures(page)).readings[1], `${days} days`).toBe(reading);
+  }
+  for (const [months, reading] of [
+    ['6', '6 أشهر'],
+    ['10', '10 أشهر'],
+    ['11', '11 شهراً'],
+    ['48', '48 شهراً'],
+  ] as const) {
+    await duration(page).fill(months);
+    expect((await readFigures(page)).readings[2], `${months} months`).toBe(reading);
+  }
 });
 
 test('the numbers read in the right order and typeface inside the Arabic', async ({ page }) => {

@@ -28,10 +28,10 @@ export type ProofFigure = FigureFrame &
         readonly after: Bar;
         /**
          * Where the figure comes from: which project, measured how, by whom,
-         * over what period. `null` until someone can say — and while it is
-         * `null` the card stays off every public deployment (ticket 47).
+         * over what period. Empty until someone can say — and while it is
+         * empty the card stays off every public deployment (ticket 47).
          */
-        readonly source: string | null;
+        readonly source: string;
       }
     | { readonly kind: 'commitment'; readonly value: string }
   );
@@ -47,7 +47,7 @@ export type HomeFiguresContent = {
 
 /** Whether a card may be shown to the public: a commitment always, a figure only once it is sourced. */
 function isAttributed(figure: ProofFigure): boolean {
-  return figure.kind === 'commitment' || figure.source !== null;
+  return figure.kind === 'commitment' || figure.source.trim() !== '';
 }
 
 /**
@@ -55,7 +55,9 @@ function isAttributed(figure: ProofFigure): boolean {
  * light deck of figures beside the heading.
  *
  * **A figure without a recorded source is left off every public deployment**
- * (ticket 47; see `src/content/proof-figures.ts`). Local builds and the test
+ * (ticket 47). Four of the six the site launched with have none; an Editor
+ * records a source against a figure in the CMS, and nothing else puts it on
+ * the site (ticket 58). Local builds and the test
  * suite draw all six cards, so the deck is tested and compared whole; a preview
  * or production deployment draws only what may be published.
  *

@@ -74,3 +74,6 @@ export const HERO_JOURNEY = ['contractor', 'consultant', 'owner', 'contractor'] 
 export type HeroStatuses = readonly [string, string, string, string];
 
 export const HERO_START = HERO_STATIONS[HERO_JOURNEY[0]];
+
+/** The document that travels between the buildings: its drawing, and the size of the file it comes from. */
+export const HERO_DOCUMENT = { src: '/hero/hero-doc.webp', intrinsic: { width: 107, height: 133 } } as const;

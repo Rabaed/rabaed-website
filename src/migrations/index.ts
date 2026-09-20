@@ -22,6 +22,8 @@ import * as migration_20260915_195429_partnership_page from './20260915_195429_p
 import * as migration_20260915_195430_import_partnership_page from './20260915_195430_import_partnership_page';
 import * as migration_20260915_200327_referral_page_and_program_values from './20260915_200327_referral_page_and_program_values';
 import * as migration_20260915_200328_import_referral_page from './20260915_200328_import_referral_page';
+import * as migration_20260915_211211_home_page from './20260915_211211_home_page';
+import * as migration_20260915_211212_import_home_page from './20260915_211212_import_home_page';
 
 export const migrations = [
   {
@@ -143,5 +145,15 @@ export const migrations = [
     up: migration_20260915_200328_import_referral_page.up,
     down: migration_20260915_200328_import_referral_page.down,
     name: '20260915_200328_import_referral_page',
+  },
+  {
+    up: migration_20260915_211211_home_page.up,
+    down: migration_20260915_211211_home_page.down,
+    name: '20260915_211211_home_page',
+  },
+  {
+    up: migration_20260915_211212_import_home_page.up,
+    down: migration_20260915_211212_import_home_page.down,
+    name: '20260915_211212_import_home_page',
   },
 ];
