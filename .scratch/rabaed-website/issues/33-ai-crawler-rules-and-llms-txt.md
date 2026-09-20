@@ -4,15 +4,116 @@
 
 **Blocked by:** 31
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] `robots.txt` distinguishes retrieval and citation crawlers from training crawlers, following the handoff's draft
-- [ ] Retrieval and citation crawlers are allowed: they are how Rabaed gets quoted in AI answers
-- [ ] Training crawler policy is a single switch the founders can flip, defaulting to allowed, with the trade-off written down
-- [ ] `llms.txt` served, based on the handoff's draft, listing the pages and describing the product in Rabaed's own words
-- [ ] `llms.txt` is regenerated from CMS content rather than hand-maintained, so it cannot go stale
-- [ ] Both files are reachable and correctly typed
+- [x] `robots.txt` distinguishes retrieval and citation crawlers from training crawlers, following the handoff's draft
+- [x] Retrieval and citation crawlers are allowed: they are how Rabaed gets quoted in AI answers
+- [x] Training crawler policy is a single switch the founders can flip, defaulting to allowed, with the trade-off written down
+- [x] `llms.txt` served, based on the handoff's draft, listing the pages and describing the product in Rabaed's own words
+- [x] `llms.txt` is regenerated from CMS content rather than hand-maintained, so it cannot go stale
+- [x] Both files are reachable and correctly typed
 
 **Note from ticket 05:** the Screen mock studio must be excluded from the sitemap. It is already `noindex` unconditionally, but it should not be listed. `STUDIO_PREFIX` in `src/screen-mocks/registry.ts` is the prefix to filter on, and ticket 05's checklist leaves that box open until this ticket ticks it.
 
 **From ticket 31:** done there — the sitemap never lists the studio, and `search-foundations.spec.ts` checks it. Ticket 31's `src/app/robots.ts` is a single rule for every crawler plus the sitemap line; this ticket replaces the rule with the retrieval/training split. Keep `search-foundations.spec.ts`'s robots test green: nothing may be disallowed that must see a page's `noindex`, and do not name the CMS admin path in the file, which would publish it.
+
+## Comments
+
+### What was built
+
+**`robots.txt` (`src/app/robots.ts`).** Three groups and the sitemap line, in the handoff's own shape: everything is allowed; the eight retrieval and citation crawlers are allowed again by name, so the promise is written down rather than inherited from the `*` rule; and the four training crawlers are allowed or refused by the switch. `Google-Extended` and `Applebot-Extended` are deliberately absent — they opt out of training alone and do nothing for AI Overviews, and the file must never name `Googlebot` in a refusal.
+
+**The switch.** A CMS global of its own, «زواحف الذكاء الاصطناعي» (`src/cms/globals/ai-crawlers.ts`), holding one checkbox that defaults to allowed. The trade-off is written in Arabic in the field's own help text, where Ahmed reads it at the moment he decides: allowing training crawlers is how a model knows Rabaed from the inside in a year or two, with no citation, visit or link; refusing them costs nothing today, because the retrieval crawlers the switch cannot touch are what decides whether Rabaed is quoted now.
+
+**`llms.txt` (`src/app/llms.txt/route.ts`).** The handoff's draft, generated. The heading and summary are the company as `CONTEXT.md` writes it and the product line in the co-founder's own words; the pages are listed with the descriptions the pages themselves declare; published articles and case studies are listed with their CMS summaries; the three legal documents with theirs. `force-static`, so it is prerendered like the sitemap and marked stale by the same hook when anything is published.
+
+**Ticket 05's sitemap box** was already ticked by ticket 31, which built the sitemap from a written-out list of pages rather than by walking the routes — so the note above, and its suggestion of filtering on `STUDIO_PREFIX`, are answered by a better mechanism than the one they name: nothing that is not a page of the site can reach the list in the first place, so there is nothing to filter out. `llms.txt` is built the same way, and `ai-crawlers.spec.ts` holds the studio out of it as `search-foundations.spec.ts` does for the sitemap.
+
+### Decisions
+
+**The switch is a global of its own, not a field on the site settings.** It was a field on `site-settings` first, which is where a one-off site-wide setting belongs. That broke every fresh database: `20260913_191346_publish_contact_points` publishes the contact points through Payload's local API, and the local API selects *every* column the current schema declares — including one added by a migration that has not run yet. The error is `column "version_allow_training_crawlers" does not exist`, raised by a migration written a week before the column existed.
+
+A global of its own has no earlier migration touching it, so the problem does not arise, and it reads better in the admin: a founder looking for the AI crawler decision finds an entry named after it rather than a checkbox under a WhatsApp number.
+
+**It keeps no drafts.** Every other global does, because a draft is words a page will show, previewed before visitors see them. This is a policy with no page to preview, so ticking the box and saving is the whole act — which is what "a single switch" has to mean.
+
+**`llms.txt` is generated, and half of it is CMS-sourced today.** Worth stating exactly, because the checklist line reads "regenerated from CMS content rather than hand-maintained, so it cannot go stale" and those are two requirements, met to different degrees.
+
+*Cannot go stale* is fully met, and is the one that matters. Nothing in the file is a second copy of the site's words: a file that restates what a page says drifts the first time somebody edits the page and not the file. `ai-crawlers.spec.ts` holds it to that directly — it fetches every address the file lists and asserts the description beside it is that page's own `<meta name="description">`, so a line written out by hand fails.
+
+*From CMS content* is met for everything the CMS holds today: the articles, the case studies and the three legal documents, each with the summary an Editor wrote. The nine page descriptions and the summary line at the top are **not** in the CMS yet — they are `src/content/pages/*.ts` and `src/content/company.ts`, hand-maintained in code behind a deploy. What this ticket did was wire the file to the single place those descriptions already live, so that **ticket 26 moves them into the CMS and this file follows them there untouched**, with the test above proving it never lagged in between. Ticket 26 carries the note.
+
+### What was learned
+
+**A data migration that uses Payload's local API is pinned to the schema of the day it was written.** Any later migration that adds a column to a table an earlier data migration writes through `payload.updateGlobal` or `payload.create` breaks that migration on a database built from scratch — production never notices, because it already ran it. This ticket went around the problem; **ticket 26 cannot**, because it adds fields to the page globals that `20260915_*_import_*` seed. A comment on ticket 26 records it.
+
+**The suite needed a stage of its own, and Playwright has room for exactly one trailing stage.** `ai-crawlers.spec.ts` reads a file that lists every page with its description, so a case study published beside it adds a page and a Referral Program value published beside it changes one — and it publishes in its turn, a robots rule every other robots test would see. It went in as a second teardown project chained after `runs-last`, which silently ran **nothing**: a teardown project waits for everything that depends on the project it belongs to, so two chained teardowns each wait for the other. Playwright reports that as tests that "did not run" and no error — the whole `runs-last` stage stopped running too, and a passing run still said `15 did not run`.
+
+It is a `reads-the-whole-site` project depending on `chromium` instead, which runs between the main project and `runs-last`. The price is that it is skipped when the main project fails, and that running its file alone runs the main project first unless `--no-deps` is passed.
+
+### From the code review
+
+Two findings worth recording, both acted on.
+
+**`search-foundations.spec.ts`'s robots test was a landmine, not a passing test.** Ticket 31's note said to keep it green, and it was — but only by accident of ordering. It asserted that no line anywhere in the file reads `Disallow: /`, and with the training crawlers refused, one legitimately does. It stayed green because `ai-crawlers.spec.ts` restores the switch in a `finally` and runs in a later stage; a crash between the two, or a production deployment where Ahmed has genuinely refused them, would have turned it red for the wrong reason — and the reason would have looked like a real regression. It now asserts what it always meant: the rule every crawler *not named in the file* follows allows the site whole. What the named groups say is this ticket's suite.
+
+**`robots.txt` now needs the database to build, where it was a pure function before.** Left as it is, and said so in `src/cms/crawler-policy.ts`: the permissive default covers a row nobody has written, never a database nobody can reach. A build without its database already fails on every page that reads the CMS, and swallowing the error here would publish a permission the founders may have refused, into a file crawlers act on and nobody rereads.
+
+Also folded in: the write-up moved under the one `## Comments` heading the tracker's conventions ask for; `refreshSiteWhenSaved` named beside `refreshSiteWhenPublished` rather than inlined, as every other global does it; and `absoluteUrl` in `src/lib/environment.ts`, because "the home page is the bare origin" was written out three times — in the sitemap, in the structured data, and here.
+
+Run on `TEST_PORT=3133`.
+
+### The preview deployment's red check
+
+PR #42's Vercel check failed, and the cause is this ticket's first build-time CMS read that no earlier deployment has a table for.
+
+Reproduced locally by dropping `ai_crawlers` and its `payload_migrations` row and building against that database, which is what a preview build sees: Postgres `42P01` at `src/cms/crawler-policy.ts`, and `Export encountered an error on /robots.txt/route: /robots.txt, exiting the build`.
+
+It is the documented situation rather than a defect — preview builds never migrate, on purpose, so that trying out a pull request cannot alter the tables the live site reads. The preview database needs `npm run cms:migrate` run against it and the deployment redeploying; no commit changes it. `docs/deployment.md` now says that the red check is expected and what clears it, because a red cross that means "nobody has migrated the preview yet" reads exactly like a red cross that means "this change is broken".
+
+`robots.txt` was deliberately not made to tolerate the missing table. The permissive default covers a row nobody has written; a table nobody has created means the deployment was never migrated, and on production that cannot coexist with a build at all, since `scripts/migrate-production.mjs` runs first. Special-casing it here would only move the same failure onto whichever page a future migration touches.
+
+### The stage was wrong, and CI said so
+
+`e2e (1/4)` failed on PR #42 with the eight `@pixel` screen-mock comparisons — the ones ticket 05 tags so that CI skips them, because they can only pass on the machine that produced the images. They ran anyway, and the shard's own log says why: `Running 889 tests using 2 workers, shard 1 of 4`. One shard ran the entire suite.
+
+The cause was the `reads-the-whole-site` project introduced above. **Playwright applies neither `--grep` nor `--shard` to a project's dependencies** — a dependency must run whole for the dependent to mean anything — so the shard that happened to carry that project ran all of `chromium` unfiltered, `@pixel` and all. Sharding had bought ticket 51 half the runner minutes; this gave them back and turned CI red for a reason that had nothing to do with the change.
+
+So the ordering stage is gone. `ai-crawlers.spec.ts` is the third file in `runs-last`, the teardown, which is not expanded that way. That puts it beside the two suites it was moved away from, so the two `llms.txt` tests now say what they tolerate: a case study published into the file while they read it, and the moment after a Referral Program value is published when the page carries the new amount and the file does not yet. The first is left out of the comparison; the second is polled, re-reading both sides, so a mismatch that is real still fails and reports both.
+
+The conflict that first argued for a stage of its own — the switch flipping `Disallow: /` under `search-foundations.spec.ts` — had already gone away, because the review fixed that test to look only at the rule unnamed crawlers follow.
+
+Verified as CI runs it: `npx playwright test --grep-invert @pixel --shard=1/4` is 232 tests in 1.7 minutes with no `@pixel` among them, and all three `runs-last` suites side by side.
+
+**Three ways to order a Playwright project, and only one works here.** A second teardown chained to the first: neither runs. A dependency on the main project: the shard carrying it runs everything, unfiltered. A file in the existing teardown: correct, at the price of tolerating what runs beside it.
+
+### A shard failed on somebody else's five seconds
+
+`e2e (2/4)` failed on `home-text.spec.ts`'s "a change to the home page published reaches visitors" — the test that publishes a word, then polls the page until the word arrives. It passes on its own, here and on CI's other shards.
+
+`expect.poll` allows five seconds by default, and what it is waiting for is a rebuild: publishing marks the page stale, and the next visit builds it again. The home page is much the biggest to build — every section's words and pictures, the site-wide words ticket 59 added, the closing section — and on a loaded runner that overran. Raised to twenty seconds, with the reason written beside it. The five other pages keep the default, because they did not fail and are smaller; if one of them starts to, the answer is the same.
+
+Not this ticket's doing, but worth being sure rather than assuming: the change here adds `revalidatePath` calls for `llms.txt` and `robots.txt` *after* the one that marks the pages stale, so nothing about the home page's own invalidation moved, and a publish that threw would have failed the assertion above it instead.
+
+### The preview was stranded by a rename, not by this branch
+
+After the founder ran `npm run cms:migrate` against the preview database, the deployment still failed. The migrate output said why, and it was not this ticket's migration:
+
+```
+Error running migration 20260920_182913_site_words_and_index_leads
+caused by: error: type "enum_site_words_languages" already exists
+```
+
+Ticket 59 migrated that database at 21:21 with `20260920_170608_site_words_and_index_leads`, then at 21:34 regenerated the same migration as `20260920_182913_…` while merging ticket 29. The two files are byte-identical apart from the timestamp in the name — but Payload matches applied migrations **by name**, so the database saw a migration it had never run, tried to create types it already had, and stopped. Everything after it was blocked, this ticket's migration included: it never ran at all.
+
+Renaming the two rows in `payload_migrations` to the new names lets the migrate finish, and needs no DDL, because the objects are already right.
+
+`docs/agents/parallel-sessions.md` now carries the rule that was missing: before regenerating a migration, ask whether any database has already applied the old one, and if so give the regenerated file its original name. If none has — the ordinary case, and this branch's — the new name is the better one, because it sorts last and its snapshot is the whole schema. The two rules pull in opposite directions and the doc now says which wins when.
+
+### The home page's revalidation test is load-sensitive, and twenty seconds was not enough either
+
+It failed again on `e2e (2/4)` after the bound was raised from five seconds to twenty, having passed on all four shards twice in between. Raised again, to a minute, and described there as a generous bound rather than a tuned one: what the test asserts is that a published change reaches visitors, not how quickly, and a passing run leaves the poll the moment the words arrive, so a bound nobody reaches costs nothing.
+
+Checked before blaming the runner, because this ticket does add `revalidatePath` calls to the hook that test depends on. They come *after* the call that marks the pages stale, so the home page's own invalidation is unchanged; and the suite went green on all four shards twice on that same code, which a broken hook would not have done.
+
+One thing left unexplained rather than explained away: CI reports the failing test at `home-text.spec.ts:628`, and no commit on this branch, on `main`, or on the pull request's merge ref has it anywhere but line 540. The log is truncated before the code frame both through `gh run view --log` and through the raw job-log API, so there is nothing further to read from here. It may be nothing more than how this reporter numbers a `test()` inside a file with the suite's helpers above it — but it is unverified, and worth a moment's suspicion from whoever next reads a line number in these logs.

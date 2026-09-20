@@ -256,6 +256,36 @@ are read for the figures — «2,500» or «٢٬٥٠٠», and «15%» — so an 
 out only in words is not recognised, and any «15%» in the terms counts as the
 discount, even one about something else.
 
+### AI crawlers
+
+Under **AI crawlers** there is one checkbox: whether the crawlers that collect
+pages to *train* AI models — `GPTBot`, `ClaudeBot`, `CCBot`,
+`Meta-ExternalAgent` — may read the site. It is ticked, and ticking or
+unticking it and saving is the whole act: no draft, no publish. `robots.txt`
+follows within moments.
+
+The trade-off, in short. Training crawlers decide whether a model knows about
+Rabaed *from the inside* in a year or two — answering from memory, with no
+citation, no link and no visit. Refusing them keeps the writing from being
+copied into models, and costs nothing today.
+
+What the checkbox does **not** touch, and no setting can, is the other kind:
+the crawlers that fetch a page at the moment somebody asks a question and name
+the source in the answer — `OAI-SearchBot`, `Claude-SearchBot`,
+`PerplexityBot`, `Googlebot` and the rest. Those are what decide whether Rabaed
+is quoted *now*, and `robots.txt` allows them all, always.
+
+`Google-Extended` and `Applebot-Extended` are not in the file on purpose: they
+opt out of training alone and change nothing about appearing in Google's AI
+Overviews. And `Googlebot` is never refused — refusing it hides the whole site
+from Google, AI answers included.
+
+Beside `robots.txt` the site serves **`llms.txt`**, a short summary of what
+Rabaed is and a list of its pages for an AI assistant to read instead of
+crawling. Nobody maintains it: it is written from the pages' own search
+descriptions and from every article, case study and legal document published in
+the CMS, and rebuilds whenever any of those is published.
+
 ### When a change adds to the CMS
 
 A change that adds a field or a content type carries a **migration** in
@@ -266,6 +296,15 @@ do**, so that trying out a pull request cannot change the tables the live site
 reads. With a separate preview database, run `npm run cms:migrate` against it,
 the same way as step 6, when a pull request that adds a migration needs a
 preview.
+
+**Until that is done, the pull request's Vercel check goes red, and the red is
+expected.** The build fails on the first page that reads a table the preview
+database has not got yet — `column … does not exist`, or `relation … does not
+exist`. It does not mean the change is broken: the same commit builds on
+production, which migrates first. Migrate the preview database and redeploy
+that deployment from Vercel, and the check goes green without a new commit.
+Adding a table early is safe even where previews and production share one
+database, because nothing reads it until the code that uses it is merged.
 
 For developers: after changing the CMS configuration, `npm run cms:migration --
 <name>` writes the migration, and `npm run cms:generate` refreshes the admin's

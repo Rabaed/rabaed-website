@@ -118,6 +118,12 @@ export const SITE_WORDS_EDITOR = {
   password: 'test-editor-password-59',
 } as const;
 
+/** The AI crawler rules' suite's own account (ticket 33), for the same reason as `BLOG_EDITOR`. */
+export const CRAWLERS_EDITOR = {
+  email: 'crawlers-editor@rabaed.test',
+  password: 'test-editor-password-33',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -135,6 +141,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   REFERRAL_VALUES_EDITOR,
   HOME_EDITOR,
   SITE_WORDS_EDITOR,
+  CRAWLERS_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
