@@ -4,14 +4,25 @@
 
 **Blocked by:** 19, 31
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every page, post and case study carries editable title, description and sharing image fields
-- [ ] Sensible defaults are generated when a field is left empty, so nothing is ever blank
-- [ ] Length guidance is shown in the admin so titles and descriptions are not silently cut off in results
-- [ ] Changes are reflected in the page's tags, in the sitemap entry and in the sharing preview
+- [x] Every page, post and case study carries editable title, description and sharing image fields
+- [x] Sensible defaults are generated when a field is left empty, so nothing is ever blank
+- [x] Length guidance is shown in the admin so titles and descriptions are not silently cut off in results
+- [x] Changes are reflected in the page's tags, in the sitemap entry and in the sharing preview
 
 ## Comments
+
+**The founder's answer (20 September 2026).** **The fields are one entry of their own, not three fields on each page's entry.** Ticket 33's warning below is real and this ticket confirmed it: a data migration that writes through Payload selects every column the schema declares today, so a field added to `home_page` makes `import_home_page` fail on any database built from scratch. Fixing that properly means rewriting eight data migrations, the home page's several hundred frozen words among them; the founder chose the smaller, safer change. **Ticket 63 is the fix itself**, and after it these fields could move onto the pages they describe.
+
+**Decided while building (20 September 2026).**
+
+- **A sharing image is a collection of its own**, not a picture in `media`. It is the one picture here the site does not draw: `media` re-encodes everything to WebP, which is right for a photograph on a page and wrong for a card WhatsApp fetches for itself; the narrower copies it makes are for a browser to choose between, and nothing chooses here. It takes a 1200×630 PNG and stores it exactly as it arrived. A picture of another shape is refused with its own size in the message, because «حدث خطأ ما» would leave an Editor resizing at random.
+- **1200×630 exactly, not «that size or larger»**, which is what `pictureField` asks of a picture on a page. Everywhere that unfurls a link crops to that shape, and each of them crops a different shape differently — the one thing a sharing image must not be.
+- **The page's short name stays in code.** It names the page inside the site, in a breadcrumb trail (ticket 32), rather than saying anything to a search engine, so only the title, the description and the picture moved.
+- **The referral page's title and description still name the Referral Program's amounts** rather than stating them — `{payout}`, `{clientDiscount}` — so changing an amount still changes every mention (ticket 56). A name the site does not hold is refused on that tab.
+- **`/llms.txt` followed without being touched**, as ticket 33 said it would: it is built from each page's description by way of the content module, so moving the description into the CMS moved the file's source with it.
+- **The six pages are covered; the blog and case studies keep what they had.** Their lines are already in the CMS (`index-leads`, ticket 59) and their titles wait for ticket 42's English site. The legal pages have had their own search title and description since ticket 25. A post and a case study gain a sharing image, their title and summary having served as the other two all along.
 
 **From ticket 31 (15 September 2026).** Every page's title, description, canonical, Open Graph and Twitter tags come from one function, `pageMetadata` in `src/lib/metadata.ts`. It uses one sharing image for all pages, `public/og-rabaed.png` (drawn by `npm run brand:export`); a page's own image belongs as an optional argument there, falling back to that one. Keep `openGraph` and `twitter` set whole in that function — Next.js merges metadata shallowly, so setting part of either anywhere else drops the rest. `tests/e2e/search-foundations.spec.ts` holds every page to a unique title and description and to an image of exactly 1200×630.
 

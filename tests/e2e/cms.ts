@@ -130,6 +130,12 @@ export const CRAWLERS_EDITOR = {
   password: 'test-editor-password-33',
 } as const;
 
+/** The search settings suite's own account (ticket 26), for the same reason as `BLOG_EDITOR`. */
+export const SEARCH_EDITOR = {
+  email: 'search-editor@rabaed.test',
+  password: 'test-editor-password-26',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -149,6 +155,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   SITE_WORDS_EDITOR,
   TRUST_STRIP_EDITOR,
   CRAWLERS_EDITOR,
+  SEARCH_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
@@ -207,6 +214,26 @@ export async function uploadFile(
     multipart: { file: { ...file, name: `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}` }, _payload: JSON.stringify({ alt }) },
   });
   expect(response.ok(), await response.text()).toBe(true);
+  return (await response.json()).doc;
+}
+
+/**
+ * A sharing image of a given size, for the collection that takes nothing but
+ * a 1200×630 PNG (ticket 26).
+ */
+export async function uploadSharingImage(
+  editor: APIRequestContext,
+  alt: string,
+  size: { width: number; height: number } = { width: 1200, height: 630 },
+): Promise<{ id: number; url: string }> {
+  const image = await sharp({ create: { ...size, channels: 3, background: '#14161C' } }).png().toBuffer();
+  const response = await editor.post('/api/sharing-images', {
+    multipart: {
+      file: { name: `sharing-${Date.now()}-${Math.random().toString(36).slice(2)}.png`, mimeType: 'image/png', buffer: image },
+      _payload: JSON.stringify({ alt }),
+    },
+  });
+  if (!response.ok()) return { id: 0, url: await response.text() };
   return (await response.json()).doc;
 }
 

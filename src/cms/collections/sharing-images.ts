@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload';
+import { APIError, type CollectionConfig } from 'payload';
 import { signedIn } from '../access';
 import { localSharingImageDirectory } from '../environment';
 
@@ -75,7 +75,9 @@ export const SharingImages: CollectionConfig = {
           req?.i18n?.language === 'en'
             ? `A sharing image must be exactly ${SHARING_IMAGE_SIZE.width}×${SHARING_IMAGE_SIZE.height} pixels. This one is ${width}×${height}.`
             : `صورة المشاركة يجب أن تكون ${SHARING_IMAGE_SIZE.width}×${SHARING_IMAGE_SIZE.height} بكسل بالضبط. هذه ${width}×${height}.`;
-        throw new Error(message);
+        // `APIError` with `isPublic`, so the Editor is told the size rather
+        // than «حدث خطأ ما»: a plain `Error` is swallowed as one.
+        throw new APIError(message, 400, undefined, true);
       },
     ],
   },
