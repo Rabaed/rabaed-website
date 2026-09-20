@@ -550,15 +550,20 @@ test('a change to the home page published reaches visitors', async ({ page, requ
       'published',
     );
     expect(response.ok(), await response.text()).toBe(true);
-    // Longer than the five seconds `expect.poll` allows by default, which the
-    // five other pages' versions of this test keep. Publishing marks the page
-    // stale and the next visit rebuilds it, so what is being waited for is a
-    // rebuild — and the home page is much the biggest, reading every section's
-    // words, its pictures, the site-wide words and the closing section. On a
-    // loaded CI runner that overran five seconds and failed the shard, while
-    // passing everywhere else. The bound is arbitrary either way: what the
-    // test asserts is that the change arrives, not how quickly.
-    await expect.poll(async () => visitorHtml(request), { timeout: 20_000 }).toContain(`${lead}</p>`);
+    // A minute, where `expect.poll` allows five seconds by default and the five
+    // other pages' versions of this test keep the default. What is waited for
+    // is a rebuild: publishing marks every page stale, and the next visit
+    // builds this one again — much the biggest, reading every section's words,
+    // its pictures, the site-wide words and the closing section. On a loaded CI
+    // runner it overran five seconds, then twenty, while passing on every other
+    // shard and on every developer machine.
+    //
+    // A generous bound rather than a tuned one, on purpose. The test asserts
+    // that a published change reaches visitors, not how quickly; the number is
+    // only there so a rebuild that never happens fails instead of hanging, and
+    // a passing run leaves the poll as soon as the words arrive, so a bound
+    // nobody reaches costs nothing.
+    await expect.poll(async () => visitorHtml(request), { timeout: 60_000 }).toContain(`${lead}</p>`);
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);

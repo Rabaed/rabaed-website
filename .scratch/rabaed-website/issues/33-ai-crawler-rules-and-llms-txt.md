@@ -109,3 +109,11 @@ Ticket 59 migrated that database at 21:21 with `20260920_170608_site_words_and_i
 Renaming the two rows in `payload_migrations` to the new names lets the migrate finish, and needs no DDL, because the objects are already right.
 
 `docs/agents/parallel-sessions.md` now carries the rule that was missing: before regenerating a migration, ask whether any database has already applied the old one, and if so give the regenerated file its original name. If none has — the ordinary case, and this branch's — the new name is the better one, because it sorts last and its snapshot is the whole schema. The two rules pull in opposite directions and the doc now says which wins when.
+
+### The home page's revalidation test is load-sensitive, and twenty seconds was not enough either
+
+It failed again on `e2e (2/4)` after the bound was raised from five seconds to twenty, having passed on all four shards twice in between. Raised again, to a minute, and described there as a generous bound rather than a tuned one: what the test asserts is that a published change reaches visitors, not how quickly, and a passing run leaves the poll the moment the words arrive, so a bound nobody reaches costs nothing.
+
+Checked before blaming the runner, because this ticket does add `revalidatePath` calls to the hook that test depends on. They come *after* the call that marks the pages stale, so the home page's own invalidation is unchanged; and the suite went green on all four shards twice on that same code, which a broken hook would not have done.
+
+One thing left unexplained rather than explained away: CI reports the failing test at `home-text.spec.ts:628`, and no commit on this branch, on `main`, or on the pull request's merge ref has it anywhere but line 540. The log is truncated before the code frame both through `gh run view --log` and through the raw job-log API, so there is nothing further to read from here. It may be nothing more than how this reporter numbers a `test()` inside a file with the suite's helpers above it — but it is unverified, and worth a moment's suspicion from whoever next reads a line number in these logs.
