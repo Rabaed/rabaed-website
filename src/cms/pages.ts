@@ -29,6 +29,7 @@ type PageSlug = Extract<
   | 'site-words'
   | 'index-leads'
   | 'trust-strip'
+  | 'search-settings'
 >;
 
 /**

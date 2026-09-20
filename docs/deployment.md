@@ -188,6 +188,57 @@ site launched with, word for word.
   `{clientDiscount}` for the Referral Program values: the site inserts the
   current amount, so no answer quotes an old one.
 
+### The blog, and the six articles waiting in it
+
+Articles are written under **Blog**. **Six Arabic drafts are already there**,
+imported with the site (ticket 38) so that the blog is not empty on the day it
+launches. Each answers one kind of question a buyer actually asks:
+
+| Article | The question it answers |
+| --- | --- |
+| ما هي منصة ربائد؟ | what Rabaed is |
+| ربائد مقابل واتساب والبريد الإلكتروني والإكسل | Rabaed against the tools a project uses today |
+| كيف تمر المعاملة من الطلب إلى الاعتماد؟ | how a transaction actually works |
+| مكتب هندسي يشرف على خمسة مشاريع… | what it looks like for one kind of customer |
+| ماذا لو رفض المقاول استخدام المنصة؟ وماذا عن بياناتنا؟ | the objections that come up before signing |
+| من يقف خلف ربائد؟ ومن أين تعمل؟ | who the company is |
+
+**They are drafts, so nobody can read them yet** — not a visitor, not Google,
+not an AI assistant. Every word in them is already somewhere on the site: they
+were written from the pages, the FAQ answers and the company's own details, and
+they state no figure or percentage that nobody can source. Nothing was invented.
+
+Each one also **arrives with a cover picture**: the Screen mock of the screen
+that article is about — the stamped approval sheet on «ما هي منصة ربائد؟», the
+correspondence screen on the comparison, and so on. Change any of them for
+another image if you would rather; they are there so that no article is waiting
+on a picture.
+
+**To publish one:**
+
+1. Open it under **Blog** and read it through. Change anything you disagree
+   with — the words are yours, and the point of them arriving as drafts is that
+   you correct them first.
+2. Fill in **الكاتب** with the name of the person who wrote it. A real person,
+   not «ربائد» and not the company: an article a reader can attribute to
+   somebody is worth more than one signed by a logo. The CMS refuses the
+   company's name here.
+3. Set **تاريخ النشر** to the day you are publishing. Each draft arrives dated
+   21 September 2026, the day it was written.
+4. **Preview** it, then **Publish changes**.
+
+Step 2 is not optional: the CMS refuses to publish an article with no author,
+which is what keeps any of this from reaching a visitor before you have seen it.
+
+Once published, an article appears on `/blog`, at its own address, in
+`sitemap.xml` and in `llms.txt`, and describes itself to search engines and AI
+assistants as an article by its named author. Unpublishing it takes it out of
+all of them again.
+
+You do not have to publish all six, or any of them. Publish the ones you stand
+behind, leave the rest as drafts, and delete any you do not want. Nothing on the
+site depends on a particular article existing.
+
 ### Page text
 
 Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**

@@ -14,6 +14,7 @@ import {
   summaryField,
   titleField,
 } from '../editorial-fields';
+import { sharingImageField } from '../page-fields';
 
 /**
  * The blog's articles (ticket 23): one entry per language, drafted, previewed
@@ -53,6 +54,7 @@ export const Posts: CollectionConfig = {
     },
     summaryField({ ar: 'صفحة المدونة', en: 'the blog index' }),
     // `page` is taken: `/blog/page/2` is the index's second page.
+    sharingImageField(),
     slugField({ collection: 'posts', section: '/blog', another: 'مقالة أخرى', reserved: ['page'] }),
     localeField,
     authorField,

@@ -10,7 +10,7 @@ import {
   PublishedDate,
 } from '@/components/editorial';
 import { allPublishedCaseStudies, publishedCaseStudyLocales, findCaseStudy, hasPublishedCaseStudies } from '@/cms/case-studies';
-import { fetchedMedia } from '@/cms/fetched-media';
+import { fetchedMedia, fetchedSharingImage } from '@/cms/fetched-media';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { localePath, type Locale } from '@/lib/locales';
@@ -39,6 +39,7 @@ export async function caseStudyMetadata(locale: Locale, slug: string): Promise<M
     path: caseStudyPath(slug),
     title: `${caseStudy.title} · ${copy.siteName}`,
     description: caseStudy.summary,
+    sharingImage: fetchedSharingImage(caseStudy.sharingImage),
   });
 }
 

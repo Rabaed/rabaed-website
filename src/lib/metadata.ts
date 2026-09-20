@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { isIndexable, siteOrigin } from './environment';
+import { SHARING_IMAGE_SIZE } from '@/cms/collections/sharing-images';
+import type { SharingImage } from '@/content/pages/page-content';
 import { LOCALE_CODES, localePath, type Locale } from './locales';
 
 /**
@@ -29,11 +31,12 @@ const SHARING = {
 } as const satisfies Record<Locale, unknown>;
 
 /**
- * The sharing image, drawn by `npm run brand:export`. One image for every page
- * until ticket 26 lets a page have its own. It is Arabic on the English
- * placeholder too, as the rest of the site is until English is switched on.
+ * The site's own sharing image, drawn by `npm run brand:export`, which every
+ * page falls back to. A page an Editor has given one of its own uses that
+ * instead (ticket 26). It is Arabic on the English placeholder too, as the
+ * rest of the site is until English is switched on.
  */
-const SHARING_IMAGE = { url: '/og-rabaed.png', width: 1200, height: 630 } as const;
+const SHARING_IMAGE = { url: '/og-rabaed.png', ...SHARING_IMAGE_SIZE } as const;
 
 /**
  * A page's own metadata: its title and description, the self-referencing
@@ -61,11 +64,19 @@ export function pageMetadata(options: {
   title: string;
   description: string;
   locales?: readonly Locale[];
+  /**
+   * The page's own picture, where an Editor has given it one (ticket 26). It
+   * is held to the same 1200×630 as the site's own, by the collection it is
+   * uploaded to, so a card is never cropped differently from page to page.
+   */
+  sharingImage?: SharingImage | null;
 }): Metadata {
-  const { locale, path = '/', title, description, locales = LOCALE_CODES } = options;
+  const { locale, path = '/', title, description, locales = LOCALE_CODES, sharingImage } = options;
   const canonical = localePath(locale, path);
   const sharing = SHARING[locale];
-  const image = { ...SHARING_IMAGE, alt: sharing.imageAlt };
+  const image = sharingImage
+    ? { ...SHARING_IMAGE, url: sharingImage.url, alt: sharingImage.alt }
+    : { ...SHARING_IMAGE, alt: sharing.imageAlt };
 
   return {
     title,

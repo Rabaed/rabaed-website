@@ -57,12 +57,21 @@ export async function withQuestions<T extends { readonly questions: QuestionsCon
   return { ...content, questions } as unknown as T;
 }
 
-/** What a page says about itself to a search engine and a browser tab. */
+/** The picture a page's link unfurls as, where a page has one of its own (ticket 26). */
+export type SharingImage = { readonly url: string; readonly alt: string };
+
+/**
+ * What a page says about itself to a search engine and a browser tab. The
+ * title, the description and the picture are an Editor's (ticket 26); the
+ * short name is the page's own, and stays in code.
+ */
 export type PageMeta = {
   /** The page's short name, as a breadcrumb trail in its structured data names it: «المنتج». */
   readonly name: string;
   readonly title: string;
   readonly description: string;
+  /** Nothing where the page shares the site's own picture, which is most of them. */
+  readonly sharingImage?: SharingImage | null;
 };
 
 /** Asked for a page in a locale it has no content in. */

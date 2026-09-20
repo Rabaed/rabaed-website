@@ -1,4 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { getSearchSettings } from '@/content/search-settings';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
@@ -14,7 +15,7 @@ import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import type { Locale } from '@/lib/locales';
 import type { ProductPage } from '@/payload-types';
-import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ProductPageContent = {
   readonly meta: PageMeta;
@@ -32,17 +33,11 @@ export type ProductPageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS,
- * and the short name its breadcrumb structured data reads (ticket 32), which
- * travels with them. Verbatim from `reference/site/product.html`.
+ * The page's short name, as its breadcrumb structured data reads it
+ * (ticket 32). Its search title and description are an Editor's, in the CMS
+ * (ticket 26, `src/content/search-settings.ts`).
  */
-const META = {
-  ar: {
-    name: 'المنتج',
-    title: 'ربائد · المنتج — من الطلب إلى الاعتماد',
-    description: 'كيف تمر معاملة واحدة من الطلب إلى الاعتماد، وماذا يرى كل طرف حين يفتح المنصة.',
-  },
-} as const;
+const NAME = 'المنتج';
 
 /** Between two parties, the way something travels: towards the reading's end. */
 const TOWARDS: Readonly<Record<Locale, string>> = { ar: '←', en: '→' };
@@ -70,12 +65,13 @@ function flowSteps(locale: Locale, flow: Flow): FlowStep[] {
  * a button says, never where it goes.
  */
 export async function getProductPage(locale: Locale): Promise<ProductPageContent> {
-  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip, meta] = await Promise.all([
     pageEntry('product-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST),
     getTrustStrip(locale),
+    getSearchSettings(locale, 'product', { name: NAME }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, journey, customStrip, roles, innerCycle } = entry;
@@ -86,7 +82,7 @@ export async function getProductPage(locale: Locale): Promise<ProductPageContent
   });
 
   return {
-    meta: inLocale('product', META, locale),
+    meta,
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

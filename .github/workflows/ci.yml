@@ -23,12 +23,18 @@ name: CI
 # runner minutes; the ruleset requires a branch to be up to date before it
 # merges, so the pull request's run is a run of what lands.
 #
-# While a pull request is a draft, the machines that matter stay off: a draft
-# gets the typecheck, and marking it ready for review is what starts the
-# suite. The suite runs on the author's own machine in about five minutes
-# (`npm test`), which is where work in progress belongs.
+# **Every pull request runs the suite, draft or not.** Drafts skipped it for a
+# day, to save runner minutes while the repository was private and they were
+# rationed. Twice a pull request was then marked ready for review and GitHub
+# started no run for it, leaving the run from its draft — suite skipped, check
+# green — standing as the verdict on code nothing had tested. The repository
+# is public now and the minutes are not rationed, so the saving bought little
+# and the check was claiming more than it knew.
 on:
   pull_request:
+    # Spelled out rather than left to the default: the bare `pull_request:`
+    # was tried on 20 September 2026 and GitHub created no run for a push to
+    # an open pull request at all, which is worse than any verdict.
     types: [opened, synchronize, reopened, ready_for_review]
 
 # A new push supersedes the run in flight for the same branch.
@@ -60,8 +66,6 @@ jobs:
 
   e2e:
     name: e2e (${{ matrix.shard }})
-    # Not while the pull request is a draft.
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -139,12 +143,4 @@ jobs:
           echo "typecheck: ${{ needs.typecheck.result }}"
           echo "e2e: ${{ needs.e2e.result }}"
           test "${{ needs.typecheck.result }}" = success
-          # `skipped` is the suite left off while the pull request is a draft,
-          # and it passes here only while it still is one. A run that started
-          # on a draft keeps its verdict after the pull request is marked
-          # ready — so without this, a branch could merge on a green check
-          # whose suite never ran. Marking one ready starts a run of its own,
-          # and that is the run this check speaks for.
-          echo "draft: ${{ github.event.pull_request.draft }}"
-          test "${{ needs.e2e.result }}" = success ||
-            { test "${{ needs.e2e.result }}" = skipped && test "${{ github.event.pull_request.draft }}" = true; }
+          test "${{ needs.e2e.result }}" = success
