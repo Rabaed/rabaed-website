@@ -9,7 +9,9 @@
  *
  * **Which fields exist is fixed here, in code.** Every field reaches storage,
  * spam protection and the Privacy Policy, so adding one is a developer's
- * change. What the fields *say* is an Editor's: the words here are only what a
+ * change — and one that carries on into `docs/privacy-inventory.ar.md` and its
+ * English twin, the inventory the lawyer writes the policy from (ticket 37).
+ * What the fields *say* is an Editor's: the words here are only what a
  * database starts with, published by a migration, and changed from the CMS
  * after that (`src/cms/globals/form-settings.ts`).
  */
