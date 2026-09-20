@@ -99,6 +99,11 @@ export function localMediaDirectory(): string {
   return process.env.MEDIA_DIR ?? path.resolve(process.cwd(), '.data', 'media');
 }
 
+/** The same, for the sharing images a page's link unfurls as (ticket 26). */
+export function localSharingImageDirectory(): string {
+  return process.env.SHARING_IMAGE_DIR ?? path.resolve(process.cwd(), '.data', 'sharing-images');
+}
+
 /**
  * The private Supabase Storage bucket applicant documents go to (ticket 28),
  * reached through the same S3 connection and keys as the media bucket — or

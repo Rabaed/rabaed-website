@@ -38,6 +38,9 @@ _Avoid_: screenshot (implies a real app), mockup, demo.
 **Trust strip** (شريط الثقة):
 The moving bar of client and partner logos. Content managed in the CMS so logos can be added over time.
 
+**Sharing image** (صورة المشاركة):
+The picture a page shows when its link is shared — on WhatsApp, on LinkedIn, in a search result's card. Always 1200×630 and a PNG, because everywhere that unfurls a link crops to that shape and draws that kind. The site's own is `public/og-rabaed.png`; a page an Editor has given one of its own uses that instead (ticket 26).
+
 **Referral Program** (برنامج الإحالة):
 The programme paying SAR 2,000 per project to an individual who refers a client, who in turn receives 10% off. Has its own page and its own terms page.
 _Avoid_: affiliate program.

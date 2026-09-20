@@ -1,4 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { getSearchSettings } from '@/content/search-settings';
 import { referralProgramValues } from '@/cms/referral-program';
 import { withValues, type ReferralProgramValues } from '@/cms/referral-program-values';
 import { numeralsInMono, type InlinePart, type InlineText } from '@/components/inline-text';
@@ -14,7 +15,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { REFERRAL_SIGNUP, type ReferralSignupField } from '@/forms/referral-signup';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ReferralPageContent = {
   readonly meta: PageMeta;
@@ -33,20 +34,12 @@ export type ReferralPageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS,
- * and the short name its breadcrumb structured data reads (ticket 32), which
- * travels with them. Verbatim from `reference/site/referral.html`, each amount
- * inserted from the Referral Program values rather than typed.
+ * The page's short name, as its breadcrumb structured data reads it
+ * (ticket 32). Its search title and description are an Editor's, in the CMS,
+ * and each may quote a Referral Program value by name — `{payout}` — which is
+ * inserted here as it is in the page's own words (tickets 26 and 56).
  */
-function meta({ payout, clientDiscount }: ReferralProgramValues) {
-  return {
-    ar: {
-      name: 'برنامج الإحالة',
-      title: `ربائد · برنامج الإحالة — ${payout} ريال عن كل مشروع`,
-      description: `أحِل مشروعاً واحداً واكسب ${payout} ريال صافية، ويحصل عميلك على خصم ${clientDiscount} على اشتراك مشروعه.`,
-    },
-  };
-}
+const NAME = 'برنامج الإحالة';
 
 /** A step or kind numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -82,16 +75,19 @@ const restOfPoint = (rest: string) => (rest === '' || /^[،,.؛:]/.test(rest) ? 
  * a button says, never where it goes.
  */
 export async function getReferralPage(locale: Locale): Promise<ReferralPageContent> {
-  const [entry, values, signupForm] = await Promise.all([
+  // The amounts are read first: the page's search title and description name
+  // them, and the words on the page do too.
+  const values = await referralProgramValues();
+  const [entry, signupForm, meta] = await Promise.all([
     pageEntry('referral-page', locale),
-    referralProgramValues(),
     formPageWording(REFERRAL_SIGNUP),
+    getSearchSettings(locale, 'referral', { name: NAME, values }),
   ]);
   const { hero, howItWorks, offer, audience, whatIsReferred, termsSummary, questions, signup } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => withValues(wordsIn(locale, stored), values);
 
   const page: BeforeQuestions<Omit<ReferralPageContent, 'signupForm'>> = {
-    meta: inLocale('referral', meta(values), locale),
+    meta,
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

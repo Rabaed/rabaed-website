@@ -1,10 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { allPublishedPosts } from '@/cms/blog';
+import { pageEntry } from '@/cms/pages';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
 import { blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
-import { localePath } from '@/lib/locales';
+import { DEFAULT_LOCALE, localePath } from '@/lib/locales';
 
 /**
  * The Arabic site's pages, as they stand. The English site's pages join it
@@ -21,15 +22,27 @@ const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', 
  * Pages are listed by name, not found by walking the routes, so nothing that
  * is not a page of the site can reach it: not the Screen mock studio, the CMS
  * admin, or the English placeholder (ticket 31).
+ *
+ * A page carries the day its search settings were last published (ticket 26).
+ * A sitemap has nowhere to put a title or a description — an entry is an
+ * address and a date — so the date is what a change to how a page is
+ * described can show here, and it is the one thing a crawler reads it for.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, caseStudies] = await Promise.all([allPublishedPosts(), allPublishedCaseStudies()]);
+  const [posts, caseStudies, search] = await Promise.all([
+    allPublishedPosts(),
+    allPublishedCaseStudies(),
+    pageEntry('search-settings', DEFAULT_LOCALE),
+  ]);
+  const described = search.updatedAt ?? undefined;
 
   return [
-    ...PAGES.map((path) => ({ url: absoluteUrl(path) })),
+    ...PAGES.map((path) => ({ url: absoluteUrl(path), lastModified: described })),
     // The case studies index is one of the Arabic site's pages once the section
     // shows there. Like `/en/blog`, the English index waits for English.
-    ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar') ? [{ url: absoluteUrl(CASE_STUDIES_PATH) }] : []),
+    ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar')
+      ? [{ url: absoluteUrl(CASE_STUDIES_PATH), lastModified: described }]
+      : []),
     ...posts.map((post) => ({
       url: absoluteUrl(localePath(post.locale, blogPostPath(post.slug))),
       lastModified: post.updatedAt,

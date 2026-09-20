@@ -1,5 +1,6 @@
 import { FAQ_PAGES } from '@/cms/faq-pages';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { getSearchSettings } from '@/content/search-settings';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { QuestionsContent } from '@/components/questions';
@@ -10,7 +11,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type StartPageContent = {
   readonly meta: PageMeta;
@@ -26,17 +27,11 @@ export type StartPageContent = {
 };
 
 /**
- * The page's search title and description, which ticket 26 moves into the CMS,
- * and the short name its breadcrumb structured data reads (ticket 32), which
- * travels with them. Verbatim from `reference/site/start.html`.
+ * The page's short name, as its breadcrumb structured data reads it
+ * (ticket 32). Its search title and description are an Editor's, in the CMS
+ * (ticket 26, `src/content/search-settings.ts`).
  */
-const META = {
-  ar: {
-    name: 'ابدأ',
-    title: 'ربائد · ابدأ — كيف نبدأ والأسئلة الشائعة',
-    description: 'ثلاث خطوات حتى التشغيل، الضمان، الاشتراك، والأسئلة الشائعة.',
-  },
-} as const;
+const NAME = 'ابدأ';
 
 /**
  * The start page's content in `locale`: its words from its entry in the CMS
@@ -47,15 +42,16 @@ const META = {
  * a button says, never where it goes.
  */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  const [entry, demoForm, trustStrip] = await Promise.all([
+  const [entry, demoForm, trustStrip, meta] = await Promise.all([
     pageEntry('start-page', locale),
     formPageWording(DEMO_REQUEST),
     getTrustStrip(locale),
+    getSearchSettings(locale, 'start', { name: NAME }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
-    meta: inLocale('start', META, locale),
+    meta,
     hero: {
       eyebrow: words(entry.hero.eyebrow),
       title: words(entry.hero.title),

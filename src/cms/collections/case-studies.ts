@@ -15,6 +15,7 @@ import {
   summaryField,
   titleField,
 } from '../editorial-fields';
+import { sharingImageField } from '../page-fields';
 
 /**
  * Each part of the story sits under a heading of the page's own (التحدي, ما
@@ -204,6 +205,7 @@ export const CaseStudies: CollectionConfig = {
       label: { ar: 'صور أخرى (اختيارية)', en: 'More images (optional)' },
     },
     summaryField({ ar: 'صفحة قصص العملاء', en: 'the case studies index' }),
+    sharingImageField(),
     slugField({ collection: 'case-studies', section: CASE_STUDIES_PATH, another: 'قصة أخرى' }),
     localeField,
     authorField,

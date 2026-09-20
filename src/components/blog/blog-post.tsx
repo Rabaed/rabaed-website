@@ -10,7 +10,7 @@ import {
   PublishedDate,
 } from '@/components/editorial';
 import { allPublishedPosts, findPost, publishedLocales } from '@/cms/blog';
-import { fetchedMedia } from '@/cms/fetched-media';
+import { fetchedMedia, fetchedSharingImage } from '@/cms/fetched-media';
 import { blogPostingData, breadcrumbData, StructuredData } from '@/components/structured-data';
 import { BLOG_COPY } from '@/content/blog';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
@@ -42,6 +42,7 @@ export async function blogPostMetadata(locale: Locale, slug: string): Promise<Me
     path: blogPostPath(slug),
     title: `${post.title} · ${copy.siteName}`,
     description: post.summary,
+    sharingImage: fetchedSharingImage(post.sharingImage),
   });
 }
 
