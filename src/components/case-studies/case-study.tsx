@@ -10,7 +10,7 @@ import {
   PublishedDate,
 } from '@/components/editorial';
 import { allPublishedCaseStudies, publishedCaseStudyLocales, findCaseStudy, hasPublishedCaseStudies } from '@/cms/case-studies';
-import { fetchedMedia } from '@/cms/fetched-media';
+import { fetchedMedia, fetchedSharingImage } from '@/cms/fetched-media';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { localePath, type Locale } from '@/lib/locales';
@@ -39,22 +39,9 @@ export async function caseStudyMetadata(locale: Locale, slug: string): Promise<M
     path: caseStudyPath(slug),
     title: `${caseStudy.title} · ${copy.siteName}`,
     description: caseStudy.summary,
-    sharingImage: sharingImageOf(caseStudy),
+    sharingImage: fetchedSharingImage(caseStudy.sharingImage),
   });
 }
-
-/**
- * The picture this entry's link unfurls as, where an Editor has given it one
- * (ticket 26). It arrives whole rather than as an id because the entry is
- * read one level deep.
- */
-function sharingImageOf(entry: { sharingImage?: unknown }): { url: string; alt: string } | null {
-  const image = entry.sharingImage;
-  if (!image || typeof image !== 'object') return null;
-  const { url, alt } = image as { url?: string | null; alt?: string | null };
-  return url ? { url, alt: alt ?? '' } : null;
-}
-
 
 /**
  * A case study (ticket 24): the hero with its title, client and sector, then

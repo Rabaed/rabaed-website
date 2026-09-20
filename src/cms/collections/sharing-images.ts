@@ -1,4 +1,5 @@
 import { APIError, type CollectionConfig } from 'payload';
+import sharp from 'sharp';
 import { signedIn } from '../access';
 import { localSharingImageDirectory } from '../environment';
 
@@ -62,22 +63,47 @@ export const SharingImages: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeValidate: [
-      ({ data, req }) => {
-        // Payload measures the file before this runs, so the size is here to
-        // check — and a picture of the wrong shape is refused rather than
-        // cropped differently by every place that unfurls it.
-        const { width, height } = data ?? {};
-        if (width === undefined || height === undefined) return data;
-        if (width === SHARING_IMAGE_SIZE.width && height === SHARING_IMAGE_SIZE.height) return data;
+    /**
+     * **Before anything is written or unwritten**, as `media.ts` refuses an
+     * SVG it cannot clean. `beforeValidate` was tried and is wrong here:
+     * replacing a picture deletes the one it replaces (`deleteAssociatedFiles`)
+     * *before* that hook runs, so a refusal there would leave every page that
+     * names the picture pointing at a file no longer on disk — a card that
+     * unfurls as nothing, with no sign in the CMS that anything is wrong.
+     *
+     * The file itself is measured rather than what the upload says about it,
+     * for the same reason the SVG sanitiser reads the bytes: a picture
+     * declared a PNG and sent as something else is still not a PNG.
+     */
+    beforeOperation: [
+      async ({ operation, req }) => {
+        const file = req.file;
+        if ((operation !== 'create' && operation !== 'update') || !file?.data) return;
 
-        const message =
-          req?.i18n?.language === 'en'
-            ? `A sharing image must be exactly ${SHARING_IMAGE_SIZE.width}×${SHARING_IMAGE_SIZE.height} pixels. This one is ${width}×${height}.`
-            : `صورة المشاركة يجب أن تكون ${SHARING_IMAGE_SIZE.width}×${SHARING_IMAGE_SIZE.height} بكسل بالضبط. هذه ${width}×${height}.`;
-        // `APIError` with `isPublic`, so the Editor is told the size rather
-        // than «حدث خطأ ما»: a plain `Error` is swallowed as one.
-        throw new APIError(message, 400, undefined, true);
+        const { width, height, format } = await sharp(file.data).metadata().catch(() => ({ width: 0, height: 0, format: '' }));
+        const english = req?.i18n?.language === 'en';
+
+        if (format !== 'png') {
+          throw new APIError(
+            english
+              ? 'A sharing image must be a PNG, which is what the places that unfurl a link can all draw.'
+              : 'صورة المشاركة يجب أن تكون بصيغة PNG، وهي الصيغة التي تعرضها كل المواقع التي تفتح الرابط.',
+            400,
+            undefined,
+            true,
+          );
+        }
+
+        if (width !== SHARING_IMAGE_SIZE.width || height !== SHARING_IMAGE_SIZE.height) {
+          throw new APIError(
+            english
+              ? `A sharing image must be exactly ${SHARING_IMAGE_SIZE.width}×${SHARING_IMAGE_SIZE.height} pixels. This one is ${width}×${height}.`
+              : `صورة المشاركة يجب أن تكون ${SHARING_IMAGE_SIZE.width}×${SHARING_IMAGE_SIZE.height} بكسل بالضبط. هذه ${width}×${height}.`,
+            400,
+            undefined,
+            true,
+          );
+        }
       },
     ],
   },

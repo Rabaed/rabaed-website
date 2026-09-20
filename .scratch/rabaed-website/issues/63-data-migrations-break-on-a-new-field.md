@@ -7,7 +7,7 @@
 **Status:** ready-for-agent
 
 - [ ] A field can be added to any page's entry without an older migration failing on a database built from scratch
-- [ ] The eight data migrations that seed the page entries are held to what they wrote when they were written, whatever the schema says later: `20260915_040105_import_start_page`, `..._import_product_page_closing_section_and_screen_mocks`, `..._import_tool_page`, `..._import_partnership_page`, `..._import_referral_page`, `..._import_home_page`, `20260920_182914_import_site_words_and_index_leads`, `20260920_204226_import_trust_strip`
+- [ ] The eight data migrations that seed the page entries are held to what they wrote when they were written, whatever the schema says later: `20260915_040105_import_start_page`, `..._import_product_page_closing_section_and_screen_mocks`, `..._import_tool_page`, `..._import_partnership_page`, `..._import_referral_page`, `..._import_home_page`, `20260920_182914_import_site_words_and_index_leads`, `20260920_204226_import_trust_strip`, `20260920_211936_import_search_settings`
 - [ ] The whole suite passes against a fresh database, which is the only place this shows
 - [ ] `docs/deployment.md` says what a data migration may and may not do, so the next one does not reintroduce it
 - [ ] Ticket 26's search settings can then move onto the pages they describe, if that is still wanted
@@ -21,5 +21,7 @@
 **Where it has bitten so far.** Ticket 33 hit it on site settings and went round it by giving its one field a global of its own. Ticket 26 hit it on all six page entries and went round it the same way, with the founder's agreement on 20 September 2026: its search settings are one entry of their own rather than three fields on each page. That is twice now, and the workaround costs an Editor a second place to look.
 
 **The likely fix**, to be confirmed while building: write the seeding as raw SQL naming the columns that existed when the migration was written, as the schema migrations beside them already do. The words themselves are already frozen in `src/migrations/*-import/words.ts` and do not move. The home page's entry is the hard one — several nested list tables, each needing its rows and its version rows — so a helper that turns a frozen entry into `INSERT` statements is likely worth more than eight hand-written migrations.
+
+**Ticket 26's own migration is on the list.** It seeds the search settings the same way, so a fourth field on that entry would break fresh databases exactly as a field on a page's entry does today. Going round the trap did not avoid laying it again — which is the argument for fixing it rather than going round it a third time.
 
 **How to know it is fixed:** add a scratch field to a page global, run the suite against a fresh database (`TEST_PORT=3163 npx playwright test`), and watch it pass; then take the field out again.

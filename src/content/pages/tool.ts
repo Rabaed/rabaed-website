@@ -12,7 +12,7 @@ import type { ToolRequirementsContent } from '@/components/tool/requirements';
 import type { ToolUpsellContent } from '@/components/tool/upsell';
 import type { ToolWhyContent } from '@/components/tool/why';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ToolPageContent = {
   readonly meta: PageMeta;

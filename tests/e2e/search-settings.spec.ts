@@ -11,6 +11,7 @@
  * preview, which visitors never see.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import sharp from 'sharp';
 import { SEARCH_EDITOR, logInByApi, uploadSharingImage } from './cms';
 
 test.describe.configure({ mode: 'default' });
@@ -163,6 +164,37 @@ test('a picture of the wrong size or the wrong kind is refused, with the reason'
 
   const small = await uploadSharingImage(page.request, 'صورة صغيرة', { width: 600, height: 315 });
   expect(small.id, 'a 600×315 picture was accepted').toBe(0);
+});
+
+test('a picture refused in place of another leaves the first one where it was', async ({ page }) => {
+  await logInByApi(page.request, SEARCH_EDITOR);
+  const image = await uploadSharingImage(page.request, 'صورة مشاركة تبقى');
+
+  try {
+    expect(image.id, image.url).toBeGreaterThan(0);
+    const before = await page.request.get(image.url);
+    expect(before.ok(), 'the picture was not there to begin with').toBe(true);
+
+    // The same record, a new file of the wrong size. Payload deletes the file
+    // a record points at before it validates the one replacing it, so a
+    // refusal in the wrong place empties the record without saying so.
+    const replaced = await page.request.patch(`/api/sharing-images/${image.id}`, {
+      multipart: {
+        file: {
+          name: `replacement-${Date.now()}.png`,
+          mimeType: 'image/png',
+          buffer: await sharp({ create: { width: 1200, height: 800, channels: 3, background: '#14161C' } }).png().toBuffer(),
+        },
+        _payload: JSON.stringify({ alt: 'صورة مشاركة تبقى' }),
+      },
+    });
+    expect(replaced.status(), 'the wrong size was accepted in place of the first').toBe(400);
+
+    const after = await page.request.get(image.url);
+    expect(after.ok(), 'the first picture went when its replacement was refused').toBe(true);
+  } finally {
+    await page.request.delete(`/api/sharing-images/${image.id}`);
+  }
 });
 
 test('a search title longer than a result shows, and an empty one, are refused', async ({ page }) => {

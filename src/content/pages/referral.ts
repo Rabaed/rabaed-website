@@ -15,7 +15,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { REFERRAL_SIGNUP, type ReferralSignupField } from '@/forms/referral-signup';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ReferralPageContent = {
   readonly meta: PageMeta;
@@ -75,12 +75,14 @@ const restOfPoint = (rest: string) => (rest === '' || /^[،,.؛:]/.test(rest) ? 
  * a button says, never where it goes.
  */
 export async function getReferralPage(locale: Locale): Promise<ReferralPageContent> {
-  const [entry, values, signupForm] = await Promise.all([
+  // The amounts are read first: the page's search title and description name
+  // them, and the words on the page do too.
+  const values = await referralProgramValues();
+  const [entry, signupForm, meta] = await Promise.all([
     pageEntry('referral-page', locale),
-    referralProgramValues(),
     formPageWording(REFERRAL_SIGNUP),
+    getSearchSettings(locale, 'referral', { name: NAME, values }),
   ]);
-  const meta = await getSearchSettings(locale, 'referral', { name: NAME, values });
   const { hero, howItWorks, offer, audience, whatIsReferred, termsSummary, questions, signup } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => withValues(wordsIn(locale, stored), values);
 

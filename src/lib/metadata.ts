@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { isIndexable, siteOrigin } from './environment';
+import { SHARING_IMAGE_SIZE } from '@/cms/collections/sharing-images';
+import type { SharingImage } from '@/content/pages/page-content';
 import { LOCALE_CODES, localePath, type Locale } from './locales';
 
 /**
@@ -34,7 +36,7 @@ const SHARING = {
  * instead (ticket 26). It is Arabic on the English placeholder too, as the
  * rest of the site is until English is switched on.
  */
-const SHARING_IMAGE = { url: '/og-rabaed.png', width: 1200, height: 630 } as const;
+const SHARING_IMAGE = { url: '/og-rabaed.png', ...SHARING_IMAGE_SIZE } as const;
 
 /**
  * A page's own metadata: its title and description, the self-referencing
@@ -67,7 +69,7 @@ export function pageMetadata(options: {
    * is held to the same 1200×630 as the site's own, by the collection it is
    * uploaded to, so a card is never cropped differently from page to page.
    */
-  sharingImage?: { readonly url: string; readonly alt: string } | null;
+  sharingImage?: SharingImage | null;
 }): Metadata {
   const { locale, path = '/', title, description, locales = LOCALE_CODES, sharingImage } = options;
   const canonical = localePath(locale, path);

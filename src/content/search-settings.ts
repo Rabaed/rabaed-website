@@ -1,8 +1,9 @@
+import { fetchedSharingImage } from '@/cms/fetched-media';
 import { pageEntry, wordsIn } from '@/cms/pages';
 import type { PageMeta } from '@/content/pages/page-content';
-import { withValues } from '@/cms/referral-program-values';
+import { withValues, type ReferralProgramValues } from '@/cms/referral-program-values';
 import type { Locale } from '@/lib/locales';
-import type { SearchSetting } from '@/payload-types';
+import type { SEARCH_PAGES } from '@/cms/globals/search-settings';
 
 /**
  * How a page appears in a search result and when its link is shared
@@ -16,12 +17,12 @@ import type { SearchSetting } from '@/payload-types';
  * breadcrumb trail, rather than saying anything to a search engine, and it
  * stays in the page's own module.
  */
-export type SearchPage = Exclude<keyof SearchSetting, 'id' | 'languages' | 'updatedAt' | 'createdAt' | '_status'>;
+export type SearchPage = (typeof SEARCH_PAGES)[number];
 
 export async function getSearchSettings(
   locale: Locale,
   page: SearchPage,
-  options: { readonly name: string; readonly values?: Parameters<typeof withValues>[1] } = { name: '' },
+  options: { readonly name: string; readonly values?: ReferralProgramValues },
 ): Promise<PageMeta> {
   const entry = await pageEntry('search-settings', locale);
   const section = entry[page];
@@ -30,12 +31,10 @@ export async function getSearchSettings(
   // The referral page's title and description quote the Referral Program's
   // own amounts, which an Editor writes as `{payout}` (ticket 56).
   const filled = (written: string) => (options.values ? withValues(written, options.values) : written);
-  const image = typeof section.sharingImage === 'object' ? section.sharingImage : null;
-
   return {
     name: options.name,
     title: filled(words(section.title)),
     description: filled(words(section.description)),
-    sharingImage: image?.url ? { url: image.url, alt: image.alt } : null,
+    sharingImage: fetchedSharingImage(section.sharingImage),
   };
 }

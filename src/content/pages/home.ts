@@ -22,7 +22,7 @@ import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
 import type { HomePage } from '@/payload-types';
-import { inLocale, withQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { withQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type HomePageContent = {
   readonly meta: PageMeta;

@@ -25,7 +25,13 @@ import { pageGlobal } from '../page-globals';
  * description after about a hundred and sixty. Both are held a little above
  * that: the words past the cut still count when a search engine decides what
  * the page is about, and the whole line is what an AI assistant quotes
- * (`/llms.txt`).
+ * (`/llms.txt`). Each field says so where an Editor types it, since Payload
+ * draws no counter of its own.
+ *
+ * Neither may be left empty — the founder chose on 20 September 2026 that the
+ * CMS refuses an empty one rather than generating something to fill it: a
+ * generated description is a guess, and two of them are the same guess, which
+ * a search engine reads as two copies of one page.
  */
 const TITLE = 70;
 const DESCRIPTION = 180;
@@ -42,22 +48,30 @@ function pageTab(options: { readonly name: string; readonly label: Words; readon
       wordsField('title', { ar: 'العنوان في نتائج البحث', en: 'Title in search results' }, TITLE, {
         values,
         description: {
-          ar: 'يُقرأ وحده في صفحة نتائج، بعيداً عن الصفحة: اذكر ما فيها، لا ترحيباً.',
-          en: 'Read on its own in a results page, away from the page itself: say what is on it, not hello.',
+          ar: 'يُقرأ وحده في صفحة نتائج، بعيداً عن الصفحة: اذكر ما فيها، لا ترحيباً. تعرض نتيجة البحث نحو ٦٠ حرفاً ثم تقطع الباقي، والحد هنا ٧٠.',
+          en: 'Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.',
         },
       }),
       wordsField('description', { ar: 'الوصف في نتائج البحث', en: 'Description in search results' }, DESCRIPTION, {
         multiline: true,
         values,
         description: {
-          ar: 'جملة أو جملتان تصفان الصفحة. تظهر تحت العنوان، وهي أيضاً ما تقتبسه المساعدات الذكية من ملف ‎/llms.txt.',
-          en: 'A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.',
+          ar: 'جملة أو جملتان تصفان الصفحة. تظهر تحت العنوان، وهي أيضاً ما تقتبسه المساعدات الذكية من ملف ‎/llms.txt. تعرض نتيجة البحث نحو ١٦٠ حرفاً ثم تقطع الباقي، والحد هنا ١٨٠: ما بعد القطع يُقرأ ولا يُعرض.',
+          en: 'A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.',
         },
       }),
       sharingImageField(),
     ],
   });
 }
+
+/**
+ * The pages this entry covers, in the order an Editor meets them. One list:
+ * the tabs are built from it, and `src/content/search-settings.ts` takes the
+ * names a page may ask for from it, so neither can name a page the other
+ * does not.
+ */
+export const SEARCH_PAGES = ['home', 'product', 'start', 'tool', 'referral', 'partnership'] as const;
 
 export const SearchSettings = pageGlobal({
   slug: 'search-settings',

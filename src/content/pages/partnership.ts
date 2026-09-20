@@ -13,7 +13,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { PARTNERSHIP_APPLICATION, type PartnershipApplicationField } from '@/forms/partnership-application';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
-import { inLocale, withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type PartnershipPageContent = {
   readonly meta: PageMeta;

@@ -10,7 +10,7 @@ import {
   PublishedDate,
 } from '@/components/editorial';
 import { allPublishedPosts, findPost, publishedLocales } from '@/cms/blog';
-import { fetchedMedia } from '@/cms/fetched-media';
+import { fetchedMedia, fetchedSharingImage } from '@/cms/fetched-media';
 import { blogPostingData, breadcrumbData, StructuredData } from '@/components/structured-data';
 import { BLOG_COPY } from '@/content/blog';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
@@ -42,22 +42,9 @@ export async function blogPostMetadata(locale: Locale, slug: string): Promise<Me
     path: blogPostPath(slug),
     title: `${post.title} · ${copy.siteName}`,
     description: post.summary,
-    sharingImage: sharingImageOf(post),
+    sharingImage: fetchedSharingImage(post.sharingImage),
   });
 }
-
-/**
- * The picture this entry's link unfurls as, where an Editor has given it one
- * (ticket 26). It arrives whole rather than as an id because the entry is
- * read one level deep.
- */
-function sharingImageOf(entry: { sharingImage?: unknown }): { url: string; alt: string } | null {
-  const image = entry.sharingImage;
-  if (!image || typeof image !== 'object') return null;
-  const { url, alt } = image as { url?: string | null; alt?: string | null };
-  return url ? { url, alt: alt ?? '' } : null;
-}
-
 
 /**
  * An article (ticket 23): the compact page hero with its title, author and

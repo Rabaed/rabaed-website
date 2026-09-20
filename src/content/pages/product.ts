@@ -15,7 +15,7 @@ import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import type { Locale } from '@/lib/locales';
 import type { ProductPage } from '@/payload-types';
-import { inLocale, type LinkedSection, type PageMeta, type Section } from './page-content';
+import { type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ProductPageContent = {
   readonly meta: PageMeta;
