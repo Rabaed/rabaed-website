@@ -1,5 +1,6 @@
 import type { FormDefinition, FormId } from './definition';
 import { DEMO_REQUEST } from './demo-request';
+import { PARTNERSHIP_APPLICATION } from './partnership-application';
 import { REFERRAL_SIGNUP } from './referral-signup';
 import { TOOL_DOWNLOAD } from './tool-download';
 
@@ -8,11 +9,12 @@ export const FORMS: Readonly<Record<FormId, FormDefinition>> = {
   'demo-request': DEMO_REQUEST,
   'referral-signup': REFERRAL_SIGNUP,
   'tool-download': TOOL_DOWNLOAD,
+  'partnership-application': PARTNERSHIP_APPLICATION,
 };
 
 /**
  * The forms that send through the submission pipeline, each with its wording
- * and alert address in the CMS. A form joins by being added here — tickets 29
- * and 30 add theirs — with a migration for its settings.
+ * and alert address in the CMS. A form joins by being added here — ticket 30
+ * adds the tool download's — with a migration for its settings.
  */
-export const SUBMITTABLE_FORMS: readonly FormDefinition[] = [DEMO_REQUEST, REFERRAL_SIGNUP];
+export const SUBMITTABLE_FORMS: readonly FormDefinition[] = [DEMO_REQUEST, REFERRAL_SIGNUP, PARTNERSHIP_APPLICATION];

@@ -101,6 +101,7 @@ export interface Config {
     'site-settings': SiteSetting;
     'demo-request-form': DemoRequestForm;
     'referral-signup-form': ReferralSignupForm;
+    'partnership-application-form': PartnershipApplicationForm;
     'referral-program': ReferralProgram;
     'start-page': StartPage;
     'tool-page': ToolPage;
@@ -115,6 +116,7 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
     'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
+    'partnership-application-form': PartnershipApplicationFormSelect<false> | PartnershipApplicationFormSelect<true>;
     'referral-program': ReferralProgramSelect<false> | ReferralProgramSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
@@ -499,7 +501,7 @@ export interface FaqEntry {
  */
 export interface FormSubmission {
   id: number;
-  form: 'demo-request' | 'referral-signup' | 'tool-download';
+  form: 'demo-request' | 'referral-signup' | 'tool-download' | 'partnership-application';
   name?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -1155,6 +1157,210 @@ export interface ReferralSignupForm {
       label: string;
       /**
        * Shown under the box while it is not ticked.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {الاسم} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnership-application-form".
+ */
+export interface PartnershipApplicationForm {
+  id: number;
+  /**
+   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   */
+  alertAddress?: string | null;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    company: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    commercialRegistration: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    city: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    name: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    jobTitle: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    activity: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_consulting_office: string;
+        option_project_management: string;
+        option_contracting: string;
+        option_real_estate_development: string;
+        option_other: string;
+      };
+    };
+    activeProjects: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_1_3: string;
+        option_4_10: string;
+        option_11_25: string;
+        option_over_25: string;
+      };
+    };
+    clientType: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_individual_developers: string;
+        option_development_companies: string;
+        option_government: string;
+        option_mixed: string;
+      };
+    };
+    projectArea: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_under_5000: string;
+        option_5000_20000: string;
+        option_20000_50000: string;
+        option_over_50000: string;
+      };
+    };
+    partnershipMode: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        o_embedded_in_proposal: string;
+        o_office_licence: string;
+        o_approved_referral: string;
+        o_undecided: string;
+      };
+    };
+    goals: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
        */
       message: string;
     };
@@ -3633,6 +3839,164 @@ export interface ReferralSignupFormSelect<T extends boolean = true> {
           | T
           | {
               label?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnership-application-form_select".
+ */
+export interface PartnershipApplicationFormSelect<T extends boolean = true> {
+  alertAddress?: T;
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        commercialRegistration?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        city?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        name?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        jobTitle?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        activity?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_consulting_office?: T;
+                    option_project_management?: T;
+                    option_contracting?: T;
+                    option_real_estate_development?: T;
+                    option_other?: T;
+                  };
+            };
+        activeProjects?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_1_3?: T;
+                    option_4_10?: T;
+                    option_11_25?: T;
+                    option_over_25?: T;
+                  };
+            };
+        clientType?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_individual_developers?: T;
+                    option_development_companies?: T;
+                    option_government?: T;
+                    option_mixed?: T;
+                  };
+            };
+        projectArea?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_under_5000?: T;
+                    option_5000_20000?: T;
+                    option_20000_50000?: T;
+                    option_over_50000?: T;
+                  };
+            };
+        partnershipMode?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    o_embedded_in_proposal?: T;
+                    o_office_licence?: T;
+                    o_approved_referral?: T;
+                    o_undecided?: T;
+                  };
+            };
+        goals?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
               message?: T;
             };
       };
