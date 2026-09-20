@@ -4,7 +4,7 @@
 
 **Blocked by:** 27, 16
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] All fields from the Reference site captured and stored, including the free-text field
 - [x] Commercial registration uploaded to private storage as in ticket 28
