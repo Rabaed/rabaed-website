@@ -118,6 +118,12 @@ export const SITE_WORDS_EDITOR = {
   password: 'test-editor-password-59',
 } as const;
 
+/** The Trust strip suite's own account (ticket 20), for the same reason as `BLOG_EDITOR`. */
+export const TRUST_STRIP_EDITOR = {
+  email: 'trust-strip-editor@rabaed.test',
+  password: 'test-editor-password-20',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -135,6 +141,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   REFERRAL_VALUES_EDITOR,
   HOME_EDITOR,
   SITE_WORDS_EDITOR,
+  TRUST_STRIP_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
@@ -177,6 +184,31 @@ export async function uploadImage(
   });
   expect(response.ok(), await response.text()).toBe(true);
   return (await response.json()).doc.id as number;
+}
+
+/**
+ * Uploads a file of any kind to the CMS's media, and returns the whole
+ * document — an SVG, a mark with a transparent background — for a test that
+ * cares what came back out rather than only that something did (ticket 20).
+ */
+export async function uploadFile(
+  editor: APIRequestContext,
+  file: { name: string; mimeType: string; buffer: Buffer },
+  alt: string,
+): Promise<{ id: number; url: string; mimeType: string; width: number | null; height: number | null }> {
+  const response = await editor.post('/api/media', {
+    multipart: { file: { ...file, name: `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}` }, _payload: JSON.stringify({ alt }) },
+  });
+  expect(response.ok(), await response.text()).toBe(true);
+  return (await response.json()).doc;
+}
+
+/** A mark with a see-through background, as a client's logo arrives. */
+export async function transparentMark(size: { width: number; height: number }): Promise<Buffer> {
+  return sharp({ create: { ...size, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 0 } } })
+    .composite([{ input: await sharp({ create: { width: Math.round(size.width / 2), height: Math.round(size.height / 2), channels: 4, background: '#FFFFFF' } }).png().toBuffer(), left: 0, top: 0 }])
+    .png()
+    .toBuffer();
 }
 
 /** Signs in through the admin's own login form, as `editor`. */
