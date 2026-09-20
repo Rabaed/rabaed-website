@@ -24,7 +24,9 @@ import * as migration_20260915_200327_referral_page_and_program_values from './2
 import * as migration_20260915_200328_import_referral_page from './20260915_200328_import_referral_page';
 import * as migration_20260915_211211_home_page from './20260915_211211_home_page';
 import * as migration_20260915_211212_import_home_page from './20260915_211212_import_home_page';
-import * as migration_20260920_170606_ai_crawler_rules from './20260920_170606_ai_crawler_rules';
+import * as migration_20260920_170916_partnership_application_form from './20260920_170916_partnership_application_form';
+import * as migration_20260920_170917_publish_partnership_application_wording from './20260920_170917_publish_partnership_application_wording';
+import * as migration_20260920_183046_ai_crawler_rules from './20260920_183046_ai_crawler_rules';
 
 export const migrations = [
   {
@@ -158,8 +160,18 @@ export const migrations = [
     name: '20260915_211212_import_home_page',
   },
   {
-    up: migration_20260920_170606_ai_crawler_rules.up,
-    down: migration_20260920_170606_ai_crawler_rules.down,
-    name: '20260920_170606_ai_crawler_rules',
+    up: migration_20260920_170916_partnership_application_form.up,
+    down: migration_20260920_170916_partnership_application_form.down,
+    name: '20260920_170916_partnership_application_form',
+  },
+  {
+    up: migration_20260920_170917_publish_partnership_application_wording.up,
+    down: migration_20260920_170917_publish_partnership_application_wording.down,
+    name: '20260920_170917_publish_partnership_application_wording',
+  },
+  {
+    up: migration_20260920_183046_ai_crawler_rules.up,
+    down: migration_20260920_183046_ai_crawler_rules.down,
+    name: '20260920_183046_ai_crawler_rules',
   },
 ];

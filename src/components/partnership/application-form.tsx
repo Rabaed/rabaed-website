@@ -1,118 +1,183 @@
+'use client';
+
 import { UploadField } from '@/components/upload-field';
+import { fieldOptions, TRAP_FIELD, type FormPageWording } from '@/forms/definition';
+import { PARTNERSHIP_APPLICATION, type PartnershipApplicationField } from '@/forms/partnership-application';
+import { useAnswers } from '@/forms/use-answers';
+import { useSubmission } from '@/forms/use-submission';
+
+/** Each list's values, in the Reference site's order. */
+const LISTS = {
+  activity: fieldOptions(PARTNERSHIP_APPLICATION.fields.activity),
+  activeProjects: fieldOptions(PARTNERSHIP_APPLICATION.fields.activeProjects),
+  clientType: fieldOptions(PARTNERSHIP_APPLICATION.fields.clientType),
+  projectArea: fieldOptions(PARTNERSHIP_APPLICATION.fields.projectArea),
+  partnershipMode: fieldOptions(PARTNERSHIP_APPLICATION.fields.partnershipMode),
+} as const;
 
 /**
  * The Partnership Program application: the office, its commercial
  * registration, the person applying, five questions about the practice, and
  * what it wants from the partnership.
  *
- * **It is a real form, and it sends nothing yet**, for the reasons the demo
- * request form gives (`src/components/demo-request-form.tsx`): its submit
- * button stays disabled until ticket 29 gives it somewhere to send, and ticket
- * 28 stores the commercial registration privately and checks it on the server.
+ * Its fields and rules are its definition's (`src/forms/partnership-application.ts`),
+ * its words the CMS's. It is sent to the submission pipeline (ticket 27),
+ * which checks the registration again by its contents and keeps it in private
+ * storage (ticket 28).
  *
  * - **The Reference site's fake success is gone.** Its button revealed «وصلنا
  *   طلبك. يتواصل معك فريق الشراكات خلال يومي عمل…» for an application nobody
  *   stored (spec: Forms). An office that believed it would wait two working
- *   days for a call that never came.
- * - **Every field has a name**, and the ones the Reference site stars are
- *   `required`, the commercial registration among them (HANDOFF §4.ج). The
- *   free text is optional, as it says.
- * - **Every list's first line is its prompt, with no value**, so `required`
- *   refuses it and the visitor has to choose.
- * - **The small print still says the form is a prototype that sends nothing**,
- *   word for word from the Reference site, because it is true.
- *
- * All copy is verbatim from `reference/site/partnership.html`.
+ *   days for a call that never came. The same sentence is what the server now
+ *   says, once the application is stored.
+ * - **The submit button stays disabled** until every starred answer and the
+ *   commercial registration are given, and while the application is on its
+ *   way; the registration shows its upload as it goes.
+ * - **Each message sits under its row**, not inside it: the rows keep the
+ *   Reference site's fields as their direct children, which its stylesheet
+ *   and the comparison with it rely on.
  */
-export function PartnershipApplicationForm() {
+export function PartnershipApplicationForm({ wording }: { wording: FormPageWording<PartnershipApplicationField> }) {
+  const answers = useAnswers(PARTNERSHIP_APPLICATION, wording);
+  const { outcome, progress, sending, send } = useSubmission(PARTNERSHIP_APPLICATION, answers.refuse);
+  const words = wording.fields;
+
+  const company = answers.field('company');
+  const city = answers.field('city');
+  const name = answers.field('name');
+  const jobTitle = answers.field('jobTitle');
+  const phone = answers.field('phone');
+  const email = answers.field('email');
+  const goals = answers.field('goals');
+  const registration = answers.upload('commercialRegistration');
+
+  /** One of the five lists, with its prompt first: the empty option `required` refuses. */
+  const list = (field: keyof typeof LISTS) => {
+    const state = answers.field(field);
+    return {
+      element: (
+        <select {...state.props} aria-label={words[field].label}>
+          <option value="">{words[field].placeholder}</option>
+          {LISTS[field].map((value) => (
+            <option key={value} value={value}>
+              {words[field].options![value]}
+            </option>
+          ))}
+        </select>
+      ),
+      message: state.message,
+    };
+  };
+  const activity = list('activity');
+  const activeProjects = list('activeProjects');
+  const clientType = list('clientType');
+  const projectArea = list('projectArea');
+  const partnershipMode = list('partnershipMode');
+
   return (
-    <form className="form" method="post" encType="multipart/form-data" aria-labelledby="partnership-apply-title">
-      <h3 id="partnership-apply-title">اطلب اجتماع شراكة</h3>
-      <small>بيانات المكتب تساعدنا على اقتراح النمط الأنسب قبل الاجتماع.</small>
+    <form
+      className="form"
+      noValidate
+      aria-labelledby="partnership-apply-title"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (answers.complete) void send(event.currentTarget);
+      }}
+    >
+      <h3 id="partnership-apply-title">{wording.heading}</h3>
+      <small>{wording.lead}</small>
 
-      {/* Each field is named by its `aria-label`, as on the Reference site
-          and in the other forms; visible labels are ticket 36's. */}
-      <div className="two">
-        <input
-          name="company"
-          placeholder="اسم المكتب / الشركة *"
-          autoComplete="organization"
-          aria-label="اسم المكتب أو الشركة"
-          required
-        />
-        <UploadField name="commercialRegistration" label="السجل التجاري" note="PDF أو صورة" required />
-      </div>
-      <div className="two">
-        <input name="city" placeholder="المدينة *" aria-label="المدينة" required />
-        <input name="name" placeholder="اسم مقدّم الطلب *" autoComplete="name" aria-label="اسم مقدّم الطلب" required />
-      </div>
-      <div className="two">
-        <input name="jobTitle" placeholder="المنصب *" autoComplete="organization-title" aria-label="المنصب" required />
-        <input name="phone" type="tel" placeholder="رقم الجوال *" autoComplete="tel" aria-label="رقم الجوال" required />
-      </div>
-      <div className="two">
-        <input
-          name="email"
-          type="email"
-          placeholder="البريد الإلكتروني *"
-          autoComplete="email"
-          aria-label="البريد الإلكتروني"
-          required
-        />
-        <select name="activity" aria-label="نوع النشاط" defaultValue="" required>
-          <option value="">نوع النشاط *</option>
-          <option value="consulting-office">مكتب استشاري</option>
-          <option value="project-management">إدارة مشاريع</option>
-          <option value="contracting">مقاولات</option>
-          <option value="real-estate-development">تطوير عقاري</option>
-          <option value="other">أخرى</option>
-        </select>
-      </div>
-      <div className="two">
-        <select name="activeProjects" aria-label="عدد المشاريع تحت الإشراف حالياً" defaultValue="" required>
-          <option value="">عدد المشاريع تحت الإشراف *</option>
-          <option value="1-3">1–3</option>
-          <option value="4-10">4–10</option>
-          <option value="11-25">11–25</option>
-          <option value="over-25">أكثر من 25</option>
-        </select>
-        <select name="clientType" aria-label="نوع العملاء الغالب" defaultValue="" required>
-          <option value="">نوع العملاء الغالب *</option>
-          <option value="individual-developers">مطوّرون أفراد</option>
-          <option value="development-companies">شركات تطوير</option>
-          <option value="government">جهات حكومية</option>
-          <option value="mixed">مزيج</option>
-        </select>
-      </div>
-      <div className="two">
-        {/* In square metres. */}
-        <select name="projectArea" aria-label="متوسط مساحة المشروع" defaultValue="" required>
-          <option value="">متوسط مساحة المشروع *</option>
-          <option value="under-5000">أقل من 5,000 م²</option>
-          <option value="5000-20000">5,000–20,000 م²</option>
-          <option value="20000-50000">20,000–50,000 م²</option>
-          <option value="over-50000">أكثر من 50,000 م²</option>
-        </select>
-        {/* The three modes on this page, or none yet. */}
-        <select name="partnershipMode" aria-label="نمط التعاون المبدئي" defaultValue="" required>
-          <option value="">نمط التعاون المبدئي *</option>
-          <option value="embedded-in-proposal">التضمين في العرض</option>
-          <option value="office-licence">رخصة المكتب</option>
-          <option value="approved-referral">الترشيح المعتمد</option>
-          <option value="undecided">غير محدد</option>
-        </select>
-      </div>
-      <textarea
-        name="goals"
-        rows={3}
-        placeholder="ما الذي تريد تحقيقه من الشراكة؟ (اختياري)"
-        aria-label="ما الذي تريد تحقيقه من الشراكة"
-      />
+      {outcome.outcome === 'received' ? (
+        // The fields go with the application, so it cannot be sent again by mistake.
+        <small role="status" className="sent">
+          {outcome.message}
+        </small>
+      ) : (
+        <>
+          {/* Each field is named by its `aria-label`, as on the Reference site
+              and in the other forms; visible labels are ticket 36's. */}
+          <div className="two">
+            <input
+              {...company.props}
+              placeholder={words.company.placeholder}
+              autoComplete="organization"
+              aria-label={words.company.label}
+            />
+            <UploadField
+              name="commercialRegistration"
+              label={words.commercialRegistration.label}
+              note={words.commercialRegistration.placeholder}
+              required={registration.required}
+              onFile={registration.onFile}
+              invalid={registration.invalid}
+              rejected={registration.rejected}
+              describedBy={registration.describedBy}
+              progress={progress}
+            />
+          </div>
+          {company.message}
+          {registration.message}
+          <div className="two">
+            <input {...city.props} placeholder={words.city.placeholder} aria-label={words.city.label} />
+            <input {...name.props} placeholder={words.name.placeholder} autoComplete="name" aria-label={words.name.label} />
+          </div>
+          {city.message}
+          {name.message}
+          <div className="two">
+            <input
+              {...jobTitle.props}
+              placeholder={words.jobTitle.placeholder}
+              autoComplete="organization-title"
+              aria-label={words.jobTitle.label}
+            />
+            <input {...phone.props} type="tel" placeholder={words.phone.placeholder} autoComplete="tel" aria-label={words.phone.label} />
+          </div>
+          {jobTitle.message}
+          {phone.message}
+          <div className="two">
+            <input
+              {...email.props}
+              type="email"
+              placeholder={words.email.placeholder}
+              autoComplete="email"
+              aria-label={words.email.label}
+            />
+            {activity.element}
+          </div>
+          {email.message}
+          {activity.message}
+          <div className="two">
+            {activeProjects.element}
+            {clientType.element}
+          </div>
+          {activeProjects.message}
+          {clientType.message}
+          <div className="two">
+            {projectArea.element}
+            {partnershipMode.element}
+          </div>
+          {projectArea.message}
+          {partnershipMode.message}
+          <textarea {...goals.props} rows={3} placeholder={words.goals.placeholder} aria-label={words.goals.label} />
+          {goals.message}
 
-      <button type="submit" className="btn p" disabled style={{ justifyContent: 'center' }}>
-        اطلب اجتماع شراكة
-      </button>
-      <small className="fine">نموذج أولي — لا يُرسل فعلياً في هذه النسخة.</small>
+          {/* The trap (`TRAP_FIELD`), as in the demo request form. */}
+          <div className="vh" aria-hidden="true">
+            <textarea name={TRAP_FIELD} tabIndex={-1} autoComplete="off" defaultValue="" />
+          </div>
+
+          {(outcome.outcome === 'refused' || outcome.outcome === 'failed') && (
+            <small role="alert" className="refusal">
+              {outcome.message}
+            </small>
+          )}
+
+          <button type="submit" className="btn p" disabled={!answers.complete || sending} style={{ justifyContent: 'center' }}>
+            {wording.submit}
+          </button>
+        </>
+      )}
+      <small className="fine">{wording.finePrint}</small>
     </form>
   );
 }

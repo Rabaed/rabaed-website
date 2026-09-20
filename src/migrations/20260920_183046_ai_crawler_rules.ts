@@ -7,6 +7,10 @@ import { type MigrateUpArgs, type MigrateDownArgs, sql } from '@payloadcms/db-po
  * No row is written. The column's default and the field's agree — training
  * crawlers are allowed — so a database nobody has touched answers the same as
  * one saved with the box ticked, and `src/cms/crawler-policy.ts` reads either.
+ *
+ * Regenerated after merging ticket 29, so that it is written against the
+ * schema `main` now has and its snapshot is the whole of it
+ * (docs/agents/parallel-sessions.md).
  */
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {

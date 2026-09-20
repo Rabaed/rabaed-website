@@ -64,7 +64,7 @@ export function useAnswers<Field extends string>(
   /** Only while the message is shown: a description that is always there would be read out on a field that is fine. */
   const describedBy = (name: Field) => (wrong(name) ? messageId(name) : undefined);
 
-  /** A typed or chosen field's props, and the message shown under it. */
+  /** A typed or chosen field's props, and the message shown under it: an input, a select or a textarea. */
   const field = (name: Field) => ({
     props: {
       name,
@@ -72,7 +72,7 @@ export function useAnswers<Field extends string>(
       // browser's own bubbles never appear, only the Arabic messages.
       required: isRequired(definition.fields[name]),
       value: answers[name],
-      onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => answer(name, event.target.value),
+      onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => answer(name, event.target.value),
       onBlur: () => visit(name),
       className: wrong(name) ? 'bad' : undefined,
       'aria-invalid': wrong(name) || undefined,

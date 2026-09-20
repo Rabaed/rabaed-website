@@ -29,8 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * `src/content/pages/partnership.ts` (ticket 55).
  *
  * Nothing on it moves but the header, so it loads no other animation code
- * (spec: Analytics and performance). The commercial registration field in the
- * form is the only other client code: it shows the file chosen.
+ * (spec: Analytics and performance). The application form is the only other
+ * client code: it checks the answers, and sends them with the commercial
+ * registration (ticket 29).
  */
 export default async function PartnershipPage() {
   const content = await getPartnershipPage('ar');
@@ -44,7 +45,7 @@ export default async function PartnershipPage() {
       {content.benefits.shows && <Benefits content={content.benefits} />}
       <Path content={content.path} />
       {content.questions.shows && <Questions content={content.questions} />}
-      <Apply content={content.apply} />
+      <Apply content={content.apply} form={content.applicationForm} />
       <StructuredData data={breadcrumbData('ar', [{ name: content.meta.name, path: '/partnership' }])} />
       <StructuredData data={faqData(content.questions)} />
     </PageShell>

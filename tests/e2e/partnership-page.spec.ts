@@ -11,6 +11,9 @@
  * and the path landing clear of the header; and a page that does not make them
  * download the home and product pages' animations.
  *
+ * What the form *does* — checking the answers, storing the application and its
+ * registration, alerting the team — is `form-submission.spec.ts`'s (ticket 29).
+ *
  * Whether it *looks* like the Reference site is asked in
  * `partnership-matches-reference.spec.ts`. Console errors and failed requests
  * are `health.spec.ts`'s, which covers every route in `routes.ts`.
@@ -223,18 +226,17 @@ test('the application form is a real form, with every field named and the requir
   await page.goto('/partnership');
 
   const fields = await applicationForm(page).evaluate((form: HTMLFormElement) =>
-    [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')].map(
-      (field) => ({
+    [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')]
+      // Not the spam trap, which is nobody's field: `form-submission.spec.ts`
+      // holds it.
+      .filter((field) => field.name !== 'website')
+      .map((field) => ({
         name: field.name,
         type: field.type,
         required: field.required,
         accept: field instanceof HTMLInputElement ? field.accept : '',
-      }),
-    ),
+      })),
   );
-
-  expect(await applicationForm(page).getAttribute('method')).toBe('post');
-  expect(await applicationForm(page).getAttribute('enctype')).toBe('multipart/form-data');
 
   // Starred on the Reference site; the free text is marked optional there
   // (HANDOFF §4.ج).

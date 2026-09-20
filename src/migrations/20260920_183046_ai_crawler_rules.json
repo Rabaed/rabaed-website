@@ -5957,6 +5957,1045 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.partnership_application_form": {
+      "name": "partnership_application_form",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "alert_address": {
+          "name": "alert_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "heading": {
+          "name": "heading",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lead": {
+          "name": "lead",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "submit": {
+          "name": "submit",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fine_print": {
+          "name": "fine_print",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_company_label": {
+          "name": "fields_company_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_company_placeholder": {
+          "name": "fields_company_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_company_message": {
+          "name": "fields_company_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_label": {
+          "name": "fields_commercial_registration_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_placeholder": {
+          "name": "fields_commercial_registration_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_message": {
+          "name": "fields_commercial_registration_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_too_large": {
+          "name": "fields_commercial_registration_too_large",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_commercial_registration_wrong_type": {
+          "name": "fields_commercial_registration_wrong_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_city_label": {
+          "name": "fields_city_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_city_placeholder": {
+          "name": "fields_city_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_city_message": {
+          "name": "fields_city_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_name_label": {
+          "name": "fields_name_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_name_placeholder": {
+          "name": "fields_name_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_name_message": {
+          "name": "fields_name_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_job_title_label": {
+          "name": "fields_job_title_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_job_title_placeholder": {
+          "name": "fields_job_title_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_job_title_message": {
+          "name": "fields_job_title_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_phone_label": {
+          "name": "fields_phone_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_phone_placeholder": {
+          "name": "fields_phone_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_phone_message": {
+          "name": "fields_phone_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_email_label": {
+          "name": "fields_email_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_email_placeholder": {
+          "name": "fields_email_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_email_message": {
+          "name": "fields_email_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_label": {
+          "name": "fields_activity_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_placeholder": {
+          "name": "fields_activity_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_message": {
+          "name": "fields_activity_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_consulting_office": {
+          "name": "fields_activity_options_option_consulting_office",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_project_management": {
+          "name": "fields_activity_options_option_project_management",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_contracting": {
+          "name": "fields_activity_options_option_contracting",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_real_estate_development": {
+          "name": "fields_activity_options_option_real_estate_development",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_activity_options_option_other": {
+          "name": "fields_activity_options_option_other",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_label": {
+          "name": "fields_active_projects_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_placeholder": {
+          "name": "fields_active_projects_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_message": {
+          "name": "fields_active_projects_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_1_3": {
+          "name": "fields_active_projects_options_option_1_3",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_4_10": {
+          "name": "fields_active_projects_options_option_4_10",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_11_25": {
+          "name": "fields_active_projects_options_option_11_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_active_projects_options_option_over_25": {
+          "name": "fields_active_projects_options_option_over_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_label": {
+          "name": "fields_client_type_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_placeholder": {
+          "name": "fields_client_type_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_message": {
+          "name": "fields_client_type_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_individual_developers": {
+          "name": "fields_client_type_options_option_individual_developers",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_development_companies": {
+          "name": "fields_client_type_options_option_development_companies",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_government": {
+          "name": "fields_client_type_options_option_government",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_client_type_options_option_mixed": {
+          "name": "fields_client_type_options_option_mixed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_label": {
+          "name": "fields_project_area_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_placeholder": {
+          "name": "fields_project_area_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_message": {
+          "name": "fields_project_area_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_under_5000": {
+          "name": "fields_project_area_options_option_under_5000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_5000_20000": {
+          "name": "fields_project_area_options_option_5000_20000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_20000_50000": {
+          "name": "fields_project_area_options_option_20000_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_project_area_options_option_over_50000": {
+          "name": "fields_project_area_options_option_over_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_label": {
+          "name": "fields_partnership_mode_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_placeholder": {
+          "name": "fields_partnership_mode_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_message": {
+          "name": "fields_partnership_mode_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_embedded_in_proposal": {
+          "name": "fields_partnership_mode_options_o_embedded_in_proposal",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_office_licence": {
+          "name": "fields_partnership_mode_options_o_office_licence",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_approved_referral": {
+          "name": "fields_partnership_mode_options_o_approved_referral",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_partnership_mode_options_o_undecided": {
+          "name": "fields_partnership_mode_options_o_undecided",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_goals_label": {
+          "name": "fields_goals_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_goals_placeholder": {
+          "name": "fields_goals_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fields_goals_message": {
+          "name": "fields_goals_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "received": {
+          "name": "received",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refused": {
+          "name": "refused",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failed": {
+          "name": "failed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmation_subject": {
+          "name": "confirmation_subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmation_body": {
+          "name": "confirmation_body",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_status": {
+          "name": "_status",
+          "type": "enum_partnership_application_form_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "partnership_application_form__status_idx": {
+          "name": "partnership_application_form__status_idx",
+          "columns": [
+            {
+              "expression": "_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._partnership_application_form_v": {
+      "name": "_partnership_application_form_v",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "version_alert_address": {
+          "name": "version_alert_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_heading": {
+          "name": "version_heading",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_lead": {
+          "name": "version_lead",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_submit": {
+          "name": "version_submit",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fine_print": {
+          "name": "version_fine_print",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_company_label": {
+          "name": "version_fields_company_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_company_placeholder": {
+          "name": "version_fields_company_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_company_message": {
+          "name": "version_fields_company_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_label": {
+          "name": "version_fields_commercial_registration_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_placeholder": {
+          "name": "version_fields_commercial_registration_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_message": {
+          "name": "version_fields_commercial_registration_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_too_large": {
+          "name": "version_fields_commercial_registration_too_large",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_commercial_registration_wrong_type": {
+          "name": "version_fields_commercial_registration_wrong_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_city_label": {
+          "name": "version_fields_city_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_city_placeholder": {
+          "name": "version_fields_city_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_city_message": {
+          "name": "version_fields_city_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_name_label": {
+          "name": "version_fields_name_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_name_placeholder": {
+          "name": "version_fields_name_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_name_message": {
+          "name": "version_fields_name_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_job_title_label": {
+          "name": "version_fields_job_title_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_job_title_placeholder": {
+          "name": "version_fields_job_title_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_job_title_message": {
+          "name": "version_fields_job_title_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_phone_label": {
+          "name": "version_fields_phone_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_phone_placeholder": {
+          "name": "version_fields_phone_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_phone_message": {
+          "name": "version_fields_phone_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_email_label": {
+          "name": "version_fields_email_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_email_placeholder": {
+          "name": "version_fields_email_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_email_message": {
+          "name": "version_fields_email_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_label": {
+          "name": "version_fields_activity_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_placeholder": {
+          "name": "version_fields_activity_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_message": {
+          "name": "version_fields_activity_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_consulting_office": {
+          "name": "version_fields_activity_options_option_consulting_office",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_project_management": {
+          "name": "version_fields_activity_options_option_project_management",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_contracting": {
+          "name": "version_fields_activity_options_option_contracting",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_real_estate_development": {
+          "name": "version_fields_activity_options_option_real_estate_development",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_activity_options_option_other": {
+          "name": "version_fields_activity_options_option_other",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_label": {
+          "name": "version_fields_active_projects_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_placeholder": {
+          "name": "version_fields_active_projects_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_message": {
+          "name": "version_fields_active_projects_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_1_3": {
+          "name": "version_fields_active_projects_options_option_1_3",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_4_10": {
+          "name": "version_fields_active_projects_options_option_4_10",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_11_25": {
+          "name": "version_fields_active_projects_options_option_11_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_active_projects_options_option_over_25": {
+          "name": "version_fields_active_projects_options_option_over_25",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_label": {
+          "name": "version_fields_client_type_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_placeholder": {
+          "name": "version_fields_client_type_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_message": {
+          "name": "version_fields_client_type_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_individual_developers": {
+          "name": "version_fields_client_type_options_option_individual_developers",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_development_companies": {
+          "name": "version_fields_client_type_options_option_development_companies",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_government": {
+          "name": "version_fields_client_type_options_option_government",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_client_type_options_option_mixed": {
+          "name": "version_fields_client_type_options_option_mixed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_label": {
+          "name": "version_fields_project_area_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_placeholder": {
+          "name": "version_fields_project_area_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_message": {
+          "name": "version_fields_project_area_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_under_5000": {
+          "name": "version_fields_project_area_options_option_under_5000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_5000_20000": {
+          "name": "version_fields_project_area_options_option_5000_20000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_20000_50000": {
+          "name": "version_fields_project_area_options_option_20000_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_project_area_options_option_over_50000": {
+          "name": "version_fields_project_area_options_option_over_50000",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_label": {
+          "name": "version_fields_partnership_mode_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_placeholder": {
+          "name": "version_fields_partnership_mode_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_message": {
+          "name": "version_fields_partnership_mode_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_embedded_in_proposal": {
+          "name": "version_fields_partnership_mode_options_o_embedded_in_proposal",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_office_licence": {
+          "name": "version_fields_partnership_mode_options_o_office_licence",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_approved_referral": {
+          "name": "version_fields_partnership_mode_options_o_approved_referral",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_partnership_mode_options_o_undecided": {
+          "name": "version_fields_partnership_mode_options_o_undecided",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_goals_label": {
+          "name": "version_fields_goals_label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_goals_placeholder": {
+          "name": "version_fields_goals_placeholder",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_fields_goals_message": {
+          "name": "version_fields_goals_message",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_received": {
+          "name": "version_received",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_refused": {
+          "name": "version_refused",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_failed": {
+          "name": "version_failed",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_confirmation_subject": {
+          "name": "version_confirmation_subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_confirmation_body": {
+          "name": "version_confirmation_body",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version__status": {
+          "name": "version__status",
+          "type": "enum__partnership_application_form_v_version_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "version_updated_at": {
+          "name": "version_updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_created_at": {
+          "name": "version_created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "latest": {
+          "name": "latest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_partnership_application_form_v_version_version__status_idx": {
+          "name": "_partnership_application_form_v_version_version__status_idx",
+          "columns": [
+            {
+              "expression": "version__status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_partnership_application_form_v_created_at_idx": {
+          "name": "_partnership_application_form_v_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_partnership_application_form_v_updated_at_idx": {
+          "name": "_partnership_application_form_v_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_partnership_application_form_v_latest_idx": {
+          "name": "_partnership_application_form_v_latest_idx",
+          "columns": [
+            {
+              "expression": "latest",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.referral_program": {
       "name": "referral_program",
       "schema": "",
@@ -25896,7 +26935,8 @@
       "values": [
         "demo-request",
         "referral-signup",
-        "tool-download"
+        "tool-download",
+        "partnership-application"
       ]
     },
     "public.enum_form_submissions_alert": {
@@ -25959,6 +26999,22 @@
     },
     "public.enum__referral_signup_form_v_version_status": {
       "name": "enum__referral_signup_form_v_version_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
+    "public.enum_partnership_application_form_status": {
+      "name": "enum_partnership_application_form_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
+    "public.enum__partnership_application_form_v_version_status": {
+      "name": "enum__partnership_application_form_v_version_status",
       "schema": "public",
       "values": [
         "draft",
@@ -26438,6 +27494,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "5858820f-8b6c-49d4-96d8-08c7b84c9cca",
+  "id": "600b38d4-1b28-4542-a8fe-3229e5f02c46",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

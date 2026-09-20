@@ -26,10 +26,15 @@
  *   The path's stage labels «المرحلة 01» are *not* among them: they are
  *   `.tail-steps b`, the rule the home and product pages' closing steps share, and keep
  *   DM Mono until bug 45 decides for all of them. They are measured in full.
- * - **The submit button is disabled** until ticket 29 gives the form somewhere
- *   to send: its colours and height are left out, and so are the 2px its
- *   border adds below it — the small print's place, and the height of the
- *   form, its grid and its section.
+ * - **The submit button is disabled** until the application is complete
+ *   (ticket 29), so an empty form draws it in the Reference site's own
+ *   disabled style, as the referral page's does: its colours and height are
+ *   left out, and so are the 2px its border adds below it — the small print's
+ *   place, and the height of the form, its grid and its section.
+ * - **The small print** says what happens to the office's commercial
+ *   registration, where the Reference site's said the form was a prototype
+ *   that sends nothing (ticket 29). The words are longer and wrap on narrower
+ *   screens, so its height is left out; its width and place across are not.
  * - **The document field's file input** is hidden from sight but not from the
  *   keyboard. Neither page draws it, so it is not measured; the label that
  *   stands for it is.
@@ -153,7 +158,9 @@ const REGIONS: readonly Region[] = [
       // Not the file input inside the document field: see above.
       '.two > input',
       'select',
-      'textarea',
+      // The free text, not the spam trap's own textarea, which is clipped out
+      // of the page inside a `.vh` of its own.
+      ':scope > textarea',
       '.upl',
       '.upl .ic',
       '.upl .tx',
@@ -162,8 +169,10 @@ const REGIONS: readonly Region[] = [
       '.upl .nm',
       // Disabled, in the Reference site's disabled style.
       { selector: '.btn', omit: ['color', 'background', 'borderColor', 'height'] },
-      // Below the button, so 2px lower.
-      { selector: '.fine', omit: ['top'] },
+      // Below the button, so 2px lower; and saying what happens to the
+      // registration, where the Reference site's said the form sends nothing,
+      // so as many lines as its own words take.
+      { selector: '.fine', omit: ['top', 'height'] },
     ],
   },
 ];
