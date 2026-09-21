@@ -2,7 +2,6 @@ import { APIError, type CollectionConfig, type ImageUploadFormatOptions } from '
 import { signedIn } from '../access';
 import { localMediaDirectory } from '../environment';
 import { inAdminLanguage } from '../page-fields';
-import { sanitisedSvg } from '../svg-sanitiser';
 
 /**
  * WebP rather than AVIF. Every browser the site supports shows it, and it
@@ -70,6 +69,15 @@ export const Media: CollectionConfig = {
         // under a photograph's type would otherwise go by untouched.
         const written = file.data.toString('utf8');
         if (file.mimetype !== 'image/svg+xml' && !/^\s*(<\?xml|<!--|<svg[\s>])/i.test(written)) return;
+
+        // Fetched here rather than imported at the top, so that jsdom — which
+        // the sanitiser builds its DOM from, and which is a whole HTML engine —
+        // is loaded by an SVG upload and by nothing else. Imported at the top it
+        // would be loaded to *boot* the CMS, because this collection is part of
+        // the Payload config: the admin, the CMS's own API and the form
+        // pipeline would each drag it in before serving anything. That is not
+        // hypothetical. It took the CMS off the internet (ticket 65).
+        const { sanitisedSvg } = await import('../svg-sanitiser');
 
         const result = sanitisedSvg(written);
         if (!result.ok) throw new APIError(inAdminLanguage(req, result.problem), 400, undefined, true);

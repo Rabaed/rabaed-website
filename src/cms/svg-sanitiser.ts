@@ -36,6 +36,22 @@ import type { Words } from './page-fields';
  *
  * One window for the process: building it costs more than the sanitising
  * does, and nothing here keeps state between files.
+ *
+ * **jsdom is held at 26, and this module is never imported to boot the CMS.**
+ * Both halves of that are load-bearing, and ticket 65 is what they cost when
+ * they were not. jsdom 27 reaches an ES module — `@exodus/bytes`, through
+ * `html-encoding-sniffer@6` — from CommonJS, with a `require()`; jsdom 26
+ * reaches `whatwg-encoding`, which is CommonJS, and the call does not exist.
+ * Node allows `require()` of an ES module from 22.12, and this repository runs
+ * 24, so the call works here and in CI — and threw on the deployment, which
+ * loads jsdom natively because Next externalises it by default rather than
+ * bundling it. Because the whole CMS was loading this module to start, the
+ * admin, the CMS API and every form went down with it.
+ *
+ * So: the Media collection imports this on the upload path only, and
+ * `tests/unit/cms-boots-without-jsdom.spec.ts` holds that. Going back to
+ * jsdom 27 needs the upstream chain to be CommonJS again — check
+ * `html-encoding-sniffer`'s dependencies, not jsdom's version number.
  */
 const { window } = new JSDOM('');
 const purify = createDOMPurify(window);
