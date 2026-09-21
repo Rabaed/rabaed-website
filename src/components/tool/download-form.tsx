@@ -15,11 +15,13 @@ const COUNTRY_CODES = fieldOptions(TOOL_DOWNLOAD.fields.countryCode);
 const LOCKED = 'أكمل البيانات لتفعيل التحميل';
 
 /**
- * The file itself, at the address `next.config.ts` sends as an attachment. The
- * name is the Reference site's, and `ticket 49` replaces what is behind it
- * with the real tool.
+ * The file itself, at the address `next.config.ts` sends as an attachment.
+ * The name is the Reference site's, and ticket 49 replaces what is behind it
+ * with the real tool. Named once: the panel says it, the link saves under it,
+ * and the confirmation email repeats it.
  */
-const FILE = '/downloads/Rabaed-Pour-Tracker.html';
+const DOWNLOAD_NAME = 'Rabaed-Pour-Tracker.html';
+const FILE = `/downloads/${DOWNLOAD_NAME}`;
 
 /**
  * What to do with the file once it has arrived, the Reference site's three
@@ -37,11 +39,22 @@ const STEPS = [
  * Starts the download. A link clicked from the page rather than a redirect:
  * the visitor stays on the page that just confirmed the details, which is
  * where the three steps for opening the file are.
+ *
+ * `download` as well as the `Content-Disposition` header `next.config.ts`
+ * sends: the header is what makes the file save rather than open, and the
+ * attribute is what saves it where the header does not reach — a file served
+ * from somewhere else one day, or a browser reading a cached response.
+ *
+ * **It cannot report back.** A browser tells a page nothing about a download
+ * it started, refused or lost, so nothing here may claim the file arrived.
+ * What the panel claims is what this can promise: the details are kept, and
+ * the file was asked for. The link beside it is what a visitor uses when it
+ * did not come.
  */
 function deliver(): void {
   const link = document.createElement('a');
   link.href = FILE;
-  link.rel = 'noopener';
+  link.download = DOWNLOAD_NAME;
   document.body.append(link);
   link.click();
   link.remove();
@@ -76,8 +89,10 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // As on the Reference site, a submit counts every field as touched.
-    touch(REQUIRED);
+    // As on the Reference site, a submit counts every field as touched —
+    // every one, not only the required four, or an over-long company name
+    // locks the button with nothing under the field to say why.
+    touch(fieldNames(TOOL_DOWNLOAD));
     if (!complete) return;
 
     const form = event.currentTarget;
@@ -109,10 +124,14 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
           <p>
             ابحث عن{' '}
             <b className="mono" dir="ltr">
-              Rabaed-Pour-Tracker.html
+              {DOWNLOAD_NAME}
             </b>{' '}
             في مجلد التنزيلات. ثلاث خطوات وتكون جاهزاً:
           </p>
+          {/* A browser tells a page nothing about a download, so the panel
+              says what it knows — the details are kept — and points at the
+              link for the case it cannot see. */}
+          <p>إن لم يبدأ التحميل خلال ثوانٍ، اضغط الرابط أسفل الخطوات.</p>
           <ol className="tl-steps">
             {STEPS.map((step, index) => (
               <li key={step.bold}>
@@ -123,11 +142,18 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
               </li>
             ))}
           </ol>
-          {/* A browser that blocked the first one, or a visitor who missed it:
-              the file is offered again, and the details are already stored. */}
-          <button className="btn o" type="button" onClick={deliver} style={{ justifyContent: 'center', width: '100%' }}>
+          {/* A link, not a button: a browser that blocked the first download,
+              or lost it, still follows a link the visitor pressed — and this
+              one needs no JavaScript at all. The details are already stored,
+              so it asks the server for nothing. */}
+          <a
+            className="btn o"
+            href={FILE}
+            download={DOWNLOAD_NAME}
+            style={{ justifyContent: 'center', width: '100%' }}
+          >
             لم يبدأ التحميل؟ اضغط هنا
-          </button>
+          </a>
         </div>
       </div>
     );

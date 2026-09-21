@@ -24,6 +24,7 @@
  * for the reason `routes.ts` gives.
  */
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi } from './cms';
@@ -978,7 +979,12 @@ test.describe('the Pour Tracker download', () => {
 
     const file = await download;
     expect(file.suggestedFilename()).toBe(FILE);
-    await file.saveAs(testInfo.outputPath(FILE));
+    // The file itself, not merely a download event: what arrives is the tool.
+    const saved = testInfo.outputPath(FILE);
+    await file.saveAs(saved);
+    const delivered = await readFile(saved, 'utf8');
+    expect(delivered).toContain('ربائد');
+    expect(delivered.length, 'the delivered file is empty').toBeGreaterThan(1000);
 
     expect(order[0], `what happened: ${order.join(', ')}`).toBe('submitted');
     expect(order).toContain('delivered');
@@ -1011,10 +1017,62 @@ test.describe('the Pour Tracker download', () => {
     // The form is gone, so the details cannot be sent a second time.
     await expect(form.getByLabel('البريد الإلكتروني', { exact: true })).toHaveCount(0);
 
-    // And the file is offered again for a browser that blocked the first.
-    const again = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'لم يبدأ التحميل؟ اضغط هنا' }).click();
-    expect((await again).suggestedFilename()).toBe(FILE);
+    // And the file is offered again for a browser that blocked the first — a
+    // link, so it works whatever became of the press that stored the details,
+    // and with no JavaScript at all.
+    const again = page.getByRole('link', { name: 'لم يبدأ التحميل؟ اضغط هنا' });
+    await expect(again).toHaveAttribute('href', `/downloads/${FILE}`);
+    await expect(again).toHaveAttribute('download', FILE);
+    const second = page.waitForEvent('download');
+    await again.click();
+    expect((await second).suggestedFilename()).toBe(FILE);
+  });
+
+  test('the team is alerted and the engineer is sent the file’s three steps', async ({ page, request }) => {
+    await logInByApi(request, FORM_EDITOR);
+    const settings = '/api/globals/tool-download-form';
+    const published = async () => (await readerGet(request, `${settings}?depth=0`)).json();
+    const original = await published();
+    const team = uniqueApplicant('tool-team').email;
+
+    try {
+      const publish = async (data: object) => {
+        const response = await request.post(settings, { data: { ...data, _status: 'published' } });
+        expect(response.ok(), await response.text()).toBe(true);
+      };
+      await publish({ ...original, alertAddress: team });
+
+      const { email, ip } = uniqueApplicant('tool-alerted');
+      const form = await openDownloadForm(page, ip);
+      await fillDetails(form, email);
+      const download = page.waitForEvent('download');
+      await downloadButton(form).click();
+      await download;
+
+      // The alert that answers to this engineer, among any this address gets.
+      const alertsFor = async () => (await mailTo(team)).filter((mail) => mail.replyTo === email);
+      await expect.poll(alertsFor).toHaveLength(1);
+      const [alert] = await alertsFor();
+      expect(alert.subject).toContain(`${ENGINEER.firstName} ${ENGINEER.lastName}`);
+      // The alert lists the answers as they were given, field by field, so the
+      // code and the number are two lines rather than one.
+      for (const answer of [email, ENGINEER.company, ENGINEER.phone, '‎+966 السعودية']) {
+        expect(alert.text, answer).toContain(answer);
+      }
+
+      // And the engineer's own copy, which says what to do with the file.
+      await expect.poll(() => mailTo(email)).toHaveLength(1);
+      const [confirmation] = await mailTo(email);
+      expect(confirmation.subject).toBe('ربائد — متتبّع الصبّات');
+      expect(confirmation.text).toContain(`مرحباً ${ENGINEER.firstName} ${ENGINEER.lastName}،`);
+      expect(confirmation.text).toContain(FILE);
+      expect(confirmation.text).toContain('بياناتك تبقى على جهازك');
+
+      const stored = await settledSubmission(request, email);
+      expect(stored).toMatchObject({ alert: 'sent', confirmation: 'sent' });
+    } finally {
+      await request.post(settings, { data: { ...original, _status: 'published' } });
+    }
   });
 
   test('a refused submission delivers nothing', async ({ page }) => {
