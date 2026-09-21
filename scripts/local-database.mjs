@@ -8,6 +8,7 @@
  * they will meet there.
  */
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -54,6 +55,16 @@ export async function startDatabase({ directory, port }) {
     url: `postgres://postgres:postgres@127.0.0.1:${port}/${DATABASE}`,
     stop: () => server.stop(),
   };
+}
+
+/**
+ * A port for a throwaway database, derived from where this checkout lives, so
+ * that the worktrees of parallel sessions never collide on one
+ * (docs/agents/parallel-sessions.md). Out of the way of the development
+ * database's range and of the test server's `TEST_PORT + 2000`.
+ */
+export function freshDatabasePort(root) {
+  return 56000 + (createHash('sha256').update(root).digest().readUInt16BE(0) % 1000) * 2;
 }
 
 /** Runs a Node script to completion, and throws if it fails. */

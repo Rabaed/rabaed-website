@@ -20,6 +20,8 @@
     "brand:export": "node scripts/export-brand-images.mjs",
     "mocks:export": "node scripts/with-database.mjs \"next build && node scripts/export-screen-mocks.mjs\"",
     "cms:migrate": "payload migrate",
+    "cms:migrate-fresh": "node scripts/migrate-fresh.mjs",
+    "cms:freeze-seed": "node scripts/freeze-seed.mjs",
     "cms:migration": "node scripts/with-database.mjs payload migrate:create",
     "cms:generate": "node scripts/with-database.mjs \"payload generate:importmap && payload generate:types\"",
     "cms:create-editor": "payload run scripts/create-editor.ts"
