@@ -11,10 +11,13 @@ export type ToolDownloadField = 'firstName' | 'lastName' | 'countryCode' | 'phon
  * after the @. The company is optional; the country code is a list, whose
  * «أخرى» is sent as `other`.
  *
- * **Nothing submits it yet.** Ticket 30 runs it through the submission
- * pipeline, delivers the file once the details are recorded, and puts its
- * wording in the CMS. Until then its page reads the words below directly, and
- * the replies and the confirmation email are placeholders nobody receives.
+ * It sends through the shared pipeline like every other form (ticket 30), and
+ * the file is delivered only once the details are stored — which is the one
+ * thing the Reference site does not do: there, the download begins whatever
+ * happens, and the details go to a console message.
+ *
+ * Every word below is an Editor's in the CMS; these are what the form was
+ * published with.
  */
 export const TOOL_DOWNLOAD: FormDefinition<ToolDownloadField> = {
   id: 'tool-download',
@@ -72,6 +75,15 @@ export const TOOL_DOWNLOAD: FormDefinition<ToolDownloadField> = {
     refused: 'تعذّر التحميل الآن. حاول مرة أخرى بعد قليل.',
     failed: 'تعذّر التحميل بسبب خطأ من جهتنا. حاول مرة أخرى بعد قليل.',
     confirmationSubject: 'ربائد — متتبّع الصبّات',
-    confirmationBody: 'مرحباً {الاسم}،\n\nشكراً لتحميلك متتبّع الصبّات.\n\nفريق ربائد',
+    confirmationBody:
+      'مرحباً {الاسم}،\n\n' +
+      'شكراً لتحميلك متتبّع الصبّات. الملف اسمه Rabaed-Pour-Tracker.html، وهو صفحة واحدة تفتح بنقرتين في Chrome أو Edge.\n\n' +
+      'ثلاث خطوات حتى أول صبّة:\n' +
+      '١. احفظ الملف في مكان ثابت — سطح المكتب أو مجلد المشروع، لا مجلد التنزيلات.\n' +
+      '٢. افتحه بنقرتين.\n' +
+      '٣. اختر مجلداً للمشروع عند أول تشغيل.\n\n' +
+      'بياناتك تبقى على جهازك: الأداة لا ترسل شيئاً إلى أي خادم.\n\n' +
+      'إن لم يصلك الملف، أعد التحميل من الصفحة نفسها.\n\n' +
+      'فريق ربائد',
   },
 };

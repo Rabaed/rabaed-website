@@ -16,7 +16,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, HOME_EDITOR, logInAs, logInByApi, reachesVisitors, uploadImage } from './cms';
+import { HOME_EDITOR, expectSectionOpen, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -357,16 +357,57 @@ test('a replaced building, and words marked in bold and broken onto a new line, 
 
 test('the hero has no switch to hide it; every other section of the home page has one', async ({ page }) => {
   await logInAs(page, HOME_EDITOR);
-  await page.goto(`${ADMIN_PATH}/globals/home-page`);
-  const tab = (name: string) => page.getByRole('button', { name, exact: true });
+  await openPageEntry(page, 'home-page');
 
   for (const section of ['Trust strip', 'Situations', 'Units', 'Record', 'Before and after', 'Delay calculator', 'Figures', 'Questions']) {
-    await tab(section).click();
+    await openSection(page, section);
     await expect(page.getByLabel('Shows on the page'), section).toBeVisible();
   }
-  await tab('Hero').click();
+  await openSection(page, 'Hero');
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
+});
+
+/**
+ * What `openPageEntry` is for (ticket 61). The admin reopens the tab an editor
+ * last had open, and asks the server which one that was; the answer undoes a
+ * tab clicked while it is still in flight, and the test above then reads
+ * another section's panel — on CI, twice, as a switch that was never found.
+ * That window is milliseconds on a machine nobody is squeezing, so the
+ * request is held up here and the window is the whole of the hold.
+ */
+test('an entry is not handed over until the admin has reopened its remembered tab, and a section opened then stays open', async ({ page }) => {
+  await logInAs(page, HOME_EDITOR);
+  // Two seconds because the window has only to be wider than a test can walk
+  // into by accident: on a runner it is the odd stall, hundreds of
+  // milliseconds at most, and every one of those is inside this. The flag is
+  // set before the request goes on, so the check below cannot race the answer
+  // it releases.
+  let released = false;
+  await page.route('**/api/payload-preferences/global-home-page*', async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    released = true;
+    await route.fallback();
+  });
+
+  await openPageEntry(page, 'home-page');
+  expect(released, 'the entry was handed back while the admin was still waiting to hear which tab to reopen').toBe(true);
+
+  // Situations, because the section the admin is told to reopen is the second
+  // one — the Trust strip — and a tab put back where the test asked for it
+  // would prove nothing.
+  await openSection(page, 'Situations');
+  await expect(page.getByLabel('Shows on the page')).toBeVisible();
+
+  // Waiting for nothing to happen is the point of this one: the restore is
+  // over, and with the tab clicked after it rather than before, nothing is
+  // left to put the Trust strip back. A second is orders of magnitude more
+  // than the admin needs to act on an answer it already has, and erring the
+  // other way would only let this test pass where it should fail.
+  await page.waitForTimeout(1_000);
+  await expectSectionOpen(page, 'Situations');
+  await expect(page.getByLabel('Shows on the page')).toBeVisible();
 });
 
 test('the CMS refuses what the home page cannot carry', async ({ page }) => {

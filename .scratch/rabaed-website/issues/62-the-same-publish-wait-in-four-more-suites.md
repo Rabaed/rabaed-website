@@ -48,3 +48,23 @@ Every one of these waits is as long as it is because a publish anywhere marks th
 - [ ] Each of the twenty-one waits as long as what it waits for can take, from the same measured budget as ticket 60's, wherever ticket 61's twenty seconds is not enough for it
 - [ ] A change that genuinely never arrives still fails, and says so in words
 - [ ] The full suite is green under load, repeatedly
+
+## Comments
+
+**A twenty-second one of these fails on this machine, 21 September 2026 (from the ticket 61 lane).** `case-studies.spec.ts:133` › "publishing the first case study reveals the section and its link; unpublishing the last hides them again" failed twice in four full local runs at twenty workers (`TEST_PORT=3161 npm test -- --grep-invert @pixel --workers=20`), and passed at eight:
+
+    tests/e2e/case-studies.spec.ts:166
+    expect(locator).toHaveAttribute('href', '/case-studies') failed
+    Timeout: 20000ms, element(s) not found
+
+That is the header of `/product` still being the one built before the case study was published — the same wait as the rest of this ticket's, on ticket 61's twenty seconds rather than a budget of its own. **Line 166 is not on the list above**, which has 162 from the same test: it is a `toHaveAttribute` rather than an `expect.poll`, so a sweep for polls would miss it, and so may other assertions in these suites that wait for a publish without looking like a wait.
+
+**It cost a run again on 21 September 2026, in ticket 30.** `tool-page-text.spec.ts` › "a change published reaches visitors" timed out after 60 seconds on shard 4 — *"Next said HIT of the page it last sent"* — and passed on a re-run with no change, and passes locally 24 of 24. So it is this ticket's flake rather than a regression.
+
+Worth noting for whoever takes this: **the tool page grew a read that day**. Ticket 30 gave it the download form's own words (`formPageWording(TOOL_DOWNLOAD)`), so its rebuild does one more CMS read than it did, and on a two-core runner that is enough to push it past the budget more often. The budget is the thing to fix — the read is correct and every other page already does the same — but it means this suite is now the likeliest of the five to go red, and the argument for doing this ticket sooner rather than later.
+
+**And again the same hour, on a pull request that changes one markdown file.** This one — tracker text, no code — lost shard 2 to `home-calculator`'s publish wait, at `/`, with the same sixty seconds and the same `HIT`. A docs-only change cannot have caused it, so this is now proven to be the suite's own, not any ticket's.
+
+**Worth saying before anyone raises the number: sixty seconds of `HIT` may not be slowness at all.** `reachesVisitors` (ticket 60) asks every 250 milliseconds and reports what Next said of the page it last sent. A render that is merely slow answers `MISS` or `STALE` and then arrives; a page that answers `HIT` for sixty seconds running is a page whose cache nothing invalidated. Both failures said `HIT`. That points at `refreshSiteWhenPublished` → `revalidatePath('/', 'layout')` not reaching those pages on that runner, rather than at a budget too small — and raising the budget would then only make the suite slower before it fails.
+
+So this ticket is a diagnosis before it is a number: reproduce with `x-nextjs-cache` logged on every poll, and find whether the revalidation happened at all, before deciding what the wait should be. `/diagnosing-bugs` is the shape of it — a command that already goes red, then the cause.

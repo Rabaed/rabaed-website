@@ -14,7 +14,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, PARTNERSHIP_PAGE_EDITOR, logInAs, logInByApi, reachesVisitors } from './cms';
+import { PARTNERSHIP_PAGE_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -219,16 +219,15 @@ test('a reworded heading and figure, a fourth mode, a fifth stage and hidden sec
 
 test('the hero and the sections links land on have no switch to hide them; every other section has one', async ({ page }) => {
   await logInAs(page, PARTNERSHIP_PAGE_EDITOR);
-  await page.goto(`${ADMIN_PATH}/globals/partnership-page`);
-  const tab = (name: string) => page.getByRole('button', { name, exact: true });
+  await openPageEntry(page, 'partnership-page');
 
   for (const hideable of ['Idea', 'Who it is for', 'Modes', 'Benefits', 'Questions']) {
-    await tab(hideable).click();
+    await openSection(page, hideable);
     await expect(page.getByLabel('Shows on the page'), hideable).toBeVisible();
   }
 
   for (const linked of ['Hero', 'Path', 'Application']) {
-    await tab(linked).click();
+    await openSection(page, linked);
     await expect(page.getByText(/Always shows/), linked).toBeVisible();
     await expect(page.getByLabel('Shows on the page'), linked).toHaveCount(0);
   }

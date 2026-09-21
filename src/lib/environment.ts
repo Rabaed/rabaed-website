@@ -56,3 +56,27 @@ export function absoluteUrl(localePath: string): string {
 export function isPubliclyDeployed(): boolean {
   return Boolean(process.env.VERCEL_ENV);
 }
+
+/**
+ * Whether this build reports what visitors do to Vercel's Web Analytics and
+ * Speed Insights (ticket 34).
+ *
+ * The production deployment alone. Narrower than `isPubliclyDeployed` on
+ * purpose: a preview deployment is looked at by us — the founder reviewing a
+ * pull request, a lawyer reading a draft — and a visit of ours counted among
+ * the site's visitors is worse than not counting it, because the number it
+ * spoils is the one the team is trying to read. Speed Insights is the same
+ * story: a preview's page speed is our own browser on our own connection.
+ *
+ * It is also what keeps the two measurement scripts out of a local build,
+ * where nothing serves them: they are fetched from the deployment's own
+ * origin, so a local page asking for them would ask for something that is not
+ * there (`tests/e2e/analytics.spec.ts`).
+ *
+ * The events the site raises are not gated on this — they are raised
+ * everywhere and go nowhere when no script is listening, which is what lets
+ * the suite check that the right ones are raised at all.
+ */
+export function isMeasured(): boolean {
+  return process.env.VERCEL_ENV === 'production';
+}

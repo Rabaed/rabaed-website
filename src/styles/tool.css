@@ -12,10 +12,6 @@
  * step labels' in `start.css`, «دقيقتان» in `tokens.css`; the scroll margins
  * are held by tests/e2e/tool-page.spec.ts.
  *
- * Not here: the Reference site's panel for after the download has started
- * (`.tl-done`, `.tl-ok`, `.tl-steps`). It confirms a delivery, and ticket 30
- * is the one that delivers.
- *
  * The Reference site already writes this page's sides as logical properties.
  */
 
@@ -95,6 +91,16 @@
 .tl-get .form { padding: 28px }
 .tl-prog { height: 3px; background: var(--soft); border-radius: 999px; overflow: hidden; margin: 6px 0 4px }
 .tl-prog i { display: block; height: 100%; width: 0; background: var(--acc); border-radius: 999px; transition: width .3s }
+
+/* The panel that replaces the form once the file is on its way (ticket 30),
+   from the Reference site's own rules. It shows only after the details are
+   stored, so it confirms something that happened. */
+.tl-done .tl-ok { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; font-size: 16px; color: var(--green); background: rgba(29, 158, 117, .1); border: 1px solid rgba(29, 158, 117, .3); border-radius: 999px; padding: 9px 18px }
+.tl-done > p { margin: 16px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.85 }
+.tl-steps { list-style: none; padding: 0; margin: 18px 0 20px }
+.tl-steps li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 14.5px; color: var(--muted); line-height: 1.8 }
+.tl-steps i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 12px; font-style: normal; margin-top: 3px }
+.tl-steps b { color: var(--ink); font-weight: 600 }
 #tl-form { display: grid; gap: 12px }
 #tl-form .two > div { display: grid }
 .tl-cc { display: grid; grid-template-columns: 150px 1fr; gap: 12px }

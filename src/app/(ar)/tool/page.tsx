@@ -42,7 +42,7 @@ export default async function ToolPage() {
       <How content={content.how} />
       {content.privacy.shows && <Privacy content={content.privacy} />}
       {content.requirements.shows && <Requirements content={content.requirements} />}
-      <Download content={content.download} />
+      <Download content={content.download} form={content.downloadForm} />
       {content.questions.shows && <Questions content={content.questions} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
       <StructuredData data={await breadcrumbData('ar', [{ name: content.meta.name, path: '/tool' }])} />

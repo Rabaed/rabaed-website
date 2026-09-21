@@ -52,6 +52,8 @@
     "@payloadcms/storage-s3": "3.89.0",
     "@payloadcms/translations": "3.89.0",
     "@payloadcms/ui": "3.89.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "dompurify": "^3.4.8",
     "graphql": "^16.14.2",
     "gsap": "^3.15.0",

@@ -1,12 +1,12 @@
 # 39a: Founder account actions
 
-**What to do:** The things in Stage 1 that need somebody with the company accounts. Ticket 03 raised the first two; the third arrived on 20 September 2026.
+**What to do:** The things in Stage 1 that need somebody with the company accounts. Ticket 03 raised the first two; the third arrived on 20 September 2026, and the fourth on 21 September 2026.
 
 **Blocked by:** nothing technical.
 
 **When:** the founder decided on 12 September 2026 to do **part 1, connecting Vercel, once ticket 04 is merged** — bringing it forward from the end of Stage 1, so that preview links exist for the page-by-page rebuild in tickets 05 onward. Part 2, the GitHub plan decision, stays at the end of Stage 1 alongside ticket 39.
 
-**Status:** parts 1 and 3 done (12 and 20 September 2026); part 2 outstanding
+**Status:** parts 1 and 3 done (12 and 20 September 2026); parts 2 and 4 outstanding
 
 Full instructions, in plain language, are in [`docs/deployment.md`](../../../docs/deployment.md).
 
@@ -56,3 +56,17 @@ On 20 September 2026 the preview database's connection string and `PAYLOAD_SECRE
 **Nothing in the CMS is encrypted with `PAYLOAD_SECRET`**, so rotating it loses no content and no password: Editors sign in again with the same passwords. It does sign out everyone, invalidate any document link already opened from a form submission (they last ten minutes anyway), and reset the few-minute window the forms use to refuse repeat submissions.
 
 **So this does not happen again:** a `.env` file in the checkout holds both values (it is git-ignored), and `npm run cms:migrate` reads them from there, so no secret is ever typed on a command line. `docs/deployment.md` says so at step 6.
+
+## 4. Switch on the visitor counting and the speed measurement
+
+Raised by ticket 34 on 21 September 2026. The site already carries both; they
+report nothing until the two features are turned on for the project, and
+nothing has to be deployed afterwards.
+
+- [ ] In the Vercel dashboard, on `rabaed-website`: **Analytics → Web Analytics → Enable**
+- [ ] And **Speed Insights → Enable**
+- [ ] Open the production site, then the project's **Analytics** tab, and confirm the visit appears
+
+Step by step, in plain language, in [`docs/deployment.md`](../../../docs/deployment.md) under *One-time setup*. What is collected, in the words the Privacy Policy will use, is [`docs/analytics.md`](../../../docs/analytics.md) — ticket 37's to fold in.
+
+**Nothing is measured before this**, and nothing is measured on preview deployments by design, so reviewing a pull request never counts as a visit. The events that count form submissions and visits an AI assistant sent need a paid Vercel team, which part 1 already established this project needs.

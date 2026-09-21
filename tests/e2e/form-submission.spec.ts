@@ -16,18 +16,28 @@
  * application** (ticket 29) run through the same pipeline with their
  * documents.
  *
- * **The tool page's download form does not send yet**, and must not pretend
- * to: ticket 30 wires it, and moves it out of the last list here.
+ * **The tool page's download form delivers the file only after the details
+ * are stored** (ticket 30), which is the one thing the Reference site does
+ * not do.
  *
  * Messages are restated here rather than imported from the form definitions,
  * for the reason `routes.ts` gives.
  */
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi } from './cms';
+import { TRAP_FIELD } from '../../src/forms/definition';
 import {
+  APPLICANT,
+  ENGINEER,
+  DEMO_BUTTON,
+  DEMO_FORM,
+  DEMO_RECEIVED,
+  DEMO_REFUSED,
   documentsDirectory,
+  fillDemoForm,
   mailTo,
   readerDelete,
   readerGet,
@@ -36,12 +46,6 @@ import {
   type StoredSubmission,
 } from './forms';
 
-const DEMO_FORM = 'احجز عرضاً حياً على مشروعك';
-const DEMO_BUTTON = 'احجز عرضاً حياً';
-
-/** The Reference site's own words for a request received, true now that it is. */
-const RECEIVED = 'وصلنا طلبك — سنتواصل خلال يوم عمل لتحديد الموعد.';
-const REFUSED = 'تعذّر استلام طلبك الآن. حاول مرة أخرى بعد قليل، أو راسلنا على واتساب.';
 
 /** What each required field says when it is left wrong. */
 const DEMO_MESSAGES = {
@@ -57,8 +61,6 @@ const DEMO_PLACEMENTS = [
   { page: 'start', path: '/start' },
 ] as const;
 
-const APPLICANT = { name: 'سارة القحطاني', phone: '0500000000', company: 'شركة الإعمار' } as const;
-
 /** Opens `path` as a visitor on network address `ip`, and returns its demo request form. */
 async function openDemoForm(page: Page, path: string, ip: string): Promise<Locator> {
   await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
@@ -67,21 +69,12 @@ async function openDemoForm(page: Page, path: string, ip: string): Promise<Locat
   return page.getByRole('form', { name: DEMO_FORM });
 }
 
-async function fillDemoRequest(form: Locator, email: string): Promise<void> {
-  await form.getByLabel('الاسم الكامل').fill(APPLICANT.name);
-  await form.getByLabel('البريد الإلكتروني').fill(email);
-  await form.getByLabel('دورك في المشروع').selectOption('owner');
-  await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
-  await form.getByLabel('اسم الشركة').fill(APPLICANT.company);
-  await form.getByLabel('عدد المشاريع النشطة').fill('3');
-}
-
 /** Fills in and sends a valid request from `path`, and waits to be told it arrived. */
 async function sendDemoRequest(page: Page, path: string, applicant: { email: string; ip: string }): Promise<void> {
   const form = await openDemoForm(page, path, applicant.ip);
-  await fillDemoRequest(form, applicant.email);
+  await fillDemoForm(form, applicant.email);
   await form.getByRole('button', { name: DEMO_BUTTON }).click();
-  await expect(form.getByRole('status')).toHaveText(RECEIVED);
+  await expect(form.getByRole('status')).toHaveText(DEMO_RECEIVED);
 }
 
 /** The one submission stored with this address, once the mail sent after it has settled. */
@@ -113,7 +106,7 @@ for (const placement of DEMO_PLACEMENTS) {
         await expect(field, label).toHaveAttribute('aria-invalid', 'true');
       }
 
-      await fillDemoRequest(form, email);
+      await fillDemoForm(form, email);
       for (const message of Object.values(DEMO_MESSAGES)) {
         await expect(form.getByText(message, { exact: true })).toBeHidden();
       }
@@ -136,12 +129,12 @@ for (const placement of DEMO_PLACEMENTS) {
       const { email, ip } = uniqueApplicant(`demo-${placement.page}`);
       const form = await openDemoForm(page, placement.path, ip);
       const address = page.url();
-      await fillDemoRequest(form, email);
+      await fillDemoForm(form, email);
 
       // Twice, as an impatient visitor would.
       await form.getByRole('button', { name: DEMO_BUTTON }).dblclick();
 
-      await expect(form.getByRole('status')).toHaveText(RECEIVED);
+      await expect(form.getByRole('status')).toHaveText(DEMO_RECEIVED);
       // The request is gone from the page, so it cannot be sent again by mistake.
       await expect(form.getByLabel('الاسم الكامل')).toHaveCount(0);
       expect(page.url(), 'what was typed went into the address').toBe(address);
@@ -169,7 +162,7 @@ test.describe('the demo request form, on the server', () => {
   }) => {
     const { email, ip } = uniqueApplicant('demo-server-check');
     const form = await openDemoForm(page, '/start', ip);
-    await fillDemoRequest(form, email);
+    await fillDemoForm(form, email);
 
     // A role the form does not offer, as a request made by hand could send.
     await form.getByLabel('دورك في المشروع').evaluate((select: HTMLSelectElement) => {
@@ -178,7 +171,7 @@ test.describe('the demo request form, on the server', () => {
     await form.getByRole('button', { name: DEMO_BUTTON }).click();
 
     await expect(form.getByText(DEMO_MESSAGES['دورك في المشروع'], { exact: true })).toBeVisible();
-    await expect(form.getByText(RECEIVED)).toHaveCount(0);
+    await expect(form.getByText(DEMO_RECEIVED)).toHaveCount(0);
     expect(await submissionsFrom(request, email)).toEqual([]);
   });
 
@@ -188,7 +181,7 @@ test.describe('the demo request form, on the server', () => {
   }) => {
     const { email, ip } = uniqueApplicant('demo-trap');
     const form = await openDemoForm(page, '/', ip);
-    await fillDemoRequest(form, email);
+    await fillDemoForm(form, email);
 
     // Out of sight and out of the keyboard order, so a person never reaches it.
     const trap = form.locator('textarea[name="website"]');
@@ -196,8 +189,8 @@ test.describe('the demo request form, on the server', () => {
     await trap.fill('https://spam.example', { force: true });
     await form.getByRole('button', { name: DEMO_BUTTON }).click();
 
-    await expect(form.getByRole('alert')).toHaveText(REFUSED);
-    await expect(form.getByText(RECEIVED)).toHaveCount(0);
+    await expect(form.getByRole('alert')).toHaveText(DEMO_REFUSED);
+    await expect(form.getByText(DEMO_RECEIVED)).toHaveCount(0);
     expect(await submissionsFrom(request, email)).toEqual([]);
   });
 
@@ -212,9 +205,9 @@ test.describe('the demo request form, on the server', () => {
 
     const sixth = uniqueApplicant('demo-limit');
     const form = await openDemoForm(page, '/start', ip);
-    await fillDemoRequest(form, sixth.email);
+    await fillDemoForm(form, sixth.email);
     await form.getByRole('button', { name: DEMO_BUTTON }).click();
-    await expect(form.getByRole('alert')).toHaveText(REFUSED);
+    await expect(form.getByRole('alert')).toHaveText(DEMO_REFUSED);
     expect(await submissionsFrom(request, sixth.email)).toEqual([]);
 
     await sendDemoRequest(page, '/start', uniqueApplicant('demo-limit'));
@@ -922,57 +915,168 @@ test.describe('the partnership application, alerted and confirmed', () => {
   });
 });
 
-/**
- * The form whose ticket has not wired it yet. Until then it sends nothing,
- * delivers nothing, and claims nothing — not the Reference site's fake
- * confirmation, and not what the visitor typed in the address.
- */
-const NOT_SENDING_YET = [
-  {
-    // Unlocked once its details are valid, as the Reference site's is, but the
-    // file is delivered only after the details are recorded (spec: Forms).
-    name: 'the Pour Tracker download',
-    ticket: 30,
-    path: '/tool',
-    form: 'بيانات التحميل',
-    fill: async (form: Locator) => {
-      await form.getByLabel('الاسم الأول', { exact: true }).fill('أحمد');
-      await form.getByLabel('اسم العائلة', { exact: true }).fill('السالم');
-      await form.getByLabel('رقم الجوال', { exact: true }).fill('51 123 4567');
-      await form.getByLabel('البريد الإلكتروني', { exact: true }).fill('ahmed@example.com');
-      await expect(form.locator('button[type="submit"]')).toBeEnabled();
-      return form.getByLabel('البريد الإلكتروني', { exact: true });
-    },
-    fakes: ['تم — التحميل بدأ'],
-    finePrint: null,
-  },
-] as const;
+test.describe('the Pour Tracker download', () => {
+  const FORM = 'بيانات التحميل';
+  const RECEIVED = 'تم — التحميل بدأ';
+  const FILE = 'Rabaed-Pour-Tracker.html';
 
-for (const entry of NOT_SENDING_YET) {
-  test(`${entry.name} sends nothing and claims nothing until ticket ${entry.ticket} wires it`, async ({ page }) => {
-    const sent: string[] = [];
-    const downloads: string[] = [];
+  const downloadForm = (page: Page) => page.getByRole('form', { name: FORM });
+  const downloadButton = (form: Locator) => form.locator('button[type="submit"]');
+
+  async function openDownloadForm(page: Page, ip: string): Promise<Locator> {
+    await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
+    await page.goto('/tool', { waitUntil: 'networkidle' });
+    return downloadForm(page);
+  }
+
+  async function fillDetails(form: Locator, email: string): Promise<void> {
+    await form.getByLabel('الاسم الأول', { exact: true }).fill(ENGINEER.firstName);
+    await form.getByLabel('اسم العائلة', { exact: true }).fill(ENGINEER.lastName);
+    await form.getByLabel('رقم الجوال', { exact: true }).fill(ENGINEER.phone);
+    await form.getByLabel('البريد الإلكتروني', { exact: true }).fill(email);
+    await form.getByLabel('اسم الشركة', { exact: true }).fill(ENGINEER.company);
+  }
+
+  test('the details are stored before the file is delivered, and the file is the one promised', async ({
+    page,
+    request,
+  }, testInfo) => {
+    const { email, ip } = uniqueApplicant('tool-download');
+    const form = await openDownloadForm(page, ip);
+    const address = page.url();
+
+    // What the visitor asked for, and what the server was told, in the order
+    // they happened: the spec delivers the file only after the details are
+    // recorded, so the record must exist before the download begins.
+    const order: string[] = [];
     page.on('request', (request) => {
-      if (request.method() !== 'GET') sent.push(`${request.method()} ${request.url()}`);
+      if (request.method() === 'POST' && request.url().includes('/api/forms/')) order.push('submitted');
+      if (request.url().includes(FILE)) order.push('fetched the file');
     });
+    page.on('download', () => order.push('delivered'));
+
+    await fillDetails(form, email);
+    await expect(downloadButton(form)).toBeEnabled();
+
+    const download = page.waitForEvent('download');
+    await downloadButton(form).click();
+
+    await expect(downloadForm(page).or(page.locator('#tl-done'))).toBeVisible();
+    await expect(page.getByText(RECEIVED)).toBeVisible();
+
+    const file = await download;
+    expect(file.suggestedFilename()).toBe(FILE);
+    // The file itself, not merely a download event: what arrives is the tool.
+    const saved = testInfo.outputPath(FILE);
+    await file.saveAs(saved);
+    const delivered = await readFile(saved, 'utf8');
+    expect(delivered).toContain('ربائد');
+    expect(delivered.length, 'the delivered file is empty').toBeGreaterThan(1000);
+
+    expect(order[0], `what happened: ${order.join(', ')}`).toBe('submitted');
+    expect(order).toContain('delivered');
+
+    const stored = await submissionsFrom(request, email);
+    expect(stored, 'the details were not stored').toHaveLength(1);
+    expect(stored[0]).toMatchObject({
+      form: 'tool-download',
+      name: `${ENGINEER.firstName} ${ENGINEER.lastName}`,
+      email,
+      phone: `+966 ${ENGINEER.phone}`,
+    });
+    expect(page.url(), 'what was typed went into the address').toBe(address);
+  });
+
+  test('the panel says where the file went and offers it again, and the form cannot be sent twice', async ({ page }) => {
+    const { email, ip } = uniqueApplicant('tool-panel');
+    const form = await openDownloadForm(page, ip);
+
+    await fillDetails(form, email);
+    const first = page.waitForEvent('download');
+    await downloadButton(form).click();
+    await first;
+
+    // The Reference site's panel, which this ticket brings over.
+    await expect(page.getByText(RECEIVED)).toBeVisible();
+    await expect(page.getByText(FILE, { exact: false })).toBeVisible();
+    await expect(page.locator('.tl-steps li')).toHaveCount(3);
+
+    // The form is gone, so the details cannot be sent a second time.
+    await expect(form.getByLabel('البريد الإلكتروني', { exact: true })).toHaveCount(0);
+
+    // And the file is offered again for a browser that blocked the first — a
+    // link, so it works whatever became of the press that stored the details,
+    // and with no JavaScript at all.
+    const again = page.getByRole('link', { name: 'لم يبدأ التحميل؟ اضغط هنا' });
+    await expect(again).toHaveAttribute('href', `/downloads/${FILE}`);
+    await expect(again).toHaveAttribute('download', FILE);
+    const second = page.waitForEvent('download');
+    await again.click();
+    expect((await second).suggestedFilename()).toBe(FILE);
+  });
+
+  test('the team is alerted and the engineer is sent the file’s three steps', async ({ page, request }) => {
+    await logInByApi(request, FORM_EDITOR);
+    const settings = '/api/globals/tool-download-form';
+    const published = async () => (await readerGet(request, `${settings}?depth=0`)).json();
+    const original = await published();
+    const team = uniqueApplicant('tool-team').email;
+
+    try {
+      const publish = async (data: object) => {
+        const response = await request.post(settings, { data: { ...data, _status: 'published' } });
+        expect(response.ok(), await response.text()).toBe(true);
+      };
+      await publish({ ...original, alertAddress: team });
+
+      const { email, ip } = uniqueApplicant('tool-alerted');
+      const form = await openDownloadForm(page, ip);
+      await fillDetails(form, email);
+      const download = page.waitForEvent('download');
+      await downloadButton(form).click();
+      await download;
+
+      // The alert that answers to this engineer, among any this address gets.
+      const alertsFor = async () => (await mailTo(team)).filter((mail) => mail.replyTo === email);
+      await expect.poll(alertsFor).toHaveLength(1);
+      const [alert] = await alertsFor();
+      expect(alert.subject).toContain(`${ENGINEER.firstName} ${ENGINEER.lastName}`);
+      // The alert lists the answers as they were given, field by field, so the
+      // code and the number are two lines rather than one.
+      for (const answer of [email, ENGINEER.company, ENGINEER.phone, '‎+966 السعودية']) {
+        expect(alert.text, answer).toContain(answer);
+      }
+
+      // And the engineer's own copy, which says what to do with the file.
+      await expect.poll(() => mailTo(email)).toHaveLength(1);
+      const [confirmation] = await mailTo(email);
+      expect(confirmation.subject).toBe('ربائد — متتبّع الصبّات');
+      expect(confirmation.text).toContain(`مرحباً ${ENGINEER.firstName} ${ENGINEER.lastName}،`);
+      expect(confirmation.text).toContain(FILE);
+      expect(confirmation.text).toContain('بياناتك تبقى على جهازك');
+
+      const stored = await settledSubmission(request, email);
+      expect(stored).toMatchObject({ alert: 'sent', confirmation: 'sent' });
+    } finally {
+      await request.post(settings, { data: { ...original, _status: 'published' } });
+    }
+  });
+
+  test('a refused submission delivers nothing', async ({ page }) => {
+    const { email, ip } = uniqueApplicant('tool-refused');
+    const form = await openDownloadForm(page, ip);
+    const downloads: string[] = [];
     page.on('download', (download) => downloads.push(download.suggestedFilename()));
 
-    await page.goto(entry.path, { waitUntil: 'networkidle' });
-    const address = page.url();
-    const form = page.getByRole('form', { name: entry.form });
+    await fillDetails(form, email);
+    // The trap a visitor never sees and a bot fills in.
+    await form.locator(`textarea[name="${TRAP_FIELD}"]`).fill('https://example.test');
+    await downloadButton(form).click();
 
-    // Enter in a field, and the button itself.
-    const lastField = await entry.fill(form);
-    await lastField.press('Enter');
-    await form.locator('button[type="submit"]').click({ force: true });
+    await expect(form.getByRole('alert')).toBeVisible();
     await page.waitForTimeout(500);
-
-    expect(sent, 'the form sent something').toEqual([]);
-    expect(downloads, 'a file was delivered').toEqual([]);
-    expect(page.url(), 'what was typed went into the address').toBe(address);
-    for (const fake of entry.fakes) await expect(page.getByText(fake)).toHaveCount(0);
-    // Nothing was cleared as though sent.
-    await expect(lastField).not.toHaveValue('');
-    if (entry.finePrint) await expect(form.locator('.fine')).toHaveText(entry.finePrint);
+    expect(downloads, 'a refused submission delivered the file').toEqual([]);
+    await expect(page.getByText(RECEIVED)).toHaveCount(0);
   });
-}
+});
+

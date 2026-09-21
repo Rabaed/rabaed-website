@@ -6,9 +6,8 @@
  * or without JavaScript; a download form whose button stays locked until the
  * details are valid, saying what is wrong only once a field has been left; a
  * and a phone number and an email typed left to right inside a right-to-left
- * page. That the unlocked button neither sends anything nor pretends to, until
- * ticket 30 records the details before delivering the file, is
- * `form-submission.spec.ts`'s.
+ * page. That the button records the details before the file is delivered
+ * (ticket 30) is `form-submission.spec.ts`'s.
  *
  * Whether it *looks* like the Reference site is asked in
  * `tool-matches-reference.spec.ts`. Console errors and failed requests are
@@ -67,7 +66,11 @@ const LOCKED = 'أكمل البيانات لتفعيل التحميل';
 const UNLOCKED = 'حمّل الأداة الآن';
 
 /** The Reference site's confirmation, shown after a download that recorded nothing. */
-const FAKE_CONFIRMATION = 'تم — التحميل بدأ';
+/**
+ * The panel's own words, which belong to a download that has started. They
+ * are not in the page a visitor first meets: nothing has been downloaded yet.
+ */
+const AFTER_THE_DOWNLOAD = 'تم — التحميل بدأ';
 
 const ERRORS = {
   first: 'اكتب الاسم الأول (حرفان على الأقل)',
@@ -111,7 +114,7 @@ test('every section is in the first response, every answer included', async ({ r
   expect(html).toContain(' يحوي كل صبّة واختبار وحالة وتاريخ، ومجلد ');
   expect(html).toContain('صُنعت في ربائد لمهندسي المواقع. الأداة مجانية — استخدمها كما تشاء.');
 
-  expect(html).not.toContain(FAKE_CONFIRMATION);
+  expect(html).not.toContain(AFTER_THE_DOWNLOAD);
 });
 
 test('every question is a native disclosure element, and opens with JavaScript off', async ({ browser }) => {

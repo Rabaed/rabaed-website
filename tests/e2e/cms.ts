@@ -267,6 +267,88 @@ export async function logIn(page: Page): Promise<void> {
 }
 
 /**
+ * Where the admin keeps which tab an editor last had open, inside that
+ * entry's preference: the path of a page entry's tabs field, which is the
+ * second field of every page global (`src/cms/page-globals.ts`) and has no
+ * name of its own, so Payload calls it by its place.
+ *
+ * Restated here rather than worked out, for `routes.ts`'s reason. If Payload
+ * ever names it something else, `openPageEntry` says so — the tab it asks the
+ * admin to reopen is then never reopened, and the wait below fails.
+ */
+const TABS_FIELD_PATH = '_index-1';
+
+/** How Payload marks the button of the tab it has open. */
+const OPEN_TAB = /tabs-field__tab-button--active/;
+
+/** A page entry's section tabs, in the order its sections are in. */
+const SECTION_TABS = '.tabs-field__tabs .tabs-field__tab-button';
+
+/**
+ * Opens a page entry in the admin, with its section tabs ready to be clicked.
+ *
+ * Going there is not enough. The admin remembers which tab an editor had open
+ * and restores it from a preference it fetches when the form mounts
+ * (`@payloadcms/ui/fields/Tabs`, under the key `global-<slug>`): the answer,
+ * whenever it lands, sets the open tab to the remembered one. A tab clicked
+ * while that is still in flight is therefore set and then unset — the button
+ * keeps the focus the click gave it, and the panel beside the tabs goes back
+ * to another section's fields. That is what failed twice on CI as an
+ * assertion that never found a switch (ticket 61), and holding that one
+ * request up reproduces it every time, as `home-text.spec.ts` does.
+ *
+ * Waiting for the answer to arrive is not enough either: the admin acts on it
+ * a render later, so a click in between is still lost. What is waited for
+ * here is the restore itself, which this makes visible by telling the admin
+ * first — through the same preference — that the second section is the one
+ * this editor last had open. The entry then opens on its first section and
+ * moves to its second, and that move is the restore, done. Nothing can undo a
+ * click afterwards: the restore happens once, and from then on the admin
+ * answers its own question out of what the clicks themselves have written.
+ *
+ * For entries of two sections or more, which is every page global but the
+ * closing section's one.
+ */
+export async function openPageEntry(page: Page, globalSlug: string): Promise<void> {
+  const remembered = await page.request.post(`/api/payload-preferences/global-${globalSlug}`, {
+    data: { value: { fields: { [TABS_FIELD_PATH]: { tabIndex: 1 } } } },
+  });
+  expect(remembered.ok(), await remembered.text()).toBe(true);
+
+  await page.goto(`${ADMIN_PATH}/globals/${globalSlug}`);
+  const second = page.locator(SECTION_TABS).nth(1);
+  await expect(second, `the admin never reopened the second section of ${globalSlug}, so the restore that undoes a click has still to come`).toHaveClass(
+    OPEN_TAB,
+  );
+}
+
+/**
+ * Opens one section of a page entry, and leaves that section's own fields in
+ * the panel beside the tabs.
+ *
+ * Clicking the tab is what an editor does; waiting for the panel to be this
+ * section's is what tells the test it may read it. Without that, a test reads
+ * whichever panel is there — the section it asked for, or the one the admin
+ * put back (`openPageEntry`), or one it opened earlier — and an assertion
+ * about a section can pass on another section's fields.
+ *
+ * The panel itself is unnamed in the markup — every section's is
+ * `tabs-field__tab` — so what is waited for is the tab whose panel it is:
+ * Payload marks the open tab's button, and draws the panel of that one tab
+ * and no other.
+ */
+export async function openSection(page: Page, name: string): Promise<void> {
+  await page.getByRole('button', { name, exact: true }).click();
+  await expectSectionOpen(page, name);
+}
+
+/** That `name` is the section the admin has open, without asking it to open one. */
+export async function expectSectionOpen(page: Page, name: string): Promise<void> {
+  const tab = page.getByRole('button', { name, exact: true });
+  await expect(tab, `the ${name} section is not the one the admin has open`).toHaveClass(OPEN_TAB);
+}
+
+/**
  * Signs in through the API rather than the form. For putting things back
  * after a test, which must work whether or not the test got as far as signing
  * in — the form redirects away when there is already a session.
