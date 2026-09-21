@@ -168,7 +168,7 @@ const PROPOSED_ANSWERS: readonly ProposedAnswer[] = [
   [
     ['referral'],
     'ماذا لو استخدم شخصان كودين مختلفين لنفس المشروع؟',
-    'إذا وصل كودان مختلفان لمشروع واحد، يُعتمد كود الإحالة الذي وصلنا أولاً مع طلب العرض التوضيحي.',
+    'إذا وصل كودان مختلفان لمشروع واحد، يعتمد فريق ربائد كود الإحالة الذي وصل أولاً مع طلب العرض التوضيحي.',
   ],
   [
     ['referral'],
@@ -235,7 +235,10 @@ export const FAQ_REWRITES: readonly FaqRewrite[] = PROPOSED_ANSWERS.flatMap(([pa
  * whole kind missing: «فئة «المقارنة» هي الأضعف حالياً وهي الأكثر طلباً في
  * محركات التوليد» — Rabaed against WhatsApp, email and the spreadsheet. Ticket
  * 38 answered it once, as a launch article; these answer it where a buyer
- * asks it, among the questions under the page.
+ * asks it, among the questions under the page: the three together on both
+ * lists, since a buyer weighing all three asks it that way, and then one each
+ * for WhatsApp, the email and the spreadsheet on the start page, which carries
+ * the full set.
  *
  * Every line of every answer is drawn from the home page's own «قبل وبعد
  * ربائد» and «مواقف من الميدان», which compare exactly these three against
@@ -256,6 +259,12 @@ export const COMPARISON_QUESTIONS: readonly FaqRewrite[] = [
     question: 'عندنا مجموعة واتساب للمشروع — لماذا ننتقل إلى ربائد؟',
     answer:
       'مجموعة واتساب تُوصل الرسالة ولا تُثبت شيئاً: لا رقم مرجعي للطلب، ولا إشعار استلام باسم ووقت، ولا حدود اطلاع تمنع طرفاً من قراءة مراسلات طرف آخر. ربائد تحفظ الطلب والاعتماد في سجل واحد يراه المالك والاستشاري والمقاول، كلٌّ في حدود صلاحيته.',
+  },
+  {
+    page: 'start',
+    question: 'نتبادل الاعتمادات بالبريد الإلكتروني — ما الذي يضيفه ربائد؟',
+    answer:
+      'البريد الإلكتروني يوصل الرسالة ولا يحفظ الإجراء: الاعتماد يأتي في ثريد آخر لا أحد يجده بعد شهور، ولا إشعار استلام باسم ووقت يثبت أن الطلب وصل أصلاً. في ربائد الاعتماد وملاحظاته داخل المستند نفسه، والسجل يبقى بعد نهاية المشروع — فالاعتماد الموجود يمكن إثباته.',
   },
   {
     page: 'start',

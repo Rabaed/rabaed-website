@@ -34,9 +34,11 @@
  * **Nothing here publishes.** Every row written is a draft, and the published
  * rows a visitor reads are left exactly as they are. Each statement is also
  * guarded so that it proposes nothing where the founder has already written
- * something of his own: a page's entry is left alone unless its published
- * words are still the ones ticket 58 imported, and a question unless its
- * published answer is still ticket 22's with no draft of its own waiting.
+ * something of his own. Each paragraph carries the words it expects to find
+ * published, and is offered only where they are still there — so rewriting one
+ * of them costs him that paragraph's proposal and no other's — and a question
+ * is left alone unless its published answer is still ticket 22's with no draft
+ * of its own waiting.
  */
 import { IMPORTED_FAQ_ENTRIES } from '../faq-import/entries';
 import { HOME_PAGE_WORDS } from '../home-page-import/words';
@@ -98,24 +100,39 @@ BEGIN
   END LOOP;
 END $copy$ LANGUAGE plpgsql;
 
-CREATE FUNCTION pg_temp.propose(entry regclass, still_says text, as_imported text, proposed jsonb) RETURNS void AS $propose$
+CREATE FUNCTION pg_temp.propose(entry regclass, proposed jsonb) RETURNS void AS $propose$
 DECLARE
   published bigint;
   proposal bigint;
+  untouched text;
+  anything bigint;
   names text;
   values text;
 BEGIN
-  -- Only where the entry's newest version is the published one, and its
-  -- paragraph is still the one that was imported. A draft of the founder's own
-  -- is the newest version while it waits, so this finds nothing and proposes
-  -- nothing: a proposal never buries his work.
-  EXECUTE format('SELECT "id" FROM %s WHERE "latest" AND "version__status" = ''published'' AND %I = $1', entry, still_says)
-    INTO published USING as_imported;
+  -- Each paragraph carries the words it expects to find, and is proposed only
+  -- where they are still there. One paragraph the founder has rewritten
+  -- therefore costs him that paragraph's proposal and no other's: a section he
+  -- has not touched is still offered its own.
+  SELECT string_agg(format('%I IS NOT DISTINCT FROM %L', key, value ->> 'expects'), ' OR ')
+    INTO untouched
+    FROM jsonb_each(proposed) AS paragraph(key, value);
+
+  -- And only while nothing of his own is waiting as a draft: a draft is the
+  -- newest version while it waits, so this finds nothing and proposes nothing.
+  EXECUTE format('SELECT "id" FROM %s WHERE "latest" AND "version__status" = ''published''', entry)
+    INTO published;
   IF published IS NULL THEN RETURN; END IF;
+
+  -- Nothing left to propose is no reason to make a draft of the whole entry.
+  EXECUTE format('SELECT count(*) FROM %s WHERE "id" = $1 AND (%s)', entry, untouched) INTO anything USING published;
+  IF anything = 0 THEN RETURN; END IF;
 
   SELECT string_agg(quote_ident(column_name), ', ' ORDER BY ordinal_position),
          string_agg(CASE
-                      WHEN proposed ? column_name THEN quote_literal(proposed ->> column_name)
+                      WHEN proposed ? column_name THEN format(
+                        'CASE WHEN %I IS NOT DISTINCT FROM %L THEN %L ELSE %I END',
+                        column_name, proposed -> column_name ->> 'expects',
+                        proposed -> column_name ->> 'becomes', column_name)
                       WHEN column_name = 'version__status' THEN '''draft'''
                       WHEN column_name = 'latest' THEN 'true'
                       WHEN column_name IN ('created_at', 'updated_at', 'version_updated_at') THEN 'now()'
@@ -134,21 +151,25 @@ BEGIN
   PERFORM pg_temp.copy_rows(entry, published, proposal);
 END $propose$ LANGUAGE plpgsql;`;
 
-/** A page's entry, with the paragraphs proposed for it as `column → words`. */
-function proposePage(entry: string, stillSays: string, asImported: string, proposed: Record<string, string>): string {
-  return `SELECT pg_temp.propose('"${entry}"'::regclass, ${text(stillSays)}, ${text(asImported)}, ${text(
-    JSON.stringify(proposed),
-  )}::jsonb);`;
+/**
+ * A page's entry, with each paragraph proposed for it: the column, the words
+ * it expects to find published there, and the words offered instead.
+ *
+ * A section the Reference site gave no paragraph expects `null`, which is what
+ * its column holds until somebody writes one.
+ */
+function proposePage(entry: string, proposed: Record<string, { expects: string | null; becomes: string }>): string {
+  return `SELECT pg_temp.propose('"${entry}"'::regclass, ${text(JSON.stringify(proposed))}::jsonb);`;
 }
 
 const PAGE_ENTRIES = [
-  proposePage('_home_page_v', 'version_record_lead_ar', HOME_PAGE_WORDS.record.lead.ar, {
-    version_four_units_lead_ar: SECTION_OPENERS.homeFourUnits,
-    version_record_lead_ar: SECTION_OPENERS.homeRecord,
+  proposePage('_home_page_v', {
+    version_four_units_lead_ar: { expects: null, becomes: SECTION_OPENERS.homeFourUnits },
+    version_record_lead_ar: { expects: HOME_PAGE_WORDS.record.lead.ar, becomes: SECTION_OPENERS.homeRecord },
   }),
-  proposePage('_product_page_v', 'version_inner_cycle_lead_ar', PRODUCT_PAGE_WORDS.innerCycle.lead, {
-    version_roles_lead_ar: SECTION_OPENERS.productRoles,
-    version_inner_cycle_lead_ar: SECTION_OPENERS.productInnerCycle,
+  proposePage('_product_page_v', {
+    version_roles_lead_ar: { expects: null, becomes: SECTION_OPENERS.productRoles },
+    version_inner_cycle_lead_ar: { expects: PRODUCT_PAGE_WORDS.innerCycle.lead, becomes: SECTION_OPENERS.productInnerCycle },
   }),
 ].join('\n\n');
 
@@ -225,7 +246,7 @@ const THE_COMPARISONS = `"_status" = 'draft' AND "locale" = 'ar'
  * Deleting a version row takes its lists with it — the lists point at it, and
  * are deleted with it — so the copies the seed made go too.
  */
-const TAKE_BACK = [
+export const ANSWER_FIRST_PROPOSAL_UNSEED = [
   ...[
     { entry: '_home_page_v', column: 'version_record_lead_ar', proposed: SECTION_OPENERS.homeRecord },
     { entry: '_product_page_v', column: 'version_inner_cycle_lead_ar', proposed: SECTION_OPENERS.productInnerCycle },
@@ -256,13 +277,11 @@ UPDATE "${page.entry}" SET "latest" = true WHERE "id" = (SELECT max("id") FROM "
  WHERE "id" IN (SELECT max("id") FROM "_faq_entries_v" GROUP BY "parent_id");`,
 ].join('\n\n');
 
-export const ANSWER_FIRST_PROPOSAL_UNSEED = TAKE_BACK;
-
 export const ANSWER_FIRST_PROPOSAL_SEED = [
   HELPERS,
   PAGE_ENTRIES,
   ANSWERS,
   COMPARISONS,
-  `DROP FUNCTION pg_temp.propose(regclass, text, text, jsonb);
+  `DROP FUNCTION pg_temp.propose(regclass, jsonb);
 DROP FUNCTION pg_temp.copy_rows(regclass, bigint, bigint);`,
 ].join('\n\n');

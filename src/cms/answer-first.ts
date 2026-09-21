@@ -23,7 +23,7 @@ export const ANSWER_LENGTH = { fewest: 30, most: 60 } as const;
  * How many words a text is. Counted between spaces, which is how both Arabic
  * and English separate them — so «ما هو ربائد؟» is three, not four.
  */
-export function wordCount(written: string): number {
+function wordCount(written: string): number {
   return written.trim().split(/\s+/).filter(Boolean).length;
 }
 

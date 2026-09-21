@@ -1,7 +1,7 @@
 /**
  * The answer-first copy pass (ticket 35): the four section openers HANDOFF
  * §6.4 asks for, all 31 answers rewritten to stand alone without their
- * question, and the four comparison questions §6.5 calls the weakest gap —
+ * question, and the comparison questions §6.5 calls the weakest gap —
  * all of them **proposed**, by `20260921_111500_propose_answer_first_copy`, and
  * none of them published.
  *
@@ -48,11 +48,16 @@ const OPENERS = [
   { entry: 'product-page', section: 'innerCycle', heading: 'ماذا يبقى عندك', says: 'لكل جهة في ربائد', wasEmpty: false },
 ] as const;
 
-/** The four comparison questions: the page each belongs to, and its address. */
+/**
+ * The comparison questions: the page each belongs to, and its address. The
+ * three together on both lists, and then one each for the three things the
+ * ticket names Rabaed against, on the page carrying the full set.
+ */
 const COMPARISONS = [
   { page: 'home', at: '/', question: 'ما الفرق بين ربائد وواتساب والبريد الإلكتروني والإكسل؟' },
   { page: 'start', at: '/start', question: 'ما الفرق بين ربائد وواتساب والبريد الإلكتروني والإكسل؟' },
   { page: 'start', at: '/start', question: 'عندنا مجموعة واتساب للمشروع — لماذا ننتقل إلى ربائد؟' },
+  { page: 'start', at: '/start', question: 'نتبادل الاعتمادات بالبريد الإلكتروني — ما الذي يضيفه ربائد؟' },
   { page: 'start', at: '/start', question: 'ندير المشروع بملفات إكسل ومجلد مشترك — ما الذي يتغيّر؟' },
 ] as const;
 
@@ -181,7 +186,7 @@ test.describe('the 31 answers', () => {
 });
 
 test.describe('the comparison questions', () => {
-  test('all four are waiting, unpublished, against WhatsApp, email and the spreadsheet', async ({ page }) => {
+  test('each is waiting, unpublished, against WhatsApp, email and the spreadsheet', async ({ page }) => {
     await logInByApi(page.request, ANSWER_FIRST_EDITOR);
     const drafts = (await questions(page.request, false)).filter((entry) => entry._status !== 'published');
 
@@ -200,8 +205,19 @@ test.describe('the comparison questions', () => {
       expect(entry._order.endsWith('0'), `«${entry.question}» sits on «${entry._order}», which is not a key`).toBe(false);
     }
 
+    // Each of the three has a question of its own, as the ticket names all
+    // three: «Rabaed against WhatsApp, email and spreadsheets».
+    for (const [against, asked] of [
+      ['واتساب', 'مجموعة واتساب'],
+      ['البريد الإلكتروني', 'بالبريد الإلكتروني'],
+      ['الإكسل', 'ملفات إكسل'],
+    ] as const) {
+      const own = waiting.filter((entry) => entry.question.includes(asked));
+      expect(own.length, `${against} has no question of its own`).toBeGreaterThan(0);
+    }
+
     const answers = waiting.map((entry) => entry.answer).join(' ');
-    for (const against of ['واتساب', 'البريد الإلكتروني', 'الإكسل']) {
+    for (const against of ['واتساب', 'البريد الإلكتروني', 'إكسل']) {
       expect(answers, `nothing compares Rabaed with ${against}`).toContain(against);
     }
     for (const figure of UNSOURCED_FIGURES) expect(answers).not.toContain(figure);

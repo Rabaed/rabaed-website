@@ -273,11 +273,19 @@ test('the parties section draws the answer under its heading once one is written
     const saved = await save(page.request, 'product-page', { ...entry, roles: { ...entry.roles, lead: arabic(answer) } }, 'draft');
     expect(saved.ok(), await saved.text()).toBe(true);
 
+    await page.setViewportSize({ width: 1280, height: 900 });
     await preview(page, '/product');
     await expect(page.locator('#roles .lead')).toHaveText(answer);
     // Between the heading and the tabs, which is what makes it the section's
     // opening answer rather than a note under the section.
     await expect(page.locator('#roles h2 + p.lead + .tabs')).toHaveCount(1);
+
+    // And it pushes the tabs down by its own height and no more: the paragraph
+    // needs no rule of its own, because its margin and the tabs' collapse into
+    // the one gap the heading leaves today (product.css says so, ticket 35).
+    const [heading, lead, tabs] = await boxesOf(page.locator('#roles h2, #roles .lead, #roles .tabs'));
+    expect(Math.round(lead!.top - heading!.bottom), 'the gap the heading leaves').toBe(12);
+    expect(Math.round(tabs!.top - lead!.bottom), 'the gap above the tabs').toBe(28);
 
     expect(await visitorHtml(request, '/product')).not.toContain(answer);
   } finally {

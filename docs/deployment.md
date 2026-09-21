@@ -350,7 +350,7 @@ without the question. The handoff asks for this and says whose the words are:
 | **Pages → Home page**, under **الوحدات** and **السجل الموثّق** | An opening paragraph for each. The units had none at all. |
 | **Pages → Product page**, under **لكل طرف** and **داخل كل جهة** | The same two. The parties had none at all. |
 | **FAQs** — all 31 | Each answer rewritten to name its own subject, so it can be quoted without its question. Nothing is longer than it needs to be. |
-| **FAQs** — four new questions, in draft | Rabaed against WhatsApp, the email and the spreadsheet: the one question buyers ask that the site never answered. |
+| **FAQs** — five new questions, in draft | Rabaed against WhatsApp, the email and the spreadsheet — the one question buyers ask that the site never answered: the three together, and then one each. |
 
 **Nothing in any of it is new.** Every claim is one the site already makes.
 Nothing states a figure, a percentage, a client count or a testimonial that was
@@ -361,7 +361,7 @@ not already published with a source.
 1. Open the entry — a page under **Pages**, or a question under **FAQs**. What
    you see is the proposal; what visitors see is still what is published.
 2. Read it, and change anything you disagree with. The words are yours.
-3. **Preview**, then **Publish changes**. The four new questions also need
+3. **Preview**, then **Publish changes**. The new questions also need
    **يظهر في الصفحة** left ticked, and can be dragged up their page's list.
 
 Take the pieces you agree with and leave the rest; nothing depends on any one

@@ -323,7 +323,9 @@ test('the units section draws the answer under its heading once one is written, 
     'ربائد أربع وحدات على سجل واحد: المراسلات الرسمية، والاعتمادات والطلبات، والتقرير اليومي للموقع، والمستندات والإصدارات. هذه مسودة مكتوبة في الاختبار وحده لترى الصفحة كيف تحمل الفقرة تحت العنوان، ومخرج الوحدات واحد: السجل الموثّق.';
   expect(answer.trim().split(/\s+/).length).toBeGreaterThanOrEqual(30);
   expect(entry.fourUnits.lead.ar ?? '', 'the units section publishes no paragraph today').toBe('');
-  expect(await visitorHtml(request)).not.toContain('id="jt"><div class="wrap"><div class="tz-head"><p');
+  // And a visitor is served the section with nothing under its heading.
+  await page.goto('/');
+  await expect(page.locator('#jt .tz-head p')).toHaveCount(0);
 
   try {
     const saved = await save(page.request, { ...entry, fourUnits: { ...entry.fourUnits, lead: arabic(answer) } }, 'draft');
