@@ -4,9 +4,6 @@ import { track } from '@vercel/analytics';
 import { useEffect } from 'react';
 import { aiAssistantFrom } from '@/lib/ai-referrals';
 
-/** The event this raises, and the one thing it says: which assistant sent the visit. */
-export const AI_REFERRAL_EVENT = 'ai-referral';
-
 /**
  * Counts a visit that an AI assistant sent (ticket 34), so that the team can
  * read it as a number beside the page views rather than by going through a
@@ -23,7 +20,7 @@ export const AI_REFERRAL_EVENT = 'ai-referral';
 export function AiReferral() {
   useEffect(() => {
     const assistant = aiAssistantFrom(document.referrer, window.location.search);
-    if (assistant) track(AI_REFERRAL_EVENT, { assistant });
+    if (assistant) track('ai-referral', { assistant });
   }, []);
 
   return null;

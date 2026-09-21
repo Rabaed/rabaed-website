@@ -5,18 +5,23 @@
  * (`src/lib/environment.ts`), so what this build can be held to is that they
  * are absent here and that nothing is asked of an origin that has none of
  * them — the same division ticket 03 made for indexing, where the suite
- * proves the blocked state and the deployment proves the other one.
+ * proves the blocked state and the deployment proves the other one. Nothing
+ * here can tell a page that would load them in production from a page that
+ * has lost them altogether; the first visit in the Vercel dashboard is what
+ * tells the founder that (`docs/deployment.md`).
  *
  * The events are a different matter: they are raised everywhere and go
  * nowhere when no script is listening, so they can be read here. These tests
  * stand where the script would and collect what it would have sent — which is
- * the site's own behaviour, not Vercel's.
+ * the site's own behaviour, not Vercel's, and it is what fails if the whole
+ * measurement is ever dropped out of the page.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { uniqueApplicant } from './forms';
+import { DEMO_BUTTON, DEMO_FORM, DEMO_RECEIVED, DEMO_REFUSED, fillDemoForm, uniqueApplicant } from './forms';
+import { ROUTES } from './routes';
 
-/** Both scripts and both intakes are served from the deployment's own origin, under this path. */
-const FROM_VERCEL = /_vercel\/(insights|speed-insights)/;
+/** Both scripts and both intakes, wherever they are served from: the deployment's own origin, or Vercel's. */
+const FROM_VERCEL = /_vercel\/(insights|speed-insights)|vercel-(scripts|insights)\.com/;
 
 /** One event, as the script receives it. */
 type Event = { name: string; data?: Record<string, unknown> };
@@ -39,25 +44,30 @@ async function eventsRaisedOn(page: Page): Promise<() => Promise<Event[]>> {
   return () => page.evaluate(() => (window as unknown as { __raised?: Event[] }).__raised ?? []);
 }
 
-test('the pages ask for no measurement script, and send nothing, where there is nothing to receive it', async ({ page }) => {
+test('no page asks for a measurement script, or sends anything, where there is nothing to receive it', async ({ page }) => {
   const asked: string[] = [];
   page.on('request', (request) => {
-    if (FROM_VERCEL.test(request.url())) asked.push(request.url());
+    if (FROM_VERCEL.test(request.url())) asked.push(`${request.url()} — from ${page.url()}`);
   });
 
-  for (const path of ['/', '/product']) {
-    await page.goto(path, { waitUntil: 'networkidle' });
-    expect(await page.content(), path).not.toMatch(FROM_VERCEL);
+  for (const route of ROUTES) {
+    await page.goto(route.path, { waitUntil: 'networkidle' });
+    expect(await page.content(), route.path).not.toMatch(FROM_VERCEL);
   }
   expect(asked).toEqual([]);
 });
 
-/** The three assistants the spec names, each arriving the way it does. */
+/** The three assistants the spec names, each arriving the way one does. */
 const SENT_BY = [
   {
     assistant: 'chatgpt',
     how: 'the address it marks a link with',
     open: (page: Page) => page.goto('/?utm_source=chatgpt.com'),
+  },
+  {
+    assistant: 'perplexity',
+    how: 'a marked address that names it without its domain',
+    open: (page: Page) => page.goto('/?utm_source=perplexity'),
   },
   {
     assistant: 'perplexity',
@@ -94,45 +104,36 @@ test('a visit nobody sent, and one a search engine sent, are counted as neither'
   expect(await raised()).toEqual([]);
 });
 
-/** The demo request form, as `form-submission.spec.ts` fills it in. */
-const DEMO_FORM = 'احجز عرضاً حياً على مشروعك';
-const DEMO_BUTTON = 'احجز عرضاً حياً';
-const RECEIVED = 'وصلنا طلبك — سنتواصل خلال يوم عمل لتحديد الموعد.';
-const REFUSED = 'تعذّر استلام طلبك الآن. حاول مرة أخرى بعد قليل، أو راسلنا على واتساب.';
-
-async function fillDemoRequest(page: Page, email: string) {
-  const form = page.getByRole('form', { name: DEMO_FORM });
-  await form.getByLabel('الاسم الكامل').fill('سارة القحطاني');
-  await form.getByLabel('البريد الإلكتروني').fill(email);
-  await form.getByLabel('دورك في المشروع').selectOption('owner');
-  await form.getByLabel('رقم الجوال').fill('0500000000');
-  return form;
+/** Opens the home page as a visitor on network address `ip`, and returns its demo request form. */
+async function openDemoForm(page: Page, ip: string) {
+  await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  return page.getByRole('form', { name: DEMO_FORM });
 }
 
-test('a request the server stored is counted, under the name of the form it came from', async ({ page }) => {
+test('a submission the server stored is counted, under the name of the form it came from', async ({ page }) => {
   const raised = await eventsRaisedOn(page);
   const { email, ip } = uniqueApplicant('analytics-demo');
-  await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
 
-  await page.goto('/', { waitUntil: 'networkidle' });
-  const form = await fillDemoRequest(page, email);
+  const form = await openDemoForm(page, ip);
+  await fillDemoForm(form, email);
   await form.getByRole('button', { name: DEMO_BUTTON }).click();
-  await expect(form.getByRole('status')).toHaveText(RECEIVED);
+  await expect(form.getByRole('status')).toHaveText(DEMO_RECEIVED);
 
+  // The form's own id, and nothing about who sent it.
   expect(await raised()).toEqual([{ name: 'demo-request' }]);
 });
 
-test('a request the server refused is counted as nothing, because what is counted is what it kept', async ({ page }) => {
+test('a submission the server refused is counted as nothing, because what is counted is what it kept', async ({ page }) => {
   const raised = await eventsRaisedOn(page);
   const { email, ip } = uniqueApplicant('analytics-refused');
-  await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
 
-  await page.goto('/', { waitUntil: 'networkidle' });
-  const form = await fillDemoRequest(page, email);
+  const form = await openDemoForm(page, ip);
+  await fillDemoForm(form, email);
   // The hidden trap, filled the way a bot fills every field.
   await form.locator('textarea[name="website"]').fill('https://spam.example', { force: true });
   await form.getByRole('button', { name: DEMO_BUTTON }).click();
 
-  await expect(form.getByRole('alert')).toHaveText(REFUSED);
+  await expect(form.getByRole('alert')).toHaveText(DEMO_REFUSED);
   expect(await raised()).toEqual([]);
 });

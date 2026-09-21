@@ -12,13 +12,27 @@
  * a visit that either one would have missed, and neither is invented here:
  * Vercel records the referrer and the query of every page view anyway
  * (`docs/analytics.md`), so this only names what is already arriving.
+ *
+ * A mark on an address is whatever put it there, and so is a referrer, so what
+ * this counts is a signal rather than an audit: anyone who wants to can open
+ * the site with `?utm_source=claude.ai` on the end. What the number is read
+ * for — whether writing for assistants is worth more of the same — survives
+ * that.
  */
 
-/** The assistants, by the host they arrive from and the `utm_source` they mark. */
-const ASSISTANTS: Readonly<Record<string, string>> = {
-  'chatgpt.com': 'chatgpt',
-  'perplexity.ai': 'perplexity',
-  'claude.ai': 'claude',
+/** The three, under the names this counts them by. */
+export type AiAssistant = 'chatgpt' | 'perplexity' | 'claude';
+
+/**
+ * Each one's host, which its own visits arrive from. A mark on the address is
+ * matched against the host and against the name above it, because an assistant
+ * has used either — ChatGPT marks `chatgpt.com` — and which it uses is not
+ * ours to decide.
+ */
+const HOSTS: Readonly<Record<AiAssistant, string>> = {
+  chatgpt: 'chatgpt.com',
+  perplexity: 'perplexity.ai',
+  claude: 'claude.ai',
 };
 
 /** `host` is that domain or a subdomain of it — `www.perplexity.ai` is Perplexity, `notperplexity.ai` is not. */
@@ -34,18 +48,18 @@ function hostOf(referrer: string): string {
 }
 
 /**
- * The assistant that sent this visit — `chatgpt`, `perplexity` or `claude` —
- * or `null` for every other visit, which is nearly all of them.
+ * The assistant that sent this visit, or `null` for every other visit, which
+ * is nearly all of them.
  *
  * `referrer` is `document.referrer` and `search` the page's query string, both
  * exactly as the browser gives them.
  */
-export function aiAssistantFrom(referrer: string, search: string): string | null {
+export function aiAssistantFrom(referrer: string, search: string): AiAssistant | null {
   const host = hostOf(referrer);
-  const source = new URLSearchParams(search).get('utm_source')?.trim().toLowerCase() ?? '';
+  const marked = new URLSearchParams(search).get('utm_source')?.trim().toLowerCase() ?? '';
 
-  for (const [domain, assistant] of Object.entries(ASSISTANTS)) {
-    if (isHost(host, domain) || isHost(source, domain)) return assistant;
+  for (const [assistant, domain] of Object.entries(HOSTS) as [AiAssistant, string][]) {
+    if (isHost(host, domain) || marked === domain || marked === assistant) return assistant;
   }
   return null;
 }

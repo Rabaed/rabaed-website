@@ -34,15 +34,23 @@ out of the request itself, and that number is thrown away after 24 hours.
 Nobody — us or Vercel — can join yesterday's visit to today's, or a visit here
 to a visit on any other website.
 
+Everything in this section is what Vercel says of its own product, in
+[Web Analytics: Privacy and Compliance](https://vercel.com/docs/analytics/privacy-policy)
+and [Speed Insights: Privacy and Compliance](https://vercel.com/docs/speed-insights/privacy-policy),
+read on 21 September 2026. It is not something the site can check for itself,
+and a Privacy Policy that repeats it is repeating a supplier's word — worth
+knowing before it is written down as ours (ticket 37).
+
 Speed Insights records how fast pages actually were for real visitors: how long
 until the page was readable, how quickly it responded to the first tap, how
 much the layout moved while loading. It holds the page's address and the
 measurements, and nothing about who was reading it.
 
-## The three things we count ourselves
+## The things we count ourselves
 
-Beyond page views, the site raises three kinds of event. None of them carries
-anything a person typed.
+Beyond page views, the site raises events of its own. Two of them happen today;
+the third arrives with the Pour Tracker's form. None carries anything a person
+typed.
 
 **An AI assistant sent someone.** When a visit arrives from ChatGPT, Perplexity
 or Claude, the site counts it as `ai-referral`, saying which of the three
@@ -53,16 +61,18 @@ referrers because an assistant often does not pass one on, and instead marks
 the address it hands over with `utm_source`; reading both catches visits that
 either alone would miss.
 
-**A form was submitted.** When the server has stored a submission, the site
+**A form was submitted.** When the server has stored a Submission, the site
 counts it under the form's own name — `demo-request`, `referral-signup`,
 `partnership-application` — and nothing else. Not the name, not the email
-address, not the phone number: those are in the submission itself, which lives
-in the CMS and never goes to analytics. A request that was refused, or that
+address, not the phone number: those are in the Submission itself, which lives
+in the CMS and never goes to analytics. A Submission that was refused, or that
 never reached the server, is not counted: what is counted is what was kept.
 
-**The Pour Tracker was downloaded**, as `tool-download`, on the same footing —
-the form and the file are one act (`src/forms/use-submission.ts`). That form is
-not sent to the server yet; it counts itself the moment ticket 30 sends it.
+**The Pour Tracker will be downloaded**, as `tool-download`, on the same
+footing — the form and the file are one act. **Nothing is counted there yet**,
+because that form does not send to the server at all until ticket 30 builds it;
+it will count itself the moment it does, because every form is sent from one
+place (`src/forms/use-submission.ts`) and that is where the counting is.
 
 ## Where the team reads it
 

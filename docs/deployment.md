@@ -74,12 +74,14 @@ minutes of the first visit. Preview deployments deliberately report nothing, so
 looking at a pull request never shows up as a visit.
 
 Custom events — the ones that count form submissions and visits an AI
-assistant sent — need a paid Vercel team, which the project is on already for
-the reason ticket 39a gives.
+assistant sent — need the paid Vercel team that ticket 39a part 1 records
+this project as needing.
 
 To check it worked: open the production site, then the project's **Analytics**
-tab, and look for the visit. `docs/analytics.md` says what is collected, in
-the words the Privacy Policy uses.
+tab, and look for the visit. Until one shows up there, nothing proves the two
+scripts reach anyone: the suite can only hold the site to loading neither of
+them anywhere else. `docs/analytics.md` says what is collected, in the words
+the Privacy Policy uses.
 
 ## Node version
 
@@ -151,8 +153,7 @@ or production deployments stop.
    ```
 
    ```powershell
-   Get-Content ~
-abaed-production.env | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$n" $v }; npm run cms:migrate
+   Get-Content ~/rabaed-production.env | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$n" $v }; npm run cms:migrate
    ```
 
    A value typed on a command line is kept in the shell's history, where it
