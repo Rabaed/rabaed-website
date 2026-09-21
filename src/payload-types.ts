@@ -2594,6 +2594,13 @@ export interface ProductPage {
       en?: string | null;
     };
     /**
+     * A standalone answer of 30 to 60 words to the question the heading asks, understood without reading what is above it. This paragraph is what AI assistants quote. Left empty, no paragraph is drawn under the heading, as the page stands today.
+     */
+    lead?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+    /**
      * Always three: the Owner, the Consultant and the Contractor. Drag them to reorder.
      */
     roles: {
@@ -2652,6 +2659,9 @@ export interface ProductPage {
       ar: string;
       en?: string | null;
     };
+    /**
+     * A standalone answer of 30 to 60 words to the question the heading asks, understood without reading what is above it. This paragraph is what AI assistants quote.
+     */
     lead: {
       ar: string;
       en?: string | null;
@@ -2947,6 +2957,13 @@ export interface HomePage {
       en?: string | null;
     };
     /**
+     * A standalone answer of 30 to 60 words to the question the heading asks, understood without reading what is above it. This paragraph is what AI assistants quote. Left empty, no paragraph is drawn under the heading, as the page stands today.
+     */
+    lead?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+    /**
      * Read out by screen readers.
      */
     tabsLabel: {
@@ -3020,6 +3037,9 @@ export interface HomePage {
       };
       id?: string | null;
     }[];
+    /**
+     * A standalone answer of 30 to 60 words to the question the heading asks, understood without reading what is above it. This paragraph is what AI assistants quote.
+     */
     lead: {
       ar: string;
       en?: string | null;
@@ -5818,6 +5838,12 @@ export interface ProductPageSelect<T extends boolean = true> {
               ar?: T;
               en?: T;
             };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
         roles?:
           | T
           | {
@@ -6218,6 +6244,12 @@ export interface HomePageSelect<T extends boolean = true> {
               en?: T;
             };
         heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
           | T
           | {
               ar?: T;

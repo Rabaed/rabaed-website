@@ -142,6 +142,12 @@ export const LAUNCH_ARTICLES_EDITOR = {
   password: 'test-editor-password-38',
 } as const;
 
+/** The answer-first copy pass's own account (ticket 35), for the same reason as `BLOG_EDITOR`. */
+export const ANSWER_FIRST_EDITOR = {
+  email: 'answer-first-editor@rabaed.test',
+  password: 'test-editor-password-35',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -163,6 +169,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   CRAWLERS_EDITOR,
   SEARCH_EDITOR,
   LAUNCH_ARTICLES_EDITOR,
+  ANSWER_FIRST_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */

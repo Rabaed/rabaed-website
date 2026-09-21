@@ -40,7 +40,7 @@ type HomeEntry = {
     pictures?: Record<string, number | null>;
   } & Record<string, unknown>;
   situations: { shows: boolean; heading: Words; situations: Situation[] } & Record<string, unknown>;
-  fourUnits: { shows: boolean; heading: Words; tabs: Tab[] } & Record<string, unknown>;
+  fourUnits: { shows: boolean; heading: Words; lead: Words; tabs: Tab[] } & Record<string, unknown>;
   record: { shows: boolean; lead: Words; types: TransactionType[] } & Record<string, unknown>;
   beforeAfter: {
     shows: boolean;
@@ -60,6 +60,11 @@ const SENTENCE = 'نجمع المالك والاستشاري والمقاول ع
 /** Arabic words exactly `length` characters long. */
 function wordsOfLength(length: number): string {
   return SENTENCE.repeat(Math.ceil(length / SENTENCE.length)).slice(0, length).trimEnd().padEnd(length, 'ع');
+}
+
+/** An Arabic paragraph of exactly `count` words, for the answer-first rule (ticket 35). */
+function wordsCounting(count: number): string {
+  return Array.from({ length: count }, (_, index) => (index % 2 === 0 ? 'ربائد' : 'سجل')).join(' ');
 }
 
 const LEFT_OUT = new Set(['id', 'createdAt', 'updatedAt', 'globalType', '_status']);
@@ -305,6 +310,36 @@ test('a reworded heading, grown lists and hidden sections are previewed, and nev
   }
 });
 
+test('the units section draws the answer under its heading once one is written, and nothing while it is empty', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, HOME_EDITOR);
+  const entry = await published(page.request);
+  // A standalone answer of 30 to 60 words, which is what this field takes
+  // (ticket 35). The Reference site gives this section no paragraph, so the
+  // field is empty until an Editor writes one.
+  const answer =
+    'ربائد أربع وحدات على سجل واحد: المراسلات الرسمية، والاعتمادات والطلبات، والتقرير اليومي للموقع، والمستندات والإصدارات. هذه مسودة مكتوبة في الاختبار وحده لترى الصفحة كيف تحمل الفقرة تحت العنوان، ومخرج الوحدات واحد: السجل الموثّق.';
+  expect(answer.trim().split(/\s+/).length).toBeGreaterThanOrEqual(30);
+  expect(entry.fourUnits.lead.ar ?? '', 'the units section publishes no paragraph today').toBe('');
+  expect(await visitorHtml(request)).not.toContain('id="jt"><div class="wrap"><div class="tz-head"><p');
+
+  try {
+    const saved = await save(page.request, { ...entry, fourUnits: { ...entry.fourUnits, lead: arabic(answer) } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await preview(page);
+    await expect(page.locator('#jt .tz-head .lead')).toHaveText(answer);
+    // Under the heading, which is what makes it the section's opening answer.
+    await expect(page.locator('#jt .tz-head > *').nth(2)).toHaveText(answer);
+
+    expect(await visitorHtml(request)).not.toContain(answer);
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
 test('a replaced building, and words marked in bold and broken onto a new line, are previewed as the page draws them', async ({
   page,
   request,
@@ -413,7 +448,7 @@ test('an entry is not handed over until the admin has reopened its remembered ta
 test('the CMS refuses what the home page cannot carry', async ({ page }) => {
   await logInByApi(page.request, HOME_EDITOR);
   const entry = await published(page.request);
-  const { hero, situations, record, beforeAfter, figures } = entry;
+  const { hero, situations, fourUnits, record, beforeAfter, figures } = entry;
   const [situation, ...otherSituations] = situations.situations;
   const [type, ...otherTypes] = record.types;
   const [step, ...otherSteps] = beforeAfter.steps;
@@ -469,6 +504,19 @@ test('the CMS refuses what the home page cannot carry', async ({ page }) => {
       'a building of another shape',
       { ...entry, hero: { ...hero, pictures: { ...hero.pictures, owner: otherShape } } },
       'hero.pictures.owner',
+    ],
+    // The answer-first rule (ticket 35): the paragraph under these headings is
+    // what an assistant lifts and quotes, so it is held to a standalone answer
+    // of 30 to 60 words rather than only to a length.
+    [
+      'an opening answer of 29 words under the units',
+      { ...entry, fourUnits: { ...fourUnits, lead: arabic(wordsCounting(29)) } },
+      'fourUnits.lead.ar',
+    ],
+    [
+      'an opening answer of 61 words under the Record',
+      { ...entry, record: { ...record, lead: arabic(wordsCounting(61)) } },
+      'record.lead.ar',
     ],
     ['English with no English words', { ...entry, languages: ['ar', 'en'] }, /\.en$/],
   ];
@@ -551,11 +599,21 @@ test('a situation card, a figure card and a before-and-after card each hold thei
  * Every word of an entry that has Arabic given English of its own; a word left
  * empty stays empty. Two letters, which the shortest place — a bar's label —
  * holds.
+ *
+ * A word whose Arabic is a paragraph of 30 words or more is given as many
+ * English words instead: the opening paragraph of a section is held to a
+ * standalone answer of 30 to 60 words in *either* language (ticket 35), and
+ * «En» is not one. Two letters a word keeps it well inside whatever length the
+ * field holds, since it already holds that many Arabic words.
  */
 function withEnglish<T>(value: T): T {
   if (Array.isArray(value)) return value.map(withEnglish) as T;
   if (value && typeof value === 'object') {
-    if ('ar' in value) return value.ar ? { ...value, en: 'En' } : value;
+    if ('ar' in value) {
+      if (!value.ar) return value;
+      const words = String(value.ar).trim().split(/\s+/).length;
+      return { ...value, en: words >= 30 ? Array.from({ length: Math.min(words, 60) }, () => 'En').join(' ') : 'En' };
+    }
     return Object.fromEntries(Object.entries(value).map(([key, each]) => [key, withEnglish(each)])) as T;
   }
   return value;

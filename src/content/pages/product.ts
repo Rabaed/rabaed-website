@@ -121,6 +121,9 @@ export async function getProductPage(locale: Locale): Promise<ProductPageContent
       shows: roles.shows !== false,
       eyebrow: words(roles.eyebrow),
       heading: words(roles.heading),
+      // Empty until an Editor writes the section's standalone answer, and
+      // drawn only once one is written (ticket 35).
+      lead: words(roles.lead),
       roles: roles.roles.map((role) => ({
         party: words(role.party),
         promise: words(role.promise),

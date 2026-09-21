@@ -17,6 +17,12 @@ export type UnitTab = {
 export type HomeFourUnitsContent = {
   readonly eyebrow: string;
   readonly heading: string;
+  /**
+   * The standalone answer the section opens with (ticket 35), or `''` for the
+   * Reference site's own opening, which puts the tabs straight under the
+   * heading.
+   */
+  readonly lead: string;
   /** Names the row of tabs, for a screen reader. */
   readonly tabsLabel: string;
   readonly tabs: readonly UnitTab[];
@@ -44,6 +50,11 @@ export type HomeFourUnitsContent = {
  * hidden from screen readers only because they already hear the same words as
  * the image's description; announcing them twice would say nothing new.
  *
+ * **The opening paragraph is not on the Reference site**, which puts the tabs
+ * straight under the heading. Ticket 35 gives the section somewhere to carry
+ * the standalone answer HANDOFF §6.4 asks every major heading for; while that
+ * is unwritten the section is drawn exactly as the baselines have it.
+ *
  * **The screen does not break out of the content width**, though the ticket and
  * the handoff describe it widening to 1440px. No Reference page has that rule
  * any more, and the baselines were captured without it — ADR-0005.
@@ -55,6 +66,7 @@ export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
         <div className="tz-head">
           <div className="eyebrow">{content.eyebrow}</div>
           <h2>{content.heading}</h2>
+          {content.lead ? <p className="lead">{content.lead}</p> : null}
         </div>
         <div className="jt-line" />
 

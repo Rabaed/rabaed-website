@@ -36,6 +36,8 @@ import * as migration_20260920_211936_import_search_settings from './20260920_21
 import * as migration_20260921_035305_tool_download_form from './20260921_035305_tool_download_form';
 import * as migration_20260921_035306_publish_tool_download_wording from './20260921_035306_publish_tool_download_wording';
 import * as migration_20260921_101500_import_launch_articles from './20260921_101500_import_launch_articles';
+import * as migration_20260921_110900_answer_first_openers from './20260921_110900_answer_first_openers';
+import * as migration_20260921_111500_propose_answer_first_copy from './20260921_111500_propose_answer_first_copy';
 
 export const migrations = [
   {
@@ -227,5 +229,15 @@ export const migrations = [
     up: migration_20260921_101500_import_launch_articles.up,
     down: migration_20260921_101500_import_launch_articles.down,
     name: '20260921_101500_import_launch_articles'
+  },
+  {
+    up: migration_20260921_110900_answer_first_openers.up,
+    down: migration_20260921_110900_answer_first_openers.down,
+    name: '20260921_110900_answer_first_openers',
+  },
+  {
+    up: migration_20260921_111500_propose_answer_first_copy.up,
+    down: migration_20260921_111500_propose_answer_first_copy.down,
+    name: '20260921_111500_propose_answer_first_copy',
   },
 ];

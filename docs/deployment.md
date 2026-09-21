@@ -330,6 +330,56 @@ are still in code. The migrations import each entry's words once, as they were.
   reaches visitors only when published. Where a button leads stays in code: an
   Editor changes what it says, not where it goes.
 
+### The answer-first copy pass, waiting for a decision
+
+**A rewrite of the site's opening paragraphs and all 31 answers is sitting in
+the CMS as drafts, and nobody can read a word of it** (ticket 35). Every page
+still says exactly what it says today, and goes on saying it until you publish
+each piece yourself.
+
+**Why.** An AI assistant quotes a paragraph, not a page. A paragraph it can
+lift has to make sense on its own — and several of ours do not. «ليست ميزة
+تُفعَّل» says nothing without the heading above it; «لا.» and «نعم.» say nothing
+without the question. The handoff asks for this and says whose the words are:
+«راجعه مع أحمد، النصّ نصّه».
+
+**What is waiting, and where:**
+
+| Where | What it is |
+| --- | --- |
+| **Pages → Home page**, under **الوحدات** and **السجل الموثّق** | An opening paragraph for each. The units had none at all. |
+| **Pages → Product page**, under **لكل طرف** and **داخل كل جهة** | The same two. The parties had none at all. |
+| **FAQs** — all 31 | Each answer rewritten to name its own subject, so it can be quoted without its question. Nothing is longer than it needs to be. |
+| **FAQs** — four new questions, in draft | Rabaed against WhatsApp, the email and the spreadsheet: the one question buyers ask that the site never answered. |
+
+**Nothing in any of it is new.** Every claim is one the site already makes.
+Nothing states a figure, a percentage, a client count or a testimonial that was
+not already published with a source.
+
+**To take it:**
+
+1. Open the entry — a page under **Pages**, or a question under **FAQs**. What
+   you see is the proposal; what visitors see is still what is published.
+2. Read it, and change anything you disagree with. The words are yours.
+3. **Preview**, then **Publish changes**. The four new questions also need
+   **يظهر في الصفحة** left ticked, and can be dragged up their page's list.
+
+Take the pieces you agree with and leave the rest; nothing depends on any one
+of them.
+
+**One thing to know before you start.** A page's entry holds one proposal at a
+time. If you publish something else on the home page or the product page first
+— a reworded heading, a new card — the proposal is no longer what the entry
+opens on, and you will find it under **Versions** instead. So read these two
+pages' proposals before making other changes to them. The questions have no
+such catch: each holds its own.
+
+The two paragraph fields that were empty — the units' and the parties' — stay
+empty and draw nothing until one is published, so the pages look exactly as
+they do today in the meantime. Each of the four is held to a standalone answer
+of **30 to 60 words**: the admin refuses a shorter or a longer one, because
+that is the length an assistant quotes.
+
 ### Referral Program values
 
 The payout for each project and the referred client's discount are set once,
@@ -442,6 +492,19 @@ To write one:
    leave `down` as it was.
 4. Check it with `npm run cms:migrate-fresh`, which migrates a throwaway
    database from nothing in a few seconds — the only place any of this shows.
+
+**A migration that changes content already seeded cannot use that tool, and it
+says so.** The freezer writes out every row of a table that grew, so it refuses
+a migration adding rows to a table an earlier import filled — which is what
+proposing a change to imported content does. Ticket 35's is the first of these:
+its statements are written out in `src/migrations/answer-first-proposal/seed.ts`
+from the words beside them, to the same rule, with two differences the freezer
+has no need of. **No row is found by an id**, because by then an Editor may have
+added or removed one, so a row is found by its own words and a new one lets the
+sequence name it. And **a page's entry is copied rather than listed**: a draft
+of it is its published version and every row of every list inside it, which is
+the one place naming today's columns would be wrong, since a column added later
+and missed would propose an entry with a field wiped.
 
 `tests/unit/data-migrations.spec.ts` holds the rule, and names the eight
 migrations that have not been brought over to it yet (ticket 64).

@@ -228,6 +228,12 @@
 /* Kept together here, media queries included, because its rules and their
    overrides only make sense read side by side. */
 #jt { border-top: 1px solid var(--dark-line) }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the opening answer HANDOFF
+   §6.4 asks this section for (ticket 35), which the Reference site has not got.
+   It is drawn only once an Editor writes one, so nothing here changes the page
+   as the baselines hold it. `.tz-head h2` carries no bottom margin of its own,
+   hence the 12px above; the gap below is `.tz-head`'s own 26px. */
+#jt .tz-head .lead { margin: 12px 0 0 }
 .jt-line { height: 1px; background: linear-gradient(to left, transparent, var(--dark-line), transparent); margin: 0 0 18px }
 .jt-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px }
 .jt-s { background: rgba(255, 255, 255, .035); border: 1px solid var(--dark-line); border-radius: 14px; padding: 16px 15px; position: relative; text-align: start; color: inherit; font: inherit; cursor: pointer; transition: border-color .3s, background .3s; -webkit-tap-highlight-color: rgba(249, 87, 56, .18) }

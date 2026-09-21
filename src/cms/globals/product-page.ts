@@ -1,5 +1,5 @@
 import type { Field } from 'payload';
-import { listField, sectionTab, wordsField } from '../page-fields';
+import { listField, openingAnswerField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { screenField } from './screen-mocks';
 
@@ -187,6 +187,10 @@ export const ProductPage = pageGlobal({
       fields: [
         EYEBROW,
         wordsField('heading', { ar: 'العنوان', en: 'Heading' }, 70),
+        // As with the home page's units: the Reference site puts the tabs
+        // straight under the heading, so this stands empty until somebody
+        // writes the answer (ticket 35).
+        openingAnswerField(320, { optional: true }),
         listField({
           name: 'roles',
           labels: {
@@ -225,7 +229,7 @@ export const ProductPage = pageGlobal({
       fields: [
         EYEBROW,
         wordsField('heading', { ar: 'العنوان', en: 'Heading' }, 70),
-        wordsField('lead', { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' }, 320, { multiline: true }),
+        openingAnswerField(320),
         listField({
           name: 'cycles',
           labels: {

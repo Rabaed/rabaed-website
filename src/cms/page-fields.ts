@@ -28,6 +28,7 @@ import {
   type UploadFieldSingleValidation,
 } from 'payload';
 import { text, textarea } from 'payload/shared';
+import { ANSWER_LENGTH, answerLengthProblem } from './answer-first';
 import { emphasisProblem } from './emphasis';
 import { ARABIC, latinNameProblem } from './latin-names';
 import { valueNameProblem } from './referral-program-values';
@@ -116,6 +117,9 @@ const englishWhereArabic = (options: ValidateOptions) =>
  * page inserts; a name the site does not hold is refused
  * (`referral-program-values.ts`). `emphasis` words may mark a phrase in bold
  * between asterisks, and break a line where a new one starts (`emphasis.ts`).
+ * `answerFirst` words are a section's opening paragraph, held to a standalone
+ * answer of 30 to 60 words whenever one is written (`answer-first.ts`); an
+ * optional one left empty is not an answer at all, and passes.
  *
  * Payload checks all of this only when a page is published: a draft may be
  * unfinished.
@@ -131,13 +135,23 @@ export function wordsField(
     readonly latinNames?: boolean;
     readonly values?: boolean;
     readonly emphasis?: boolean;
+    readonly answerFirst?: boolean;
   } = {},
 ): Field {
-  const { multiline = false, description, optional = false, latinNames = false, values = false, emphasis = false } = options;
+  const {
+    multiline = false,
+    description,
+    optional = false,
+    latinNames = false,
+    values = false,
+    emphasis = false,
+    answerFirst = false,
+  } = options;
   const marks = (written: string) =>
     (latinNames ? latinNameProblem(written) : null) ??
     (values ? valueNameProblem(written) : null) ??
-    (emphasis ? emphasisProblem(written) : null);
+    (emphasis ? emphasisProblem(written) : null) ??
+    (answerFirst ? answerLengthProblem(written) : null);
   const box = (language: keyof Words, needed: (options: ValidateOptions) => Words | null): Field => {
     const rtl = language === 'ar';
     const common = {
@@ -166,6 +180,37 @@ export function wordsField(
       },
     ],
   };
+}
+
+/** What every opening answer's field says it is for, in the same words each time. */
+const OPENING_ANSWER: Words = { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' };
+
+/**
+ * The paragraph a section opens with, held to the answer-first rule: a
+ * standalone answer of 30 to 60 words, understood without reading a word above
+ * it (`answer-first.ts`, ticket 35). This is the paragraph an answer engine
+ * lifts and quotes, so it is the one place on the page where length is a rule
+ * rather than a limit.
+ *
+ * `optional` is for a section the Reference site gave no paragraph at all —
+ * the home page's units and the product page's parties. Their field stands
+ * empty, and the section is drawn exactly as it is today until somebody writes
+ * one; written, it is held to the same rule as the rest.
+ */
+export function openingAnswerField(maxLength: number, options: { readonly optional?: boolean } = {}): Field {
+  return wordsField('lead', OPENING_ANSWER, maxLength, {
+    multiline: true,
+    optional: options.optional,
+    answerFirst: true,
+    description: {
+      ar: `جواب مستقل من ${ANSWER_LENGTH.fewest} إلى ${ANSWER_LENGTH.most} كلمة عن سؤال العنوان، يُفهم دون قراءة ما فوقه. هذه الفقرة هي ما تقتبسه المساعدات الذكية.${
+        options.optional ? ' اتركها فارغة ولن تظهر فقرة تحت العنوان، كما هي الصفحة اليوم.' : ''
+      }`,
+      en: `A standalone answer of ${ANSWER_LENGTH.fewest} to ${ANSWER_LENGTH.most} words to the question the heading asks, understood without reading what is above it. This paragraph is what AI assistants quote.${
+        options.optional ? ' Left empty, no paragraph is drawn under the heading, as the page stands today.' : ''
+      }`,
+    },
+  });
 }
 
 const TEXT_NEEDED: Words = {
