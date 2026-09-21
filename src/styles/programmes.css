@@ -48,7 +48,7 @@
 /* ---- who the programme is for ---- */
 /* Its cards are `.rt-row` and `.rt-c`, in `tokens.css`, which the tool page
    shares. The link inside the notes (`.gain`, also in `tokens.css`): */
-.gain .inl { color: var(--acc); font-weight: 600 }
+.gain .inl { color: var(--acc-ink); font-weight: 600 }
 .gain .inl:hover { text-decoration: underline }
 /* DELIBERATE EXCEPTION (HANDOFF §7.4): the partnership page's four audiences,
    two to a row — at desktop widths only. The tool page's rows of cards take it
@@ -60,7 +60,7 @@
 /* ---- the terms in points ---- */
 .t8 { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px }
 .t8 li { display: flex; gap: 13px; align-items: flex-start; padding: 14px 0; border-bottom: 1px dashed var(--line); font-size: 15px; color: var(--muted); line-height: 1.8 }
-.t8 i { width: 26px; height: 26px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc); font-style: normal; margin-top: 3px }
+.t8 i { width: 26px; height: 26px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc-ink); font-style: normal; margin-top: 3px }
 .t8 b { color: var(--ink); font-weight: 600 }
 
 /* ---- the partnership path's stages ---- */
@@ -78,7 +78,7 @@
 .ben-row { list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 36px }
 .ben-row.one { grid-template-columns: 1fr; margin-top: 20px }
 .ben-row li { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 1px dashed var(--line); font-size: 15px; color: var(--muted); line-height: 1.8 }
-.ben-row i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px }
+.ben-row i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px }
 .ben-row b { color: var(--ink); font-weight: 600 }
 
 /* The partnership application's free text, drawn like the fields above it
@@ -88,7 +88,7 @@
 /* The consents, and the declaration one of them agrees to. */
 .chk { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--muted); line-height: 1.85; cursor: pointer }
 .chk input { width: 17px; height: 17px; flex: none; margin: 5px 0 0; accent-color: var(--acc) }
-.chk a { color: var(--acc); border-bottom: 1px solid rgba(249, 87, 56, .35) }
+.chk a { color: var(--acc-ink); border-bottom: 1px solid rgba(249, 87, 56, .35) }
 .declar { background: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--muted); line-height: 1.95 }
 
 @media (max-width: 980px) {
@@ -101,7 +101,7 @@
 .form .upl { display: flex; align-items: center; gap: 12px; border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px; background: var(--paper); cursor: pointer; transition: border-color .25s, background .25s }
 .form .upl:hover { border-color: var(--acc); background: #fff }
 .form .upl:focus-within { outline: 2px solid var(--acc); outline-offset: 3px }
-.form .upl .ic { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; line-height: 1 }
+.form .upl .ic { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--acc-soft); color: var(--acc-ink); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; line-height: 1 }
 .form .upl .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 }
 .form .upl .tx b { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.5 }
 .form .upl .tx small { font-size: 11.5px; color: var(--muted); line-height: 1.5 }

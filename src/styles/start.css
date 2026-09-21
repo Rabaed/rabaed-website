@@ -27,7 +27,7 @@
    Arabic face and only the numeral is `.mono`, in the markup — as in the
    guarantee pill. The letter-spacing is the Reference site's; whether Arabic
    labels keep it is bug 45's decision. */
-.start .s .k { color: var(--acc); font-size: 12px; letter-spacing: .12em; margin-bottom: 8px }
+.start .s .k { color: var(--acc-ink); font-size: 12px; letter-spacing: .12em; margin-bottom: 8px }
 .start .s h3 { font-size: 19px; margin-bottom: 6px }
 .start .s p { color: var(--muted); margin: 0; font-size: 14px }
 @media (max-width: 980px) { .start { grid-template-columns: 1fr 1fr } }

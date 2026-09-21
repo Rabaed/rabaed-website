@@ -62,14 +62,14 @@
 .nsub-p a:hover { background: rgba(255, 255, 255, .06) }
 .nsub-p b { display: block; font-size: 14.5px; font-weight: 600; color: var(--dark-text); margin-bottom: 3px }
 .nsub-p span { display: block; font-size: 12.5px; color: var(--dark-muted); line-height: 1.7 }
-.nsub-p a.on b { color: var(--acc) }
+.nsub-p a.on b { color: var(--acc-ink) }
 .nav.on-light .nsub-t { color: var(--muted) }
 .nav.on-light .nsub-t:hover, .nav.on-light .nsub.open > .nsub-t, .nav.on-light .nsub.on > .nsub-t { color: var(--ink) }
 .nav.on-light .nsub-p { background: rgba(255, 255, 255, .98); border-color: var(--line); box-shadow: 0 26px 60px rgba(0, 0, 0, .13) }
 .nav.on-light .nsub-p b { color: var(--ink) }
 .nav.on-light .nsub-p span { color: var(--muted) }
 .nav.on-light .nsub-p a:hover { background: var(--soft) }
-.nav.on-light .nsub-p a.on b { color: var(--acc) }
+.nav.on-light .nsub-p a.on b { color: var(--acc-ink) }
 
 /* ---- mobile panel ---- */
 .navtog { display: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--dark-line); background: rgba(255, 255, 255, .05); color: #fff; align-items: center; justify-content: center; cursor: pointer; flex: none; padding: 0; transition: border-color .25s, background .25s }
@@ -130,7 +130,7 @@
 }
 
 .mnav .msub { border-top: 1px solid var(--dark-line); padding: 13px 0 4px }
-.mnav .msub .msub-t { display: block; font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--acc); margin-bottom: 2px }
+.mnav .msub .msub-t { display: block; font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--acc-ink); margin-bottom: 2px }
 .mnav .msub a { border-top: 0; padding: 9px 0; font-size: 15px; position: relative; padding-inline-start: 16px }
 .mnav .msub a:before { content: ""; position: absolute; inset-inline-start: 2px; top: 50%; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, .28); transform: translateY(-50%) }
 .mnav .msub a.on:before { background: var(--acc) }
@@ -168,9 +168,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .tail-steps { list-style: none; padding: 0; margin: 20px 0 0 }
 .tail-steps li { display: flex; gap: 14px; align-items: baseline; padding: 11px 0; border-bottom: 1px dashed var(--line) }
 .tail-steps li:last-child { border-bottom: 0 }
-.tail-steps b { font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc); white-space: nowrap; min-width: 96px; direction: rtl }
+.tail-steps b { font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc-ink); white-space: nowrap; min-width: 96px; direction: rtl }
 .tail-steps span { font-size: 14.5px; color: var(--muted); line-height: 1.75 }
-.tail-more { display: inline-block; margin-top: 16px; font-size: 14px; color: var(--acc); font-weight: 600; padding: 6px 0 }
+.tail-more { display: inline-block; margin-top: 16px; font-size: 14px; color: var(--acc-ink); font-weight: 600; padding: 6px 0 }
 .tail-more:hover { text-decoration: underline }
 @media (max-width: 980px) { .tail-grid { grid-template-columns: 1fr; gap: 28px } }
 

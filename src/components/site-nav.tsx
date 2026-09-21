@@ -34,8 +34,8 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
           {/* Two wordmarks, cross-faded by `.nav.on-light`: one legible on the
               dark sections, one on the light. The second is decorative — the
               first already names the site. */}
-          <img className="lg d" src="/brand/rabaed-wordmark-on-dark.png" alt="ربائد — Rabaed" width={563} height={210} />
-          <img className="lg l" src="/brand/rabaed-wordmark-on-light.png" alt="" width={563} height={210} />
+          <img className="lg d" src="/brand/rabaed-wordmark-on-dark.webp" alt="ربائد — Rabaed" width={563} height={210} />
+          <img className="lg l" src="/brand/rabaed-wordmark-on-light.webp" alt="" width={563} height={210} />
         </a>
 
         <div className="links">

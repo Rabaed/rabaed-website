@@ -16,6 +16,6 @@ export const COMPANY = {
   locality: 'الرياض',
   country: 'SA',
   /** The wordmark in its colours, on a transparent ground. */
-  logo: '/brand/rabaed-wordmark-on-light.png',
+  logo: '/brand/rabaed-wordmark-on-light.webp',
   productDescription: 'نظام تشغيل مشاريع الإنشاء: يجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
 } as const;

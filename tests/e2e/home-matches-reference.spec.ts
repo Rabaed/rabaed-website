@@ -30,6 +30,7 @@ import {
   startReferenceSite,
   type ReferenceSite,
 } from './reference-site';
+import { installReadings } from './geometry';
 
 /**
  * Everything the hero is made of. Both documents carry all of it, under the
@@ -77,6 +78,8 @@ const HERO_PARTS = [
 const DIVERGENT = '.guar';
 
 async function measure(page: Page, parts: readonly string[]) {
+  await installReadings(page);
+
   return page.evaluate(
     ({ parts, divergent }: { parts: string[]; divergent: string }) => {
       const root = document.querySelector('#hero')!;
@@ -92,10 +95,8 @@ async function measure(page: Page, parts: readonly string[]) {
           left: round(box.left - origin.left),
           height: round(box.height),
           width: round(box.width),
-          color: style.color,
-          background: style.backgroundColor,
-          borderColor: [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
-          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`,
+          // Colours and typeface as `geometry.ts` reads them, and explains.
+          ...window.__readings(style),
           display: style.display,
           visibility: style.visibility,
           opacity: style.opacity,

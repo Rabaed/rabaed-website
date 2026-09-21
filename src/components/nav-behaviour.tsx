@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+/**
+ * Where the header's lower edge sits: 78px, the offset the Reference site
+ * gives its colour toggle and the one ScrollTrigger was given here.
+ */
+const HEADER_HEIGHT = 78;
 
 /**
  * The header's three behaviours, attached to markup the server already sent:
@@ -138,7 +142,24 @@ function usePartnershipsDropdown() {
  * the cascade. `.on-light` carries everything else — the wordmark cross-fade,
  * the links, the sign-in pill, the burger.
  *
- * A page with no light section keeps the dark header and no trigger is created.
+ * A page with no light section keeps the dark header and nothing is listened
+ * for.
+ *
+ * **No GSAP here, deliberately (ticket 36).** This was a `ScrollTrigger`, and
+ * because the header is on every page, every page therefore carried GSAP and
+ * ScrollTrigger — about 70 KB of animation library — for a class and three
+ * inline styles. The tool, referral, partnership, legal, blog and English
+ * pages use the library for nothing else, and the spec's performance budget
+ * says a page must not ship it where it is unused (spec: Analytics and
+ * performance). Those pages now ship none. GSAP is still the site's one
+ * animation library, and the home, product and start pages still load it for
+ * animations that are actually animations. The Reference tool page settles
+ * this the same way: a plain scroll listener, and no GSAP at all.
+ *
+ * The two positions are the ones ScrollTrigger was given — `top 78px` on the
+ * first light section, `top top` on the footer — read straight off the two
+ * elements, and read on every scroll rather than measured once, so a section
+ * that changes height needs no refreshing.
  */
 function useHeaderColourToggle() {
   useEffect(() => {
@@ -149,33 +170,52 @@ function useHeaderColourToggle() {
     // which ticket 17 asks the legal pages to share rather than the listener
     // of their own the Reference site gave them.
     const firstLight = document.querySelector('section.light, section.legal');
+    const footer = document.querySelector('footer');
     if (!nav || !firstLight) return;
 
-    gsap.registerPlugin(ScrollTrigger);
+    // What the markup the server sent already shows, so that a page opened at
+    // the top writes nothing: `.nav`'s own rule sets a bottom border and lets
+    // the other three edges follow the text colour, and writing the dark
+    // values over it would put a border on all four.
+    let onLight = false;
+    const paint = () => {
+      // Light from the moment the section's top edge passes under the header,
+      // and back to dark once the footer's top edge reaches the window's.
+      const light = firstLight.getBoundingClientRect().top <= HEADER_HEIGHT && (footer?.getBoundingClientRect().top ?? Infinity) > 0;
+      if (light === onLight) return;
+      onLight = light;
 
-    const trigger = ScrollTrigger.create({
-      trigger: firstLight,
-      start: 'top 78px',
-      endTrigger: 'footer',
-      end: 'top top',
-      onToggle: (self) => {
-        nav.classList.toggle('on-light', self.isActive);
-        nav.style.background = self.isActive ? 'rgba(250,250,248,.8)' : 'rgba(20,22,28,.72)';
-        nav.style.color = self.isActive ? '#222' : '#EDEEF3';
-        nav.style.borderColor = self.isActive ? '#E3E1DC' : 'rgba(255,255,255,.08)';
-      },
-    });
+      // Written as inline styles, exactly as the Reference site writes them,
+      // because they have to beat `.nav`'s own background and border in the
+      // cascade.
+      nav.classList.toggle('on-light', light);
+      nav.style.background = light ? 'rgba(250,250,248,.8)' : 'rgba(20,22,28,.72)';
+      nav.style.color = light ? '#222' : '#EDEEF3';
+      nav.style.borderColor = light ? '#E3E1DC' : 'rgba(255,255,255,.08)';
+    };
 
-    // Section heights move once the webfont replaces the fallback, and every
-    // start and end position was measured against the old ones.
-    let cancelled = false;
-    void document.fonts.ready.then(() => {
-      if (!cancelled) ScrollTrigger.refresh();
-    });
+    // Once per frame at most: a scroll fires far more often than the screen is
+    // drawn, and reading a box forces layout.
+    let pending = 0;
+    const onScroll = () => {
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = 0;
+        paint();
+      });
+    };
+
+    paint();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    // Section heights move once the webfont replaces the fallback, and a page
+    // opened part-way down is already past the boundary by then.
+    void document.fonts.ready.then(paint);
 
     return () => {
-      cancelled = true;
-      trigger.kill();
+      cancelAnimationFrame(pending);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
       // Leaves the header as the markup describes it, so a remount starts from
       // the same place the server rendered.
       nav.classList.remove('on-light');
