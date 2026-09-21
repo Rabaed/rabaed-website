@@ -469,6 +469,12 @@ const WORTH_SAYING = 5_000;
  * `MISS` where it rendered the page for that request, `STALE` where it was
  * still rendering it, `HIT` where it answered from what it had built before.
  *
+ * `HIT` for the whole budget is not a slow rebuild, and no budget covers it:
+ * it is a render that began before the publish and finished after it, whose
+ * page Next keeps as fresh because of when it was written rather than what is
+ * in it (ticket 64). Raising the number only makes such a run slower before it
+ * fails.
+ *
  * The test's own deadline is lengthened by the budget here, so that the bound
  * is reachable whatever `playwright.config.ts` allows a test (two minutes as
  * this is written, ticket 61) and however many waits one test makes. A bound a
@@ -497,6 +503,43 @@ export async function reachesVisitors(request: APIRequestContext, path: string, 
     }
     await new Promise((resolve) => setTimeout(resolve, ASKED_EVERY));
   }
+}
+
+/**
+ * The same wait as `reachesVisitors`, for what a publish has to reach that is
+ * not a page's own words: a status, the titles on an index in order, a link in
+ * the header, a search description, a placeholder in a form (ticket 62).
+ *
+ * `what` names it in the failure a change that never arrives earns, which
+ * Playwright follows with the last value the read returned. The budget is
+ * `reachesVisitors`'s, because the wait is the same one — a page being built
+ * again after a publish — however it is read, and the test's deadline is
+ * lengthened by it for the same reason.
+ *
+ * Wait for the page the next assertion reads. Publishing marks every page, but
+ * each is built again on its own next visit, so one page having the change
+ * says nothing about another (ticket 62).
+ */
+export function reaching<T>(what: string, read: () => Promise<T> | T) {
+  const info = test.info();
+  info.setTimeout(info.timeout + REBUILT_IN);
+
+  // Said once, for the same reason `reachesVisitors` says it: a wait past the
+  // default these tests used to take is a runner drifting towards the bound,
+  // and this is where it says so in a green run rather than a red one.
+  const started = Date.now();
+  let said = false;
+  const timed = async () => {
+    const value = await read();
+    const waited = Date.now() - started;
+    if (!said && waited > WORTH_SAYING) {
+      said = true;
+      console.log(`${what} took over ${WORTH_SAYING}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
+    }
+    return value;
+  };
+
+  return expect.poll(timed, { timeout: REBUILT_IN, message: `${what} never reached a visitor in ${REBUILT_IN}ms` });
 }
 
 /** A page's search description, as a visitor with no session receives it. */

@@ -19,7 +19,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, FAQ_EDITOR, logInAs, logInByApi } from './cms';
+import { ADMIN_PATH, FAQ_EDITOR, logInAs, logInByApi, reaching } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -218,7 +218,9 @@ test('an answer edited and published in the admin reaches visitors', async ({ pa
     await page.getByRole('button', { name: 'Publish changes' }).click();
     await expect(page.getByText('Updated successfully')).toBeVisible();
 
-    await expect.poll(() => visitorHtml(request, '/referral')).toContain(`${entry.answer}${EDIT}`);
+    await reaching("the editor's published answer on the referral page", () => visitorHtml(request, '/referral')).toContain(
+      `${entry.answer}${EDIT}`,
+    );
   } finally {
     const restored = await page.request.patch(`/api/faq-entries/${entry.id}`, {
       data: { answer: entry.answer, _status: 'published' },

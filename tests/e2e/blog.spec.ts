@@ -11,7 +11,7 @@
  * to them (`cms.ts`).
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ADMIN_PATH, BLOG_EDITOR, logInByApi, richText, uploadImage } from './cms';
+import { ADMIN_PATH, BLOG_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
 import { nodesOf, structuredData, trail } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
@@ -107,7 +107,7 @@ test('a published article is on the blog index and at its own address, whole in 
   const fields = article();
   await createPost(page.request, fields);
 
-  await expect.poll(async () => (await visit(request, '/blog')).html).toContain(fields.title);
+  await reaching('the article on the blog index', async () => (await visit(request, '/blog')).html).toContain(fields.title);
   const index = await visit(request, '/blog');
   expect(index.html).toContain(fields.summary);
   expect(index.html).toContain(`href="/blog/${fields.slug}"`);
@@ -190,8 +190,8 @@ test('a draft is nowhere a visitor can reach it; the editor previews it, then pu
   await page.getByRole('button', { name: 'Publish changes' }).click();
   await expect(page.getByText(/successfully/).first()).toBeVisible();
 
-  await expect.poll(async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
-  await expect.poll(async () => (await visit(request, '/blog')).html).toContain(fields.title);
+  await reaching('the article at its own address', async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
+  await reaching('the article on the blog index', async () => (await visit(request, '/blog')).html).toContain(fields.title);
 });
 
 test('a draft saved over a published article reaches the editor’s preview, never a visitor', async ({
@@ -211,7 +211,7 @@ test('a draft saved over a published article reaches the editor’s preview, nev
   });
   expect(drafted.ok()).toBe(true);
 
-  await expect.poll(async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
+  await reaching('the article at its own address', async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
   const published = await visit(request, `/blog/${fields.slug}`);
   expect(published.html).toContain(fields.body);
   expect(published.html).not.toContain(draft.body);
@@ -232,7 +232,7 @@ test('a published article describes itself in article data, opening with its ans
   await createPost(page.request, fields);
   const address = `${baseURL}/blog/${fields.slug}`;
 
-  await expect.poll(async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
+  await reaching('the article at its own address', async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
   const nodes = structuredData((await visit(request, `/blog/${fields.slug}`)).html);
 
   const articles = nodesOf(nodes, 'BlogPosting');
@@ -283,7 +283,7 @@ test('the index lists articles newest first, a page at a time', async ({ page, r
     return page.getByRole('article').getByRole('heading').allTextContents();
   };
 
-  await expect.poll(() => titlesOn('/blog')).toEqual(newestFirst.slice(0, POSTS_PER_PAGE));
+  await reaching('the newest articles on the blog index', () => titlesOn('/blog')).toEqual(newestFirst.slice(0, POSTS_PER_PAGE));
   const description = page.locator('meta[name="description"]');
   const firstPageDescription = await description.getAttribute('content');
 
@@ -320,13 +320,18 @@ test('an article is in the sitemap while it is published, and leaves it when unp
   const { id } = await createPost(page.request, fields);
   const address = `<loc>${baseURL}/blog/${fields.slug}</loc>`;
 
-  await expect.poll(async () => (await visit(request, '/sitemap.xml')).html).toContain(address);
+  await reaching('the article in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(address);
 
   const unpublished = await page.request.patch(`/api/posts/${id}`, { data: { _status: 'draft' } });
   expect(unpublished.ok()).toBe(true);
 
-  await expect.poll(async () => (await visit(request, '/sitemap.xml')).html).not.toContain(address);
-  await expect.poll(async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(404);
+  await reaching('the unpublished article gone from the sitemap', async () => (await visit(request, '/sitemap.xml')).html).not.toContain(
+    address,
+  );
+  await reaching(
+    'the unpublished article gone from its own address',
+    async () => (await visit(request, `/blog/${fields.slug}`)).status,
+  ).toBe(404);
 });
 
 test('an article exists per language, and a missing translation offers the one that exists', async ({
@@ -338,7 +343,10 @@ test('an article exists per language, and a missing translation offers the one t
   await createPost(page.request, arabic);
 
   // Only the Arabic exists: the English address says so and links to it.
-  await expect.poll(async () => (await visit(request, `/en/blog/${arabic.slug}`)).status).toBe(200);
+  await reaching(
+    'the English address of the Arabic article',
+    async () => (await visit(request, `/en/blog/${arabic.slug}`)).status,
+  ).toBe(200);
   await page.goto(`/en/blog/${arabic.slug}`);
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('link', { name: 'Read it in Arabic' })).toHaveAttribute('href', `/blog/${arabic.slug}`);
@@ -355,7 +363,10 @@ test('an article exists per language, and a missing translation offers the one t
   });
   await createPost(page.request, english);
 
-  await expect.poll(async () => (await visit(request, `/en/blog/${arabic.slug}`)).html).toContain(english.body);
+  await reaching(
+    'the English article at its own address',
+    async () => (await visit(request, `/en/blog/${arabic.slug}`)).html,
+  ).toContain(english.body);
   expect((await visit(request, '/en/blog')).html).toContain(english.title);
   expect((await visit(request, '/en/blog')).html).not.toContain(arabic.title);
   expect((await visit(request, '/blog')).html).not.toContain(english.title);
@@ -367,7 +378,10 @@ test('an article exists per language, and a missing translation offers the one t
   // The other way round: an English-only article, asked for in Arabic.
   const englishOnly = article({ locale: 'en', title: `English only ${runId}`, author: 'Test Author' });
   await createPost(page.request, englishOnly);
-  await expect.poll(async () => (await visit(request, `/blog/${englishOnly.slug}`)).status).toBe(200);
+  await reaching(
+    'the Arabic address of the English-only article',
+    async () => (await visit(request, `/blog/${englishOnly.slug}`)).status,
+  ).toBe(200);
   await page.goto(`/blog/${englishOnly.slug}`);
   await expect(page.getByRole('link', { name: 'اقرأها بالإنجليزية' })).toHaveAttribute('href', `/en/blog/${englishOnly.slug}`);
 
