@@ -460,6 +460,28 @@ const ASKED_EVERY = 250;
 const WORTH_SAYING = 5_000;
 
 /**
+ * What both waits below owe the budget: the running test's deadline lengthened
+ * by it, so that the bound is reachable whatever `playwright.config.ts` allows
+ * a test (two minutes as this is written, ticket 61) and however many waits one
+ * test makes — a bound a test cannot outlive is not a bound, since it ends as
+ * "Test timeout exceeded", which says nothing about what never arrived — and a
+ * line in the log, said once, where the wait ran past `WORTH_SAYING`.
+ */
+function waitBegins(what: string) {
+  const info = test.info();
+  info.setTimeout(info.timeout + REBUILT_IN);
+
+  let said = false;
+  return {
+    sayIfSlow(waited: number) {
+      if (said || waited <= WORTH_SAYING) return;
+      said = true;
+      console.log(`${what} took ${waited}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
+    },
+  };
+}
+
+/**
  * The page a visitor receives at `path` once `words` published in the CMS have
  * reached it — which is what the test then reads, rather than asking for the
  * page again.
@@ -469,6 +491,12 @@ const WORTH_SAYING = 5_000;
  * `MISS` where it rendered the page for that request, `STALE` where it was
  * still rendering it, `HIT` where it answered from what it had built before.
  *
+ * `HIT` for the whole budget is not a slow rebuild, and no budget covers it:
+ * it is a render that began before the publish and finished after it, whose
+ * page Next keeps as fresh because of when it was written rather than what is
+ * in it (ticket 64). Raising the number only makes such a run slower before it
+ * fails.
+ *
  * The test's own deadline is lengthened by the budget here, so that the bound
  * is reachable whatever `playwright.config.ts` allows a test (two minutes as
  * this is written, ticket 61) and however many waits one test makes. A bound a
@@ -476,8 +504,7 @@ const WORTH_SAYING = 5_000;
  * says nothing about what never arrived.
  */
 export async function reachesVisitors(request: APIRequestContext, path: string, words: string, what: string): Promise<string> {
-  const info = test.info();
-  info.setTimeout(info.timeout + REBUILT_IN);
+  const waiting = waitBegins(path);
 
   const started = Date.now();
   for (;;) {
@@ -485,9 +512,7 @@ export async function reachesVisitors(request: APIRequestContext, path: string, 
     const html = await response.text();
     const waited = Date.now() - started;
     if (html.includes(words)) {
-      if (waited > WORTH_SAYING) {
-        console.log(`${path} took ${waited}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
-      }
+      waiting.sayIfSlow(waited);
       return html;
     }
     if (waited >= REBUILT_IN) {
@@ -497,6 +522,38 @@ export async function reachesVisitors(request: APIRequestContext, path: string, 
     }
     await new Promise((resolve) => setTimeout(resolve, ASKED_EVERY));
   }
+}
+
+/**
+ * The same wait as `reachesVisitors`, for what a publish has to reach that is
+ * not a page's own words: a status, the titles on an index in order, a link in
+ * the header, a search description, a placeholder in a form (ticket 62).
+ *
+ * `what` names it in the failure a change that never arrives earns, which
+ * Playwright follows with the last value the read returned. The budget is
+ * `reachesVisitors`'s, because the wait is the same one — a page being built
+ * again after a publish — however it is read.
+ *
+ * What it cannot say is what Next said of the page, as `reachesVisitors` does:
+ * the read is the caller's, and is not always a page this fetched — one walks
+ * the browser, one reads a footer link. A run that needs that tell has it from
+ * the page-text suites, whose waits carry it, and `HIT` throughout is ticket
+ * 64 rather than a budget too small.
+ *
+ * Wait for the page the next assertion reads. Publishing marks every page, but
+ * each is built again on its own next visit, so one page having the change
+ * says nothing about another (ticket 62).
+ */
+export function reaching<T>(what: string, read: () => Promise<T> | T) {
+  const waiting = waitBegins(what);
+  const started = Date.now();
+  const timed = async () => {
+    const value = await read();
+    waiting.sayIfSlow(Date.now() - started);
+    return value;
+  };
+
+  return expect.poll(timed, { timeout: REBUILT_IN, message: `${what} never reached a visitor in ${REBUILT_IN}ms` });
 }
 
 /** A page's search description, as a visitor with no session receives it. */

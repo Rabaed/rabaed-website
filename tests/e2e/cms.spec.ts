@@ -29,6 +29,7 @@ import {
   logIn,
   logInByApi,
   metaDescription,
+  reaching,
   todayInRiyadh,
 } from './cms';
 import { LEGAL_PAGES } from './legal-documents';
@@ -132,7 +133,9 @@ test.describe('site settings', () => {
     // Publishing the draft is what reaches visitors.
     await page.getByRole('button', { name: 'Publish changes' }).click();
     await expect(page.getByText('Updated successfully')).toBeVisible();
-    await expect.poll(() => footerLink(request, '/', 'واتساب')).toBe('https://wa.me/966500000190');
+    await reaching('the published number in the home page’s footer', () => footerLink(request, '/', 'واتساب')).toBe(
+      'https://wa.me/966500000190',
+    );
   });
 
   test('a page rebuilt while a draft is waiting shows what is published, not the draft', async ({ page, request }) => {
@@ -150,7 +153,9 @@ test.describe('site settings', () => {
     });
     expect(drafted.ok()).toBe(true);
 
-    await expect.poll(() => footerLink(request, '/referral', 'واتساب')).not.toBe(REAL_WHATSAPP);
+    await reaching('the published number in the referral page’s footer', () => footerLink(request, '/referral', 'واتساب')).not.toBe(
+      REAL_WHATSAPP,
+    );
     expect(await footerLink(request, '/referral', 'واتساب')).toBe('https://wa.me/966500000191');
   });
 
@@ -266,7 +271,9 @@ test.describe('legal documents', () => {
       });
       expect(drafted.ok()).toBe(true);
 
-      await expect.poll(() => metaDescription(request, '/privacy')).toBe(DESCRIPTION);
+      await reaching('the published search description of the privacy page', () => metaDescription(request, '/privacy')).toBe(
+        DESCRIPTION,
+      );
       expect(await (await request.get('/privacy')).text()).not.toContain(DRAFTED.trim());
       expect(await lastUpdatedLine(request, '/privacy')).toBe(`آخر تحديث: ${todayInRiyadh()}`);
 

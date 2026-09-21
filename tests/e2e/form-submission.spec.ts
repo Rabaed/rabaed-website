@@ -27,7 +27,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi } from './cms';
+import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi, reaching } from './cms';
 import { TRAP_FIELD } from '../../src/forms/definition';
 import {
   APPLICANT,
@@ -313,11 +313,9 @@ test.describe('mail and wording from the admin', () => {
       });
 
       for (const placement of DEMO_PLACEMENTS) {
-        await expect
-          .poll(async () => (await (await request.get(placement.path)).text()).includes(`placeholder="${PLACEHOLDER}"`), {
-            message: placement.path,
-          })
-          .toBe(true);
+        await reaching(`the published placeholder at ${placement.path}`, async () =>
+          (await (await request.get(placement.path)).text()).includes(`placeholder="${PLACEHOLDER}"`),
+        ).toBe(true);
       }
 
       const applicant = uniqueApplicant('demo-reworded');

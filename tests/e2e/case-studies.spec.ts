@@ -12,7 +12,7 @@
  * the same reason within the suite.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { CASE_STUDIES_EDITOR, logInByApi, richText, uploadImage } from './cms';
+import { CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
 
@@ -159,9 +159,16 @@ test('publishing the first case study reveals the section and its link; unpublis
   const fields = caseStudy();
   const { id } = await create(page.request, fields);
 
-  await expect.poll(async () => linksToSection((await visit(request, '/')).html)).toBe(true);
+  /** Whether a page's header leads to the case studies, once that page has been built again. */
+  const headerShowsSection = (path: string) =>
+    reaching(`the case study's link in the header of ${path}`, async () => linksToSection((await visit(request, path)).html));
+
+  await headerShowsSection('/').toBe(true);
 
   // In the header, desktop and mobile, on every page — and marked on the section's own pages.
+  // Each page is waited for where it is read: publishing marks them all, but
+  // each is built again on its own next visit (ticket 62).
+  await headerShowsSection('/product').toBe(true);
   await page.goto('/product');
   await expect(page.locator('.nav .links').getByRole('link', { name: NAV_LABEL, exact: true })).toHaveAttribute(
     'href',
@@ -171,6 +178,7 @@ test('publishing the first case study reveals the section and its link; unpublis
   // fits between the brand and the buttons. Loaded at that width: the product
   // page's journey sizes its track to the window it loads in.
   await page.setViewportSize({ width: 981, height: 900 });
+  await headerShowsSection('/start').toBe(true);
   await page.goto('/start');
   const box = async (selector: string) => (await page.locator(selector).boundingBox())!;
   const [brand, links, buttons] = [await box('.nav .brand'), await box('.nav .links'), await box('.nav .nav-cta')];
@@ -189,34 +197,52 @@ test('publishing the first case study reveals the section and its link; unpublis
     .toBeLessThanOrEqual(0);
   await page.setViewportSize({ width: 1280, height: 900 });
 
+  await reaching('the case studies index', async () => (await visit(request, '/case-studies')).status).toBe(200);
   const index = await visit(request, '/case-studies');
-  expect(index.status).toBe(200);
   for (const text of [fields.title, fields.summary, fields.client, fields.sector]) expect(index.html).toContain(text);
   expect(index.html).toContain(`href="/case-studies/${fields.slug}"`);
 
+  await reaching(
+    'the case study at its own address',
+    async () => (await visit(request, `/case-studies/${fields.slug}`)).status,
+  ).toBe(200);
   await page.goto(`/case-studies/${fields.slug}`);
   await expect(page.locator('.nav .links a.on')).toHaveText(NAV_LABEL);
   // Nothing stands in for the figures and the quote it does not have.
   await expect(page.getByRole('heading', { name: 'بالأرقام' })).toHaveCount(0);
   await expect(page.locator('blockquote')).toHaveCount(0);
 
+  await reaching('the section in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
+    `<loc>${baseURL}/case-studies</loc>`,
+  );
   const sitemap = (await visit(request, '/sitemap.xml')).html;
-  expect(sitemap).toContain(`<loc>${baseURL}/case-studies</loc>`);
   expect(sitemap).toContain(`<loc>${baseURL}/case-studies/${fields.slug}</loc>`);
 
   // Each language's section is its own: only an Arabic case study exists, so
   // the English section stays hidden, and the English address points to the Arabic.
   expect((await visit(request, '/en/case-studies')).status).toBe(404);
+  await reaching(
+    "the case study's English address",
+    async () => (await visit(request, `/en/case-studies/${fields.slug}`)).status,
+  ).toBe(200);
   await page.goto(`/en/case-studies/${fields.slug}`);
   await expect(page.getByRole('link', { name: 'Read it in Arabic' })).toHaveAttribute('href', `/case-studies/${fields.slug}`);
 
   const unpublished = await page.request.patch(`/api/case-studies/${id}`, { data: { _status: 'draft' } });
   expect(unpublished.ok()).toBe(true);
 
-  await expect.poll(async () => (await visit(request, '/case-studies')).status).toBe(404);
-  await expect.poll(async () => linksToSection((await visit(request, '/')).html)).toBe(false);
-  expect((await visit(request, `/case-studies/${fields.slug}`)).status).toBe(404);
-  expect((await visit(request, '/sitemap.xml')).html).not.toContain('/case-studies');
+  await reaching(
+    'the index of a section with nothing published in it, gone',
+    async () => (await visit(request, '/case-studies')).status,
+  ).toBe(404);
+  await headerShowsSection('/').toBe(false);
+  await reaching(
+    'the unpublished case study gone from its own address',
+    async () => (await visit(request, `/case-studies/${fields.slug}`)).status,
+  ).toBe(404);
+  await reaching('the section gone from the sitemap', async () => (await visit(request, '/sitemap.xml')).html).not.toContain(
+    '/case-studies',
+  );
 });
 
 test('a case study page tells the whole story, whole in the first response', async ({ page, request, browser, baseURL }) => {
@@ -230,7 +256,10 @@ test('a case study page tells the whole story, whole in the first response', asy
     images: 2,
   });
   await create(page.request, fields);
-  await expect.poll(async () => (await visit(request, `/case-studies/${fields.slug}`)).status).toBe(200);
+  await reaching(
+    'the case study at its own address',
+    async () => (await visit(request, `/case-studies/${fields.slug}`)).status,
+  ).toBe(200);
 
   const context = await browser.newContext({ javaScriptEnabled: false });
   const visitor = await context.newPage();
@@ -277,6 +306,7 @@ test('a case study page tells the whole story, whole in the first response', asy
   // Its place in the site, and the index's, in breadcrumb data (ticket 32).
   const breadcrumbsOn = async (path: string) =>
     trail(nodesOf(structuredData((await visit(request, path)).html), 'BreadcrumbList')[0]);
+  await reaching('the case studies index', async () => (await visit(request, '/case-studies')).status).toBe(200);
   expect(await breadcrumbsOn(`/case-studies/${fields.slug}`)).toEqual([
     ['الرئيسية', baseURL],
     ['قصص العملاء', `${baseURL}/case-studies`],
