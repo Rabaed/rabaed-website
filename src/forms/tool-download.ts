@@ -11,10 +11,13 @@ export type ToolDownloadField = 'firstName' | 'lastName' | 'countryCode' | 'phon
  * after the @. The company is optional; the country code is a list, whose
  * «أخرى» is sent as `other`.
  *
- * **Nothing submits it yet.** Ticket 30 runs it through the submission
- * pipeline, delivers the file once the details are recorded, and puts its
- * wording in the CMS. Until then its page reads the words below directly, and
- * the replies and the confirmation email are placeholders nobody receives.
+ * It sends through the shared pipeline like every other form (ticket 30), and
+ * the file is delivered only once the details are stored — which is the one
+ * thing the Reference site does not do: there, the download begins whatever
+ * happens, and the details go to a console message.
+ *
+ * Every word below is an Editor's in the CMS; these are what the form was
+ * published with.
  */
 export const TOOL_DOWNLOAD: FormDefinition<ToolDownloadField> = {
   id: 'tool-download',

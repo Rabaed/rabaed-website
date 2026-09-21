@@ -1,5 +1,7 @@
 import { Inline, type InlineText } from '@/components/inline-text';
 import { DownloadForm } from '@/components/tool/download-form';
+import type { FormPageWording } from '@/forms/definition';
+import type { ToolDownloadField } from '@/forms/tool-download';
 import { TickList } from '@/components/tool/parts';
 
 export type ToolDownloadContent = {
@@ -17,7 +19,7 @@ export type ToolDownloadContent = {
  *
  * The form keeps its own words (ticket 27).
  */
-export function Download({ content }: { content: ToolDownloadContent }) {
+export function Download({ content, form }: { content: ToolDownloadContent; form: FormPageWording<ToolDownloadField> }) {
   return (
     <section id="get" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
@@ -34,7 +36,7 @@ export function Download({ content }: { content: ToolDownloadContent }) {
             </div>
           </div>
 
-          <DownloadForm />
+          <DownloadForm wording={form} />
         </div>
       </div>
     </section>

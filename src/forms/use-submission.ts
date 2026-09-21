@@ -9,8 +9,13 @@ import { sendForm } from './send';
  * submission is on its way while it goes, and `send`.
  *
  * One submission is sent at a time: a second press while one is on its way
- * does nothing. Every attempt carries the same one-off token, made up on the
- * first, so a submission that arrives twice is stored once (`TOKEN_FIELD`).
+ * does nothing, and `send` answers with nothing to say so. Every attempt
+ * carries the same one-off token, made up on the first, so a submission that
+ * arrives twice is stored once (`TOKEN_FIELD`).
+ *
+ * `send` also hands back what the server said, for a form that does something
+ * of its own once it is stored: the tool download delivers the file then, and
+ * only then (ticket 30).
  */
 export function useSubmission<Field extends string>(
   definition: FormDefinition<Field>,
@@ -22,8 +27,8 @@ export function useSubmission<Field extends string>(
   const token = useRef<string | null>(null);
   const sending = useRef(false);
 
-  const send = async (form: HTMLFormElement) => {
-    if (sending.current) return;
+  const send = async (form: HTMLFormElement): Promise<SubmissionOutcome | undefined> => {
+    if (sending.current) return undefined;
     sending.current = true;
     setProgress(0);
 
@@ -38,6 +43,7 @@ export function useSubmission<Field extends string>(
       onInvalid(result.fields as Field[], (result.problems ?? {}) as Partial<Record<Field, DocumentProblem>>);
     }
     setOutcome(result);
+    return result;
   };
 
   return { outcome, progress, sending: progress !== null, send };

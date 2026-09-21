@@ -1,6 +1,9 @@
 import { withLatinNames } from '@/cms/latin-names';
 import { pageEntry, wordsIn } from '@/cms/pages';
 import { getSearchSettings } from '@/content/search-settings';
+import type { FormPageWording } from '@/forms/definition';
+import { formPageWording } from '@/forms/settings';
+import { TOOL_DOWNLOAD, type ToolDownloadField } from '@/forms/tool-download';
 import type { InlinePart, InlineText } from '@/components/inline-text';
 import type { QuestionsContent } from '@/components/questions';
 import type { ToolDownloadContent } from '@/components/tool/download';
@@ -25,6 +28,8 @@ export type ToolPageContent = {
   readonly requirements: Section<ToolRequirementsContent>;
   /** The hero's «حمّل الأداة مجاناً» lands here. */
   readonly download: LinkedSection<ToolDownloadContent>;
+  /** The download form's own words, which an Editor changes (ticket 30). */
+  readonly downloadForm: FormPageWording<ToolDownloadField>;
   readonly questions: Section<QuestionsContent>;
   readonly upsell: Section<ToolUpsellContent>;
 };
@@ -58,15 +63,17 @@ function boldThen(bold: string, rest: InlineText): InlinePart[] {
  * says, never where it goes.
  */
 export async function getToolPage(locale: Locale): Promise<ToolPageContent> {
-  const [entry, meta] = await Promise.all([
+  const [entry, meta, downloadForm] = await Promise.all([
     pageEntry('tool-page', locale),
     getSearchSettings(locale, 'tool', { name: NAME }),
+    formPageWording(TOOL_DOWNLOAD),
   ]);
   const { hero, why, features, how, privacy, requirements, download, questions, upsell } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<ToolPageContent> = {
     meta,
+    downloadForm,
     hero: {
       eyebrow: words(hero.eyebrow),
       // With the space before its last words, which are drawn apart.

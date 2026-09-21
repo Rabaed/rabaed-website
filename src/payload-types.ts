@@ -104,6 +104,7 @@ export interface Config {
     'ai-crawlers': AiCrawler;
     'demo-request-form': DemoRequestForm;
     'referral-signup-form': ReferralSignupForm;
+    'tool-download-form': ToolDownloadForm;
     'partnership-application-form': PartnershipApplicationForm;
     'referral-program': ReferralProgram;
     'start-page': StartPage;
@@ -124,6 +125,7 @@ export interface Config {
     'ai-crawlers': AiCrawlersSelect<false> | AiCrawlersSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
     'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
+    'tool-download-form': ToolDownloadFormSelect<false> | ToolDownloadFormSelect<true>;
     'partnership-application-form': PartnershipApplicationFormSelect<false> | PartnershipApplicationFormSelect<true>;
     'referral-program': ReferralProgramSelect<false> | ReferralProgramSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
@@ -1236,6 +1238,115 @@ export interface ReferralSignupForm {
       label: string;
       /**
        * Shown under the box while it is not ticked.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {الاسم} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tool-download-form".
+ */
+export interface ToolDownloadForm {
+  id: number;
+  /**
+   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   */
+  alertAddress?: string | null;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    firstName: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    lastName: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    countryCode: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option__966: string;
+        option__971: string;
+        option__965: string;
+        option__974: string;
+        option__973: string;
+        option__968: string;
+        option__962: string;
+        option__20: string;
+        option__90: string;
+        option_other: string;
+      };
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    company: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
        */
       message: string;
     };
@@ -3910,14 +4021,14 @@ export interface SearchSetting {
   languages: ('ar' | 'en')[];
   home: {
     /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
      */
     title: {
       ar: string;
       en?: string | null;
     };
     /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
      */
     description: {
       ar: string;
@@ -3930,14 +4041,14 @@ export interface SearchSetting {
   };
   product: {
     /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
      */
     title: {
       ar: string;
       en?: string | null;
     };
     /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
      */
     description: {
       ar: string;
@@ -3950,14 +4061,14 @@ export interface SearchSetting {
   };
   start: {
     /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
      */
     title: {
       ar: string;
       en?: string | null;
     };
     /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
      */
     description: {
       ar: string;
@@ -3970,14 +4081,14 @@ export interface SearchSetting {
   };
   tool: {
     /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
      */
     title: {
       ar: string;
       en?: string | null;
     };
     /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
      */
     description: {
       ar: string;
@@ -3990,14 +4101,14 @@ export interface SearchSetting {
   };
   referral: {
     /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
      */
     title: {
       ar: string;
       en?: string | null;
     };
     /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
      */
     description: {
       ar: string;
@@ -4010,14 +4121,14 @@ export interface SearchSetting {
   };
   partnership: {
     /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello.
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
      */
     title: {
       ar: string;
       en?: string | null;
     };
     /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt.
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
      */
     description: {
       ar: string;
@@ -4246,6 +4357,86 @@ export interface ReferralSignupFormSelect<T extends boolean = true> {
           | T
           | {
               label?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tool-download-form_select".
+ */
+export interface ToolDownloadFormSelect<T extends boolean = true> {
+  alertAddress?: T;
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        firstName?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        lastName?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        countryCode?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option__966?: T;
+                    option__971?: T;
+                    option__965?: T;
+                    option__974?: T;
+                    option__973?: T;
+                    option__968?: T;
+                    option__962?: T;
+                    option__20?: T;
+                    option__90?: T;
+                    option_other?: T;
+                  };
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
               message?: T;
             };
       };

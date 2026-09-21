@@ -8,8 +8,12 @@
  * needs; the download section; the form untouched, then with a field left
  * wrong, then with every detail valid; the questions, closed; and the upsell.
  *
- * Not measured either: the Reference site's panel for after a download has
- * started, which the rebuild does not have until ticket 30 delivers the file.
+ * Not measured either: the panel for after a download has started. Both sites
+ * have it now (ticket 30), but neither shows it without being driven — the
+ * Reference site's is hidden until its own submit, and the rebuild's appears
+ * only once a download has actually been recorded, which would mean storing a
+ * submission from a test that measures geometry. Its rules are the Reference
+ * site's own, copied across in `src/styles/tool.css`.
  *
  * Not measured: the header, which `shell-matches-reference.spec.ts` covers.
  * The page has no Trust strip.
