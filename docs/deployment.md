@@ -443,8 +443,8 @@ To write one:
 4. Check it with `npm run cms:migrate-fresh`, which migrates a throwaway
    database from nothing in a few seconds — the only place any of this shows.
 
-`tests/unit/data-migrations.spec.ts` holds the rule, and names the seven
-migrations written before it that have not been brought over yet.
+`tests/unit/data-migrations.spec.ts` holds the rule, and names the eight
+migrations that have not been brought over to it yet (ticket 64).
 
 ### Forms
 

@@ -87,6 +87,11 @@ const CLOCK_COLUMNS = new Set(['created_at', 'updated_at', 'version_created_at',
 type Rows = Record<string, string | null>[];
 
 const payload = await getPayload({ config });
+// Past Payload's public types on purpose, and only here: `pool` is the
+// connection this script reads the rows back through, and `migrate` takes a
+// list of migrations to run, which is what lets it stop after each import.
+// `scripts/` is outside the typechecker (`tsconfig.json`), so nothing else
+// depends on either shape.
 const database = payload.db as unknown as {
   pool: { query: (text: string, values?: unknown[]) => Promise<{ rows: Rows }> };
   migrate: (args: { migrations: unknown[] }) => Promise<void>;
@@ -233,6 +238,20 @@ for (const [index, migration] of migrations.entries()) {
     (name) => after.get(name)! > (before.get(name) ?? 0) && !(name in excludes),
   );
 
+  // Every row of a table that grew is written out, so a table an earlier
+  // import had already put rows into would be frozen twice — once here and
+  // once where it belongs — and a database built from scratch would end up
+  // with both. None of the imports frozen so far shares a table with another,
+  // and the one that would have to is told rather than quietly duplicated.
+  const shared = grew.filter((name) => (before.get(name) ?? 0) > 0);
+  if (shared.length > 0) {
+    throw new Error(
+      `${migration.name} adds rows to tables another import had already filled: ${shared.join(', ')}. ` +
+        'Freezing every row of those tables would import them twice. Teach this script to write out only ' +
+        'the rows this import added before freezing it.',
+    );
+  }
+
   const statements: string[] = [];
   for (const table of ordered(grew, structure)) statements.push(...(await insertsFor(table, excludes)));
 
@@ -242,8 +261,8 @@ for (const [index, migration] of migrations.entries()) {
     path.join(directory, 'seed.ts'),
     [
       '/**',
-      ` * What \`${migration.name}\` wrote, as the`,
-      ' * statements that wrote it (ticket 63).',
+      ' * The statements that seeded this import, as it made them on the day it was',
+      ` * written: \`${migration.name}\` (ticket 63).`,
       ' *',
       ' * **Generated, and frozen.** `npm run cms:freeze-seed` produced this from the',
       ' * import as it ran, and nothing regenerates it: the column names below are the',

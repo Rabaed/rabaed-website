@@ -16,8 +16,8 @@
  * So the rule: **a data migration writes its rows in SQL, frozen when it is
  * written.** The one thing no INSERT can stand in for is an upload — a file
  * has to be converted and written to storage — so creating an image is the
- * single allowance, and the migrations that predate the rule are named below
- * rather than left to be discovered.
+ * single allowance, and the migrations not brought over to the rule yet are
+ * named below rather than left to be discovered.
  *
  * Here rather than in `tests/e2e` because it opens no browser: what it reads
  * is source in the repository, which no running application serves (spec:
@@ -53,25 +53,29 @@ import { TRUST_STRIP_SEED } from '../../src/migrations/trust-strip-import/seed';
 const migrationsDirectory = path.resolve(import.meta.dirname, '..', '..', 'src', 'migrations');
 
 /**
- * The seven data migrations written before the rule, which still seed their
- * rows through Payload.
+ * The eight data migrations that still seed their rows through Payload.
  *
  * Each is the same trap as the one ticket 63 closed, still set: a field added
  * to the site settings, to a form's settings, to the legal documents, to the
  * FAQs or to an article would stop a database built from scratch at that
  * migration. `npm run cms:freeze-seed` is what brings one over, and ticket 64
- * asks for all seven.
+ * asks for all eight.
  *
- * The list is exact on purpose. A new offender fails this test, and so does
+ * Seven were written before the rule. The eighth, ticket 30's tool download
+ * wording, was written beside it on another branch and merged in — which is
+ * the argument for this list being a test rather than a note somewhere.
+ *
+ * The list is exact on purpose. A new one fails this test, and so does
  * converting one of these without striking it off.
  */
-const PREDATING = [
+const NOT_YET_FROZEN = [
   '20260913_191346_publish_contact_points',
   '20260914_061635_import_legal_documents',
   '20260914_193520_import_faq_entries',
   '20260914_194144_publish_demo_request_wording',
   '20260914_222809_publish_referral_signup_wording',
   '20260920_170917_publish_partnership_application_wording',
+  '20260921_035306_publish_tool_download_wording',
   '20260921_101500_import_launch_articles',
 ];
 
@@ -134,16 +138,16 @@ function strings(value: unknown, found: string[] = []): string[] {
 
 test.describe('data migrations', () => {
   test('seed their rows in SQL rather than through Payload', async () => {
-    const offenders: string[] = [];
+    const stillOnPayload: string[] = [];
     for (const name of await dataMigrations()) {
       const up = await upOf(name);
       // An upload is the one call no INSERT can stand in for: the file has to
       // be converted and written to storage.
       const calls = [...up.matchAll(/payload\.\w+\(\{[\s\S]{0,160}/g)].map((match) => match[0]);
-      if (calls.some((call) => !/^payload\.create\(\{[\s\S]*collection: 'media'/.test(call))) offenders.push(name);
+      if (calls.some((call) => !/^payload\.create\(\{[\s\S]*collection: 'media'/.test(call))) stillOnPayload.push(name);
     }
 
-    expect(offenders).toEqual([...PREDATING].sort());
+    expect(stillOnPayload).toEqual([...NOT_YET_FROZEN].sort());
   });
 
   test('upload their files through Payload, since no INSERT can', async () => {

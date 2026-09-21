@@ -1,6 +1,6 @@
 /**
- * What `20260920_211936_import_search_settings` wrote, as the
- * statements that wrote it (ticket 63).
+ * The statements that seeded this import, as it made them on the day it was
+ * written: `20260920_211936_import_search_settings` (ticket 63).
  *
  * **Generated, and frozen.** `npm run cms:freeze-seed` produced this from the
  * import as it ran, and nothing regenerates it: the column names below are the

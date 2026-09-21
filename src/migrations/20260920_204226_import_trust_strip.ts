@@ -1,8 +1,8 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
 import path from 'node:path';
 import { SKIP_REVALIDATION } from '../cms/revalidation';
-import { TRUST_STRIP_SEED } from './trust-strip-import/seed';
 import { TRUST_STRIP_LOGOS } from './trust-strip-import/logos';
+import { TRUST_STRIP_SEED } from './trust-strip-import/seed';
 
 /**
  * Imports the Trust strip's eight marks into the CMS as its first published
@@ -42,6 +42,16 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   }
 
   await db.execute(sql.raw(TRUST_STRIP_SEED));
+
+  // Each row above finds its mark by the file name it was stored under, and a
+  // name nothing matches gives no row rather than an error — a strip with
+  // eight blank spaces where its marks should be. Rename a file in
+  // `public/logos/` and this says so instead.
+  const blank = await db.execute(sql`SELECT count(*) AS "blank" FROM "trust_strip_strip_logos" WHERE "mark_id" IS NULL`);
+  const count = Number((blank.rows[0] as { blank: string | number }).blank);
+  if (count > 0) {
+    throw new Error(`${count} of the Trust strip's marks were not found in the uploads this migration made.`);
+  }
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
