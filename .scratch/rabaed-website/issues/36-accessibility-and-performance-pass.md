@@ -10,7 +10,7 @@
 - [x] Every Screen mock has a meaningful description; every image has `alt` text
 - [x] Every interactive element is reachable and operable by keyboard, with a visible focus state — Tab walks every page and every control it passes looks different while it holds focus; a site-wide `:focus-visible` ring puts one on the links, fields and buttons the Reference site left to the browser, and the calculator's sliders get theirs back
 - [x] Colour contrast meets the standard, including the muted greys on dark sections — one listed exception, white on the accent fill, which the founder kept (ADR-0011)
-- [x] No layout shift as images and fonts load — from 0.003–0.12 down to 0.001–0.053, held at 0.06 (ADR-0012)
+- [x] No layout shift as images and fonts load — from 0.003–0.12 down to 0.001–0.053, and the page's own shift, with the webfont cached, held to 0.001 on every route. The swap itself is measured at its cause, the stand-in's width against the real face (ADR-0012)
 - [x] Page-speed targets met on a simulated mobile connection — the largest element paints inside 2.5s on Slow 4G on every route, and each page's weight is held to a ratchet
 - [x] No page ships the animation library or code it does not use — the tool, referral, partnership, legal, blog and English pages now load no GSAP at all
 - [x] With reduced motion enabled, every page remains complete and readable
@@ -29,3 +29,5 @@
 - **The Screen mocks are ~370 KB on the home and product pages.** Below 700px each is drawn 1040 CSS pixels wide and panned across (tickets 08 and 12), so a phone is sent the widest copy of every one, and every panel is fetched at once because a panel behind a tab is `display: none` and would otherwise arrive blank in front of the visitor.
 
 The one weight this ticket did cut: the header's wordmark was a 41 KB PNG on every page and is now a 13 KB WebP, drawn by `npm run brand:export` from the founders' own file in `reference/brand/`.
+
+**The runner has no Arabic face (21 September 2026).** The first CI run went red on five of the twelve shift readings, at 0.08 to 0.13 — worse than the numbers this ticket started from, on the same commit that measures 0.001 to 0.053 on a developer's machine. The hosted Linux runner draws Arabic in a last-resort face that no `local()` can name, no `size-adjust` can rescue, and no visitor has. A budget that held on both machines would have been worth nothing on either. So the per-route reading is taken on the page's *second* load, with the webfont already cached and no swap in it, and held to 0.001 — what is left there is the page's own doing and is the same on every machine — and the swap is measured once, at the thing that decides it: how wide the stand-in sets a line of the site's Arabic against the real face. ADR-0012 records it.

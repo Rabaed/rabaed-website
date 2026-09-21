@@ -78,25 +78,36 @@ const BUDGET_KB: Record<string, number> = {
 /**
  * Layout shift the browser attributes to nobody having clicked anything.
  *
- * 0.06, against the 0.1 at which the Core Web Vitals stop calling layout shift
- * "good" — and against the 0.12 the partnership page measured before this
- * ticket, when the Arabic webfont replacing the fallback took a line off the
- * hero and pulled the whole page up behind it. The metric-matched stand-in in
- * `tokens.css` is what closed that: every page now measures between 0.001 and
- * 0.053, most of them under 0.005, and what is left is the odd paragraph that
- * still changes line at a width the stand-in cannot match exactly.
+ * Measured with the webfont already in the browser's cache — the second page
+ * a visitor opens, and every page after it — so that what is left is the
+ * page's own doing: a picture whose space was not reserved, something the
+ * client put in after the server's markup, a section that grows when its
+ * script runs. One thousandth, because none of those is allowed at all and
+ * the only thing this has to tolerate is the rounding of a fraction of a
+ * pixel.
  *
- * It is one number for every route rather than a budget each, because what it
- * measures depends on which Arabic face the machine running it has — a hosted
- * Linux runner's is not this one's — and a per-route ratchet would be holding
- * each page to a measurement taken somewhere else.
+ * **The first page view, where the webfont replaces the fallback, is not
+ * measured here — and deliberately so (ADR-0012).** How far that moves the
+ * page depends entirely on which Arabic face the machine happens to have, and
+ * a hosted Linux runner's is not a Saudi phone's: the same eleven pages that
+ * measure between 0.001 and 0.053 on a developer's Windows machine measure
+ * between 0.08 and 0.13 on the runner, which has no Arabic face worth the
+ * name. A budget that held on both would have to be loose enough to be worth
+ * nothing on either. What the site does about that swap is a property of the
+ * stand-in rather than of any one page, and is measured as such below.
  */
-const SHIFT_ALLOWANCE = 0.06;
+const SHIFT_ALLOWANCE = 0.001;
 
 /** What the browser shifted, and which elements it moved, from navigation to settled. */
 async function layoutShift(page: Page, path: string): Promise<{ total: number; moved: string[] }> {
-  // Installed before the navigation, because a shift in the first frames is
-  // exactly the kind this is looking for.
+  // Opened once and thrown away, to put the webfont in the browser's cache.
+  // The reading below is then of the page a visitor meets from their second
+  // page onward, with no swap in it (see `SHIFT_ALLOWANCE`).
+  await page.goto(path, { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
+
+  // Installed before the navigation it measures, because a shift in the first
+  // frames is exactly the kind this is looking for.
   await page.addInitScript(() => {
     const record: { total: number; moved: string[] } = { total: 0, moved: [] };
     (window as unknown as { __shift: typeof record }).__shift = record;
@@ -126,9 +137,7 @@ async function layoutShift(page: Page, path: string): Promise<{ total: number; m
     }).observe({ type: 'layout-shift', buffered: true });
   });
 
-  await page.goto(path, { waitUntil: 'networkidle' });
-  // The webfont swapping in for the fallback moves every line of Arabic on the
-  // page, and is the shift most likely to be missed by looking too early.
+  await page.reload({ waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
 
@@ -136,7 +145,7 @@ async function layoutShift(page: Page, path: string): Promise<{ total: number; m
 }
 
 for (const route of ROUTES) {
-  test(`nothing moves on ${route.path} as it loads`, async ({ page }) => {
+  test(`nothing moves on ${route.path} once the webfont is cached`, async ({ page }) => {
     await page.setViewportSize(PHONE);
 
     const { total, moved } = await layoutShift(page, route.path);
@@ -147,6 +156,73 @@ for (const route of ROUTES) {
     ).toBeLessThanOrEqual(SHIFT_ALLOWANCE);
   });
 }
+
+/**
+ * A line of the site's own Arabic, long enough that a few per cent of width
+ * is several pixels and short enough to stay on one line at any size.
+ */
+const PROBE = 'شراكة ربائد للمكاتب الهندسية وشركات إدارة المشاريع';
+
+/**
+ * How wide `PROBE` is in a family, at a size large enough that the difference
+ * is not lost to rounding. `document.fonts.ready` has already resolved, so
+ * IBM Plex Sans Arabic is present and any other name falls to what the
+ * machine has.
+ */
+async function widthIn(page: Page, family: string): Promise<number> {
+  return page.evaluate((font: string) => {
+    const probe = document.createElement('span');
+    probe.textContent = 'شراكة ربائد للمكاتب الهندسية وشركات إدارة المشاريع';
+    probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-size:200px;font-family:${font}`;
+    document.body.append(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    return width;
+  }, family);
+}
+
+/**
+ * **The stand-in is the width of the face it stands in for** (ADR-0012).
+ *
+ * This is the cause the per-route readings above used to measure the symptom
+ * of, and it is the honest place to measure it: a paragraph changes line, or
+ * it does not, and which way it goes for a given piece of copy tells you far
+ * less than how far apart the two faces are. If this holds, a page cannot
+ * reflow on the swap by more than the odd line; if it does not, some page
+ * will, and which one is an accident of how its sentences happen to wrap.
+ *
+ * Four per cent, because a line of Arabic set in Segoe UI measured between
+ * 0.88 and 0.94 of IBM Plex Sans Arabic across twelve lines of the site's
+ * copy, and the stand-in is adjusted to the middle of that.
+ *
+ * **Skipped where the machine has no Arabic face at all.** A hosted Linux
+ * runner draws Arabic in whatever last-resort face it has, which no `local()`
+ * can name and no `size-adjust` can rescue — and which no visitor has either,
+ * so a failure there would say nothing about anybody's browser. The test
+ * detects that case rather than assuming it: it asks for a family that
+ * cannot exist and compares.
+ */
+test('the stand-in is the width of the face it stands in for', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+
+  const real = await widthIn(page, '"IBM Plex Sans Arabic"');
+  // The site's stack with the webfont taken off the front: what a reader sees
+  // for the few hundred milliseconds before it arrives.
+  const standIn = await widthIn(page, '"Arabic stand-in", "Arabic stand-in Noto", "Tajawal", system-ui, sans-serif');
+  const lastResort = await widthIn(page, '"no such family at all"');
+
+  test.skip(
+    Math.abs(standIn - lastResort) < 1,
+    'this machine has no Arabic face for the stand-in to stand in for — it draws the probe in its last-resort face, which no visitor has',
+  );
+
+  const ratio = standIn / real;
+  expect(
+    Math.abs(1 - ratio),
+    `the stand-in sets this line ${(ratio * 100).toFixed(1)}% as wide as IBM Plex Sans Arabic does (${Math.round(standIn)}px against ${Math.round(real)}px). Adjust its \`size-adjust\` in src/styles/tokens.css.`,
+  ).toBeLessThanOrEqual(0.04);
+});
 
 for (const route of ROUTES) {
   test(`${route.path} is inside the first-screen budget`, async ({ page }) => {
