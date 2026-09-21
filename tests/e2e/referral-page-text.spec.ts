@@ -17,7 +17,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, REFERRAL_PAGE_EDITOR, logInAs, logInByApi, reachesVisitors } from './cms';
+import { REFERRAL_PAGE_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -230,14 +230,13 @@ test('a reworded heading, a fifth step, a third side, a ninth point and hidden s
 
 test('the sections the hero lands on have no switch to hide them; a section that can hide has one', async ({ page }) => {
   await logInAs(page, REFERRAL_PAGE_EDITOR);
-  await page.goto(`${ADMIN_PATH}/globals/referral-page`);
-  const tab = (name: string) => page.getByRole('button', { name, exact: true });
+  await openPageEntry(page, 'referral-page');
 
-  await tab('Offer').click();
+  await openSection(page, 'Offer');
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
 
   for (const linked of ['How it works', 'Signup']) {
-    await tab(linked).click();
+    await openSection(page, linked);
     await expect(page.getByText(/Always shows/), linked).toBeVisible();
     await expect(page.getByLabel('Shows on the page'), linked).toHaveCount(0);
   }
