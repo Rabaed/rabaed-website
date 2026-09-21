@@ -1,57 +1,21 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/revalidation';
-import { START_PAGE_WORDS as words } from './start-page-import/words';
-
-/** A word in Arabic alone: the English is written when the page is translated (ticket 42). */
-const arabic = (text: string) => ({ ar: text });
+import { START_PAGE_SEED } from './start-page-import/seed';
 
 /**
  * Imports the start page's words into the CMS, verbatim, as its first
  * published version, in Arabic (ticket 53). From here on they are edited only
  * in the CMS.
+ *
+ * The statements are frozen in `start-page-import/seed.ts`, naming the columns
+ * this entry's tables had on the day this was written (ticket 63). It wrote
+ * through `payload.updateGlobal` until then, which built its statement from
+ * the fields the code declares *today* — so the first field added to the start
+ * page would have made this name a column the database has not reached yet,
+ * and stopped every database built from scratch. The words are unchanged:
+ * `start-page-import/words.ts` is still where they are read.
  */
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-  await payload.updateGlobal({
-    slug: 'start-page',
-    data: {
-      languages: ['ar'],
-      hero: {
-        eyebrow: arabic(words.hero.eyebrow),
-        title: arabic(words.hero.title),
-        lead: arabic(words.hero.lead),
-        primaryLabel: arabic(words.hero.primaryLabel),
-        secondaryLabel: arabic(words.hero.secondaryLabel),
-      },
-      trustStrip: { shows: words.trustStrip.shows },
-      steps: {
-        shows: words.steps.shows,
-        eyebrow: arabic(words.steps.eyebrow),
-        heading: arabic(words.steps.heading),
-        steps: words.steps.steps.map((step) => ({
-          label: arabic(step.label),
-          title: arabic(step.title),
-          text: arabic(step.text),
-          markedOut: step.markedOut,
-        })),
-      },
-      questions: {
-        eyebrow: arabic(words.questions.eyebrow),
-        heading: arabic(words.questions.heading),
-      },
-      freeTool: {
-        shows: words.freeTool.shows,
-        eyebrow: arabic(words.freeTool.eyebrow),
-        heading: arabic(words.freeTool.heading),
-        text: arabic(words.freeTool.text),
-        linkLabel: arabic(words.freeTool.linkLabel),
-      },
-      _status: 'published',
-    },
-    // A migration runs outside the site, where there are no pages to
-    // refresh (`src/cms/globals/site-settings.ts`).
-    context: { [SKIP_REVALIDATION]: true },
-    req,
-  });
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql.raw(START_PAGE_SEED));
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {

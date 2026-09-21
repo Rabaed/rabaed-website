@@ -8,8 +8,11 @@
  * they will meet there.
  */
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import EmbeddedPostgres from 'embedded-postgres';
@@ -54,6 +57,48 @@ export async function startDatabase({ directory, port }) {
     url: `postgres://postgres:postgres@127.0.0.1:${port}/${DATABASE}`,
     stop: () => server.stop(),
   };
+}
+
+/**
+ * Runs `work` against an empty Postgres in the system's temporary directory,
+ * and takes the database and its directory away again afterwards, whether or
+ * not the work succeeded. Returns what the work threw, or `null`.
+ *
+ * `work` is given the environment to run a command in: the connection string,
+ * a secret good for nothing outside this machine, and upload directories in
+ * the same temporary place, so that a migration which uploads a file cannot
+ * leave one in the checkout.
+ *
+ * The port is derived from **where this checkout lives and what `name` is**,
+ * over a range of 2000. The checkout keeps the worktrees of parallel sessions
+ * off each other's databases (docs/agents/parallel-sessions.md); the name
+ * keeps two of these scripts running at once in one worktree off each other's.
+ * 56000 and up is clear of the development database's range and of the test
+ * server's `TEST_PORT + 2000`.
+ */
+export async function withThrowawayDatabase(name, work) {
+  const directory = await mkdtemp(path.join(tmpdir(), `rabaed-${name}-`));
+  const port = 56000 + (createHash('sha256').update(`${repoRoot}
+${name}`).digest().readUInt16BE(0) % 2000);
+  const database = await startDatabase({ directory: path.join(directory, 'postgres'), port });
+  console.log(`Empty database on port ${port}.`);
+
+  let failure = null;
+  try {
+    await work({
+      ...process.env,
+      DATABASE_URL: database.url,
+      PAYLOAD_SECRET: 'local-development-only',
+      MEDIA_DIR: path.join(directory, 'media'),
+      SHARING_IMAGE_DIR: path.join(directory, 'sharing-images'),
+    });
+  } catch (error) {
+    failure = error;
+  }
+
+  await database.stop().catch(() => {});
+  await rm(directory, { recursive: true, force: true }).catch(() => {});
+  return failure;
 }
 
 /** Runs a Node script to completion, and throws if it fails. */
