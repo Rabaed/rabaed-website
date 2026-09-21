@@ -22,7 +22,7 @@ turning up in Google.
 
 ## One-time setup
 
-Two steps only a person with the accounts can do. Neither blocks development —
+Three steps only a person with the accounts can do. None blocks development —
 the site builds and tests locally without them.
 
 ### 1. Connect Vercel to GitHub
@@ -58,6 +58,30 @@ Once the organisation is upgraded, this makes the check mandatory:
 ```bash
 gh api -X POST repos/Rabaed/rabaed-website/rulesets --input docs/github-ruleset.json
 ```
+
+### 3. Switch on the visitor counting and the speed measurement
+
+Two toggles in the Vercel dashboard, on the `rabaed-website` project:
+
+1. **Analytics → Web Analytics → Enable.** This is what counts visits, pages
+   and where visitors came from.
+2. **Speed Insights → Enable.** This is what measures how fast the site
+   actually was for real visitors.
+
+The site already carries both, so nothing has to be deployed afterwards: the
+next production deployment starts reporting, and figures appear within a few
+minutes of the first visit. Preview deployments deliberately report nothing, so
+looking at a pull request never shows up as a visit.
+
+Custom events — the ones that count form submissions and visits an AI
+assistant sent — need the paid Vercel team that ticket 39a part 1 records
+this project as needing.
+
+To check it worked: open the production site, then the project's **Analytics**
+tab, and look for the visit. Until one shows up there, nothing proves the two
+scripts reach anyone: the suite can only hold the site to loading neither of
+them anywhere else. `docs/analytics.md` says what is collected, in the words
+the Privacy Policy uses.
 
 ## Node version
 
@@ -129,7 +153,7 @@ or production deployments stop.
    ```
 
    ```powershell
-   Get-Content ~abaed-production.env | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$n" $v }; npm run cms:migrate
+   Get-Content ~/rabaed-production.env | ForEach-Object { $n, $v = $_ -split '=', 2; Set-Item "env:$n" $v }; npm run cms:migrate
    ```
 
    A value typed on a command line is kept in the shell's history, where it

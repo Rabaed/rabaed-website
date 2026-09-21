@@ -1,6 +1,7 @@
 /**
  * What the form suites share: the mail the test server would have sent, the
- * documents it stored, and the submissions an editor finds in the admin.
+ * documents it stored, the submissions an editor finds in the admin, and the
+ * demo request form as a visitor meets it — which two suites fill in.
  *
  * The test server gives the site an outbox instead of a mailbox, and a folder
  * instead of a private bucket (`scripts/test-server.mjs`): every message and
@@ -11,7 +12,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { expect, type APIRequestContext, type APIResponse } from '@playwright/test';
+import { expect, type APIRequestContext, type APIResponse, type Locator } from '@playwright/test';
 // With its extension: the test server imports this file under Node's own
 // TypeScript loading, which resolves no other way (`scripts/test-server.mjs`).
 import { FORM_READER } from './cms.ts';
@@ -125,4 +126,40 @@ export function uniqueApplicant(label: string) {
     email: `${label}-${serial}@example.com`,
     ip: `10.${random()}.${random()}.${random()}`,
   };
+}
+
+
+/**
+ * The demo request form, in the words a visitor reads: its accessible name,
+ * its button, and what it says when a submission is stored or refused.
+ *
+ * Restated here rather than imported from the form's definition or its
+ * settings, for the reason `routes.ts` gives — and in one place rather than
+ * two, because `form-submission.spec.ts` and `analytics.spec.ts` both send
+ * this form and would otherwise drift apart the first time the wording moves.
+ */
+export const DEMO_FORM = 'احجز عرضاً حياً على مشروعك';
+export const DEMO_BUTTON = 'احجز عرضاً حياً';
+export const DEMO_RECEIVED = 'وصلنا طلبك — سنتواصل خلال يوم عمل لتحديد الموعد.';
+export const DEMO_REFUSED = 'تعذّر استلام طلبك الآن. حاول مرة أخرى بعد قليل، أو راسلنا على واتساب.';
+
+/** The one applicant these suites send, save for the address, which is each test's own. */
+export const APPLICANT = { name: 'سارة القحطاني', phone: '0500000000', company: 'شركة الإعمار' } as const;
+
+/** The site engineer who asks for the Pour Tracker (ticket 30), likewise. */
+export const ENGINEER = {
+  firstName: 'أحمد',
+  lastName: 'السالم',
+  phone: '51 123 4567',
+  company: 'مقاولات الشرق',
+} as const;
+
+/** Answers every field of the demo request form, the optional two included. */
+export async function fillDemoForm(form: Locator, email: string): Promise<void> {
+  await form.getByLabel('الاسم الكامل').fill(APPLICANT.name);
+  await form.getByLabel('البريد الإلكتروني').fill(email);
+  await form.getByLabel('دورك في المشروع').selectOption('owner');
+  await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
+  await form.getByLabel('اسم الشركة').fill(APPLICANT.company);
+  await form.getByLabel('عدد المشاريع النشطة').fill('3');
 }
