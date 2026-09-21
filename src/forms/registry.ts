@@ -14,7 +14,12 @@ export const FORMS: Readonly<Record<FormId, FormDefinition>> = {
 
 /**
  * The forms that send through the submission pipeline, each with its wording
- * and alert address in the CMS. A form joins by being added here — ticket 30
- * adds the tool download's — with a migration for its settings.
+ * and alert address in the CMS. A form joins by being added here, with a
+ * migration for its settings.
  */
-export const SUBMITTABLE_FORMS: readonly FormDefinition[] = [DEMO_REQUEST, REFERRAL_SIGNUP, PARTNERSHIP_APPLICATION];
+export const SUBMITTABLE_FORMS: readonly FormDefinition[] = [
+  DEMO_REQUEST,
+  REFERRAL_SIGNUP,
+  TOOL_DOWNLOAD,
+  PARTNERSHIP_APPLICATION,
+];

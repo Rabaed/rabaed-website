@@ -146,6 +146,14 @@ export const DEMO_REFUSED = 'تعذّر استلام طلبك الآن. حاول
 /** The one applicant these suites send, save for the address, which is each test's own. */
 export const APPLICANT = { name: 'سارة القحطاني', phone: '0500000000', company: 'شركة الإعمار' } as const;
 
+/** The site engineer who asks for the Pour Tracker (ticket 30), likewise. */
+export const ENGINEER = {
+  firstName: 'أحمد',
+  lastName: 'السالم',
+  phone: '51 123 4567',
+  company: 'مقاولات الشرق',
+} as const;
+
 /** Answers every field of the demo request form, the optional two included. */
 export async function fillDemoForm(form: Locator, email: string): Promise<void> {
   await form.getByLabel('الاسم الكامل').fill(APPLICANT.name);
