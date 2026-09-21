@@ -26,7 +26,7 @@
 .entry-card time { font-size: 12.5px; color: var(--muted) }
 .entry-card h2 { font-size: 18px; line-height: 1.55; margin: 6px 0 8px; font-weight: 600 }
 .entry-card h2 a { transition: color .2s }
-.entry-card h2 a:hover { color: var(--acc) }
+.entry-card h2 a:hover { color: var(--acc-ink) }
 .entry-card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.8 }
 .entry-empty { margin: 0; font-size: 16px; color: var(--muted) }
 
@@ -56,6 +56,6 @@
 .entry-body ul, .entry-body ol { margin: 0 0 18px; padding-inline-start: 22px }
 .entry-body li { margin-bottom: 8px }
 .entry-body strong { font-weight: 600 }
-.entry-body a { color: var(--acc); border-bottom: 1px solid rgba(249, 87, 56, .35) }
+.entry-body a { color: var(--acc-ink); border-bottom: 1px solid rgba(249, 87, 56, .35) }
 .entry-body blockquote { margin: 28px 0; padding: 14px 22px; background: var(--soft); border-inline-start: 3px solid var(--acc); border-radius: 12px }
 .entry-body blockquote p:last-child { margin-bottom: 0 }

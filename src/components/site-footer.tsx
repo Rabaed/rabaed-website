@@ -19,7 +19,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
     <footer>
       <div className="wrap">
         <div className="brand foot">
-          <img className="lg" src="/brand/rabaed-wordmark-on-dark.png" alt="ربائد" width={563} height={210} />
+          <img className="lg" src="/brand/rabaed-wordmark-on-dark.webp" alt="ربائد" width={563} height={210} />
         </div>
         <div>{tagline}</div>
         <div className="social">

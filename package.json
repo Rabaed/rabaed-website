@@ -25,6 +25,7 @@
     "cms:create-editor": "payload run scripts/create-editor.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@fontsource/dm-mono": "^5.3.0",
     "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
     "@fontsource/plus-jakarta-sans": "^5.3.0",

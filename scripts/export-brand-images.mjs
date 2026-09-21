@@ -7,6 +7,11 @@
  *  - `src/app/icon.png` and `src/app/apple-icon.png`, the favicon and the home
  *    screen icon: the brand mark cut from the wordmark, with no text, because
  *    text is illegible at tab size.
+ *  - `public/brand/*.webp`, the two wordmarks the header and the footer show
+ *    (ticket 36). The brand files are PNGs with soft edges on a transparent
+ *    ground, which PNG stores badly: the dark one is 41 KB, and the header
+ *    carries it on every page of the site. As WebP it is 13 KB, at the same
+ *    563x210 and the same transparency.
  *
  *   npm run brand:export
  *
@@ -26,6 +31,18 @@ const fromRoot = (...parts) => path.join(repoRoot, ...parts);
 
 const SHARING_IMAGE = { width: 1200, height: 630 };
 
+/**
+ * The brand files, and the names the site serves them under. Read from
+ * `reference/brand/`, which is where the founders' originals live and which
+ * nothing may edit; `public/brand/` holds only what this writes.
+ */
+const WORDMARKS = [
+  { from: 'W-removebg-preview.png', to: 'rabaed-wordmark-on-dark.webp' },
+  { from: 'Rabaed Final Logo.png', to: 'rabaed-wordmark-on-light.webp' },
+];
+
+const brandFile = (name) => fromRoot('reference', 'brand', name);
+
 /** A file as a `data:` URL, so the page rendered below needs no server. */
 async function dataUrl(file, type) {
   return `data:${type};base64,${(await readFile(file)).toString('base64')}`;
@@ -37,7 +54,7 @@ async function dataUrl(file, type) {
  */
 async function sharingImageHtml() {
   const font = (file) => dataUrl(fromRoot('assets', 'fonts', file), 'font/woff2');
-  const wordmark = await dataUrl(fromRoot('public', 'brand', 'rabaed-wordmark-on-dark.png'), 'image/png');
+  const wordmark = await dataUrl(brandFile(WORDMARKS[0].from), 'image/png');
 
   return `<!doctype html>
 <html lang="ar" dir="rtl">
@@ -131,8 +148,21 @@ async function squareMark(file, size, padding, background) {
   return sharp(square).resize(size, size).png({ compressionLevel: 9 }).toBuffer();
 }
 
+/**
+ * The two wordmarks as WebP, at the size and transparency they came in.
+ * Quality 90 rather than lossless: the wordmark is a photograph of ink, not a
+ * diagram of flat colours, and lossless WebP is no smaller than the PNG.
+ */
+async function exportWordmarks() {
+  for (const { from, to } of WORDMARKS) {
+    await sharp(brandFile(from))
+      .webp({ quality: 90 })
+      .toFile(fromRoot('public', 'brand', to));
+  }
+}
+
 async function exportIcons() {
-  const wordmark = fromRoot('public', 'brand', 'rabaed-wordmark-on-light.png');
+  const wordmark = brandFile(WORDMARKS[1].from);
   const transparent = { r: 0, g: 0, b: 0, alpha: 0 };
   // Transparent in a tab, where the mark's colours read on light and dark
   // browser themes alike. Opaque on the home screen, where iOS fills
@@ -144,5 +174,5 @@ async function exportIcons() {
   );
 }
 
-await Promise.all([exportSharingImage(), exportIcons()]);
-console.log('Wrote public/og-rabaed.png, src/app/icon.png and src/app/apple-icon.png.');
+await Promise.all([exportSharingImage(), exportIcons(), exportWordmarks()]);
+console.log('Wrote public/og-rabaed.png, public/brand/*.webp, src/app/icon.png and src/app/apple-icon.png.');

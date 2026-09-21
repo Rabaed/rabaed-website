@@ -36,6 +36,35 @@ export type Measurement =
 export const EVERYTHING_BUT_ACROSS: readonly Measurement[] = ['top', 'height', 'font', 'display', 'visibility', 'opacity'];
 
 /**
+ * The colours ticket 36 changed for contrast, each beside the Reference site's
+ * value it replaced (ADR-0011), as a computed style reports them.
+ *
+ * Every comparison reads both documents through this, so a part whose colour
+ * is one of these reads as the Reference site's — and every other colour is
+ * still compared to the value. That keeps the comparisons saying what they
+ * were written to say ("this label is the accent, not grey") instead of the
+ * two hundred `omit: ['color']` entries the alternative would need, which
+ * would stop them saying anything about colour at all.
+ *
+ * It is applied to both pages, so a pair that already matched still matches:
+ * `#836921` is the dark gold the Reference site's own badge uses, and reading
+ * it as gold on both sides changes nothing about that badge.
+ */
+export const RECOLOURED: readonly (readonly [string, string])[] = [
+  // The accent as text on a pale ground, and the two lifts of it on the tool
+  // page's state pills.
+  ['rgb(178, 58, 27)', 'rgb(249, 87, 56)'],
+  ['rgb(255, 106, 76)', 'rgb(249, 87, 56)'],
+  // The gold label, and the green and blue pills, dark on the pale legend and
+  // lifted on the dark drawing.
+  ['rgb(131, 105, 33)', 'rgb(204, 168, 64)'],
+  ['rgb(17, 106, 76)', 'rgb(29, 158, 117)'],
+  ['rgb(53, 183, 140)', 'rgb(29, 158, 117)'],
+  ['rgb(44, 91, 190)', 'rgb(91, 141, 239)'],
+  ['rgb(127, 166, 244)', 'rgb(91, 141, 239)'],
+];
+
+/**
  * A selector to measure in full, or one with the measurements a deliberate
  * difference changes left out — which should be said in a comment beside it.
  */
@@ -57,7 +86,20 @@ export async function measureRegion(page: Page, region: Region) {
   );
 
   return page.evaluate(
-    ({ root, omitFromRoot, parts }: { root: string; omitFromRoot: Measurement[]; parts: { selector: string; omit: Measurement[] }[] }) => {
+    ({
+      root,
+      omitFromRoot,
+      parts,
+      recoloured,
+    }: {
+      root: string;
+      omitFromRoot: Measurement[];
+      parts: { selector: string; omit: Measurement[] }[];
+      recoloured: [string, string][];
+    }) => {
+      /** A colour ticket 36 changed, read as the Reference site's (RECOLOURED). */
+      const asReference = (value: string) =>
+        recoloured.reduce((read, [now, before]) => read.split(now).join(before), value);
       const base = document.querySelector(root);
       if (!base) return null;
       const origin = base.getBoundingClientRect();
@@ -66,16 +108,26 @@ export async function measureRegion(page: Page, region: Region) {
       const of = (element: Element, omit: Measurement[]) => {
         const box = element.getBoundingClientRect();
         const style = getComputedStyle(element);
+        // The stand-in families are a loading device, not a typeface choice:
+        // they hold the fallback's place at the width IBM Plex Sans Arabic
+        // sets Arabic at, and by the time anything is measured the real face
+        // is in use (ADR-0012). `fontFamily` reports the whole declared stack
+        // whatever is rendering, so left in they would fail every comparison
+        // on the site against a Reference site that does not declare them —
+        // while saying nothing about what either page is set in.
+        const family = style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, '');
         const measured: Record<Measurement, unknown> = {
           top: round(box.top - origin.top),
           left: round(box.left - origin.left),
           height: round(box.height),
           width: round(box.width),
-          color: style.color,
-          background: style.backgroundColor,
+          color: asReference(style.color),
+          background: asReference(style.backgroundColor),
           // All four edges: a rule on one side is invisible to a reading of another.
-          borderColor: [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
-          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`,
+          borderColor: asReference(
+            [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
+          ),
+          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${family}`,
           display: style.display,
           visibility: style.visibility,
           opacity: style.opacity,
@@ -90,7 +142,12 @@ export async function measureRegion(page: Page, region: Region) {
       }
       return result;
     },
-    { root: region.root, omitFromRoot: [...(region.omitFromRoot ?? [])], parts },
+    {
+      root: region.root,
+      omitFromRoot: [...(region.omitFromRoot ?? [])],
+      parts,
+      recoloured: RECOLOURED.map(([now, before]) => [now, before] as [string, string]),
+    },
   );
 }
 

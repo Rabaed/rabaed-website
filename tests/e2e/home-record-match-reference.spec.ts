@@ -61,7 +61,12 @@ function contentRegion(viewport: { width: number }): Region {
       '.fourq span',
       '.lead',
       '.rec-types',
-      '.rec-types span',
+      // DELIBERATE DIVERGENCE (ticket 36, ADR-0011): the Reference site dims an
+      // unchosen chip to `.32`, which over the dark ground leaves its words at
+      // 2.7:1 — unreadable. Here they are dimmed to `.5`, the lowest value that
+      // reaches the standard. Everything else about the chips is still
+      // compared, the chosen one included.
+      { selector: '.rec-types span', omit: ['opacity'] as Measurement[] },
       { selector: '.rec-card', omit: holdsTallest },
       { selector: '.rec-card .doc', omit: holdsTallest },
       `${SHOWING} .h`,
