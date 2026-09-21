@@ -60,36 +60,29 @@ html { scroll-behavior: auto }
  * layout shift "good". `size-adjust` narrows the stand-in so that it wraps
  * where the real face wraps, and the swap moves nothing.
  *
- * Each percentage is measured, not guessed: a line of Arabic set in the named
- * face, against the same line in IBM Plex Sans Arabic. They are two families
- * rather than one list because the two are adjusted by different amounts — the
- * desktop faces are wider than IBM Plex and Noto is narrower — and `local()`
- * takes the first that exists, so a system with none of them falls through to
- * the unadjusted stack below and is no worse off than before.
+ * **Only faces whose width has actually been measured are named here.** The
+ * three below are the desktop Arabic faces, which set a line of the site's own
+ * Arabic 9 to 17 per cent wider than IBM Plex Sans Arabic; 92% is the middle
+ * of that, and the spread is why the match is close rather than exact. A
+ * system with none of them falls through to the stack below at its own width,
+ * which is where every system was before this, so naming a face on a guess can
+ * only make things worse — as one did: an entry for Noto at 113%, a figure
+ * taken from a machine that turned out not to have Noto installed, set the
+ * hosted runner's Arabic 17.6 per cent too wide until it was removed.
+ * `tests/e2e/performance.spec.ts` measures this and reports the width it found
+ * in each face, so the next one added has a number behind it. ADR-0012.
  */
 @font-face {
   font-family: "Arabic stand-in";
-  /* Windows and macOS: 8.7% wider than IBM Plex Sans Arabic, over twelve lines
-     of the site's own Arabic (0.88 to 0.94, median 0.92). */
-  src: local("Segoe UI"), local("Tahoma"), local("Geeza Pro"), local("Arial");
+  src: local("Segoe UI"), local("Tahoma"), local("Geeza Pro");
   size-adjust: 92%;
   /* Exactly the block IBM Plex Sans Arabic's own Arabic face covers, so the
      stand-in stands in for nothing else: a glyph that face does not have
      falls through to the stack below at its own size, as it did before. */
   unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;
 }
-@font-face {
-  font-family: "Arabic stand-in Noto";
-  /* Android, and most Linux: 12.7% narrower. */
-  src: local("Noto Sans Arabic"), local("Noto Naskh Arabic");
-  size-adjust: 113%;
-  /* Exactly the block IBM Plex Sans Arabic's own Arabic face covers, so the
-     stand-in stands in for nothing else: a glyph that face does not have
-     falls through to the stack below at its own size, as it did before. */
-  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1;
-}
 
-body { margin: 0; font-family: "IBM Plex Sans Arabic", "Arabic stand-in", "Arabic stand-in Noto", "Tajawal", system-ui, sans-serif; color: var(--dark-text); background: var(--dark); line-height: 1.8; font-size: 16px; overflow-x: clip }
+body { margin: 0; font-family: "IBM Plex Sans Arabic", "Arabic stand-in", "Tajawal", system-ui, sans-serif; color: var(--dark-text); background: var(--dark); line-height: 1.8; font-size: 16px; overflow-x: clip }
 a { color: inherit; text-decoration: none }
 .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px }
 

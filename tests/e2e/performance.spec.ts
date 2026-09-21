@@ -163,64 +163,89 @@ for (const route of ROUTES) {
  */
 const PROBE = 'شراكة ربائد للمكاتب الهندسية وشركات إدارة المشاريع';
 
+/** The site's stack with the webfont taken off the front, and the same without the stand-in. */
+const WITH_STAND_IN = '"Arabic stand-in", "Tajawal", system-ui, sans-serif';
+const WITHOUT_STAND_IN = '"Tajawal", system-ui, sans-serif';
+
 /**
- * How wide `PROBE` is in a family, at a size large enough that the difference
- * is not lost to rounding. `document.fonts.ready` has already resolved, so
- * IBM Plex Sans Arabic is present and any other name falls to what the
- * machine has.
+ * How wide `PROBE` is in each family, at a size large enough that the
+ * difference is not lost to rounding. `document.fonts.ready` has already
+ * resolved, so IBM Plex Sans Arabic is present and any other name falls to
+ * what the machine has.
  */
-async function widthIn(page: Page, family: string): Promise<number> {
-  return page.evaluate((font: string) => {
-    const probe = document.createElement('span');
-    probe.textContent = 'شراكة ربائد للمكاتب الهندسية وشركات إدارة المشاريع';
-    probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-size:200px;font-family:${font}`;
-    document.body.append(probe);
-    const width = probe.getBoundingClientRect().width;
-    probe.remove();
-    return width;
-  }, family);
+async function widthsIn(page: Page, families: readonly string[]): Promise<number[]> {
+  return page.evaluate(
+    ({ probe, families }: { probe: string; families: string[] }) =>
+      families.map((family) => {
+        const span = document.createElement('span');
+        span.textContent = probe;
+        span.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-size:200px;font-family:${family}`;
+        document.body.append(span);
+        const width = span.getBoundingClientRect().width;
+        span.remove();
+        return width;
+      }),
+    { probe: PROBE, families: [...families] },
+  );
 }
+
+/**
+ * The faces the stand-in names, each measured on its own, so that a failure
+ * says which one the machine actually used and what `size-adjust` it wants
+ * rather than only that the sum is wrong. Adding a face to `tokens.css`
+ * without a number from here is what put a wrong one in it once already
+ * (ADR-0012).
+ */
+const NAMED = ['"Segoe UI"', '"Tahoma"', '"Geeza Pro"'];
 
 /**
  * **The stand-in is the width of the face it stands in for** (ADR-0012).
  *
- * This is the cause the per-route readings above used to measure the symptom
- * of, and it is the honest place to measure it: a paragraph changes line, or
- * it does not, and which way it goes for a given piece of copy tells you far
- * less than how far apart the two faces are. If this holds, a page cannot
- * reflow on the swap by more than the odd line; if it does not, some page
- * will, and which one is an accident of how its sentences happen to wrap.
+ * This is the cause the per-route readings measure the symptom of, and it is
+ * the honest place to measure it: a paragraph changes line, or it does not,
+ * and which way it goes for a given piece of copy tells you far less than how
+ * far apart the two faces are. If this holds, no page can reflow on the swap
+ * by more than the odd line; if it does not, some page will, and which one is
+ * an accident of how its sentences happen to wrap.
  *
- * Four per cent, because a line of Arabic set in Segoe UI measured between
- * 0.88 and 0.94 of IBM Plex Sans Arabic across twelve lines of the site's
- * copy, and the stand-in is adjusted to the middle of that.
+ * Four per cent, because the desktop faces set this line between 1.09 and
+ * 1.17 times as wide as IBM Plex Sans Arabic and the stand-in is adjusted to
+ * the middle of that.
  *
- * **Skipped where the machine has no Arabic face at all.** A hosted Linux
- * runner draws Arabic in whatever last-resort face it has, which no `local()`
- * can name and no `size-adjust` can rescue — and which no visitor has either,
- * so a failure there would say nothing about anybody's browser. The test
- * detects that case rather than assuming it: it asks for a family that
- * cannot exist and compares.
+ * **Skipped where the stand-in changes nothing.** A machine with none of the
+ * named faces — a hosted Linux runner among them — draws Arabic in whatever it
+ * has, which no `size-adjust` reaches and which no visitor has either, so a
+ * reading there would say nothing about anybody's browser. The test detects
+ * that case rather than assuming it: it measures the same stack twice, with
+ * the stand-in and without, and a stand-in that moved nothing is one that is
+ * not there.
  */
 test('the stand-in is the width of the face it stands in for', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
 
-  const real = await widthIn(page, '"IBM Plex Sans Arabic"');
-  // The site's stack with the webfont taken off the front: what a reader sees
-  // for the few hundred milliseconds before it arrives.
-  const standIn = await widthIn(page, '"Arabic stand-in", "Arabic stand-in Noto", "Tajawal", system-ui, sans-serif');
-  const lastResort = await widthIn(page, '"no such family at all"');
+  const [real, standIn, bare, ...named] = await widthsIn(page, [
+    '"IBM Plex Sans Arabic"',
+    WITH_STAND_IN,
+    WITHOUT_STAND_IN,
+    ...NAMED,
+  ]);
+
+  const found = NAMED.map(
+    (family, index) => `  ${family}: ${Math.round(named[index])}px, wanting size-adjust ${Math.round((real / named[index]) * 100)}%`,
+  ).join('\n');
 
   test.skip(
-    Math.abs(standIn - lastResort) < 1,
-    'this machine has no Arabic face for the stand-in to stand in for — it draws the probe in its last-resort face, which no visitor has',
+    Math.abs(standIn - bare) < 1,
+    'this machine has none of the faces the stand-in names, so there is nothing here for it to stand in for',
   );
 
   const ratio = standIn / real;
   expect(
     Math.abs(1 - ratio),
-    `the stand-in sets this line ${(ratio * 100).toFixed(1)}% as wide as IBM Plex Sans Arabic does (${Math.round(standIn)}px against ${Math.round(real)}px). Adjust its \`size-adjust\` in src/styles/tokens.css.`,
+    `the stand-in sets this line ${(ratio * 100).toFixed(1)}% as wide as IBM Plex Sans Arabic does (${Math.round(standIn)}px against ${Math.round(real)}px). What this machine has, each on its own:
+${found}
+Adjust \`size-adjust\` in src/styles/tokens.css, or drop a face it turns out not to have.`,
   ).toBeLessThanOrEqual(0.04);
 });
 
