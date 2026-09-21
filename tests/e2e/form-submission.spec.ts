@@ -27,7 +27,13 @@ import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi } from './cms';
 import {
+  APPLICANT,
+  DEMO_BUTTON,
+  DEMO_FORM,
+  DEMO_RECEIVED,
+  DEMO_REFUSED,
   documentsDirectory,
+  fillDemoForm,
   mailTo,
   readerDelete,
   readerGet,
@@ -36,12 +42,6 @@ import {
   type StoredSubmission,
 } from './forms';
 
-const DEMO_FORM = 'احجز عرضاً حياً على مشروعك';
-const DEMO_BUTTON = 'احجز عرضاً حياً';
-
-/** The Reference site's own words for a request received, true now that it is. */
-const RECEIVED = 'وصلنا طلبك — سنتواصل خلال يوم عمل لتحديد الموعد.';
-const REFUSED = 'تعذّر استلام طلبك الآن. حاول مرة أخرى بعد قليل، أو راسلنا على واتساب.';
 
 /** What each required field says when it is left wrong. */
 const DEMO_MESSAGES = {
@@ -57,8 +57,6 @@ const DEMO_PLACEMENTS = [
   { page: 'start', path: '/start' },
 ] as const;
 
-const APPLICANT = { name: 'سارة القحطاني', phone: '0500000000', company: 'شركة الإعمار' } as const;
-
 /** Opens `path` as a visitor on network address `ip`, and returns its demo request form. */
 async function openDemoForm(page: Page, path: string, ip: string): Promise<Locator> {
   await page.setExtraHTTPHeaders({ 'x-forwarded-for': ip });
@@ -67,21 +65,12 @@ async function openDemoForm(page: Page, path: string, ip: string): Promise<Locat
   return page.getByRole('form', { name: DEMO_FORM });
 }
 
-async function fillDemoRequest(form: Locator, email: string): Promise<void> {
-  await form.getByLabel('الاسم الكامل').fill(APPLICANT.name);
-  await form.getByLabel('البريد الإلكتروني').fill(email);
-  await form.getByLabel('دورك في المشروع').selectOption('owner');
-  await form.getByLabel('رقم الجوال').fill(APPLICANT.phone);
-  await form.getByLabel('اسم الشركة').fill(APPLICANT.company);
-  await form.getByLabel('عدد المشاريع النشطة').fill('3');
-}
-
 /** Fills in and sends a valid request from `path`, and waits to be told it arrived. */
 async function sendDemoRequest(page: Page, path: string, applicant: { email: string; ip: string }): Promise<void> {
   const form = await openDemoForm(page, path, applicant.ip);
-  await fillDemoRequest(form, applicant.email);
+  await fillDemoForm(form, applicant.email);
   await form.getByRole('button', { name: DEMO_BUTTON }).click();
-  await expect(form.getByRole('status')).toHaveText(RECEIVED);
+  await expect(form.getByRole('status')).toHaveText(DEMO_RECEIVED);
 }
 
 /** The one submission stored with this address, once the mail sent after it has settled. */
@@ -113,7 +102,7 @@ for (const placement of DEMO_PLACEMENTS) {
         await expect(field, label).toHaveAttribute('aria-invalid', 'true');
       }
 
-      await fillDemoRequest(form, email);
+      await fillDemoForm(form, email);
       for (const message of Object.values(DEMO_MESSAGES)) {
         await expect(form.getByText(message, { exact: true })).toBeHidden();
       }
@@ -136,12 +125,12 @@ for (const placement of DEMO_PLACEMENTS) {
       const { email, ip } = uniqueApplicant(`demo-${placement.page}`);
       const form = await openDemoForm(page, placement.path, ip);
       const address = page.url();
-      await fillDemoRequest(form, email);
+      await fillDemoForm(form, email);
 
       // Twice, as an impatient visitor would.
       await form.getByRole('button', { name: DEMO_BUTTON }).dblclick();
 
-      await expect(form.getByRole('status')).toHaveText(RECEIVED);
+      await expect(form.getByRole('status')).toHaveText(DEMO_RECEIVED);
       // The request is gone from the page, so it cannot be sent again by mistake.
       await expect(form.getByLabel('الاسم الكامل')).toHaveCount(0);
       expect(page.url(), 'what was typed went into the address').toBe(address);
@@ -169,7 +158,7 @@ test.describe('the demo request form, on the server', () => {
   }) => {
     const { email, ip } = uniqueApplicant('demo-server-check');
     const form = await openDemoForm(page, '/start', ip);
-    await fillDemoRequest(form, email);
+    await fillDemoForm(form, email);
 
     // A role the form does not offer, as a request made by hand could send.
     await form.getByLabel('دورك في المشروع').evaluate((select: HTMLSelectElement) => {
@@ -178,7 +167,7 @@ test.describe('the demo request form, on the server', () => {
     await form.getByRole('button', { name: DEMO_BUTTON }).click();
 
     await expect(form.getByText(DEMO_MESSAGES['دورك في المشروع'], { exact: true })).toBeVisible();
-    await expect(form.getByText(RECEIVED)).toHaveCount(0);
+    await expect(form.getByText(DEMO_RECEIVED)).toHaveCount(0);
     expect(await submissionsFrom(request, email)).toEqual([]);
   });
 
@@ -188,7 +177,7 @@ test.describe('the demo request form, on the server', () => {
   }) => {
     const { email, ip } = uniqueApplicant('demo-trap');
     const form = await openDemoForm(page, '/', ip);
-    await fillDemoRequest(form, email);
+    await fillDemoForm(form, email);
 
     // Out of sight and out of the keyboard order, so a person never reaches it.
     const trap = form.locator('textarea[name="website"]');
@@ -196,8 +185,8 @@ test.describe('the demo request form, on the server', () => {
     await trap.fill('https://spam.example', { force: true });
     await form.getByRole('button', { name: DEMO_BUTTON }).click();
 
-    await expect(form.getByRole('alert')).toHaveText(REFUSED);
-    await expect(form.getByText(RECEIVED)).toHaveCount(0);
+    await expect(form.getByRole('alert')).toHaveText(DEMO_REFUSED);
+    await expect(form.getByText(DEMO_RECEIVED)).toHaveCount(0);
     expect(await submissionsFrom(request, email)).toEqual([]);
   });
 
@@ -212,9 +201,9 @@ test.describe('the demo request form, on the server', () => {
 
     const sixth = uniqueApplicant('demo-limit');
     const form = await openDemoForm(page, '/start', ip);
-    await fillDemoRequest(form, sixth.email);
+    await fillDemoForm(form, sixth.email);
     await form.getByRole('button', { name: DEMO_BUTTON }).click();
-    await expect(form.getByRole('alert')).toHaveText(REFUSED);
+    await expect(form.getByRole('alert')).toHaveText(DEMO_REFUSED);
     expect(await submissionsFrom(request, sixth.email)).toEqual([]);
 
     await sendDemoRequest(page, '/start', uniqueApplicant('demo-limit'));
