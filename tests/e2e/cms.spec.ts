@@ -215,6 +215,12 @@ test.describe('legal documents', () => {
       await firstClause.getByText('أنت تقر وتضمن التالي:').click();
       await page.keyboard.press('End');
       await page.keyboard.type(EDIT);
+      // Saved only once the editor holds the whole edit. Typing is a key at a
+      // time and the rich text editor takes each one as it comes, so a click
+      // that follows the last key immediately can save what had arrived by
+      // then: CI has produced a draft ending «تعديل محف», seven characters
+      // short, and failed on the preview rather than on the save that caused it.
+      await expect(firstClause).toContainText(`أنت تقر وتضمن التالي:${EDIT}`);
       await page.getByRole('button', { name: 'Save Draft' }).click();
       await expect(page.getByText(/Draft saved successfully/)).toBeVisible();
 

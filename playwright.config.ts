@@ -33,9 +33,10 @@ function testPort(value: string | undefined): number {
 }
 
 export default defineConfig({
-  // `tests/e2e` drives the built site; `tests/unit` holds the one direct unit
-  // tests the spec permits — the delay-cost formula and the SVG sanitiser —
-  // which open no browser.
+  // `tests/e2e` drives the built site; `tests/unit` holds the specs that open
+  // no browser — the delay-cost formula and the SVG sanitiser, the two direct
+  // unit tests the spec permits, and the privacy inventory held to the form
+  // definitions.
   // `tests/baselines` is images and has no specs for this to find.
   testDir: './tests',
   fullyParallel: true,

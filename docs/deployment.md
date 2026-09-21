@@ -415,6 +415,12 @@ submissions**, newest first, whether or not any email went out about it. Each
 record shows what became of its two emails: the alert to the team and the
 confirmation to the applicant.
 
+What every form collects, where each answer is kept and who can reach it is
+written out in plain language for the lawyer in
+[`privacy-inventory.ar.md`](privacy-inventory.ar.md) and
+[`privacy-inventory.md`](privacy-inventory.md) (ticket 37). **Adding a field to
+a form means updating both**, and a test fails until they are.
+
 Each form that sends has its own settings under **Forms**: its heading, button
 and small print, every field's label, placeholder and error message, what the
 visitor is told after sending, the confirmation email, and the **alert

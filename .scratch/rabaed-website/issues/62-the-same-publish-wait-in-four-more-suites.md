@@ -19,6 +19,19 @@ Nothing was wrong with the article or the wording. Ticket 60's own eleven waits,
 
 **Status:** ready-for-agent
 
+## Seen once at the full minute, on a runner (20 September 2026)
+
+Not one of the twenty-one above — this was ticket 60's own wait, at its measured budget, on the partnership page:
+
+```
+Error: the partnership page's reworded paragraph never reached a visitor at
+/partnership in 60065ms; Next said HIT of the page it last sent
+```
+
+`tests/e2e/partnership-page-text.spec.ts`, shard 3 of 4, run 35538148646, on a commit whose whole diff was markdown and one test file. `HIT` for the entire minute means Next answered every one of those 240 requests from what it had built before — not a render that queued behind others and arrived late, but a page that was never rebuilt at all, or was marked after the wait began.
+
+That is a different failure from a budget being too small, and raising the number would not have caught it. Worth establishing which it is before this ticket picks a number for the other twenty-one: if a publish can fail to mark a page, every wait in the suite is waiting on something that may never come, and the budget is beside the point.
+
 ## Why it happens
 
 The same reason as ticket 60, which `tests/e2e/cms.ts` now sets out above `reachesVisitors`: publishing marks every page of the site for rebuilding, the next visit to a marked page renders it again, and on a loaded machine that render queues behind every other page the run has since asked for.
