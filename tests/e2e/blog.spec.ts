@@ -112,8 +112,8 @@ test('a published article is on the blog index and at its own address, whole in 
   expect(index.html).toContain(fields.summary);
   expect(index.html).toContain(`href="/blog/${fields.slug}"`);
 
+  await reaching('the article at its own address', async () => (await visit(request, `/blog/${fields.slug}`)).status).toBe(200);
   const post = await visit(request, `/blog/${fields.slug}`);
-  expect(post.status).toBe(200);
   for (const text of [fields.title, fields.answer, fields.body, fields.author]) {
     expect(post.html).toContain(text);
   }
@@ -291,6 +291,7 @@ test('the index lists articles newest first, a page at a time', async ({ page, r
   await expect(page).toHaveURL(/\/blog\/page\/2$/);
   // Each page of the index is a page of its own to a search engine (ticket 31).
   await expect(description).not.toHaveAttribute('content', firstPageDescription!);
+  await reaching('the second page of the blog index', async () => (await visit(request, '/blog/page/2')).status).toBe(200);
   const [breadcrumbs] = nodesOf(structuredData((await visit(request, '/blog/page/2')).html), 'BreadcrumbList');
   expect(trail(breadcrumbs)).toEqual([
     ['الرئيسية', baseURL],
@@ -367,7 +368,9 @@ test('an article exists per language, and a missing translation offers the one t
     'the English article at its own address',
     async () => (await visit(request, `/en/blog/${arabic.slug}`)).html,
   ).toContain(english.body);
-  expect((await visit(request, '/en/blog')).html).toContain(english.title);
+  await reaching('the English article on the English blog index', async () => (await visit(request, '/en/blog')).html).toContain(
+    english.title,
+  );
   expect((await visit(request, '/en/blog')).html).not.toContain(arabic.title);
   expect((await visit(request, '/blog')).html).not.toContain(english.title);
 

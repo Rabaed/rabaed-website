@@ -159,16 +159,16 @@ test('publishing the first case study reveals the section and its link; unpublis
   const fields = caseStudy();
   const { id } = await create(page.request, fields);
 
-  /** The case study's link in the header of a page, once that page has been built again. */
-  const headerLinks = (path: string) =>
+  /** Whether a page's header leads to the case studies, once that page has been built again. */
+  const headerShowsSection = (path: string) =>
     reaching(`the case study's link in the header of ${path}`, async () => linksToSection((await visit(request, path)).html));
 
-  await headerLinks('/').toBe(true);
+  await headerShowsSection('/').toBe(true);
 
   // In the header, desktop and mobile, on every page — and marked on the section's own pages.
   // Each page is waited for where it is read: publishing marks them all, but
   // each is built again on its own next visit (ticket 62).
-  await headerLinks('/product').toBe(true);
+  await headerShowsSection('/product').toBe(true);
   await page.goto('/product');
   await expect(page.locator('.nav .links').getByRole('link', { name: NAV_LABEL, exact: true })).toHaveAttribute(
     'href',
@@ -178,7 +178,7 @@ test('publishing the first case study reveals the section and its link; unpublis
   // fits between the brand and the buttons. Loaded at that width: the product
   // page's journey sizes its track to the window it loads in.
   await page.setViewportSize({ width: 981, height: 900 });
-  await headerLinks('/start').toBe(true);
+  await headerShowsSection('/start').toBe(true);
   await page.goto('/start');
   const box = async (selector: string) => (await page.locator(selector).boundingBox())!;
   const [brand, links, buttons] = [await box('.nav .brand'), await box('.nav .links'), await box('.nav .nav-cta')];
@@ -235,7 +235,7 @@ test('publishing the first case study reveals the section and its link; unpublis
     'the index of a section with nothing published in it, gone',
     async () => (await visit(request, '/case-studies')).status,
   ).toBe(404);
-  await headerLinks('/').toBe(false);
+  await headerShowsSection('/').toBe(false);
   await reaching(
     'the unpublished case study gone from its own address',
     async () => (await visit(request, `/case-studies/${fields.slug}`)).status,
@@ -306,6 +306,7 @@ test('a case study page tells the whole story, whole in the first response', asy
   // Its place in the site, and the index's, in breadcrumb data (ticket 32).
   const breadcrumbsOn = async (path: string) =>
     trail(nodesOf(structuredData((await visit(request, path)).html), 'BreadcrumbList')[0]);
+  await reaching('the case studies index', async () => (await visit(request, '/case-studies')).status).toBe(200);
   expect(await breadcrumbsOn(`/case-studies/${fields.slug}`)).toEqual([
     ['الرئيسية', baseURL],
     ['قصص العملاء', `${baseURL}/case-studies`],

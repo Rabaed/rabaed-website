@@ -460,6 +460,28 @@ const ASKED_EVERY = 250;
 const WORTH_SAYING = 5_000;
 
 /**
+ * What both waits below owe the budget: the running test's deadline lengthened
+ * by it, so that the bound is reachable whatever `playwright.config.ts` allows
+ * a test (two minutes as this is written, ticket 61) and however many waits one
+ * test makes — a bound a test cannot outlive is not a bound, since it ends as
+ * "Test timeout exceeded", which says nothing about what never arrived — and a
+ * line in the log, said once, where the wait ran past `WORTH_SAYING`.
+ */
+function waitBegins(what: string) {
+  const info = test.info();
+  info.setTimeout(info.timeout + REBUILT_IN);
+
+  let said = false;
+  return {
+    sayIfSlow(waited: number) {
+      if (said || waited <= WORTH_SAYING) return;
+      said = true;
+      console.log(`${what} took ${waited}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
+    },
+  };
+}
+
+/**
  * The page a visitor receives at `path` once `words` published in the CMS have
  * reached it — which is what the test then reads, rather than asking for the
  * page again.
@@ -482,8 +504,7 @@ const WORTH_SAYING = 5_000;
  * says nothing about what never arrived.
  */
 export async function reachesVisitors(request: APIRequestContext, path: string, words: string, what: string): Promise<string> {
-  const info = test.info();
-  info.setTimeout(info.timeout + REBUILT_IN);
+  const waiting = waitBegins(path);
 
   const started = Date.now();
   for (;;) {
@@ -491,9 +512,7 @@ export async function reachesVisitors(request: APIRequestContext, path: string, 
     const html = await response.text();
     const waited = Date.now() - started;
     if (html.includes(words)) {
-      if (waited > WORTH_SAYING) {
-        console.log(`${path} took ${waited}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
-      }
+      waiting.sayIfSlow(waited);
       return html;
     }
     if (waited >= REBUILT_IN) {
@@ -513,29 +532,24 @@ export async function reachesVisitors(request: APIRequestContext, path: string, 
  * `what` names it in the failure a change that never arrives earns, which
  * Playwright follows with the last value the read returned. The budget is
  * `reachesVisitors`'s, because the wait is the same one — a page being built
- * again after a publish — however it is read, and the test's deadline is
- * lengthened by it for the same reason.
+ * again after a publish — however it is read.
+ *
+ * What it cannot say is what Next said of the page, as `reachesVisitors` does:
+ * the read is the caller's, and is not always a page this fetched — one walks
+ * the browser, one reads a footer link. A run that needs that tell has it from
+ * the page-text suites, whose waits carry it, and `HIT` throughout is ticket
+ * 64 rather than a budget too small.
  *
  * Wait for the page the next assertion reads. Publishing marks every page, but
  * each is built again on its own next visit, so one page having the change
  * says nothing about another (ticket 62).
  */
 export function reaching<T>(what: string, read: () => Promise<T> | T) {
-  const info = test.info();
-  info.setTimeout(info.timeout + REBUILT_IN);
-
-  // Said once, for the same reason `reachesVisitors` says it: a wait past the
-  // default these tests used to take is a runner drifting towards the bound,
-  // and this is where it says so in a green run rather than a red one.
+  const waiting = waitBegins(what);
   const started = Date.now();
-  let said = false;
   const timed = async () => {
     const value = await read();
-    const waited = Date.now() - started;
-    if (!said && waited > WORTH_SAYING) {
-      said = true;
-      console.log(`${what} took over ${WORTH_SAYING}ms of the ${REBUILT_IN}ms a published change is given to reach a visitor`);
-    }
+    waiting.sayIfSlow(Date.now() - started);
     return value;
   };
 
