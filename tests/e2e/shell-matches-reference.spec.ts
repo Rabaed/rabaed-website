@@ -38,6 +38,7 @@ import {
   startReferenceSite,
   type ReferenceSite,
 } from './reference-site';
+import { installReadings } from './geometry';
 
 /** The eight widths the visual baselines were captured at (ticket 02). */
 const WIDTHS = [360, 390, 768, 820, 1024, 1280, 1440, 1600];
@@ -139,6 +140,8 @@ async function setState(page: Page, classes: readonly string[]) {
 }
 
 async function measure(page: Page, region: string, parts: readonly string[]) {
+  await installReadings(page);
+
   return page.evaluate(
     ({ region, parts, divergent }: { region: string; parts: string[]; divergent: string | null }) => {
       const root = document.querySelector(region)!;
@@ -157,13 +160,11 @@ async function measure(page: Page, region: string, parts: readonly string[]) {
           left: round(box.left - origin.left),
           height: round(box.height),
           width: round(box.width),
-          color: style.color,
-          background: style.backgroundColor,
-          // All four edges: the header's own rule is a `border-bottom`, so
-          // reading only the top would have made a wrong header border
-          // invisible to this comparison.
-          borderColor: [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
-          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`,
+          // Colours and typeface as `geometry.ts` reads them, and explains —
+          // the border on all four edges, because the header's own rule is a
+          // `border-bottom` and reading only the top would have made a wrong
+          // header border invisible to this comparison.
+          ...window.__readings(style),
           display: style.display,
           visibility: style.visibility,
           opacity: style.opacity,

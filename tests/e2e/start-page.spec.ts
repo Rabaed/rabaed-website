@@ -184,7 +184,7 @@ test('the free tool teaser leads to the tool page', async ({ page }) => {
  * "The page does not load the animation library or homepage animation code it
  * has no use for" (ticket 13). The Reference start page carries all of it. The
  * markers are in `animation-code.ts`; GSAP itself does load here, for the
- * header's colour toggle and the Trust strip.
+ * Trust strip, and `performance.spec.ts` is what says which pages may.
  */
 test("the page loads none of the home and product pages' animations", async ({ page }) => {
   const start = await scriptsOf(page, '/start');

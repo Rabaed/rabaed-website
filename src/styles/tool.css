@@ -20,7 +20,7 @@
 .phero .tl-hero .lead { margin: 0 }
 .tl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px }
 .tl-chip { font-size: 12.5px; color: var(--dark-muted); background: rgba(255, 255, 255, .04); border: 1px solid var(--dark-line); border-radius: 999px; padding: 7px 15px }
-.tl-chip i { color: var(--acc); font-style: normal; margin-inline-end: 7px }
+.tl-chip i { color: var(--acc-ink); font-style: normal; margin-inline-end: 7px }
 
 /* The drawing of the tool (src/components/tool/hero.tsx). Its tiles are the
    Reference site's `.tiles` and `.tile`, which it shares with the Rabaed
@@ -36,7 +36,7 @@
 .tl-mock .tile b { display: block; font-size: 26px; font-family: "DM Mono", monospace; font-weight: 500 }
 .tl-mock .tile small { color: var(--dark-muted); font-size: 12px }
 .tl-row { background: rgba(255, 255, 255, .02); border: 1px solid var(--dark-line); border-radius: 12px; padding: 13px 15px; margin-top: 9px }
-.tl-row .rf { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--acc); letter-spacing: .06em; direction: ltr; display: inline-block }
+.tl-row .rf { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--acc-ink); letter-spacing: .06em; direction: ltr; display: inline-block }
 .tl-row .rn { display: block; font-size: 13.5px; color: var(--dark-text); margin: 5px 0 11px; line-height: 1.6 }
 .tl-row .rm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
 .tl-row .rm > div { display: flex; flex-direction: column; gap: 6px; align-items: flex-start }
@@ -47,17 +47,37 @@
 .tl-s i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none }
 .tl-s.idle { color: #9AA0B4; background: rgba(154, 160, 180, .12); border-color: rgba(154, 160, 180, .28) }
 .tl-s.warn { color: #CCA840; background: rgba(204, 168, 64, .13); border-color: rgba(204, 168, 64, .34) }
-.tl-s.bad { color: #F95738; background: rgba(249, 87, 56, .13); border-color: rgba(249, 87, 56, .36) }
-.tl-s.ok { color: #1D9E75; background: rgba(29, 158, 117, .13); border-color: rgba(29, 158, 117, .34) }
-.tl-s.info { color: #5B8DEF; background: rgba(91, 141, 239, .13); border-color: rgba(91, 141, 239, .34) }
+.tl-s.bad { color: #FF6A4C; background: rgba(249, 87, 56, .13); border-color: rgba(249, 87, 56, .36) }
+.tl-s.ok { color: #35B78C; background: rgba(29, 158, 117, .13); border-color: rgba(29, 158, 117, .34) }
+.tl-s.info { color: #7FA6F4; background: rgba(91, 141, 239, .13); border-color: rgba(91, 141, 239, .34) }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 36, ADR-0011).
+   A pill's words sit on a wash of the pill's own colour, which is the one
+   place a colour is laid over itself — and the wash eats the contrast from
+   both sides at once. The Reference site paints the words and the wash the
+   same value on both grounds, and five of the ten combinations come out
+   below 4.5:1: three on the dark drawing (orange 4.2, green 4.0, blue 4.1)
+   and four in the pale legend (gold 2.1, orange 2.8, blue 2.8, green 2.9).
+   The wash and the border are left exactly as they are; only the words
+   move, up on the dark ground and down on the pale one, by the least that
+   reaches the standard. Grey and gold already pass on the dark ground and
+   keep their values there.
+
+   A pill's colours are written here as literals, as the Reference site writes
+   its own two rows above. The two exceptions are tokens because they are not
+   this file's colours: the deeper accent and the dark gold are the site's two
+   inks, used wherever the accent or the gold is text (ADR-0011). */
 .tl-s.lt.idle { color: #6B6A66; background: var(--soft); border-color: var(--line) }
+.tl-s.lt.warn { color: var(--gold-ink) }
+.tl-s.lt.bad { color: var(--acc-deep) }
+.tl-s.lt.ok { color: #116A4C }
+.tl-s.lt.info { color: #2C5BBE }
 
 /* ---- what it does ---- */
 .tl-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px }
 .tl-feat .rt-c:hover { transform: none }
 .tl-also { list-style: none; padding: 0; margin: 26px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px }
 .tl-also li { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 1px dashed var(--line); font-size: 14.5px; color: var(--muted); line-height: 1.8 }
-.tl-also i { width: 21px; height: 21px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px; font-family: "DM Mono", monospace }
+.tl-also i { width: 21px; height: 21px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px; font-family: "DM Mono", monospace }
 
 /* ---- what it needs ---- */
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the requirement cards'
@@ -71,7 +91,7 @@
 .tl-2 { display: grid; grid-template-columns: 1.02fr .98fr; gap: 46px; align-items: start }
 .tl-tick { list-style: none; padding: 0; margin: 22px 0 0 }
 .tl-tick li { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-bottom: 1px dashed var(--line); font-size: 15px; color: var(--muted); line-height: 1.85 }
-.tl-tick i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px }
+.tl-tick i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; font-style: normal; margin-top: 4px }
 .tl-tick b { color: var(--ink); font-weight: 600 }
 .tl-tree { background: var(--dark); border: 1px solid var(--dark-line); border-radius: 16px; padding: 22px 24px }
 .tl-tree .rt { font-size: 14px; font-weight: 600; color: var(--dark-text); display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--dark-line) }
@@ -99,7 +119,7 @@
 .tl-done > p { margin: 16px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.85 }
 .tl-steps { list-style: none; padding: 0; margin: 18px 0 20px }
 .tl-steps li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 14.5px; color: var(--muted); line-height: 1.8 }
-.tl-steps i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 12px; font-style: normal; margin-top: 3px }
+.tl-steps i { width: 22px; height: 22px; flex: none; border-radius: 50%; background: var(--acc-soft); color: var(--acc-ink); display: flex; align-items: center; justify-content: center; font-family: "DM Mono", monospace; font-size: 12px; font-style: normal; margin-top: 3px }
 .tl-steps b { color: var(--ink); font-weight: 600 }
 #tl-form { display: grid; gap: 12px }
 #tl-form .two > div { display: grid }
@@ -117,7 +137,7 @@
 .tl-up-list { list-style: none; padding: 0; margin: 0 }
 .tl-up-list li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 14.5px; color: var(--muted); line-height: 1.8 }
 .tl-up-list li:last-child { border-bottom: 0 }
-.tl-up-list i { color: var(--acc); font-style: normal; margin-top: 2px }
+.tl-up-list i { color: var(--acc-ink); font-style: normal; margin-top: 2px }
 .tl-foot-line { margin: 26px 0 0; text-align: center; font-size: 13.5px; color: var(--muted) }
 
 @media (max-width: 980px) {

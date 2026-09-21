@@ -13,8 +13,7 @@ import type { Page } from '@playwright/test';
  * renamed, or minified away — fails there rather than letting a page's test
  * pass by finding nothing.
  *
- * GSAP itself loads on every page, and is meant to: the header's colour toggle
- * is on every page and is built on it.
+ * The library the code is written against is `LIBRARIES` below.
  */
 export const ANIMATIONS = [
   // Quoted, because React's `revealOrder` and Next's `revealAfter` contain
@@ -25,6 +24,40 @@ export const ANIMATIONS = [
   { name: "the home page's four units", marker: '.jt-hint', usedOn: '/' },
   { name: "the product page's journey", marker: '.j-head', usedOn: '/product' },
   { name: "the product page's roles", marker: 'role on', usedOn: '/product' },
+] as const;
+
+/**
+ * The animation library itself, and the pages that have something to animate
+ * (ticket 36).
+ *
+ * It used to be every page, because the header's colour toggle was built on
+ * ScrollTrigger and the header is on every page. The toggle is a plain scroll
+ * listener now (`src/components/nav-behaviour.tsx`), so a page with no
+ * animation of its own ships no animation library — which is what the spec's
+ * performance budget asks (spec: Analytics and performance).
+ *
+ * Each marker is a string literal from the library's own source, which
+ * minification keeps because it is a message, not a name. `performance.spec.ts`
+ * holds every route to this table from both sides: a page that loads a library
+ * it is not listed for fails, and so does a page listed for one it does not
+ * load — which is what would happen if a marker stopped appearing.
+ */
+export const LIBRARIES = [
+  {
+    name: 'GSAP',
+    marker: '"GSAP target "',
+    // The home page's hero, decks, four units, Record, before-and-after and
+    // entrances; the product page's journey and roles; and the Trust strip,
+    // which the home, product and start pages all carry.
+    usedOn: ['/', '/product', '/start'],
+  },
+  {
+    name: "GSAP's ScrollTrigger",
+    marker: '"pin-spacer-"',
+    // The Trust strip is a timeline and needs no scrolling, so the start page
+    // loads the core and not this.
+    usedOn: ['/', '/product'],
+  },
 ] as const;
 
 /**

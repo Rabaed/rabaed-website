@@ -24,7 +24,7 @@
 .legal ul { margin: 0 0 15px; padding-inline-start: 20px }
 .legal li { margin-bottom: 10px }
 .legal b { color: var(--ink); font-weight: 600 }
-.legal a { color: var(--acc); text-decoration: none; border-bottom: 1px solid rgba(249, 87, 56, .35) }
+.legal a { color: var(--acc-ink); text-decoration: none; border-bottom: 1px solid rgba(249, 87, 56, .35) }
 
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: «آخر تحديث» is Arabic, and
    the Reference site sets the whole line in DM Mono, which has no Arabic
