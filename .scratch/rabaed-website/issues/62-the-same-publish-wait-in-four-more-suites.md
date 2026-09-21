@@ -91,8 +91,8 @@ So the answer to the question this ticket raised is the second one, and worse th
 
 All on `TEST_PORT=3162`, on the machine this was written on: 20 cores, 20 workers, `npx playwright test --grep-invert @pixel --workers=20`.
 
-- **Three full-suite runs green**: 946 passed, 946 passed, and 945 passed with one failure that is not a wait — `apiRequestContext.get: read ECONNRESET` on an API read in `page-text.spec.ts`. Ticket 61 already wrote that one down: the server drops a connection about once a run at twenty workers, in a different test each time, never at eight. It is the machine, not a test.
-- **A fourth run never reached its tests**: its throwaway Postgres fell over during the build — `cannot connect to Postgres … the database system is in recovery mode` — after four full runs back to back on one machine. Also the machine.
+- **Four full-suite runs green**: 946 passed three times, and 945 passed with one failure that is not a wait — `apiRequestContext.get: read ECONNRESET` on an API read in `page-text.spec.ts`. Ticket 61 already wrote that one down: the server drops a connection about once a run at twenty workers, in a different test each time, never at eight. It is the machine, not a test.
+- **One run never reached its tests**: its throwaway Postgres fell over during the build — `cannot connect to Postgres … the database system is in recovery mode` — after four full runs back to back on one machine. Also the machine.
 - **Not one wait crossed five seconds** in any of those runs: the helpers say so in the log when one does, and no run has such a line. Idle, the five suites together take 1.8 minutes and 79 tests pass.
 - **They still fail when the change never arrives.** With `if (process.env.BREAK_REVALIDATION) return;` added to `refreshSite` (ticket 60's trick, added and removed again), `blog.spec.ts`'s first wait failed at the full minute in its own words: *"the article on the blog index never reached a visitor in 60000ms"*, with the over-five-seconds line in the log before it. To repeat it, add that line and run any of the five suites with `BREAK_REVALIDATION=1`.
 
