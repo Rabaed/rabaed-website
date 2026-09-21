@@ -1,6 +1,5 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/revalidation';
-import { REFERRAL_PAGE_WORDS, REFERRAL_PROGRAM_AMOUNTS } from './referral-page-import/words';
+import { REFERRAL_PAGE_SEED } from './referral-page-import/seed';
 
 /**
  * Imports the Referral Program values the site launched with, and the referral
@@ -8,23 +7,14 @@ import { REFERRAL_PAGE_WORDS, REFERRAL_PROGRAM_AMOUNTS } from './referral-page-i
  * (ticket 56). From here on both are edited only in the CMS.
  *
  * The values first: the page names them rather than typing an amount.
+ *
+ * The statements are frozen in `referral-page-import/seed.ts`, naming the
+ * columns both entries' tables had on the day this was written (ticket 63);
+ * `referral-page-import/words.ts` is still where the words and the amounts
+ * are read.
  */
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-  // A migration runs outside the site, where there are no pages to refresh
-  // (`src/cms/globals/site-settings.ts`).
-  const context = { [SKIP_REVALIDATION]: true };
-  await payload.updateGlobal({
-    slug: 'referral-program',
-    data: { ...REFERRAL_PROGRAM_AMOUNTS, _status: 'published' },
-    context,
-    req,
-  });
-  await payload.updateGlobal({
-    slug: 'referral-page',
-    data: { languages: ['ar'], ...REFERRAL_PAGE_WORDS, _status: 'published' },
-    context,
-    req,
-  });
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql.raw(REFERRAL_PAGE_SEED));
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {

@@ -17,7 +17,7 @@ Nothing was wrong with the article or the wording. Ticket 60's own eleven waits,
 
 **Blocked by:** nothing. Take it after ticket 60 is merged, so that `reachesVisitors` in `tests/e2e/cms.ts` is there to follow. Less urgent than when it was filed: ticket 61's twenty seconds covers most of these most of the time.
 
-**Status:** ready-for-agent
+**Status:** resolved — and the sixty seconds of `HIT` it asked about is a bug of its own, ticket 64
 
 ## Seen once at the full minute, on a runner (20 September 2026)
 
@@ -45,9 +45,9 @@ Every one of these waits is as long as it is because a publish anywhere marks th
 
 ## Done when
 
-- [ ] Each of the twenty-one waits as long as what it waits for can take, from the same measured budget as ticket 60's, wherever ticket 61's twenty seconds is not enough for it
-- [ ] A change that genuinely never arrives still fails, and says so in words
-- [ ] The full suite is green under load, repeatedly
+- [x] Each of the twenty-one waits as long as what it waits for can take, from the same measured budget as ticket 60's, wherever ticket 61's twenty seconds is not enough for it
+- [x] A change that genuinely never arrives still fails, and says so in words
+- [x] The full suite is green under load, repeatedly
 
 ## Comments
 
@@ -68,3 +68,32 @@ Worth noting for whoever takes this: **the tool page grew a read that day**. Tic
 **Worth saying before anyone raises the number: sixty seconds of `HIT` may not be slowness at all.** `reachesVisitors` (ticket 60) asks every 250 milliseconds and reports what Next said of the page it last sent. A render that is merely slow answers `MISS` or `STALE` and then arrives; a page that answers `HIT` for sixty seconds running is a page whose cache nothing invalidated. Both failures said `HIT`. That points at `refreshSiteWhenPublished` → `revalidatePath('/', 'layout')` not reaching those pages on that runner, rather than at a budget too small — and raising the budget would then only make the suite slower before it fails.
 
 So this ticket is a diagnosis before it is a number: reproduce with `x-nextjs-cache` logged on every poll, and find whether the revalidation happened at all, before deciding what the wait should be. `/diagnosing-bugs` is the shape of it — a command that already goes red, then the cause.
+
+### The diagnosis this ticket asked for first
+
+**The sixty seconds of `HIT` is neither a small budget nor a lost mark.** The mark happens; the publish is fine. What happens is that a render which started *before* the publish finishes *after* it, and writes the words it read — the ones the publish replaced — back into the cache. Next decides whether a cached page is past a mark by when the page was written, not by what is in it (`areTagsExpired` in `node_modules/next/dist/server/lib/incremental-cache/tags-manifest.external.js`, against the `Date.now()` that `FileSystemCache.set` stamps as it writes). A page written after the mark therefore counts as fresh, holding what the publish replaced, and every request after it is a `HIT` of that — until somebody publishes again.
+
+So the answer to the question this ticket raised is the second one, and worse than it looked: **the page is not late, it is wrong**, and no budget reaches it. Raising the number only makes such a run slower before it goes red. That is now **ticket 64**, where it belongs: it is a visitor-facing bug — an Editor publishes and the site can keep serving the old page — and the fix changes what publishing does on every page, which is a founder's call and an ADR.
+
+**Reproduced, deterministically, 21 September 2026**, three rounds, three stuck pages, 115 consecutive `HIT`s each, on the machine this was written on. A knob held a render open (`SLOW_RENDER_MS` in `cachedEntry`, `src/cms/pages.ts`, added for the experiment and removed after); then: publish anything so the site is marked; ask for `/tool`, so a render starts and reads the words as they are; publish the change under test while that render is still going; then ask for `/tool` until the change shows. It never shows. Without the knob, the same script on an idle machine got the change in 22–300ms every time, `MISS`. The full recipe and the source citations are in ticket 64.
+
+**What that leaves for this ticket**, unchanged: the twenty-one waits have no bound of their own for a rebuild that can take longer than twenty seconds on a runner. A budget is still the right answer for them — for the ordinary case of a page queueing behind every other page the run has asked for, which is what ticket 60 measured.
+
+### The fix
+
+**One more helper beside `reachesVisitors`** in `tests/e2e/cms.ts`, `reaching(what, read)`: the same minute, the same lengthening of the test's own deadline, and a failure that names what never arrived — for the waits that read something other than a page's own words, which is all twenty-one of these (a status, the titles on an index in order, a link in a header, a search description, a placeholder in a form). It wraps `expect.poll`, so every call site keeps the assertion it already made.
+
+**A wait now names the page the next assertion reads.** The publish-wait in `case-studies.spec.ts` waited for the home page and then asserted on `/product`, `/start`, `/case-studies`, the case study's own page, its English address and the sitemap — none of which the home page's arrival says anything about, because each is built again on its own next visit. That is the failure the ticket 61 lane saw at line 166, which was read as a twenty-second budget being too small and was never a budget problem at all. Each of those pages is now waited for where it is read.
+
+**The second half of that test, and two assertions after it, were waiting for nothing**: the unpublished case study's own address and its disappearance from the sitemap were read without a wait, a line after two waits that happened to cover them most of the time. They have their own now.
+
+### Verified
+
+All on `TEST_PORT=3162`, on the machine this was written on: 20 cores, 20 workers, `npx playwright test --grep-invert @pixel --workers=20`.
+
+- **Four full-suite runs green**: 946 passed three times, and 945 passed with one failure that is not a wait — `apiRequestContext.get: read ECONNRESET` on an API read in `page-text.spec.ts`. Ticket 61 already wrote that one down: the server drops a connection about once a run at twenty workers, in a different test each time, never at eight. It is the machine, not a test.
+- **One run never reached its tests**: its throwaway Postgres fell over during the build — `cannot connect to Postgres … the database system is in recovery mode` — after four full runs back to back on one machine. Also the machine.
+- **Not one wait crossed five seconds** in any of those runs: the helpers say so in the log when one does, and no run has such a line. Idle, the five suites together take 1.8 minutes and 79 tests pass.
+- **They still fail when the change never arrives.** With `if (process.env.BREAK_REVALIDATION) return;` added to `refreshSite` (ticket 60's trick, added and removed again), `blog.spec.ts`'s first wait failed at the full minute in its own words: *"the article on the blog index never reached a visitor in 60000ms"*, with the over-five-seconds line in the log before it. To repeat it, add that line and run any of the five suites with `BREAK_REVALIDATION=1`.
+
+**What is not proven here** is a hosted runner, which ticket 60 measured as slower than this machine by more than an order of magnitude. The budget is that ticket's, sized on its measurements; this ticket only puts the twenty-one waits on it.

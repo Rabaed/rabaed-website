@@ -1,6 +1,5 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/revalidation';
-import { INDEX_LEADS, SITE_WORDS } from './site-words-import/words';
+import { SITE_WORDS_SEED } from './site-words-import/seed';
 
 /**
  * Imports the words every page shares into the CMS as their first published
@@ -10,25 +9,13 @@ import { INDEX_LEADS, SITE_WORDS } from './site-words-import/words';
  * have no English words yet, and an English page shows none of them until
  * ticket 40 writes them. The two index leads are published in both, because
  * the blog and the case studies are (tickets 23 and 24).
+ *
+ * The statements are frozen in `site-words-import/seed.ts`, naming the columns
+ * both entries' tables had on the day this was written (ticket 63);
+ * `site-words-import/words.ts` is still where the words are read.
  */
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-  // A migration runs outside the site, where there are no pages to refresh
-  // (`src/cms/globals/site-settings.ts`).
-  const context = { [SKIP_REVALIDATION]: true };
-
-  await payload.updateGlobal({
-    slug: 'site-words',
-    data: { languages: ['ar'], ...SITE_WORDS, _status: 'published' },
-    context,
-    req,
-  });
-
-  await payload.updateGlobal({
-    slug: 'index-leads',
-    data: { languages: ['ar', 'en'], ...INDEX_LEADS, _status: 'published' },
-    context,
-    req,
-  });
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql.raw(SITE_WORDS_SEED));
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {

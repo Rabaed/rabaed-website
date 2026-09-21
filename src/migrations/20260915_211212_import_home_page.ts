@@ -1,20 +1,17 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/revalidation';
-import { HOME_PAGE_WORDS } from './home-page-import/words';
+import { HOME_PAGE_SEED } from './home-page-import/seed';
 
 /**
  * Imports the home page's words into the CMS as its first published version,
  * in Arabic (ticket 58). From here on they are edited only in the CMS.
+ *
+ * The statements are frozen in `home-page-import/seed.ts`, naming the columns
+ * this entry's tables had on the day this was written (ticket 63) — the
+ * longest of the nine, because the home page's lists are the most nested;
+ * `home-page-import/words.ts` is still where the words are read.
  */
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-  await payload.updateGlobal({
-    slug: 'home-page',
-    data: { languages: ['ar'], ...HOME_PAGE_WORDS, _status: 'published' },
-    // A migration runs outside the site, where there are no pages to
-    // refresh (`src/cms/globals/site-settings.ts`).
-    context: { [SKIP_REVALIDATION]: true },
-    req,
-  });
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql.raw(HOME_PAGE_SEED));
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {

@@ -408,6 +408,44 @@ import map and `src/payload-types.ts`. Payload writes the migration's type
 imports as value imports, which this project's compiler settings refuse; mark
 them `type` by hand.
 
+#### What a data migration may and may not do
+
+Beside the migrations Payload generates from the configuration, some are
+written by hand to put **content** into the database: the words each page
+started with, the Trust strip's marks, the six launch articles. They are the
+ones with no `.json` snapshot beside them.
+
+**A data migration writes its rows in SQL, frozen the day it is written.** It
+may not write them through Payload — no `payload.updateGlobal`, no
+`payload.create` for an entry or a document — because such a statement is built
+from the fields the code declares *today*, not from the tables as they were
+when the migration ran. Add a field to a page's entry and an untouched
+migration from weeks ago starts naming a column the database has not reached
+yet: every database built from scratch stops there with `column … does not
+exist`, while production, which migrated before the column existed, carries on.
+That cost two tickets a workaround each (33 and 26) before ticket 63 closed it.
+
+The one exception is an **upload**. A file has to be converted and written to
+storage, which no `INSERT` can do, so a migration that brings in a picture
+still creates it with `payload.create({ collection: 'media', … })` — and a
+field added to Images can still stop a fresh database there.
+
+To write one:
+
+1. Write the import the readable way first, against the local API, with the
+   words in a frozen module of their own beside it (`src/migrations/*-import/`).
+2. Add it to `IMPORTS` in `scripts/freeze-seed.ts` and run `npm run
+   cms:freeze-seed`. On an empty database it replays the chain, records what
+   the import wrote, and writes the statements out as `seed.ts` beside the
+   words.
+3. Change the migration's `up` to `await db.execute(sql.raw(THE_SEED))`, and
+   leave `down` as it was.
+4. Check it with `npm run cms:migrate-fresh`, which migrates a throwaway
+   database from nothing in a few seconds — the only place any of this shows.
+
+`tests/unit/data-migrations.spec.ts` holds the rule, and names the eight
+migrations that have not been brought over to it yet (ticket 64).
+
 ### Forms
 
 Every request sent from a form on the site is kept under **Forms → Form
