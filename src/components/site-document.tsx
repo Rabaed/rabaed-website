@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { getPublishedContact } from '@/cms/contact-points';
+import { Measurement } from '@/components/measurement';
 import { PreviewBanner } from '@/components/preview-banner';
 import { organisationData, StructuredData } from '@/components/structured-data';
 import { LOCALES, type Locale } from '@/lib/locales';
@@ -14,7 +15,9 @@ import { LOCALES, type Locale } from '@/lib/locales';
  * The page shell proper (header, footer, navigation) is ticket 04.
  *
  * The company's structured data is here, once, because every page of both
- * locales carries it (ticket 32).
+ * locales carries it (ticket 32). So is the measurement of how the site is
+ * used (ticket 34), for the same reason — and because this is the document the
+ * site serves visitors, while the admin has a layout of its own.
  */
 export async function SiteDocument({ locale, children }: { locale: Locale; children: ReactNode }) {
   const contact = await getPublishedContact();
@@ -25,6 +28,7 @@ export async function SiteDocument({ locale, children }: { locale: Locale; child
         {children}
         <StructuredData data={organisationData(contact)} />
         <PreviewBanner />
+        <Measurement />
       </body>
     </html>
   );
