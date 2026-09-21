@@ -58,3 +58,7 @@ Every one of these waits is as long as it is because a publish anywhere marks th
     Timeout: 20000ms, element(s) not found
 
 That is the header of `/product` still being the one built before the case study was published — the same wait as the rest of this ticket's, on ticket 61's twenty seconds rather than a budget of its own. **Line 166 is not on the list above**, which has 162 from the same test: it is a `toHaveAttribute` rather than an `expect.poll`, so a sweep for polls would miss it, and so may other assertions in these suites that wait for a publish without looking like a wait.
+
+**It cost a run again on 21 September 2026, in ticket 30.** `tool-page-text.spec.ts` › "a change published reaches visitors" timed out after 60 seconds on shard 4 — *"Next said HIT of the page it last sent"* — and passed on a re-run with no change, and passes locally 24 of 24. So it is this ticket's flake rather than a regression.
+
+Worth noting for whoever takes this: **the tool page grew a read that day**. Ticket 30 gave it the download form's own words (`formPageWording(TOOL_DOWNLOAD)`), so its rebuild does one more CMS read than it did, and on a two-core runner that is enough to push it past the budget more often. The budget is the thing to fix — the read is correct and every other page already does the same — but it means this suite is now the likeliest of the five to go red, and the argument for doing this ticket sooner rather than later.
