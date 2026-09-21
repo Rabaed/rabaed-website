@@ -38,7 +38,7 @@ import {
   startReferenceSite,
   type ReferenceSite,
 } from './reference-site';
-import { RECOLOURED } from './geometry';
+import { installReadings } from './geometry';
 
 /** The eight widths the visual baselines were captured at (ticket 02). */
 const WIDTHS = [360, 390, 768, 820, 1024, 1280, 1440, 1600];
@@ -140,21 +140,10 @@ async function setState(page: Page, classes: readonly string[]) {
 }
 
 async function measure(page: Page, region: string, parts: readonly string[]) {
+  await installReadings(page);
+
   return page.evaluate(
-    ({
-      region,
-      parts,
-      divergent,
-      recoloured,
-    }: {
-      region: string;
-      parts: string[];
-      divergent: string | null;
-      recoloured: [string, string][];
-    }) => {
-      /** A colour ticket 36 changed, read as the Reference site's (`geometry.ts`). */
-      const asReference = (value: string) =>
-        recoloured.reduce((read, [now, before]) => read.split(now).join(before), value);
+    ({ region, parts, divergent }: { region: string; parts: string[]; divergent: string | null }) => {
       const root = document.querySelector(region)!;
       const origin = root.getBoundingClientRect();
       const round = (n: number) => Math.round(n * 100) / 100;
@@ -171,18 +160,11 @@ async function measure(page: Page, region: string, parts: readonly string[]) {
           left: round(box.left - origin.left),
           height: round(box.height),
           width: round(box.width),
-          color: asReference(style.color),
-          background: asReference(style.backgroundColor),
-          // All four edges: the header's own rule is a `border-bottom`, so
-          // reading only the top would have made a wrong header border
-          // invisible to this comparison.
-          borderColor: asReference(
-            [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
-          ),
-          // The stand-in families are stripped out, as `geometry.ts` does and
-          // explains: they hold the fallback's place while the webfont loads
-          // and say nothing about what the page is set in (ADR-0012).
-          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, '')}`,
+          // Colours and typeface as `geometry.ts` reads them, and explains —
+          // the border on all four edges, because the header's own rule is a
+          // `border-bottom` and reading only the top would have made a wrong
+          // header border invisible to this comparison.
+          ...window.__readings(style),
           display: style.display,
           visibility: style.visibility,
           opacity: style.opacity,
@@ -200,12 +182,7 @@ async function measure(page: Page, region: string, parts: readonly string[]) {
       }
       return result;
     },
-    {
-      region,
-      parts: [...parts],
-      divergent: region === 'footer' ? DIVERGENT : null,
-      recoloured: RECOLOURED.map(([now, before]) => [now, before] as [string, string]),
-    },
+    { region, parts: [...parts], divergent: region === 'footer' ? DIVERGENT : null },
   );
 }
 

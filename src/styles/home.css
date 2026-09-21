@@ -358,7 +358,11 @@
 /* With reduced motion the section is lit in one step, rather than blended, by
    this class; and nothing on it fades or grows into place. */
 #record.lit { background: var(--paper); color: var(--ink) }
-#record.lit .rec-card { background: #fff; border-color: var(--line) }
+/* The card's ground turns white here, so the stamp on it goes back to the
+   deeper ink `tokens.css` reset for the dark card (ADR-0011). The automated
+   check cannot see this one: the stamp is `opacity: 0` until the section has
+   been scrolled through, and axe reads the page as it arrives. */
+#record.lit .rec-card { background: #fff; border-color: var(--line); --acc-ink: var(--acc-deep) }
 @media (prefers-reduced-motion: reduce) {
   .rec-card, .rec-card .h b, .rec-card .tl li, .rec-types span, .stamp { transition: none }
 }

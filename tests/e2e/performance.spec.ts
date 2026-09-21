@@ -156,7 +156,8 @@ for (const route of ROUTES) {
     // than as `content-length` claims, which several of these responses do not
     // carry at all because they are sent in chunks.
     const COUNTED = ['document', 'stylesheet', 'font', 'script', 'image'];
-    const weighed: Promise<{ url: string; type: string; kb: number } | null>[] = [];
+    const weighed: Promise<{ url: string; type: string; kb: number }>[] = [];
+    const unweighable: string[] = [];
     page.on('requestfinished', (request) => {
       if (!COUNTED.includes(request.resourceType())) return;
       weighed.push(
@@ -167,14 +168,22 @@ for (const route of ROUTES) {
             type: request.resourceType(),
             kb: (sizes.responseBodySize + sizes.responseHeadersSize) / 1024,
           }))
-          .catch(() => null),
+          // Said out loud rather than dropped: a response left out of the sum
+          // makes the page look lighter than it is, which is the one way this
+          // budget could pass by measuring nothing.
+          .catch((reason: unknown) => {
+            unweighable.push(`${request.url()}: ${String(reason)}`);
+            return { url: request.url(), type: request.resourceType(), kb: 0 };
+          }),
       );
     });
 
     await page.goto(route.path, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
 
-    const loaded = (await Promise.all(weighed)).filter((item) => item !== null);
+    const loaded = await Promise.all(weighed);
+    expect(unweighable, `${route.path} sent responses whose size could not be read`).toEqual([]);
+
     const total = loaded.reduce((sum, item) => sum + item.kb, 0);
     const subtotals = COUNTED.map((type) => {
       const of = loaded.filter((item) => item.type === type);
@@ -228,7 +237,7 @@ for (const route of ROUTES) {
     // entries are never kept in the buffer `getEntriesByType` reads, so asking
     // for them later always answers with nothing.
     await page.addInitScript(() => {
-      const record: { at: number; what: string } = { at: 0, what: 'the browser named no largest element' };
+      const record: { at: number | null; what: string } = { at: null, what: 'the browser named no largest element' };
       (window as unknown as { __largest: typeof record }).__largest = record;
       new PerformanceObserver((list) => {
         // The last candidate the browser settled on is the one it reports.
@@ -245,13 +254,20 @@ for (const route of ROUTES) {
     await page.evaluate(() => document.fonts.ready);
 
     const largest = await page.evaluate(
-      () => (window as unknown as { __largest: { at: number; what: string } }).__largest,
+      () => (window as unknown as { __largest: { at: number | null; what: string } }).__largest,
     );
     await session.detach();
 
+    // Before the reading: a page where the observer never fired would report
+    // nothing, and a test that reads nothing as zero passes by finding nothing
+    // (spec: Testing Decisions). Every route here has something the browser
+    // calls contentful on its first screen, so this is a broken measurement
+    // rather than a page with no content.
+    expect(largest.at, `${route.path}: ${largest.what}`).not.toBeNull();
+
     expect(
-      Math.round(largest.at),
-      `${route.path} took ${Math.round(largest.at)}ms at ${SLOW_4G.downloadKbps} kbit/s to paint ${largest.what}`,
+      Math.round(largest.at!),
+      `${route.path} took ${Math.round(largest.at!)}ms at ${SLOW_4G.downloadKbps} kbit/s to paint ${largest.what}`,
     ).toBeLessThanOrEqual(LARGEST_PAINT_TARGET_MS);
   });
 }

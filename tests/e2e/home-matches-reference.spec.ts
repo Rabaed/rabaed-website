@@ -30,7 +30,7 @@ import {
   startReferenceSite,
   type ReferenceSite,
 } from './reference-site';
-import { RECOLOURED } from './geometry';
+import { installReadings } from './geometry';
 
 /**
  * Everything the hero is made of. Both documents carry all of it, under the
@@ -78,11 +78,10 @@ const HERO_PARTS = [
 const DIVERGENT = '.guar';
 
 async function measure(page: Page, parts: readonly string[]) {
+  await installReadings(page);
+
   return page.evaluate(
-    ({ parts, divergent, recoloured }: { parts: string[]; divergent: string; recoloured: [string, string][] }) => {
-      /** A colour ticket 36 changed, read as the Reference site's (`geometry.ts`). */
-      const asReference = (value: string) =>
-        recoloured.reduce((read, [now, before]) => read.split(now).join(before), value);
+    ({ parts, divergent }: { parts: string[]; divergent: string }) => {
       const root = document.querySelector('#hero')!;
       const origin = root.getBoundingClientRect();
       const round = (n: number) => Math.round(n * 100) / 100;
@@ -96,15 +95,8 @@ async function measure(page: Page, parts: readonly string[]) {
           left: round(box.left - origin.left),
           height: round(box.height),
           width: round(box.width),
-          color: asReference(style.color),
-          background: asReference(style.backgroundColor),
-          borderColor: asReference(
-            [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
-          ),
-          // The stand-in families are stripped out, as `geometry.ts` does and
-          // explains: they hold the fallback's place while the webfont loads
-          // and say nothing about what the page is set in (ADR-0012).
-          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, '')}`,
+          // Colours and typeface as `geometry.ts` reads them, and explains.
+          ...window.__readings(style),
           display: style.display,
           visibility: style.visibility,
           opacity: style.opacity,
@@ -118,7 +110,7 @@ async function measure(page: Page, parts: readonly string[]) {
       }
       return result;
     },
-    { parts: [...parts], divergent: DIVERGENT, recoloured: RECOLOURED.map(([now, before]) => [now, before] as [string, string]) },
+    { parts: [...parts], divergent: DIVERGENT },
   );
 }
 

@@ -60,7 +60,12 @@
    The wash and the border are left exactly as they are; only the words
    move, up on the dark ground and down on the pale one, by the least that
    reaches the standard. Grey and gold already pass on the dark ground and
-   keep their values there. */
+   keep their values there.
+
+   A pill's colours are written here as literals, as the Reference site writes
+   its own two rows above. The two exceptions are tokens because they are not
+   this file's colours: the deeper accent and the dark gold are the site's two
+   inks, used wherever the accent or the gold is text (ADR-0011). */
 .tl-s.lt.idle { color: #6B6A66; background: var(--soft); border-color: var(--line) }
 .tl-s.lt.warn { color: var(--gold-ink) }
 .tl-s.lt.bad { color: var(--acc-deep) }

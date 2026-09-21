@@ -18,8 +18,13 @@
  *     there, and still readable.
  *
  * axe is run against the page as it arrives, before anything is scrolled:
- * what a visitor meets. The states behind a click belong to the suites that
- * open them.
+ * what a visitor meets. The states behind a click, a scroll or a tab belong to
+ * the suites that open them — **and that is a real limit, not a tidy division
+ * of labour.** The Record section's stamp was missed by exactly this: it is
+ * `opacity: 0` until the section has been scrolled through, so axe never saw
+ * that its ground turns white under it (ticket 36 found it by reading the
+ * stylesheet, and `home.css` says so beside the rule). A state worth showing a
+ * visitor is worth a contrast check, and one added later will not get it here.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Page } from '@playwright/test';
@@ -47,7 +52,37 @@ const STANDARD = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
  */
 const ACCEPTED = [{ foreground: '#ffffff', background: '#f95738' }];
 
-/** Whether axe's account of one element is the accepted pair and nothing else. */
+/**
+ * The reasons axe gives for not being able to judge contrast that are the
+ * question not applying rather than an answer it is withholding. Each was
+ * looked at once, on this site, and each is the same handful of elements:
+ *
+ *  - **Only non-text characters.** The arrows on the "read more" links and in
+ *    the Partnerships trigger, the `+` and `–` on a question, the bullets in a
+ *    list. They are drawing, and they say nothing a reader has to read.
+ *  - **Overlapped by another element.** The before/after slider's two arrows,
+ *    which sit over the picture they move across, and a card's number under
+ *    its own overlay.
+ *  - **A background gradient.** The hero's glow, a faint wash of the accent
+ *    over the dark ground, under text that is already held to that ground.
+ */
+const UNDECIDABLE = [
+  'Element content contains only non-text characters',
+  'background color could not be determined because it is overlapped by another element',
+  'background color could not be determined due to a background gradient',
+];
+
+/** Whether every reason axe gave for one element is one of those. */
+function undecidable(failureSummary: string | undefined): boolean {
+  return UNDECIDABLE.some((why) => failureSummary?.includes(why) ?? false);
+}
+
+/**
+ * Whether axe's account of one element names an accepted pair. It is the whole
+ * account that is forgiven, because axe writes one pair per element for this
+ * rule: a second shortfall on the same element would be a second element in
+ * the report, not a second line here.
+ */
 function accepted(failureSummary: string | undefined): boolean {
   return ACCEPTED.some(
     (pair) =>
@@ -56,7 +91,7 @@ function accepted(failureSummary: string | undefined): boolean {
 }
 
 /** The rule, the elements and the fix, rather than a count. */
-function describeViolations(violations: { id: string; impact?: string | null; help: string; nodes: { target: unknown[]; failureSummary?: string }[] }[]): string {
+function describeChecks(violations: { id: string; impact?: string | null; help: string; nodes: { target: unknown[]; failureSummary?: string }[] }[]): string {
   return violations
     .map((violation) => {
       const where = violation.nodes.map(
@@ -72,13 +107,25 @@ for (const route of ROUTES) {
     await page.goto(route.path);
     await page.evaluate(() => document.fonts.ready);
 
-    const { violations } = await new AxeBuilder({ page }).withTags(STANDARD).analyze();
+    const { violations, incomplete } = await new AxeBuilder({ page }).withTags(STANDARD).analyze();
 
     const unaccepted = violations
       .map((violation) => ({ ...violation, nodes: violation.nodes.filter((node) => !accepted(node.failureSummary)) }))
       .filter((violation) => violation.nodes.length > 0);
 
-    expect(describeViolations(unaccepted), `${route.path} has accessibility violations`).toBe('');
+    expect(describeChecks(unaccepted), `${route.path} has accessibility violations`).toBe('');
+
+    // What axe could not decide, which it keeps in a bucket of its own. Read
+    // rather than dropped: contrast it cannot compute lands here rather than
+    // above, and a page that quietly filled up with it would look as clean as
+    // one with nothing wrong. Only the three reasons below are let through,
+    // each of them axe saying the question does not apply, so a fourth kind of
+    // undecidable arrives as a failure rather than as silence.
+    const undecided = incomplete
+      .map((check) => ({ ...check, nodes: check.nodes.filter((node) => !undecidable(node.failureSummary)) }))
+      .filter((check) => check.nodes.length > 0);
+
+    expect(describeChecks(undecided), `${route.path} has checks axe could not decide`).toBe('');
   });
 }
 
@@ -133,13 +180,20 @@ const LOOK = `window.__look = (element) => {
   return [element, ...element.querySelectorAll('*')].map(of).join('//');
 }`;
 
+/** What to call a control in a failure, when it has no words of its own. */
+const NAMES = `window.__names = (element) =>
+  (element.getAttribute('aria-label') || element.getAttribute('placeholder') || element.getAttribute('name') || element.textContent || element.className || '')
+    .trim()
+    .slice(0, 40);`;
+
 declare global {
   interface Window {
     __look: (element: Element) => string;
+    __names: (element: Element) => string;
   }
 }
 
-type Stop = { probe: string | null; tag: string; name: string; changed: boolean };
+type Stop = { probe: string; tag: string; name: string; changed: boolean };
 
 /**
  * Every control the page offers, in the order Tab reaches them, and whether
@@ -156,6 +210,7 @@ type Stop = { probe: string | null; tag: string; name: string; changed: boolean 
  */
 async function tabThrough(page: Page): Promise<Stop[]> {
   await page.evaluate(LOOK);
+  await page.evaluate(NAMES);
   await page.evaluate(() => {
     const focusable = 'a[href], button, input, select, textarea, summary, [tabindex]';
     const candidates = [...document.querySelectorAll<HTMLElement>(focusable)].filter((element) => {
@@ -192,74 +247,76 @@ async function tabThrough(page: Page): Promise<Stop[]> {
     const stop = await page.evaluate((resting: Record<string, string>) => {
       const active = document.activeElement as HTMLElement | null;
       if (!active || active === document.body) return null;
-      const probe = active.dataset.focusProbe ?? null;
+      // Nothing this walk asked about: a control it deliberately left
+      // unstamped, or something outside the page. Skipped rather than
+      // counted, so a stop nobody asked about cannot pass for one that showed
+      // its focus.
+      const probe = active.dataset.focusProbe;
+      if (probe === undefined) return 'skip' as const;
       return {
         probe,
         tag: active.tagName.toLowerCase(),
-        name: (
-          active.getAttribute('aria-label') ||
-          active.getAttribute('placeholder') ||
-          active.getAttribute('name') ||
-          active.textContent ||
-          active.className ||
-          ''
-        )
-          .trim()
-          .slice(0, 40),
+        name: window.__names(active),
         // Anything about it or its contents that the focus changed.
-        changed: probe === null || window.__look(active) !== resting[probe],
+        changed: window.__look(active) !== resting[probe],
       };
     }, atRest);
 
     if (!stop) break;
-    if (stop.probe !== null && seen.has(stop.probe)) break;
-    if (stop.probe !== null) seen.add(stop.probe);
+    if (stop === 'skip') continue;
+    if (seen.has(stop.probe)) break;
+    seen.add(stop.probe);
     stops.push(stop);
   }
 
   return stops;
 }
 
+/**
+ * Both sides of the 981px breakpoint, because each offers different controls:
+ * above it the header's links and the Partnerships dropdown are in the tab
+ * order, below it they are behind a burger and it is the burger that has to be
+ * reachable. Opening the panel is `page-shell.spec.ts`; this is about what the
+ * page offers before anything is opened.
+ */
+const KEYBOARD_WIDTHS = [
+  { where: 'a desktop', width: 1280, height: 900 },
+  { where: 'a phone', width: 390, height: 844 },
+];
+
 for (const route of ROUTES) {
-  test(`every control on ${route.path} is reachable by keyboard, and shows it`, async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(route.path);
-    await page.evaluate(() => document.fonts.ready);
+  for (const viewport of KEYBOARD_WIDTHS) {
+    test(`every control on ${route.path} is reachable by keyboard on ${viewport.where}, and shows it`, async ({ page }) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto(route.path);
+      await page.evaluate(() => document.fonts.ready);
 
-    const stops = await tabThrough(page);
+      const stops = await tabThrough(page);
 
-    // No assertion that the walk found anything: a page with nothing to
-    // operate — the English blog index before ticket 43 gives it articles —
-    // is not a page with an unreachable control. What the page does offer is
-    // held to both counts below, the second of which reads the page rather
-    // than the walk and so cannot pass by finding nothing.
-    const invisible = stops.filter((stop) => !stop.changed).map((stop) => `${stop.tag} «${stop.name}»`);
-    expect(invisible, `controls that look the same focused as unfocused on ${route.path}`).toEqual([]);
+      // No assertion that the walk found anything: a page with nothing to
+      // operate — the English blog index before ticket 43 gives it articles —
+      // is not a page with an unreachable control. What the page does offer is
+      // held to both counts below, the second of which reads the page rather
+      // than the walk and so cannot pass by finding nothing.
+      const invisible = stops.filter((stop) => !stop.changed).map((stop) => `${stop.tag} «${stop.name}»`);
+      expect(invisible, `controls that look the same focused as unfocused on ${route.path} at ${viewport.width}px`).toEqual([]);
 
-    // Everything the page offers, not only what the walk happened to pass: a
-    // control the tab order skips is one a keyboard visitor cannot use at all.
-    const reached = stops.map((stop) => stop.probe).filter((probe): probe is string => probe !== null);
-    const unreached = await page.evaluate((visited: string[]) => {
-      const visible = (element: HTMLElement) => {
-        const box = element.getBoundingClientRect();
-        return box.width > 0 && box.height > 0 && getComputedStyle(element).visibility !== 'hidden';
-      };
-      return [...document.querySelectorAll<HTMLElement>('[data-focus-probe]')]
-        .filter((element) => visible(element) && !visited.includes(element.dataset.focusProbe!))
-        .map((element) => {
-          const name =
-            element.getAttribute('aria-label') ||
-            element.getAttribute('placeholder') ||
-            element.getAttribute('name') ||
-            element.textContent ||
-            element.className ||
-            '';
-          return `${element.tagName.toLowerCase()} «${name.trim().slice(0, 40)}»`;
-        });
-    }, reached);
+      // Everything the page offers, not only what the walk happened to pass: a
+      // control the tab order skips is one a keyboard visitor cannot use at all.
+      const reached = stops.map((stop) => stop.probe);
+      const unreached = await page.evaluate((visited: string[]) => {
+        const visible = (element: HTMLElement) => {
+          const box = element.getBoundingClientRect();
+          return box.width > 0 && box.height > 0 && getComputedStyle(element).visibility !== 'hidden';
+        };
+        return [...document.querySelectorAll<HTMLElement>('[data-focus-probe]')]
+          .filter((element) => visible(element) && !visited.includes(element.dataset.focusProbe!))
+          .map((element) => `${element.tagName.toLowerCase()} «${window.__names(element)}»`);
+      }, reached);
 
-    expect(unreached, `controls the keyboard never reaches on ${route.path}`).toEqual([]);
-  });
+      expect(unreached, `controls the keyboard never reaches on ${route.path} at ${viewport.width}px`).toEqual([]);
+    });
+  }
 }
 
 test.describe('with motion turned down', () => {

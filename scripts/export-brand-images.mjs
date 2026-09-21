@@ -36,10 +36,12 @@ const SHARING_IMAGE = { width: 1200, height: 630 };
  * `reference/brand/`, which is where the founders' originals live and which
  * nothing may edit; `public/brand/` holds only what this writes.
  */
-const WORDMARKS = [
-  { from: 'W-removebg-preview.png', to: 'rabaed-wordmark-on-dark.webp' },
-  { from: 'Rabaed Final Logo.png', to: 'rabaed-wordmark-on-light.webp' },
-];
+const WORDMARKS = {
+  /** White lettering, for the dark header and the footer. */
+  onDark: { from: 'W-removebg-preview.png', to: 'rabaed-wordmark-on-dark.webp' },
+  /** The wordmark in its colours, for a light header and the brand mark the icons are cut from. */
+  onLight: { from: 'Rabaed Final Logo.png', to: 'rabaed-wordmark-on-light.webp' },
+};
 
 const brandFile = (name) => fromRoot('reference', 'brand', name);
 
@@ -54,7 +56,7 @@ async function dataUrl(file, type) {
  */
 async function sharingImageHtml() {
   const font = (file) => dataUrl(fromRoot('assets', 'fonts', file), 'font/woff2');
-  const wordmark = await dataUrl(brandFile(WORDMARKS[0].from), 'image/png');
+  const wordmark = await dataUrl(brandFile(WORDMARKS.onDark.from), 'image/png');
 
   return `<!doctype html>
 <html lang="ar" dir="rtl">
@@ -154,7 +156,7 @@ async function squareMark(file, size, padding, background) {
  * diagram of flat colours, and lossless WebP is no smaller than the PNG.
  */
 async function exportWordmarks() {
-  for (const { from, to } of WORDMARKS) {
+  for (const { from, to } of Object.values(WORDMARKS)) {
     await sharp(brandFile(from))
       .webp({ quality: 90 })
       .toFile(fromRoot('public', 'brand', to));
@@ -162,7 +164,7 @@ async function exportWordmarks() {
 }
 
 async function exportIcons() {
-  const wordmark = brandFile(WORDMARKS[1].from);
+  const wordmark = brandFile(WORDMARKS.onLight.from);
   const transparent = { r: 0, g: 0, b: 0, alpha: 0 };
   // Transparent in a tab, where the mark's colours read on light and dark
   // browser themes alike. Opaque on the home screen, where iOS fills

@@ -36,33 +36,82 @@ export type Measurement =
 export const EVERYTHING_BUT_ACROSS: readonly Measurement[] = ['top', 'height', 'font', 'display', 'visibility', 'opacity'];
 
 /**
- * The colours ticket 36 changed for contrast, each beside the Reference site's
- * value it replaced (ADR-0011), as a computed style reports them.
+ * How a comparison reads an element's colours and its typeface, installed in
+ * the page by `installReadings` below and shared by all three of the specs
+ * that measure a document against the Reference site.
  *
- * Every comparison reads both documents through this, so a part whose colour
- * is one of these reads as the Reference site's — and every other colour is
- * still compared to the value. That keeps the comparisons saying what they
- * were written to say ("this label is the accent, not grey") instead of the
+ * It is source rather than a function because it is read inside the page, and
+ * a function cannot be handed across that boundary. One copy rather than three
+ * because the two things it does are two deliberate divergences this ticket
+ * introduced, and a fourth spec that starts comparing documents should inherit
+ * both rather than rediscover them.
+ *
+ * **Colour (ADR-0011).** The colours ticket 36 changed for contrast read as
+ * the Reference site's value they replaced, so a comparison still says what it
+ * was written to say — "this label is the accent, not grey" — instead of the
  * two hundred `omit: ['color']` entries the alternative would need, which
- * would stop them saying anything about colour at all.
+ * would stop it saying anything about colour at all. Both documents are read
+ * this way, so a pair that already matched still matches: `#836921` is the
+ * dark gold the Reference site's own badge uses, and reading it as gold on
+ * both sides changes nothing about that badge.
  *
- * It is applied to both pages, so a pair that already matched still matches:
- * `#836921` is the dark gold the Reference site's own badge uses, and reading
- * it as gold on both sides changes nothing about that badge.
+ * **Only where the text is what changed.** `border-color` and `background`
+ * start out as `currentColor`, so on most elements they simply report the
+ * text's colour — which is why they have to be read the same way. They are
+ * read that way *only when the element's own text is one of the changed
+ * inks*. A fill, a rule or a ring is not text, ADR-0011 leaves it at the
+ * accent, and one that turned up as the deeper orange is a real difference
+ * this still fails on.
+ *
+ * **Typeface (ADR-0012).** The stand-in families are stripped out. They hold
+ * the fallback's place at the width IBM Plex Sans Arabic sets Arabic at, and
+ * by the time anything is measured the real face is in use — but `fontFamily`
+ * reports the whole declared stack whatever is rendering, so left in they
+ * would fail every comparison against a Reference site that does not declare
+ * them, while saying nothing about what either page is set in.
  */
-export const RECOLOURED: readonly (readonly [string, string])[] = [
-  // The accent as text on a pale ground, and the two lifts of it on the tool
-  // page's state pills.
-  ['rgb(178, 58, 27)', 'rgb(249, 87, 56)'],
-  ['rgb(255, 106, 76)', 'rgb(249, 87, 56)'],
-  // The gold label, and the green and blue pills, dark on the pale legend and
-  // lifted on the dark drawing.
-  ['rgb(131, 105, 33)', 'rgb(204, 168, 64)'],
-  ['rgb(17, 106, 76)', 'rgb(29, 158, 117)'],
-  ['rgb(53, 183, 140)', 'rgb(29, 158, 117)'],
-  ['rgb(44, 91, 190)', 'rgb(91, 141, 239)'],
-  ['rgb(127, 166, 244)', 'rgb(91, 141, 239)'],
-];
+const READINGS = `window.__readings = (style) => {
+  const recoloured = ${JSON.stringify([
+    // The accent as text on a pale ground, and the lift of it on the tool
+    // page's state pills over the dark drawing.
+    ['rgb(178, 58, 27)', 'rgb(249, 87, 56)'],
+    ['rgb(255, 106, 76)', 'rgb(249, 87, 56)'],
+    // The gold label, and the green and blue pills, deeper on the pale legend
+    // and lifted on the dark drawing.
+    ['rgb(131, 105, 33)', 'rgb(204, 168, 64)'],
+    ['rgb(17, 106, 76)', 'rgb(29, 158, 117)'],
+    ['rgb(53, 183, 140)', 'rgb(29, 158, 117)'],
+    ['rgb(44, 91, 190)', 'rgb(91, 141, 239)'],
+    ['rgb(127, 166, 244)', 'rgb(91, 141, 239)'],
+  ])};
+  const asReference = (value) => recoloured.reduce((read, [now, before]) => read.split(now).join(before), value);
+  const color = asReference(style.color);
+  const textChanged = color !== style.color;
+  // All four edges: a rule on one side is invisible to a reading of another.
+  const border = [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' ');
+  return {
+    color,
+    background: textChanged ? asReference(style.backgroundColor) : style.backgroundColor,
+    borderColor: textChanged ? asReference(border) : border,
+    font: style.fontWeight + ' ' + style.fontSize + '/' + style.lineHeight + ' ' + style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, ''),
+  };
+};`;
+
+/** Puts `READINGS` in the page. Call it once per document, before measuring. */
+export async function installReadings(page: Page) {
+  await page.evaluate(READINGS);
+}
+
+declare global {
+  interface Window {
+    __readings: (style: CSSStyleDeclaration) => {
+      color: string;
+      background: string;
+      borderColor: string;
+      font: string;
+    };
+  }
+}
 
 /**
  * A selector to measure in full, or one with the measurements a deliberate
@@ -85,21 +134,10 @@ export async function measureRegion(page: Page, region: Region) {
     typeof part === 'string' ? { selector: part, omit: [] } : { selector: part.selector, omit: [...part.omit] },
   );
 
+  await installReadings(page);
+
   return page.evaluate(
-    ({
-      root,
-      omitFromRoot,
-      parts,
-      recoloured,
-    }: {
-      root: string;
-      omitFromRoot: Measurement[];
-      parts: { selector: string; omit: Measurement[] }[];
-      recoloured: [string, string][];
-    }) => {
-      /** A colour ticket 36 changed, read as the Reference site's (RECOLOURED). */
-      const asReference = (value: string) =>
-        recoloured.reduce((read, [now, before]) => read.split(now).join(before), value);
+    ({ root, omitFromRoot, parts }: { root: string; omitFromRoot: Measurement[]; parts: { selector: string; omit: Measurement[] }[] }) => {
       const base = document.querySelector(root);
       if (!base) return null;
       const origin = base.getBoundingClientRect();
@@ -108,26 +146,12 @@ export async function measureRegion(page: Page, region: Region) {
       const of = (element: Element, omit: Measurement[]) => {
         const box = element.getBoundingClientRect();
         const style = getComputedStyle(element);
-        // The stand-in families are a loading device, not a typeface choice:
-        // they hold the fallback's place at the width IBM Plex Sans Arabic
-        // sets Arabic at, and by the time anything is measured the real face
-        // is in use (ADR-0012). `fontFamily` reports the whole declared stack
-        // whatever is rendering, so left in they would fail every comparison
-        // on the site against a Reference site that does not declare them —
-        // while saying nothing about what either page is set in.
-        const family = style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, '');
         const measured: Record<Measurement, unknown> = {
           top: round(box.top - origin.top),
           left: round(box.left - origin.left),
           height: round(box.height),
           width: round(box.width),
-          color: asReference(style.color),
-          background: asReference(style.backgroundColor),
-          // All four edges: a rule on one side is invisible to a reading of another.
-          borderColor: asReference(
-            [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' '),
-          ),
-          font: `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${family}`,
+          ...window.__readings(style),
           display: style.display,
           visibility: style.visibility,
           opacity: style.opacity,
@@ -142,12 +166,7 @@ export async function measureRegion(page: Page, region: Region) {
       }
       return result;
     },
-    {
-      root: region.root,
-      omitFromRoot: [...(region.omitFromRoot ?? [])],
-      parts,
-      recoloured: RECOLOURED.map(([now, before]) => [now, before] as [string, string]),
-    },
+    { root: region.root, omitFromRoot: [...(region.omitFromRoot ?? [])], parts },
   );
 }
 

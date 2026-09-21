@@ -179,7 +179,7 @@ h2 { font-size: 38px; margin-bottom: 12px }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: every badge — «حسب المشروع»,
    «لك», «لعميلك» — is Arabic set in DM Mono there, which has no Arabic glyphs.
    The Arabic face here; every other value is the Reference site's. */
-.strip .c .badge { position: absolute; top: 18px; inset-inline-end: 18px; font-size: 11px; font-family: inherit; background: #FBF6E8; color: #836921; padding: 3px 10px; border-radius: 999px }
+.strip .c .badge { position: absolute; top: 18px; inset-inline-end: 18px; font-size: 11px; font-family: inherit; background: #FBF6E8; color: var(--gold-ink); padding: 3px 10px; border-radius: 999px }
 .strip .c h3 { font-size: 20px; margin-bottom: 8px }
 .strip .c p { color: var(--muted); margin: 0; font-size: 15px }
 .strip .c a { display: inline-block; margin-top: 12px; color: var(--acc-ink); font-weight: 600; font-size: 14px }

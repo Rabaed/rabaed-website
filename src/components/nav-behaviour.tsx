@@ -3,6 +3,12 @@
 import { useEffect } from 'react';
 
 /**
+ * Where the header's lower edge sits: 78px, the offset the Reference site
+ * gives its colour toggle and the one ScrollTrigger was given here.
+ */
+const HEADER_HEIGHT = 78;
+
+/**
  * The header's three behaviours, attached to markup the server already sent:
  * the mobile panel, the Partnerships dropdown, and the recolouring as the page
  * crosses from a dark section into a light one.
@@ -219,9 +225,3 @@ function useHeaderColourToggle() {
     };
   }, []);
 }
-
-/**
- * Where the header's lower edge sits: 78px, the offset the Reference site
- * gives the toggle and the one ScrollTrigger was given here.
- */
-const HEADER_HEIGHT = 78;
