@@ -42,3 +42,16 @@ Next offers nothing that closes the window: every invalidation it has — `reval
 - **Report it upstream.** Worth doing whatever else is decided, but it is not a fix on any timescale of ours.
 
 **The founder's call** is the first one: a publish costing every page two rebuilds instead of one, and a few seconds of function time, against a rare page that stays wrong until the next publish. Ticket 62 is what it costs today — a suite that goes red on changes that cannot have caused it.
+
+## Seen again — on the pull request that diagnosed it
+
+Run 35568626883, shard 3 of 4, 21 September 2026, the branch for ticket 62:
+
+```
+Error: the partnership page's reworded paragraph never reached a visitor at
+/partnership in 60254ms; Next said HIT of the page it last sent
+```
+
+`partnership-page-text.spec.ts`, one of ticket 60's eleven waits — not one of the twenty-one ticket 62 touched, and on a branch whose whole diff is tests and tracker text. The other three shards passed, and so did four full runs of the same suite on a twenty-core machine. That is this ticket exactly: a page re-cached by a render that was already going, sixty seconds of `HIT`, nothing late about it.
+
+It is worth saying plainly what that means for the suite: **CI will go red like this now and then whatever the tests do**, on changes that cannot have caused it, until this is fixed. Each time costs a re-run. That is the running cost to weigh against the cost of the fix.
