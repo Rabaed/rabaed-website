@@ -165,6 +165,9 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
       shows: fourUnits.shows !== false,
       eyebrow: words(fourUnits.eyebrow),
       heading: words(fourUnits.heading),
+      // Empty until an Editor writes the section's standalone answer, and
+      // drawn only once one is written (ticket 35).
+      lead: words(fourUnits.lead),
       tabsLabel: words(fourUnits.tabsLabel),
       tabs,
       more: { label: words(fourUnits.moreLabel), href: localePath(locale, '/product') },

@@ -34,8 +34,8 @@ type ProductEntry = {
   trustStrip: { shows: boolean };
   journey: { eyebrow: Words; heading: Words; outputLabel: Words; panels: Panel[] };
   customStrip: { shows: boolean; eyebrow: Words; heading: Words; badge: Words; features: Feature[]; askLabel: Words };
-  roles: { shows: boolean; heading: Words; roles: { party: Words; promise: Words; screen: string }[] };
-  innerCycle: { shows: boolean; cycles: { party: Words }[] };
+  roles: { shows: boolean; heading: Words; lead: Words; roles: { party: Words; promise: Words; screen: string }[] };
+  innerCycle: { shows: boolean; lead: Words; cycles: { party: Words }[] };
 };
 type ClosingEntry = {
   languages: string[];
@@ -51,6 +51,11 @@ const SENTENCE = 'نجمع المالك والاستشاري والمقاول ع
 /** Arabic words exactly `length` characters long. */
 function wordsOfLength(length: number): string {
   return SENTENCE.repeat(Math.ceil(length / SENTENCE.length)).slice(0, length).trimEnd().padEnd(length, 'ع');
+}
+
+/** An Arabic paragraph of exactly `count` words, for the answer-first rule (ticket 35). */
+function wordsCounting(count: number): string {
+  return Array.from({ length: count }, (_, index) => (index % 2 === 0 ? 'ربائد' : 'سجل')).join(' ');
 }
 
 const LEFT_OUT = new Set(['id', 'createdAt', 'updatedAt', 'globalType', '_status']);
@@ -250,6 +255,44 @@ test("the product page's lists grow, its sections hide, and its grids stay neat"
   }
 });
 
+test('the parties section draws the answer under its heading once one is written, and nothing while it is empty', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  // A standalone answer of 30 to 60 words, which is what this field takes
+  // (ticket 35). The Reference site gives this section no paragraph, so the
+  // field is empty until an Editor writes one.
+  const answer =
+    'يفتح كل طرف ما يخصّ عمله من السجل نفسه: المالك، والاستشاري، والمقاول. هذه مسودة مكتوبة في الاختبار وحده لترى الصفحة كيف تحمل الفقرة تحت العنوان، ولكل جهة صلاحياتها ونماذجها العربية بالمعايير السعودية.';
+  expect(answer.trim().split(/\s+/).length).toBeGreaterThanOrEqual(30);
+  expect(entry.roles.lead.ar ?? '', 'the parties section publishes no paragraph today').toBe('');
+
+  try {
+    const saved = await save(page.request, 'product-page', { ...entry, roles: { ...entry.roles, lead: arabic(answer) } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await preview(page, '/product');
+    await expect(page.locator('#roles .lead')).toHaveText(answer);
+    // Between the heading and the tabs, which is what makes it the section's
+    // opening answer rather than a note under the section.
+    await expect(page.locator('#roles h2 + p.lead + .tabs')).toHaveCount(1);
+
+    // And it pushes the tabs down by its own height and no more: the paragraph
+    // needs no rule of its own, because its margin and the tabs' collapse into
+    // the one gap the heading leaves today (product.css says so, ticket 35).
+    const [heading, lead, tabs] = await boxesOf(page.locator('#roles h2, #roles .lead, #roles .tabs'));
+    expect(Math.round(lead!.top - heading!.bottom), 'the gap the heading leaves').toBe(12);
+    expect(Math.round(tabs!.top - lead!.bottom), 'the gap above the tabs').toBe(28);
+
+    expect(await visitorHtml(request, '/product')).not.toContain(answer);
+  } finally {
+    await discardDraft(page.request, 'product-page');
+  }
+});
+
 test('a replaced screen shows, described in its own words, on every page that shows it', async ({ page, request }) => {
   await logInByApi(page.request, PRODUCT_EDITOR);
   const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
@@ -353,6 +396,21 @@ test('the CMS refuses what the product page, the closing section and the screens
       'closing-section',
       { ...closing, closing: { ...closing.closing, steps: [{ ...step, label: arabic(wordsOfLength(11)) }, ...otherSteps] } },
       'closing.steps.0.label.ar',
+    ],
+    // The answer-first rule (ticket 35): the paragraph under these two
+    // headings is what an assistant lifts and quotes, so it is held to a
+    // standalone answer of 30 to 60 words rather than only to a length.
+    [
+      'an opening answer of 29 words under the parties',
+      'product-page',
+      { ...product, roles: { ...roles, lead: arabic(wordsCounting(29)) } },
+      'roles.lead.ar',
+    ],
+    [
+      'an opening answer of 61 words inside each party',
+      'product-page',
+      { ...product, innerCycle: { ...innerCycle, lead: arabic(wordsCounting(61)) } },
+      'innerCycle.lead.ar',
     ],
     [
       'a replacement of another shape',

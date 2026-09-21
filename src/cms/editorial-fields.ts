@@ -40,6 +40,8 @@ import { text, textarea } from 'payload/shared';
 import { COMPANY } from '../content/company';
 import { localePath } from '../lib/locales';
 import { signedIn } from './access';
+import { answerLengthProblem } from './answer-first';
+import { inAdminLanguage } from './page-fields';
 import { refreshSite } from './revalidation';
 
 type Label = { ar: string; en: string };
@@ -133,18 +135,18 @@ export const titleField: Field = {
 };
 
 /**
- * The spec's rule for every major heading, held here for the one an entry
- * opens with: a standalone answer of 30 to 60 words (spec: SEO and GEO). Words
- * are counted between spaces, which is how both Arabic and English separate
- * them.
+ * The spec's rule for every major heading, applied here to the one an entry
+ * opens with: a standalone answer of 30 to 60 words (spec: SEO and GEO). The
+ * rule itself is `answer-first.ts`, shared with the opening paragraph of a
+ * section on the home and product pages, so there is one range and one message
+ * rather than two that can drift.
  */
 const answerValidation: TextareaFieldValidation = async (value, options) => {
   const base = await textarea(value, options);
   if (base !== true || !value) return base;
 
-  const words = value.trim().split(/\s+/).length;
-  if (words >= 30 && words <= 60) return true;
-  return `اكتب جواباً مستقلاً من 30 إلى 60 كلمة. عدد الكلمات الآن: ${words}.`;
+  const problem = answerLengthProblem(value);
+  return problem ? inAdminLanguage(options.req, problem) : true;
 };
 
 export function answerField(question: Label): Field {

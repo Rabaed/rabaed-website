@@ -1,6 +1,6 @@
 import type { Block, Field } from 'payload';
 import { HERO_DOCUMENT, HERO_STATIONS } from '../../components/home/hero-stations';
-import { latinField, listField, pictureField, sectionTab, wordsField, type Words } from '../page-fields';
+import { latinField, listField, openingAnswerField, pictureField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { screenField } from './screen-mocks';
 
@@ -340,6 +340,11 @@ export const HomePage = pageGlobal({
       fields: [
         EYEBROW,
         wordsField('heading', HEADING, 50),
+        // The Reference site opens this section on its tabs, with no paragraph
+        // between them and the heading — so the field is optional, and the
+        // section is drawn exactly as it is today while it stands empty
+        // (ticket 35).
+        openingAnswerField(400, { optional: true }),
         wordsField('tabsLabel', { ar: 'اسم التبويبات', en: 'The tabs’ name' }, 40, { description: READ_OUT }),
         wordsField('outputLabel', { ar: 'اسم ما تنتجه الوحدات', en: 'Name for what the units produce' }, 15, {
           description: {
@@ -405,7 +410,7 @@ export const HomePage = pageGlobal({
           description: { ar: 'متتالية تفصل بينها نقاط.', en: 'Set in a row, with dots between.' },
           fields: [wordsField('question', { ar: 'السؤال', en: 'Question' }, 15)],
         }),
-        wordsField('lead', LEAD, 400, { multiline: true }),
+        openingAnswerField(400),
         listField({
           name: 'types',
           labels: {

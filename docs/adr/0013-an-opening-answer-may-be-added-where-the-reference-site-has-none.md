@@ -1,0 +1,14 @@
+# An opening answer may be added where the Reference site has none
+
+The Reference site is the specification for appearance, and a rebuild that matches it is the whole point (CLAUDE.md). Ticket 35 asks for the opposite of a design change — "without changing what the page says or how it looks" — and `reference/HANDOFF.md` §6.4 says the same in its own words: «هذا تعديل نصّي لا يمسّ التصميم».
+
+And yet §6.4 names four sections to give a standalone opening answer to — `#jt` · `#record` · `#roles` · `#inner` — and **two of them have no paragraph under their heading at all**. The home page's units open straight on their tabs, and so do the product page's parties. There is nowhere to put the answer the same sentence asks for. Both cannot be had: either the two sections go without the thing the handoff names them for, or a paragraph appears where the Reference site has none.
+
+**A paragraph may appear.** The handoff names the sections deliberately and knows what is in them; and an opening answer is the one paragraph on a page written to be lifted and quoted by an answer engine, which is what the whole of §6 is for. What it must not do is bring a design with it: it is set in `.lead`, the Reference site's own class and the token every other paragraph under a heading already uses, and it changes no rule either section has. This is the same kind of exception ADR-0002's caption already is — a thing the Reference site has not got, added because something the rebuild must do requires it.
+
+## Consequences
+
+- **The field is optional and empty.** Neither section draws anything until somebody publishes a paragraph, so until then the pages are the Reference site's, and the baselines and the comparisons hold as they did. Ticket 35 proposes words for both, as drafts, and the founder decides.
+- **Published, the two sections no longer match the Reference site**, and the suite will not say so. `home-four-units-match-reference.spec.ts` and `product-matches-reference.spec.ts` measure where each part of a section sits, and a paragraph above the tabs moves everything below it — but they run against the test server's throwaway database, where the paragraph is an unpublished draft, so they stay green whatever production publishes. **The divergence is real and unpoliced, which is why it is written down here.** Bringing it under the comparisons — excluding what the paragraph moves, as those suites already exclude what ADR-0002's caption moves — is worth doing once a paragraph is actually published, and not before, since there would be nothing to measure.
+- **The other two sections are untouched by this.** `#record` and `#inner` already have a paragraph; theirs is rewritten, not added, and the page's shape does not change.
+- **This is not a general licence.** It covers the opening answer under a major heading, and nothing else. A section wanting some other thing the Reference site has not got is a new decision, made on purpose, with new baselines.

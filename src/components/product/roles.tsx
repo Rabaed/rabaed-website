@@ -17,6 +17,12 @@ export type Role = {
 export type ProductRolesContent = {
   readonly eyebrow: string;
   readonly heading: string;
+  /**
+   * The standalone answer the section opens with (ticket 35), or `''` for the
+   * Reference site's own opening, which puts the tabs straight under the
+   * heading.
+   */
+  readonly lead: string;
   /** The three parties, no more and no fewer (spec: Content model), which the CMS holds them to on publishing. */
   readonly roles: readonly Role[];
   /** What every party gets, whichever is chosen. */
@@ -32,6 +38,11 @@ export type ProductRolesContent = {
  * in the first response, with the Owner chosen; `RolesBehaviour` switches
  * between them.
  *
+ * **The opening paragraph is not on the Reference site**, which puts the tabs
+ * straight under the heading. Ticket 35 gives the section somewhere to carry
+ * the standalone answer HANDOFF §6.4 asks of it; while that is unwritten the
+ * section is drawn exactly as the baselines have it.
+ *
  * **The tabs are tabs to assistive technology**, which the Reference site's
  * plain buttons are not: a tab list named by the section's heading, each tab
  * saying whether it is selected and which panel it controls.
@@ -42,6 +53,7 @@ export function Roles({ content }: { content: ProductRolesContent }) {
       <div className="wrap">
         <div className="eyebrow">{content.eyebrow}</div>
         <h2 id="roles-heading">{content.heading}</h2>
+        {content.lead ? <p className="lead">{content.lead}</p> : null}
 
         <div className="tabs" role="tablist" aria-labelledby="roles-heading">
           {content.roles.map((role, index) => {

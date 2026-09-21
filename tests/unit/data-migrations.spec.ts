@@ -27,6 +27,8 @@
 import { test, expect } from '@playwright/test';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { ANSWER_FIRST_PROPOSAL_SEED } from '../../src/migrations/answer-first-proposal/seed';
+import { COMPARISON_QUESTIONS, FAQ_REWRITES, SECTION_OPENERS } from '../../src/migrations/answer-first-proposal/words';
 import { HOME_PAGE_SEED } from '../../src/migrations/home-page-import/seed';
 import { HOME_PAGE_WORDS } from '../../src/migrations/home-page-import/words';
 import { PARTNERSHIP_PAGE_SEED } from '../../src/migrations/partnership-page-import/seed';
@@ -97,6 +99,11 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
   { name: 'home page', words: HOME_PAGE_WORDS, seed: HOME_PAGE_SEED },
   { name: 'site words and index leads', words: [SITE_WORDS, INDEX_LEADS], seed: SITE_WORDS_SEED },
   { name: 'search settings', words: SEARCH_SETTINGS, seed: SEARCH_SETTINGS_SEED },
+  {
+    name: 'the answer-first copy pass',
+    words: [SECTION_OPENERS, FAQ_REWRITES, COMPARISON_QUESTIONS],
+    seed: ANSWER_FIRST_PROPOSAL_SEED,
+  },
   {
     name: 'Trust strip',
     words: [TRUST_STRIP_LOGOS, TRUST_STRIP_WORDS],

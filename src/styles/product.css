@@ -170,6 +170,13 @@
 
 /* The Reference site wrote this section's top rule as an inline style. */
 #roles { border-top: 1px solid var(--line) }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the counterpart of the
+   one on `#jt` in home.css: the opening answer HANDOFF §6.4 asks this section
+   for (ticket 35), drawn only once an Editor writes one. It needs no rule of
+   its own — `#inner` above sets its paragraph the same way — because the
+   tokens already hold: `.lead`'s 28px under it and this 28px over it are
+   adjacent siblings and collapse to the 28px the heading has today, and the
+   12px above it is `h2`'s own. */
 #roles .tabs { display: flex; gap: 8px; margin: 28px 0 22px; flex-wrap: wrap }
 #roles .tab { padding: 10px 20px; border-radius: 999px; border: 1px solid var(--line); background: #fff; cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--muted) }
 #roles .tab.on { background: var(--ink); color: #fff; border-color: var(--ink) }
