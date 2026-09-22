@@ -83,7 +83,7 @@ function useRememberedLanguage() {
   }, []);
 }
 
-/** Below 981px the links are behind a button. Escape and following a link close it. */
+/** Below 1100px the links are behind a button. Escape and following a link close it. */
 function useMobilePanel() {
   useEffect(() => {
     const nav = document.querySelector('.nav');
@@ -104,7 +104,7 @@ function useMobilePanel() {
     // Resizing past the breakpoint hides the button, which would otherwise
     // leave the panel open with nothing to close it.
     const onResize = () => {
-      if (window.innerWidth > 980) close();
+      if (window.innerWidth > 1099) close();
     };
 
     const links = [...nav.querySelectorAll('.mnav a')];
@@ -161,7 +161,7 @@ function usePartnershipsDropdown() {
     // Hover only where hovering is a thing a visitor can do. A touch device
     // emulates `mouseenter` on the way to a tap, so wiring it unconditionally
     // — as the Reference site does — means the tap opens the panel and then
-    // immediately toggles it shut again. Below 981px this is moot because the
+    // immediately toggles it shut again. Below 1100px this is moot because the
     // dropdown is replaced by the mobile panel, but a touchscreen laptop is
     // above it.
     const hovers = window.matchMedia('(hover: hover)').matches;

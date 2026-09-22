@@ -202,11 +202,12 @@ test('a menu of the longest labels the CMS allows still sits on one line', async
     const saved = await save(page.request, filled, 'draft');
     expect(saved.ok(), await saved.text()).toBe(true);
 
-    // 981px is where the panel gives way to a row of links.
-    await page.setViewportSize({ width: 981, height: 900 });
+    // 1100px is where the panel gives way to a row of links — 981px until
+    // ticket 40 made room for the language switcher (`src/styles/shell.css`).
+    await page.setViewportSize({ width: 1100, height: 900 });
     await preview(page, '/');
 
-    // The header's own row: the panel that replaces it below 981px has a
+    // The header's own row: the panel that replaces it below 1100px has a
     // `.wrap` of its own.
     const row = page.locator('.nav > .wrap');
     await expect(row).toBeVisible();
@@ -218,7 +219,7 @@ test('a menu of the longest labels the CMS allows still sits on one line', async
     expect(new Set(tops).size, 'the menu wrapped onto a second line').toBe(1);
 
     // And nothing in the header is pushed outside it, at this width or wider.
-    for (const width of [981, 1280, 1600]) {
+    for (const width of [1100, 1280, 1600]) {
       await page.setViewportSize({ width, height: 900 });
       const overflow = await row.evaluate((element) => element.scrollWidth - element.clientWidth);
       expect(overflow, `the header overflows at ${width}px`).toBeLessThanOrEqual(0);

@@ -608,3 +608,23 @@ export function footerLinkIn(html: string, label: string): string | null {
   const link = footer.match(/<a\b[^>]*>/g)?.find((tag) => tag.includes(`aria-label="${label}"`));
   return link?.match(/\bhref="([^"]*)"/)?.[1] ?? null;
 }
+
+/**
+ * A page's HTML without its header, for asking whether anything English
+ * reached an Arabic page.
+ *
+ * The four page-text suites and the home page's publish an entry with every
+ * word given English of its own, then check that a visitor's Arabic page came
+ * back exactly as it was — `>English<` appearing in it would mean the English
+ * had leaked into the Arabic. Since ticket 40 that string is in every Arabic
+ * page legitimately: it is the language switcher, whose whole purpose is to
+ * offer English by name to somebody reading Arabic.
+ *
+ * So the question is asked of the page rather than of the document. The header
+ * has suites of its own — `site-words.spec.ts` for its words and
+ * `localisation.spec.ts` for the switcher — and neither of them is what these
+ * are measuring.
+ */
+export function outsideTheHeader(html: string): string {
+  return html.replace(/<nav class="nav"[\s\S]*?<\/nav>/, '');
+}

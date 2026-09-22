@@ -174,10 +174,12 @@ test('publishing the first case study reveals the section and its link; unpublis
     'href',
     '/case-studies',
   );
-  // At 981px, the narrowest the desktop row shows at, the extra link still
-  // fits between the brand and the buttons. Loaded at that width: the product
-  // page's journey sizes its track to the window it loads in.
-  await page.setViewportSize({ width: 981, height: 900 });
+  // At 1100px, the narrowest the desktop row shows at — 981px until ticket 40
+  // moved the header's breakpoint to make room for the language switcher
+  // (ADR-0015) — the extra link still fits between the brand and the buttons.
+  // Loaded at that width: the product page's journey sizes its track to the
+  // window it loads in.
+  await page.setViewportSize({ width: 1100, height: 900 });
   await headerShowsSection('/start').toBe(true);
   await page.goto('/start');
   const box = async (selector: string) => (await page.locator(selector).boundingBox())!;

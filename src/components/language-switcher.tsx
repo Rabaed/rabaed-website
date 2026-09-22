@@ -38,7 +38,7 @@ const WORDS = {
 
 /**
  * `bar` is the header's own row, where there is room for the language and
- * nothing else; `panel` is the menu behind the button below 981px, where the
+ * nothing else; `panel` is the menu behind the button below 1100px, where the
  * sentence fits and is shown rather than left to the link's accessible name.
  */
 type Variant = 'bar' | 'panel';

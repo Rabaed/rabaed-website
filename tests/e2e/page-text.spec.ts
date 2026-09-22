@@ -14,7 +14,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { PAGES_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors } from './cms';
+import { PAGES_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, outsideTheHeader } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -221,7 +221,7 @@ test('a page with every word written in English is published in English, and its
 
     const html = await reachesVisitors(request, '/start', `${lead}</p>`, 'the start page published in English');
     expect(html).toContain(entry.hero.title.ar);
-    expect(html).not.toContain('>English<');
+    expect(outsideTheHeader(html)).not.toContain('>English<');
   } finally {
     const restored = await save(page.request, fields(entry), 'published');
     expect(restored.ok(), await restored.text()).toBe(true);

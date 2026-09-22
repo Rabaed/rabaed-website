@@ -4,7 +4,7 @@ import { getHeader } from '@/content/site-words';
 import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
 
 /**
- * The button that opens the panel below 981px. It draws three lines and no
+ * The button that opens the panel below 1100px. It draws three lines and no
  * words, so its accessible name is the only thing that says what it is — and
  * it was Arabic on every page, English ones included, until ticket 40. Not an
  * Editor's words: it names a control, and it is never seen.
@@ -14,7 +14,7 @@ const MENU_LABEL: Record<Locale, string> = { ar: 'القائمة', en: 'Menu' };
 /**
  * The site header: brand, primary links, the Partnerships dropdown, the sign-in
  * link and the demo call to action, plus the panel that replaces all of it
- * below 981px.
+ * below 1100px.
  *
  * A server component. The markup — every link, every label — is in the first
  * response; `NavBehaviour` only adds the opening and closing on top of it

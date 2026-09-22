@@ -52,10 +52,10 @@
 .lang[data-remembered]:after { content: ""; position: absolute; inset-inline-end: -2px; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--acc) }
 .nav.on-light .lang { color: var(--muted) }
 .nav.on-light .lang:hover { color: var(--ink) }
-@media (max-width: 980px) { .lang { display: none } }
+@media (max-width: 1099px) { .lang { display: none } }
 .nav.on-light .login { color: var(--muted); border-color: var(--line) }
 .nav.on-light .login:hover { color: var(--ink); border-color: var(--ink) }
-@media (max-width: 980px) { .login { display: none } }
+@media (max-width: 1099px) { .login { display: none } }
 
 /* ---- Partnerships dropdown ---- */
 .nsub { position: relative; display: flex; align-items: center }
@@ -97,7 +97,23 @@
 .nav.open .navtog i:after { transform: translateY(-6px) rotate(-45deg) }
 .mnav { display: none }
 
-@media (max-width: 980px) {
+/* The header's own breakpoint, and the site's is 981px (ticket 40).
+   They were the same number until the language switcher joined the row, and
+   the row had no room for it: measured at 981px, four menu links at the eleven
+   characters the CMS allows, the Partnerships word, the sign-in link and the
+   demo button already filled the space between the wordmark and the edge
+   exactly (src/cms/globals/site-words.ts). The switcher wanted 57px more.
+
+   The labels could not pay for it — «قصص العملاء» is already eleven characters,
+   so a lower limit would refuse a word the site ships with. So the row gives
+   way to the panel earlier instead, at 1100px rather than 981px, where there is
+   room for all of it. The cost is a band of tablet widths that now see the
+   panel, which is the founder's decision of 22 September 2026.
+
+   The panel is the better place for the switcher in any case: it has room to
+   say why a page with no translation leads to a home page, which the row does
+   not. */
+@media (max-width: 1099px) {
   /* The desktop row gives way to the button and the panel. */
   .links { display: none }
   .navtog { display: flex }
@@ -112,12 +128,16 @@
      It is still a fixed cap because max-height cannot transition to auto. The
      test in tests/e2e/page-shell.spec.ts fails the moment the content outgrows
      it again, which is what happens the first time a link is added. The case
-     studies link (ticket 24) did: with it the content is 454px, so the cap is
-     520px, and tests/e2e/case-studies.spec.ts checks the panel with it.
+     studies link (ticket 24) did: with it the content was 454px, so the cap
+     was 520px, and tests/e2e/case-studies.spec.ts checks the panel with it.
+     The language switcher (ticket 40) did it again — it is a line of its own
+     in the panel, and with the case studies link beside it the content ran
+     30px past the 520px cap and the panel clipped what it was holding. 590px
+     is that 550px with the same headroom the 520px had.
      The 74px is the header at its tallest; below 700px it is 66px, so the
      bound is 8px conservative there, erring towards the panel scrolling
      rather than towards it reaching up under the header. */
-  .nav.open .mnav { max-height: min(520px, calc(100dvh - 74px)); overflow-y: auto }
+  .nav.open .mnav { max-height: min(590px, calc(100dvh - 74px)); overflow-y: auto }
 
   /* DELIBERATE EXCEPTION — the mobile panel's wrap (spec: Design system).
      `.nav .wrap` is a 74px-tall flex row. The panel reuses `.wrap` for its
