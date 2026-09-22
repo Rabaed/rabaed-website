@@ -20,10 +20,25 @@ import type { Media } from '@/payload-types';
  * English shell is ticket 40's to build — the reason `/en` has none either
  * (`src/app/(en)/en/page.tsx`).
  */
-export function EditorialFrame({ locale, path, children }: { locale: Locale; path: string; children: ReactNode }) {
+export function EditorialFrame({
+  locale,
+  path,
+  ownPath,
+  locales,
+  children,
+}: {
+  locale: Locale;
+  /** The section the header marks — the blog's link above an article, not the article. */
+  path: string;
+  /** The page's own address, which the language switcher offers in the other language. */
+  ownPath: string;
+  /** The languages this entry is published in, which is not every locale (ticket 40). */
+  locales: readonly Locale[];
+  children: ReactNode;
+}) {
   if (locale === 'en') return <main>{children}</main>;
   return (
-    <PageShell locale="ar" path={path}>
+    <PageShell locale="ar" path={path} ownPath={ownPath} locales={locales}>
       {children}
     </PageShell>
   );
@@ -70,6 +85,7 @@ export function EditorialHero({
 export function OtherLanguageNotice({
   locale,
   path,
+  ownPath,
   eyebrow,
   indexHref,
   notice,
@@ -79,6 +95,8 @@ export function OtherLanguageNotice({
 }: {
   locale: Locale;
   path: string;
+  /** The entry's own address, which exists in `available` and not in `locale`. */
+  ownPath: string;
   eyebrow: string;
   indexHref?: string;
   notice: string;
@@ -87,7 +105,10 @@ export function OtherLanguageNotice({
   href: string;
 }) {
   return (
-    <EditorialFrame locale={locale} path={path}>
+    // The one language it is published in is the one the switcher offers, and
+    // the button below offers it too: this page is the untranslated case, so
+    // the switcher must not present the address being read as a translation.
+    <EditorialFrame locale={locale} path={path} ownPath={ownPath} locales={[available]}>
       <EditorialHero eyebrow={eyebrow} indexHref={indexHref} title={notice}>
         <div className="ctas">
           <a className="btn p" href={href} hrefLang={available}>

@@ -37,7 +37,7 @@ export default async function PartnershipPage() {
   const content = await getPartnershipPage('ar');
 
   return (
-    <PageShell locale="ar" path="/partnership">
+    <PageShell locale="ar" path="/partnership" locales={['ar']}>
       <PageHero content={content.hero} />
       {content.idea.shows && <Idea content={content.idea} />}
       {content.audience.shows && <Audience content={content.audience} />}

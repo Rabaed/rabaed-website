@@ -35,7 +35,7 @@ export default async function ToolPage() {
   const content = await getToolPage('ar');
 
   return (
-    <PageShell locale="ar" path="/tool">
+    <PageShell locale="ar" path="/tool" locales={['ar']}>
       <ToolHero content={content.hero} />
       {content.why.shows && <Why content={content.why} />}
       {content.features.shows && <Features content={content.features} />}

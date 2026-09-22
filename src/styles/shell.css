@@ -39,6 +39,20 @@
 .nav-cta { display: flex; align-items: center; gap: 16px }
 .login { font-size: 14px; color: var(--dark-muted); padding: 9px 14px; border: 1px solid var(--dark-line); border-radius: 999px; transition: all .3s; white-space: nowrap }
 .login:hover { color: #fff; border-color: rgba(255, 255, 255, .28) }
+
+/* The language switcher (ticket 40). Quieter than the sign-in link beside it:
+   it is a way out for the minority reading the other language, not a call to
+   action. The dot marks the language this browser last chose, which is drawn
+   only when that is not the language being read (nav-behaviour.tsx) — so a
+   returning visitor who picked English and lands on an Arabic page finds the
+   way back without hunting for it. The mark is an addition: no visitor depends
+   on it, because the browser may have no record at all. */
+.lang { font-size: 14px; color: var(--dark-muted); padding: 9px 4px; transition: color .3s; white-space: nowrap; position: relative }
+.lang:hover { color: #fff }
+.lang[data-remembered]:after { content: ""; position: absolute; inset-inline-end: -2px; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--acc) }
+.nav.on-light .lang { color: var(--muted) }
+.nav.on-light .lang:hover { color: var(--ink) }
+@media (max-width: 980px) { .lang { display: none } }
 .nav.on-light .login { color: var(--muted); border-color: var(--line) }
 .nav.on-light .login:hover { color: var(--ink); border-color: var(--ink) }
 @media (max-width: 980px) { .login { display: none } }
@@ -127,6 +141,14 @@
   .nav.on-light .mnav a { color: var(--muted); border-top-color: var(--line) }
   .nav.on-light .mnav a.on { color: var(--ink) }
   .nav.on-light .mnav .mlogin { border-color: var(--line); color: var(--ink) }
+
+  /* The switcher in the panel, where there is room to say why it leads to a
+     home page rather than to this page in the other language. */
+  .mnav .mlang { font-size: 15px }
+  .mnav .mlang[data-remembered] { color: #fff }
+  .mnav .mlang .mlang-n { display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.45; color: var(--dark-muted) }
+  .nav.on-light .mnav .mlang[data-remembered] { color: var(--ink) }
+  .nav.on-light .mnav .mlang .mlang-n { color: var(--muted) }
 }
 
 .mnav .msub { border-top: 1px solid var(--dark-line); padding: 13px 0 4px }

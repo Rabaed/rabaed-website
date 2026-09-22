@@ -25,7 +25,62 @@ export function NavBehaviour() {
   useMobilePanel();
   usePartnershipsDropdown();
   useHeaderColourToggle();
+  useRememberedLanguage();
   return null;
+}
+
+/** Where the language a visitor picked is kept. One browser's, and nobody else's. */
+const LANGUAGE_KEY = 'rabaed:language';
+
+/**
+ * Remembers the language a visitor chooses, and marks the switcher when they
+ * are reading the other one (ticket 40).
+ *
+ * **It never sends anybody anywhere** (ADR-0014). Every address serves the
+ * language it names, first visit or fiftieth, so a shared link shows what it
+ * says and a crawler following `hreflang` is not bounced. What the record buys
+ * is that a visitor who chose English last week and lands on an Arabic page —
+ * from a search result, from a colleague — finds the way back marked rather
+ * than having to look for it.
+ *
+ * `localStorage` is empty in a private window, on another device, and wherever
+ * site data is cleared or blocked, and reading it can throw outright. So every
+ * touch of it is wrapped, and the page is correct without it: the mark is an
+ * addition to a switcher that already works.
+ */
+function useRememberedLanguage() {
+  useEffect(() => {
+    const switches = [...document.querySelectorAll<HTMLAnchorElement>('.nav [data-language]')];
+    if (switches.length === 0) return;
+
+    const remember = (event: Event) => {
+      const chosen = (event.currentTarget as HTMLElement).dataset.language;
+      if (!chosen) return;
+      try {
+        window.localStorage.setItem(LANGUAGE_KEY, chosen);
+      } catch {
+        // Blocked or full. The link still leads where it leads.
+      }
+    };
+
+    let remembered: string | null = null;
+    try {
+      remembered = window.localStorage.getItem(LANGUAGE_KEY);
+    } catch {
+      remembered = null;
+    }
+
+    // Marked only where the remembered language is the one being offered —
+    // that is, where the visitor is reading the language they did not pick.
+    for (const link of switches) {
+      if (remembered && link.dataset.language === remembered) link.dataset.remembered = 'true';
+      link.addEventListener('click', remember);
+    }
+
+    return () => {
+      for (const link of switches) link.removeEventListener('click', remember);
+    };
+  }, []);
 }
 
 /** Below 981px the links are behind a button. Escape and following a link close it. */

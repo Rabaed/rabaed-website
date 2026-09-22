@@ -36,7 +36,7 @@ export default async function StartPage() {
   const content = await getStartPage('ar');
 
   return (
-    <PageShell locale="ar" path="/start">
+    <PageShell locale="ar" path="/start" locales={['ar']}>
       <PageHero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {content.steps.shows && <Steps content={content.steps} />}

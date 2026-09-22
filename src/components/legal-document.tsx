@@ -39,8 +39,12 @@ export function legalMetadata(document: LegalDocument): Metadata {
 export async function LegalDocumentPage({ document }: { document: LegalDocument }) {
   const page = LEGAL_PAGES[document.slug];
 
+  // Arabic only, and it is the alternates' `locales` restated: the Arabic is
+  // binding and these are never translated (spec: Out of Scope), so the
+  // switcher offers the English home page rather than a translation that does
+  // not exist and never will.
   return (
-    <PageShell locale="ar" path={page.path}>
+    <PageShell locale="ar" path={page.path} locales={['ar']}>
       <section className="phero dark">
         <div className="pglow" />
         <div className="wrap">
