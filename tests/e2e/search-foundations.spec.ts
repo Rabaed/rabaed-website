@@ -132,7 +132,7 @@ test('the sitemap lists exactly the site’s pages, each at its own canonical ad
   // and unpublishes its own alongside this test; it holds them to the sitemap.
   const pages = listed.filter((loc) => !/\/blog\/[^/]+$/.test(loc));
 
-  // The Arabic site's pages. `/en` and `/en/blog` wait for English (ticket 40),
+  // The Arabic site's pages. `/en` and `/en/blog` wait for English (ticket 42),
   // and the Screen mock studio is never listed (ticket 05). With no case study
   // published, their section has no page (ticket 24).
   const expected = ['/', '/product', '/start', '/tool', '/referral', '/partnership', '/blog', '/terms', '/privacy', '/referral-terms'];

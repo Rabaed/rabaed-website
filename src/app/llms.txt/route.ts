@@ -32,7 +32,7 @@ import type { CaseStudy } from '@/payload-types';
  * goes quietly stale. Ticket 26 moves the pages' descriptions into the CMS,
  * and this file follows them there without being touched.
  *
- * Arabic alone, as the site is until English is switched on (ticket 40).
+ * Arabic alone, as the site is until ticket 42 writes the English pages.
  *
  * The home page is the site, and the heading and summary at the top of the
  * file describe it; it is not listed again among the pages. Nor is the Screen

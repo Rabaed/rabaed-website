@@ -426,6 +426,47 @@ they do today in the meantime. Each of the four is held to a standalone answer
 of **30 to 60 words**: the admin refuses a shorter or a longer one, because
 that is the length an assistant quotes.
 
+### The English header and footer, waiting for a decision
+
+**The English pages have no header and no footer yet, and English words for
+both are sitting in the CMS as a draft** (ticket 40). Publishing that draft is
+what gives every English page the menu, the switch back to Arabic, and the
+footer — all at once.
+
+**Why it waits for you.** Every word in the header and footer was Arabic, and
+an English page never shows Arabic in place of English it has not got. So the
+English was written for you to read, not published: the words are yours.
+
+**What is proposed.** Each is the Arabic's meaning in the room the header has.
+Three are not the obvious English, because the obvious one does not fit:
+**Customers** for «قصص العملاء» («Case studies» is a letter too long for the
+menu), **Partners** for «الشراكات», and **Book a demo** for «احجز عرضاً حياً».
+The footer's line is *Operating system for construction projects · Riyadh ·
+rabaedapp.com*.
+
+**To take it:**
+
+1. Open **كلمات الموقع المشتركة**. What you see is the proposal — English beside
+   every Arabic word, and **الإنجليزية** listed under **منشورة باللغات**. What visitors
+   see is still what is published.
+2. Read it, and change anything you disagree with. The Arabic is untouched.
+3. To see it on a page, open `/api/preview?path=/en` while signed in — the
+   **Preview** button opens the Arabic home page, which this does not change.
+4. **Publish changes.**
+
+**One thing to know before you start.** The entry holds one proposal at a
+time. If you publish another change to the header or footer first, the
+proposal is no longer what the entry opens on; you will find it under
+**Versions**, where **Restore** brings it back.
+
+**Two things the English site will still lack, by design.** The sign-in link
+leads to the app in Arabic: its address is one for both languages, and nobody
+has said what the English one is. And five of the pages the menu names are
+not in English until ticket 42 writes them: their English address says so and
+offers the Arabic. The Terms, the Privacy Policy and the Referral Program's
+terms are never translated — the Arabic is binding — and their English address
+says that too.
+
 ### Referral Program values
 
 The payout for each project and the referred client's discount are set once,

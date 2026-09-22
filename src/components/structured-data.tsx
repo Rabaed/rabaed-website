@@ -143,7 +143,7 @@ export function faqData(questions: {
 
 /**
  * The home page's name at the head of every trail, where the menu does not
- * give it one: an English page, whose menu is ticket 40's.
+ * give it one: an English page, before the menu's English is published (ticket 40).
  */
 const HOME_NAME: Record<Locale, string> = { ar: 'الرئيسية', en: 'Home' };
 

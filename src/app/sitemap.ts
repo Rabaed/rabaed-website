@@ -9,7 +9,8 @@ import { DEFAULT_LOCALE, localePath } from '@/lib/locales';
 
 /**
  * The Arabic site's pages, as they stand. The English site's pages join it
- * when ticket 40 switches English on; until then `/en` is a placeholder.
+ * when ticket 42 writes them; until then `/en` is a placeholder, and the
+ * English address of an Arabic-only page is a notice saying so (ticket 40).
  */
 const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', '/blog', '/terms', '/privacy', '/referral-terms'];
 

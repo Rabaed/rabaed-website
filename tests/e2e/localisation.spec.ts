@@ -65,9 +65,10 @@ test('each page is its own canonical and names both locales as alternates', asyn
 /**
  * The language switcher (ticket 40).
  *
- * It exists on the Arabic pages, which have the page shell. The English pages
- * have no header yet — `EditorialFrame` and `/en` both say so — so the
- * switcher has nowhere to sit there until the English shell is built.
+ * A visitor meets it on the Arabic pages. The English pages have the same
+ * header, but only once the founder publishes its English words, which wait
+ * in the CMS as a draft — so the English side of the switcher is previewed
+ * from that draft in `site-words.spec.ts`, the suite that owns the entry.
  */
 const ARABIC_ROUTES = ROUTES.filter((route) => route.locale === 'ar');
 
@@ -136,4 +137,59 @@ test('the language chosen is remembered, and never redirects anyone (ADR-0014)',
   await page.goto('/product');
   await expect(page).toHaveURL(/\/product$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
+});
+
+/**
+ * An English address of a page that has no English (ticket 40): the English
+ * menu links to every page the Arabic one does, and a visitor may arrive at
+ * one from anywhere. It says so and offers the Arabic, rather than showing a
+ * blank page or answering «not found» about a page that exists (spec: user
+ * story 18).
+ *
+ * The five marketing pages are Arabic-only until ticket 42 writes their
+ * English. The three legal documents are Arabic-only for good: the Arabic is
+ * the binding text and is never translated (spec: Out of Scope), which an
+ * English reader is told in as many words.
+ */
+const NOT_YET_IN_ENGLISH = ['/product', '/start', '/tool', '/referral', '/partnership'];
+const LEGAL_DOCUMENTS = [
+  { path: '/terms', name: 'Terms and Conditions' },
+  { path: '/privacy', name: 'Privacy Policy' },
+  { path: '/referral-terms', name: 'Referral Program Terms' },
+];
+
+test('an English address of a page not yet in English says so, and offers the Arabic', async ({ page }) => {
+  for (const path of NOT_YET_IN_ENGLISH) {
+    const response = await page.goto(`/en${path}`);
+    expect(response?.status(), `/en${path}`).toBe(200);
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+    await expect(page.locator('h1'), `/en${path}`).toHaveText('This page is not available in English yet.');
+
+    const arabic = page.getByRole('link', { name: 'Read it in Arabic' });
+    await expect(arabic, `/en${path}`).toHaveAttribute('href', path);
+    await expect(arabic).toHaveAttribute('hreflang', 'ar');
+
+    // A notice is not a page of the site, before launch or after.
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  }
+});
+
+test('an English address of a legal document says the Arabic is the binding text', async ({ page }) => {
+  for (const document of LEGAL_DOCUMENTS) {
+    const response = await page.goto(`/en${document.path}`);
+    expect(response?.status(), `/en${document.path}`).toBe(200);
+
+    await expect(page.locator('.phero .eyebrow'), `/en${document.path}`).toHaveText(document.name);
+    await expect(page.locator('h1'), `/en${document.path}`).toHaveText(
+      'This document is published in Arabic only, and the Arabic text is the binding version.',
+    );
+    await expect(page.getByRole('link', { name: 'Read them in Arabic' })).toHaveAttribute('href', document.path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  }
+});
+
+test('an English address that names no page is still not found', async ({ request }) => {
+  expect((await request.get('/en/nothing-here')).status()).toBe(404);
 });
