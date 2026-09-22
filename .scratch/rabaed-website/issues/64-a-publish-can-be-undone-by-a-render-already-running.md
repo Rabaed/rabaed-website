@@ -2,12 +2,12 @@
 
 **What is wrong:** An Editor publishes, the change reaches the site, and then the site goes back to the words from before it — for good, until somebody publishes again. Visitors see the old page; the Editor, who checks in preview or after a rebuild, may not. On CI it is a red run on a page nobody touched, with Next reporting a cache `HIT` for the whole of a sixty-second wait (ticket 62).
 
-**Blocked by:** nothing. The decision below wants the founder before the code does.
+**Blocked by:** nothing. The founder's call is made — mark twice, see "Decision" at the foot.
 
-**Status:** needs-info — what it costs to fix is a founder's call (below)
+**Status:** ready-for-agent — the founder chose to mark twice, 23 September 2026 ("Decision", below)
 
 - [ ] A change an Editor publishes reaches every page, whatever was being rendered at the time
-- [ ] The cost of the fix — a page built more than once per publish, or a wait before the second mark — is written down and agreed
+- [x] The cost of the fix — a page built more than once per publish, or a wait before the second mark — is written down and agreed
 - [ ] Held by a test that fails without the fix, at a seam that does not ship a delay knob in the page's own code
 - [ ] An ADR records the decision, because it changes what publishing does on every page
 
@@ -79,3 +79,44 @@ costing nothing. Then this ticket, with real numbers behind it.
 
 **Still true whatever is decided:** the founder's call on marking twice, and the ADR
 it needs, because it changes what publishing does on every page.
+
+## Decision
+
+**Mark twice.** The founder's call, 23 September 2026, taken with ticket 66's
+ten-minute age already on `main`.
+
+- **What publishing does from here:** every publish marks the site stale at
+  once, as `refreshSite` does today, and marks it again after a delay, so that
+  a render already running at the first mark has finished by the second and
+  its stale page is rebuilt on the next visit. An Editor's change reaches
+  visitors in under a second every time, not "almost always, and within ten
+  minutes otherwise".
+- **The cost, agreed:** each page a publish touches is built twice rather than
+  once, and the server stays awake for the delay after the Editor's request has
+  been answered — `after()` from `next/server`, billed on Vercel. The Editor
+  sees no difference: the second mark happens after the response.
+- **The delay is measured, not guessed, and its ceiling is ten seconds.** It
+  must be longer than the slowest render the site does. If the measurement
+  says ten seconds is not enough, **stop and bring the number to the founder
+  before building**: a render that slow means something else is wrong, and the
+  founder wants to hear that rather than have it built in.
+
+**Why now rather than waiting for numbers**, which is what the comment above
+suggested. Ticket 66 made a lost race cost minutes rather than days, so what
+decided it was the test runs, which 66 does not help (a publish wait gives up
+after sixty seconds). Three of the last sixty CI runs went red on it, all on
+the partnership page, 20 and 21 September — none in the forty-odd since, but
+with three lanes opening pull requests each one costs a re-run and a session
+chasing a failure its change could not have caused. Lane A, which builds this,
+is otherwise waiting on ticket 40, so building it costs no one any time.
+
+**Still required, unchanged:**
+
+- An ADR recording what publishing now does — check `origin/main` and every
+  open branch for the next free number first; two lanes have collided on ADR
+  numbers twice this week.
+- A test that fails without the fix, at a seam that does not ship a delay knob
+  in the page's own code (the experiment's `SLOW_RENDER_MS` was removed for
+  that reason).
+- The pull request touches the publishing path in `src/cms/`, so it needs the
+  ticket 39a part 5 preview check before it merges.
