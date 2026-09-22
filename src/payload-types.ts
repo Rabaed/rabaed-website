@@ -311,6 +311,10 @@ export interface Post {
   slug: string;
   locale: 'ar' | 'en';
   /**
+   * Whether this entry exists in the other language at the same slug, and whether that is published.
+   */
+  translation?: ('missing' | 'draft' | 'published') | null;
+  /**
    * The person who wrote it, not the company.
    */
   author: string;
@@ -420,6 +424,10 @@ export interface CaseStudy {
    */
   slug: string;
   locale: 'ar' | 'en';
+  /**
+   * Whether this entry exists in the other language at the same slug, and whether that is published.
+   */
+  translation?: ('missing' | 'draft' | 'published') | null;
   /**
    * The person who wrote it, not the company.
    */
@@ -796,6 +804,7 @@ export interface PostsSelect<T extends boolean = true> {
   sharingImage?: T;
   slug?: T;
   locale?: T;
+  translation?: T;
   author?: T;
   publishedAt?: T;
   updatedAt?: T;
@@ -835,6 +844,7 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   sharingImage?: T;
   slug?: T;
   locale?: T;
+  translation?: T;
   author?: T;
   publishedAt?: T;
   updatedAt?: T;

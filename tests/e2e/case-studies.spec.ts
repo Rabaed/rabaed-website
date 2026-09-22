@@ -12,7 +12,7 @@
  * the same reason within the suite.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
+import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
 
@@ -369,4 +369,72 @@ test('a case study cannot be published missing any part of the story, or with a 
 
   // A draft may be unfinished: Ahmed saves as he writes.
   expect((await save(page.request, caseStudy({ answer: 'مسودة لم تكتمل.', client: '' }), 'draft')).ok()).toBe(true);
+});
+
+test('an English case study has its own section, breadcrumb trail and sitemap entry', async ({
+  page,
+  request,
+  baseURL,
+}) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const english = caseStudy({
+    locale: 'en',
+    title: `Test case study ${runId}`,
+    summary: 'A summary of the test case study.',
+    client: `Test client ${runId}`,
+    sector: 'Residential projects',
+    challenge: 'Approvals were lost between messages.',
+    whatChanged: 'The team moved to one Record.',
+    outcome: 'Every party knew what was waiting for it.',
+    author: 'Test Author',
+  });
+  await create(page.request, english);
+  const address = `${baseURL}/en/case-studies/${english.slug}`;
+
+  await reaching(
+    'the English case study at its own address',
+    async () => (await visit(request, `/en/case-studies/${english.slug}`)).status,
+  ).toBe(200);
+  const trailOf = async (path: string) =>
+    trail(nodesOf(structuredData((await visit(request, path)).html), 'BreadcrumbList')[0]);
+  const [home, section, itself] = await trailOf(`/en/case-studies/${english.slug}`);
+  expect(home![1]).toBe(`${baseURL}/en`);
+  expect(section![1]).toBe(`${baseURL}/en/case-studies`);
+  expect(itself).toEqual([english.title, address]);
+
+  await reaching('the English case study in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
+    `<loc>${address}</loc>`,
+  );
+  // Its section's index with it, as the Arabic one is listed once it has a case study.
+  expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/en/case-studies</loc>`);
+  expect((await visit(request, '/sitemap.xml')).html).not.toContain(`<loc>${baseURL}/case-studies</loc>`);
+  // The Arabic section stays hidden: only an English case study exists.
+  expect((await visit(request, '/case-studies')).status).toBe(404);
+});
+
+test('the admin shows which case studies are missing a translation', async ({ page }) => {
+  // Drafts: the admin lists an entry whether or not it is published, and a
+  // draft changes nothing on the site for this to clean up after.
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const arabic = caseStudy({ withoutCover: true });
+  await create(page.request, arabic, 'draft');
+
+  /** The Translation column of a case study's row in the Case studies list. */
+  const translationOf = async (title: string) => {
+    await page.goto(`${ADMIN_PATH}/collections/case-studies?where[slug][equals]=${arabic.slug}`);
+    return page.getByRole('row').filter({ hasText: title }).locator('.cell-translation');
+  };
+
+  await expect(await translationOf(arabic.title)).toHaveText('Missing');
+
+  const english = caseStudy({
+    locale: 'en',
+    slug: arabic.slug,
+    title: `Test case study ${runId}`,
+    author: 'Test Author',
+    withoutCover: true,
+  });
+  await create(page.request, english, 'draft');
+  await expect(await translationOf(arabic.title)).toHaveText('Draft only');
+  await expect(await translationOf(english.title)).toHaveText('Draft only');
 });

@@ -338,10 +338,18 @@ test('an article is in the sitemap while it is published, and leaves it when unp
 test('an article exists per language, and a missing translation offers the one that exists', async ({
   page,
   request,
+  baseURL,
 }) => {
   await logInByApi(page.request, BLOG_EDITOR);
   const arabic = article();
   await createPost(page.request, arabic);
+
+  // Only the Arabic exists: the English index has nothing in it, so the sitemap
+  // does not list it (ticket 43).
+  await reaching('the Arabic article in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
+    `<loc>${baseURL}/blog/${arabic.slug}</loc>`,
+  );
+  expect((await visit(request, '/sitemap.xml')).html).not.toContain(`<loc>${baseURL}/en/blog</loc>`);
 
   // Only the Arabic exists: the English address says so and links to it.
   await reaching(
@@ -374,6 +382,24 @@ test('an article exists per language, and a missing translation offers the one t
   expect((await visit(request, '/en/blog')).html).not.toContain(arabic.title);
   expect((await visit(request, '/blog')).html).not.toContain(english.title);
 
+  // Its own article data, in English and at its English address, and its own
+  // place in the sitemap beside the Arabic's (ticket 43).
+  const englishAddress = `${baseURL}/en/blog/${arabic.slug}`;
+  const [posting] = nodesOf(structuredData((await visit(request, `/en/blog/${arabic.slug}`)).html), 'BlogPosting');
+  expect(posting).toMatchObject({
+    headline: english.title,
+    author: { '@type': 'Person', name: english.author },
+    inLanguage: 'en',
+    url: englishAddress,
+    mainEntityOfPage: englishAddress,
+  });
+  await reaching('the English article in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
+    `<loc>${englishAddress}</loc>`,
+  );
+  expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/blog/${arabic.slug}</loc>`);
+  // And now that it has an article, the English index is a page of the site.
+  expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/en/blog</loc>`);
+
   // Now that both exist, each names the other as its alternate.
   await page.goto(`/blog/${arabic.slug}`);
   await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute('href', new RegExp(`/en/blog/${arabic.slug}$`));
@@ -390,6 +416,45 @@ test('an article exists per language, and a missing translation offers the one t
 
   // An article in neither language is simply not there.
   expect((await visit(request, `/en/blog/test-${runId}-nowhere`)).status).toBe(404);
+});
+
+test('the admin shows at a glance which articles are missing a translation', async ({ page, request }) => {
+  await logInByApi(page.request, BLOG_EDITOR);
+  const arabic = article();
+  const { id } = await createPost(page.request, arabic);
+
+  /** The Translation column of an article's row in the Blog list, both languages of this one listed. */
+  const translationOf = async (title: string) => {
+    await page.goto(`${ADMIN_PATH}/collections/posts?where[slug][equals]=${arabic.slug}`);
+    return page.getByRole('row').filter({ hasText: title }).locator('.cell-translation');
+  };
+
+  // Nothing in English yet: the Arabic row says so.
+  await expect(await translationOf(arabic.title)).toHaveText('Missing');
+
+  // An English draft is on its way, but no English reader has it.
+  const english = article({
+    locale: 'en',
+    slug: arabic.slug,
+    title: `Test article ${runId}`,
+    summary: 'A summary of the test article.',
+    body: 'A paragraph from the body of the test article.',
+    author: 'Test Author',
+  });
+  const { id: englishId } = await createPost(page.request, english, 'draft');
+  await expect(await translationOf(arabic.title)).toHaveText('Draft only');
+  // And the English row reads the other way: its Arabic is published.
+  await expect(await translationOf(english.title)).toHaveText('Published');
+
+  const published = await page.request.patch(`/api/posts/${englishId}`, { data: { _status: 'published' } });
+  expect(published.ok(), await published.text()).toBe(true);
+  await expect(await translationOf(arabic.title)).toHaveText('Published');
+
+  // Worked out for an editor only: a visitor's copy of the article carries nothing of it.
+  expect(((await (await page.request.get(`/api/posts/${id}`)).json()) as { translation?: string }).translation).toBe(
+    'published',
+  );
+  expect(((await (await request.get(`/api/posts/${id}`)).json()) as { translation?: string }).translation).toBeUndefined();
 });
 
 test('an article cannot be published without an opening answer of 30 to 60 words, or on an address already taken', async ({
