@@ -35,11 +35,23 @@ export async function caseStudiesIndexMetadata(locale: Locale): Promise<Metadata
  */
 export async function CaseStudiesIndexPage({ locale }: { locale: Locale }) {
   const copy = CASE_STUDIES_COPY[locale];
-  const [caseStudies, lead] = await Promise.all([publishedCaseStudies(locale), getIndexLead(locale, 'caseStudies')]);
+  const [caseStudies, lead, showing] = await Promise.all([
+    publishedCaseStudies(locale),
+    getIndexLead(locale, 'caseStudies'),
+    // The same question the alternates ask: the index exists in a language
+    // only where that language has a published story, so the switcher never
+    // offers a section that is not there.
+    Promise.all(LOCALE_CODES.map((code) => hasPublishedCaseStudies(code))),
+  ]);
   if (caseStudies.length === 0) notFound();
 
   return (
-    <EditorialFrame locale={locale} path={CASE_STUDIES_PATH}>
+    <EditorialFrame
+      locale={locale}
+      path={CASE_STUDIES_PATH}
+      ownPath={CASE_STUDIES_PATH}
+      locales={LOCALE_CODES.filter((_, index) => showing[index])}
+    >
       <EditorialHero eyebrow={copy.eyebrow} title={copy.title}>
         <p className="lead">{lead}</p>
       </EditorialHero>

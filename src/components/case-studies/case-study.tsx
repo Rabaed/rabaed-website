@@ -71,6 +71,7 @@ export async function CaseStudyPage({ locale, slug }: { locale: Locale; slug: st
       <OtherLanguageNotice
         locale={locale}
         path={CASE_STUDIES_PATH}
+        ownPath={caseStudyPath(slug)}
         eyebrow={copy.eyebrow}
         indexHref={indexHref}
         notice={copy.untranslated}
@@ -88,7 +89,12 @@ export async function CaseStudyPage({ locale, slug }: { locale: Locale; slug: st
   const quote = caseStudy.quote?.text?.trim() ? caseStudy.quote : null;
 
   return (
-    <EditorialFrame locale={locale} path={CASE_STUDIES_PATH}>
+    <EditorialFrame
+      locale={locale}
+      path={CASE_STUDIES_PATH}
+      ownPath={caseStudyPath(slug)}
+      locales={await publishedCaseStudyLocales(slug)}
+    >
       <EditorialHero eyebrow={copy.eyebrow} indexHref={indexHref} title={caseStudy.title}>
         <dl className="case-facts">
           {caseStudy.client && (

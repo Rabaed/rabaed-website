@@ -25,10 +25,65 @@ export function NavBehaviour() {
   useMobilePanel();
   usePartnershipsDropdown();
   useHeaderColourToggle();
+  useRememberedLanguage();
   return null;
 }
 
-/** Below 981px the links are behind a button. Escape and following a link close it. */
+/** Where the language a visitor picked is kept. One browser's, and nobody else's. */
+const LANGUAGE_KEY = 'rabaed:language';
+
+/**
+ * Remembers the language a visitor chooses, and marks the switcher when they
+ * are reading the other one (ticket 40).
+ *
+ * **It never sends anybody anywhere** (ADR-0014). Every address serves the
+ * language it names, first visit or fiftieth, so a shared link shows what it
+ * says and a crawler following `hreflang` is not bounced. What the record buys
+ * is that a visitor who chose English last week and lands on an Arabic page —
+ * from a search result, from a colleague — finds the way back marked rather
+ * than having to look for it.
+ *
+ * `localStorage` is empty in a private window, on another device, and wherever
+ * site data is cleared or blocked, and reading it can throw outright. So every
+ * touch of it is wrapped, and the page is correct without it: the mark is an
+ * addition to a switcher that already works.
+ */
+function useRememberedLanguage() {
+  useEffect(() => {
+    const switches = [...document.querySelectorAll<HTMLAnchorElement>('.nav [data-language]')];
+    if (switches.length === 0) return;
+
+    const remember = (event: Event) => {
+      const chosen = (event.currentTarget as HTMLElement).dataset.language;
+      if (!chosen) return;
+      try {
+        window.localStorage.setItem(LANGUAGE_KEY, chosen);
+      } catch {
+        // Blocked or full. The link still leads where it leads.
+      }
+    };
+
+    let remembered: string | null = null;
+    try {
+      remembered = window.localStorage.getItem(LANGUAGE_KEY);
+    } catch {
+      remembered = null;
+    }
+
+    // Marked only where the remembered language is the one being offered —
+    // that is, where the visitor is reading the language they did not pick.
+    for (const link of switches) {
+      if (remembered && link.dataset.language === remembered) link.dataset.remembered = 'true';
+      link.addEventListener('click', remember);
+    }
+
+    return () => {
+      for (const link of switches) link.removeEventListener('click', remember);
+    };
+  }, []);
+}
+
+/** Below 1100px the links are behind a button. Escape and following a link close it. */
 function useMobilePanel() {
   useEffect(() => {
     const nav = document.querySelector('.nav');
@@ -49,7 +104,7 @@ function useMobilePanel() {
     // Resizing past the breakpoint hides the button, which would otherwise
     // leave the panel open with nothing to close it.
     const onResize = () => {
-      if (window.innerWidth > 980) close();
+      if (window.innerWidth > 1099) close();
     };
 
     const links = [...nav.querySelectorAll('.mnav a')];
@@ -106,7 +161,7 @@ function usePartnershipsDropdown() {
     // Hover only where hovering is a thing a visitor can do. A touch device
     // emulates `mouseenter` on the way to a tap, so wiring it unconditionally
     // — as the Reference site does — means the tap opens the panel and then
-    // immediately toggles it shut again. Below 981px this is moot because the
+    // immediately toggles it shut again. Below 1100px this is moot because the
     // dropdown is replaced by the mobile panel, but a touchscreen laptop is
     // above it.
     const hovers = window.matchMedia('(hover: hover)').matches;

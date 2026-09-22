@@ -29,7 +29,7 @@ export default async function ProductPage() {
   const content = await getProductPage('ar');
 
   return (
-    <PageShell locale="ar" path="/product">
+    <PageShell locale="ar" path="/product" locales={['ar']}>
       <PageHero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       <Journey content={content.journey} />

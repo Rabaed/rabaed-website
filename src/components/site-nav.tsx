@@ -1,11 +1,20 @@
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { NavBehaviour } from '@/components/nav-behaviour';
 import { getHeader } from '@/content/site-words';
 import { localePath, type Locale } from '@/lib/locales';
 
 /**
+ * The button that opens the panel below 1100px. It draws three lines and no
+ * words, so its accessible name is the only thing that says what it is — and
+ * it was Arabic on every page, English ones included, until ticket 40. Not an
+ * Editor's words: it names a control, and it is never seen.
+ */
+const MENU_LABEL: Record<Locale, string> = { ar: 'القائمة', en: 'Menu' };
+
+/**
  * The site header: brand, primary links, the Partnerships dropdown, the sign-in
  * link and the demo call to action, plus the panel that replaces all of it
- * below 981px.
+ * below 1100px.
  *
  * A server component. The markup — every link, every label — is in the first
  * response; `NavBehaviour` only adds the opening and closing on top of it
@@ -21,7 +30,20 @@ import { localePath, type Locale } from '@/lib/locales';
  * as is whether case studies have a link yet; publishing anything rebuilds
  * every page (`src/cms/revalidation.ts`).
  */
-export async function SiteNav({ locale, path }: { locale: Locale; path: string }) {
+export async function SiteNav({
+  locale,
+  path,
+  ownPath,
+  locales,
+}: {
+  locale: Locale;
+  /** The section whose link in the menu is marked as the one being read. */
+  path: string;
+  /** This page's own address, which the switcher offers in the other language. */
+  ownPath: string;
+  /** The languages this page exists in, for the switcher (ticket 40). */
+  locales: readonly Locale[];
+}) {
   const { links, partnershipsLabel, partnerships, signIn, demoLabel } = await getHeader(locale);
   const inPartnerships = partnerships.some((link) => link.path === path);
 
@@ -62,6 +84,7 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
         </div>
 
         <div className="nav-cta">
+          <LanguageSwitcher locale={locale} path={ownPath} locales={locales} variant="bar" />
           <a className="login" href={signIn.href} target="_blank" rel="noopener">
             {signIn.label}
           </a>
@@ -71,7 +94,7 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
           <a className="btn p" href="#demo">
             {demoLabel}
           </a>
-          <button className="navtog" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="mnav">
+          <button className="navtog" type="button" aria-label={MENU_LABEL[locale]} aria-expanded="false" aria-controls="mnav">
             <i />
           </button>
         </div>
@@ -95,6 +118,7 @@ export async function SiteNav({ locale, path }: { locale: Locale; path: string }
           <a className="mlogin" href={signIn.href} target="_blank" rel="noopener">
             {signIn.label}
           </a>
+          <LanguageSwitcher locale={locale} path={ownPath} locales={locales} variant="panel" />
         </div>
       </div>
 

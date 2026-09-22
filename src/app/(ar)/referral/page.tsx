@@ -43,7 +43,7 @@ export default async function ReferralPage() {
   const content = await getReferralPage('ar');
 
   return (
-    <PageShell locale="ar" path="/referral">
+    <PageShell locale="ar" path="/referral" locales={['ar']}>
       <PageHero content={content.hero} />
       <HowItWorks content={content.howItWorks} />
       {content.offer.shows && <Offer content={content.offer} />}

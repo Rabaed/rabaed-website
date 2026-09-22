@@ -95,6 +95,104 @@ const FOOTER_PARTS = [
 const DIVERGENT = '.foot-bar > div:last-child';
 
 /**
+ * The header's own deliberate divergences, both ticket 40's and both the
+ * founder's decision of 22 September 2026 (ADR-0015).
+ *
+ * The Reference site's header has no language switcher. The rebuild's does,
+ * as the first thing in `.nav-cta`, so the three controls after it — the
+ * sign-in link, the demo button and the menu button — sit one control further
+ * along than the Reference site's do, and the group that holds them is wider
+ * by exactly that control.
+ *
+ * So these four give up `left` and `width` to this comparison and nothing
+ * else. Their heights, the row they sit on, every colour, the typeface, and
+ * whether they are shown at all are all still held to the Reference site —
+ * which is what would catch a sign-in pill that lost its border or a menu
+ * button that stopped being square. What is given up is the one measurement
+ * an added control is bound to change.
+ */
+const SHIFTED = ['.nav-cta', '.login', '.nav-cta .btn.p', '.navtog'];
+
+function dropHorizontalPlacement(measurement: Record<string, unknown>) {
+  for (const key of SHIFTED) {
+    const part = measurement[key];
+    if (part && typeof part === 'object') {
+      delete (part as Record<string, unknown>).left;
+      delete (part as Record<string, unknown>).width;
+    }
+  }
+  return measurement;
+}
+
+/**
+ * The width at which the two headers are not comparable at all, because they
+ * are in different states: the rebuild gives way to the panel below 1100px and
+ * the Reference site below 981px, so at 1024px one draws a row of links and
+ * the other draws a menu button. Every part differs, and nothing useful is
+ * learned by saying so eight times over.
+ *
+ * The breakpoint moved because the switcher did not fit: at 981px the row was
+ * already full at the longest words the CMS allows, and those limits could not
+ * shrink without refusing a word the site ships with
+ * (`src/cms/globals/site-words.ts`). 1024px is the only width of the eight
+ * that falls between the two breakpoints — the rest are 820 and below, where
+ * both draw the panel, or 1280 and above, where both draw the row. **The
+ * footer is compared at 1024px as at every other width**; it is only the
+ * header that has nothing to say there.
+ */
+const HEADER_MODES_DIFFER = 1024;
+
+/**
+ * The menu is shifted by the switcher, and measured from itself instead.
+ *
+ * `.nav > .wrap` spreads the wordmark, the menu and the controls across the
+ * row, so widening the controls by one language link moves the whole menu — at
+ * 1280px, by 34.8px, the same for every link in it. Dropping each link's
+ * position would give up the menu's entire arrangement to hide one shift.
+ *
+ * So each part inside `.links` is measured from `.links` rather than from the
+ * header, and `.links` gives up only where it starts. Every gap between the
+ * links, every width, and the dropdown's placement under its trigger are all
+ * still held to the Reference site exactly.
+ */
+const IN_MENU = ['.links > a:nth-child(1)', '.links > a:nth-child(2)', '.links > a:nth-child(3)', '.nsub', '.nsub-t', '.nsub-p'];
+
+function measureMenuFromItself(measurement: Record<string, unknown>) {
+  const group = measurement['.links'] as { left?: number } | null;
+  if (!group || typeof group.left !== 'number') return measurement;
+
+  const origin = group.left;
+  for (const key of IN_MENU) {
+    const part = measurement[key] as { left?: number } | null;
+    // To a tenth, where everything else here is measured to a hundredth: both
+    // numbers have already been rounded to a hundredth, so their difference
+    // carries up to 0.01 of rounding that is not a difference in the page —
+    // 186.41 against 186.4 at 1280px, which is one of them. A tenth of a pixel
+    // is still far finer than any real misplacement.
+    if (part && typeof part.left === 'number') part.left = Math.round((part.left - origin) * 10) / 10;
+  }
+  delete group.left;
+  return measurement;
+}
+
+/**
+ * The panel's content is 56px taller than the Reference site's at every width
+ * and in every state, because the switcher is the last thing in it (ticket
+ * 40). Closed, the panel is clipped to nothing by `max-height` in both
+ * documents and only this inner box knows; open, its own height is already
+ * given up above for a different reason.
+ *
+ * Nothing above the switcher moves, so every item in the panel is still held
+ * to the Reference site's placement — it is one box's height that is given up,
+ * and only downwards.
+ */
+function dropPanelContentHeight(measurement: Record<string, unknown>) {
+  const part = measurement['.mnav .wrap'];
+  if (part && typeof part === 'object') delete (part as Record<string, unknown>).height;
+  return measurement;
+}
+
+/**
  * The states the shell has. Comparing only the one a page loads in would leave
  * every `.nav.on-light` and `.nav.open` rule unchecked — a whole second
  * palette, and the mobile panel's entire appearance.
@@ -213,12 +311,19 @@ test.describe('the shell matches the Reference site', () => {
         await rebuilt.evaluate(() => document.fonts.ready);
         await freezeTransitions(rebuilt);
 
-        for (const [state, classes] of Object.entries(STATES)) {
+        // The width decides this, not the state, so it is asked once rather
+        // than four times inside the loop.
+        const stateEntries = width === HEADER_MODES_DIFFER ? [] : Object.entries(STATES);
+
+        for (const [state, classes] of stateEntries) {
           await setState(reference, classes);
           await setState(rebuilt, classes);
 
           const open = classes.includes('open');
-          const shape = (m: Record<string, unknown>) => (open ? dropOpenPanelHeights(m) : m);
+          const shape = (m: Record<string, unknown>) =>
+            measureMenuFromItself(
+              dropPanelContentHeight(dropHorizontalPlacement(open ? dropOpenPanelHeights(m) : m)),
+            );
 
           expect(shape(await measure(rebuilt, '.nav', HEADER_PARTS)), `header ${state}`).toEqual(
             shape(await measure(reference, '.nav', HEADER_PARTS)),

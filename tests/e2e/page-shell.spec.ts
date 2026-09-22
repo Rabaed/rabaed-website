@@ -134,12 +134,21 @@ test.describe('the Partnerships dropdown', () => {
 });
 
 test.describe('the mobile panel', () => {
-  test('replaces the desktop links at 980px and not at 981px', async ({ page }) => {
+  // 1100px, and 981px until ticket 40: the language switcher did not fit in a
+  // row that was already full at the longest words the CMS allows, so the row
+  // gives way to the panel earlier instead (ADR-0015). Both sides of the
+  // boundary are asserted, because a breakpoint written in one place and
+  // believed in another is how the row and the panel both went missing once.
+  test('replaces the desktop links at 1099px and not at 1100px', async ({ page }) => {
     await page.goto('/');
 
-    await page.setViewportSize({ width: 981, height: 900 });
+    await page.setViewportSize({ width: 1100, height: 900 });
     await expect(page.locator('.navtog')).toBeHidden();
     await expect(page.locator('.links')).toBeVisible();
+
+    await page.setViewportSize({ width: 1099, height: 900 });
+    await expect(page.locator('.navtog')).toBeVisible();
+    await expect(page.locator('.links')).toBeHidden();
 
     await page.setViewportSize(MOBILE);
     await expect(page.locator('.navtog')).toBeVisible();

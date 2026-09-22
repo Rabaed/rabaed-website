@@ -6,7 +6,7 @@ import { fetchedMedia } from '@/cms/fetched-media';
 import { BLOG_COPY } from '@/content/blog';
 import { getIndexLead } from '@/content/index-leads';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
-import { localePath, type Locale } from '@/lib/locales';
+import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import { pageMetadata } from '@/lib/metadata';
 import type { Post } from '@/payload-types';
@@ -52,7 +52,14 @@ export async function BlogIndexPage({ locale, page }: { locale: Locale; page: nu
 
   return (
     // The blog is not in the navigation, so no link in the header is marked.
-    <EditorialFrame locale={locale} path={blogIndexPath()}>
+    // Page one exists in both languages; a later page only where that language
+    // has articles enough to fill it, which is what its alternates say too.
+    <EditorialFrame
+      locale={locale}
+      path={blogIndexPath()}
+      ownPath={blogIndexPath(page)}
+      locales={page === 1 ? LOCALE_CODES : [locale]}
+    >
       <EditorialHero eyebrow={copy.eyebrow} title={copy.title}>
         <p className="lead">{lead}</p>
       </EditorialHero>

@@ -17,7 +17,7 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { REFERRAL_PAGE_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors } from './cms';
+import { REFERRAL_PAGE_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, outsideTheHeader } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
@@ -304,7 +304,7 @@ test('the referral page is published in English once every word it has is writte
 
     const html = await reachesVisitors(request, '/referral', `${lead}</p>`, 'the referral page published in English');
     expect(html).toContain(entry.signup.heading.ar);
-    expect(html).not.toContain('>English<');
+    expect(outsideTheHeader(html)).not.toContain('>English<');
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);

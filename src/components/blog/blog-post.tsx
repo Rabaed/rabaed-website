@@ -71,6 +71,7 @@ export async function BlogPostPage({ locale, slug }: { locale: Locale; slug: str
       <OtherLanguageNotice
         locale={locale}
         path={blogIndexPath()}
+        ownPath={blogPostPath(slug)}
         eyebrow={copy.eyebrow}
         indexHref={indexHref}
         notice={copy.untranslated}
@@ -85,7 +86,12 @@ export async function BlogPostPage({ locale, slug }: { locale: Locale; slug: str
   const image = fetchedMedia(post.coverImage);
 
   return (
-    <EditorialFrame locale={locale} path={blogIndexPath()}>
+    <EditorialFrame
+      locale={locale}
+      path={blogIndexPath()}
+      ownPath={blogPostPath(slug)}
+      locales={await publishedLocales(slug)}
+    >
       <EditorialHero eyebrow={copy.eyebrow} indexHref={indexHref} title={post.title}>
         <div className="entry-meta">
           {post.author && <span>{`${copy.by} ${post.author}`}</span>}

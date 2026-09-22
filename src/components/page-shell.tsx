@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteNav } from '@/components/site-nav';
-import type { Locale } from '@/lib/locales';
+import { LOCALE_CODES, type Locale } from '@/lib/locales';
 
 /**
  * Header, page, footer. Every page wraps its content in this.
@@ -20,16 +20,38 @@ import type { Locale } from '@/lib/locales';
 export function PageShell({
   locale,
   path,
+  ownPath = path,
+  locales = LOCALE_CODES,
   children,
 }: {
   locale: Locale;
   /** This page's locale-independent path, as the menu's links name it (`src/content/site-words.ts`). */
   path: string;
+  /**
+   * This page's *own* locale-independent address, where it is not the one the
+   * menu marks. They part company on the editorial pages: an article marks the
+   * blog's link in the header and lives at `/blog/<slug>`, and a switcher
+   * given `path` would offer the other language's blog index in place of the
+   * translation of the article being read.
+   */
+  ownPath?: string;
+  /**
+   * The languages this page exists in, for the language switcher (ticket 40) —
+   * the same fact the page hands `pageMetadata` to build its `hreflang`
+   * alternates from, and every locale unless the page says otherwise.
+   *
+   * Stated twice, here and in the page's metadata, because a page's two halves
+   * are written apart and neither can read the other's. They are held together
+   * by a test instead: `localisation.spec.ts` walks every route and refuses a
+   * switcher that offers a language the alternates do not, or the other way
+   * round.
+   */
+  locales?: readonly Locale[];
   children: ReactNode;
 }) {
   return (
     <>
-      <SiteNav locale={locale} path={path} />
+      <SiteNav locale={locale} path={path} ownPath={ownPath} locales={locales} />
       {children}
       <SiteFooter locale={locale} />
     </>
