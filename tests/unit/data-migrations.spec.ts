@@ -16,8 +16,8 @@
  * So the rule: **a data migration writes its rows in SQL, frozen when it is
  * written.** The one thing no INSERT can stand in for is an upload — a file
  * has to be converted and written to storage — so creating an image is the
- * single allowance, and the migrations not brought over to the rule yet are
- * named below rather than left to be discovered.
+ * single allowance. Every data migration the chain holds keeps the rule —
+ * the last eight were brought over by ticket 68.
  *
  * Here rather than in `tests/e2e` because it opens no browser: what it reads
  * is source in the repository, which no running application serves (spec:
@@ -29,8 +29,22 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { ANSWER_FIRST_PROPOSAL_SEED } from '../../src/migrations/answer-first-proposal/seed';
 import { COMPARISON_QUESTIONS, FAQ_REWRITES, SECTION_OPENERS } from '../../src/migrations/answer-first-proposal/words';
+import { CONTACT_POINTS_SEED } from '../../src/migrations/contact-points-import/seed';
+import { CONTACT_POINTS } from '../../src/migrations/contact-points-import/words';
+import { DEMO_REQUEST_SEED } from '../../src/migrations/demo-request-import/seed';
+import { DEMO_REQUEST_WORDS } from '../../src/migrations/demo-request-import/words';
+import { IMPORTED_FAQ_ENTRIES } from '../../src/migrations/faq-import/entries';
+import { FAQ_ENTRIES_SEED } from '../../src/migrations/faq-import/seed';
 import { HOME_PAGE_SEED } from '../../src/migrations/home-page-import/seed';
 import { HOME_PAGE_WORDS } from '../../src/migrations/home-page-import/words';
+import { ARTICLE_PER_QUESTION_KIND } from '../../src/migrations/launch-articles/articles';
+import { LAUNCH_ARTICLES_SEED } from '../../src/migrations/launch-articles/seed';
+import { PRIVACY_POLICY } from '../../src/migrations/legal-import/privacy';
+import { REFERRAL_TERMS } from '../../src/migrations/legal-import/referral-terms';
+import { LEGAL_DOCUMENTS_SEED } from '../../src/migrations/legal-import/seed';
+import { TERMS } from '../../src/migrations/legal-import/terms';
+import { PARTNERSHIP_APPLICATION_SEED } from '../../src/migrations/partnership-application-import/seed';
+import { PARTNERSHIP_APPLICATION_WORDS } from '../../src/migrations/partnership-application-import/words';
 import { PARTNERSHIP_PAGE_SEED } from '../../src/migrations/partnership-page-import/seed';
 import { PARTNERSHIP_PAGE_WORDS } from '../../src/migrations/partnership-page-import/words';
 import { PRODUCT_PAGE_SEED } from '../../src/migrations/product-page-import/seed';
@@ -41,6 +55,8 @@ import {
 } from '../../src/migrations/product-page-import/words';
 import { REFERRAL_PAGE_SEED } from '../../src/migrations/referral-page-import/seed';
 import { REFERRAL_PAGE_WORDS } from '../../src/migrations/referral-page-import/words';
+import { REFERRAL_SIGNUP_SEED } from '../../src/migrations/referral-signup-import/seed';
+import { REFERRAL_SIGNUP_WORDS } from '../../src/migrations/referral-signup-import/words';
 import { SEARCH_SETTINGS_SEED } from '../../src/migrations/search-settings-import/seed';
 import { SEARCH_SETTINGS } from '../../src/migrations/search-settings-import/words';
 import { SITE_WORDS_SEED } from '../../src/migrations/site-words-import/seed';
@@ -48,6 +64,8 @@ import { INDEX_LEADS, SITE_WORDS } from '../../src/migrations/site-words-import/
 import { START_PAGE_SEED } from '../../src/migrations/start-page-import/seed';
 import { START_PAGE_WORDS } from '../../src/migrations/start-page-import/words';
 import { TOOL_PAGE_SEED } from '../../src/migrations/tool-page-import/seed';
+import { TOOL_DOWNLOAD_SEED } from '../../src/migrations/tool-download-import/seed';
+import { TOOL_DOWNLOAD_WORDS } from '../../src/migrations/tool-download-import/words';
 import { TOOL_PAGE_WORDS } from '../../src/migrations/tool-page-import/words';
 import { TRUST_STRIP_LOGOS, TRUST_STRIP_WORDS } from '../../src/migrations/trust-strip-import/logos';
 import { TRUST_STRIP_SEED } from '../../src/migrations/trust-strip-import/seed';
@@ -55,31 +73,18 @@ import { TRUST_STRIP_SEED } from '../../src/migrations/trust-strip-import/seed';
 const migrationsDirectory = path.resolve(import.meta.dirname, '..', '..', 'src', 'migrations');
 
 /**
- * The eight data migrations that still seed their rows through Payload.
+ * The data migrations that still seed their rows through Payload: none.
  *
- * Each is the same trap as the one ticket 63 closed, still set: a field added
+ * There were eight, each the trap ticket 63 closed still set — a field added
  * to the site settings, to a form's settings, to the legal documents, to the
- * FAQs or to an article would stop a database built from scratch at that
- * migration. `npm run cms:freeze-seed` is what brings one over, and ticket 68
- * asks for all eight.
+ * FAQs or to an article would have stopped a database built from scratch at
+ * that migration. Ticket 68 froze them with `npm run cms:freeze-seed`.
  *
- * Seven were written before the rule. The eighth, ticket 30's tool download
- * wording, was written beside it on another branch and merged in — which is
- * the argument for this list being a test rather than a note somewhere.
- *
- * The list is exact on purpose. A new one fails this test, and so does
- * converting one of these without striking it off.
+ * Kept, and kept empty, because the next data migration is the one that
+ * matters: written through the local API, it fails this test on the day it
+ * merges, and the way out is to freeze it, not to name it here.
  */
-const NOT_YET_FROZEN = [
-  '20260913_191346_publish_contact_points',
-  '20260914_061635_import_legal_documents',
-  '20260914_193520_import_faq_entries',
-  '20260914_194144_publish_demo_request_wording',
-  '20260914_222809_publish_referral_signup_wording',
-  '20260920_170917_publish_partnership_application_wording',
-  '20260921_035306_publish_tool_download_wording',
-  '20260921_101500_import_launch_articles',
-];
+const NOT_YET_FROZEN: string[] = [];
 
 /**
  * Every import whose frozen SQL has the frozen words beside it. `except` skips
@@ -110,6 +115,18 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     seed: TRUST_STRIP_SEED,
     except: (value) => value.endsWith('.png'),
   },
+  { name: 'contact points', words: CONTACT_POINTS, seed: CONTACT_POINTS_SEED },
+  { name: 'legal documents', words: [TERMS, PRIVACY_POLICY, REFERRAL_TERMS], seed: LEGAL_DOCUMENTS_SEED },
+  { name: 'FAQ entries', words: IMPORTED_FAQ_ENTRIES, seed: FAQ_ENTRIES_SEED },
+  { name: 'demo request form', words: DEMO_REQUEST_WORDS, seed: DEMO_REQUEST_SEED },
+  { name: 'Referral Program signup form', words: REFERRAL_SIGNUP_WORDS, seed: REFERRAL_SIGNUP_SEED },
+  {
+    name: 'Partnership Program application',
+    words: PARTNERSHIP_APPLICATION_WORDS,
+    seed: PARTNERSHIP_APPLICATION_SEED,
+  },
+  { name: 'Pour Tracker download form', words: TOOL_DOWNLOAD_WORDS, seed: TOOL_DOWNLOAD_SEED },
+  { name: 'launch articles', words: ARTICLE_PER_QUESTION_KIND, seed: LAUNCH_ARTICLES_SEED },
 ];
 
 /**
@@ -170,8 +187,13 @@ test.describe('data migrations', () => {
     for (const entry of FROZEN) {
       const missing = strings(entry.words)
         .filter((value) => value.trim().length > 0 && !(entry.except?.(value) ?? false))
-        // A quote inside a SQL string is written twice.
-        .filter((value) => !entry.seed.includes(value.replaceAll("'", "''")));
+        // A quote inside a SQL string is written twice. Rich text — the legal
+        // documents, an article's body — is stored as JSON, where a double
+        // quote is escaped as well, so a value may be written either way.
+        .filter((value) => {
+          const forms = [value, JSON.stringify(value).slice(1, -1)];
+          return !forms.some((form) => entry.seed.includes(form.replaceAll("'", "''")));
+        });
 
       expect(missing, `${entry.name}: frozen words its seed does not write`).toEqual([]);
     }

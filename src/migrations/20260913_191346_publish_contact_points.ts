@@ -1,5 +1,5 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
-import { SKIP_REVALIDATION } from '../cms/revalidation';
+import { CONTACT_POINTS_SEED } from './contact-points-import/seed';
 
 /**
  * Publishes the contact points the site carried before the CMS existed, so
@@ -9,21 +9,13 @@ import { SKIP_REVALIDATION } from '../cms/revalidation';
  * The WhatsApp number is the Reference site's own. The email and phone are
  * the ones the approved legal documents give (`src/migrations/legal-import/`). The
  * social accounts start empty: none has been supplied (spec: Further Notes).
+ *
+ * The statements are frozen in `contact-points-import/seed.ts`, naming the
+ * columns the site settings' tables had on the day this was written (ticket
+ * 68); `contact-points-import/words.ts` is where the values are read.
  */
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
-  await payload.updateGlobal({
-    slug: 'site-settings',
-    data: {
-      whatsappNumber: '966576767900',
-      email: 'ahmed.s@rabaedapp.com',
-      phone: '+966576767900',
-      _status: 'published',
-    },
-    // A migration runs outside the site, where there are no pages to
-    // refresh (`src/cms/revalidation.ts`).
-    context: { [SKIP_REVALIDATION]: true },
-    req,
-  });
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql.raw(CONTACT_POINTS_SEED));
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {

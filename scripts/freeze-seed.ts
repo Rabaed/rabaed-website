@@ -44,6 +44,8 @@ const IMPORTS: {
   directory: string;
   export: string;
   excludes?: Record<string, string>;
+  /** Where the words are, when they are not in a `words.ts` of their own. */
+  words?: string;
 }[] = [
   { migration: '20260915_040105_import_start_page', directory: 'start-page-import', export: 'START_PAGE_SEED' },
   {
@@ -74,6 +76,52 @@ const IMPORTS: {
     migration: '20260920_211936_import_search_settings',
     directory: 'search-settings-import',
     export: 'SEARCH_SETTINGS_SEED',
+  },
+  // Ticket 68: the eight written before the rule, or beside it on another
+  // branch, in the order they run.
+  {
+    migration: '20260913_191346_publish_contact_points',
+    directory: 'contact-points-import',
+    export: 'CONTACT_POINTS_SEED',
+  },
+  {
+    migration: '20260914_061635_import_legal_documents',
+    directory: 'legal-import',
+    export: 'LEGAL_DOCUMENTS_SEED',
+    words: '`terms.ts`, `privacy.ts` and `referral-terms.ts`',
+  },
+  {
+    migration: '20260914_193520_import_faq_entries',
+    directory: 'faq-import',
+    export: 'FAQ_ENTRIES_SEED',
+    words: '`entries.ts`',
+  },
+  {
+    migration: '20260914_194144_publish_demo_request_wording',
+    directory: 'demo-request-import',
+    export: 'DEMO_REQUEST_SEED',
+  },
+  {
+    migration: '20260914_222809_publish_referral_signup_wording',
+    directory: 'referral-signup-import',
+    export: 'REFERRAL_SIGNUP_SEED',
+  },
+  {
+    migration: '20260920_170917_publish_partnership_application_wording',
+    directory: 'partnership-application-import',
+    export: 'PARTNERSHIP_APPLICATION_SEED',
+  },
+  {
+    migration: '20260921_035306_publish_tool_download_wording',
+    directory: 'tool-download-import',
+    export: 'TOOL_DOWNLOAD_SEED',
+  },
+  {
+    migration: '20260921_101500_import_launch_articles',
+    directory: 'launch-articles',
+    export: 'LAUNCH_ARTICLES_SEED',
+    excludes: { media: 'filename' },
+    words: '`articles.ts`',
   },
 ];
 
@@ -270,7 +318,7 @@ for (const [index, migration] of migrations.entries()) {
       ' * the file. A field added to this entry later belongs in a migration of its',
       ' * own, never here.',
       ' *',
-      ' * The words themselves are in `words.ts` beside this, which is what to read.',
+      ` * The words themselves are in ${entry.words ?? '`words.ts`'} beside this, which is what to read.`,
       ' */',
       `export const ${entry.export} = \``,
       escaped(statements.join('\n\n')),
