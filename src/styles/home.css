@@ -312,8 +312,9 @@
 
 /* Kept together here, media queries included, for the same reason as the four
    units. The section is 220vh tall and its content holds still in a window-
-   tall box while the visitor scrolls through it; the colours and the record
-   showing are moved from `src/components/home/record-behaviour.tsx`. */
+   tall box while the visitor scrolls through it. The switch to the light
+   treatment and the record showing are moved from
+   `src/components/home/record-behaviour.tsx`; the colours are set here. */
 #record { min-height: 220vh; background: var(--dark); color: var(--dark-text); transition: background-color .4s, color .4s }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: `height: auto` with a floor
    of the window, where the Reference site fixes the box at `height: 100vh`.
@@ -362,18 +363,21 @@
 .stamp.on { opacity: 1; transform: none }
 
 /* The light treatment, switched on by the script 12.5% of the way in and
-   carried there by the transitions above, 0.4s long — or in one step, with
-   reduced motion. DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 69):
-   the Reference site blends ground and words under the scroll, and they meet
-   in a grey no text can be read on.
+   carried there by the transitions on the section, the card and the words
+   below, 0.4s long — or in one step, with reduced motion.
+
+   DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 69): the Reference
+   site blends ground and words under the scroll, and they meet in a grey no
+   text can be read on.
 
    DIVERGENCE FROM THE REFERENCE SITE, deliberate, too: on the light treatment
    the Reference site keeps the dark one's inks, and the parts written in them
    fall short — the accent as small text (ADR-0011), the card's second lines
    and times at 2.6:1 on white, the dots between the four questions, and the
    unchosen chips at 3.1:1. Each takes the ink the site uses on a pale ground,
-   and the chips are dimmed to `.65` rather than `.5`, the lowest that reaches
-   4.5:1 on paper. The dark treatment is untouched. */
+   and the chips are dimmed to `.65` rather than `.5`: 4.9:1 on paper, a
+   little clear of `.63`, the lowest that reaches 4.5:1. The dark treatment
+   is untouched. */
 #record.lit { background: var(--paper); color: var(--ink); --acc-ink: var(--acc-deep) }
 #record.lit .rec-card { background: #fff; border-color: var(--line); --acc-ink: var(--acc-deep) }
 #record.lit .fourq span,

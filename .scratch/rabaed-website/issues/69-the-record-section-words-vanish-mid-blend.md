@@ -76,7 +76,7 @@ Reduced motion already avoids the grey: `.lit` is toggled in one step at 12.5% (
 
 Both paths now go through the one `lit` class. `RecordBehaviour` creates a single ScrollTrigger that toggles it, and the stylesheet says what the light treatment is and how long the switch takes. The two scrubbed GSAP tweens are gone.
 
-The light treatment takes the inks the site uses on a pale ground: the deeper orange for the eyebrow and the four questions (ADR-0011), `--muted` for the card's second lines, its times and the dots between the questions, and `.65` for the unchosen chips, the lowest that reaches 4.5:1 on paper. The dark treatment is unchanged, and the at-rest comparison with the Reference site, which reads it, passes at all sixteen viewports untouched.
+The light treatment takes the inks the site uses on a pale ground: the deeper orange for the eyebrow and the four questions (ADR-0011), `--muted` for the card's second lines, its times and the dots between the questions, and `.65` for the unchosen chips, 4.9:1 on paper and a little clear of `.63`, the lowest that reaches 4.5:1. The dark treatment is unchanged, and the at-rest comparison with the Reference site, which reads it, passes at all sixteen viewports untouched.
 
 **One thing the triage missed.** The eyebrow (12px) and the four questions (15px) are accent-coloured text on the section itself, not on the card, so they stayed `#F95738` on paper when the section turned light: 3.1:1. They are fixed in the same way as everything else on the light treatment.
 
