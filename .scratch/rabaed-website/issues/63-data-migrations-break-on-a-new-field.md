@@ -40,7 +40,7 @@ Two things it does rather than dump literally: a timestamp column is written `no
 3. **Round trip.** With the imports frozen, running the freezer again dumps what the frozen SQL inserted. All nine files came back byte for byte identical, so the SQL writes precisely what the local API wrote.
 4. `npm run cms:migrate-fresh` green, and the whole suite green against the fresh database the test server builds.
 
-**What is not fixed.** Eight data migrations still seed through Payload: the site settings, the four forms' wording, the legal documents, the FAQs and the launch articles. They are the same trap, still set — a field added to Posts, which ticket 43's English blog is likely to want, would stop a fresh database at `import_launch_articles`. They are ticket 64, and `tests/unit/data-migrations.spec.ts` names all eight exactly, so a new one fails the suite and converting one of these without striking it off fails too.
+**What is not fixed.** Eight data migrations still seed through Payload: the site settings, the four forms' wording, the legal documents, the FAQs and the launch articles. They are the same trap, still set — a field added to Posts, which ticket 43's English blog is likely to want, would stop a fresh database at `import_launch_articles`. They are ticket 68, and `tests/unit/data-migrations.spec.ts` names all eight exactly, so a new one fails the suite and converting one of these without striking it off fails too.
 
 Seven of the eight predate the rule. The eighth, ticket 30's tool download wording, was written on another branch while this was being built and merged in on 21 September 2026 — which is why the list is a test and not a note.
 
