@@ -338,6 +338,7 @@ test('an article is in the sitemap while it is published, and leaves it when unp
 test('an article exists per language, and a missing translation offers the one that exists', async ({
   page,
   request,
+  baseURL,
 }) => {
   await logInByApi(page.request, BLOG_EDITOR);
   const arabic = article();
@@ -373,6 +374,22 @@ test('an article exists per language, and a missing translation offers the one t
   );
   expect((await visit(request, '/en/blog')).html).not.toContain(arabic.title);
   expect((await visit(request, '/blog')).html).not.toContain(english.title);
+
+  // Its own article data, in English and at its English address, and its own
+  // place in the sitemap beside the Arabic's (ticket 43).
+  const englishAddress = `${baseURL}/en/blog/${arabic.slug}`;
+  const [posting] = nodesOf(structuredData((await visit(request, `/en/blog/${arabic.slug}`)).html), 'BlogPosting');
+  expect(posting).toMatchObject({
+    headline: english.title,
+    author: { '@type': 'Person', name: english.author },
+    inLanguage: 'en',
+    url: englishAddress,
+    mainEntityOfPage: englishAddress,
+  });
+  await reaching('the English article in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
+    `<loc>${englishAddress}</loc>`,
+  );
+  expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/blog/${arabic.slug}</loc>`);
 
   // Now that both exist, each names the other as its alternate.
   await page.goto(`/blog/${arabic.slug}`);
