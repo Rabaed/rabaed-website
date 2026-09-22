@@ -52,9 +52,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...PAGES.map((path) => ({ url: absoluteUrl(path), lastModified: described })),
     // The case studies index is one of the Arabic site's pages once the section
-    // shows there. Like `/en/blog`, the English index waits for English.
+    // shows there. The English blog and case studies indexes are the English
+    // site's pages once each has something published in English to list — until
+    // then one is empty and the other is not there (ticket 43).
     ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar')
       ? [{ url: absoluteUrl(CASE_STUDIES_PATH), lastModified: described }]
+      : []),
+    ...(posts.some((post) => post.locale === 'en') ? [{ url: absoluteUrl(localePath('en', '/blog')) }] : []),
+    ...(caseStudies.some((caseStudy) => caseStudy.locale === 'en')
+      ? [{ url: absoluteUrl(localePath('en', CASE_STUDIES_PATH)) }]
       : []),
     ...posts.map((post) => ({
       url: absoluteUrl(localePath(post.locale, blogPostPath(post.slug))),

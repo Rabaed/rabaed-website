@@ -13,6 +13,7 @@ import {
   slugField,
   summaryField,
   titleField,
+  translationField,
 } from '../editorial-fields';
 import { sharingImageField } from '../page-fields';
 
@@ -30,7 +31,7 @@ export const Posts: CollectionConfig = {
   versions: editorialVersions,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'locale', 'publishedAt', '_status'],
+    defaultColumns: ['title', 'locale', 'translation', 'publishedAt', '_status'],
     preview: previewAt(blogPostPath),
   },
   defaultSort: '-publishedAt',
@@ -57,6 +58,7 @@ export const Posts: CollectionConfig = {
     sharingImageField(),
     slugField({ collection: 'posts', section: '/blog', another: 'مقالة أخرى', reserved: ['page'] }),
     localeField,
+    translationField('posts'),
     authorField,
     publishedAtField,
   ],
