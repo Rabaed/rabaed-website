@@ -4,7 +4,7 @@
 
 **Blocked by:** nothing.
 
-**Status:** resolved — to be merged only once the founder has seen it on the preview
+**Status:** resolved — the founder scrolled the section on the preview, on a desktop and on a phone, on 22 September 2026, and approved it
 
 **The founder sees it before it merges.** They chose this fix to try it, not yet to keep it. The pull request is not merged until they have scrolled through the section on its preview deployment, on a desktop and on a phone, and said yes.
 
