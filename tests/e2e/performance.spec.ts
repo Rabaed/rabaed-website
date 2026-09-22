@@ -22,7 +22,7 @@
  * and the processor left alone, for the reason given there.
  */
 import { test, expect, type Page } from '@playwright/test';
-import { ANIMATIONS, LIBRARIES, scriptsOf } from './animation-code';
+import { ANIMATIONS, CARRIES_THE_SCRIPTS_OF, LIBRARIES, scriptsOf } from './animation-code';
 import { ROUTES } from './routes';
 
 /** A phone, at the narrowest width the baselines cover. */
@@ -376,9 +376,10 @@ for (const route of ROUTES) {
 for (const route of ROUTES) {
   test(`${route.path} loads only the animation code it uses`, async ({ page }) => {
     const scripts = await scriptsOf(page, route.path);
+    const carriesFor = CARRIES_THE_SCRIPTS_OF[route.path] ?? route.path;
 
     for (const library of LIBRARIES) {
-      const expected = (library.usedOn as readonly string[]).includes(route.path);
+      const expected = (library.usedOn as readonly string[]).includes(carriesFor);
       expect(
         scripts.includes(library.marker),
         expected
@@ -388,7 +389,7 @@ for (const route of ROUTES) {
     }
 
     for (const animation of ANIMATIONS) {
-      const expected = animation.usedOn === route.path;
+      const expected = animation.usedOn === carriesFor;
       expect(
         scripts.includes(animation.marker),
         expected

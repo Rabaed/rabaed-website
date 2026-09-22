@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ArabicOnlyNotice, arabicOnlyMetadata } from '@/components/arabic-only-notice';
+import { StartPage } from '@/components/pages/start-page';
 import { NOT_YET_IN_ENGLISH } from '@/content/arabic-only-pages';
 import { getStartPage } from '@/content/pages/start';
 import { inEnglish } from '@/content/pages/page-content';
@@ -16,13 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * The English start page (ticket 42): the page itself once its English is
  * published, and until then a notice that offers the Arabic
  * (`src/content/arabic-only-pages.ts`) — never the Arabic words in its place.
- *
- * The page is imported only when it is drawn, so that the notice does not
- * carry the page's scripts.
  */
 export default async function EnglishStartPage() {
   const content = await inEnglish(getStartPage);
   if (!content) return <ArabicOnlyNotice page={NOT_YET_IN_ENGLISH.start} />;
-  const { StartPage } = await import('@/components/pages/start-page');
   return <StartPage locale="en" locales={LOCALE_CODES} content={content} />;
 }
