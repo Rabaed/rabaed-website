@@ -405,12 +405,16 @@ test('an English case study has its own section, breadcrumb trail and sitemap en
   await reaching('the English case study in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
     `<loc>${address}</loc>`,
   );
+  // Its section's index with it, as the Arabic one is listed once it has a case study.
+  expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/en/case-studies</loc>`);
+  expect((await visit(request, '/sitemap.xml')).html).not.toContain(`<loc>${baseURL}/case-studies</loc>`);
   // The Arabic section stays hidden: only an English case study exists.
   expect((await visit(request, '/case-studies')).status).toBe(404);
 });
 
 test('the admin shows which case studies are missing a translation', async ({ page }) => {
-  // Drafts only: the tests beside this one read "no case study is published".
+  // Drafts: the admin lists an entry whether or not it is published, and a
+  // draft changes nothing on the site for this to clean up after.
   await logInByApi(page.request, CASE_STUDIES_EDITOR);
   const arabic = caseStudy({ withoutCover: true });
   await create(page.request, arabic, 'draft');

@@ -344,6 +344,13 @@ test('an article exists per language, and a missing translation offers the one t
   const arabic = article();
   await createPost(page.request, arabic);
 
+  // Only the Arabic exists: the English index has nothing in it, so the sitemap
+  // does not list it (ticket 43).
+  await reaching('the Arabic article in the sitemap', async () => (await visit(request, '/sitemap.xml')).html).toContain(
+    `<loc>${baseURL}/blog/${arabic.slug}</loc>`,
+  );
+  expect((await visit(request, '/sitemap.xml')).html).not.toContain(`<loc>${baseURL}/en/blog</loc>`);
+
   // Only the Arabic exists: the English address says so and links to it.
   await reaching(
     'the English address of the Arabic article',
@@ -390,6 +397,8 @@ test('an article exists per language, and a missing translation offers the one t
     `<loc>${englishAddress}</loc>`,
   );
   expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/blog/${arabic.slug}</loc>`);
+  // And now that it has an article, the English index is a page of the site.
+  expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/en/blog</loc>`);
 
   // Now that both exist, each names the other as its alternate.
   await page.goto(`/blog/${arabic.slug}`);

@@ -273,6 +273,10 @@ export function translationField(collection: EditorialCollection): Field {
     },
     hooks: {
       afterRead: [
+        // Reads the entry's slug and language from the whole document, which is
+        // what the admin's list fetches — unless `enableListViewSelectAPI` is
+        // turned on for the collection, when the list fetches only the columns
+        // shown and every row would read Missing.
         async ({ data, req }) => {
           if (!req.user) return undefined;
           const { slug, locale } = (data ?? {}) as { slug?: string | null; locale?: string | null };
