@@ -14,7 +14,7 @@ import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getReferralPage('ar');
-  // Arabic alone until English is switched on (tickets 40 and 42).
+  // Arabic alone until ticket 42 writes its English.
   return pageMetadata({ locale: 'ar', locales: ['ar'], path: '/referral', ...meta });
 }
 

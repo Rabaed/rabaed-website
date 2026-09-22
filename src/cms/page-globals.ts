@@ -79,8 +79,8 @@ export function pageGlobal(options: {
     },
     admin: {
       group: group ?? undefined,
-      // English pages are not switched on yet (ticket 40), so a page is
-      // previewed in Arabic.
+      // A page is previewed in Arabic, the site's language. Its English is
+      // previewed by opening its `/en` address while previewing.
       preview: () => `/api/preview?path=${encodeURIComponent(path)}`,
     },
     hooks: {

@@ -33,6 +33,8 @@ import { CONTACT_POINTS_SEED } from '../../src/migrations/contact-points-import/
 import { CONTACT_POINTS } from '../../src/migrations/contact-points-import/words';
 import { DEMO_REQUEST_SEED } from '../../src/migrations/demo-request-import/seed';
 import { DEMO_REQUEST_WORDS } from '../../src/migrations/demo-request-import/words';
+import { ENGLISH_SITE_WORDS_SEED } from '../../src/migrations/english-site-words/seed';
+import { ENGLISH_SITE_WORDS } from '../../src/migrations/english-site-words/words';
 import { IMPORTED_FAQ_ENTRIES } from '../../src/migrations/faq-import/entries';
 import { FAQ_ENTRIES_SEED } from '../../src/migrations/faq-import/seed';
 import { HOME_PAGE_SEED } from '../../src/migrations/home-page-import/seed';
@@ -110,6 +112,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     words: [SECTION_OPENERS, FAQ_REWRITES, COMPARISON_QUESTIONS],
     seed: ANSWER_FIRST_PROPOSAL_SEED,
   },
+  { name: 'the English site words', words: ENGLISH_SITE_WORDS, seed: ENGLISH_SITE_WORDS_SEED },
   {
     name: 'Trust strip',
     words: [TRUST_STRIP_LOGOS, TRUST_STRIP_WORDS],

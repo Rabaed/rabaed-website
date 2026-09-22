@@ -14,11 +14,10 @@ import type { Media } from '@/payload-types';
  */
 
 /**
- * The frame an editorial page sits in. An Arabic page has the site's header
- * and footer, with `path` marking its section's link when the header has one.
- * An English page has neither yet: every label in them is Arabic, and the
- * English shell is ticket 40's to build — the reason `/en` has none either
- * (`src/app/(en)/en/page.tsx`).
+ * The frame an editorial page sits in: the site's header and footer, with
+ * `path` marking its section's link when the header has one. An English page
+ * has them once their English is published, and is its content alone until
+ * then (`PageShell`, ticket 40).
  */
 export function EditorialFrame({
   locale,
@@ -36,9 +35,8 @@ export function EditorialFrame({
   locales: readonly Locale[];
   children: ReactNode;
 }) {
-  if (locale === 'en') return <main>{children}</main>;
   return (
-    <PageShell locale="ar" path={path} ownPath={ownPath} locales={locales}>
+    <PageShell locale={locale} path={path} ownPath={ownPath} locales={locales}>
       {children}
     </PageShell>
   );

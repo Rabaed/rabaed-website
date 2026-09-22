@@ -61,6 +61,23 @@ function href(locale: Locale, destination: string): string {
 }
 
 /**
+ * Whether the header and footer can be drawn in `locale`: whether the words
+ * every page shares are published in it. Arabic always is — the CMS publishes
+ * nothing without it. English is once the founder publishes the English words
+ * ticket 40 proposed; until then an English page has neither, rather than the
+ * Arabic in their place.
+ */
+export async function siteWordsIn(locale: Locale): Promise<boolean> {
+  try {
+    await pageEntry('site-words', locale);
+    return true;
+  } catch (error) {
+    if (error instanceof ContentNotInLocale) return false;
+    throw error;
+  }
+}
+
+/**
  * The header's menu in `locale`. The case studies link waits for its first
  * published story: until then the section it names is not there, and the
  * header is the Reference site's. An Editor still sees the link in the CMS,
@@ -128,9 +145,9 @@ export async function menuName(locale: Locale, path: string): Promise<string | n
     const { links, partnerships } = await getHeader(locale);
     return [...links, ...partnerships].find((link) => link.path === path)?.label ?? null;
   } catch (error) {
-    // The menu is Arabic until ticket 40 writes it in English, and an English
-    // page carries no Arabic in place of it — here, no name from the menu, and
-    // the page's own English name stands.
+    // The menu is Arabic until its English is published (ticket 40), and an
+    // English page carries no Arabic in place of it — here, no name from the
+    // menu, and the page's own English name stands.
     if (error instanceof ContentNotInLocale) return null;
     throw error;
   }

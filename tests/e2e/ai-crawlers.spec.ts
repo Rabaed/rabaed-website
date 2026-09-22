@@ -165,7 +165,7 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   const listed = [...llms.matchAll(/^- \[[^\]]+\]\(([^)]+)\):/gm)].map(([, url]) => url);
 
   // The Arabic site's pages, each once. The home page is the file's own
-  // heading rather than an entry; `/en` waits for English (ticket 40); and the
+  // heading rather than an entry; `/en` waits for English (ticket 42); and the
   // Screen mock studio is never listed (ticket 05).
   const expected = [
     '/product',

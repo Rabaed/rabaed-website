@@ -264,16 +264,164 @@ test('an English page carries no Arabic header or footer in place of English it 
   await logInByApi(page.request, SITE_WORDS_EDITOR);
   const entry = await published(page.request);
 
-  await page.goto('/en/blog');
-
   // Not a word of the Arabic menu or footer is drawn: an English page has
-  // neither until ticket 40 writes them, rather than the Arabic in their place.
-  await expect(page.locator('.nav')).toHaveCount(0);
-  await expect(page.locator('footer')).toHaveCount(0);
-  const body = page.locator('body');
-  for (const link of entry.header.links) await expect(body).not.toContainText(link.label.ar);
-  await expect(body).not.toContainText(entry.footer.tagline.ar);
-  await expect(body).not.toContainText(entry.footer.rights.ar);
+  // neither until the founder publishes their English, rather than the
+  // Arabic in their place. The notice an untranslated page's English address
+  // shows is an English page like any other.
+  for (const path of ['/en/blog', '/en/product']) {
+    await page.goto(path);
+    await expect(page.locator('.nav'), path).toHaveCount(0);
+    await expect(page.locator('footer'), path).toHaveCount(0);
+    const body = page.locator('body');
+    for (const link of entry.header.links) await expect(body).not.toContainText(link.label.ar);
+    await expect(body).not.toContainText(entry.footer.tagline.ar);
+    await expect(body).not.toContainText(entry.footer.rights.ar);
+  }
+});
+
+/**
+ * The English header and footer (ticket 40), proposed by
+ * `20260923_090000_propose_english_site_words` and published by nobody but the
+ * founder: the words are his. What is proposed is restated here rather than
+ * imported, for the reason `routes.ts` gives.
+ */
+const ENGLISH = {
+  links: { '/': 'Home', '/product': 'Product', '/start': 'Get started' },
+  partnershipsLabel: 'Partners',
+  partnerships: { '/referral': 'Referral Program', '/partnership': 'Partnership Program' },
+  signInLabel: 'Sign in',
+  demoLabel: 'Book a demo',
+  tagline: 'Operating system for construction projects · Riyadh · rabaedapp.com',
+  legalLinks: { '/terms': 'Terms and conditions', '/privacy': 'Privacy policy' },
+  rights: 'Rabaed · All rights reserved',
+};
+
+/**
+ * The proposal, among the entry's versions: this suite drafts and discards all
+ * the while, so the proposal is seldom still the newest version by the time a
+ * test looks.
+ */
+async function englishProposal(editor: APIRequestContext): Promise<{ id: string; version: SiteWords }> {
+  const response = await editor.get(
+    `${GLOBAL}/versions?where[version._status][equals]=draft&sort=-updatedAt&depth=0&limit=100`,
+  );
+  expect(response.ok(), await response.text()).toBe(true);
+  const drafts = (await response.json()).docs as { id: string; version: SiteWords }[];
+  const proposal = drafts.find((draft) => draft.version.header.demoLabel.en === ENGLISH.demoLabel);
+  expect(proposal, 'no draft carries the English words proposed').toBeTruthy();
+  return proposal!;
+}
+
+/** Makes the proposal the draft Preview draws, as restoring it from the admin's Versions does. */
+async function restore(editor: APIRequestContext, version: { id: string }): Promise<void> {
+  const restored = await editor.post(`${GLOBAL}/versions/${version.id}?draft=true`);
+  expect(restored.ok(), await restored.text()).toBe(true);
+}
+
+test('the English words wait in the CMS as a draft, every one of them written', async ({ page, request }) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  const { version } = await englishProposal(page.request);
+
+  // Published in English as well as Arabic the moment the founder presses
+  // Publish: nothing is left for him to fill in first.
+  expect(version.languages).toEqual(['ar', 'en']);
+  const english = (links: Link[]) => Object.fromEntries(links.map((link) => [link.path, link.label.en]));
+  expect(english(version.header.links)).toMatchObject(ENGLISH.links);
+  expect(version.header.links.find((link) => link.path === '/case-studies')?.label.en).toBeTruthy();
+  expect(version.header.partnershipsLabel.en).toBe(ENGLISH.partnershipsLabel);
+  expect(english(version.header.partnerships)).toEqual(ENGLISH.partnerships);
+  for (const group of version.header.partnerships) expect(group.summary.en, group.path).toBeTruthy();
+  expect(version.header.signInLabel.en).toBe(ENGLISH.signInLabel);
+  expect(version.footer.tagline.en).toBe(ENGLISH.tagline);
+  expect(english(version.footer.legalLinks)).toEqual(ENGLISH.legalLinks);
+  expect(version.footer.rights.en).toBe(ENGLISH.rights);
+  for (const words of Object.values(version.notFound)) expect(words.en).toBeTruthy();
+
+  // And the Arabic is untouched: the draft is the published entry with English added.
+  const entry = await published(page.request);
+  expect(entry.languages).toEqual(['ar']);
+  expect(version.header.links.map((link) => link.label.ar)).toEqual(entry.header.links.map((link) => link.label.ar));
+  expect(version.footer.tagline.ar).toBe(entry.footer.tagline.ar);
+
+  // No visitor reads a word of it.
+  for (const path of ['/en', '/en/blog']) expect(await visitorHtml(request, path)).not.toContain(ENGLISH.tagline);
+});
+
+test('previewed, English pages have the English header and footer, and switch to the same page in Arabic', async ({
+  page,
+}) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  await restore(page.request, await englishProposal(page.request));
+
+  try {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    // Each English page, and the Arabic address its switcher must lead to:
+    // the same page where there is one, the Arabic original of a notice, and
+    // the Arabic home page for the English home page.
+    const pages = [
+      { path: '/en', arabic: '/', marks: 'Home' },
+      { path: '/en/blog', arabic: '/blog', marks: null },
+      { path: '/en/product', arabic: '/product', marks: 'Product' },
+      { path: '/en/terms', arabic: '/terms', marks: null },
+    ];
+    for (const { path, arabic: arabicPath, marks } of pages) {
+      await preview(page, path);
+      const nav = page.locator('.nav');
+
+      for (const [to, label] of Object.entries(ENGLISH.links)) {
+        await expect(nav.locator('.links').getByRole('link', { name: label, exact: true }), path).toHaveAttribute(
+          'href',
+          to === '/' ? '/en' : `/en${to}`,
+        );
+      }
+      await expect(nav.locator('.nsub-t'), path).toContainText(ENGLISH.partnershipsLabel);
+      await expect(nav.locator('.login'), path).toHaveText(ENGLISH.signInLabel);
+      await expect(nav.locator('.nav-cta .btn'), path).toHaveText(ENGLISH.demoLabel);
+      await expect(nav.locator('.links > a.on'), path).toHaveText(marks ? [marks] : []);
+
+      const switcher = nav.locator('.lang');
+      await expect(switcher, path).toHaveText('العربية');
+      await expect(switcher, path).toHaveAttribute('href', arabicPath);
+      await expect(switcher, path).toHaveAttribute('hreflang', 'ar');
+      await expect(switcher, `${path} has Arabic, so says nothing more`).not.toHaveAttribute('aria-label', /.+/);
+
+      const footer = page.locator('footer');
+      await expect(footer, path).toContainText(ENGLISH.tagline);
+      await expect(footer, path).toContainText(ENGLISH.rights);
+      // The legal documents are Arabic only, and their English address says so.
+      await expect(footer.getByRole('link', { name: ENGLISH.legalLinks['/terms'] }), path).toHaveAttribute(
+        'href',
+        '/en/terms',
+      );
+      await expect(footer.getByRole('link', { name: 'LinkedIn' }), path).toHaveCount(1);
+    }
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
+test('the English header sits on one line wherever it is a row', async ({ page }) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  await restore(page.request, await englishProposal(page.request));
+
+  try {
+    await page.setViewportSize({ width: 1100, height: 900 });
+    await preview(page, '/en');
+
+    const tops = await page.locator('.nav .links > a, .nav .links .nsub').evaluateAll((elements) =>
+      elements.map((element) => Math.round(element.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size, 'the English menu wrapped onto a second line').toBe(1);
+
+    const row = page.locator('.nav > .wrap');
+    for (const width of [1100, 1280, 1600]) {
+      await page.setViewportSize({ width, height: 900 });
+      const overflow = await row.evaluate((element) => element.scrollWidth - element.clientWidth);
+      expect(overflow, `the English header overflows at ${width}px`).toBeLessThanOrEqual(0);
+    }
+  } finally {
+    await discardDraft(page.request);
+  }
 });
 
 test('a change published reaches visitors', async ({ page, request }) => {
@@ -290,6 +438,13 @@ test('a change published reaches visitors', async ({ page, request }) => {
     );
     expect(response.ok(), await response.text()).toBe(true);
     await expect.poll(async () => visitorHtml(request)).toContain(`${tagline}</div>`);
+
+    // A publish marks every page for rebuilding, and a rebuilt page must still
+    // be the page: the English notice of an Arabic-only page once came back
+    // from its first rebuild as «not found» (ticket 40).
+    for (const path of ['/en/product', '/en/terms']) {
+      await expect.poll(async () => (await request.get(path)).status(), path).toBe(200);
+    }
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);

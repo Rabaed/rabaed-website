@@ -6,9 +6,9 @@ import { pageGlobal } from '../page-globals';
  * lines, and the page a visitor reaches when an address matches nothing.
  *
  * One entry rather than three, because the three are published together and in
- * one language: the header and footer are Arabic, and English pages have
- * neither until ticket 40 builds them. The spec's Content model names
- * navigation and footer as separate globals; they are tabs of this one, which
+ * the same languages: the header and footer are drawn on an English page only
+ * once all three are published in English (ticket 40). The spec's Content
+ * model names navigation and footer as separate globals; they are tabs of this one, which
  * gives an Editor the same two places to edit without a second set of tables
  * and a second publish to remember.
  */

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteNav } from '@/components/site-nav';
+import { siteWordsIn } from '@/content/site-words';
 import { LOCALE_CODES, type Locale } from '@/lib/locales';
 
 /**
@@ -16,8 +17,14 @@ import { LOCALE_CODES, type Locale } from '@/lib/locales';
  * It carries only what every page uses. A page with `.reveal` entrances mounts
  * `RevealOnScroll` itself, so a page without them does not download the
  * script (spec: Analytics and performance).
+ *
+ * **Both locales, but only in words published in them** (ticket 40). The
+ * header and footer are drawn from the CMS, and an English page shows no
+ * Arabic in place of English it has not got — so until the English of those
+ * words is published, an English page is its content alone, as every English
+ * page was before the English shell existed.
  */
-export function PageShell({
+export async function PageShell({
   locale,
   path,
   ownPath = path,
@@ -49,6 +56,8 @@ export function PageShell({
   locales?: readonly Locale[];
   children: ReactNode;
 }) {
+  if (!(await siteWordsIn(locale))) return <main>{children}</main>;
+
   return (
     <>
       <SiteNav locale={locale} path={path} ownPath={ownPath} locales={locales} />
