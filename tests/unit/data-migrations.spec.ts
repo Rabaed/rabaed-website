@@ -60,7 +60,7 @@ const migrationsDirectory = path.resolve(import.meta.dirname, '..', '..', 'src',
  * Each is the same trap as the one ticket 63 closed, still set: a field added
  * to the site settings, to a form's settings, to the legal documents, to the
  * FAQs or to an article would stop a database built from scratch at that
- * migration. `npm run cms:freeze-seed` is what brings one over, and ticket 64
+ * migration. `npm run cms:freeze-seed` is what brings one over, and ticket 68
  * asks for all eight.
  *
  * Seven were written before the rule. The eighth, ticket 30's tool download
