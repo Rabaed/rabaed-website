@@ -4,17 +4,17 @@
 
 **Blocked by:** nothing.
 
-**Status:** ready-for-agent
+**Status:** resolved — to be merged only once the founder has seen it on the preview
 
 **The founder sees it before it merges.** They chose this fix to try it, not yet to keep it. The pull request is not merged until they have scrolled through the section on its preview deployment, on a desktop and on a phone, and said yes.
 
-- [ ] With motion on, scroll position alone can never leave the section in between dark and light: the headline, the copy, the chips and every word on the card read at 4.5:1 or more at every point the visitor can stop, on a desktop window and below 981px
-- [ ] The section still holds the dark treatment as the visitor arrives, and switches to the light one on its own, over roughly half a second, once the visitor is 12.5% of the way in; scrolling back above that point switches it back the same way
-- [ ] Section, words and card switch together, as one change
-- [ ] With reduced motion nothing changes: one step, at the same point, as now
-- [ ] On the light treatment, the card's second lines and times, the unchosen chips, and the stamp all read at 4.5:1 or more on their ground — with motion on and with it off
-- [ ] The dark treatment looks exactly as it does now
-- [ ] A test samples the section at points through its first third, once the switch has settled, and fails on today's blend
+- [x] With motion on, scroll position alone can never leave the section in between dark and light: the headline, the copy, the chips and every word on the card read at 4.5:1 or more at every point the visitor can stop, on a desktop window and below 981px
+- [x] The section still holds the dark treatment as the visitor arrives, and switches to the light one on its own, over roughly half a second, once the visitor is 12.5% of the way in; scrolling back above that point switches it back the same way
+- [x] Section, words and card switch together, as one change
+- [x] With reduced motion nothing changes: one step, at the same point, as now
+- [x] On the light treatment, the card's second lines and times, the unchosen chips, and the stamp all read at 4.5:1 or more on their ground — with motion on and with it off
+- [x] The dark treatment looks exactly as it does now
+- [x] A test samples the section at points through its first third, once the switch has settled, and fails on today's blend
 
 ## Comments
 
@@ -69,3 +69,24 @@ Reduced motion already avoids the grey: `.lit` is toggled in one step at 12.5% (
 - Any other section's colours or motion.
 
 **No ADR.** `reference/HANDOFF.md` only names this section, so this overrules nothing there. As with ticket 09's divergences, the reasoning lives in the code comment and here.
+
+### What was built
+
+«السجل الموثّق» no longer blends under the scroll. 12.5% of the way in, the section and its card switch to the light treatment. The switch then runs on its own for 0.4s: ground, words, card and its border together. Scrolling back above that point switches it back the same way. With reduced motion the same switch happens in one step, as before. The point is the one reduced motion already used, half-way through the Reference site's blend, so the section turns light at the moment the Reference site's is half-way there.
+
+Both paths now go through the one `lit` class. `RecordBehaviour` creates a single ScrollTrigger that toggles it, and the stylesheet says what the light treatment is and how long the switch takes. The two scrubbed GSAP tweens are gone.
+
+The light treatment takes the inks the site uses on a pale ground: the deeper orange for the eyebrow and the four questions (ADR-0011), `--muted` for the card's second lines, its times and the dots between the questions, and `.65` for the unchosen chips, the lowest that reaches 4.5:1 on paper. The dark treatment is unchanged, and the at-rest comparison with the Reference site, which reads it, passes at all sixteen viewports untouched.
+
+**One thing the triage missed.** The eyebrow (12px) and the four questions (15px) are accent-coloured text on the section itself, not on the card, so they stayed `#F95738` on paper when the section turned light: 3.1:1. They are fixed in the same way as everything else on the light treatment.
+
+**A flash that was caught.** The first build also set `lit` straight from the trigger's `isActive` as it was created, meant for a visitor already past the point after a resize. Before its first measurement the trigger reports itself active, so the section turned light as the page loaded and then faded back to dark. ScrollTrigger reports the state itself once it has measured, so that line went. The resize case is held by its own test.
+
+### Tests
+
+- `tests/e2e/home-record.spec.ts`: axe reads the whole section at eighteen points, from half a window above it to a third of the way through (two of them either side of the switch), each once nothing in it is moving, and once more stamped at the end. It runs with motion on and with motion reduced, at 1440×900 and 390×900. This replaces the reduced-motion-only contrast test, which computed only the section's words against its ground and the card's. The switch test now asks that the section is exactly dark just before 12.5% and exactly light just after, with no more scrolling, and back again. A new test asks that a window resized across the breakpoint with the section light keeps it light.
+- `tests/e2e/axe.ts`: the axe standard, the accepted white-on-accent pair and the undecidable reasons move here from `accessibility.spec.ts`, which now imports them. The check that runs on every page is unchanged; the Record section's suite runs the same one on the states it opens, which is the gap `accessibility.spec.ts`'s header described.
+- `tests/e2e/home-record-match-reference.spec.ts`: the colours are compared where the Reference site's are still, before its blend and after the card's (0, 0.32, 0.45, and back to 0), and not in between. The reason is recorded as the third deliberate difference in the file's header.
+
+**Verified by falsification.** With the two scrubbed tweens put back, the contrast test failed with motion on at 68px into the section at 1440×900 and at 54px at 390×900, and the switch test failed. With the light treatment's inks taken out, the contrast test failed with motion both on and off: axe named the four questions at 3.11:1, the unchosen chips at 3.13:1 and the card's grey lines at 2.6:1.
+

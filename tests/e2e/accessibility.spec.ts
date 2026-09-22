@@ -25,107 +25,22 @@
  * that its ground turns white under it (ticket 36 found it by reading the
  * stylesheet, and `home.css` says so beside the rule). A state worth showing a
  * visitor is worth a contrast check, and one added later will not get it here.
+ * The check itself is in `axe.ts` so that those suites can run it on the
+ * states they open, as the Record section's does (ticket 69).
  */
-import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Page } from '@playwright/test';
+import { axeFindings } from './axe';
 import { ROUTES } from './routes';
 import { SCREEN_MOCKS } from '../../src/screen-mocks/registry';
-
-/**
- * The standard the ticket names. `wcag21aa` carries the contrast rule;
- * `best-practice` is deliberately left out, so that what fails here is a
- * standard somebody can be held to rather than axe's own house style.
- */
-const STANDARD = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
-
-/**
- * The one combination the founder kept as it is (ADR-0011): white lettering on
- * the brand accent, which is what the primary button — and the chips that share
- * its treatment — are made of. It reaches 3.25:1 where AA asks 4.5:1, and the
- * only ways to close that are to darken the brand orange on every page or to
- * set every button label at 18.66px bold. The accent as *text* was darkened
- * instead, and this pair was left.
- *
- * Listed as a pair rather than by turning the rule off, so that any other
- * colour that falls short — a new one, or one of these on a different ground —
- * still fails here.
- */
-const ACCEPTED = [{ foreground: '#ffffff', background: '#f95738' }];
-
-/**
- * The reasons axe gives for not being able to judge contrast that are the
- * question not applying rather than an answer it is withholding. Each was
- * looked at once, on this site, and each is the same handful of elements:
- *
- *  - **Only non-text characters.** The arrows on the "read more" links and in
- *    the Partnerships trigger, the `+` and `–` on a question, the bullets in a
- *    list. They are drawing, and they say nothing a reader has to read.
- *  - **Overlapped by another element.** The before/after slider's two arrows,
- *    which sit over the picture they move across, and a card's number under
- *    its own overlay.
- *  - **A background gradient.** The hero's glow, a faint wash of the accent
- *    over the dark ground, under text that is already held to that ground.
- */
-const UNDECIDABLE = [
-  'Element content contains only non-text characters',
-  'background color could not be determined because it is overlapped by another element',
-  'background color could not be determined due to a background gradient',
-];
-
-/** Whether every reason axe gave for one element is one of those. */
-function undecidable(failureSummary: string | undefined): boolean {
-  return UNDECIDABLE.some((why) => failureSummary?.includes(why) ?? false);
-}
-
-/**
- * Whether axe's account of one element names an accepted pair. It is the whole
- * account that is forgiven, because axe writes one pair per element for this
- * rule: a second shortfall on the same element would be a second element in
- * the report, not a second line here.
- */
-function accepted(failureSummary: string | undefined): boolean {
-  return ACCEPTED.some(
-    (pair) =>
-      failureSummary?.includes(`foreground color: ${pair.foreground}, background color: ${pair.background}`) ?? false,
-  );
-}
-
-/** The rule, the elements and the fix, rather than a count. */
-function describeChecks(violations: { id: string; impact?: string | null; help: string; nodes: { target: unknown[]; failureSummary?: string }[] }[]): string {
-  return violations
-    .map((violation) => {
-      const where = violation.nodes.map(
-        (node) => `      ${node.target.join(' ')}\n        ${node.failureSummary?.replace(/\n/g, '\n        ')}`,
-      );
-      return `  ${violation.id} (${violation.impact}): ${violation.help}\n${where.join('\n')}`;
-    })
-    .join('\n');
-}
 
 for (const route of ROUTES) {
   test(`${route.path} passes the automated accessibility checks`, async ({ page }) => {
     await page.goto(route.path);
     await page.evaluate(() => document.fonts.ready);
 
-    const { violations, incomplete } = await new AxeBuilder({ page }).withTags(STANDARD).analyze();
-
-    const unaccepted = violations
-      .map((violation) => ({ ...violation, nodes: violation.nodes.filter((node) => !accepted(node.failureSummary)) }))
-      .filter((violation) => violation.nodes.length > 0);
-
-    expect(describeChecks(unaccepted), `${route.path} has accessibility violations`).toBe('');
-
-    // What axe could not decide, which it keeps in a bucket of its own. Read
-    // rather than dropped: contrast it cannot compute lands here rather than
-    // above, and a page that quietly filled up with it would look as clean as
-    // one with nothing wrong. Only the three reasons below are let through,
-    // each of them axe saying the question does not apply, so a fourth kind of
-    // undecidable arrives as a failure rather than as silence.
-    const undecided = incomplete
-      .map((check) => ({ ...check, nodes: check.nodes.filter((node) => !undecidable(node.failureSummary)) }))
-      .filter((check) => check.nodes.length > 0);
-
-    expect(describeChecks(undecided), `${route.path} has checks axe could not decide`).toBe('');
+    const { violations, undecided } = await axeFindings(page);
+    expect(violations, `${route.path} has accessibility violations`).toBe('');
+    expect(undecided, `${route.path} has checks axe could not decide`).toBe('');
   });
 }
 

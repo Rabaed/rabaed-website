@@ -9,11 +9,11 @@
  * the trail showing in it, and the stamp waiting to come on.
  *
  * **While scrolling**, with motion on: the colours of the section and the card
- * at points through their change, and on a desktop window which transaction
+ * before and after their change, and on a desktop window which transaction
  * type is marked and whether the stamp is on at points through the cycle.
  *
- * Two deliberate differences shape the comparison, each left out only where it
- * reaches:
+ * Three deliberate differences shape the comparison, each left out only where
+ * it reaches:
  *
  * - **Every type's trail is in the page**, where the Reference site has one and
  *   rewrites it. The trails not showing are `hidden`, so every part of a trail
@@ -28,6 +28,12 @@
  *   follow the card rather than the section, because the Reference site's
  *   cycle has no room to run there, so the cycle is compared on desktop
  *   windows only.
+ * - **The section does not blend under the scroll** (ticket 69). The
+ *   Reference site's blend passes through a grey no text can be read on; here
+ *   the section switches at one point instead. So its colours are compared
+ *   where the Reference site's are still, before its blend starts and after
+ *   the card's ends, and not in between. The light treatment's inks, which
+ *   also differ, are not among the colours read here.
  */
 import { test, expect, type Page } from '@playwright/test';
 import { measureRegion, type Measurement, type Region } from './geometry';
@@ -171,11 +177,15 @@ test.describe('the Record section changes as on the Reference site while scrolli
       const pages = await openBothPages(browser, baseURL!, site, viewport, { motion: 'no-preference' });
 
       try {
-        // Through the section's own change, which runs over its first quarter,
-        // and the card's, which runs from 12% to 32%.
-        for (const fraction of [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.28, 0.32, 0.45]) {
+        // Either side of the Reference site's change: the section's runs over
+        // its first quarter, and the card's from 12% to 32%. Here the switch
+        // takes 0.4s to run, so the rebuilt page is read once it has.
+        for (const fraction of [0, 0.32, 0.45, 0]) {
           await scrollIntoSection(pages.reference, fraction);
           await scrollIntoSection(pages.rebuilt, fraction);
+          await expect
+            .poll(() => pages.rebuilt.locator('#record').evaluate((section) => section.getAnimations({ subtree: true }).length))
+            .toBe(0);
           expectCloseColours(await readColours(pages.rebuilt), await readColours(pages.reference), `at ${fraction} of the section`);
         }
       } finally {

@@ -13,6 +13,7 @@
  * points, is asked in `home-record-match-reference.spec.ts`.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { axeFindings } from './axe';
 import { readColours, readCycle, scrollToProgress, settle } from './record-section';
 
 /** The five transaction types in order: each chip's label and the title of the trail it shows. */
@@ -28,6 +29,8 @@ const STAMP = '✓ سجل كامل · 4 خطوات · 3 أطراف';
 
 const DARK = 'rgb(20, 22, 28)';
 const PAPER = 'rgb(250, 250, 248)';
+const DARK_TREATMENT = { section: DARK, text: 'rgb(237, 238, 243)', card: 'rgb(27, 30, 39)' };
+const LIGHT_TREATMENT = { section: PAPER, text: 'rgb(34, 34, 34)', card: 'rgb(255, 255, 255)' };
 const HEADER_OVER_DARK = 'rgba(20, 22, 28, 0.72)';
 const HEADER_OVER_LIGHT = 'rgba(250, 250, 248, 0.8)';
 
@@ -65,6 +68,25 @@ async function expectShowing(page: Page, chosen: number) {
       await expect(title(page, index)).toBeHidden();
     }
   }
+}
+
+/**
+ * Until nothing in the section is moving: no colour part-way through its
+ * switch, no chip part-way through lighting up, no trail part-way through
+ * fading in. What a visitor who stopped scrolling here would see.
+ */
+async function waitForStillness(page: Page) {
+  await expect
+    .poll(() =>
+      section(page).evaluate(
+        (element) =>
+          element.getAnimations({ subtree: true }).length === 0 &&
+          [...element.querySelectorAll('.rec-card :not([hidden]) > .h b, .rec-card :not([hidden]) > .tl > li')].every(
+            (part) => getComputedStyle(part).opacity === '1',
+          ),
+      ),
+    )
+    .toBe(true);
 }
 
 async function expectStamped(page: Page, stamped: boolean) {
@@ -208,26 +230,48 @@ for (const viewport of [
   });
 }
 
-test('the section turns from dark to light, and the card with it', async ({ page }) => {
+test('the section switches from dark to light at one point, on its own, and back', async ({ page }) => {
+  // DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 69): the Reference
+  // site blends the section under the scroll, through a grey no text can be
+  // read on. Here it switches at 12.5% of the way in, and the switch runs to
+  // its end without any more scrolling.
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const { top, height } = await measure(page);
 
   await scrollTo(page, top - 10);
-  expect(await readColours(page)).toMatchObject({ section: DARK, text: 'rgb(237, 238, 243)' });
+  expect(await readColours(page)).toMatchObject(DARK_TREATMENT);
 
-  // Half-way through the change it is neither.
-  await scrollTo(page, top + height * 0.125);
-  const between = await readColours(page);
-  expect(between.section).not.toBe(DARK);
-  expect(between.section).not.toBe(PAPER);
+  await scrollTo(page, top + height * 0.11);
+  await waitForStillness(page);
+  expect(await readColours(page)).toMatchObject(DARK_TREATMENT);
+
+  await scrollTo(page, top + height * 0.14);
+  await waitForStillness(page);
+  expect(await readColours(page)).toMatchObject(LIGHT_TREATMENT);
 
   await scrollTo(page, top + height * 0.4);
-  await expect.poll(() => readColours(page)).toMatchObject({ section: PAPER, text: 'rgb(34, 34, 34)', card: 'rgb(255, 255, 255)' });
+  expect(await readColours(page)).toMatchObject(LIGHT_TREATMENT);
 
   // And back.
-  await scrollTo(page, top - 10);
-  await expect.poll(() => readColours(page)).toMatchObject({ section: DARK, text: 'rgb(237, 238, 243)' });
+  await scrollTo(page, top + height * 0.11);
+  await waitForStillness(page);
+  expect(await readColours(page)).toMatchObject(DARK_TREATMENT);
+});
+
+test('a window resized with the section light keeps it light', async ({ page }) => {
+  // Crossing the breakpoint takes the behaviour apart and builds it again,
+  // with the visitor already past the point where it switches.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await scrollToProgress(page, 0.4);
+  await expect.poll(() => readColours(page)).toMatchObject(LIGHT_TREATMENT);
+
+  await page.setViewportSize({ width: 390, height: 900 });
+  const { top, height } = await measure(page);
+  await scrollTo(page, top + height * 0.5);
+  await waitForStillness(page);
+  expect(await readColours(page)).toMatchObject(LIGHT_TREATMENT);
 });
 
 test('the header stays dark through the section, and turns light at the first light section after it', async ({ page }) => {
@@ -331,42 +375,51 @@ test.describe('with reduced motion', () => {
     await expectShowing(page, 1);
   });
 
-  for (const viewport of [
-    { width: 1440, height: 900 },
-    { width: 390, height: 900 },
-  ]) {
-    test(`at ${viewport.width}x${viewport.height} the words can be read at every point of the scroll`, async ({ page }) => {
-      // Blended, the section passes through a grey where dark words and light
-      // ones are both lost against it. With motion turned down it changes at
-      // once instead, so there is no point at which it cannot be read.
-      await page.setViewportSize(viewport);
-      await page.goto('/');
-      const { top, height, window: tall } = await measure(page);
-
-      for (let y = top - tall / 2; y <= top + height; y += height / 40) {
-        await scrollTo(page, y);
-        const colours = await readColours(page);
-        const contrast = await page.evaluate(({ text, section, card }) => {
-          const luminance = (colour: string) => {
-            const [r, g, b] = colour
-              .match(/[\d.]+/g)!
-              .slice(0, 3)
-              .map((channel) => {
-                const c = Number(channel) / 255;
-                return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-              });
-            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-          };
-          const ratio = (a: string, b: string) => {
-            const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-            return (light + 0.05) / (dark + 0.05);
-          };
-          return { onSection: ratio(text, section), onCard: ratio(text, card) };
-        }, colours);
-        const where = `at ${Math.round(y - top)}px into the section`;
-        expect(contrast.onSection, where).toBeGreaterThanOrEqual(4.5);
-        expect(contrast.onCard, where).toBeGreaterThanOrEqual(4.5);
-      }
-    });
-  }
 });
+
+for (const motion of ['no-preference', 'reduce'] as const) {
+  test.describe(`with motion ${motion === 'reduce' ? 'reduced' : 'on'}`, () => {
+    test.use({ contextOptions: { reducedMotion: motion } });
+
+    for (const viewport of [
+      { width: 1440, height: 900 },
+      { width: 390, height: 900 },
+    ]) {
+      test(`at ${viewport.width}x${viewport.height} every word can be read wherever the visitor stops`, async ({ page }) => {
+        // Blended under the scroll, as on the Reference site, the section
+        // passes through a grey where dark words and light ones are both lost
+        // against it, for as long as the visitor stops there (ticket 69). So
+        // at points from before the section to a third of the way through it,
+        // across the switch, axe reads every word in it once everything has
+        // stopped moving. Then once more, stamped, which only the end shows.
+        await page.setViewportSize(viewport);
+        await page.goto('/');
+        await page.evaluate(() => document.fonts.ready);
+        const { top, height, window: tall } = await measure(page);
+
+        // Sixteen evenly spaced, and two either side of the switch.
+        const from = top - tall / 2;
+        const to = top + height / 3;
+        const stops = [...Array.from({ length: 16 }, (_, index) => from + ((to - from) * index) / 15), top + height * 0.12, top + height * 0.13];
+        for (const y of stops.sort((a, b) => a - b)) {
+          await scrollTo(page, y);
+          await waitForStillness(page);
+          const { violations, undecided } = await axeFindings(page, '#record');
+          const where = `at ${Math.round(y - top)}px into the section`;
+          expect(violations, where).toBe('');
+          expect(undecided, where).toBe('');
+        }
+
+        // The end of the cycle: the section's foot at the window's on a desktop
+        // window, the card's centre past 15% of the window's height below one.
+        const { cardCentre } = await measure(page);
+        await scrollTo(page, viewport.width > 980 ? top + height - tall : cardCentre - tall * 0.1);
+        await expectStamped(page, true);
+        await waitForStillness(page);
+        const { violations, undecided } = await axeFindings(page, '#record');
+        expect(violations, 'stamped').toBe('');
+        expect(undecided, 'stamped').toBe('');
+      });
+    }
+  });
+}
