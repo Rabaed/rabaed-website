@@ -8,7 +8,7 @@ the mark are others we have not had yet. There is no floor under any of them.
 
 **Blocked by:** nothing.
 
-**Status:** resolved — ten minutes, ADR-0014
+**Status:** resolved — ten minutes, ADR-0016
 
 - [x] Every page a visitor can reach is rebuilt at most a set time after it was
       last built, whether or not anything was published
@@ -99,7 +99,7 @@ and `(studio)`.
 ## Answer
 
 **Ten minutes**, set on the two site layouts and on each of the three discovery
-files, and recorded in ADR-0014.
+files, and recorded in ADR-0016.
 
 - `src/lib/cache-age.ts` holds `MAX_PAGE_AGE_SECONDS` and the reason it is that
   number: it answers "how far behind may a page be when something has gone
@@ -157,5 +157,5 @@ all three to that.
 moved out of the Route Segment Config reference into
 `01-app/02-guides/caching-without-cache-components.md`, which makes it look
 removed. It is removed only when Cache Components is enabled, which this project
-does not enable. ADR-0014 records that the day Cache Components is turned on,
+does not enable. ADR-0016 records that the day Cache Components is turned on,
 this decision moves to `cacheLife`.

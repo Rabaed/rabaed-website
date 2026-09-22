@@ -63,7 +63,7 @@ cache — something else is wrong, and it is worth saying so rather than
 publishing again.
 
 The number lives in `src/lib/cache-age.ts` with the reasoning behind it, and
-ADR-0014 records the decision. The Screen mock studio and the CMS admin have no
+ADR-0016 records the decision. The Screen mock studio and the CMS admin have no
 age: nothing a publish does can make either stale.
 
 ## One-time setup

@@ -7,7 +7,7 @@ import '@/styles/globals.css';
 /**
  * The floor under every English page: whatever becomes of a publish's mark, a
  * page is rebuilt at most ten minutes after it was last built (ticket 66,
- * ADR-0014). An ordinary publish is unaffected and still arrives in under a
+ * ADR-0016). An ordinary publish is unaffected and still arrives in under a
  * second; this catches the publish whose mark went astray, which otherwise
  * leaves a page wrong until somebody publishes again.
  *

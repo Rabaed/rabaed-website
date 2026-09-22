@@ -51,7 +51,7 @@ const TRAINING_CRAWLERS = ['GPTBot', 'ClaudeBot', 'Meta-ExternalAgent', 'CCBot']
 
 /**
  * The floor under `robots.txt`: whatever becomes of a publish's mark, it is
- * rebuilt at most ten minutes after it was last built (ticket 66, ADR-0014).
+ * rebuilt at most ten minutes after it was last built (ticket 66, ADR-0016).
  *
  * Its own, because a discovery file is a route beside the layouts rather than
  * beneath one, so no layout's age reaches it — the same reason

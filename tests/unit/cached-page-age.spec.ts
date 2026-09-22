@@ -1,6 +1,6 @@
 /**
  * The maximum age is set on every route that needs one, and on none that does
- * not (ticket 66, ADR-0014).
+ * not (ticket 66, ADR-0016).
  *
  * A page is rebuilt when a publish marks it stale, and at no other time. So
  * anything that loses a mark leaves that page showing the words from before

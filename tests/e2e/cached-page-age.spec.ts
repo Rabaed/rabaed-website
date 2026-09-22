@@ -1,6 +1,6 @@
 /**
  * The maximum age as a visitor's browser — and Vercel's edge — actually
- * receives it (ticket 66, ADR-0014).
+ * receives it (ticket 66, ADR-0016).
  *
  * A page is rebuilt when a publish marks it stale and at no other time, so
  * anything that loses a mark leaves that page wrong until somebody publishes
