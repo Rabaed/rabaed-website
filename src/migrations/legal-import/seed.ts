@@ -1,6 +1,6 @@
 /**
  * The statements that seeded this import, as it made them on the day it was
- * written: `20260914_061635_import_legal_documents` (ticket 63).
+ * written: `20260914_061635_import_legal_documents` (ticket 68).
  *
  * **Generated, and frozen.** `npm run cms:freeze-seed` produced this from the
  * import as it ran, and nothing regenerates it: the column names below are the
@@ -8,7 +8,7 @@
  * the file. A field added to this entry later belongs in a migration of its
  * own, never here.
  *
- * The words themselves are in `terms.ts`, `privacy.ts` and `referral-terms.ts` beside this, which is what to read.
+ * The words themselves are in `terms.ts`, `privacy.ts`, `referral-terms.ts` and `approved-text.ts` beside this, which is what to read.
  */
 export const LEGAL_DOCUMENTS_SEED = `
 INSERT INTO "legal_documents" ("id", "slug", "edited_by", "title", "lead", "meta_title", "description", "intro", "see_also", "updated_at", "created_at", "_status")

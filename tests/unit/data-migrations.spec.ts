@@ -39,6 +39,7 @@ import { HOME_PAGE_SEED } from '../../src/migrations/home-page-import/seed';
 import { HOME_PAGE_WORDS } from '../../src/migrations/home-page-import/words';
 import { ARTICLE_PER_QUESTION_KIND } from '../../src/migrations/launch-articles/articles';
 import { LAUNCH_ARTICLES_SEED } from '../../src/migrations/launch-articles/seed';
+import { IMPORTED_BY } from '../../src/migrations/legal-import/approved-text';
 import { PRIVACY_POLICY } from '../../src/migrations/legal-import/privacy';
 import { REFERRAL_TERMS } from '../../src/migrations/legal-import/referral-terms';
 import { LEGAL_DOCUMENTS_SEED } from '../../src/migrations/legal-import/seed';
@@ -63,9 +64,9 @@ import { SITE_WORDS_SEED } from '../../src/migrations/site-words-import/seed';
 import { INDEX_LEADS, SITE_WORDS } from '../../src/migrations/site-words-import/words';
 import { START_PAGE_SEED } from '../../src/migrations/start-page-import/seed';
 import { START_PAGE_WORDS } from '../../src/migrations/start-page-import/words';
-import { TOOL_PAGE_SEED } from '../../src/migrations/tool-page-import/seed';
 import { TOOL_DOWNLOAD_SEED } from '../../src/migrations/tool-download-import/seed';
 import { TOOL_DOWNLOAD_WORDS } from '../../src/migrations/tool-download-import/words';
+import { TOOL_PAGE_SEED } from '../../src/migrations/tool-page-import/seed';
 import { TOOL_PAGE_WORDS } from '../../src/migrations/tool-page-import/words';
 import { TRUST_STRIP_LOGOS, TRUST_STRIP_WORDS } from '../../src/migrations/trust-strip-import/logos';
 import { TRUST_STRIP_SEED } from '../../src/migrations/trust-strip-import/seed';
@@ -116,7 +117,11 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     except: (value) => value.endsWith('.png'),
   },
   { name: 'contact points', words: CONTACT_POINTS, seed: CONTACT_POINTS_SEED },
-  { name: 'legal documents', words: [TERMS, PRIVACY_POLICY, REFERRAL_TERMS], seed: LEGAL_DOCUMENTS_SEED },
+  {
+    name: 'legal documents',
+    words: [TERMS, PRIVACY_POLICY, REFERRAL_TERMS, IMPORTED_BY],
+    seed: LEGAL_DOCUMENTS_SEED,
+  },
   { name: 'FAQ entries', words: IMPORTED_FAQ_ENTRIES, seed: FAQ_ENTRIES_SEED },
   { name: 'demo request form', words: DEMO_REQUEST_WORDS, seed: DEMO_REQUEST_SEED },
   { name: 'Referral Program signup form', words: REFERRAL_SIGNUP_WORDS, seed: REFERRAL_SIGNUP_SEED },

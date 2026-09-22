@@ -44,8 +44,10 @@ const IMPORTS: {
   directory: string;
   export: string;
   excludes?: Record<string, string>;
-  /** Where the words are, when they are not in a `words.ts` of their own. */
-  words?: string;
+  /** The files the words are in, when they are not in a `words.ts` of their own. */
+  words?: string[];
+  /** The ticket that froze it, when it was not ticket 63. */
+  ticket?: number;
 }[] = [
   { migration: '20260915_040105_import_start_page', directory: 'start-page-import', export: 'START_PAGE_SEED' },
   {
@@ -83,45 +85,53 @@ const IMPORTS: {
     migration: '20260913_191346_publish_contact_points',
     directory: 'contact-points-import',
     export: 'CONTACT_POINTS_SEED',
+    ticket: 68,
   },
   {
     migration: '20260914_061635_import_legal_documents',
     directory: 'legal-import',
     export: 'LEGAL_DOCUMENTS_SEED',
-    words: '`terms.ts`, `privacy.ts` and `referral-terms.ts`',
+    words: ['terms.ts', 'privacy.ts', 'referral-terms.ts', 'approved-text.ts'],
+    ticket: 68,
   },
   {
     migration: '20260914_193520_import_faq_entries',
     directory: 'faq-import',
     export: 'FAQ_ENTRIES_SEED',
-    words: '`entries.ts`',
+    words: ['entries.ts'],
+    ticket: 68,
   },
   {
     migration: '20260914_194144_publish_demo_request_wording',
     directory: 'demo-request-import',
     export: 'DEMO_REQUEST_SEED',
+    ticket: 68,
   },
   {
     migration: '20260914_222809_publish_referral_signup_wording',
     directory: 'referral-signup-import',
     export: 'REFERRAL_SIGNUP_SEED',
+    ticket: 68,
   },
   {
     migration: '20260920_170917_publish_partnership_application_wording',
     directory: 'partnership-application-import',
     export: 'PARTNERSHIP_APPLICATION_SEED',
+    ticket: 68,
   },
   {
     migration: '20260921_035306_publish_tool_download_wording',
     directory: 'tool-download-import',
     export: 'TOOL_DOWNLOAD_SEED',
+    ticket: 68,
   },
   {
     migration: '20260921_101500_import_launch_articles',
     directory: 'launch-articles',
     export: 'LAUNCH_ARTICLES_SEED',
     excludes: { media: 'filename' },
-    words: '`articles.ts`',
+    words: ['articles.ts'],
+    ticket: 68,
   },
 ];
 
@@ -258,6 +268,13 @@ function ordered(names: string[], parents: Map<string, string[]>): string[] {
   return out;
 }
 
+/** File names as a sentence names them: `a.ts`, `b.ts` and `c.ts`. */
+const named = (files: string[]) =>
+  files
+    .map((file) => `\`${file}\``)
+    .join(', ')
+    .replace(/, ([^,]*)$/, ' and $1');
+
 /** A SQL body as it has to read inside a TypeScript template literal. */
 const escaped = (statements: string) =>
   statements
@@ -310,7 +327,7 @@ for (const [index, migration] of migrations.entries()) {
     [
       '/**',
       ' * The statements that seeded this import, as it made them on the day it was',
-      ` * written: \`${migration.name}\` (ticket 63).`,
+      ` * written: \`${migration.name}\` (ticket ${entry.ticket ?? 63}).`,
       ' *',
       ' * **Generated, and frozen.** `npm run cms:freeze-seed` produced this from the',
       ' * import as it ran, and nothing regenerates it: the column names below are the',
@@ -318,7 +335,7 @@ for (const [index, migration] of migrations.entries()) {
       ' * the file. A field added to this entry later belongs in a migration of its',
       ' * own, never here.',
       ' *',
-      ` * The words themselves are in ${entry.words ?? '`words.ts`'} beside this, which is what to read.`,
+      ` * The words themselves are in ${named(entry.words ?? ['words.ts'])} beside this, which is what to read.`,
       ' */',
       `export const ${entry.export} = \``,
       escaped(statements.join('\n\n')),

@@ -5,7 +5,8 @@ import type { ApprovedDocument } from './approved-text';
  *
  * The approved text, verbatim, as the CMS's first version of the Referral
  * Program Terms (ticket 25). Frozen: the terms are edited and versioned in the
- * CMS, and this file is only what the import migration reads (`approved-text.ts`).
+ * CMS. This file is the readable record of what the import wrote; the
+ * statements themselves are frozen in `seed.ts` beside it (ticket 68).
  */
 export const REFERRAL_TERMS: ApprovedDocument = {
   metaTitle: 'ربائد · الشروط والأحكام — برنامج الإحالة',

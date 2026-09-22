@@ -9,8 +9,8 @@ const APPROVED_ON = '2026-09-01T00:00:00+03:00';
  * the CMS, verbatim and misspellings included, as each document's first
  * published version (ticket 25, ADR-0003). From here on they are edited only
  * in the CMS; the Word documents in `reference/legal-source/` stay as the
- * pre-launch archive. Each first version records its author as «استيراد النص
- * المعتمد قبل الإطلاق»: no Editor made them.
+ * pre-launch archive. Each first version records its author as `IMPORTED_BY`
+ * (`legal-import/approved-text.ts`): no Editor made them.
  *
  * The first versions are dated 1 September 2026, not the day this runs: that
  * is the date the approved text carries, and the date its pages gave before

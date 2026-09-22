@@ -1,6 +1,6 @@
 /**
  * The statements that seeded this import, as it made them on the day it was
- * written: `20260914_222809_publish_referral_signup_wording` (ticket 63).
+ * written: `20260914_222809_publish_referral_signup_wording` (ticket 68).
  *
  * **Generated, and frozen.** `npm run cms:freeze-seed` produced this from the
  * import as it ran, and nothing regenerates it: the column names below are the
