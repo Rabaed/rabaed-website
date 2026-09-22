@@ -1,12 +1,12 @@
 # 39a: Founder account actions
 
-**What to do:** The things in Stage 1 that need somebody with the company accounts. Ticket 03 raised the first two; the third arrived on 20 September 2026, and the fourth on 21 September 2026.
+**What to do:** The things in Stage 1 that need somebody with the company accounts. Ticket 03 raised the first two; the third arrived on 20 September 2026, the fourth on 21 September 2026, and the fifth on 22 September 2026.
 
 **Blocked by:** nothing technical.
 
 **When:** the founder decided on 12 September 2026 to do **part 1, connecting Vercel, once ticket 04 is merged** — bringing it forward from the end of Stage 1, so that preview links exist for the page-by-page rebuild in tickets 05 onward. Part 2, the GitHub plan decision, stays at the end of Stage 1 alongside ticket 39.
 
-**Status:** parts 1 and 3 done (12 and 20 September 2026); parts 2 and 4 outstanding
+**Status:** parts 1 and 3 done (12 and 20 September 2026); parts 2 and 4 outstanding. Part 5 is not a task that finishes — it is a check to run before certain merges, from now on.
 
 Full instructions, in plain language, are in [`docs/deployment.md`](../../../docs/deployment.md).
 
@@ -70,3 +70,24 @@ nothing has to be deployed afterwards.
 Step by step, in plain language, in [`docs/deployment.md`](../../../docs/deployment.md) under *One-time setup*. What is collected, in the words the Privacy Policy will use, is [`docs/analytics.md`](../../../docs/analytics.md) — ticket 37's to fold in.
 
 **Nothing is measured before this**, and nothing is measured on preview deployments by design, so reviewing a pull request never counts as a visit. The events that count form submissions and visits an AI assistant sent need a paid Vercel team, which part 1 already established this project needs.
+
+## 5. Check the admin on a preview before merging, when a pull request could reach the CMS
+
+Raised by ticket 65 on 22 September 2026. Unlike parts 1–4 this one never
+completes: it is a check to run on a pull request, by the only person who can.
+
+**On a pull request that touches `src/cms/`, `src/payload.config.ts`, the form
+routes, or any dependency they load** — open the preview link Vercel comments
+on the pull request, and before approving the merge:
+
+- [ ] Load `/maktab` and confirm it shows the sign-in page, not "This page couldn't load"
+- [ ] Load `/api/users/me` and confirm JSON comes back, not a 500
+- [ ] Say on the pull request that you did, so the record shows the check was run
+
+**Why it has to be you.** Deployment Protection is on for the team (part 1 above), so fetching a preview without a session redirects to `vercel.com/sso-api`. An agent cannot get past that login, and should not try. Production is open and an agent can check it — but only *after* a merge, which is exactly too late.
+
+**Why the check exists at all.** Ticket 65 was the CMS down in production for at least a day: `/maktab` black, every `/api` address a 500, Ahmed unable to sign in or publish, no form on the site sendable. Nothing saw it. CI builds and drives `/maktab` on Node 24, where the underlying call succeeds, so the suite passed before the fix and after it. Every public page answered `200` the whole time, because they are static HTML from the last build still being served — so every check that looks at the site from outside said the site was fine. The first request that ran code was the one that told the truth.
+
+That gap is structural and did not go away with the fix. CI cannot see a deployment-only failure; an agent reaches production only after a merge; a preview, before the merge, is the one place it shows — and previews open for you alone.
+
+Ticket 65 asked for this check in as many words and did not say it was yours, so nobody ran it. The fix merged, production turned out fine, and the box stayed open rather than being ticked on proof that was never gathered.

@@ -6,8 +6,10 @@ For a session working in a git worktree while other sessions take tickets from t
 
 1. **Claim** a ready ticket as `issue-tracker.md` describes. Done when `git ls-remote --heads origin ticket-NN` lists your branch.
 2. **Test on the ticket's own port**, `TEST_PORT=31NN`: ticket 09 tests on 3109, ticket 12 on 3112. Done when the full suite is green on that port.
-3. **Hand over**: push and open a pull request against `main`. Done when its `test` check is green. The founder decides when it is merged, and merging with `--delete-branch` releases the claim.
-4. **Start the next ticket** on a new branch from a fresh `origin/main`, so it builds on everything merged since.
+3. **Resolve the ticket on its branch** as `issue-tracker.md` describes. Done before the pull request opens, so the `Status:` line merges with the work rather than needing a pull request of its own.
+4. **Hand over**: push and open a pull request against `main`. Done when its `test` check is green. The founder decides when it is merged.
+5. **Release the claim** once it is merged, as `issue-tracker.md` describes. Done when `git ls-remote --heads origin ticket-NN` comes back empty.
+6. **Start the next ticket** on a new branch from a fresh `origin/main`, so it builds on everything merged since.
 
 A claim is a convention, not a lock: two sessions claiming the same ticket in the same moment could both succeed. Each session is given its own lane of tickets, which keeps that rare.
 

@@ -14,7 +14,17 @@ opening a pull request is the whole process.
 3. Vercel builds the same commit and comments on the pull request with a
    **preview link** — a real, working copy of the site at that change, on its
    own web address. This is what you look at to approve the work.
-4. Merging into `main` deploys to production.
+4. **If the change could reach the CMS** — anything under `src/cms/`, the
+   Payload config, the form routes, or a dependency they load — open
+   `/maktab` on that preview link before you merge, and check it shows the
+   sign-in page rather than an error. The marketing pages are no guide here:
+   they are built once and served from cache, so they go on answering
+   normally for hours after the live half of the site has stopped. The CMS
+   was down for a day that way in September 2026, with every public page
+   still answering `200` (ticket 65). Nothing else catches it — the tests
+   run where the fault does not appear, and a preview link opens only for
+   you.
+5. Merging into `main` deploys to production.
 
 Every environment except production tells search engines and AI assistants to
 ignore it, so preview links can be shared freely without the unfinished site

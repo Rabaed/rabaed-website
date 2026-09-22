@@ -4,13 +4,13 @@
 
 **Blocked by:** nothing.
 
-**Status:** ready-for-agent
+**Status:** resolved — the last box is left unticked, as tickets 03 and 34 left their own; see the Comments
 
-- [ ] `/maktab` serves the sign-in page on a Vercel deployment, not a 500
-- [ ] Every address under `/api` answers on a Vercel deployment: the CMS's own, and the forms'
-- [ ] An SVG logo still uploads, and is still sanitised exactly as before — no case in `tests/unit/svg-sanitiser.spec.ts` changes its answer
-- [ ] Loading the CMS does not load jsdom, held by a test that fails without the fix
-- [ ] Proved on the pull request's own preview deployment before it is merged, because CI cannot see this failure
+- [x] `/maktab` serves the sign-in page on a Vercel deployment, not a 500
+- [x] Every address under `/api` answers on a Vercel deployment: the CMS's own, and the forms'
+- [x] An SVG logo still uploads, and is still sanitised exactly as before — no case in `tests/unit/svg-sanitiser.spec.ts` changes its answer
+- [x] Loading the CMS does not load jsdom, held by a test that fails without the fix
+- [ ] Proved on the pull request's own preview deployment before it is merged, because CI cannot see this failure — **left unticked: proved on production after the merge instead, see the Comments**
 
 ## Problem statement
 
@@ -104,3 +104,50 @@ A good test here states something a person outside the code would notice: that t
 ## Further notes
 
 The shape of this outage is worth remembering more than its cause. Every public page answered `200`, so every check that looks at the site from outside said the site was fine. They answered from `X-Nextjs-Prerender: 1` and `X-Vercel-Cache: HIT` — HTML written during the build, still being served hours later because the thing that would rebuild it was the thing that was down. The first request that actually ran code was the one that told the truth.
+
+## Comments
+
+### Resolved (22 September 2026)
+
+The fix merged as pull request #61 on 21 September 2026 — `93a69fe`, merged at `590acfe`. The Media collection fetches the SVG sanitiser on the upload path instead of importing it at the top, so the Payload config no longer loads jsdom to boot; and jsdom goes back to `^26.1.0`, where the `require()` of an ES module that threw on the deployment does not exist in the tree at all.
+
+**The first two boxes, checked against production on 22 September 2026.** `rabaed-website.vercel.app/maktab` redirects to `/maktab/login` and serves the real sign-in form — `Login — ربائد`, an email field and a password field — rather than "This page couldn't load". Under `/api`, every address answers with code that ran:
+
+| Address | Answer |
+| --- | --- |
+| `/api/users/me` | `200`, `{"user":null,"message":"Account"}` |
+| `/api/access` | `200`, the collections' field permissions |
+| `/api/preview` | `401`, "Sign in to the admin to preview." |
+| `/api/forms/demo-request` | `405` — the forms route is POST-only, and refused the GET itself |
+
+Not one `500`. The 401 and the 405 matter as much as the 200s: each is this site's own code deciding something, which is exactly what could not happen while the config would not evaluate.
+
+**The third and fourth boxes, on `main`'s own lockfile.** `npm ci` (jsdom 26.1.0 installed), then `TEST_PORT=3165 npm test -- tests/unit/cms-boots-without-jsdom.spec.ts tests/unit/svg-sanitiser.spec.ts --no-deps` — 16 passed. The full suite on the same port: 1078 passed. Every case in `svg-sanitiser.spec.ts` gives the same answer on jsdom 26 as it did on 27, and `cms-boots-without-jsdom.spec.ts` holds both halves of the question: starting the CMS loads no jsdom, and loading the sanitiser does.
+
+`--no-deps` is not optional there. Without it the `runs-last` teardown project runs after any filtered selection (`playwright.config.ts` says so), and `ai-crawlers.spec.ts` then reads a `/case-studies` that no suite in the selection published — a `404` that is the filter's doing and not a failure.
+
+**The fifth box is left unticked rather than claimed**, as ticket 34 left two of its own and ticket 03 left two before that. It asked for proof on the pull request's own preview deployment *before* the merge. What exists is proof on production *after* it — the table above. The preview built and reported Ready (`rabaed-website-git-ticket-65-rabaed.vercel.app`), and the pull request asked the reviewer in as many words to load `/maktab` on it, but nothing on the pull request records that anyone did.
+
+The outage is real and is over, which is why this ticket is `resolved` with a box still open. What is not evidenced is the *check* — the one thing here that was supposed to catch a deployment-only failure before a merge rather than after one. A tick with a footnote would bury that; an open box is what a later reader's eye lands on, which is the point of leaving it.
+
+### Why the fifth box went unrun, which the ticket did not say
+
+It asked for the check as though it were an ordinary review step. It is not: **a preview deployment is SSO-gated, so no agent can run it.** Loading this cleanup's own preview — `rabaed-website-git-resolve-ticket-65-rabaed.vercel.app/maktab`, on pull request #62, 22 September 2026 — redirects to `vercel.com` and a Vercel login. Production is open and answers; every preview is behind the team's sign-in.
+
+So the box asked the one party who could not do it. That is worth more than the box: a criterion only the founder can satisfy has to say so, next to itself, or it waits for a reviewer who was never able to be one.
+
+It now does. The check is **part 5 of `39a-founder-account-actions.md`** — the first part of that ticket that never completes, because it runs on a pull request rather than once — and `docs/deployment.md` carries it at step 4 of *How a change reaches the internet*, which is where the founder reads before approving a merge.
+
+It is also the shape of every deployment-only failure this ticket describes. CI builds on Node 24 and cannot see the fault; an agent can reach production but only after a merge; the one moment that would catch it — a preview, before the merge — is reachable by the founder alone. Any future ticket whose proof lives on a preview inherits this, jsdom or not.
+
+### The claim on this ticket outlived the work
+
+`ticket-65` was released when it merged, but its `Status:` line was not moved off `ready-for-agent` until now — so for a day `main` described finished, deployed work as available to take. The `Status:` line and the branch are two halves of one signal and they drifted apart.
+
+Seven other branches had drifted the other way: `ticket-20`, `ticket-26`, `ticket-30`, `ticket-58`, `ticket-59`, `ticket-62` and `ticket-62-evidence` were all still on the remote with their tickets `resolved` and their pull requests merged, so `git ls-remote --heads origin "ticket-*"` told a fresh session that seven finished tickets were taken. They are deleted in this change.
+
+The cause was in the documentation, and it had two halves. Both `docs/agents/issue-tracker.md` and `docs/agents/parallel-sessions.md` said to release a claim by merging with `--delete-branch` — the one flag that cannot be used here, because it deletes the local branch too and takes another worktree's checkout with it when one is on that branch. Nothing replaced it, so nothing released the claims. And neither doc ever said who moves a ticket's `Status:` line, or when.
+
+Both are fixed in `issue-tracker.md`, which ticket 48's review already made the single home of the claim rule — *"There is one rule now, in `issue-tracker.md`"* — so `parallel-sessions.md` defers to it here as it already does for claiming, rather than keeping a second copy to drift. Releasing is `git push origin --delete ticket-NN`. Resolving happens **on the ticket's own branch, before the pull request opens**, so the `Status:` line merges with the work. That is the half that failed here: done afterwards it needs a branch and a pull request of its own, which is what this one is.
+
+One more thing that helped `ls-remote` lie, and is fixed with them: `ticket-62-evidence` was never a claim, but it matched `ticket-*` and so read as one. The claim rule said the branch is "named exactly `ticket-NN`" without saying what that forbids; it now says a side branch needs a name outside the glob.
