@@ -4,11 +4,13 @@
  * any other, in English, left to right, with their own titles, structured data
  * and forms.
  *
- * **Runs last** (`playwright.config.ts`). To preview the proposals it makes
- * each the draft its entry opens on, and to hold a published English page to
- * what a page of the site is held to it publishes one — the start page, and
- * what it reads beside its own entry: the Trust strip, the search settings,
- * its questions and its form's English. The page-text suites edit these
+ * **Runs last** (`playwright.config.ts`). To preview the proposals it does
+ * what the founder does to approve one — makes it the draft its entry opens
+ * on, and ticks English among the languages it is published in — and to hold
+ * a published English page to what a page of the site is held to it publishes
+ * one: the start page, and what it reads beside its own entry — the Trust
+ * strip, the search settings, its questions, its form's English, and the
+ * header and footer's (ticket 40). The page-text suites edit these
  * entries all the while, and would find a draft of this suite's under theirs;
  * nothing that runs last reads them. The Arabic of every entry published here
  * is the Arabic already published: the proposals carry it unchanged.
@@ -54,11 +56,17 @@ async function versions(editor: APIRequestContext, slug: string, status: 'draft'
   return (await response.json()).docs;
 }
 
-/** The proposal: among the entry's drafts, the one published in English too. */
+/**
+ * The proposal: among the entry's drafts, one with its English written — the
+ * newest, since restoring a version saves a copy of it as a new draft.
+ */
 async function proposal(editor: APIRequestContext, slug: string): Promise<Version> {
   const drafts = await versions(editor, slug, 'draft');
-  const proposed = drafts.find((draft) => draft.version.languages?.includes('en'));
-  expect(proposed, `${slug} has no draft in English`).toBeTruthy();
+  const proposed = drafts.find((draft) => {
+    const all = words(draft.version);
+    return all.length > 0 && all.every((word) => typeof word.en === 'string' && word.en.trim() !== '');
+  });
+  expect(proposed, `${slug} has no draft with its English written`).toBeTruthy();
   return proposed!;
 }
 
@@ -73,19 +81,37 @@ function words(value: unknown, path: string[] = []): { path: string; ar: string;
   return [...own, ...Object.entries(record).flatMap(([key, inner]) => words(inner, [...path, key]))];
 }
 
-/** Makes the proposal the draft its entry opens on, as restoring it from the admin's Versions does. */
-async function restore(editor: APIRequestContext, slug: string): Promise<void> {
+/**
+ * Approves the entry's proposal as the founder does: makes it the draft the
+ * entry opens on, as restoring it from the admin's Versions does, ticks
+ * English among the languages it is published in, and saves it — as a draft,
+ * or published.
+ */
+async function approve(editor: APIRequestContext, slug: string, status: 'draft' | 'published'): Promise<void> {
   const { id } = await proposal(editor, slug);
   const restored = await editor.post(`/api/globals/${slug}/versions/${id}?draft=true`);
   expect(restored.ok(), await restored.text()).toBe(true);
-}
-
-/** Publishes the entry's proposal, as the founder pressing Publish on it does. */
-async function publish(editor: APIRequestContext, slug: string): Promise<void> {
-  await restore(editor, slug);
   const draft = await editor.get(`/api/globals/${slug}?draft=true&depth=0`);
   expect(draft.ok()).toBe(true);
-  const published = await editor.post(`/api/globals/${slug}`, { data: { ...(await draft.json()), _status: 'published' } });
+  const saved = await editor.post(`/api/globals/${slug}${status === 'draft' ? '?draft=true' : ''}`, {
+    data: { ...(await draft.json()), languages: ['ar', 'en'], _status: status },
+  });
+  expect(saved.ok(), await saved.text()).toBe(true);
+}
+
+/**
+ * The header and footer's English (ticket 40), which every English page is
+ * drawn in and is published in English only with: its proposal is the draft
+ * already published in English.
+ */
+async function approveSiteWords(editor: APIRequestContext, status: 'draft' | 'published'): Promise<void> {
+  const [proposed] = (await versions(editor, 'site-words', 'draft')).filter((draft) => draft.version.languages?.includes('en'));
+  expect(proposed, 'the English header and footer are not proposed').toBeTruthy();
+  const restored = await editor.post(`/api/globals/site-words/versions/${proposed.id}?draft=true`);
+  expect(restored.ok(), await restored.text()).toBe(true);
+  if (status === 'draft') return;
+  const draft = await editor.get('/api/globals/site-words?draft=true&depth=0');
+  const published = await editor.post('/api/globals/site-words', { data: { ...(await draft.json()), _status: 'published' } });
   expect(published.ok(), await published.text()).toBe(true);
 }
 
@@ -107,7 +133,9 @@ test('every entry the English pages read waits as a draft, with every word of it
 
   for (const slug of ENTRIES) {
     const proposed = await proposal(request, slug);
-    expect(proposed.version.languages, slug).toEqual(['ar', 'en']);
+    // English is not ticked: ticking it is the founder's approval, and an
+    // Arabic edit published on top of the draft must not publish its English.
+    expect(proposed.version.languages, slug).toEqual(['ar']);
     const missing = words(proposed.version).filter((word) => typeof word.en !== 'string' || word.en.trim() === '');
     expect(missing, `${slug}: Arabic words left without English`).toEqual([]);
 
@@ -131,7 +159,8 @@ test('every entry the English pages read waits as a draft, with every word of it
 
 test('previewed, each English page is the whole page, in English, left to right', async ({ page }) => {
   await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
-  for (const slug of ENTRIES) await restore(page.request, slug);
+  for (const slug of ENTRIES) await approve(page.request, slug, 'draft');
+  await approveSiteWords(page.request, 'draft');
 
   for (const path of PAGES) {
     await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
@@ -143,9 +172,8 @@ test('previewed, each English page is the whole page, in English, left to right'
     await expect(page.locator('h1'), path).not.toHaveText(/not available in English|on its way/);
     await expect(page.locator('main, section').first(), path).toBeVisible();
 
-    // Not a word of Arabic in place of English. The header's switcher names
-    // Arabic in Arabic, which is its point — but the header is ticket 40's,
-    // and waits for its own words to be published.
+    // Not a word of Arabic in place of English, but the header's switcher,
+    // which names Arabic in Arabic: that is its point.
     const text = (await readText(page)).replaceAll('العربية', '');
     expect(text.match(new RegExp(`${ARABIC.source}+`, 'g')) ?? [], `${path} shows Arabic`).toEqual([]);
 
@@ -168,7 +196,10 @@ test.describe('the comparison', () => {
 
   test('previewed, the home page’s comparison turns over from the left, where an English line begins', async ({ page }) => {
     await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
-    await restore(page.request, 'home-page');
+    for (const slug of ['home-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
+      await approve(page.request, slug, 'draft');
+    }
+    await approveSiteWords(page.request, 'draft');
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`/api/preview?path=${encodeURIComponent('/en')}`, { waitUntil: 'networkidle' });
 
@@ -192,14 +223,15 @@ test.describe('the comparison', () => {
 
 /**
  * The start page published in English, and what it reads with it — the Trust
- * strip, the search settings, its English questions and the demo request
- * form's English — as the founder publishes them.
+ * strip, the search settings, the header and footer, its English questions
+ * and the demo request form's English — as the founder publishes them.
  */
 test.describe('published in English', () => {
   test.beforeAll(async ({ playwright }, testInfo) => {
     const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
     await logInByApi(request, ENGLISH_PAGES_EDITOR);
-    for (const slug of ['start-page', 'trust-strip', 'search-settings'] as const) await publish(request, slug);
+    for (const slug of ['start-page', 'trust-strip', 'search-settings'] as const) await approve(request, slug, 'published');
+    await approveSiteWords(request, 'published');
 
     const questions = await request.get('/api/faq-entries?where[locale][equals]=en&where[page][equals]=start&draft=true&depth=0&limit=100');
     expect(questions.ok()).toBe(true);

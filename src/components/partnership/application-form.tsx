@@ -104,7 +104,7 @@ export function PartnershipApplicationForm({ wording }: { wording: FormPageWordi
               aria-label={words.company.label}
             />
             <UploadField
-          locale={wording.locale}
+              locale={wording.locale}
               name="commercialRegistration"
               label={words.commercialRegistration.label}
               note={words.commercialRegistration.placeholder}

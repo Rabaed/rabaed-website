@@ -3,7 +3,7 @@ import { allPublishedPosts } from '@/cms/blog';
 import { pageEntry } from '@/cms/pages';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
 import { getHomePage } from '@/content/pages/home';
-import { contentOrNull } from '@/content/pages/page-content';
+import { inEnglish } from '@/content/pages/page-content';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { getProductPage } from '@/content/pages/product';
 import { getReferralPage } from '@/content/pages/referral';
@@ -65,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     allPublishedPosts(),
     allPublishedCaseStudies(),
     pageEntry('search-settings', DEFAULT_LOCALE),
-    Promise.all(MARKETING_PAGES.map(async (page) => ((await contentOrNull(page.read('en'))) === null ? [] : [page.path]))),
+    Promise.all(MARKETING_PAGES.map(async (page) => ((await inEnglish(page.read)) === null ? [] : [page.path]))),
   ]);
   const described = search.updatedAt ?? undefined;
 

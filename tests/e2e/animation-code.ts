@@ -23,7 +23,9 @@ export const ANIMATIONS = [
   { name: "the home page's card decks", marker: '.pcard', usedOn: '/' },
   { name: "the home page's four units", marker: '.jt-hint', usedOn: '/' },
   { name: "the product page's journey", marker: '.j-head', usedOn: '/product' },
-  { name: "the product page's roles", marker: 'role on', usedOn: '/product' },
+  // Quoted, because the demo request form's English label, «Your role on the
+  // project», is on the home and start pages too (ticket 42).
+  { name: "the product page's roles", marker: '"role on"', usedOn: '/product' },
 ] as const;
 
 /**

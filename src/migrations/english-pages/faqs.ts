@@ -188,7 +188,7 @@ const WRITTEN: readonly Written[] = [
     ['referral'],
     'أعمل لدى جهة قد يُعدّ هذا تعارضاً معها — ماذا أفعل؟',
     'My employer might see this as a conflict of interest — what should I do?',
-    'It is your responsibility to make sure nothing prevents you from accepting a referral payout from your employer, and that is what the declaration you sign when you join the Referral Program covers.',
+    'It is your responsibility to make sure nothing on your employer’s side prevents you from accepting a referral payout, and that is what the declaration you sign when you join the Referral Program covers.',
   ],
   // The partnership page's «قبل الاجتماع الأول».
   [

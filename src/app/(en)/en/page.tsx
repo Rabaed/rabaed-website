@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
-import { HomePage } from '@/components/pages/home-page';
 import { PageShell } from '@/components/page-shell';
 import { getHomePage } from '@/content/pages/home';
-import { contentOrNull } from '@/content/pages/page-content';
+import { inEnglish } from '@/content/pages/page-content';
 import { LOCALE_CODES } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await contentOrNull(getHomePage('en'));
+  const content = await inEnglish(getHomePage);
   if (content) return pageMetadata({ locale: 'en', path: '/', ...content.meta });
   return pageMetadata({
     locale: 'en',
@@ -27,12 +26,16 @@ export async function generateMetadata(): Promise<Metadata> {
  * English page with Arabic words in it, and never English copy nobody has
  * approved.
  *
- * It sits in the page shell either way, which draws the English header and
- * footer once their words are published (ticket 40).
+ * The home page is imported only when it is drawn, so that the placeholder
+ * does not carry its scripts — the hero loop, the decks, GSAP
+ * (`tests/e2e/performance.spec.ts`).
  */
 export default async function EnglishHomePage() {
-  const content = await contentOrNull(getHomePage('en'));
-  if (content) return <HomePage locale="en" locales={LOCALE_CODES} content={content} />;
+  const content = await inEnglish(getHomePage);
+  if (content) {
+    const { HomePage } = await import('@/components/pages/home-page');
+    return <HomePage locale="en" locales={LOCALE_CODES} content={content} />;
+  }
 
   return (
     <PageShell locale="en" path="/">

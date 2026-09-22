@@ -97,7 +97,7 @@ export function organisationData(contact: PublishedContact, locale: Locale): Wit
     legalName: COMPANY.legalName,
     url: homeUrl(),
     logo: new URL(COMPANY.logo, siteOrigin()).href,
-    identifier: { '@type': 'PropertyValue', propertyID: COMPANY.unifiedNumber.label, value: COMPANY.unifiedNumber.value },
+    identifier: { '@type': 'PropertyValue', propertyID: COMPANY.unifiedNumber.label[locale], value: COMPANY.unifiedNumber.value },
     address: { '@type': 'PostalAddress', addressLocality: COMPANY.locality[locale], addressCountry: COMPANY.country },
     ...(contact.email ? { email: contact.email } : {}),
     ...(contact.phone ? { telephone: contact.phone } : {}),

@@ -12,7 +12,7 @@ export const COMPANY = {
   name: { ar: 'ربائد', en: 'Rabaed' },
   legalName: 'شركة ربائد البناء',
   /** The Saudi unified national number of the establishment — not a tax number. */
-  unifiedNumber: { label: 'الرقم الموحد', value: '7050078786' },
+  unifiedNumber: { label: { ar: 'الرقم الموحد', en: 'Unified national number' }, value: '7050078786' },
   locality: { ar: 'الرياض', en: 'Riyadh' },
   country: 'SA',
   /** The wordmark in its colours, on a transparent ground. */

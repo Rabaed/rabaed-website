@@ -481,8 +481,9 @@ never shown half in English: it becomes an English page only when **everything
 it reads** is published in English, and until then it is the notice.
 
 **What is waiting, and where.** In each of these entries the draft it opens on
-has English beside every Arabic word, and **الإنجليزية** listed under **منشورة
-باللغات**:
+has English beside every Arabic word. **الإنجليزية** is *not* ticked under
+**منشورة باللغات**: ticking it is how you approve a page's English, and until you
+do, publishing an Arabic change to the entry publishes none of its English.
 
 | Entry in the admin | Which English pages read it |
 | --- | --- |
@@ -496,6 +497,7 @@ has English beside every Arabic word, and **الإنجليزية** listed under 
 | **شاشات المنصة** | The home and product pages: what each screen shows, in words |
 | **شريط الثقة** | The home, product and start pages: its line, and each company's name |
 | **الظهور في البحث والمشاركة** | All six: each page's title and description in a search result |
+| **كلمات الموقع المشتركة** | All six: the header and the footer (the section above) |
 
 And beside them:
 
@@ -510,20 +512,22 @@ And beside them:
 
 1. Open its entry. What you see is the proposal; what visitors see is still
    what is published. Read the English and change anything you disagree with.
-2. To see it as a page, open its English address in preview while signed in —
+2. Tick **الإنجليزية** under **منشورة باللغات**, and **Save Draft**. Do the same
+   on every shared entry the page reads (the table above).
+3. To see it as a page, open its English address in preview while signed in —
    for example `/api/preview?path=/en/start`. The **Preview** button opens the
    Arabic page, which this does not change.
-3. **Publish changes** on the page's entry, on every shared entry it reads (the
-   table above), and on its English questions. The page becomes English the
-   moment the last of them is published, and appears in the sitemap and in the
-   Arabic page's language switch at the same time.
-4. Publish each form's English entry too. Until you do, the English form shows
+4. **Publish changes** on the page's entry, on every shared entry it reads, and
+   on its English questions. The page becomes English the moment the last of
+   them is published — the header and footer's included — and appears in the
+   sitemap and in the Arabic page's language switch at the same time.
+5. Publish each form's English entry too. Until you do, the English form shows
    the same words the draft holds, so nothing is ever in Arabic — but they are
    yours to change only once published.
 
 **The start page is the quickest.** It reads only its own entry, the Trust
-strip and the search settings, so it can be the first page in English while
-you read the rest.
+strip, the search settings and the header and footer, so it can be the first
+page in English while you read the rest.
 
 **Things to know before you start:**
 

@@ -13,7 +13,8 @@ import { getTrustStrip } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
+import { ONWARD } from '@/lib/reading-direction';
 import type { ProductPage } from '@/payload-types';
 import { type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -39,8 +40,7 @@ export type ProductPageContent = {
  */
 const NAME: Readonly<Record<Locale, string>> = { ar: 'المنتج', en: 'Product' };
 
-/** Between two parties, the way something travels: towards the reading's end. */
-const TOWARDS: Readonly<Record<Locale, string>> = { ar: '←', en: '→' };
+
 /** What separates one route from the next. */
 const THEN = '·';
 
@@ -51,7 +51,7 @@ function flowSteps(locale: Locale, flow: Flow): FlowStep[] {
   return flow.flatMap((item, index): FlowStep[] => {
     const party: FlowStep = { party: wordsIn(locale, item.party) };
     if (index === flow.length - 1 || item.after === 'none') return [party];
-    return [party, item.after === 'towards' ? { towards: TOWARDS[locale] } : { then: THEN }];
+    return [party, item.after === 'towards' ? { towards: ONWARD[LOCALES[locale].dir] } : { then: THEN }];
   });
 }
 

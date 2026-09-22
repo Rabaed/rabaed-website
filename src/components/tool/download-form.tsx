@@ -5,7 +5,7 @@ import { TRAP_FIELD, fieldNames, fieldOptions, isRequired, type FormPageWording 
 import { TOOL_DOWNLOAD, type ToolDownloadField } from '@/forms/tool-download';
 import { useAnswers } from '@/forms/use-answers';
 import { useSubmission } from '@/forms/use-submission';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /** The four details the button waits for; the country code has a default and the company is optional. */
 const REQUIRED = fieldNames(TOOL_DOWNLOAD).filter((name) => isRequired(TOOL_DOWNLOAD.fields[name]));
@@ -143,7 +143,7 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
   const own = WORDS[wording.locale];
   // Typed left to right, as a number and an address are; in Arabic aligned to
   // the right like the rest of the form — the Reference site's override.
-  const latinAlign = wording.locale === 'ar' ? 'right' : 'left';
+  const latinAlign = LOCALES[wording.locale].dir === 'rtl' ? 'right' : 'left';
 
   if (delivered) {
     return (

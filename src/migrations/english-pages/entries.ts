@@ -9,8 +9,6 @@
  * search settings. The words every page shares — the header and the footer —
  * are ticket 40's, proposed already.
  */
-import { SCREEN_MOCKS } from '../../screen-mocks/registry';
-import { screenMockFieldName } from '../../cms/screen-mock-fields';
 import { SECTION_OPENERS } from '../answer-first-proposal/words';
 import { HOME_PAGE_WORDS } from '../home-page-import/words';
 import { PARTNERSHIP_PAGE_WORDS } from '../partnership-page-import/words';
@@ -35,11 +33,16 @@ export type EnglishEntry = {
   readonly twins: readonly (readonly [arabic: unknown, english: unknown])[];
 };
 
-/** The Screen mocks' descriptions, keyed as the entry keys its tabs. */
+/**
+ * The Screen mocks' descriptions, keyed as the entry keys its tabs: a mock's
+ * id in camel case, `daily-report` as `dailyReport`. The rule is written out
+ * here rather than read from `src/cms/screen-mock-fields.ts`, and the mocks
+ * are the frozen import's rather than the registry's, so that nothing added to
+ * the site later changes what this migration proposes.
+ */
 function screenMocks(descriptions: Readonly<Record<string, string>>) {
-  return Object.fromEntries(
-    SCREEN_MOCKS.map((mock) => [screenMockFieldName(mock.id), { description: descriptions[mock.id] }]),
-  );
+  const tab = (id: string) => id.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase());
+  return Object.fromEntries(Object.entries(descriptions).map(([id, description]) => [tab(id), { description }]));
 }
 
 export const ENGLISH_ENTRIES: readonly EnglishEntry[] = [

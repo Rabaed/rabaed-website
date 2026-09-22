@@ -1,8 +1,7 @@
 /**
  * The statements that propose the English pages (ticket 42): a draft of each
- * entry the six pages read, with its English written in and English added to
- * the languages it is published in, and a draft English question for each
- * Arabic one.
+ * entry the six pages read, with its English written in, and a draft English
+ * question for each Arabic one.
  *
  * **Built from the modules beside this, which are what to read.** This is only
  * how the drafts are made.
@@ -30,28 +29,20 @@
  *   published — so a draft already waiting, the Arabic openers ticket 35
  *   proposed among them, is carried into this one with its Arabic untouched
  *   rather than pushed aside by it — and an English word already written is
- *   kept. An entry whose newest version is in English already has its English,
- *   and is left alone; so is a question already asked in English.
+ *   kept. An entry whose newest version has its English already — the word
+ *   that marks this proposal written — is left alone; so is a question
+ *   already asked in English.
+ * - **English is not ticked.** The draft's languages are the ones it was
+ *   copied with, Arabic alone. Ticking **الإنجليزية** under «منشورة باللغات» is
+ *   the founder's approval of the English, and nothing else gives it: were it
+ *   ticked here, publishing an Arabic edit made on top of this draft would put
+ *   the page's English live with it, read or not.
  */
 import { ENGLISH_WORDS } from './entries';
 import { ENGLISH_QUESTIONS } from './faqs';
 
 /** A value as a SQL string: a quote inside one is written twice. */
 const text = (value: string) => `'${value.replaceAll("'", "''")}'`;
-
-/** Each entry's table of versions, by the slug `entries.ts` names it by. */
-const VERSIONS: Readonly<Record<string, string>> = {
-  'home-page': '_home_page_v',
-  'product-page': '_product_page_v',
-  'start-page': '_start_page_v',
-  'tool-page': '_tool_page_v',
-  'referral-page': '_referral_page_v',
-  'partnership-page': '_partnership_page_v',
-  'closing-section': '_closing_section_v',
-  'screen-mocks': '_screen_mocks_v',
-  'trust-strip': '_trust_strip_v',
-  'search-settings': '_search_settings_v',
-};
 
 /**
  * The helpers, made for this session alone and dropped at the end.
@@ -121,10 +112,9 @@ BEGIN
   END LOOP;
 END $copy$ LANGUAGE plpgsql;
 
-CREATE FUNCTION pg_temp.propose(versions text, english jsonb) RETURNS void AS $propose$
+CREATE FUNCTION pg_temp.propose(versions text, mark text, english jsonb) RETURNS void AS $propose$
 DECLARE
   entry regclass := quote_ident(versions)::regclass;
-  languages regclass := quote_ident(versions || '_version_languages')::regclass;
   newest bigint;
   proposal bigint;
   in_english boolean;
@@ -138,7 +128,7 @@ BEGIN
 
   -- Already in English: it has its words, the founder's or this proposal's
   -- from a run before, and wants none of these.
-  EXECUTE format('SELECT EXISTS (SELECT 1 FROM %s WHERE "parent_id" = $1 AND "value" = ''en'')', languages)
+  EXECUTE format('SELECT coalesce(%I, '''') <> '''' FROM %s WHERE "id" = $1', mark, entry)
     INTO in_english USING newest;
   IF in_english THEN RETURN; END IF;
 
@@ -159,18 +149,41 @@ BEGIN
 
   PERFORM pg_temp.english_of(entry, proposal, english);
   PERFORM pg_temp.copy_rows(entry, newest, proposal, english);
-
-  -- Published in English too, once the founder presses Publish.
-  EXECUTE format('INSERT INTO %s ("order", "parent_id", "value") SELECT coalesce(max("order"), 0) + 1, $1, ''en'' FROM %s WHERE "parent_id" = $1',
-                 languages, languages)
-    USING proposal;
 END $propose$ LANGUAGE plpgsql;`;
+
+/**
+ * Each entry's table of versions, and one English word its proposal writes and
+ * nobody else would, by the column it is in: how an entry that has its English
+ * already is known, and how the proposal's draft is known again when it is
+ * taken back.
+ * Written out, so that a word changed in the English modules cannot quietly
+ * leave a draft unmarked; the unit test holds each to what is proposed.
+ */
+export const MARKS: Readonly<Record<string, { readonly column: string; readonly english: string }>> = {
+  '_home_page_v': { column: 'version_hero_eyebrow_en', english: 'The construction project OS · Rabaed' },
+  '_product_page_v': { column: 'version_hero_title_en', english: 'Rabaed’s units — and what each party sees of them.' },
+  '_start_page_v': { column: 'version_hero_title_en', english: 'How we start with you — and everything you might ask.' },
+  '_tool_page_v': { column: 'version_hero_title_en', english: 'Log today’s pour, and know when the cube test is due —' },
+  '_referral_page_v': { column: 'version_hero_title_en', english: 'Refer one project. Earn SAR {payout}.' },
+  '_partnership_page_v': { column: 'version_hero_title_en', english: 'A project management platform… inside your own proposal' },
+  '_closing_section_v': {
+    column: 'version_closing_heading_en',
+    english: 'Our team on your site. All three parties on the platform within days.',
+  },
+  '_screen_mocks_v': {
+    column: 'version_correspondence_description_en',
+    english:
+      'Rabaed’s official correspondence screen: letters with reference numbers, reply statuses and how long each has waited between the parties',
+  },
+  '_trust_strip_v': { column: 'version_strip_caption_en', english: 'Parties using Rabaed right now' },
+  '_search_settings_v': { column: 'version_home_title_en', english: 'Rabaed · Three parties. One record.' },
+};
 
 /** Every Arabic word's English, as the helpers read it. */
 const ENGLISH = text(JSON.stringify(Object.fromEntries(ENGLISH_WORDS)));
 
-const ENTRIES = Object.values(VERSIONS)
-  .map((versions) => `SELECT pg_temp.propose(${text(versions)}, ${ENGLISH}::jsonb);`)
+const ENTRIES = Object.entries(MARKS)
+  .map(([versions, mark]) => `SELECT pg_temp.propose(${text(versions)}, ${text(mark.column)}, ${ENGLISH}::jsonb);`)
   .join('\n');
 
 /**
@@ -220,36 +233,10 @@ export const ENGLISH_PAGES_SEED = [
   HELPERS,
   ENTRIES,
   QUESTIONS,
-  `DROP FUNCTION pg_temp.propose(text, jsonb);
+  `DROP FUNCTION pg_temp.propose(text, text, jsonb);
 DROP FUNCTION pg_temp.copy_rows(regclass, bigint, bigint, jsonb);
 DROP FUNCTION pg_temp.english_of(regclass, bigint, jsonb);`,
 ].join('\n\n');
-
-/**
- * One English word each proposal writes and nobody else would, by the column
- * it is in: how its draft is known again when the proposal is taken back.
- * Written out, so that a word changed in the English modules cannot quietly
- * leave a draft unmarked; the unit test holds each to what is proposed.
- */
-export const MARKS: Readonly<Record<string, { readonly column: string; readonly english: string }>> = {
-  '_home_page_v': { column: 'version_hero_eyebrow_en', english: 'The construction project OS · Rabaed' },
-  '_product_page_v': { column: 'version_hero_title_en', english: 'Rabaed’s units — and what each party sees of them.' },
-  '_start_page_v': { column: 'version_hero_title_en', english: 'How we start with you — and everything you might ask.' },
-  '_tool_page_v': { column: 'version_hero_title_en', english: 'Log today’s pour, and know when the cube test is due —' },
-  '_referral_page_v': { column: 'version_hero_title_en', english: 'Refer one project. Earn SAR {payout}.' },
-  '_partnership_page_v': { column: 'version_hero_title_en', english: 'A project management platform… inside your own proposal' },
-  '_closing_section_v': {
-    column: 'version_closing_heading_en',
-    english: 'Our team on your site. All three parties on the platform within days.',
-  },
-  '_screen_mocks_v': {
-    column: 'version_correspondence_description_en',
-    english:
-      'Rabaed’s official correspondence screen: letters with reference numbers, reply statuses and how long each has waited between the parties',
-  },
-  '_trust_strip_v': { column: 'version_strip_caption_en', english: 'Parties using Rabaed right now' },
-  '_search_settings_v': { column: 'version_home_title_en', english: 'Rabaed · Three parties. One record.' },
-};
 
 /**
  * Takes the proposals back: each entry's drafts still carrying the word that
