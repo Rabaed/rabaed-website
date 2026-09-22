@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { RecordBehaviour } from '@/components/home/record-behaviour';
 import { recordAt, transactionTypeAppearance } from '@/components/home/record-state';
+import type { ReadingDirection } from '@/lib/reading-direction';
 
 /** One step of a trail: what happened, who did it or how, and at what time. */
 export type TransactionStep = {
@@ -52,12 +53,19 @@ export type HomeRecordSectionContent = {
  * It is not a `.light` section, though it ends light: the Reference site keeps
  * the header dark over it, until the section after it begins.
  */
-export function RecordSection({ content }: { content: HomeRecordSectionContent }) {
+export function RecordSection({
+  content,
+  direction,
+}: {
+  content: HomeRecordSectionContent;
+  /** The page's reading direction, which the section's behaviour turns round by (`src/lib/reading-direction.ts`). */
+  direction: ReadingDirection;
+}) {
   // How the section looks before the visitor has scrolled into it.
   const atStart = recordAt(0, content.types.length);
 
   return (
-    <section id="record" data-direction="rtl">
+    <section id="record" data-direction={direction}>
       <div className="sticky">
         <div className="wrap">
           <div className="rec-grid">

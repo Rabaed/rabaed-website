@@ -1,11 +1,48 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { UploadField } from '@/components/upload-field';
 import { fieldOptions, TRAP_FIELD, type FormPageWording } from '@/forms/definition';
 import { REFERRAL_SIGNUP, type ReferralSignupField } from '@/forms/referral-signup';
 import { useAnswers } from '@/forms/use-answers';
 import { useSubmission } from '@/forms/use-submission';
-import { localePath } from '@/lib/locales';
+import { localePath, type Locale } from '@/lib/locales';
+
+/**
+ * What the referrer agrees to and declares, in each language. The terms and
+ * the privacy policy are Arabic alone, so both languages link to the Arabic.
+ */
+const CONSENTS: Readonly<Record<Locale, { readonly terms: ReactNode; readonly declaration: string; readonly declared: string }>> = {
+  ar: {
+    terms: (
+      <>
+        أوافق على <a href={localePath('ar', '/referral-terms')}>شروط وأحكام برنامج الإحالة</a> و
+        <a href={localePath('ar', '/privacy')}>سياسة الخصوصية</a>.
+      </>
+    ),
+    declaration:
+      'أُقرّ بأن ترشيحي لمنصة ربائد لا يتعارض مع واجباتي المهنية، وأنه لا يؤثر على أي قرار فني أو تعاقدي أتخذه أو أُشارك فيه بحكم عملي. كما أُقرّ بعدم وجود ما يمنعني نظاماً أو تعاقدياً مع جهة عملي من قبول هذا المقابل، وأتحمّل وحدي مسؤولية أي إخلال بذلك.',
+    declared: 'أُقرّ بما ورد أعلاه (إقرار عدم التعارض).',
+  },
+  en: {
+    terms: (
+      <>
+        I agree to the{' '}
+        <a href={localePath('ar', '/referral-terms')} hrefLang="ar">
+          Referral Program terms and conditions
+        </a>{' '}
+        and the{' '}
+        <a href={localePath('ar', '/privacy')} hrefLang="ar">
+          privacy policy
+        </a>
+        , published in Arabic, which is their binding text.
+      </>
+    ),
+    declaration:
+      'I declare that referring Rabaed does not conflict with my professional duties, and does not influence any technical or contractual decision I make or take part in through my work. I also declare that nothing in law or in any contract with my employer prevents me from accepting this payment, and that I alone am responsible for any breach of this.',
+    declared: 'I make the declaration above (no-conflict declaration).',
+  },
+};
 
 /** The professions, in the Reference site's order. */
 const PROFESSIONS = fieldOptions(REFERRAL_SIGNUP.fields.profession);
@@ -32,10 +69,13 @@ const PROFESSIONS = fieldOptions(REFERRAL_SIGNUP.fields.profession);
  *
  * What the two consents say — the terms sentence with its links, and the
  * declaration — stays here: it is what the referrer agrees to, not wording.
+ * In English it says the same, and says that the terms and the privacy policy
+ * it links to are published in Arabic, which is their binding text (spec: Out
+ * of Scope): an English reader agrees to them knowing that.
  */
 export function ReferralSignupForm({ wording }: { wording: FormPageWording<ReferralSignupField> }) {
   const answers = useAnswers(REFERRAL_SIGNUP, wording);
-  const { outcome, progress, sending, send } = useSubmission(REFERRAL_SIGNUP, answers.refuse);
+  const { outcome, progress, sending, send } = useSubmission(REFERRAL_SIGNUP, wording.locale, answers.refuse);
   const words = wording.fields;
 
   const name = answers.field('name');
@@ -53,6 +93,7 @@ export function ReferralSignupForm({ wording }: { wording: FormPageWording<Refer
     return {
       element: (
         <UploadField
+          locale={wording.locale}
           name={field}
           label={words[field].label}
           note={words[field].placeholder}
@@ -144,15 +185,12 @@ export function ReferralSignupForm({ wording }: { wording: FormPageWording<Refer
 
           <label className="chk">
             <input {...acceptTerms.props} aria-label={words.acceptTerms.label} aria-describedby={acceptTerms.describedBy} />
-            <span>
-              أوافق على <a href={localePath('ar', '/referral-terms')}>شروط وأحكام برنامج الإحالة</a> و
-              <a href={localePath('ar', '/privacy')}>سياسة الخصوصية</a>.
-            </span>
+            <span>{CONSENTS[wording.locale].terms}</span>
           </label>
           {acceptTerms.message}
           {/* What the checkbox under it declares, so it is read with it. */}
           <div className="declar" id="referral-declaration">
-            أُقرّ بأن ترشيحي لمنصة ربائد لا يتعارض مع واجباتي المهنية، وأنه لا يؤثر على أي قرار فني أو تعاقدي أتخذه أو أُشارك فيه بحكم عملي. كما أُقرّ بعدم وجود ما يمنعني نظاماً أو تعاقدياً مع جهة عملي من قبول هذا المقابل، وأتحمّل وحدي مسؤولية أي إخلال بذلك.
+            {CONSENTS[wording.locale].declaration}
           </div>
           <label className="chk">
             <input
@@ -160,7 +198,7 @@ export function ReferralSignupForm({ wording }: { wording: FormPageWording<Refer
               aria-label={words.declareNoConflict.label}
               aria-describedby={['referral-declaration', declareNoConflict.describedBy].filter(Boolean).join(' ')}
             />
-            <span>أُقرّ بما ورد أعلاه (إقرار عدم التعارض).</span>
+            <span>{CONSENTS[wording.locale].declared}</span>
           </label>
           {declareNoConflict.message}
 

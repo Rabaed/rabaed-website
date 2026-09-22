@@ -39,6 +39,8 @@ import * as migration_20260921_101500_import_launch_articles from './20260921_10
 import * as migration_20260921_110900_answer_first_openers from './20260921_110900_answer_first_openers';
 import * as migration_20260921_111500_propose_answer_first_copy from './20260921_111500_propose_answer_first_copy';
 import * as migration_20260923_090000_propose_english_site_words from './20260923_090000_propose_english_site_words';
+import * as migration_20260923_120000_english_form_wording from './20260923_120000_english_form_wording';
+import * as migration_20260923_120001_propose_english_form_wording from './20260923_120001_propose_english_form_wording';
 
 export const migrations = [
   {
@@ -229,7 +231,7 @@ export const migrations = [
   {
     up: migration_20260921_101500_import_launch_articles.up,
     down: migration_20260921_101500_import_launch_articles.down,
-    name: '20260921_101500_import_launch_articles'
+    name: '20260921_101500_import_launch_articles',
   },
   {
     up: migration_20260921_110900_answer_first_openers.up,
@@ -245,5 +247,15 @@ export const migrations = [
     up: migration_20260923_090000_propose_english_site_words.up,
     down: migration_20260923_090000_propose_english_site_words.down,
     name: '20260923_090000_propose_english_site_words',
+  },
+  {
+    up: migration_20260923_120000_english_form_wording.up,
+    down: migration_20260923_120000_english_form_wording.down,
+    name: '20260923_120000_english_form_wording',
+  },
+  {
+    up: migration_20260923_120001_propose_english_form_wording.up,
+    down: migration_20260923_120001_propose_english_form_wording.down,
+    name: '20260923_120001_propose_english_form_wording',
   },
 ];

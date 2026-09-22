@@ -39,7 +39,7 @@ export type ToolPageContent = {
  * (ticket 32). Its search title and description are an Editor's, in the CMS
  * (ticket 26, `src/content/search-settings.ts`).
  */
-const NAME = 'متتبّع الصبّات';
+const NAME: Readonly<Record<Locale, string>> = { ar: 'متتبّع الصبّات', en: 'Pour Tracker' };
 
 /** A test's states, in the order the legend lists them. */
 const LEGEND = ['idle', 'warn', 'bad', 'info', 'ok'] as const;
@@ -65,8 +65,8 @@ function boldThen(bold: string, rest: InlineText): InlinePart[] {
 export async function getToolPage(locale: Locale): Promise<ToolPageContent> {
   const [entry, meta, downloadForm] = await Promise.all([
     pageEntry('tool-page', locale),
-    getSearchSettings(locale, 'tool', { name: NAME }),
-    formPageWording(TOOL_DOWNLOAD),
+    getSearchSettings(locale, 'tool', { name: NAME[locale] }),
+    formPageWording(TOOL_DOWNLOAD, locale),
   ]);
   const { hero, why, features, how, privacy, requirements, download, questions, upsell } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);

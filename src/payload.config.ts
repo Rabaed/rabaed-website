@@ -98,7 +98,8 @@ export default buildConfig({
   globals: [
     SiteSettings,
     AiCrawlers,
-    ...SUBMITTABLE_FORMS.map(formSettingsGlobal),
+    // Each form's settings, in Arabic and then in English (ticket 42).
+    ...SUBMITTABLE_FORMS.flatMap((form) => [formSettingsGlobal(form, 'ar'), formSettingsGlobal(form, 'en')]),
     ReferralProgram,
     StartPage,
     ToolPage,

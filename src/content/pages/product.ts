@@ -37,7 +37,7 @@ export type ProductPageContent = {
  * (ticket 32). Its search title and description are an Editor's, in the CMS
  * (ticket 26, `src/content/search-settings.ts`).
  */
-const NAME = 'المنتج';
+const NAME: Readonly<Record<Locale, string>> = { ar: 'المنتج', en: 'Product' };
 
 /** Between two parties, the way something travels: towards the reading's end. */
 const TOWARDS: Readonly<Record<Locale, string>> = { ar: '←', en: '→' };
@@ -69,9 +69,9 @@ export async function getProductPage(locale: Locale): Promise<ProductPageContent
     pageEntry('product-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
-    formPageWording(DEMO_REQUEST),
+    formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
-    getSearchSettings(locale, 'product', { name: NAME }),
+    getSearchSettings(locale, 'product', { name: NAME[locale] }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, journey, customStrip, roles, innerCycle } = entry;

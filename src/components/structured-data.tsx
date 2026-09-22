@@ -24,6 +24,11 @@ import type { Post } from '@/payload-types';
  * that lets Google and AI assistants quote the site accurately instead of
  * guessing (ticket 32; spec: SEO and GEO).
  *
+ * Each is in the language of the page it is on (ticket 42): an English page
+ * names Rabaed in English first, and says what the product is in English. The
+ * company is one entity either way, named by one `@id`, with the other
+ * language's name as its alternate.
+ *
  * Every builder here states only what is true and on the page. No ratings, no
  * reviews and no offers are emitted, because no genuine ones exist, and
  * invented ones are the kind of structured data search engines penalise
@@ -55,15 +60,24 @@ const homeUrl = () => `${siteOrigin()}/`;
 /** One identifier for the company, so every other node can point at the same one. */
 const organisationId = () => `${siteOrigin()}/#organisation`;
 
-const publisher = (): Organization => ({ '@type': 'Organization', '@id': organisationId(), name: COMPANY.name.ar });
+/** Rabaed's name in `locale`, and in the other language as its alternate. */
+const names = (locale: Locale) => ({
+  name: COMPANY.name[locale],
+  alternateName: COMPANY.name[locale === 'ar' ? 'en' : 'ar'],
+});
 
-/** What the site and the product have in common: Rabaed's two names, its home, its language and its publisher. */
-const identity = () => ({
-  name: COMPANY.name.ar,
-  alternateName: COMPANY.name.en,
-  url: homeUrl(),
-  inLanguage: 'ar',
-  publisher: publisher(),
+const publisher = (locale: Locale): Organization => ({
+  '@type': 'Organization',
+  '@id': organisationId(),
+  name: COMPANY.name[locale],
+});
+
+/** What the site and the product have in common: Rabaed's two names, its home in `locale`, its language and its publisher. */
+const identity = (locale: Locale) => ({
+  ...names(locale),
+  url: locale === 'ar' ? homeUrl() : pageUrl(locale, '/'),
+  inLanguage: locale,
+  publisher: publisher(locale),
 });
 
 /**
@@ -71,20 +85,20 @@ const identity = () => ({
  * published in the CMS; an account nobody has supplied is left out, where the
  * footer shows `#` (ticket 39 decides what goes public).
  */
-export function organisationData(contact: PublishedContact): WithContext<Organization> {
+export function organisationData(contact: PublishedContact, locale: Locale): WithContext<Organization> {
   const sameAs = Object.values(contact.social).filter((account): account is string => account !== null);
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': organisationId(),
-    name: COMPANY.name.ar,
-    alternateName: COMPANY.name.en,
+    ...names(locale),
+    // The registered name, which is Arabic whatever language the page is in.
     legalName: COMPANY.legalName,
     url: homeUrl(),
     logo: new URL(COMPANY.logo, siteOrigin()).href,
     identifier: { '@type': 'PropertyValue', propertyID: COMPANY.unifiedNumber.label, value: COMPANY.unifiedNumber.value },
-    address: { '@type': 'PostalAddress', addressLocality: COMPANY.locality, addressCountry: COMPANY.country },
+    address: { '@type': 'PostalAddress', addressLocality: COMPANY.locality[locale], addressCountry: COMPANY.country },
     ...(contact.email ? { email: contact.email } : {}),
     ...(contact.phone ? { telephone: contact.phone } : {}),
     ...(sameAs.length > 0 ? { sameAs } : {}),
@@ -92,21 +106,21 @@ export function organisationData(contact: PublishedContact): WithContext<Organiz
 }
 
 /** The site itself, on the home page. */
-export function websiteData(): WithContext<WebSite> {
+export function websiteData(locale: Locale): WithContext<WebSite> {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    ...identity(),
+    ...identity(locale),
   };
 }
 
 /** The product, on the home and product pages. */
-export function softwareData(): WithContext<SoftwareApplication> {
+export function softwareData(locale: Locale): WithContext<SoftwareApplication> {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    ...identity(),
-    description: COMPANY.productDescription,
+    ...identity(locale),
+    description: COMPANY.productDescription[locale],
     applicationCategory: 'BusinessApplication',
     applicationSubCategory: 'Construction Management',
     operatingSystem: 'Web',
@@ -196,6 +210,6 @@ export function blogPostingData(locale: Locale, post: Post): WithContext<BlogPos
     url,
     mainEntityOfPage: url,
     ...(cover ? { image: new URL(cover, siteOrigin()).href } : {}),
-    publisher: publisher(),
+    publisher: publisher(locale),
   };
 }

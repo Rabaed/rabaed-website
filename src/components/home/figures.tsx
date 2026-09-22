@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { CardDeck, type CardDeckWords } from '@/components/home/card-deck';
 import { isPubliclyDeployed } from '@/lib/environment';
+import type { ReadingDirection } from '@/lib/reading-direction';
 
 /** The drawing in the corner of each card. */
 export type ProofIcon = 'approval' | 'retrieval' | 'time' | 'governance' | 'activation' | 'onboarding';
@@ -73,7 +74,14 @@ function isAttributed(figure: ProofFigure): boolean {
  * written against it (spec: Design system). Everywhere a name is ours to
  * choose, it is "figures".
  */
-export function Figures({ content }: { content: HomeFiguresContent }) {
+export function Figures({
+  content,
+  direction,
+}: {
+  content: HomeFiguresContent;
+  /** The page's reading direction, which the section's behaviour turns round by (`src/lib/reading-direction.ts`). */
+  direction: ReadingDirection;
+}) {
   const shown = isPubliclyDeployed() ? content.figures.filter(isAttributed) : content.figures;
 
   const cards = shown.map((figure) => (
@@ -121,7 +129,7 @@ export function Figures({ content }: { content: HomeFiguresContent }) {
             <p className="lead">{content.lead}</p>
           </div>
 
-          <CardDeck id="figures-deck" {...content.deck} direction="rtl" tone="light" cards={cards} />
+          <CardDeck id="figures-deck" {...content.deck} direction={direction} tone="light" cards={cards} />
         </div>
       </div>
     </section>

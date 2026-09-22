@@ -42,48 +42,96 @@ export const TOOL_DOWNLOAD: FormDefinition<ToolDownloadField> = {
   }),
   // Verbatim from the Reference site, but for the replies (see above).
   wording: {
-    heading: 'بيانات التحميل',
-    lead: 'حقل الشركة اختياري. البقية مطلوبة لتفعيل زر التحميل.',
-    submit: 'حمّل الأداة الآن',
-    finePrint: 'بالضغط على زر التحميل توافق على أن نتواصل معك بخصوص الأداة وتحديثاتها. لن نشارك بياناتك مع أي جهة أخرى.',
-    fields: {
-      firstName: { label: 'الاسم الأول', placeholder: 'الاسم الأول *', message: 'اكتب الاسم الأول (حرفان على الأقل)' },
-      lastName: { label: 'اسم العائلة', placeholder: 'اسم العائلة *', message: 'اكتب اسم العائلة (حرفان على الأقل)' },
-      countryCode: {
-        label: 'مفتاح الدولة',
-        placeholder: 'مفتاح الدولة',
-        message: 'اختر مفتاح الدولة',
-        // Each label opens with a left-to-right mark, so the + stays before the digits.
-        options: {
-          '+966': '‎+966 السعودية',
-          '+971': '‎+971 الإمارات',
-          '+965': '‎+965 الكويت',
-          '+974': '‎+974 قطر',
-          '+973': '‎+973 البحرين',
-          '+968': '‎+968 عُمان',
-          '+962': '‎+962 الأردن',
-          '+20': '‎+20 مصر',
-          '+90': '‎+90 تركيا',
-          other: 'أخرى',
+    ar: {
+      heading: 'بيانات التحميل',
+      lead: 'حقل الشركة اختياري. البقية مطلوبة لتفعيل زر التحميل.',
+      submit: 'حمّل الأداة الآن',
+      finePrint: 'بالضغط على زر التحميل توافق على أن نتواصل معك بخصوص الأداة وتحديثاتها. لن نشارك بياناتك مع أي جهة أخرى.',
+      fields: {
+        firstName: { label: 'الاسم الأول', placeholder: 'الاسم الأول *', message: 'اكتب الاسم الأول (حرفان على الأقل)' },
+        lastName: { label: 'اسم العائلة', placeholder: 'اسم العائلة *', message: 'اكتب اسم العائلة (حرفان على الأقل)' },
+        countryCode: {
+          label: 'مفتاح الدولة',
+          placeholder: 'مفتاح الدولة',
+          message: 'اختر مفتاح الدولة',
+          // Each label opens with a left-to-right mark, so the + stays before the digits.
+          options: {
+            '+966': '‎+966 السعودية',
+            '+971': '‎+971 الإمارات',
+            '+965': '‎+965 الكويت',
+            '+974': '‎+974 قطر',
+            '+973': '‎+973 البحرين',
+            '+968': '‎+968 عُمان',
+            '+962': '‎+962 الأردن',
+            '+20': '‎+20 مصر',
+            '+90': '‎+90 تركيا',
+            other: 'أخرى',
+          },
         },
+        phone: { label: 'رقم الجوال', placeholder: '5X XXX XXXX *', message: 'اكتب رقم جوال صحيح (٦ إلى ١٥ رقماً)' },
+        email: { label: 'البريد الإلكتروني', placeholder: 'البريد الإلكتروني *', message: 'اكتب بريداً إلكترونياً صحيحاً' },
+        company: { label: 'اسم الشركة', placeholder: 'اسم الشركة (اختياري)', message: 'اسم الشركة أطول من اللازم' },
       },
-      phone: { label: 'رقم الجوال', placeholder: '5X XXX XXXX *', message: 'اكتب رقم جوال صحيح (٦ إلى ١٥ رقماً)' },
-      email: { label: 'البريد الإلكتروني', placeholder: 'البريد الإلكتروني *', message: 'اكتب بريداً إلكترونياً صحيحاً' },
-      company: { label: 'اسم الشركة', placeholder: 'اسم الشركة (اختياري)', message: 'اسم الشركة أطول من اللازم' },
+      received: 'تم — التحميل بدأ',
+      refused: 'تعذّر التحميل الآن. حاول مرة أخرى بعد قليل.',
+      failed: 'تعذّر التحميل بسبب خطأ من جهتنا. حاول مرة أخرى بعد قليل.',
+      confirmationSubject: 'ربائد — متتبّع الصبّات',
+      confirmationBody:
+        'مرحباً {الاسم}،\n\n' +
+        'شكراً لتحميلك متتبّع الصبّات. الملف اسمه Rabaed-Pour-Tracker.html، وهو صفحة واحدة تفتح بنقرتين في Chrome أو Edge.\n\n' +
+        'ثلاث خطوات حتى أول صبّة:\n' +
+        '١. احفظ الملف في مكان ثابت — سطح المكتب أو مجلد المشروع، لا مجلد التنزيلات.\n' +
+        '٢. افتحه بنقرتين.\n' +
+        '٣. اختر مجلداً للمشروع عند أول تشغيل.\n\n' +
+        'بياناتك تبقى على جهازك: الأداة لا ترسل شيئاً إلى أي خادم.\n\n' +
+        'إن لم يصلك الملف، أعد التحميل من الصفحة نفسها.\n\n' +
+        'فريق ربائد',
     },
-    received: 'تم — التحميل بدأ',
-    refused: 'تعذّر التحميل الآن. حاول مرة أخرى بعد قليل.',
-    failed: 'تعذّر التحميل بسبب خطأ من جهتنا. حاول مرة أخرى بعد قليل.',
-    confirmationSubject: 'ربائد — متتبّع الصبّات',
-    confirmationBody:
-      'مرحباً {الاسم}،\n\n' +
-      'شكراً لتحميلك متتبّع الصبّات. الملف اسمه Rabaed-Pour-Tracker.html، وهو صفحة واحدة تفتح بنقرتين في Chrome أو Edge.\n\n' +
-      'ثلاث خطوات حتى أول صبّة:\n' +
-      '١. احفظ الملف في مكان ثابت — سطح المكتب أو مجلد المشروع، لا مجلد التنزيلات.\n' +
-      '٢. افتحه بنقرتين.\n' +
-      '٣. اختر مجلداً للمشروع عند أول تشغيل.\n\n' +
-      'بياناتك تبقى على جهازك: الأداة لا ترسل شيئاً إلى أي خادم.\n\n' +
-      'إن لم يصلك الملف، أعد التحميل من الصفحة نفسها.\n\n' +
-      'فريق ربائد',
+    // The English: ticket 42's, proposed to the founder with the English site.
+    en: {
+      heading: 'Download details',
+      lead: 'The company is optional. The rest unlock the download button.',
+      submit: 'Download the tool now',
+      finePrint:
+        'By pressing the download button you agree that we may contact you about the tool and its updates. We will not share your details with anyone else.',
+      fields: {
+        firstName: { label: 'First name', placeholder: 'First name *', message: 'Enter your first name (at least two letters)' },
+        lastName: { label: 'Last name', placeholder: 'Last name *', message: 'Enter your last name (at least two letters)' },
+        countryCode: {
+          label: 'Country code',
+          placeholder: 'Country code',
+          message: 'Choose a country code',
+          options: {
+            '+966': '+966 Saudi Arabia',
+            '+971': '+971 UAE',
+            '+965': '+965 Kuwait',
+            '+974': '+974 Qatar',
+            '+973': '+973 Bahrain',
+            '+968': '+968 Oman',
+            '+962': '+962 Jordan',
+            '+20': '+20 Egypt',
+            '+90': '+90 Türkiye',
+            other: 'Other',
+          },
+        },
+        phone: { label: 'Mobile number', placeholder: '5X XXX XXXX *', message: 'Enter a valid mobile number (6 to 15 digits)' },
+        email: { label: 'Email', placeholder: 'Email *', message: 'Enter a valid email address' },
+        company: { label: 'Company name', placeholder: 'Company name (optional)', message: 'The company name is too long' },
+      },
+      received: 'Done — your download has started',
+      refused: 'The download is not available just now. Please try again shortly.',
+      failed: 'The download failed because of an error on our side. Please try again shortly.',
+      confirmationSubject: 'Rabaed — Pour Tracker',
+      confirmationBody:
+        'Hello {name},\n\n' +
+        'Thank you for downloading the Pour Tracker. The file is called Rabaed-Pour-Tracker.html: a single page that opens with a double-click in Chrome or Edge.\n\n' +
+        'Three steps to your first pour:\n' +
+        '1. Save the file somewhere permanent — your desktop or the project folder, not your downloads folder.\n' +
+        '2. Double-click it to open it.\n' +
+        '3. Choose a folder for the project the first time it runs.\n\n' +
+        'Your data stays on your computer: the tool sends nothing to any server.\n\n' +
+        'If the file did not arrive, download it again from the same page.\n\n' +
+        'The Rabaed team',
+    },
   },
 };

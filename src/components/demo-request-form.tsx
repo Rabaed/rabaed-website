@@ -4,6 +4,18 @@ import { fieldOptions, TRAP_FIELD, type FormPageWording } from '@/forms/definiti
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { useAnswers } from '@/forms/use-answers';
 import { useSubmission } from '@/forms/use-submission';
+import type { Locale } from '@/lib/locales';
+
+/**
+ * The guarantee, in each language. A binding commitment rather than the
+ * form's wording, so it stays here rather than in the form's settings; the
+ * English says exactly what the Arabic does. Only the numeral is `.mono`: DM
+ * Mono has no Arabic glyphs (spec: Design system).
+ */
+const GUARANTEE: Readonly<Record<Locale, { readonly days: string; readonly rest: string }>> = {
+  ar: { days: 'يوماً', rest: 'ضمان استرجاع كامل المبلغ' },
+  en: { days: 'days', rest: 'full money-back guarantee' },
+};
 
 /**
  * The demo request form: one form, placed at the end of the home and product
@@ -21,7 +33,7 @@ import { useSubmission } from '@/forms/use-submission';
  */
 export function DemoRequestForm({ wording }: { wording: FormPageWording<DemoRequestField> }) {
   const { complete, field, refuse } = useAnswers(DEMO_REQUEST, wording);
-  const { outcome, sending, send } = useSubmission(DEMO_REQUEST, refuse);
+  const { outcome, sending, send } = useSubmission(DEMO_REQUEST, wording.locale, refuse);
 
   const name = field('name');
   const email = field('email');
@@ -44,14 +56,11 @@ export function DemoRequestForm({ wording }: { wording: FormPageWording<DemoRequ
     >
       <h3 id="demo-title">{wording.heading}</h3>
       <small>{wording.lead}</small>
-      {/* The guarantee is a binding commitment, not the form's wording, so it
-          stays here rather than in the form's settings. Only the numeral is
-          `.mono`: DM Mono has no Arabic glyphs (spec: Design system). */}
       <div className="guar" style={{ marginBottom: '14px' }}>
         <b>
-          <span className="mono">60</span> يوماً
+          <span className="mono">60</span> {GUARANTEE[wording.locale].days}
         </b>{' '}
-        ضمان استرجاع كامل المبلغ
+        {GUARANTEE[wording.locale].rest}
       </div>
 
       {outcome.outcome === 'received' ? (

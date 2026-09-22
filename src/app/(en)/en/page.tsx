@@ -1,24 +1,39 @@
 import type { Metadata } from 'next';
+import { HomePage } from '@/components/pages/home-page';
 import { PageShell } from '@/components/page-shell';
+import { getHomePage } from '@/content/pages/home';
+import { contentOrNull } from '@/content/pages/page-content';
+import { LOCALE_CODES } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
-export const metadata: Metadata = pageMetadata({
-  locale: 'en',
-  title: 'Rabaed',
-  description: 'The English version of the Rabaed site is in preparation. The site is available in Arabic.',
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await contentOrNull(getHomePage('en'));
+  if (content) return pageMetadata({ locale: 'en', path: '/', ...content.meta });
+  return pageMetadata({
+    locale: 'en',
+    title: 'Rabaed',
+    description: 'The English version of the Rabaed site is in preparation. The site is available in Arabic.',
+  });
+}
 
 /**
- * The English locale, reserved. `/en` exists from the start so that routing,
- * direction and the `hreflang` pair are settled before there is anything to
- * translate. It says only that, deliberately: the English home page is ticket
- * 42's, and English marketing copy written here would be copy nobody has
- * approved and ticket 42 would have to unpick.
+ * The English home page (ticket 42): the home page itself once its English is
+ * published — its own words, and everything it shares with the other pages,
+ * the closing section, the Trust strip, the Screen mocks and its search
+ * settings among them (`src/content/pages/home.ts`).
  *
- * It sits in the page shell, which draws the English header and footer once
- * their words are published (ticket 40), and until then draws this alone.
+ * Until then, what `/en` has said since the English locale was reserved: that
+ * the English site is on its way, and where the Arabic one is. Never an
+ * English page with Arabic words in it, and never English copy nobody has
+ * approved.
+ *
+ * It sits in the page shell either way, which draws the English header and
+ * footer once their words are published (ticket 40).
  */
-export default function EnglishHomePage() {
+export default async function EnglishHomePage() {
+  const content = await contentOrNull(getHomePage('en'));
+  if (content) return <HomePage locale="en" locales={LOCALE_CODES} content={content} />;
+
   return (
     <PageShell locale="en" path="/">
       <section className="phero">

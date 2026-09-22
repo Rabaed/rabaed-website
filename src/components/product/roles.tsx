@@ -1,6 +1,7 @@
 import { RolesBehaviour } from '@/components/product/roles-behaviour';
 import { FIRST_ROLE, roleAppearance } from '@/components/product/roles-state';
 import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
+import type { ReadingDirection } from '@/lib/reading-direction';
 
 export type Role = {
   /** The tab's label. */
@@ -47,9 +48,16 @@ export type ProductRolesContent = {
  * plain buttons are not: a tab list named by the section's heading, each tab
  * saying whether it is selected and which panel it controls.
  */
-export function Roles({ content }: { content: ProductRolesContent }) {
+export function Roles({
+  content,
+  direction,
+}: {
+  content: ProductRolesContent;
+  /** The page's reading direction, which the section's behaviour turns round by (`src/lib/reading-direction.ts`). */
+  direction: ReadingDirection;
+}) {
   return (
-    <section id="roles" className="light pad" data-direction="rtl">
+    <section id="roles" className="light pad" data-direction={direction}>
       <div className="wrap">
         <div className="eyebrow">{content.eyebrow}</div>
         <h2 id="roles-heading">{content.heading}</h2>

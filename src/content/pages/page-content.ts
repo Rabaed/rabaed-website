@@ -94,3 +94,28 @@ export function inLocale<T>(page: string, content: Partial<Record<Locale, T>>, l
   if (found === undefined) throw new ContentNotInLocale(page, locale);
   return found;
 }
+
+/**
+ * A page's content, or `null` where the page is not published in the locale
+ * asked for — which an English route answers with a notice (ticket 42). Any
+ * other failure is not a missing translation, and is thrown on.
+ */
+export async function contentOrNull<T>(content: Promise<T>): Promise<T | null> {
+  try {
+    return await content;
+  } catch (error) {
+    if (error instanceof ContentNotInLocale) return null;
+    throw error;
+  }
+}
+
+/**
+ * The languages a marketing page is published in, from its module: Arabic,
+ * which it always is, and English once everything it reads is published in
+ * English — its own entry, and whatever it shares with other pages (ticket 42).
+ * What the Arabic page tells the switcher and its `hreflang` alternates, so
+ * neither offers an English page before it exists.
+ */
+export async function publishedLocales(read: (locale: Locale) => Promise<unknown>): Promise<Locale[]> {
+  return (await contentOrNull(read('en'))) === null ? ['ar'] : ['ar', 'en'];
+}

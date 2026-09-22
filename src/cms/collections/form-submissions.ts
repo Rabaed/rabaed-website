@@ -92,6 +92,24 @@ export const FormSubmissions: CollectionConfig = {
       admin: { readOnly: true, position: 'sidebar' },
     },
     {
+      // The language the form was filled in (ticket 42), which the reply is
+      // written in. Every submission before English pages existed was Arabic.
+      name: 'locale',
+      type: 'select',
+      required: true,
+      defaultValue: 'ar',
+      options: [
+        { value: 'ar', label: { ar: 'العربية', en: 'Arabic' } },
+        { value: 'en', label: { ar: 'الإنجليزية', en: 'English' } },
+      ],
+      label: { ar: 'لغة النموذج', en: 'Language' },
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: { ar: 'اللغة التي مُلئ بها النموذج، فالرد بها.', en: 'The language the form was filled in, to reply in.' },
+      },
+    },
+    {
       type: 'row',
       fields: [
         { name: 'name', type: 'text', label: { ar: 'الاسم', en: 'Name' }, admin: { readOnly: true } },

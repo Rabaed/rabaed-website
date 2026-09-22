@@ -20,6 +20,12 @@
  *    alert address, nothing at all. Whatever became of each email is written
  *    on the record, so a failure shows in the admin rather than nowhere.
  *
+ * **In the language the form was filled in** (ticket 42): the visitor is
+ * answered, and the confirmation written, in their language. The team's side
+ * — the record in the admin and the alert — stays in Arabic, the language the
+ * team works in, and says which language the applicant used, so a reply goes
+ * back in it.
+ *
  * Server-only: it reaches the database, the mailbox and private storage.
  */
 import { createHash, randomUUID } from 'node:crypto';
@@ -27,6 +33,7 @@ import config, { ADMIN_ROUTE } from '@payload-config';
 import { getPayload } from 'payload';
 import { payloadSecret } from '@/cms/environment';
 import { siteOrigin } from '@/lib/environment';
+import type { Locale } from '@/lib/locales';
 import {
   CONSENT_GIVEN,
   DOCUMENTS,
@@ -40,6 +47,7 @@ import {
   type DocumentProblem,
   type FieldDefinition,
   type FormDefinition,
+  type FormWording,
   type SubmissionOutcome,
 } from './definition';
 import { DOCUMENT_EXTENSIONS, documentContentType, documentStore } from './documents';
@@ -68,16 +76,19 @@ export type Later = (task: () => Promise<void>) => void;
 export async function submit<Field extends string>(
   definition: FormDefinition<Field>,
   data: FormData,
-  source: { readonly address: string },
+  source: { readonly address: string; readonly locale: Locale },
   later: Later,
 ): Promise<SubmissionOutcome> {
+  const { locale } = source;
   let settings: FormSettings<Field> | null = null;
   try {
     settings = await publishedFormSettings(definition);
+    /** What the visitor is told, in their language. */
+    const reply = settings.wording[locale];
 
     const token = textOf(data, TOKEN_FIELD);
     if (textOf(data, TRAP_FIELD) !== '' || !TOKEN.test(token)) {
-      return { outcome: 'refused', message: settings.refused };
+      return { outcome: 'refused', message: reply.refused };
     }
 
     const names = fieldNames(definition);
@@ -110,7 +121,7 @@ export async function submit<Field extends string>(
         : { outcome: 'invalid', fields: invalid };
     }
 
-    const received: SubmissionOutcome = { outcome: 'received', message: settings.received };
+    const received: SubmissionOutcome = { outcome: 'received', message: reply.received };
     const payload = await getPayload({ config });
     if (await alreadyStored(token)) return received;
 
@@ -120,7 +131,7 @@ export async function submit<Field extends string>(
       collection: 'form-submissions',
       where: { and: [{ sourceHash: { equals: sourceHash } }, { createdAt: { greater_than: since } }] },
     });
-    if (recent >= REQUEST_LIMIT.count) return { outcome: 'refused', message: settings.refused };
+    if (recent >= REQUEST_LIMIT.count) return { outcome: 'refused', message: reply.refused };
 
     const store = uploads.length > 0 ? documentStore() : null;
     if (uploads.length > 0 && !store) {
@@ -130,6 +141,8 @@ export async function submit<Field extends string>(
     const applicant = definition.applicant(answers);
     // The settings as read, held where the callbacks below can see them non-null.
     const published = settings;
+    // The record is the team's, and names each answer as the Arabic form does.
+    const team = published.wording.ar;
     const kept: { field: string; label: string; fileName: string; contentType: string; size: number; key: string }[] = [];
     let stored: { id: number };
     try {
@@ -139,7 +152,7 @@ export async function submit<Field extends string>(
         await store!.put(key, upload.bytes, upload.contentType);
         kept.push({
           field: upload.field,
-          label: published.fields[upload.field as Field].label,
+          label: team.fields[upload.field as Field].label,
           fileName: upload.fileName,
           contentType: upload.contentType,
           size: upload.bytes.byteLength,
@@ -150,14 +163,15 @@ export async function submit<Field extends string>(
         collection: 'form-submissions',
         data: {
           form: definition.id,
+          locale,
           name: applicant.name,
           email: applicant.email,
           phone: applicant.phone,
           answers: names.map((name) => ({
             field: name,
-            label: published.fields[name].label,
+            label: team.fields[name].label,
             value: definition.fields[name].kind === 'consent' ? CONSENT_RECORDED : answers[name],
-            option: published.fields[name].options?.[answers[name]] ?? null,
+            option: team.fields[name].options?.[answers[name]] ?? null,
           })),
           documents: kept,
           token,
@@ -171,11 +185,11 @@ export async function submit<Field extends string>(
       throw error;
     }
 
-    later(() => sendMail(definition, published, stored.id, answers));
+    later(() => sendMail(definition, published, stored.id, answers, locale));
     return received;
   } catch (error) {
     console.error(`The ${definition.id} form could not take a request in:`, error);
-    return { outcome: 'failed', message: settings?.failed ?? definition.wording.failed };
+    return { outcome: 'failed', message: (settings?.wording ?? definition.wording)[locale].failed };
   }
 }
 
@@ -208,8 +222,10 @@ async function sendMail<Field extends string>(
   settings: FormSettings<Field>,
   id: number,
   answers: Answers<Field>,
+  locale: Locale,
 ): Promise<void> {
   const applicant = definition.applicant(answers);
+  const confirmed = settings.wording[locale];
   let alert: MailOutcome = 'skipped';
   let confirmation: MailOutcome = 'skipped';
 
@@ -218,12 +234,14 @@ async function sendMail<Field extends string>(
       to: settings.alertAddress,
       replyTo: applicant.email,
       subject: `${definition.title.ar} — ${applicant.name}`,
-      text: alertText(definition, settings, id, answers),
+      text: alertText(definition, settings.wording.ar, id, answers, locale),
+      locale: 'ar',
     });
     confirmation = await deliver({
       to: applicant.email,
-      subject: settings.confirmationSubject,
-      text: settings.confirmationBody.replaceAll(NAME_PLACEHOLDER, applicant.name),
+      subject: confirmed.confirmationSubject,
+      text: confirmed.confirmationBody.replaceAll(NAME_PLACEHOLDER[locale], applicant.name),
+      locale,
     });
   }
 
@@ -250,19 +268,24 @@ async function deliver(mail: Mail): Promise<MailOutcome> {
   }
 }
 
+/** How the alert names the language a form was filled in, where it was not the team's own. */
+const FILLED_IN: Readonly<Record<Locale, string | null>> = { ar: null, en: 'الإنجليزية' };
+
 /**
- * The team's alert: every answer under the words the visitor saw, and the way
- * to the record. Documents are named, never attached: they are opened from the
- * record, by a signed-in editor.
+ * The team's alert, in Arabic: every answer under the words the Arabic form
+ * gives it, and the way to the record — and, for a form filled in another
+ * language, which one, so the reply goes back in it. Documents are named,
+ * never attached: they are opened from the record, by a signed-in editor.
  */
 function alertText<Field extends string>(
   definition: FormDefinition<Field>,
-  settings: FormSettings<Field>,
+  team: FormWording<Field>,
   id: number,
   answers: Answers<Field>,
+  locale: Locale,
 ): string {
   const lines = fieldNames(definition).map((name) => {
-    const wording = settings.fields[name];
+    const wording = team.fields[name];
     const answer = answers[name];
     if (definition.fields[name].kind === 'consent') return `${wording.label}: ${answer === CONSENT_GIVEN ? 'موافق' : '—'}`;
     return `${wording.label}: ${wording.options?.[answer] ?? (answer || '—')}`;
@@ -273,8 +296,10 @@ function alertText<Field extends string>(
     timeStyle: 'short',
   }).format(new Date());
 
+  const language = FILLED_IN[locale];
   return [
     `وصل طلب جديد من نموذج «${definition.title.ar}».`,
+    ...(language ? [`مُلئ النموذج بـ${language}، فالرد على مقدّمه بها.`] : []),
     '',
     ...lines,
     '',

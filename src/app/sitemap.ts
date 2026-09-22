@@ -2,17 +2,35 @@ import type { MetadataRoute } from 'next';
 import { allPublishedPosts } from '@/cms/blog';
 import { pageEntry } from '@/cms/pages';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
+import { getHomePage } from '@/content/pages/home';
+import { contentOrNull } from '@/content/pages/page-content';
+import { getPartnershipPage } from '@/content/pages/partnership';
+import { getProductPage } from '@/content/pages/product';
+import { getReferralPage } from '@/content/pages/referral';
+import { getStartPage } from '@/content/pages/start';
+import { getToolPage } from '@/content/pages/tool';
 import { blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
 import { DEFAULT_LOCALE, localePath } from '@/lib/locales';
 
-/**
- * The Arabic site's pages, as they stand. The English site's pages join it
- * when ticket 42 writes them; until then `/en` is a placeholder, and the
- * English address of an Arabic-only page is a notice saying so (ticket 40).
- */
+/** The Arabic site's pages, as they stand. */
 const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', '/blog', '/terms', '/privacy', '/referral-terms'];
+
+/**
+ * The marketing pages, each with what reads it in a language (ticket 42). An
+ * English one is listed once it is published in English, and not before:
+ * until then its address is a notice (`src/content/arabic-only-pages.ts`),
+ * or, for the home page, the English site's word that it is on its way.
+ */
+const MARKETING_PAGES: readonly { readonly path: string; readonly read: (locale: 'en') => Promise<unknown> }[] = [
+  { path: '/', read: getHomePage },
+  { path: '/product', read: getProductPage },
+  { path: '/start', read: getStartPage },
+  { path: '/tool', read: getToolPage },
+  { path: '/referral', read: getReferralPage },
+  { path: '/partnership', read: getPartnershipPage },
+];
 
 /**
  * The floor under `sitemap.xml`: whatever becomes of a publish's mark, it is
@@ -34,7 +52,8 @@ export const revalidate = 600;
  *
  * Pages are listed by name, not found by walking the routes, so nothing that
  * is not a page of the site can reach it: not the Screen mock studio, the CMS
- * admin, or the English placeholder (ticket 31).
+ * admin, the English placeholder (ticket 31), or the notice at the English
+ * address of a page not yet in English (ticket 42).
  *
  * A page carries the day its search settings were last published (ticket 26).
  * A sitemap has nowhere to put a title or a description — an entry is an
@@ -42,15 +61,17 @@ export const revalidate = 600;
  * described can show here, and it is the one thing a crawler reads it for.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, caseStudies, search] = await Promise.all([
+  const [posts, caseStudies, search, english] = await Promise.all([
     allPublishedPosts(),
     allPublishedCaseStudies(),
     pageEntry('search-settings', DEFAULT_LOCALE),
+    Promise.all(MARKETING_PAGES.map(async (page) => ((await contentOrNull(page.read('en'))) === null ? [] : [page.path]))),
   ]);
   const described = search.updatedAt ?? undefined;
 
   return [
     ...PAGES.map((path) => ({ url: absoluteUrl(path), lastModified: described })),
+    ...english.flat().map((path) => ({ url: absoluteUrl(localePath('en', path)), lastModified: described })),
     // The case studies index is one of the Arabic site's pages once the section
     // shows there. Like `/en/blog`, the English index waits for English.
     ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar')

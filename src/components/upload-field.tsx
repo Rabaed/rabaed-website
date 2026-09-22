@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 import { DOCUMENTS } from '@/forms/definition';
+import type { Locale } from '@/lib/locales';
+
+/** The card's own words: what it says before a file is chosen, and what its progress bar is called. */
+const WORDS: Readonly<Record<Locale, { readonly choose: string; readonly uploading: (label: string) => string }>> = {
+  ar: { choose: 'اختر ملفاً', uploading: (label) => `رفع ${label}` },
+  en: { choose: 'Choose a file', uploading: (label) => `Uploading ${label}` },
+};
 
 /**
  * A document field: a card that opens the file picker, and once a file is
@@ -27,6 +34,7 @@ import { DOCUMENTS } from '@/forms/definition';
  * card's foot while the form is sending.
  */
 export function UploadField({
+  locale,
   name,
   label,
   note,
@@ -37,6 +45,8 @@ export function UploadField({
   describedBy,
   progress = null,
 }: {
+  /** The language of the form it is in. */
+  locale: Locale;
   name: string;
   /** The document's name: the field's accessible name, and its visible one with the Reference site's star where it is required. */
   label: string;
@@ -76,12 +86,12 @@ export function UploadField({
         <b>{required ? `${label} *` : label}</b>
         <small>{note}</small>
       </span>
-      <span className="nm">{fileName ?? 'اختر ملفاً'}</span>
+      <span className="nm">{fileName ?? WORDS[locale].choose}</span>
       {progress !== null && fileName !== null && (
         <span
           className="pg"
           role="progressbar"
-          aria-label={`رفع ${label}`}
+          aria-label={WORDS[locale].uploading(label)}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progress * 100)}

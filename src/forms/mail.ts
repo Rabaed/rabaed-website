@@ -20,15 +20,21 @@ import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { isPubliclyDeployed } from '../lib/environment';
+import { LOCALES, type Locale } from '../lib/locales';
 
 export type Mail = {
   readonly to: string;
   /** Where an answer to the message goes. */
   readonly replyTo?: string;
   readonly subject: string;
-  /** Plain text. Sent as it is, and as right-to-left HTML beside it. */
+  /** Plain text. Sent as it is, and as HTML beside it laid out in its language's direction. */
   readonly text: string;
+  /** The language it is written in: the direction its HTML is laid out in, and the name it is sent under. */
+  readonly locale: Locale;
 };
+
+/** Who the mail is from, in each language: the company's name as that language writes it. */
+const SENDER: Readonly<Record<Locale, string>> = { ar: 'ربائد', en: 'Rabaed' };
 
 export type Mailer = {
   send(mail: Mail): Promise<void>;
@@ -87,19 +93,21 @@ function microsoft365Mailer(user: string, password: string): Mailer {
   return {
     async send(mail) {
       await transporter.sendMail({
-        from: { name: 'ربائد', address: user },
+        from: { name: SENDER[mail.locale], address: user },
         to: mail.to,
         replyTo: mail.replyTo,
         subject: mail.subject,
         text: mail.text,
-        html: rightToLeft(mail.text),
+        html: inDirection(mail.text, mail.locale),
       });
     },
   };
 }
 
-/** The text as HTML that a mail client lays out right to left, line breaks kept. */
-function rightToLeft(text: string): string {
+/** The text as HTML that a mail client lays out in its language's direction, line breaks kept. */
+function inDirection(text: string, locale: Locale): string {
   const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return `<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8;white-space:pre-line">${escaped}</div>`;
+  const dir = LOCALES[locale].dir;
+  const align = dir === 'rtl' ? 'right' : 'left';
+  return `<div dir="${dir}" style="text-align:${align};font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8;white-space:pre-line">${escaped}</div>`;
 }

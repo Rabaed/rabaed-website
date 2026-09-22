@@ -2,12 +2,16 @@
 
 import { track } from '@vercel/analytics';
 import { useRef, useState } from 'react';
+import type { Locale } from '@/lib/locales';
 import { NOT_SENT, TOKEN_FIELD, type DocumentProblem, type FormDefinition, type SubmissionOutcome } from './definition';
 import { sendForm } from './send';
 
 /**
  * Sending a form, in the browser: what the server last said, how much of the
  * submission is on its way while it goes, and `send`.
+ *
+ * Sent in the language of the page the form is on, which the server answers
+ * in (ticket 42).
  *
  * One submission is sent at a time: a second press while one is on its way
  * does nothing, and `send` answers with nothing to say so. Every attempt
@@ -31,6 +35,7 @@ import { sendForm } from './send';
  */
 export function useSubmission<Field extends string>(
   definition: FormDefinition<Field>,
+  locale: Locale,
   onInvalid: (fields: readonly Field[], problems: Partial<Record<Field, DocumentProblem>>) => void,
 ) {
   const [outcome, setOutcome] = useState<SubmissionOutcome>(NOT_SENT);
@@ -47,7 +52,7 @@ export function useSubmission<Field extends string>(
     const data = new FormData(form);
     token.current ??= crypto.randomUUID();
     data.set(TOKEN_FIELD, token.current);
-    const result = await sendForm(definition.id, data, setProgress, definition.wording.failed);
+    const result = await sendForm(definition.id, locale, data, setProgress, definition.wording[locale].failed);
 
     sending.current = false;
     setProgress(null);
