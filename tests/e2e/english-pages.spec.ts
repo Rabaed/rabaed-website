@@ -1,0 +1,316 @@
+/**
+ * The English pages (ticket 42): proposed to the founder as drafts, read by no
+ * visitor until he publishes them, and — once he does — pages of the site like
+ * any other, in English, left to right, with their own titles, structured data
+ * and forms.
+ *
+ * **Runs last** (`playwright.config.ts`). To preview the proposals it makes
+ * each the draft its entry opens on, and to hold a published English page to
+ * what a page of the site is held to it publishes one — the start page, and
+ * what it reads beside its own entry: the Trust strip, the search settings,
+ * its questions and its form's English. The page-text suites edit these
+ * entries all the while, and would find a draft of this suite's under theirs;
+ * nothing that runs last reads them. The Arabic of every entry published here
+ * is the Arabic already published: the proposals carry it unchanged.
+ *
+ * What English would say is not asserted word for word here — it is the
+ * founder's to change, and `tests/unit/english-words.spec.ts` holds the words
+ * proposed. What is asserted is what any English would have to do: be
+ * English, fill the page, and never leave Arabic in its place.
+ */
+import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import { ENGLISH_PAGES_EDITOR, logInByApi, reachesVisitors, reaching } from './cms';
+import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
+
+test.describe.configure({ mode: 'default' });
+
+/** Every entry an English page reads, and so every entry proposed in English. */
+const ENTRIES = [
+  'home-page',
+  'product-page',
+  'start-page',
+  'tool-page',
+  'referral-page',
+  'partnership-page',
+  'closing-section',
+  'screen-mocks',
+  'trust-strip',
+  'search-settings',
+] as const;
+
+/** The six English pages. */
+const PAGES = ['/en', '/en/product', '/en/start', '/en/tool', '/en/referral', '/en/partnership'];
+
+/** Anything with an Arabic letter in it. */
+const ARABIC = /[\u0600-\u06FF]/;
+
+type Version = { id: string; updatedAt: string; version: Record<string, unknown> & { languages?: string[]; _status?: string } };
+
+async function versions(editor: APIRequestContext, slug: string, status: 'draft' | 'published'): Promise<Version[]> {
+  const response = await editor.get(
+    `/api/globals/${slug}/versions?where[version._status][equals]=${status}&sort=-updatedAt&limit=100&depth=0`,
+  );
+  expect(response.ok(), await response.text()).toBe(true);
+  return (await response.json()).docs;
+}
+
+/** The proposal: among the entry's drafts, the one published in English too. */
+async function proposal(editor: APIRequestContext, slug: string): Promise<Version> {
+  const drafts = await versions(editor, slug, 'draft');
+  const proposed = drafts.find((draft) => draft.version.languages?.includes('en'));
+  expect(proposed, `${slug} has no draft in English`).toBeTruthy();
+  return proposed!;
+}
+
+/** Every word in Arabic and in English in a version, with where it is. */
+function words(value: unknown, path: string[] = []): { path: string; ar: string; en: unknown }[] {
+  if (Array.isArray(value)) return value.flatMap((item, index) => words(item, [...path, String(index)]));
+  if (!value || typeof value !== 'object') return [];
+  const record = value as Record<string, unknown>;
+  const own = 'ar' in record && 'en' in record && typeof record.ar === 'string' && record.ar.trim() !== ''
+    ? [{ path: path.join('.'), ar: record.ar, en: record.en }]
+    : [];
+  return [...own, ...Object.entries(record).flatMap(([key, inner]) => words(inner, [...path, key]))];
+}
+
+/** Makes the proposal the draft its entry opens on, as restoring it from the admin's Versions does. */
+async function restore(editor: APIRequestContext, slug: string): Promise<void> {
+  const { id } = await proposal(editor, slug);
+  const restored = await editor.post(`/api/globals/${slug}/versions/${id}?draft=true`);
+  expect(restored.ok(), await restored.text()).toBe(true);
+}
+
+/** Publishes the entry's proposal, as the founder pressing Publish on it does. */
+async function publish(editor: APIRequestContext, slug: string): Promise<void> {
+  await restore(editor, slug);
+  const draft = await editor.get(`/api/globals/${slug}?draft=true&depth=0`);
+  expect(draft.ok()).toBe(true);
+  const published = await editor.post(`/api/globals/${slug}`, { data: { ...(await draft.json()), _status: 'published' } });
+  expect(published.ok(), await published.text()).toBe(true);
+}
+
+/** The page's text as a visitor reads it, less the preview's own banner, which only an Editor sees. */
+function readText(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const body = document.body.cloneNode(true) as HTMLElement;
+    body.querySelectorAll('[role="status"], script, style, noscript').forEach((element) => element.remove());
+    return body.innerText;
+  });
+}
+
+test.afterEach(async ({ page }) => {
+  await page.request.get('/api/preview/exit');
+});
+
+test('every entry the English pages read waits as a draft, with every word of it in English', async ({ request }) => {
+  await logInByApi(request, ENGLISH_PAGES_EDITOR);
+
+  for (const slug of ENTRIES) {
+    const proposed = await proposal(request, slug);
+    expect(proposed.version.languages, slug).toEqual(['ar', 'en']);
+    const missing = words(proposed.version).filter((word) => typeof word.en !== 'string' || word.en.trim() === '');
+    expect(missing, `${slug}: Arabic words left without English`).toEqual([]);
+
+    // And the English is English: no word of it is the Arabic in its place,
+    // save a name written in Latin letters in the Arabic box too.
+    for (const word of words(proposed.version)) expect(String(word.en), `${slug} ${word.path}`).not.toMatch(ARABIC);
+
+    // Nothing is published in English: a visitor reads none of it.
+    const [published] = await versions(request, slug, 'published');
+    expect(published.version.languages, `${slug} is published in English`).toEqual(['ar']);
+  }
+
+  // So every English address is still what it was: the home page says the
+  // English site is on its way, and every other says the page is not in
+  // English yet, and offers the Arabic.
+  expect(await (await request.get('/en')).text()).toContain('The English site is on its way.');
+  for (const path of PAGES.slice(1)) {
+    expect(await (await request.get(path)).text(), path).toContain('This page is not available in English yet.');
+  }
+});
+
+test('previewed, each English page is the whole page, in English, left to right', async ({ page }) => {
+  await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+  for (const slug of ENTRIES) await restore(page.request, slug);
+
+  for (const path of PAGES) {
+    await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+    await expect(page.getByRole('status').first()).toContainText('معاينة');
+
+    await expect(page.locator('html'), path).toHaveAttribute('lang', 'en');
+    await expect(page.locator('html'), path).toHaveAttribute('dir', 'ltr');
+    // The page itself, not the notice that stands for it.
+    await expect(page.locator('h1'), path).not.toHaveText(/not available in English|on its way/);
+    await expect(page.locator('main, section').first(), path).toBeVisible();
+
+    // Not a word of Arabic in place of English. The header's switcher names
+    // Arabic in Arabic, which is its point — but the header is ticket 40's,
+    // and waits for its own words to be published.
+    const text = (await readText(page)).replaceAll('العربية', '');
+    expect(text.match(new RegExp(`${ARABIC.source}+`, 'g')) ?? [], `${path} shows Arabic`).toEqual([]);
+
+    // Every picture described, in English.
+    for (const alt of await page.locator('img[alt]').evaluateAll((images) => images.map((image) => image.getAttribute('alt') ?? ''))) {
+      expect(alt, `${path}: a picture described in Arabic`).not.toMatch(ARABIC);
+    }
+
+    // Nothing wider than the window.
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, `${path} overflows`).toBeLessThanOrEqual(0);
+  }
+});
+
+test.describe('the comparison', () => {
+  // The seam sweeps once by itself when it first comes into view, which a
+  // test pressing its keys would be racing; with reduced motion it never does
+  // (`home-before-after.spec.ts` drives the Arabic one the same way).
+  test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
+  test('previewed, the home page’s comparison turns over from the left, where an English line begins', async ({ page }) => {
+    await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+    await restore(page.request, 'home-page');
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`/api/preview?path=${encodeURIComponent('/en')}`, { waitUntil: 'networkidle' });
+
+    const handle = page.locator('#ba [role="slider"]');
+    await handle.focus();
+    // All the way right: every step shows Rabaed's way, and the verdict says so.
+    for (let press = 0; press < 13; press += 1) await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#ba .cmp-verdict.good')).toHaveCSS('opacity', '1');
+    // All the way left: every step is the usual way again.
+    for (let press = 0; press < 20; press += 1) await page.keyboard.press('ArrowLeft');
+    await expect(page.locator('#ba .cmp-verdict.bad')).toHaveCSS('opacity', '1');
+
+    // Rabaed's tag stands over the left, where its steps begin.
+    const tags = await page.locator('#ba .cmp-tag').evaluateAll((elements) =>
+      elements.map((element) => ({ rabaed: element.classList.contains('ta'), left: element.getBoundingClientRect().left })),
+    );
+    const [rabaed, usual] = [tags.find((tag) => tag.rabaed)!, tags.find((tag) => !tag.rabaed)!];
+    expect(rabaed.left).toBeLessThan(usual.left);
+  });
+});
+
+/**
+ * The start page published in English, and what it reads with it — the Trust
+ * strip, the search settings, its English questions and the demo request
+ * form's English — as the founder publishes them.
+ */
+test.describe('published in English', () => {
+  test.beforeAll(async ({ playwright }, testInfo) => {
+    const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+    await logInByApi(request, ENGLISH_PAGES_EDITOR);
+    for (const slug of ['start-page', 'trust-strip', 'search-settings'] as const) await publish(request, slug);
+
+    const questions = await request.get('/api/faq-entries?where[locale][equals]=en&where[page][equals]=start&draft=true&depth=0&limit=100');
+    expect(questions.ok()).toBe(true);
+    const { docs } = await questions.json();
+    expect(docs.length, 'no English questions proposed for the start page').toBeGreaterThan(0);
+    for (const question of docs) {
+      const published = await request.patch(`/api/faq-entries/${question.id}`, { data: { _status: 'published' } });
+      expect(published.ok(), await published.text()).toBe(true);
+    }
+
+    const form = await request.get('/api/globals/demo-request-form-en?draft=true&depth=0');
+    expect(form.ok()).toBe(true);
+    const publishedForm = await request.post('/api/globals/demo-request-form-en', {
+      data: { ...(await form.json()), _status: 'published' },
+    });
+    expect(publishedForm.ok(), await publishedForm.text()).toBe(true);
+    await request.dispose();
+  });
+
+  test('the English start page is a page of the site, with its own title, alternates and trail', async ({ request, baseURL }) => {
+    await logInByApi(request, ENGLISH_PAGES_EDITOR);
+    const title = (await proposal(request, 'search-settings')).version.start as { title: { en: string } };
+    const html = await reachesVisitors(request, '/en/start', title.title.en, 'the English start page');
+
+    expect(html).not.toContain('This page is not available in English yet.');
+    expect(html).toContain(`<link rel="canonical" href="${baseURL}/en/start"/>`);
+    expect(html).toContain(`hrefLang="ar" href="${baseURL}/start"`);
+    expect(html).toContain(`hrefLang="en" href="${baseURL}/en/start"`);
+
+    // Its structured data is English too: the trail, and the questions word
+    // for word as the page shows them.
+    const data = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((match) => JSON.parse(match[1]));
+    const trail = data.find((node) => node['@type'] === 'BreadcrumbList');
+    expect(trail.itemListElement.map((step: { name: string }) => step.name)).toEqual(['Home', 'Get started']);
+    const faq = data.find((node) => node['@type'] === 'FAQPage');
+    expect(faq.mainEntity.length).toBeGreaterThan(0);
+    for (const question of faq.mainEntity) {
+      expect(question.name).not.toMatch(ARABIC);
+      expect(question.acceptedAnswer.text).not.toMatch(ARABIC);
+    }
+    const organisation = data.find((node) => node['@type'] === 'Organization');
+    expect(organisation).toMatchObject({ name: 'Rabaed', alternateName: 'ربائد' });
+  });
+
+  test('the Arabic start page names its English, and the sitemap lists it', async ({ request, baseURL }) => {
+    await reaching('the English alternate on /start', async () =>
+      (await (await request.get('/start')).text()).includes(`hrefLang="en" href="${baseURL}/en/start"`),
+    ).toBe(true);
+    const html = await (await request.get('/start')).text();
+    // The switcher leads to the same page in English, not to the English home page.
+    expect(html).toMatch(/class="lang"[^>]*href="\/en\/start"|href="\/en\/start"[^>]*class="lang"/);
+
+    await reaching('/en/start in the sitemap', async () => (await (await request.get('/sitemap.xml')).text()).includes(`${baseURL}/en/start<`)).toBe(true);
+    // And only the page published in English: the product page's English waits.
+    expect(await (await request.get('/sitemap.xml')).text()).not.toContain(`${baseURL}/en/product<`);
+    expect(await (await request.get('/en/product')).text()).toContain('This page is not available in English yet.');
+  });
+
+  test('a request sent from the English page is answered, confirmed and recorded in English', async ({ page, request }) => {
+    await logInByApi(request, ENGLISH_PAGES_EDITOR);
+    // The alert address is the Arabic entry's, one for both languages. While
+    // it is empty no mail is sent at all, so this sets one and puts it back.
+    const settings = await request.get('/api/globals/demo-request-form?depth=0');
+    const { id, globalType, createdAt, updatedAt, ...original } = await settings.json();
+    const team = uniqueApplicant('english-team').email;
+    const withAddress = await request.post('/api/globals/demo-request-form', { data: { ...original, alertAddress: team, _status: 'published' } });
+    expect(withAddress.ok(), await withAddress.text()).toBe(true);
+
+    try {
+      const applicant = uniqueApplicant('english-demo');
+      await page.setExtraHTTPHeaders({ 'x-forwarded-for': applicant.ip });
+      await reachesVisitors(page.request, '/en/start', 'Full name', 'the English form');
+      await page.goto('/en/start', { waitUntil: 'networkidle' });
+
+      const form = page.locator('form#demo');
+      const button = form.getByRole('button', { name: 'Book a live demo' });
+      await expect(button).toBeDisabled();
+      // Its messages are English too.
+      const email = form.getByLabel('Email', { exact: true });
+      await email.fill('not an address');
+      await email.blur();
+      await expect(form.getByText('Enter a valid email address')).toBeVisible();
+
+      await form.getByLabel('Full name', { exact: true }).fill('Sarah Hughes');
+      await email.fill(applicant.email);
+      await form.getByLabel('Your role on the project', { exact: true }).selectOption('consultant');
+      await form.getByLabel('Mobile number', { exact: true }).fill('+44 20 7946 0000');
+      await button.click();
+      await expect(form.getByRole('status')).toContainText('We have your request');
+
+      await expect.poll(() => mailTo(applicant.email)).toHaveLength(1);
+      const [confirmation] = await mailTo(applicant.email);
+      expect(confirmation.subject).not.toMatch(ARABIC);
+      expect(confirmation.text).toContain('Hello Sarah Hughes,');
+      expect(confirmation.text).not.toMatch(ARABIC);
+
+      // The team's alert is in Arabic, as the team works, and says the form
+      // was filled in English so the reply goes back in it.
+      await expect.poll(async () => (await mailTo(team)).filter((mail) => mail.replyTo === applicant.email)).toHaveLength(1);
+      const [alert] = (await mailTo(team)).filter((mail) => mail.replyTo === applicant.email);
+      expect(alert.text).toContain('الإنجليزية');
+      expect(alert.text).toContain('استشاري');
+
+      const [stored] = await submissionsFrom(request, applicant.email);
+      expect(stored).toMatchObject({ form: 'demo-request', locale: 'en', name: 'Sarah Hughes' });
+      // Named as the Arabic form names each answer, for the team who reads it.
+      expect(stored.answers.find((answer) => answer.field === 'role')).toMatchObject({ label: 'دورك في المشروع', option: 'استشاري' });
+    } finally {
+      await logInByApi(request, ENGLISH_PAGES_EDITOR);
+      const restored = await request.post('/api/globals/demo-request-form', { data: { ...original, _status: 'published' } });
+      expect(restored.ok(), await restored.text()).toBe(true);
+    }
+  });
+});

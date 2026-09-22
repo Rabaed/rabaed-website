@@ -553,7 +553,9 @@ test.describe('the Referral Program signup', () => {
     // Held on its way, so the upload can be seen.
     let release!: () => void;
     const held = new Promise<void>((resolve) => (release = resolve));
-    await page.route('**/api/forms/referral-signup', async (route) => {
+    // Matched by its path: the form names the language it was filled in, in
+    // the address (`?locale=ar`).
+    await page.route((url) => url.pathname === '/api/forms/referral-signup', async (route) => {
       await held;
       await route.continue();
     });

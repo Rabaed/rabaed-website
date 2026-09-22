@@ -19,7 +19,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 const PORT = testPort(process.env.TEST_PORT);
 /** The suites that publish, or read, what every other suite would notice — run once those are done (below). */
-const RUNS_LAST = /(case-studies|referral-program-values|ai-crawlers|launch-articles)\.spec\.ts$/;
+const RUNS_LAST = /(case-studies|referral-program-values|ai-crawlers|launch-articles|english-pages)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 
 /** Reads `TEST_PORT`, and refuses a value that is not a usable port. */

@@ -2,7 +2,7 @@
  * Where a word of a page's entry is held in the CMS, found by the path
  * `pairs.ts` gives it — so that the English proposed for it can be checked by
  * the field that will hold it, before anybody is asked to publish it
- * (`tests/unit/english-pages.spec.ts`).
+ * (`tests/unit/english-words.spec.ts`).
  *
  * A path names the entry's data as its import wrote it: a section's tab, a
  * field inside it, an item of a list by its place. Rows and unnamed tabs hold

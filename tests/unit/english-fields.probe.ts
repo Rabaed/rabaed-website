@@ -2,10 +2,15 @@
  * What the CMS says of each English word proposed for the English pages
  * (ticket 42), asked of the field that will hold it — its length, its marks,
  * the opening answer's 30 to 60 words — exactly as it will be asked when the
- * founder presses Publish with English among the page's languages.
+ * founder presses Publish with English among the page's languages. It prints
+ * every word refused, with its place and the reason, as JSON on its last line.
  *
- * Kept apart from the spec so that it can be run on its own while the English
- * is being written.
+ * Run in a process of its own by `english-words.spec.ts`, never by Playwright,
+ * for the reason `cms-boot.probe.ts` is: the CMS's configuration reaches
+ * `next/cache`, which only a Payload process loads. Run it by hand while
+ * writing the English:
+ *
+ *   node node_modules/payload/bin.js run tests/unit/english-fields.probe.ts
  */
 import type { GlobalConfig, PayloadRequest } from 'payload';
 import { ClosingSection } from '../../src/cms/globals/closing-section';
@@ -51,7 +56,7 @@ function at(value: unknown, path: readonly (string | number)[]): unknown {
 }
 
 /** Every English word the CMS would refuse, with its place and its reason. */
-export async function refusedEnglish(): Promise<string[]> {
+async function refusedEnglish(): Promise<string[]> {
   const refused: string[] = [];
   for (const pair of ENGLISH_PAIRS) {
     const entry = ENTRIES[pair.entry];
@@ -74,3 +79,5 @@ export async function refusedEnglish(): Promise<string[]> {
   }
   return refused;
 }
+
+console.log(JSON.stringify(await refusedEnglish()));

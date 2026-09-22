@@ -32,6 +32,14 @@ const COMPANY = {
   telephone: '+966576767900',
 };
 
+/**
+ * What changes on an English page (ticket 42): the company is named in English
+ * first, with its Arabic name as the alternate, and where it is in English.
+ * Its registered name is Arabic in either language.
+ */
+const IN_ENGLISH = { name: 'Rabaed', alternateName: 'ربائد', locality: 'Riyadh' };
+const companyIn = (locale: string) => (locale === 'en' ? { ...COMPANY, ...IN_ENGLISH } : COMPANY);
+
 /** The footer's social icons, in the footer's order. */
 const SOCIAL_LABELS = ['لينكدإن', 'إكس', 'فيسبوك', 'إنستجرام'];
 
@@ -77,14 +85,15 @@ for (const route of ROUTES) {
     const organisations = nodesOf(nodes, 'Organization');
     expect(organisations).toHaveLength(1);
     const [organisation] = organisations;
+    const company = companyIn(route.locale);
     expect(organisation).toMatchObject({
-      name: COMPANY.name,
-      alternateName: COMPANY.alternateName,
-      legalName: COMPANY.legalName,
+      name: company.name,
+      alternateName: company.alternateName,
+      legalName: company.legalName,
       url: `${baseURL}/`,
-      email: COMPANY.email,
-      telephone: COMPANY.telephone,
-      address: { '@type': 'PostalAddress', addressLocality: COMPANY.locality, addressCountry: COMPANY.country },
+      email: company.email,
+      telephone: company.telephone,
+      address: { '@type': 'PostalAddress', addressLocality: company.locality, addressCountry: company.country },
     });
     expect(JSON.stringify(organisation.identifier)).toContain(COMPANY.unifiedNumber);
 

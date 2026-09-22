@@ -12,6 +12,13 @@ import { localePath, type Locale } from '@/lib/locales';
 const MENU_LABEL: Record<Locale, string> = { ar: 'القائمة', en: 'Menu' };
 
 /**
+ * What the wordmark is called, which is what a screen reader reads for the
+ * link home: both names in Arabic, as the mark draws them, and Rabaed alone in
+ * English, as the footer's wordmark is named there (ticket 42).
+ */
+const WORDMARK: Record<Locale, string> = { ar: 'ربائد — Rabaed', en: 'Rabaed' };
+
+/**
  * The site header: brand, primary links, the Partnerships dropdown, the sign-in
  * link and the demo call to action, plus the panel that replaces all of it
  * below 1100px.
@@ -56,7 +63,7 @@ export async function SiteNav({
           {/* Two wordmarks, cross-faded by `.nav.on-light`: one legible on the
               dark sections, one on the light. The second is decorative — the
               first already names the site. */}
-          <img className="lg d" src="/brand/rabaed-wordmark-on-dark.webp" alt="ربائد — Rabaed" width={563} height={210} />
+          <img className="lg d" src="/brand/rabaed-wordmark-on-dark.webp" alt={WORDMARK[locale]} width={563} height={210} />
           <img className="lg l" src="/brand/rabaed-wordmark-on-light.webp" alt="" width={563} height={210} />
         </a>
 

@@ -11,7 +11,7 @@
  */
 
 /** Anything with an Arabic letter in it. */
-const ARABIC_LETTER = /[؀-ۿ]/;
+const ARABIC_LETTER = /[\u0600-\u06FF]/;
 
 /** One Arabic word with its English, and where it was found. */
 export type Pair = { readonly entry: string; readonly path: readonly (string | number)[]; readonly ar: string; readonly en: string };

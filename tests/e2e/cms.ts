@@ -148,6 +148,12 @@ export const ANSWER_FIRST_EDITOR = {
   password: 'test-editor-password-35',
 } as const;
 
+/** The English pages' own account (ticket 42), for the same reason as `BLOG_EDITOR`. */
+export const ENGLISH_PAGES_EDITOR = {
+  email: 'english-pages-editor@rabaed.test',
+  password: 'test-editor-password-42',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -170,6 +176,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   SEARCH_EDITOR,
   LAUNCH_ARTICLES_EDITOR,
   ANSWER_FIRST_EDITOR,
+  ENGLISH_PAGES_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
