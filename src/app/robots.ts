@@ -49,6 +49,18 @@ const RETRIEVAL_CRAWLERS = [
 /** Crawlers that collect pages to train a model. The switch above governs these and only these. */
 const TRAINING_CRAWLERS = ['GPTBot', 'ClaudeBot', 'Meta-ExternalAgent', 'CCBot'];
 
+/**
+ * The floor under `robots.txt`: whatever becomes of a publish's mark, it is
+ * rebuilt at most ten minutes after it was last built (ticket 66, ADR-0014).
+ *
+ * Its own, because a discovery file is a route beside the layouts rather than
+ * beneath one, so no layout's age reaches it — the same reason
+ * `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`. Written out rather
+ * than imported because Next reads only a literal; `src/lib/cache-age.ts`
+ * holds the number and the reason it is that number.
+ */
+export const revalidate = 600;
+
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const training = await trainingCrawlersAllowed();
 

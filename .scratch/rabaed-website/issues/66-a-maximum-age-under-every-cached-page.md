@@ -8,18 +8,18 @@ the mark are others we have not had yet. There is no floor under any of them.
 
 **Blocked by:** nothing.
 
-**Status:** needs-triage
+**Status:** resolved — ten minutes, ADR-0014
 
-- [ ] Every page a visitor can reach is rebuilt at most a set time after it was
+- [x] Every page a visitor can reach is rebuilt at most a set time after it was
       last built, whether or not anything was published
-- [ ] The three discovery files too — they are routes of their own and no
+- [x] The three discovery files too — they are routes of their own and no
       layout covers them
-- [ ] The number is written down with the reason it is that number
-- [ ] Publishing still reaches the site in under a second in the ordinary case:
+- [x] The number is written down with the reason it is that number
+- [x] Publishing still reaches the site in under a second in the ordinary case:
       the age is a floor under failure, not the way a change travels
-- [ ] Held by a test that fails without it
-- [ ] An ADR records the decision, because it sets how stale a page may be
-- [ ] `docs/deployment.md` says what the age is, under the caching section
+- [x] Held by a test that fails without it
+- [x] An ADR records the decision, because it sets how stale a page may be
+- [x] `docs/deployment.md` says what the age is, under the caching section
 
 **Not this ticket:** the race in ticket 64. This does not close the window — a page
 caught by it is still wrong. It bounds how long it stays wrong.
@@ -95,3 +95,45 @@ convention, `src/app/sitemap.ts` and `src/app/robots.ts`. And there is a third
 route group the exclusion list does not name, `(forms)`, which holds two API
 routes and no pages; it wants no age either, for the same reason as `(payload)`
 and `(studio)`.
+
+## Answer
+
+**Ten minutes**, set on the two site layouts and on each of the three discovery
+files, and recorded in ADR-0014.
+
+- `src/lib/cache-age.ts` holds `MAX_PAGE_AGE_SECONDS` and the reason it is that
+  number: it answers "how far behind may a page be when something has gone
+  wrong", it is well inside the time an Editor would take to notice and publish
+  again, and it costs about half the rebuilds of five minutes for a failure this
+  rare. The founder's call, 22 September 2026.
+- `src/app/(ar)/layout.tsx` and `src/app/(en)/en/layout.tsx` carry it for all
+  twenty pages, a route taking the lowest age in its chain.
+  `src/app/llms.txt/route.ts`, `src/app/robots.ts` and `src/app/sitemap.ts` each
+  carry their own, having no layout above them.
+- The number is written out in all five rather than imported, because Next reads
+  `export const revalidate` by static analysis and accepts only a literal.
+  `tests/unit/cached-page-age.spec.ts` holds every one of them to the constant,
+  so they cannot drift.
+
+**What the test does that a source check would not.** Setting the age on two
+layouts instead of twenty pages only works if a page inherits its parent's, and
+a spec that read the source alone would assume that rather than show it. So it
+also reads `.next/prerender-manifest.json` and asserts what the build actually
+resolved. Before the change every one of the twenty-nine prerendered routes read
+`initialRevalidateSeconds: false`; after it, the seventeen visitor routes read
+`600` and the studio and framework routes still read `false`. A new page group
+added without an age fails there rather than being discovered by a visitor.
+
+**A correction to "Where it goes" in the body above**, found while doing it: only
+`llms.txt` is a `route.ts`; the sitemap and robots are the metadata-file
+convention, `src/app/sitemap.ts` and `src/app/robots.ts`. And there is a third
+route group the exclusion list did not name, `(forms)`, which is two API routes
+and no pages; it is excluded with `(payload)` and `(studio)`, and the test holds
+all three to that.
+
+**On the installed Next.** `export const revalidate` survives in 16.3.5 but has
+moved out of the Route Segment Config reference into
+`01-app/02-guides/caching-without-cache-components.md`, which makes it look
+removed. It is removed only when Cache Components is enabled, which this project
+does not enable. ADR-0014 records that the day Cache Components is turned on,
+this decision moves to `cacheLife`.
