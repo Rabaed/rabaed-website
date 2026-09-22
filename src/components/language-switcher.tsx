@@ -23,7 +23,19 @@ import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
  * «الإنجليزية» says.
  */
 
-/** What the link says, and what it says when this page is not in that language. */
+/**
+ * What the link says, and what it says when this page is not in that language.
+ *
+ * **In the code rather than the CMS, unlike every other word a visitor reads
+ * (ticket 59).** A language is named in its own language or it is not
+ * recognised by the person looking for it, so `name` is not a wording anyone
+ * should be able to change. `missing` is a sentence a visitor does read, and
+ * it is here on a narrower argument: it describes what the link does, not
+ * anything about Rabaed, and it exists in both languages before either
+ * language's words are in the CMS at all — which is the state this ticket
+ * leaves the site in. Ticket 42 puts the English site's words in the CMS; if
+ * `missing` should join them, that is the ticket to do it in.
+ */
 const WORDS = {
   ar: {
     name: 'العربية',
@@ -58,8 +70,11 @@ export function LanguageSwitcher({
   variant: Variant;
 }) {
   // Two locales, so "the other one" is a fact rather than a choice
-  // (`src/lib/locales.ts`). Written as a search so that a third would fail
-  // here, loudly, rather than quietly showing the wrong language.
+  // (`src/lib/locales.ts`), and a search rather than a table is what says so.
+  // A third locale would make "the other one" meaningless, and this would then
+  // offer whichever of the two it found first — so it draws nothing instead,
+  // and a switcher missing from every header is the signal. Adding a third
+  // locale means deciding what this should do before it will work at all.
   const other = LOCALE_CODES.find((code) => code !== locale);
   if (!other) return null;
 

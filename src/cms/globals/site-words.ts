@@ -19,23 +19,25 @@ import { pageGlobal } from '../page-globals';
  * Measured at the narrowest width that draws the menu as a row rather than
  * the panel, with every word at its longest and the case studies link
  * showing: four links and the Partnerships word beside them, at eleven
- * characters each, plus the two buttons. A twelfth character, or a fifth link,
- * pushes the row past the header's edge — at eight characters a fifth link
- * would fit, which is shorter than the words the site has.
+ * characters each, fill the row between the wordmark and the controls at its
+ * edge. A twelfth character, or a fifth link, pushes the row past that edge —
+ * at eight characters a fifth link would fit, which is shorter than the words
+ * the site has.
  *
  * **The header is full at the words it launched with**: «قصص العملاء» is
  * eleven characters, the sign-in link twelve and the demo button fifteen. An
  * Editor rewords the menu within the room the design gives it rather than
  * adding to it, and the limits here are what that room measures.
- *
- * That narrowest width is **1100px**, and was 981px until ticket 40. The
- * language switcher joined the row and wanted 57px the row did not have at
- * 981px, and these limits could not pay for it: «قصص العملاء» is already at
- * the eleven, so a lower limit would refuse a word the site ships with. The
- * row gives way to the panel earlier instead (`src/styles/shell.css`), which
- * is what kept every limit below unchanged.
  * `tests/e2e/site-words.spec.ts` fills the menu to these numbers and measures
  * the row.
+ *
+ * That narrowest width is **1100px**, and was 981px until ticket 40. The
+ * language switcher joined the controls at the row's edge and wanted 57px the
+ * row did not have at 981px, and these limits could not pay for it: «قصص
+ * العملاء» is already at the eleven, so a lower limit would refuse a word the
+ * site ships with. The row gives way to the panel earlier instead
+ * (`src/styles/shell.css`, ADR-0015), which is what kept every limit here
+ * unchanged.
  */
 const MENU_LABEL = 11;
 const MENU_LINKS = 4;

@@ -1,7 +1,7 @@
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { NavBehaviour } from '@/components/nav-behaviour';
 import { getHeader } from '@/content/site-words';
-import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
+import { localePath, type Locale } from '@/lib/locales';
 
 /**
  * The button that opens the panel below 1100px. It draws three lines and no
@@ -33,16 +33,16 @@ const MENU_LABEL: Record<Locale, string> = { ar: 'القائمة', en: 'Menu' };
 export async function SiteNav({
   locale,
   path,
-  ownPath = path,
-  locales = LOCALE_CODES,
+  ownPath,
+  locales,
 }: {
   locale: Locale;
   /** The section whose link in the menu is marked as the one being read. */
   path: string;
   /** This page's own address, which the switcher offers in the other language. */
-  ownPath?: string;
+  ownPath: string;
   /** The languages this page exists in, for the switcher (ticket 40). */
-  locales?: readonly Locale[];
+  locales: readonly Locale[];
 }) {
   const { links, partnershipsLabel, partnerships, signIn, demoLabel } = await getHeader(locale);
   const inPartnerships = partnerships.some((link) => link.path === path);

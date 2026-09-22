@@ -143,17 +143,6 @@ function dropHorizontalPlacement(measurement: Record<string, unknown>) {
 const HEADER_MODES_DIFFER = 1024;
 
 /**
- * The panel's content is 56px taller than the Reference site's at every width
- * and in every state, because the switcher is the last thing in it (ticket
- * 40). Closed, the panel is clipped to nothing by `max-height` in both
- * documents and only this inner box knows; open, its own height is already
- * given up above for a different reason.
- *
- * Nothing above the switcher moves, so every item in the panel is still held
- * to the Reference site's placement — it is one box's height that is given up,
- * and only downwards.
- */
-/**
  * The menu is shifted by the switcher, and measured from itself instead.
  *
  * `.nav > .wrap` spreads the wordmark, the menu and the controls across the
@@ -186,6 +175,17 @@ function measureMenuFromItself(measurement: Record<string, unknown>) {
   return measurement;
 }
 
+/**
+ * The panel's content is 56px taller than the Reference site's at every width
+ * and in every state, because the switcher is the last thing in it (ticket
+ * 40). Closed, the panel is clipped to nothing by `max-height` in both
+ * documents and only this inner box knows; open, its own height is already
+ * given up above for a different reason.
+ *
+ * Nothing above the switcher moves, so every item in the panel is still held
+ * to the Reference site's placement — it is one box's height that is given up,
+ * and only downwards.
+ */
 function dropPanelContentHeight(measurement: Record<string, unknown>) {
   const part = measurement['.mnav .wrap'];
   if (part && typeof part === 'object') delete (part as Record<string, unknown>).height;
@@ -311,8 +311,11 @@ test.describe('the shell matches the Reference site', () => {
         await rebuilt.evaluate(() => document.fonts.ready);
         await freezeTransitions(rebuilt);
 
-        for (const [state, classes] of Object.entries(STATES)) {
-          if (width === HEADER_MODES_DIFFER) break;
+        // The width decides this, not the state, so it is asked once rather
+        // than four times inside the loop.
+        const stateEntries = width === HEADER_MODES_DIFFER ? [] : Object.entries(STATES);
+
+        for (const [state, classes] of stateEntries) {
           await setState(reference, classes);
           await setState(rebuilt, classes);
 
