@@ -11,20 +11,23 @@ import { readingDirectionOf } from '@/lib/reading-direction';
 const DESKTOP = '(min-width: 981px)';
 /** Everywhere else. Named as well, because `gsap.matchMedia` only builds when one of its conditions holds. */
 const NARROW = '(max-width: 980px)';
+/** Where the section switches from dark to light: half-way through the Reference site's blend. */
+const LIT_FROM = '12.5% top';
 
 /**
  * Sets the Record section moving as the visitor scrolls through it, attached to
  * markup the server already sent. Renders nothing.
  *
- * - **Dark to light.** The section's ground and words blend to the light
- *   treatment over its first quarter, and the card to white from 12% to 32% —
- *   the Reference site's ranges, following the scroll exactly.
+ * - **Dark to light.** 12.5% of the way in, the section and its card switch to
+ *   the light treatment together, and back again above that point. The switch
+ *   is the `lit` class; the stylesheet decides how it looks and how long it
+ *   takes.
  * - **The five transaction types.** The card shows each type's trail in turn,
  *   and the stamp comes on at the end (`record-state.ts`). A change fades the
  *   old trail out and brings the new one in step by step, as on the Reference
  *   site.
  *
- * **DIVERGENCE FROM THE REFERENCE SITE, deliberate**, twice:
+ * **DIVERGENCE FROM THE REFERENCE SITE, deliberate**, three times:
  *
  * - **Below 981px the types follow the card across the window.** There the
  *   section is only as tall as the window, so the Reference site's cycle —
@@ -32,12 +35,16 @@ const NARROW = '(max-width: 980px)';
  *   window's bottom — has no distance to run, and jumps from the first type
  *   straight to the stamped last. Here the cycle runs while the card's centre
  *   crosses the middle 70% of the window, so every type is seen.
- * - **With reduced motion nothing blends or fades.** A trail changes at once,
- *   and the section and its card change colour together, in one step, 12.5%
- *   of the way in — half-way through the section's blend. A blend passes
- *   through a grey against which neither dark words nor light ones can be
- *   read; a step never does. The types still follow the scroll, because
- *   scrolling is the only way to reach them.
+ * - **The section does not blend from dark to light under the scroll.** The
+ *   Reference site scrubs its ground and its words towards each other over its
+ *   first quarter, and they meet in a grey against which nothing can be read —
+ *   1.1:1 at worst, for as long as the visitor stops there (ticket 69). Here
+ *   the section switches at one point, 12.5% of the way in — half-way through
+ *   the Reference site's blend — and the switch runs on its own for 0.4s, so
+ *   the grey lasts that long and no scroll position can hold it. With reduced
+ *   motion it happens in one step.
+ * - **With reduced motion nothing fades.** A trail changes at once. The types
+ *   still follow the scroll, because scrolling is the only way to reach them.
  *
  * `gsap.matchMedia` builds all of it for the window and the preference there
  * are, and takes it apart and builds it again when either changes. Teardown
@@ -125,27 +132,12 @@ export function RecordBehaviour() {
       const { desktop, reduced } = context.conditions as { desktop: boolean; reduced: boolean };
       reducedMotion = reduced;
 
-      if (reduced) {
-        ScrollTrigger.create({
-          trigger: section,
-          start: '12.5% top',
-          end: 'max',
-          onToggle: (self) => section.classList.toggle('lit', self.isActive),
-        });
-      } else {
-        gsap.to(section, {
-          backgroundColor: '#FAFAF8',
-          color: '#222222',
-          ease: 'none',
-          scrollTrigger: { trigger: section, start: 'top top', end: '25% top', scrub: true },
-        });
-        gsap.to(card, {
-          backgroundColor: '#ffffff',
-          borderColor: '#E3E1DC',
-          ease: 'none',
-          scrollTrigger: { trigger: section, start: '12% top', end: '32% top', scrub: true },
-        });
-      }
+      ScrollTrigger.create({
+        trigger: section,
+        start: LIT_FROM,
+        end: 'max',
+        onToggle: (self) => section.classList.toggle('lit', self.isActive),
+      });
 
       const cycle = ScrollTrigger.create(
         desktop
