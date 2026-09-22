@@ -39,7 +39,7 @@ export const ENGLISH_FORM_WORDING = {
       company: { label: 'Company name', placeholder: 'Company name', message: 'The company name is too long' },
       activeProjects: {
         label: 'Number of active projects',
-        placeholder: 'Number of active projects',
+        placeholder: 'Active projects',
         message: 'Enter the number of projects in figures only',
       },
     },
@@ -144,7 +144,7 @@ export const ENGLISH_FORM_WORDING = {
         placeholder: 'Country code',
         message: 'Choose a country code',
         options: {
-          '+966': '+966 Saudi Arabia',
+          '+966': '+966 Saudi',
           '+971': '+971 UAE',
           '+965': '+965 Kuwait',
           '+974': '+974 Qatar',
@@ -237,7 +237,7 @@ export const ENGLISH_FORM_WORDING = {
       },
       partnershipMode: {
         label: 'Preferred way of working together',
-        placeholder: 'Preferred way of working together *',
+        placeholder: 'Way of working together *',
         message: 'Choose a preferred way of working together',
         options: {
           'embedded-in-proposal': 'Built into your proposal',

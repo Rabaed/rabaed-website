@@ -211,6 +211,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .tail-steps li { display: flex; gap: 14px; align-items: baseline; padding: 11px 0; border-bottom: 1px dashed var(--line) }
 .tail-steps li:last-child { border-bottom: 0 }
 .tail-steps b { font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc-ink); white-space: nowrap; min-width: 96px; direction: rtl }
+/* An English page's label is English, «Set up · 01», and reads left to right —
+   and so does the stage's heading on the partnership page, a `b` inside the
+   same list (ticket 42). */
+[dir="ltr"] .tail-steps b { direction: ltr }
 .tail-steps span { font-size: 14.5px; color: var(--muted); line-height: 1.75 }
 .tail-more { display: inline-block; margin-top: 16px; font-size: 14px; color: var(--acc-ink); font-weight: 600; padding: 6px 0 }
 .tail-more:hover { text-decoration: underline }

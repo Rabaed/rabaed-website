@@ -9,7 +9,7 @@ import { TermsSummary } from '@/components/referral/terms-summary';
 import { WhatIsReferred } from '@/components/referral/what-is-referred';
 import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import type { ReferralPageContent } from '@/content/pages/referral';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /**
  * The Referral Program page, in either language, in the Reference site's
@@ -43,15 +43,17 @@ export async function ReferralPage({
   locales: readonly Locale[];
   content: ReferralPageContent;
 }) {
+  const direction = LOCALES[locale].dir;
+
   return (
     <PageShell locale={locale} path="/referral" locales={locales}>
       <PageHero content={content.hero} />
       <HowItWorks content={content.howItWorks} />
       {content.offer.shows && <Offer content={content.offer} />}
       {content.audience.shows && <Audience content={content.audience} />}
-      {content.whatIsReferred.shows && <WhatIsReferred content={content.whatIsReferred} />}
-      {content.termsSummary.shows && <TermsSummary content={content.termsSummary} />}
-      {content.questions.shows && <Questions content={content.questions} />}
+      {content.whatIsReferred.shows && <WhatIsReferred content={content.whatIsReferred} direction={direction} />}
+      {content.termsSummary.shows && <TermsSummary content={content.termsSummary} direction={direction} />}
+      {content.questions.shows && <Questions content={content.questions} direction={direction} />}
       <Signup content={content.signup} form={content.signupForm} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/referral' }])} />
       <StructuredData data={faqData(content.questions)} />

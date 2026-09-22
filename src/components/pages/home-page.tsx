@@ -44,10 +44,10 @@ export function HomePage({
       {content.situations.shows && <Situations content={content.situations} direction={direction} />}
       {content.fourUnits.shows && <FourUnits content={content.fourUnits} direction={direction} />}
       {content.record.shows && <RecordSection content={content.record} direction={direction} />}
-      {content.beforeAfter.shows && <BeforeAfter content={content.beforeAfter} />}
+      {content.beforeAfter.shows && <BeforeAfter content={content.beforeAfter} direction={direction} />}
       {content.calculator.shows && <DelayCalculator content={content.calculator} />}
       {content.figures.shows && <Figures content={content.figures} direction={direction} />}
-      {content.questions.shows && <Questions ruled={false} content={content.questions} />}
+      {content.questions.shows && <Questions ruled={false} content={content.questions} direction={direction} />}
       <ClosingSection content={content.closing} form={content.demoForm} />
       {/* The page's `.reveal` entrances, attached once for the page. Here
           rather than in `PageShell`, so pages without any do not load it. */}

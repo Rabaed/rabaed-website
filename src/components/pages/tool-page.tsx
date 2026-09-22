@@ -10,7 +10,7 @@ import { Requirements } from '@/components/tool/requirements';
 import { Upsell } from '@/components/tool/upsell';
 import { Why } from '@/components/tool/why';
 import type { ToolPageContent } from '@/content/pages/tool';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /**
  * The tool page — the landing page for the free Pour Tracker — in either
@@ -44,7 +44,7 @@ export async function ToolPage({
       {content.privacy.shows && <Privacy content={content.privacy} />}
       {content.requirements.shows && <Requirements content={content.requirements} />}
       <Download content={content.download} form={content.downloadForm} />
-      {content.questions.shows && <Questions content={content.questions} />}
+      {content.questions.shows && <Questions content={content.questions} direction={LOCALES[locale].dir} />}
       {content.upsell.shows && <Upsell content={content.upsell} />}
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/tool' }])} />
       <StructuredData data={faqData(content.questions)} />

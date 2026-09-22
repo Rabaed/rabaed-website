@@ -39,7 +39,7 @@ export async function ProductPage({
       <Journey content={content.journey} direction={direction} />
       {content.customStrip.shows && <CustomStrip content={content.customStrip} />}
       {content.roles.shows && <Roles content={content.roles} direction={direction} />}
-      {content.innerCycle.shows && <InnerCycle content={content.innerCycle} />}
+      {content.innerCycle.shows && <InnerCycle content={content.innerCycle} direction={direction} />}
       <ClosingSection content={content.closing} form={content.demoForm} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/product' }])} />
       <StructuredData data={softwareData(locale)} />

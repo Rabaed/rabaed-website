@@ -7,7 +7,7 @@ import { FreeToolTeaser } from '@/components/start/free-tool-teaser';
 import { Steps } from '@/components/start/steps';
 import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import type { StartPageContent } from '@/content/pages/start';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /**
  * The start page, in either language, in the Reference site's order: the page
@@ -40,7 +40,7 @@ export async function StartPage({
       <PageHero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {content.steps.shows && <Steps content={content.steps} />}
-      <Questions content={content.questions} beside={<DemoRequestForm wording={content.demoForm} />}>
+      <Questions content={content.questions} direction={LOCALES[locale].dir} beside={<DemoRequestForm wording={content.demoForm} />}>
         {content.freeTool.shows && <FreeToolTeaser content={content.freeTool} />}
       </Questions>
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/start' }])} />

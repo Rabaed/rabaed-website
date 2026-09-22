@@ -21,6 +21,14 @@ export const ARROW_KEYS: Record<ReadingDirection, { readonly forward: ArrowKey; 
   ltr: { forward: 'ArrowRight', back: 'ArrowLeft' },
 };
 
+/**
+ * The arrow that points onward, the way the page reads: at the end of a link
+ * drawn in code, and between two things one follows the other. «←» in Arabic,
+ * «→» in English — the character itself rather than one turned round by the
+ * stylesheet, since it is read out with the link it ends.
+ */
+export const ONWARD: Record<ReadingDirection, '←' | '→'> = { rtl: '←', ltr: '→' };
+
 /** The direction the server wrote onto `element` as `data-direction`. */
 export function readingDirectionOf(element: HTMLElement): ReadingDirection {
   return element.dataset.direction === 'ltr' ? 'ltr' : 'rtl';

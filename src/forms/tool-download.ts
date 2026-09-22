@@ -102,7 +102,7 @@ export const TOOL_DOWNLOAD: FormDefinition<ToolDownloadField> = {
           placeholder: 'Country code',
           message: 'Choose a country code',
           options: {
-            '+966': '+966 Saudi Arabia',
+            '+966': '+966 Saudi',
             '+971': '+971 UAE',
             '+965': '+965 Kuwait',
             '+974': '+974 Qatar',

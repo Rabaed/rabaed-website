@@ -9,7 +9,7 @@ import { Path } from '@/components/partnership/path';
 import { Questions } from '@/components/questions';
 import { breadcrumbData, faqData, StructuredData } from '@/components/structured-data';
 import type { PartnershipPageContent } from '@/content/pages/partnership';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /**
  * The Partnership Program page, for engineering offices and project
@@ -38,6 +38,8 @@ export async function PartnershipPage({
   locales: readonly Locale[];
   content: PartnershipPageContent;
 }) {
+  const direction = LOCALES[locale].dir;
+
   return (
     <PageShell locale={locale} path="/partnership" locales={locales}>
       <PageHero content={content.hero} />
@@ -45,8 +47,8 @@ export async function PartnershipPage({
       {content.audience.shows && <Audience content={content.audience} />}
       {content.modes.shows && <Modes content={content.modes} />}
       {content.benefits.shows && <Benefits content={content.benefits} />}
-      <Path content={content.path} />
-      {content.questions.shows && <Questions content={content.questions} />}
+      <Path content={content.path} direction={direction} />
+      {content.questions.shows && <Questions content={content.questions} direction={direction} />}
       <Apply content={content.apply} form={content.applicationForm} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/partnership' }])} />
       <StructuredData data={faqData(content.questions)} />

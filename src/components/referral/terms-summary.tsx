@@ -1,4 +1,5 @@
 import type { PageLink } from '@/components/page-link';
+import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 /**
  * One of the points: its lead phrase, drawn in bold, and the rest of its
@@ -22,7 +23,14 @@ export type ReferralTermsSummaryContent = {
  * columns of however many an Editor gives it, and a link to the full terms,
  * which are binding where this is a summary (ticket 17).
  */
-export function TermsSummary({ content }: { content: ReferralTermsSummaryContent }) {
+export function TermsSummary({
+  content,
+  direction,
+}: {
+  content: ReferralTermsSummaryContent;
+  /** The page's reading direction, which its arrow points (`ONWARD`). */
+  direction: ReadingDirection;
+}) {
   return (
     <section id="terms" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
@@ -44,7 +52,7 @@ export function TermsSummary({ content }: { content: ReferralTermsSummaryContent
         <div className="tz-foot">
           <a className="tz-more" href={content.link.href}>
             {content.link.label}
-            <span className="ar">←</span>
+            <span className="ar">{ONWARD[direction]}</span>
           </a>
         </div>
       </div>

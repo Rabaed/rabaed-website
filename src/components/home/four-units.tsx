@@ -2,7 +2,7 @@ import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
 import type { PageLink } from '@/components/page-link';
 import { ScreenMockImage, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
-import type { ReadingDirection } from '@/lib/reading-direction';
+import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 export type UnitTab = {
   /** The small line above the title: a unit's number, or the name of what the units produce. */
@@ -137,7 +137,7 @@ export function FourUnits({
         <div className="tz-foot">
           <a className="tz-more" href={content.more.href}>
             <span>{content.more.label}</span>
-            <span className="ar">←</span>
+            <span className="ar">{ONWARD[direction]}</span>
           </a>
         </div>
       </div>

@@ -157,9 +157,10 @@
 /* The card's number is Latin digits, set left to right so "01 / 06" does not
    read backwards, and pushed to the right-hand edge where an Arabic line
    begins. `text-align: right` stays physical on purpose: inside a box forced
-   to left-to-right, `start` would mean the left. The English site revisits it
-   (ticket 42). */
+   to left-to-right, `start` would mean the left — which is where an English
+   line begins, so that is where an English page puts it (ticket 42). */
 .pcard .n { font-family: "DM Mono", monospace; font-size: 11.5px; letter-spacing: .1em; color: var(--dark-muted); direction: ltr; unicode-bidi: isolate; text-align: right }
+[dir="ltr"] .pcard .n { text-align: left }
 .pcard q { display: block; font-size: 21px; font-weight: 600; line-height: 1.62; quotes: "\201C" "\201D"; margin: 22px 0 auto }
 .pcard.top { cursor: grab; box-shadow: 0 30px 70px rgba(0, 0, 0, .55) }
 .pcard.top:active { cursor: grabbing }
@@ -206,9 +207,11 @@
 /* A phrase rather than a number — «أقل من يوم» — so it is set in the Arabic
    face. `unicode-bidi: isolate` is not an addition: the Reference site gives
    it to every `b` in the card and nothing on `b.txtnum` takes it away.
-   `direction: rtl` is physical because the phrase is Arabic whichever page it
-   sits on; the English site brings its own (ticket 42). */
+   `direction: rtl` is physical because the phrase is Arabic on an Arabic page;
+   an English page's is English, «Under a day», and reads left to right
+   (ticket 42). */
 .deck-lt .pcard b.txtnum { font-family: inherit; font-size: 34px; font-weight: 700; direction: rtl; unicode-bidi: isolate; line-height: 1.25; color: var(--ink); display: block; margin-bottom: 0 }
+[dir="ltr"] .deck-lt .pcard b.txtnum { direction: ltr }
 .deck-lt .mark { display: flex; align-items: flex-end; gap: 16px; height: 78px; flex: none }
 .deck-lt .mark span { width: 28px; border-radius: 6px 6px 3px 3px; background: #E6E3DC; position: relative }
 .deck-lt .mark span.on { background: var(--acc) }
@@ -245,11 +248,16 @@
    physical: inside a box forced to left-to-right, `start` would mean the left,
    and the box's width would never show the mistake. */
 .jt-s .n { font-family: "DM Mono", monospace; font-size: 11.5px; color: var(--acc-ink); letter-spacing: .1em; direction: ltr; unicode-bidi: isolate; display: block; margin-bottom: 8px; text-align: right }
+/* The number sits at the start of the tab, over its title: the right in
+   Arabic, the left in English (ticket 42). Physical for the reason above. */
+[dir="ltr"] .jt-s .n { text-align: left }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the one the footer and
    the guarantee pill already carry: «المخرَج» is Arabic, and the Reference
    site sets it in DM Mono, a face with no Arabic glyphs, so it falls through to
    the browser's last-resort monospace. The spec forbids that outright. */
 .jt-s .n.out { font-family: inherit; direction: rtl; letter-spacing: .02em }
+/* An English page's word is English, «The output» (ticket 42). */
+[dir="ltr"] .jt-s .n.out { direction: ltr }
 .jt-s h3 { font-size: 15px; margin: 0; font-weight: 600; line-height: 1.5 }
 
 .jt-stage { position: relative; width: 100%; max-width: 820px; margin: 26px auto 0; aspect-ratio: 1440/900 }
@@ -435,15 +443,19 @@
 /* DELIBERATE EXCEPTION to the logical-properties rule: the seam, the wash
    behind it and the two tags are a picture with a left and a right, and
    `--p` is measured from the left (src/components/home/before-after-seam.ts).
-   The usual way is on the left, Rabaed's on the right. The English site
-   revisits it (ticket 42). */
+   The usual way is on the left, Rabaed's on the right — and on an English page
+   the picture is turned round, Rabaed's way on the left, where its steps
+   begin (ticket 42). */
 .cmp-wash { position: absolute; inset: 0; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(to right, var(--soft) 0 calc(var(--p) - 1px), #FFF6F3 calc(var(--p) + 1px) 100%) }
+[dir="ltr"] .cmp-wash { background: linear-gradient(to right, #FFF6F3 0 calc(var(--p) - 1px), var(--soft) calc(var(--p) + 1px) 100%) }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the tags are Arabic, and the
    Reference site sets them in DM Mono, which has no Arabic glyphs — the defect
    the footer, the guarantee pill and the four units' «المخرَج» already fix. */
 .cmp-tag { position: absolute; top: -13px; font-size: 11.5px; padding: 5px 14px; border-radius: 999px; pointer-events: none; z-index: 3; opacity: .5; transition: opacity .28s ease }
 .cmp-tag.tb { left: 22px; background: var(--ink); color: #fff }
 .cmp-tag.ta { right: 22px; background: var(--acc); color: #fff }
+[dir="ltr"] .cmp-tag.tb { left: auto; right: 22px }
+[dir="ltr"] .cmp-tag.ta { right: auto; left: 22px }
 .cmp-steps, .cmp-cols { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; z-index: 2 }
 .cmp-steps { margin-bottom: 10px }
 .cmp-steps span { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); padding-inline-start: 4px }
@@ -475,8 +487,9 @@
 
 /* The seam at rest, before the script takes over — see
    src/components/home/before-after.tsx. A step turns over once the seam is
-   left of its column's centre; at rest that is the right-hand half, which is
-   the first two columns of four, and the first of each row of two. The values
+   past its column's centre; at rest that is the half a line begins on, which
+   is the first two columns of four, and the first of each row of two — in
+   either direction, since the columns follow it. The values
    are the ones the script paints for a step all the way over or not at all. */
 .face.fa { opacity: 0; transform: translateY(14px) scale(.97) }
 .face.fb { opacity: 1 }

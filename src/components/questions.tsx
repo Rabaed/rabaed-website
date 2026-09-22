@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Faq, FaqEntries, type FaqEntry } from '@/components/faq';
 import type { PageLink } from '@/components/page-link';
+import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 export type QuestionsContent = {
   /** The id links land on (`src/cms/faq-pages.ts`). */
@@ -28,11 +29,14 @@ export type QuestionsContent = {
  */
 export function Questions({
   content,
+  direction,
   ruled = true,
   beside,
   children,
 }: {
   content: QuestionsContent;
+  /** The page's reading direction, which its arrow points (`ONWARD`). */
+  direction: ReadingDirection;
   /** A rule across the top. The home page's section has none, as on the Reference site. */
   ruled?: boolean;
   /** Stood beside the questions, which then stack in a column. */
@@ -58,7 +62,7 @@ export function Questions({
               <div className="tz-foot">
                 <a className="tz-more" href={content.more.href}>
                   <span>{content.more.label}</span>
-                  <span className="ar">←</span>
+                  <span className="ar">{ONWARD[direction]}</span>
                 </a>
               </div>
             )}

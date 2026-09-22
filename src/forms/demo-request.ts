@@ -105,7 +105,7 @@ export const DEMO_REQUEST: FormDefinition<DemoRequestField> = {
         company: { label: 'Company name', placeholder: 'Company name', message: 'The company name is too long' },
         activeProjects: {
           label: 'Number of active projects',
-          placeholder: 'Number of active projects',
+          placeholder: 'Active projects',
           message: 'Enter the number of projects in figures only',
         },
       },

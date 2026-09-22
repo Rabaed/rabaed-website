@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { Inline, type InlineText } from '@/components/inline-text';
+import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 /** One party's review, inside its own walls. */
 export type ReviewCycle = {
@@ -47,7 +48,14 @@ export type ProductInnerCycleContent = {
  *
  * A server component with no behaviour.
  */
-export function InnerCycle({ content }: { content: ProductInnerCycleContent }) {
+export function InnerCycle({
+  content,
+  direction,
+}: {
+  content: ProductInnerCycleContent;
+  /** The page's reading direction, which the Record travels in from one party to the next (`ONWARD`). */
+  direction: ReadingDirection;
+}) {
   return (
     <section id="inner" className="light pad">
       <div className="wrap">
@@ -62,7 +70,7 @@ export function InnerCycle({ content }: { content: ProductInnerCycleContent }) {
                   order of the cards already says it to a screen reader. */}
               {index > 0 && (
                 <div className="cross" aria-hidden="true">
-                  <span>←</span>
+                  <span>{ONWARD[direction]}</span>
                 </div>
               )}
               <div className="org">

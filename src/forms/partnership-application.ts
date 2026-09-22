@@ -229,7 +229,7 @@ export const PARTNERSHIP_APPLICATION: FormDefinition<PartnershipApplicationField
         },
         partnershipMode: {
           label: 'Preferred way of working together',
-          placeholder: 'Preferred way of working together *',
+          placeholder: 'Way of working together *',
           message: 'Choose a preferred way of working together',
           options: {
             'embedded-in-proposal': 'Built into your proposal',

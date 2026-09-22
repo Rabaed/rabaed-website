@@ -78,9 +78,10 @@
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the one the home page's
    four units already carry: «المخرَج» is Arabic, and the Reference site sets it
    in DM Mono, which has no Arabic glyphs (spec: Design system). `direction`
-   is physical because the word is Arabic; the English site brings its own
-   (ticket 42). */
+   is physical because the word is Arabic on an Arabic page; an English
+   page's is English, and reads left to right (ticket 42). */
 #journey .num.out { font-family: inherit; direction: rtl; letter-spacing: .02em; background: rgba(249, 87, 56, .12); border: 1px solid rgba(249, 87, 56, .3); border-radius: 999px; padding: 3px 12px; font-size: 12px }
+[dir="ltr"] #journey .num.out { direction: ltr }
 #journey .panel h3 { font-size: 30px; margin: 10px 0 12px }
 #journey .tag { font-size: 22px; font-weight: 600; line-height: 1.5; margin-bottom: 16px }
 #journey .panel p { color: var(--dark-muted); font-size: 15px; margin: 0 }
