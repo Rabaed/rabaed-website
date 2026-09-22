@@ -43,6 +43,18 @@ import type { CaseStudy } from '@/payload-types';
 /** Built ahead of time and rebuilt when content is published (`src/cms/revalidation.ts`). */
 export const dynamic = 'force-static';
 
+/**
+ * The floor under `llms.txt`: whatever becomes of a publish's mark, it is
+ * rebuilt at most ten minutes after it was last built (ticket 66, ADR-0014).
+ *
+ * Its own, because a discovery file is a route beside the layouts rather than
+ * beneath one, so no layout's age reaches it — the same reason
+ * `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`. Written out rather
+ * than imported because Next reads only a literal; `src/lib/cache-age.ts`
+ * holds the number and the reason it is that number.
+ */
+export const revalidate = 600;
+
 const LOCALE = 'ar';
 
 /** One line of the file: a link, and what the page it points at says about itself. */

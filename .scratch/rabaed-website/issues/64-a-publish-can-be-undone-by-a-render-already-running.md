@@ -55,3 +55,27 @@ Error: the partnership page's reworded paragraph never reached a visitor at
 `partnership-page-text.spec.ts`, one of ticket 60's eleven waits — not one of the twenty-one ticket 62 touched, and on a branch whose whole diff is tests and tracker text. The other three shards passed, and so did four full runs of the same suite on a twenty-core machine. That is this ticket exactly: a page re-cached by a render that was already going, sixty seconds of `HIT`, nothing late about it.
 
 It is worth saying plainly what that means for the suite: **CI will go red like this now and then whatever the tests do**, on changes that cannot have caused it, until this is fixed. Each time costs a re-run. That is the running cost to weigh against the cost of the fix.
+
+## Comments
+
+**A rung the options list was missing.** The three options above are "mark twice",
+"do nothing" and "report upstream", and the middle one is harsher than it needs to
+be. What makes this bug expensive is not that the window exists — it is that a page
+caught by it stays wrong until the next publish, because nothing else in the site
+ever rebuilds a page. Ticket 66 puts a maximum age under every cached page, which
+does not close the window but turns "wrong until somebody publishes" into "wrong
+for a few minutes".
+
+That changes what this ticket is deciding. With 66 in place the question stops being
+about correctness and becomes one about speed: should an Editor's change reach
+visitors in under a second every time, or is within the backstop good enough on the
+rare occasion the race is lost? That is a much cheaper decision to get wrong, and it
+can be taken after watching how often CI goes red with 66 in place rather than
+before.
+
+**Suggested order:** ticket 66 first — it is unblocked, needs no founder's call
+beyond the number, and covers failures beyond this one. Ticket 67 alongside it,
+costing nothing. Then this ticket, with real numbers behind it.
+
+**Still true whatever is decided:** the founder's call on marking twice, and the ADR
+it needs, because it changes what publishing does on every page.

@@ -1,0 +1,161 @@
+# 66: A maximum age under every cached page
+
+**What is wrong:** Nothing makes a cached page rebuild except a publish marking it
+stale. So anything that loses a mark leaves that page showing words from before it
+— not for a while, but until somebody publishes again. Ticket 64 found one way to
+lose a mark; a hook that throws, a request that never lands, a region that missed
+the mark are others we have not had yet. There is no floor under any of them.
+
+**Blocked by:** nothing.
+
+**Status:** resolved — ten minutes, ADR-0014
+
+- [x] Every page a visitor can reach is rebuilt at most a set time after it was
+      last built, whether or not anything was published
+- [x] The three discovery files too — they are routes of their own and no
+      layout covers them
+- [x] The number is written down with the reason it is that number
+- [x] Publishing still reaches the site in under a second in the ordinary case:
+      the age is a floor under failure, not the way a change travels
+- [x] Held by a test that fails without it
+- [x] An ADR records the decision, because it sets how stale a page may be
+- [x] `docs/deployment.md` says what the age is, under the caching section
+
+**Not this ticket:** the race in ticket 64. This does not close the window — a page
+caught by it is still wrong. It bounds how long it stays wrong.
+
+## Why this rather than waiting
+
+`refreshSite` in `src/cms/revalidation.ts` is the standard Payload and Next
+pattern, and it is right. What is missing beside it is the thing almost every
+CMS on a cache also runs: a plain time limit, so a mark that goes astray costs
+minutes rather than costing until the next publish. It is the cheapest change in
+this family and it covers failures we have not met yet, not only ticket 64's.
+
+## Where it goes
+
+The two site layouts — `src/app/(ar)/layout.tsx` and `src/app/(en)/en/layout.tsx`
+— sit above all twenty pages, and a segment takes the lowest age in its chain, so
+setting it there covers every page without twenty edits to keep in step. Check
+that against `node_modules/next/dist/docs/` before writing it: the installed Next
+is 16.3.5 and this is exactly the kind of thing that has moved.
+
+`src/app/llms.txt/route.ts`, the sitemap and `robots.txt` are routes beside the
+layouts, the same reason `DISCOVERY_FILES` exists in `revalidation.ts`. Each needs
+its own.
+
+`(payload)` — the admin — and `(studio)` must not get one. Neither is cached and
+neither is a page a visitor reads.
+
+## What it costs
+
+Next rebuilds when somebody asks for a page whose age has run out, not on a timer.
+On a site with no visitors it costs nothing; on this one it costs about one extra
+render per page per window, and only for windows in which somebody visited.
+
+Worth knowing before picking the number: the visitor who arrives first after the
+age runs out is still served the old page while the rebuild happens behind them.
+So the real bound is the age plus one render, and it is the second visitor who
+sees the change. That argues for a number chosen as "how far behind may a page be
+when something has gone wrong", not as a publishing delay.
+
+## Comments
+
+**What was checked against the installed Next before this was filed.** The
+ticket asks the implementer to verify the mechanism still exists, so that check
+was done at filing time — Next 16.3.5, `cacheComponents` not enabled in
+`next.config.ts`:
+
+- `export const revalidate = <seconds>` is **still the mechanism**, but it has
+  moved out of the Route Segment Config reference and into the guide
+  `01-app/02-guides/caching-without-cache-components.md`. The segment-config
+  index now lists only `dynamicParams`, `runtime`, `preferredRegion` and
+  `maxDuration`, which makes it look removed. It is removed **only when Cache
+  Components is enabled** — this project does not enable it, so the option is
+  live. Read that guide, not the segment-config reference.
+- That guide confirms the assumption this ticket rests on: "The lowest
+  `revalidate` across each layout and page of a single route will determine the
+  revalidation frequency of the _entire_ route." So the two layouts do cover the
+  pages beneath them.
+- The value must be statically analysable — `revalidate = 600` is valid,
+  `revalidate = 60 * 10` is not. That rules out expressing the number as a
+  computation, which is worth knowing before writing it down "with the reason it
+  is that number".
+- **Worth a line in the ADR:** this is the previous caching model. The day Cache
+  Components is turned on, `revalidate` is removed and `cacheLife` is the
+  replacement. The ADR should say that, so whoever enables it knows this
+  decision has to move with it.
+
+**The route groups, as they actually are.** `src/app/(ar)/layout.tsx` and
+`src/app/(en)/en/layout.tsx` both exist. `DISCOVERY_FILES` in
+`src/cms/revalidation.ts` is exactly `['/sitemap.xml', '/llms.txt',
+'/robots.txt']`, matching the second criterion. Two small corrections to "Where
+it goes": only `llms.txt` is a `route.ts` — the other two are the metadata-file
+convention, `src/app/sitemap.ts` and `src/app/robots.ts`. And there is a third
+route group the exclusion list does not name, `(forms)`, which holds two API
+routes and no pages; it wants no age either, for the same reason as `(payload)`
+and `(studio)`.
+
+## Answer
+
+**Ten minutes**, set on the two site layouts and on each of the three discovery
+files, and recorded in ADR-0014.
+
+- `src/lib/cache-age.ts` holds `MAX_PAGE_AGE_SECONDS` and the reason it is that
+  number: it answers "how far behind may a page be when something has gone
+  wrong", it is well inside the time an Editor would take to notice and publish
+  again, and it costs about half the rebuilds of five minutes for a failure this
+  rare. The founder's call, 22 September 2026.
+- `src/app/(ar)/layout.tsx` and `src/app/(en)/en/layout.tsx` carry it for all
+  twenty pages, a route taking the lowest age in its chain.
+  `src/app/llms.txt/route.ts`, `src/app/robots.ts` and `src/app/sitemap.ts` each
+  carry their own, having no layout above them.
+- The number is written out in all five rather than imported, because Next reads
+  `export const revalidate` by static analysis and accepts only a literal.
+  `tests/unit/cached-page-age.spec.ts` holds every one of them to the constant,
+  so they cannot drift.
+
+**Where the test asks, and why there.** Setting the age on two layouts rather
+than twenty pages only works if a route inherits its parent's, so the test has
+to show that inheritance rather than assume it. The build's manifest records
+what Next resolved, but only for routes prerendered at build time — the blog
+posts and the case studies are rendered on demand and are absent from it, and
+they are the CMS-driven pages a lost mark hurts most. What every route has in
+common is the response, so `tests/e2e/cached-page-age.spec.ts` reads that:
+`s-maxage=600` on the fourteen pages, on `llms.txt`, and on five routes rendered
+on demand; `must-revalidate` on `sitemap.xml` and `robots.txt`, which is what
+the metadata-file convention sends; and `s-maxage=31536000` still on the Screen
+mock studio, so the exclusion is asserted rather than assumed.
+`tests/unit/cached-page-age.spec.ts` keeps only what no running application can
+observe — the five literals held to `MAX_PAGE_AGE_SECONDS`, and the three
+excluded route groups still carrying nothing.
+
+That split is the spec's own rule (Testing Decisions): the running application
+is the seam, and the repository-consistency seam is for what the application
+cannot show. An earlier draft asserted against `.next/prerender-manifest.json`,
+which is neither — a build artefact, and blind to exactly the routes most worth
+covering.
+
+**What was measured.** Before the change, all twenty-nine prerendered routes
+read `initialRevalidateSeconds: false` and every page was served
+`s-maxage=31536000` — a year — to any cache in front of it. After it, the
+pages, `llms.txt` and the on-demand routes read `s-maxage=600`. The full suite
+is green at 647 passed, with no publish wait anywhere in it running past the
+five seconds at which `tests/e2e/cms.ts` reports one, so nothing about how a
+change travels was disturbed. That is the evidence for the fourth criterion: it
+is "no publish wait slowed", not a fresh sub-second measurement, which this
+ticket did not take.
+
+**A correction to "Where it goes" in the body above**, found while doing it: only
+`llms.txt` is a `route.ts`; the sitemap and robots are the metadata-file
+convention, `src/app/sitemap.ts` and `src/app/robots.ts`. And there is a third
+route group the exclusion list did not name, `(forms)`, which is two API routes
+and no pages; it is excluded with `(payload)` and `(studio)`, and the test holds
+all three to that.
+
+**On the installed Next.** `export const revalidate` survives in 16.3.5 but has
+moved out of the Route Segment Config reference into
+`01-app/02-guides/caching-without-cache-components.md`, which makes it look
+removed. It is removed only when Cache Components is enabled, which this project
+does not enable. ADR-0014 records that the day Cache Components is turned on,
+this decision moves to `cacheLife`.

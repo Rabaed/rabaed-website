@@ -14,6 +14,18 @@ import { DEFAULT_LOCALE, localePath } from '@/lib/locales';
 const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', '/blog', '/terms', '/privacy', '/referral-terms'];
 
 /**
+ * The floor under `sitemap.xml`: whatever becomes of a publish's mark, it is
+ * rebuilt at most ten minutes after it was last built (ticket 66, ADR-0014).
+ *
+ * Its own, because a discovery file is a route beside the layouts rather than
+ * beneath one, so no layout's age reaches it — the same reason
+ * `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`. Written out rather
+ * than imported because Next reads only a literal; `src/lib/cache-age.ts`
+ * holds the number and the reason it is that number.
+ */
+export const revalidate = 600;
+
+/**
  * `sitemap.xml`: the site's pages and every published article and case study,
  * in whichever language it is published (tickets 23 and 24). A draft is never
  * listed, and an entry leaves when it is unpublished: publishing and

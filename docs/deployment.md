@@ -30,6 +30,42 @@ Every environment except production tells search engines and AI assistants to
 ignore it, so preview links can be shared freely without the unfinished site
 turning up in Google.
 
+## Caching
+
+Pages are built ahead of time and kept, so a visitor gets one instantly rather
+than waiting for it to be assembled. That means a page has to be rebuilt before
+a change shows on it, and two separate things cause that:
+
+- **Publishing in the CMS.** Publishing marks every page — and `sitemap.xml`,
+  `llms.txt` and `robots.txt` with them — as out of date, and each is rebuilt
+  the next time somebody asks for it. This is how a change normally travels,
+  and it arrives in under a second.
+- **The maximum age: ten minutes.** Whatever becomes of that mark, no page is
+  older than ten minutes before it is rebuilt anyway.
+
+The second exists because the first has one failure it cannot see. A mark can
+go astray — a rebuild that was already running can finish afterwards and put
+the old words back, and Next has no way to tell they are old (ticket 64) — and
+when that happens the page stays wrong **until somebody publishes again**,
+which could be days. The ten-minute age is the floor under that: it does not
+stop it happening, it stops it lasting.
+
+Two things are worth knowing about the ten minutes:
+
+- It is **not** how long publishing takes. Publishing is unaffected. The age
+  only matters when something has already gone wrong.
+- The real bound is ten minutes plus one rebuild. The visitor who arrives first
+  after the age runs out is still served the old page while the rebuild happens
+  behind them; the next one gets the new page.
+
+If a published change has not shown up after about ten minutes, that is not the
+cache — something else is wrong, and it is worth saying so rather than
+publishing again.
+
+The number lives in `src/lib/cache-age.ts` with the reasoning behind it, and
+ADR-0014 records the decision. The Screen mock studio and the CMS admin have no
+age: nothing a publish does can make either stale.
+
 ## One-time setup
 
 Three steps only a person with the accounts can do. None blocks development —
