@@ -13,8 +13,9 @@ import { ENGLISH_PAGES_SEED, ENGLISH_PAGES_UNSEED } from './english-pages/seed';
  * only once he approves it, and that no English page be published with words
  * missing. So nothing here is published: an English page's address goes on
  * saying the page is not in English yet until he has published every entry
- * that page reads in English (`inEnglish`, `src/content/pages/page-content.ts`). `docs/deployment.md` has what he
- * does, under «The English pages, waiting for a decision».
+ * that page reads in English (`inEnglish`, in
+ * `src/content/pages/page-content.ts`). `docs/deployment.md` has what he does,
+ * under «The English pages, waiting for a decision».
  *
  * The statements are in `english-pages/seed.ts`, and the words in the modules
  * beside it.
