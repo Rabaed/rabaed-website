@@ -115,14 +115,36 @@ files, and recorded in ADR-0014.
   `tests/unit/cached-page-age.spec.ts` holds every one of them to the constant,
   so they cannot drift.
 
-**What the test does that a source check would not.** Setting the age on two
-layouts instead of twenty pages only works if a page inherits its parent's, and
-a spec that read the source alone would assume that rather than show it. So it
-also reads `.next/prerender-manifest.json` and asserts what the build actually
-resolved. Before the change every one of the twenty-nine prerendered routes read
-`initialRevalidateSeconds: false`; after it, the seventeen visitor routes read
-`600` and the studio and framework routes still read `false`. A new page group
-added without an age fails there rather than being discovered by a visitor.
+**Where the test asks, and why there.** Setting the age on two layouts rather
+than twenty pages only works if a route inherits its parent's, so the test has
+to show that inheritance rather than assume it. The build's manifest records
+what Next resolved, but only for routes prerendered at build time — the blog
+posts and the case studies are rendered on demand and are absent from it, and
+they are the CMS-driven pages a lost mark hurts most. What every route has in
+common is the response, so `tests/e2e/cached-page-age.spec.ts` reads that:
+`s-maxage=600` on the fourteen pages, on `llms.txt`, and on five routes rendered
+on demand; `must-revalidate` on `sitemap.xml` and `robots.txt`, which is what
+the metadata-file convention sends; and `s-maxage=31536000` still on the Screen
+mock studio, so the exclusion is asserted rather than assumed.
+`tests/unit/cached-page-age.spec.ts` keeps only what no running application can
+observe — the five literals held to `MAX_PAGE_AGE_SECONDS`, and the three
+excluded route groups still carrying nothing.
+
+That split is the spec's own rule (Testing Decisions): the running application
+is the seam, and the repository-consistency seam is for what the application
+cannot show. An earlier draft asserted against `.next/prerender-manifest.json`,
+which is neither — a build artefact, and blind to exactly the routes most worth
+covering.
+
+**What was measured.** Before the change, all twenty-nine prerendered routes
+read `initialRevalidateSeconds: false` and every page was served
+`s-maxage=31536000` — a year — to any cache in front of it. After it, the
+pages, `llms.txt` and the on-demand routes read `s-maxage=600`. The full suite
+is green at 647 passed, with no publish wait anywhere in it running past the
+five seconds at which `tests/e2e/cms.ts` reports one, so nothing about how a
+change travels was disturbed. That is the evidence for the fourth criterion: it
+is "no publish wait slowed", not a fresh sub-second measurement, which this
+ticket did not take.
 
 **A correction to "Where it goes" in the body above**, found while doing it: only
 `llms.txt` is a `route.ts`; the sitemap and robots are the metadata-file
