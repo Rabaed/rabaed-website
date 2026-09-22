@@ -524,7 +524,11 @@ That cost two tickets a workaround each (33 and 26) before ticket 63 closed it.
 The one exception is an **upload**. A file has to be converted and written to
 storage, which no `INSERT` can do, so a migration that brings in a picture
 still creates it with `payload.create({ collection: 'media', … })` — and a
-field added to Images can still stop a fresh database there.
+field added to Images can still stop a fresh database there. Two do: the Trust
+strip's marks and the launch articles' covers. Each uploads its pictures first
+and then runs the SQL for the rows that point at them, which finds each picture
+by its file name rather than by the id it had the day it was frozen (`excludes`
+in `IMPORTS`).
 
 To write one:
 
@@ -535,7 +539,10 @@ To write one:
    the import wrote, and writes the statements out as `seed.ts` beside the
    words.
 3. Change the migration's `up` to `await db.execute(sql.raw(THE_SEED))`, and
-   leave `down` as it was.
+   leave `down` as it was. SQL the import already ran after Payload's calls
+   stays after the seed: the legal documents' two `UPDATE`s, which date them
+   to the day the text was approved, are why their seed can write `now()` like
+   every other.
 4. Check it with `npm run cms:migrate-fresh`, which migrates a throwaway
    database from nothing in a few seconds — the only place any of this shows.
 
@@ -552,8 +559,10 @@ of it is its published version and every row of every list inside it, which is
 the one place naming today's columns would be wrong, since a column added later
 and missed would propose an entry with a field wiped.
 
-`tests/unit/data-migrations.spec.ts` holds the rule, and names the eight
-migrations that have not been brought over to it yet (ticket 68).
+`tests/unit/data-migrations.spec.ts` holds the rule, and every data migration
+keeps it: ticket 68 brought over the last eight. A new one written through
+Payload fails the suite the day it merges, and so does a frozen seed that no
+longer writes the words beside it.
 
 ### Forms
 

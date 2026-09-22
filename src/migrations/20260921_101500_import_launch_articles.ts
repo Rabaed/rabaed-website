@@ -3,7 +3,7 @@ import path from 'node:path';
 import { SKIP_REVALIDATION } from '../cms/revalidation';
 import { screenMockImagePath } from '../screen-mocks/registry';
 import { ARTICLE_PER_QUESTION_KIND } from './launch-articles/articles';
-import { toRichText } from './launch-articles/body';
+import { LAUNCH_ARTICLES_SEED } from './launch-articles/seed';
 import { SCREEN_MOCK_DESCRIPTIONS } from './product-page-import/words';
 
 /**
@@ -20,9 +20,10 @@ import { SCREEN_MOCK_DESCRIPTIONS } from './product-page-import/words';
  * (`src/cms/editorial-fields.ts`). `docs/deployment.md` says what to do, in
  * plain language.
  *
- * `draft: true` is what makes that possible: it saves the version without
- * checking the rules an entry must meet to be published, which is the same
- * allowance an Editor has while writing.
+ * They were first written through Payload with `draft: true`, which saves the
+ * version without checking the rules an entry must meet to be published — the
+ * same allowance an Editor has while writing. The rows that made are what is
+ * frozen now.
  *
  * **Each article arrives with a cover.** It is the Screen mock of the screen
  * that article is about, uploaded from `public/screen-mocks/ar/` — which gives
@@ -31,23 +32,29 @@ import { SCREEN_MOCK_DESCRIPTIONS } from './product-page-import/words';
  * only pictures of Rabaed that exist (ADR-0002), and Ahmed swaps any of them
  * from the CMS like any other image.
  *
- * The date is the day the drafts were written, not the day this runs — as the
- * legal import dates its first versions by the day the text was approved — so
- * that every database gets the same one. Ahmed sets it to the day he
- * publishes, which is what the date on an article means to a reader.
+ * The date is the day the drafts were written, 21 September 2026, not the day
+ * this runs — as the legal import dates its first versions by the day the text
+ * was approved — so that every database gets the same one. Ahmed sets it to
+ * the day he publishes, which is what the date on an article means to a
+ * reader.
+ *
+ * **Frozen as SQL, all but the covers** (ticket 68). A picture has to be
+ * converted and written to storage, which no `INSERT` can do, so the six still
+ * go through Payload, first; the posts are then the statements in
+ * `launch-articles/seed.ts`, naming the columns the posts' tables had on the
+ * day this was written, and each finds its cover by file name rather than by
+ * the id it had that day. `launch-articles/articles.ts` is where the articles
+ * are read.
  */
-
-/** Midnight on 21 September 2026 in Riyadh: the day the six were drafted. */
-const DRAFTED_ON = '2026-09-21T00:00:00+03:00';
 
 const LAUNCH_ARTICLES = Object.values(ARTICLE_PER_QUESTION_KIND);
 
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   const context = { [SKIP_REVALIDATION]: true };
   const publicDirectory = path.join(process.cwd(), 'public');
 
   for (const article of LAUNCH_ARTICLES) {
-    const cover = await payload.create({
+    await payload.create({
       collection: 'media',
       // What the screen shows, in the words the product page already uses for
       // the same picture (ticket 57) rather than a second description of it:
@@ -58,29 +65,9 @@ export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
       context,
       req,
     });
-
-    await payload.create({
-      collection: 'posts',
-      draft: true,
-      data: {
-        locale: 'ar',
-        title: article.title,
-        slug: article.slug,
-        summary: article.summary,
-        answer: article.answer,
-        body: toRichText(article.body),
-        coverImage: cover.id,
-        publishedAt: DRAFTED_ON,
-        // Ahmed's, and required to publish.
-        author: '',
-      },
-      // A migration runs outside the site, where there are no pages to
-      // refresh (`src/cms/revalidation.ts`). Nothing is published here in any
-      // case, so there is nothing a visitor could see change.
-      context,
-      req,
-    });
   }
+
+  await db.execute(sql.raw(LAUNCH_ARTICLES_SEED));
 }
 
 /**

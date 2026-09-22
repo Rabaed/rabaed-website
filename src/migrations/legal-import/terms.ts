@@ -4,8 +4,9 @@ import type { ApprovedDocument } from './approved-text';
  * شروط الخدمة — imported word for word from reference/legal-source/V.0.0_AR_Terms_of_Service.docx, by way of reference/site/terms.html (ticket 17).
  *
  * The approved text, verbatim, as the CMS's first version of the Terms
- * (ticket 25). Frozen: the Terms are edited and versioned in the CMS, and this
- * file is only what the import migration reads (`approved-text.ts`).
+ * (ticket 25). Frozen: the Terms are edited and versioned in the
+ * CMS. This file is the readable record of what the import wrote; the
+ * statements themselves are frozen in `seed.ts` beside it (ticket 68).
  */
 export const TERMS: ApprovedDocument = {
   metaTitle: 'ربائد · شروط الخدمة',
