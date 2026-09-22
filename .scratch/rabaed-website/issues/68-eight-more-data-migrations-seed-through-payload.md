@@ -4,18 +4,18 @@
 
 **Blocked by:** nothing. Ticket 63 is resolved, and built the tool this needs.
 
-**Status:** ready-for-agent
+**Status:** resolved — all eight write frozen SQL, and a field added later no longer stops a fresh database
 
-- [ ] `20260913_191346_publish_contact_points` — the site settings
-- [ ] `20260914_061635_import_legal_documents` — the Terms, the Privacy Policy and the Referral Terms
-- [ ] `20260914_193520_import_faq_entries` — the 31 questions
-- [ ] `20260914_194144_publish_demo_request_wording` — the demo request form's words
-- [ ] `20260914_222809_publish_referral_signup_wording` — the Referral Program signup's words
-- [ ] `20260920_170917_publish_partnership_application_wording` — the partnership application's words
-- [ ] `20260921_035306_publish_tool_download_wording` — the tool download form's words (ticket 30's, written beside ticket 63 on another branch)
-- [ ] `20260921_101500_import_launch_articles` — the six launch articles and their covers
-- [ ] `tests/unit/data-migrations.spec.ts` has an empty `NOT_YET_FROZEN` list, and the rule it holds has no exception left but the upload
-- [ ] The whole suite passes against a fresh database
+- [x] `20260913_191346_publish_contact_points` — the site settings
+- [x] `20260914_061635_import_legal_documents` — the Terms, the Privacy Policy and the Referral Terms
+- [x] `20260914_193520_import_faq_entries` — the 31 questions
+- [x] `20260914_194144_publish_demo_request_wording` — the demo request form's words
+- [x] `20260914_222809_publish_referral_signup_wording` — the Referral Program signup's words
+- [x] `20260920_170917_publish_partnership_application_wording` — the partnership application's words
+- [x] `20260921_035306_publish_tool_download_wording` — the tool download form's words (ticket 30's, written beside ticket 63 on another branch)
+- [x] `20260921_101500_import_launch_articles` — the six launch articles and their covers
+- [x] `tests/unit/data-migrations.spec.ts` has an empty `NOT_YET_FROZEN` list, and the rule it holds has no exception left but the upload
+- [x] The whole suite passes against a fresh database
 
 **Not this ticket:** changing what any migration imported. The words, the documents and the articles stay exactly as they are — the round trip in ticket 63 is how that is shown: freeze, then freeze again, and the file comes back identical.
 
@@ -99,21 +99,21 @@ passes.
 
 **Acceptance criteria:**
 
-- [ ] The five that hold their words inline have them in a readable module
+- [x] The five that hold their words inline have them in a readable module
       beside the migration, and the words are byte-for-byte what they were
-- [ ] All eight execute frozen SQL in their `up`; the only Payload call left
+- [x] All eight execute frozen SQL in their `up`; the only Payload call left
       anywhere is the launch articles' cover upload
-- [ ] `import_legal_documents` still dates its three documents 1 September 2026,
+- [x] `import_legal_documents` still dates its three documents 1 September 2026,
       by keeping its two `UPDATE` statements after the seed
-- [ ] `import_launch_articles` still creates its six posts as drafts with an
+- [x] `import_launch_articles` still creates its six posts as drafts with an
       empty author, still uploads a cover per article, and its `down` still
       deletes those covers through Payload so the stored files go with them
-- [ ] `NOT_YET_FROZEN` is empty and the data-migrations unit test passes
-- [ ] `npm run cms:migrate-fresh` runs the whole chain on a database built from
+- [x] `NOT_YET_FROZEN` is empty and the data-migrations unit test passes
+- [x] `npm run cms:migrate-fresh` runs the whole chain on a database built from
       scratch
-- [ ] The whole suite passes against a fresh database, on this ticket's port
+- [x] The whole suite passes against a fresh database, on this ticket's port
       (`TEST_PORT=3168`)
-- [ ] Freezing a second time produces an identical file for each of the eight —
+- [x] Freezing a second time produces an identical file for each of the eight —
       ticket 63's round trip, which is how "the words did not change" is shown
 
 **Out of scope:**
@@ -130,3 +130,40 @@ passes.
   one call no `INSERT` can stand in for, and it stays.
 - **Publishing the six launch articles.** They stay unpublished drafts with an
   empty author; that is ticket 38, and the founder's.
+
+---
+
+**Resolved, 22 September 2026, branch `ticket-68`.**
+
+**The words did not change, shown three ways.** Freezing the eight as they
+were, then again with the five sets of inline words lifted into their own
+`words.ts`, then again with every `up` on its seed, gave the same eight files
+each time. The one exception is the legal documents' seed between the first two
+runs, which differed only in the 80 ids Payload gives the clauses' list rows,
+new on every run through its API. Those are fixed now that the migration runs
+its seed, as the home page's 116 have been since ticket 63. The nine older
+seeds were untouched by every run.
+
+**The trap is closed, shown both ways.** With a throwaway field added to the
+site settings and its migration generated, `npm run cms:migrate-fresh` ran the
+whole chain from nothing. With the contact points migration put back on
+Payload and nothing else changed, it stopped at that migration, from 13
+September, with `column "version_probe_field" does not exist`. The experiment
+was thrown away.
+
+**The test has teeth.** `NOT_YET_FROZEN` is empty. `FROZEN` holds all eight to
+their words, and changing one word of the demo request form's heading turns it
+red. It now reads a value stored as rich text in its JSON-escaped form too:
+three paragraphs of the Terms contain a double quote, which JSON writes
+escaped.
+
+**What else went.** `toRichText` and `toLegalDocumentFields` had no caller left
+once their migrations ran seeds, so they were removed. The shapes the words are
+written in stay. The legal documents' recorded author, «استيراد النص المعتمد
+قبل الإطلاق», is `IMPORTED_BY` in `legal-import/approved-text.ts`, where the test
+can see it.
+
+**The full suite:** 1105 of 1106 on `TEST_PORT=3168`, 20 workers. The one was
+`read ECONNRESET` on the legal documents API, early in the run. It is a dropped
+connection, not an answer from the server. The legal documents' tests then
+passed 23 of 23 in three separate runs, each on a fresh server.
