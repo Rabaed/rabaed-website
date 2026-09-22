@@ -63,7 +63,7 @@ cache — something else is wrong, and it is worth saying so rather than
 publishing again.
 
 The number lives in `src/lib/cache-age.ts` with the reasoning behind it, and
-ADR-0014 records the decision. The Screen mock studio and the CMS admin have no
+ADR-0016 records the decision. The Screen mock studio and the CMS admin have no
 age: nothing a publish does can make either stale.
 
 ## One-time setup
@@ -553,7 +553,7 @@ the one place naming today's columns would be wrong, since a column added later
 and missed would propose an entry with a field wiped.
 
 `tests/unit/data-migrations.spec.ts` holds the rule, and names the eight
-migrations that have not been brought over to it yet (ticket 64).
+migrations that have not been brought over to it yet (ticket 68).
 
 ### Forms
 
