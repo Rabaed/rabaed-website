@@ -12,7 +12,7 @@
  * the same reason within the suite.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
+import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
 
@@ -369,4 +369,30 @@ test('a case study cannot be published missing any part of the story, or with a 
 
   // A draft may be unfinished: Ahmed saves as he writes.
   expect((await save(page.request, caseStudy({ answer: 'مسودة لم تكتمل.', client: '' }), 'draft')).ok()).toBe(true);
+});
+
+test('the admin shows which case studies are missing a translation', async ({ page }) => {
+  // Drafts only: the tests beside this one read "no case study is published".
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const arabic = caseStudy({ withoutCover: true });
+  await create(page.request, arabic, 'draft');
+
+  /** The Translation column of a case study's row in the Case studies list. */
+  const translationOf = async (title: string) => {
+    await page.goto(`${ADMIN_PATH}/collections/case-studies?where[slug][equals]=${arabic.slug}`);
+    return page.getByRole('row').filter({ hasText: title }).locator('.cell-translation');
+  };
+
+  await expect(await translationOf(arabic.title)).toHaveText('Missing');
+
+  const english = caseStudy({
+    locale: 'en',
+    slug: arabic.slug,
+    title: `Test case study ${runId}`,
+    author: 'Test Author',
+    withoutCover: true,
+  });
+  await create(page.request, english, 'draft');
+  await expect(await translationOf(arabic.title)).toHaveText('Draft only');
+  await expect(await translationOf(english.title)).toHaveText('Draft only');
 });

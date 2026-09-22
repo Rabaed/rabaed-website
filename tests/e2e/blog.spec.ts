@@ -392,6 +392,45 @@ test('an article exists per language, and a missing translation offers the one t
   expect((await visit(request, `/en/blog/test-${runId}-nowhere`)).status).toBe(404);
 });
 
+test('the admin shows at a glance which articles are missing a translation', async ({ page, request }) => {
+  await logInByApi(page.request, BLOG_EDITOR);
+  const arabic = article();
+  const { id } = await createPost(page.request, arabic);
+
+  /** The Translation column of an article's row in the Blog list, both languages of this one listed. */
+  const translationOf = async (title: string) => {
+    await page.goto(`${ADMIN_PATH}/collections/posts?where[slug][equals]=${arabic.slug}`);
+    return page.getByRole('row').filter({ hasText: title }).locator('.cell-translation');
+  };
+
+  // Nothing in English yet: the Arabic row says so.
+  await expect(await translationOf(arabic.title)).toHaveText('Missing');
+
+  // An English draft is on its way, but no English reader has it.
+  const english = article({
+    locale: 'en',
+    slug: arabic.slug,
+    title: `Test article ${runId}`,
+    summary: 'A summary of the test article.',
+    body: 'A paragraph from the body of the test article.',
+    author: 'Test Author',
+  });
+  const { id: englishId } = await createPost(page.request, english, 'draft');
+  await expect(await translationOf(arabic.title)).toHaveText('Draft only');
+  // And the English row reads the other way: its Arabic is published.
+  await expect(await translationOf(english.title)).toHaveText('Published');
+
+  const published = await page.request.patch(`/api/posts/${englishId}`, { data: { _status: 'published' } });
+  expect(published.ok(), await published.text()).toBe(true);
+  await expect(await translationOf(arabic.title)).toHaveText('Published');
+
+  // Worked out for an editor only: a visitor's copy of the article carries nothing of it.
+  expect(((await (await page.request.get(`/api/posts/${id}`)).json()) as { translation?: string }).translation).toBe(
+    'published',
+  );
+  expect(((await (await request.get(`/api/posts/${id}`)).json()) as { translation?: string }).translation).toBeUndefined();
+});
+
 test('an article cannot be published without an opening answer of 30 to 60 words, or on an address already taken', async ({
   page,
 }) => {

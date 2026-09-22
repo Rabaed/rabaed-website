@@ -35,6 +35,7 @@ import type {
   RichTextField,
   TextareaFieldValidation,
   TextFieldSingleValidation,
+  Where,
 } from 'payload';
 import { text, textarea } from 'payload/shared';
 import { COMPANY } from '../content/company';
@@ -236,6 +237,59 @@ export function slugField(options: {
       },
     },
     validate,
+  };
+}
+
+/**
+ * Whether an entry is in the other language too — none, a draft only, or
+ * published — so that the admin's list shows at a glance what the English
+ * section is still missing, and it cannot fall behind unnoticed (ticket 43).
+ *
+ * A translation is the entry at the same slug in the other language (above),
+ * so there is nothing to keep in step: this is worked out on every read, never
+ * stored. Counted rather than fetched, because fetching the other entry would
+ * work this out for it too, which would ask after this one, and so on. And only
+ * for a signed-in reader: the site's own pages read entries by the dozen, for
+ * the index, the sitemap and `llms.txt`, and have no use for it.
+ */
+export function translationField(collection: EditorialCollection): Field {
+  return {
+    name: 'translation',
+    type: 'select',
+    virtual: true,
+    label: { ar: 'الترجمة', en: 'Translation' },
+    options: [
+      { value: 'missing', label: { ar: 'غير موجودة', en: 'Missing' } },
+      { value: 'draft', label: { ar: 'مسودة فقط', en: 'Draft only' } },
+      { value: 'published', label: { ar: 'منشورة', en: 'Published' } },
+    ],
+    admin: {
+      readOnly: true,
+      position: 'sidebar',
+      description: {
+        ar: 'هل لهذا المدخل نسخة باللغة الأخرى بعنوان الرابط نفسه، وهل نُشرت.',
+        en: 'Whether this entry exists in the other language at the same slug, and whether that is published.',
+      },
+    },
+    hooks: {
+      afterRead: [
+        async ({ data, req }) => {
+          if (!req.user) return undefined;
+          const { slug, locale } = (data ?? {}) as { slug?: string | null; locale?: string | null };
+          if (!slug) return 'missing';
+
+          const counterpart: Where[] = [{ slug: { equals: slug } }, { locale: { equals: locale === 'en' ? 'ar' : 'en' } }];
+          const published = await req.payload.count({
+            collection,
+            where: { and: [...counterpart, { _status: { equals: 'published' } }] },
+            req,
+          });
+          if (published.totalDocs > 0) return 'published';
+          const drafted = await req.payload.count({ collection, where: { and: counterpart }, req });
+          return drafted.totalDocs > 0 ? 'draft' : 'missing';
+        },
+      ],
+    },
   };
 }
 
