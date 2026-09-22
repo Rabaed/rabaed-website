@@ -69,7 +69,7 @@
       "id": "kanban",
       "width": 2880,
       "height": 1800,
-      "source": "101704bb7a8774e85c34b3b8db938765b6e1738e8ea2ac6dbba2385d20a60797"
+      "source": "4b4b6189b886a0ecd58be221b2f6e33c1d04df8b589af939eb33dd79994c792c"
     },
     {
       "locale": "en",
@@ -83,7 +83,7 @@
       "id": "documents",
       "width": 2880,
       "height": 1800,
-      "source": "e9011802742fd6bafe2b3201d9c0f4da4e50409b4c276ee9b630eab6ba112efb"
+      "source": "80179dcba97e492e68d0b576a1aede7a7e7d08810ecb4d6566272a3882cc0063"
     },
     {
       "locale": "en",
@@ -111,7 +111,7 @@
       "id": "submittal",
       "width": 2880,
       "height": 1800,
-      "source": "ed81fcdad059822684c71cbbdda55d26e61f02b9a448c0727720e34fdcd8931e"
+      "source": "c0f5f9d7059bdd5dbdc2cabd519cc92cabfc4b4e205f076fed565f6dcb15ca48"
     }
   ]
 }

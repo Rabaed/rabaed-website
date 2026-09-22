@@ -5,7 +5,10 @@ import type { ScreenMockPictureContent } from '@/components/screen-mock-picture'
 import type { Locale } from '@/lib/locales';
 import type { ScreenMock as ScreenMocksEntry } from '@/payload-types';
 
-/** One mock's fields in the CMS's Screen mocks entry: its replacement picture for each language, and its description. */
+/**
+ * One mock's fields in the CMS's Screen mocks entry: its replacement picture
+ * for each language, and its description.
+ */
 type MockFields = ScreenMocksEntry['correspondence'];
 
 /**

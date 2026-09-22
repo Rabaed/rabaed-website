@@ -21,8 +21,10 @@ import type { Locale } from '../lib/locales.ts';
  * tilt's sign — and the chevrons that point onward turned to point right.
  * Charts, signatures and stamps are pictures of things, not of the interface,
  * and keep their direction. `tests/e2e/screen-mocks.spec.ts` holds the two
- * sets to the same elements and to mirrored positions, so a change to one
- * language's screen is a change to both.
+ * sets to the same elements in the same order, and the cards on the stage to
+ * mirrored positions — so an element added to or dropped from one language's
+ * screen fails until the other has it too. A change of style or colour is not
+ * caught, and is made in both by hand.
  *
  * **No `alt` text here, deliberately.** What a mock shows, in words, is copy —
  * the picture's description and the visible caption ADR-0002 requires — and it

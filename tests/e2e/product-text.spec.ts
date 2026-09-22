@@ -687,9 +687,9 @@ test('the English descriptions of the screens wait as a draft, and the CMS publi
   expect(await visitorHtml(request, '/product')).not.toContain(ENGLISH_SCREEN_MOCK_DESCRIPTIONS.correspondence);
 
   // And the CMS takes it as it stands, when the founder presses Publish: every
-  // English word fits its place. Published, then put straight back. No page
-  // shows a screen in English until ticket 42, so a visitor sees nothing of
-  // it in between, and no suite beside this one reads the entry.
+  // English word fits its place. Published, then put straight back. Nothing a
+  // visitor or another suite reads changes in between: the Arabic is the
+  // published Arabic, and no page shows a screen in English until ticket 42.
   try {
     const publishing = await save(page.request, 'screen-mocks', proposal, 'published');
     expect(publishing.ok(), await publishing.text()).toBe(true);

@@ -2,7 +2,7 @@
  * Screen mocks: the studio that renders them and the images exported from it
  * (ticket 05, ADR-0002).
  *
- * Three things have to stay true, and each fails in a different way:
+ * Four things have to stay true, and each fails in a different way:
  *
  *  1. The studio renders a mock exactly as the Reference site does. The markup
  *     was lifted out of `reference/site/` by hand, and a mock is 15–50 KB of
@@ -63,8 +63,8 @@ const ARABIC_LETTER = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE
 /**
  * Whether an Editor has replaced this mock in the admin (ticket 57), for the
  * pages of one language — each has a replacement of its own (ticket 41): a
- * page shows it, and shows a picture other than its export. A mock no page shows
- * just now — its section hidden — is not replaced, and is still checked.
+ * page shows it, and shows a picture other than its export. A mock no page
+ * shows just now — its section hidden — is not replaced, and is still checked.
  *
  * Read from the pages, as a visitor with no session receives them, rather than
  * from the CMS: these checks run side by side, and side by side sign-ins to one
@@ -368,6 +368,7 @@ test.describe('screen mocks', () => {
           const original = arabic.cards[index]!;
           const where = `card ${index + 1} on the stage`;
           expect(card.anchoredLeft, `${where} is anchored by the other side`).toBe(!original.anchoredLeft);
+          expect(card.anchoredBottom, `${where} is anchored the same way up`).toBe(original.anchoredBottom);
           if (card.anchoredBottom) expect(card.bottom, where).toBe(original.bottom);
           else expect(card.top, where).toBe(original.top);
           if (card.anchoredLeft) expect(card.left, where).toBe(original.right);
@@ -382,18 +383,27 @@ test.describe('screen mocks', () => {
 
   test("every picture of a Screen mock on a page is its own language's", async ({ request }) => {
     // English pages show the English export and Arabic pages the Arabic one.
-    // A replacement an Editor chose is not an export, and not checked here.
+    // A replacement an Editor chose is served by the CMS, and is its
+    // language's by the entry's own fields (`src/content/screen-mocks.ts`).
+    // Until ticket 42 no English page shows a mock, so the English half of
+    // this finds nothing to hold; the Arabic half shows it can find them.
+    const found: Record<MockLocale, number> = { ar: 0, en: 0 };
     for (const locale of MOCK_LOCALES) {
       for (const page of PAGES_SHOWING_MOCKS[locale]) {
         const response = await request.get(page);
         expect(response.ok(), page).toBe(true);
         const html = await response.text();
         for (const [tag] of html.matchAll(/<img[^>]*data-screen-mock="[^"]*"[^>]*>/g)) {
-          const exported = decodeURIComponent(tag).match(/\/screen-mocks\/(\w+)\//);
-          if (exported) expect(exported[1], `${page}: ${tag}`).toBe(locale);
+          const source = decodeURIComponent(tag);
+          if (source.includes('/api/media/')) continue;
+          const exported = source.match(/\/screen-mocks\/(\w+)\//);
+          expect(exported, `${page}: a picture of a mock that is neither an export nor a replacement: ${tag}`).not.toBeNull();
+          expect(exported![1], `${page}: ${tag}`).toBe(locale);
+          found[locale]++;
         }
       }
     }
+    expect(found.ar, 'the Arabic pages show their mocks').toBeGreaterThan(0);
   });
 
   test('the studio is blocked from indexing, and not only before launch', async ({ page }) => {
