@@ -1,20 +1,27 @@
 import Image from 'next/image';
+import type { Locale } from '@/lib/locales';
 import type { Media } from '@/payload-types';
 import { findScreenMock, screenMockImagePath, type ScreenMock } from '@/screen-mocks/registry';
 
 export type ScreenMockPictureContent = {
   /** Which Screen mock, by its id in `src/screen-mocks/registry.ts`. */
   readonly mock: ScreenMock['id'];
+  /** The language of the page it is on, whose exported image it shows (ticket 41). */
+  readonly locale: Locale;
   /** What it shows, in words: the picture's `alt` and the caption under it (ADR-0002). */
   readonly description: string;
-  /** The picture an Editor put in place of the exported image, in the same shape (ticket 57); `null` for the export. */
+  /**
+   * The picture an Editor put in place of the exported image for this
+   * language's pages, in the same shape (tickets 57, 41); `null` for the export.
+   */
   readonly replacement: Media | null;
 };
 
 /**
  * A Screen mock's picture alone: an Editor's replacement where there is one
- * (ticket 57), and otherwise ticket 05's exported image. Both are drawn in the
- * mock's 1440×900 box, which the admin holds a replacement to.
+ * (ticket 57), and otherwise ticket 05's exported image in the page's own
+ * language (ticket 41) — an English page never shows the Arabic screens. Both
+ * are drawn in the mock's 1440×900 box, which the admin holds a replacement to.
  *
  * Either way the picture names its mock (`data-screen-mock`), which is how the
  * check on exported images tells a replaced mock from one still exported
@@ -65,7 +72,7 @@ export function ScreenMockImage({
     <Image
       className={className}
       data-screen-mock={entry.id}
-      src={screenMockImagePath('ar', entry.id)}
+      src={screenMockImagePath(content.locale, entry.id)}
       alt={content.description}
       width={entry.width}
       height={entry.height}

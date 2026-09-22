@@ -27,6 +27,10 @@
  *     Screen mocks).
  *  3. The studio is not indexable. It is a private route that exists to be
  *     photographed, and its contents duplicate pages that are meant to rank.
+ *  4. The English set is the Arabic one translated and mirrored, and nothing
+ *     else (ticket 41): every word English, laid out left to right, and the
+ *     same screen underneath — so the two languages cannot come to show two
+ *     different products.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { createHash } from 'node:crypto';
@@ -41,8 +45,25 @@ import { SCREEN_MOCKS, screenMockImagePath, studioPath } from '../../src/screen-
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 
 /**
- * Whether an Editor has replaced this mock in the admin (ticket 57): a page
- * shows it, and shows a picture other than its export. A mock no page shows
+ * Every language a set of mocks is exported in, and the pages of that language
+ * that show them. Restated rather than read from `src/lib/locales.ts`, for the
+ * reason `routes.ts` gives. The English addresses are notices until ticket 42
+ * writes those pages, and show no mock; the moment they do, they are checked.
+ */
+const MOCK_LOCALES = ['ar', 'en'] as const;
+type MockLocale = (typeof MOCK_LOCALES)[number];
+const PAGES_SHOWING_MOCKS: Record<MockLocale, readonly string[]> = {
+  ar: ['/product', '/'],
+  en: ['/en/product', '/en'],
+};
+
+/** A letter of the Arabic script, in any of its blocks. */
+const ARABIC_LETTER = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+/**
+ * Whether an Editor has replaced this mock in the admin (ticket 57), for the
+ * pages of one language — each has a replacement of its own (ticket 41): a
+ * page shows it, and shows a picture other than its export. A mock no page shows
  * just now — its section hidden — is not replaced, and is still checked.
  *
  * Read from the pages, as a visitor with no session receives them, rather than
@@ -50,9 +71,9 @@ const repoRoot = path.resolve(import.meta.dirname, '..', '..');
  * account erase each other's sessions (`cms.ts`). Every mock's picture names
  * its mock (`src/components/screen-mock-picture.tsx`).
  */
-async function replacedInTheAdmin(request: APIRequestContext, mockId: string): Promise<boolean> {
-  const exported = screenMockImagePath('ar', mockId);
-  for (const page of ['/product', '/']) {
+async function replacedInTheAdmin(request: APIRequestContext, locale: MockLocale, mockId: string): Promise<boolean> {
+  const exported = screenMockImagePath(locale, mockId);
+  for (const page of PAGES_SHOWING_MOCKS[locale]) {
     const response = await request.get(page);
     expect(response.ok(), page).toBe(true);
     const pictures = (await response.text()).match(new RegExp(`<img[^>]*data-screen-mock="${mockId}"[^>]*>`, 'g')) ?? [];
@@ -158,6 +179,43 @@ async function stageOf(page: import('@playwright/test').Page, mockId: string) {
   return PNG.sync.read(await stage.screenshot({ omitBackground: true, animations: 'disabled' }));
 }
 
+/**
+ * What of a mock's layout two languages must share: its elements in document
+ * order, by tag, and where each card laid directly on its stage sits.
+ *
+ * A card is held by the edges it is anchored by, not by its size, because its
+ * words size it: a card's height grows with them, so one anchored by its
+ * bottom is held by its bottom edge; and a card with no width of its own —
+ * the dark badges — is as wide as its words, so only its anchored side is held.
+ */
+async function layoutOf(page: import('@playwright/test').Page, mockId: string) {
+  return page.evaluate((id) => {
+    const mock = document.querySelector(`[data-vs-shot="${id}"]`);
+    if (!mock) throw new Error(`no mock "${id}" in this document`);
+    const screen = mock.querySelector('.vs-shot__stage > [dir]');
+    if (!screen) throw new Error(`mock "${id}" declares no direction`);
+    const origin = screen.getBoundingClientRect();
+    const cards = [...screen.children]
+      .filter((child) => getComputedStyle(child).position === 'absolute')
+      .map((child) => {
+        const box = child.getBoundingClientRect();
+        return {
+          left: Math.round(box.left - origin.left),
+          right: Math.round(origin.right - box.right),
+          top: Math.round(box.top - origin.top),
+          bottom: Math.round(origin.bottom - box.bottom),
+          width: Math.round(box.width),
+          // Anchored by the side its style names, and sized by its words
+          // unless its style names a width.
+          anchoredLeft: (child as HTMLElement).style.left !== '',
+          anchoredBottom: (child as HTMLElement).style.bottom !== '',
+          fixedWidth: (child as HTMLElement).style.width !== '',
+        };
+      });
+    return { tags: [...mock.querySelectorAll('*')].map((element) => element.tagName), cards };
+  }, mockId);
+}
+
 test.describe('screen mocks', () => {
   let site: ReferenceSite;
 
@@ -204,71 +262,139 @@ test.describe('screen mocks', () => {
       }
     });
 
-    test(`${mock.id}'s exported image was made from the markup as it stands`, async ({ request }) => {
-      test.skip(await replacedInTheAdmin(request, mock.id), 'replaced in the admin: the site shows the replacement');
-      const manifest = JSON.parse(
-        await readFile(path.join(repoRoot, 'src', 'screen-mocks', 'exported.json'), 'utf8'),
-      ) as { images: ExportRecord[] };
+    for (const locale of MOCK_LOCALES) {
+      test(`${locale}/${mock.id}'s exported image was made from the markup as it stands`, async ({ request }) => {
+        test.skip(await replacedInTheAdmin(request, locale, mock.id), 'replaced in the admin: the site shows the replacement');
+        const manifest = JSON.parse(
+          await readFile(path.join(repoRoot, 'src', 'screen-mocks', 'exported.json'), 'utf8'),
+        ) as { images: ExportRecord[] };
 
-      const record = manifest.images.find((image) => image.locale === 'ar' && image.id === mock.id);
-      expect(record, `${mock.id} has no export on record`).toBeDefined();
+        const record = manifest.images.find((image) => image.locale === locale && image.id === mock.id);
+        expect(record, `${locale}/${mock.id} has no export on record`).toBeDefined();
 
-      const markup = await readFile(
-        path.join(repoRoot, 'src', 'screen-mocks', 'ar', `${mock.id}.html`),
-      );
-      expect(
-        createHash('sha256').update(markup).digest('hex'),
-        `${mock.id}.html has changed since its image was exported — run "npm run mocks:export"`,
-      ).toBe(record!.source);
-
-      expect({ width: record!.width, height: record!.height }).toEqual({
-        width: mock.width * mock.scale,
-        height: mock.height * mock.scale,
-      });
-    });
-
-    test(`@pixel ${mock.id}'s exported image is what the studio renders today`, async ({
-      browser,
-      baseURL,
-      request,
-    }) => {
-      test.skip(await replacedInTheAdmin(request, mock.id), 'replaced in the admin: the site shows the replacement');
-      const file = path.join(repoRoot, 'public', screenMockImagePath('ar', mock.id));
-      const exported = await sharp(await readFile(file))
-        .flatten({ background: { r: BACKDROP[0], g: BACKDROP[1], b: BACKDROP[2] } })
-        .ensureAlpha()
-        .raw()
-        .toBuffer({ resolveWithObject: true });
-
-      expect(
-        { width: exported.info.width, height: exported.info.height },
-        'exported at the recorded size',
-      ).toEqual({ width: mock.width * mock.scale, height: mock.height * mock.scale });
-
-      const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: mock.scale });
-      try {
-        const studio = await context.newPage();
-        await studio.goto(`${baseURL}${studioPath('ar', mock.id)}`);
-        await studio.evaluate(() => document.fonts.ready);
-        const fresh = await stageOf(studio, mock.id);
-
-        const differing = pixelmatch(
-          exported.data,
-          onBackdrop(fresh),
-          undefined,
-          exported.info.width,
-          exported.info.height,
-          { threshold: 0.1 },
+        const markup = await readFile(
+          path.join(repoRoot, 'src', 'screen-mocks', locale, `${mock.id}.html`),
         );
         expect(
-          differing,
-          `${mock.id}.webp is out of date — run \`npm run mocks:export\``,
-        ).toBe(0);
+          createHash('sha256').update(markup).digest('hex'),
+          `${locale}/${mock.id}.html has changed since its image was exported — run "npm run mocks:export"`,
+        ).toBe(record!.source);
+
+        expect({ width: record!.width, height: record!.height }).toEqual({
+          width: mock.width * mock.scale,
+          height: mock.height * mock.scale,
+        });
+      });
+
+      test(`@pixel ${locale}/${mock.id}'s exported image is what the studio renders today`, async ({
+        browser,
+        baseURL,
+        request,
+      }) => {
+        test.skip(await replacedInTheAdmin(request, locale, mock.id), 'replaced in the admin: the site shows the replacement');
+        const file = path.join(repoRoot, 'public', screenMockImagePath(locale, mock.id));
+        const exported = await sharp(await readFile(file))
+          .flatten({ background: { r: BACKDROP[0], g: BACKDROP[1], b: BACKDROP[2] } })
+          .ensureAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+
+        expect(
+          { width: exported.info.width, height: exported.info.height },
+          'exported at the recorded size',
+        ).toEqual({ width: mock.width * mock.scale, height: mock.height * mock.scale });
+
+        const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: mock.scale });
+        try {
+          const studio = await context.newPage();
+          await studio.goto(`${baseURL}${studioPath(locale, mock.id)}`);
+          await studio.evaluate(() => document.fonts.ready);
+          const fresh = await stageOf(studio, mock.id);
+
+          const differing = pixelmatch(
+            exported.data,
+            onBackdrop(fresh),
+            undefined,
+            exported.info.width,
+            exported.info.height,
+            { threshold: 0.1 },
+          );
+          expect(
+            differing,
+            `${locale}/${mock.id}.webp is out of date — run \`npm run mocks:export\``,
+          ).toBe(0);
+        } finally {
+          await context.close();
+        }
+      });
+    }
+
+    test(`${mock.id} in English is in English, left to right`, async ({ page }) => {
+      await page.goto(studioPath('en', mock.id));
+
+      await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+      await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+      // The mock declares its own direction, as the Arabic one does.
+      await expect(page.locator(`[data-vs-shot="${mock.id}"] .vs-shot__stage > [dir]`)).toHaveAttribute('dir', 'ltr');
+
+      // Every word translated in the markup, not painted over afterwards: an
+      // Arabic letter anywhere in it would be in the picture.
+      const words = await page.locator(`[data-vs-shot="${mock.id}"]`).evaluate((mockElement) => mockElement.textContent ?? '');
+      const arabic = [...new Set(words.match(new RegExp(ARABIC_LETTER.source + '[^<>]{0,30}', 'g')) ?? [])];
+      expect(arabic, 'Arabic left in the English mock').toEqual([]);
+    });
+
+    test(`${mock.id} in English is the Arabic one, translated and mirrored`, async ({ browser, baseURL }) => {
+      const context = await browser.newContext({ viewport: VIEWPORT });
+      try {
+        const [arabic, english] = await Promise.all(
+          (['ar', 'en'] as const).map(async (locale) => {
+            const studio = await context.newPage();
+            await studio.goto(`${baseURL}${studioPath(locale, mock.id)}`);
+            await studio.evaluate(() => document.fonts.ready);
+            return layoutOf(studio, mock.id);
+          }),
+        );
+
+        // The same screen underneath: element for element, the English is the
+        // Arabic with other words in it — not a second design to keep in step.
+        expect(english.tags, 'the same elements, in the same order').toEqual(arabic.tags);
+
+        // And turned around: each card laid on the stage sits where the
+        // Arabic one does, reflected across the stage's middle — its left
+        // edge where the Arabic one's right edge was, or the other way round.
+        expect(english.cards.length).toBe(arabic.cards.length);
+        english.cards.forEach((card, index) => {
+          const original = arabic.cards[index]!;
+          const where = `card ${index + 1} on the stage`;
+          expect(card.anchoredLeft, `${where} is anchored by the other side`).toBe(!original.anchoredLeft);
+          if (card.anchoredBottom) expect(card.bottom, where).toBe(original.bottom);
+          else expect(card.top, where).toBe(original.top);
+          if (card.anchoredLeft) expect(card.left, where).toBe(original.right);
+          else expect(card.right, where).toBe(original.left);
+          if (card.fixedWidth) expect(card.width, where).toBe(original.width);
+        });
       } finally {
         await context.close();
       }
     });
   }
+
+  test("every picture of a Screen mock on a page is its own language's", async ({ request }) => {
+    // English pages show the English export and Arabic pages the Arabic one.
+    // A replacement an Editor chose is not an export, and not checked here.
+    for (const locale of MOCK_LOCALES) {
+      for (const page of PAGES_SHOWING_MOCKS[locale]) {
+        const response = await request.get(page);
+        expect(response.ok(), page).toBe(true);
+        const html = await response.text();
+        for (const [tag] of html.matchAll(/<img[^>]*data-screen-mock="[^"]*"[^>]*>/g)) {
+          const exported = decodeURIComponent(tag).match(/\/screen-mocks\/(\w+)\//);
+          if (exported) expect(exported[1], `${page}: ${tag}`).toBe(locale);
+        }
+      }
+    }
+  });
 
   test('the studio is blocked from indexing, and not only before launch', async ({ page }) => {
     const response = await page.goto(studioPath('ar', SCREEN_MOCKS[0].id));
@@ -288,18 +414,28 @@ test.describe('screen mocks', () => {
     // dropped from it would take its own coverage with it — and a set of
     // markup added without an export would go unnoticed until a page came
     // looking for the picture.
-    const onDisk = (await readdir(path.join(repoRoot, 'src', 'screen-mocks', 'ar')))
-      .filter((file) => file.endsWith('.html'))
-      .map((file) => file.replace(/.html$/, ''))
-      .sort();
-    const exportedImages = (await readdir(path.join(repoRoot, 'public', 'screen-mocks', 'ar')))
-      .filter((file) => file.endsWith('.webp'))
-      .map((file) => file.replace(/.webp$/, ''))
-      .sort();
+    // Every language has the whole set: a language with half of one would
+    // show some of its screens and not others.
     const registered = SCREEN_MOCKS.map((mock) => mock.id).sort();
+    const locales = (await readdir(path.join(repoRoot, 'src', 'screen-mocks'), { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+    expect(locales, 'a set of markup for each language').toEqual([...MOCK_LOCALES].sort());
 
-    expect(onDisk, 'markup on disk against the registry').toEqual(registered);
-    expect(exportedImages, 'exported images against the registry').toEqual(registered);
+    for (const locale of MOCK_LOCALES) {
+      const onDisk = (await readdir(path.join(repoRoot, 'src', 'screen-mocks', locale)))
+        .filter((file) => file.endsWith('.html'))
+        .map((file) => file.replace(/.html$/, ''))
+        .sort();
+      const exportedImages = (await readdir(path.join(repoRoot, 'public', 'screen-mocks', locale)))
+        .filter((file) => file.endsWith('.webp'))
+        .map((file) => file.replace(/.webp$/, ''))
+        .sort();
+
+      expect(onDisk, `${locale} markup on disk against the registry`).toEqual(registered);
+      expect(exportedImages, `${locale} exported images against the registry`).toEqual(registered);
+    }
   });
 
   test('every mock is one the Home or Product page actually uses', async () => {

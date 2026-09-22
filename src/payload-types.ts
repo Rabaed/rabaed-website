@@ -3463,6 +3463,10 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
+    /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
     description: {
@@ -3475,6 +3479,10 @@ export interface ScreenMock {
      * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
      */
     picture?: (number | null) | Media;
+    /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -3489,6 +3497,10 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
+    /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
     description: {
@@ -3501,6 +3513,10 @@ export interface ScreenMock {
      * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
      */
     picture?: (number | null) | Media;
+    /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -3515,6 +3531,10 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
+    /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
     description: {
@@ -3527,6 +3547,10 @@ export interface ScreenMock {
      * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
      */
     picture?: (number | null) | Media;
+    /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -3541,6 +3565,10 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
+    /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
     description: {
@@ -3553,6 +3581,10 @@ export interface ScreenMock {
      * 1440×900, or larger in the same proportions. Remove it to bring back the exported image.
      */
     picture?: (number | null) | Media;
+    /**
+     * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
+     */
+    englishPicture?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -6825,6 +6857,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6836,6 +6869,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6847,6 +6881,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6858,6 +6893,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6869,6 +6905,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6880,6 +6917,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6891,6 +6929,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {
@@ -6902,6 +6941,7 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        englishPicture?: T;
         description?:
           | T
           | {

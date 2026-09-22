@@ -32,7 +32,7 @@ export default async function ScreenMockPage({
   try {
     markup = await readScreenMockMarkup(locale as Locale, mock);
   } catch {
-    // A locale that has no set yet — English until ticket 41.
+    // A locale with no set of mocks on disk.
     notFound();
   }
 

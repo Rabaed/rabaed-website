@@ -52,6 +52,12 @@ function englishTitle(mockId: string): string {
  * (ADR-0002). One entry for every page, so a mock the home and product pages
  * both show is replaced once for both.
  *
+ * **A replacement per language (ticket 41).** A screen's words are in its
+ * picture, so a picture belongs to one language as its description does: the
+ * Arabic pages show one replacement and the English pages another, and each
+ * language falls back to its own export. A single shared one would put an
+ * Arabic screenshot on the English pages under an English caption.
+ *
  * With no picture chosen, the page shows the image exported from the studio.
  * What a mock depicts is still a developer's to change, through the studio and
  * `npm run mocks:export`; a replacement keeps the studio's 1440×900 shape
@@ -73,12 +79,22 @@ export const ScreenMocks = pageGlobal({
       fields: [
         pictureField({
           name: 'picture',
-          label: { ar: 'صورة بديلة', en: 'Replacement picture' },
+          label: { ar: 'صورة بديلة للصفحات العربية', en: 'Replacement picture, Arabic pages' },
           size: { width: mock.width, height: mock.height },
           required: false,
           description: {
             ar: `بمقاس ${mock.width}×${mock.height} أو أكبر بالنسبة نفسها. احذفها لتعود الصورة المصدَّرة.`,
             en: `${mock.width}×${mock.height}, or larger in the same proportions. Remove it to bring back the exported image.`,
+          },
+        }),
+        pictureField({
+          name: 'englishPicture',
+          label: { ar: 'صورة بديلة للصفحات الإنجليزية', en: 'Replacement picture, English pages' },
+          size: { width: mock.width, height: mock.height },
+          required: false,
+          description: {
+            ar: `بواجهة إنجليزية، بمقاس ${mock.width}×${mock.height} أو أكبر بالنسبة نفسها. احذفها لتعود الصورة المصدَّرة بالإنجليزية.`,
+            en: `With an English interface, ${mock.width}×${mock.height} or larger in the same proportions. Remove it to bring back the English exported image.`,
           },
         }),
         wordsField('description', { ar: 'ما تُظهره الشاشة', en: 'What the screen shows' }, 150, {
