@@ -11,3 +11,7 @@
 - [ ] English set exported by the same script that produces the Arabic set
 - [ ] English pages serve the English mocks; Arabic pages are unaffected
 - [ ] Descriptions and captions translated too — a mock with an Arabic description on an English page helps nobody
+
+## Comments
+
+**The descriptions and captions are written (ticket 42, 23 September 2026).** Ticket 42 proposed the English of every Screen mock's description as a draft of «شاشات المنصة», with the rest of the English pages' words, since an English page is published only once everything it reads is — so the last criterion's words exist, waiting for the founder. What is left here is the pictures: `ScreenMockImage` still draws `screenMockImagePath('ar', …)` on every page.

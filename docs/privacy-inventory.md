@@ -110,6 +110,7 @@ No form asks for a national ID number, a passport number, a date of birth, a pay
 The same few things are recorded with each one, whichever form it came from:
 
 - **Which form it came from**, and **the date and time** it arrived.
+- **The language the form was filled in** — Arabic, or English on the site's English pages — so that the team replies in it.
 - **The applicant's name, email and phone** a second time, in columns of their own, so that the team can search its list of submissions by them.
 - **What became of each of the two emails** described in section 6 — sent, not sent, or failed.
 - **A one-time reference** the form generates for the submission, so that a double click or a retry on a dropped connection does not create a second copy of the same request.
@@ -154,7 +155,7 @@ The site sends email through **the company's existing Microsoft 365 no-reply mai
 Exactly two messages may go out, both triggered by a form submission and neither of them marketing:
 
 1. **An alert to the Rabaed team**, at an address the team sets per form. It repeats every answer under the same wording the visitor saw, names any documents that came with it (never attaching them), gives the time in Riyadh, and links to the record in the admin. A reply to it goes to the applicant.
-2. **A confirmation to the person who filled the form in**, in Arabic, telling them their request arrived and what happens next. Nothing else is ever sent to them; there is no list to unsubscribe from.
+2. **A confirmation to the person who filled the form in**, in the language they filled it in — Arabic, or English from the site's English pages — telling them their request arrived and what happens next. Nothing else is ever sent to them; there is no list to unsubscribe from.
 
 **Two conditions the policy should be written against.** While a form has no alert address set, it sends *nothing at all* — neither the alert nor the applicant's confirmation — and the submission is still stored. At the time of writing, no alert address has been supplied, so today the site stores submissions and sends no email whatsoever. Whatever happened to each message is recorded on the submission, so a failure is visible to the team rather than silent.
 
