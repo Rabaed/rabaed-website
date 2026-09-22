@@ -134,7 +134,9 @@ The outage is real and is over, which is why this ticket is `resolved` with a bo
 
 It asked for the check as though it were an ordinary review step. It is not: **a preview deployment is SSO-gated, so no agent can run it.** Loading this cleanup's own preview — `rabaed-website-git-resolve-ticket-65-rabaed.vercel.app/maktab`, on pull request #62, 22 September 2026 — redirects to `vercel.com` and a Vercel login. Production is open and answers; every preview is behind the team's sign-in.
 
-So the box asked the one party who could not do it. That is worth more than the box: a criterion only the founder can satisfy has to say so, next to itself, or it waits for a reviewer who was never able to be one. `39a-founder-account-actions.md` is where work of that kind is normally written down.
+So the box asked the one party who could not do it. That is worth more than the box: a criterion only the founder can satisfy has to say so, next to itself, or it waits for a reviewer who was never able to be one.
+
+It now does. The check is **part 5 of `39a-founder-account-actions.md`** — the first part of that ticket that never completes, because it runs on a pull request rather than once — and `docs/deployment.md` carries it at step 4 of *How a change reaches the internet*, which is where the founder reads before approving a merge.
 
 It is also the shape of every deployment-only failure this ticket describes. CI builds on Node 24 and cannot see the fault; an agent can reach production but only after a merge; the one moment that would catch it — a preview, before the merge — is reachable by the founder alone. Any future ticket whose proof lives on a preview inherits this, jsdom or not.
 
