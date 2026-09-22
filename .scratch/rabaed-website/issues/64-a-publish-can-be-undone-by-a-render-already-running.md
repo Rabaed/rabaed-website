@@ -4,12 +4,12 @@
 
 **Blocked by:** nothing. The founder's call is made — mark twice, see "Decision" at the foot.
 
-**Status:** ready-for-agent — the founder chose to mark twice, 23 September 2026 ("Decision", below)
+**Status:** resolved — publishing marks the site again ten seconds later, ADR-0017
 
-- [ ] A change an Editor publishes reaches every page, whatever was being rendered at the time
+- [x] A change an Editor publishes reaches every page, whatever was being rendered at the time
 - [x] The cost of the fix — a page built more than once per publish, or a wait before the second mark — is written down and agreed
-- [ ] Held by a test that fails without the fix, at a seam that does not ship a delay knob in the page's own code
-- [ ] An ADR records the decision, because it changes what publishing does on every page
+- [x] Held by a test that fails without the fix, at a seam that does not ship a delay knob in the page's own code
+- [x] An ADR records the decision, because it changes what publishing does on every page
 
 ## How it happens
 
@@ -120,3 +120,46 @@ is otherwise waiting on ticket 40, so building it costs no one any time.
   that reason).
 - The pull request touches the publishing path in `src/cms/`, so it needs the
   ticket 39a part 5 preview check before it merges.
+
+## Answer
+
+**Resolved, 23 September 2026, branch `ticket-64`.** `refreshSite` marks the
+site as before and then, from `after()`, again ten seconds later. ADR-0017 has
+the decision and the numbers.
+
+**The delay, measured.** 362 builds timed over a full suite at twenty workers:
+Arabic pages median 287ms, English 176ms, the discovery files under 200ms. The
+slowest six, 6.1 to 6.3 seconds, came in one burst as the server met its first
+wave of requests; below them the slowest was 1.9 seconds. Ten seconds covers the
+burst with room for slower machines, and is the founder's ceiling — no need to
+bring a number back.
+
+**What the obvious fix would have done: nothing.** Next keeps a request's marks
+after sending them and sends a mark made in `after()` only if its tag is new to
+the request, so marking the same paths again is dropped in silence. Shown, not
+read: with a naive second mark at ten seconds the test below failed exactly as
+it does with no fix, `HIT` for the whole minute. The second mark goes through
+tags the first does not use — each language's group layout, `/(ar)` and
+`/(en)`, and each discovery file's own layout segment — which every page and
+discovery file carries beside the first mark's (`x-next-cache-tags`).
+
+**The test, `tests/e2e/stale-render.spec.ts`,** holds a build of `/tool` open at
+the database, with nothing in the site's code: it locks the site settings, which
+the footer reads after the tool page's own words; publishes new words to the
+tool page while that build waits; holds it three seconds more, as a slow build
+would be held; lets it go; and waits for the new words.
+
+- Without the fix: never, `Next said HIT` for sixty seconds.
+- With the naive second mark: the same.
+- With the fix: they arrive 6.7 seconds into the wait — ten seconds after the
+  publish, less the three it held the build.
+
+Two things learned on the way, both in the test's comments: a visitor's page
+reads the tool page's words from the version history, not the entry, and
+Postgres answers `pg_stat_activity` from one snapshot per transaction, so the
+test watches from a second connection.
+
+**The first box, precisely:** every page, for any build shorter than ten seconds
+— which is every build measured. A build slower than that falls back to ADR-0016's
+ten minutes; on CI, under far more load than production sees, one may, and a
+publish wait would then read `HIT` throughout (`tests/e2e/cms.ts` says so).

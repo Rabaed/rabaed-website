@@ -30,11 +30,11 @@
  * At worst it is one extra render per page per window, and only for the pages
  * somebody actually asked for.
  *
- * **What it does not do.** It does not close ticket 64's window. A page caught
- * by that race is still wrong; this bounds how long it stays wrong, turning
- * "until somebody publishes again" into "ten minutes". Whether to close the
- * window itself is ticket 64's decision, and this is deliberately the cheaper
- * thing that covers more.
+ * **What it does not do.** It did not close ticket 64's window, and was never
+ * meant to: it bounds how long a page caught by that race stays wrong. The
+ * window itself is closed by publishing's second mark (`refreshSite`,
+ * ADR-0017), which catches the race within seconds; this is still the floor
+ * under every failure that loses a mark and is not that one.
  *
  * **Why the number is not imported where it is used.** Next reads
  * `export const revalidate` by static analysis, and only a literal: the
