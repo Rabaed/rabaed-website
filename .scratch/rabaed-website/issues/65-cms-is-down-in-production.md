@@ -130,6 +130,14 @@ Not one `500`. The 401 and the 405 matter as much as the 200s: each is this site
 
 The outage is real and is over, which is why this ticket is `resolved` with a box still open. What is not evidenced is the *check* — the one thing here that was supposed to catch a deployment-only failure before a merge rather than after one. A tick with a footnote would bury that; an open box is what a later reader's eye lands on, which is the point of leaving it.
 
+### Why the fifth box went unrun, which the ticket did not say
+
+It asked for the check as though it were an ordinary review step. It is not: **a preview deployment is SSO-gated, so no agent can run it.** Loading this cleanup's own preview — `rabaed-website-git-resolve-ticket-65-rabaed.vercel.app/maktab`, on pull request #62, 22 September 2026 — redirects to `vercel.com` and a Vercel login. Production is open and answers; every preview is behind the team's sign-in.
+
+So the box asked the one party who could not do it. That is worth more than the box: a criterion only the founder can satisfy has to say so, next to itself, or it waits for a reviewer who was never able to be one. `39a-founder-account-actions.md` is where work of that kind is normally written down.
+
+It is also the shape of every deployment-only failure this ticket describes. CI builds on Node 24 and cannot see the fault; an agent can reach production but only after a merge; the one moment that would catch it — a preview, before the merge — is reachable by the founder alone. Any future ticket whose proof lives on a preview inherits this, jsdom or not.
+
 ### The claim on this ticket outlived the work
 
 `ticket-65` was released when it merged, but its `Status:` line was not moved off `ready-for-agent` until now — so for a day `main` described finished, deployed work as available to take. The `Status:` line and the branch are two halves of one signal and they drifted apart.
