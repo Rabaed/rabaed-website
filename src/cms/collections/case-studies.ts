@@ -14,6 +14,7 @@ import {
   slugField,
   summaryField,
   titleField,
+  translationField,
 } from '../editorial-fields';
 import { sharingImageField } from '../page-fields';
 
@@ -62,7 +63,7 @@ export const CaseStudies: CollectionConfig = {
   versions: editorialVersions,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'client', 'locale', 'publishedAt', '_status'],
+    defaultColumns: ['title', 'client', 'locale', 'translation', 'publishedAt', '_status'],
     preview: previewAt(caseStudyPath),
   },
   defaultSort: '-publishedAt',
@@ -208,6 +209,7 @@ export const CaseStudies: CollectionConfig = {
     sharingImageField(),
     slugField({ collection: 'case-studies', section: CASE_STUDIES_PATH, another: 'قصة أخرى' }),
     localeField,
+    translationField('case-studies'),
     authorField,
     publishedAtField,
   ],
