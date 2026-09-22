@@ -22,7 +22,7 @@
  * wait would rebuild `/tool` for it — so in the full suite this is a guard,
  * and the proof that it fails without the second mark is a run of it alone.
  */
-import { test, expect, type APIRequestContext } from '@playwright/test';
+import { test, expect, type APIRequestContext, type APIResponse } from '@playwright/test';
 import pg from 'pg';
 import { STALE_RENDER_EDITOR, logInByApi, reachesVisitors } from './cms';
 
@@ -31,7 +31,11 @@ const GLOBAL = '/api/globals/tool-page';
 type Words = { ar: string; en: string | null };
 type ToolPage = { upsell: { lead: Words } } & Record<string, unknown>;
 
-/** The test server's database: `TEST_PORT + 2000` (`scripts/test-server.mjs`). */
+/**
+ * The test server's database: `TEST_PORT + 2000`, as `scripts/test-server.mjs`
+ * starts it and `scripts/local-database.mjs` names it. Restated rather than
+ * imported, for the reason `routes.ts` gives.
+ */
 function testDatabase(baseURL: string): pg.Client {
   const port = Number(new URL(baseURL).port) + 2000;
   return new pg.Client({ connectionString: `postgres://postgres:postgres@127.0.0.1:${port}/rabaed` });
@@ -69,9 +73,11 @@ test('a change published while a page is being built still reaches that page', a
   // connection holding the lock would never see the build arrive.
   const database = testDatabase(baseURL!);
   const watcher = testDatabase(baseURL!);
-  await Promise.all([database.connect(), watcher.connect()]);
   let locked = false;
+  let building: Promise<APIResponse> | undefined;
   try {
+    await Promise.all([database.connect(), watcher.connect()]);
+
     // Every page marked, so that the next visit to /tool builds it again.
     await publish(page.request, entry);
 
@@ -79,7 +85,7 @@ test('a change published while a page is being built still reaches that page', a
     await database.query('BEGIN');
     await database.query('LOCK TABLE "site_settings" IN ACCESS EXCLUSIVE MODE');
     locked = true;
-    const building = request.get('/tool');
+    building = request.get('/tool');
     await expect
       .poll(
         async () =>
@@ -92,6 +98,9 @@ test('a change published while a page is being built still reaches that page', a
         { message: 'a build of /tool waiting on the site settings' },
       )
       .toBeGreaterThan(0);
+    // The suites beside this one build pages too, and any of them may be what
+    // the watcher saw: a moment for /tool's own build to have read its words.
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // The words change while that build is under way. The build is held a
     // little longer, as a slow one would be: Next writes a publish's mark as it
@@ -103,13 +112,24 @@ test('a change published while a page is being built still reaches that page', a
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await database.query('COMMIT');
     locked = false;
-    await building;
+
+    // The build that was held answered with the words from before, or this
+    // test set up no race and would pass without testing anything.
+    const held = await (await building).text();
+    expect(held, 'the held build of /tool read the words from before the publish').toContain(
+      `${entry.upsell.lead.ar}</p>`,
+    );
 
     // `HIT` for the whole wait, if it fails, is the page that build cached.
     await reachesVisitors(request, '/tool', `${lead}</p>`, 'the words published while /tool was being built');
   } finally {
-    if (locked) await database.query('ROLLBACK');
-    await Promise.all([database.end(), watcher.end()]);
-    await publish(page.request, entry);
+    // The words go back whatever happened above, before anything that could throw.
+    try {
+      if (locked) await database.query('ROLLBACK');
+      await building?.catch(() => undefined);
+    } finally {
+      await Promise.allSettled([database.end(), watcher.end()]);
+      await publish(page.request, entry);
+    }
   }
 });
