@@ -438,6 +438,13 @@ test('a change published reaches visitors', async ({ page, request }) => {
     );
     expect(response.ok(), await response.text()).toBe(true);
     await expect.poll(async () => visitorHtml(request)).toContain(`${tagline}</div>`);
+
+    // A publish marks every page for rebuilding, and a rebuilt page must still
+    // be the page: the English notice of an Arabic-only page once came back
+    // from its first rebuild as «not found» (ticket 40).
+    for (const path of ['/en/product', '/en/terms']) {
+      await expect.poll(async () => (await request.get(path)).status(), path).toBe(200);
+    }
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);

@@ -5,7 +5,7 @@ import type { Locale } from '@/lib/locales';
 /**
  * The names a screen reader gives the wordmark and the icons, which draw no
  * words of their own. Arabic on every page until ticket 40 gave English pages
- * a footer. Not an Editor's words: they name a brand and four services, and are
+ * a footer. Not an Editor's words: they name a brand and five services, and are
  * never seen.
  */
 const NAMES = {

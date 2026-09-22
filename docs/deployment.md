@@ -461,9 +461,9 @@ proposal is no longer what the entry opens on; you will find it under
 
 **Two things the English site will still lack, by design.** The sign-in link
 leads to the app in Arabic: its address is one for both languages, and nobody
-has said what the English one is. And five of the pages the menu names are
-not in English until ticket 42 writes them: their English address says so and
-offers the Arabic. The Terms, the Privacy Policy and the Referral Program's
+has said what the English one is. And five pages — the product, start, tool,
+referral and partnership pages — are not in English until ticket 42 writes
+them: their English address says so and offers the Arabic. The Terms, the Privacy Policy and the Referral Program's
 terms are never translated — the Arabic is binding — and their English address
 says that too.
 

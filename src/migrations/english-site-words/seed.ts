@@ -34,8 +34,11 @@ import { ENGLISH_SITE_WORDS } from './words';
 /** A value as a SQL string: a quote inside one is written twice. */
 const text = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
-/** A column's English, set where it is still empty. */
-const fill = (column: string, english: string) => `${column} = coalesce(${column}, ${text(english)})`;
+/**
+ * A column's English, set where it is still empty — null, or cleared to
+ * nothing, which the CMS saves as an empty string.
+ */
+const fill = (column: string, english: string) => `${column} = coalesce(nullif(${column}, ''), ${text(english)})`;
 
 /**
  * A list's English, set by where each row goes: `CASE path WHEN … END`, which
@@ -45,7 +48,7 @@ function byPath(column: string, englishByPath: Record<string, string>): string {
   const cases = Object.entries(englishByPath)
     .map(([path, english]) => `WHEN ${text(path)} THEN ${text(english)}`)
     .join(' ');
-  return `${column} = coalesce(${column}, CASE "path" ${cases} END)`;
+  return `${column} = coalesce(nullif(${column}, ''), CASE "path" ${cases} END)`;
 }
 
 const { header, footer, notFound } = ENGLISH_SITE_WORDS;
@@ -117,13 +120,16 @@ BEGIN
 
   -- And every row of every list that points at it — the menu, the dropdown,
   -- the footer's links, the languages — found by the foreign keys, so a list
-  -- added later is copied too. None of them holds a list of its own.
+  -- added later is copied too. One level only: none of them holds a list of
+  -- its own. A list nested inside one later would need copying the way
+  -- \`answer-first-proposal/seed.ts\` copies its lists, recursively.
   FOR list IN
     SELECT f.conrelid::regclass AS held_in, a.attname AS points_at
       FROM pg_constraint f
       JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = ANY (f.conkey)
      WHERE f.contype = 'f' AND f.confrelid = '"_site_words_v"'::regclass AND f.conrelid <> f.confrelid
        AND array_length(f.conkey, 1) = 1
+     ORDER BY f.conrelid::regclass::text
   LOOP
     SELECT string_agg(quote_ident(column_name), ', ' ORDER BY ordinal_position),
            string_agg(CASE WHEN column_name = list.points_at THEN '$2' ELSE quote_ident(column_name) END,

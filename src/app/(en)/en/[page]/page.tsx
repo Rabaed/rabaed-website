@@ -3,9 +3,13 @@ import { notFound } from 'next/navigation';
 import { OtherLanguageNotice, otherLanguageMetadata } from '@/components/editorial';
 import { ARABIC_ONLY_PAGES, arabicOnlyPage } from '@/content/arabic-only-pages';
 
-/** Every one built ahead of time, and no other: an English address naming no page is not found. */
-export const dynamicParams = false;
-
+/**
+ * Every one built ahead of time. An English address naming no page is not
+ * found by the page itself, below, rather than by `dynamicParams = false`:
+ * with that set, the first rebuild after a publish answered «not found» for
+ * every one of these addresses too, and a publish marks every page for
+ * rebuilding (`src/cms/revalidation.ts`).
+ */
 export function generateStaticParams() {
   return Object.keys(ARABIC_ONLY_PAGES).map((page) => ({ page }));
 }

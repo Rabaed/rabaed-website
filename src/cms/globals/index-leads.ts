@@ -8,8 +8,8 @@ import { pageGlobal } from '../page-globals';
  *
  * Separate from the words every page shares because these two exist in English
  * as well: the blog and the case studies are published in both languages
- * (tickets 23 and 24), while the header and footer are
- * Arabic until the founder publishes their English (ticket 40).
+ * (tickets 23 and 24), while the header and footer
+ * are Arabic until the founder publishes their English (ticket 40).
  * A page is published in a language only with all of its words in it
  * (`page-fields.ts`), so the two cannot live in one entry.
  *

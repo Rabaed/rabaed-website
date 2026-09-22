@@ -185,7 +185,7 @@ test('an English address of a legal document says the Arabic is the binding text
     await expect(page.locator('h1'), `/en${document.path}`).toHaveText(
       'This document is published in Arabic only, and the Arabic text is the binding version.',
     );
-    await expect(page.getByRole('link', { name: 'Read them in Arabic' })).toHaveAttribute('href', document.path);
+    await expect(page.getByRole('link', { name: 'Read it in Arabic' })).toHaveAttribute('href', document.path);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   }
 });

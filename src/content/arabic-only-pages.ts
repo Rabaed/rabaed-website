@@ -37,7 +37,7 @@ const NOT_YET = {
 
 const NEVER = {
   notice: 'This document is published in Arabic only, and the Arabic text is the binding version.',
-  linkLabel: 'Read them in Arabic',
+  linkLabel: 'Read it in Arabic',
 } as const;
 
 /** Keyed by the address's last segment: `/en/product` is `product`. */
