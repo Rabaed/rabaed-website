@@ -1,6 +1,6 @@
 /**
  * How far behind a page may be when something has gone wrong (ticket 66,
- * ADR-0014).
+ * ADR-0016).
  *
  * A page of this site is built ahead of time and rebuilt when a publish marks
  * it stale (`refreshSite` in `src/cms/revalidation.ts`), and at no other time.
