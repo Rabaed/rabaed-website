@@ -176,19 +176,40 @@ function measureMenuFromItself(measurement: Record<string, unknown>) {
 }
 
 /**
- * The panel's content is 56px taller than the Reference site's at every width
- * and in every state, because the switcher is the last thing in it (ticket
- * 40). Closed, the panel is clipped to nothing by `max-height` in both
+ * The panel's content is not the Reference site's height at any width or in
+ * any state, because its last line is not the Reference site's: the switcher
+ * joined it (ticket 40), and then shared a row with the sign-in link, with the
+ * switcher's note under both where a page has no translation (ticket 76,
+ * ADR-0020). Closed, the panel is clipped to nothing by `max-height` in both
  * documents and only this inner box knows; open, its own height is already
  * given up above for a different reason.
  *
- * Nothing above the switcher moves, so every item in the panel is still held
- * to the Reference site's placement — it is one box's height that is given up,
- * and only downwards.
+ * Nothing above that last row moves, so every item in the panel before it is
+ * still held to the Reference site's placement — it is one box's height that
+ * is given up, and only downwards.
  */
 function dropPanelContentHeight(measurement: Record<string, unknown>) {
   const part = measurement['.mnav .wrap'];
   if (part && typeof part === 'object') delete (part as Record<string, unknown>).height;
+  return measurement;
+}
+
+/**
+ * The panel's sign-in link, which ticket 76 moved (ADR-0020).
+ *
+ * The Reference site ends its panel with a full-width pill on a line of its
+ * own. The rebuild's shares a row with the language switcher, as a button
+ * sized to its words — so where it sits, how wide and how tall it is, and the
+ * box it is drawn as (a flex item rather than a block) are all deliberately
+ * different, and given up here by name. Its ink, its border's colour, its
+ * typeface and size, and whether it shows at all are still held to the
+ * Reference site's.
+ */
+function dropPanelLoginPlacement(measurement: Record<string, unknown>) {
+  const part = measurement['.mnav .mlogin'];
+  if (part && typeof part === 'object') {
+    for (const key of ['top', 'left', 'width', 'height', 'display']) delete (part as Record<string, unknown>)[key];
+  }
   return measurement;
 }
 
@@ -322,7 +343,9 @@ test.describe('the shell matches the Reference site', () => {
           const open = classes.includes('open');
           const shape = (m: Record<string, unknown>) =>
             measureMenuFromItself(
-              dropPanelContentHeight(dropHorizontalPlacement(open ? dropOpenPanelHeights(m) : m)),
+              dropPanelLoginPlacement(
+                dropPanelContentHeight(dropHorizontalPlacement(open ? dropOpenPanelHeights(m) : m)),
+              ),
             );
 
           expect(shape(await measure(rebuilt, '.nav', HEADER_PARTS)), `header ${state}`).toEqual(

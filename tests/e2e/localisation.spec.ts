@@ -105,8 +105,28 @@ test('where a page has no English, the switcher says so rather than pretending',
   // reader.
   await expect(switcher).toHaveAttribute('aria-label', /not available in English/);
 
-  // In the panel, where there is room, it is shown rather than only announced.
-  await expect(page.locator('.mnav .mlang .mlang-n')).toHaveText(/not available in English/);
+  // In the panel, where there is room, it is shown rather than only announced:
+  // under the row Login and the language share, across the panel's width
+  // (ticket 76), and tied to the link it explains.
+  await page.setViewportSize({ width: 390, height: 812 });
+  await page.locator('.navtog').click();
+  const note = page.locator('.mnav .mlang-n');
+  await expect(note).toHaveText(/not available in English/);
+  await expect(page.locator('.mnav .mlang')).toHaveAttribute('aria-describedby', (await note.getAttribute('id'))!);
+
+  const row = await page.locator('.mnav').evaluate((panel) => {
+    const box = (selector: string) => panel.querySelector(selector)!.getBoundingClientRect();
+    const wrap = panel.querySelector('.wrap')!;
+    const style = getComputedStyle(wrap);
+    return {
+      login: box('.mlogin').bottom,
+      language: box('.mlang').bottom,
+      note: box('.mlang-n'),
+      inside: wrap.getBoundingClientRect().width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+    };
+  });
+  expect(row.note.top).toBeGreaterThanOrEqual(Math.max(row.login, row.language));
+  expect(Math.abs(row.note.width - row.inside)).toBeLessThan(1);
 });
 
 test('a page that has English switches to that page, not to the home page', async ({ page }) => {
