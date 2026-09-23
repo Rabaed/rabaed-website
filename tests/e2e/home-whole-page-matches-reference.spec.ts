@@ -68,13 +68,19 @@ const DELIBERATELY_DIFFERENT: readonly {
   {
     section: 'jt',
     where: () => true,
-    why: 'Ticket 08 and ADR-0002: every Screen mock has a caption under it saying in words what the picture shows. The Reference site has none.',
+    why: 'Ticket 08 and ADR-0002: every Screen mock has a caption under it saying in words what the picture shows. The Reference site has none. And ticket 78 with ADR-0022: at 700px and narrower the stage holds the screen\'s Phone crop, whole across the column, where the Reference site\'s stage is 650px tall and pans.',
     // No taller than the caption and the space above it; no taller at all
-    // where the column of tabs beside the screen is what sets the height.
+    // where the column of tabs beside the screen is what sets the height. On
+    // a phone, taller or shorter besides by the crop's stage against 650px.
     allowance: (rebuilt) =>
       rebuilt.evaluate(() => {
         const caption = [...document.querySelectorAll<HTMLElement>('#jt .jt-hint')].find((hint) => !hint.hidden)!;
-        return { atLeast: 0, atMost: caption.getBoundingClientRect().height + parseFloat(getComputedStyle(caption).marginTop) };
+        const stage = document.querySelector('#jt .jt-stage')!.getBoundingClientRect().height;
+        const crop = innerWidth <= 700 ? stage - 650 : 0;
+        return {
+          atLeast: crop,
+          atMost: crop + caption.getBoundingClientRect().height + parseFloat(getComputedStyle(caption).marginTop),
+        };
       }),
   },
   {

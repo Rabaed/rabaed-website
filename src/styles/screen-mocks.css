@@ -56,3 +56,81 @@
   /* Read once, it has done its work. */
   [data-pan][data-swiped] + .pan-hint { opacity: 0 }
 }
+
+/* ---- a Phone crop, and the whole screen it opens (ticket 78) ---- */
+
+/* At 700px and narrower a Screen mock still showing its export is its Phone
+   crop (ADR-0022): the browser takes the crop from the picture's `<source>`,
+   and these rules draw it whole, in its own 520 by 650 shape, with nothing to
+   pan and so no fade and no swipe hint. A button over it says it opens the
+   whole screen (`src/components/screen-mock-whole.tsx`). A replaced screen
+   has no crop, and keeps ticket 77's pan above. Wider than 700px none of this
+   applies, and the page is as it was. */
+
+/* The `<picture>` the crop is offered in takes no part in the layout: the
+   pages' rules size the picture inside it, as they did before there was one. */
+picture:has(> [data-screen-mock]) { display: contents }
+
+/* The button's words are the page's, in the page's face, even while it is not
+   displayed: a button does not inherit the font unless told to. */
+.shot-open { display: none; font: inherit }
+
+@media (max-width: 700px) {
+  /* The home page's stage, while the unit on show has a crop. */
+  .jt-stage:has(> .jt-shot.on [data-phone-crop]) { aspect-ratio: 520 / 650; height: auto; overflow: visible; mask-image: none }
+  .jt-stage:has(> .jt-shot.on [data-phone-crop]) > .jt-shot { inset: 0; width: 100%; height: 100% }
+  .jt-pan:has(.jt-shot.on [data-phone-crop]) .pan-hint { display: none }
+
+  /* The product page's windows. */
+  :is(#journey, #roles) .vs-shot-wrap:has([data-phone-crop]) { position: relative; overflow: visible; mask-image: none }
+  :is(#journey, #roles) .vs-shot[data-phone-crop] { width: 100%; height: auto; max-width: 100%; aspect-ratio: 520 / 650 }
+  .win:has([data-phone-crop]) .pan-hint { display: none }
+
+  /* The whole crop is the tap target, and its words sit where the swipe hint
+     would: over the foot of the picture, centred. */
+  .shot-open {
+    display: block; position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .shot-open:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px }
+  .shot-open-label {
+    display: flex; align-items: center; gap: 8px;
+    position: absolute; inset-inline: 0; bottom: 14px; margin: 0 auto;
+    width: max-content; max-width: calc(100% - 32px);
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(20, 22, 28, .84); color: #fff; font-size: 12.5px; line-height: 1.4;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+  }
+  .shot-open-i { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round }
+}
+
+/* The whole screen, opened over the page. Not tied to a width: a phone turned
+   on its side while it is open can be wider than 700px. */
+.shot-whole {
+  width: 100%; height: 100%; max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0;
+  background: var(--dark); color: var(--dark-text);
+}
+.shot-whole[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) }
+.shot-whole::backdrop { background: var(--dark) }
+.shot-whole-bar {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+}
+.shot-whole-btn {
+  font: inherit; font-size: 14px; line-height: 1.4; cursor: pointer;
+  padding: 8px 18px; border-radius: 999px;
+  color: var(--dark-text); background: rgba(255, 255, 255, .08); border: 1px solid var(--dark-line);
+}
+.shot-whole-btn[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: #fff }
+.shot-whole-btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px }
+/* The screen pans inside the cover, never the page behind it. `margin: auto`
+   centres it while it fits and lets it start at its own edge once zoomed. */
+.shot-whole-view { display: flex; overflow: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom) }
+/* Held by the cover as well as the view: the home page's own rule for a
+   screen's picture, `.jt-shot img`, reaches this one too, and is as specific
+   as the view's alone. */
+.shot-whole .shot-whole-view img { display: block; margin: auto; width: 100%; height: auto; max-width: none; cursor: zoom-in }
+.shot-whole .shot-whole-view[data-zoomed="true"] img { width: 1440px; cursor: zoom-out }
+html:has(.shot-whole[open]) { overflow: hidden }

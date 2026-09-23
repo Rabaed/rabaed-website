@@ -119,17 +119,18 @@ test('every screen is the exported picture, described by its caption', async ({ 
   }
 });
 
-test('on a phone the screen is shown full size, to be panned across', async ({ page }) => {
+test('on a phone the screen is its Phone crop, drawn whole across its window', async ({ page }) => {
+  // Ticket 78 in place of tickets 08 and 12's 1040px pan (`phone-crops.spec.ts`).
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto('/product');
   await section(page).scrollIntoViewIfNeeded();
 
-  expect((await screen(page, 0).boundingBox())?.width).toBe(1040);
-  const panned = await screen(page, 0).evaluate((image) => {
-    const window = image.parentElement!;
-    const before = window.scrollLeft;
-    window.scrollBy({ left: -300 });
-    return { canPan: window.scrollWidth > window.clientWidth, moved: window.scrollLeft !== before };
+  const drawn = await screen(page, 0).evaluate((image) => {
+    const window = image.closest('.vs-shot-wrap')!;
+    const [shot, frame] = [image.getBoundingClientRect(), window.getBoundingClientRect()];
+    return { fills: Math.abs(shot.width - frame.width) < 1, shape: shot.width / shot.height, hidden: window.scrollWidth - window.clientWidth };
   });
-  expect(panned).toEqual({ canPan: true, moved: true });
+  expect(drawn.fills).toBe(true);
+  expect(drawn.shape).toBeCloseTo(520 / 650, 2);
+  expect(drawn.hidden).toBeLessThanOrEqual(0);
 });

@@ -216,19 +216,43 @@ test('previewed, each English page is the whole page, in English, left to right'
   expect(eyebrows, 'no English page has an eyebrow').toBeGreaterThan(0);
 });
 
-test('previewed on a phone, the English Screen mocks say they can be swiped, in English', async ({ page }) => {
+test('previewed on a phone, the English Screen mocks are English Phone crops; at 768px, whole English screens', async ({
+  page,
+}) => {
   await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
-  for (const slug of ['home-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
+  for (const slug of ['home-page', 'product-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
     await approve(page.request, slug, 'draft');
   }
   await approveSiteWords(page.request, 'draft');
-  await page.setViewportSize({ width: 390, height: 812 });
-  await page.goto(`/api/preview?path=${encodeURIComponent('/en')}`);
 
-  // Ticket 77's hint, from the English the site words proposal carries.
-  const hint = page.locator('#jt .pan-hint');
-  await hint.scrollIntoViewIfNeeded();
-  await expect(hint).toHaveText('Swipe to see the whole screen');
+  /** The file the Screen mock on show was drawn from, as `next/image` names it. */
+  const drawnFrom = async (section: string) => {
+    const picture = page.locator(section).locator('img[data-screen-mock]').first();
+    await picture.scrollIntoViewIfNeeded();
+    await expect.poll(() => picture.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    const url = new URL(await picture.evaluate((image: HTMLImageElement) => image.currentSrc));
+    const file = url.pathname === '/_next/image' ? url.searchParams.get('url')! : url.pathname;
+    return { file, mock: await picture.getAttribute('data-screen-mock') };
+  };
+
+  for (const [path, section] of [
+    ['/en', '#jt .jt-shot.on'],
+    ['/en/product', '#journey .ui'],
+    ['/en/product', '#roles .role.on'],
+  ] as const) {
+    await page.setViewportSize({ width: 390, height: 812 });
+    await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+    // Ticket 78's crop, cut from the English screen — the Arabic crop mirrored.
+    const phone = await drawnFrom(section);
+    expect(phone.file, path).toBe(`/screen-mocks/en/phone/${phone.mock}.webp`);
+    // Its words, from the English the site words proposal carries.
+    await expect(page.locator(section).first().getByRole('button', { name: 'Tap to see the whole screen' })).toBeVisible();
+
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.reload();
+    const tablet = await drawnFrom(section);
+    expect(tablet.file, path).toBe(`/screen-mocks/en/${tablet.mock}.webp`);
+  }
 });
 
 test.describe('the comparison', () => {

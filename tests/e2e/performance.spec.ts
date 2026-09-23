@@ -54,11 +54,13 @@ const SLOW_4G = { downloadKbps: 1600, latencyMs: 150 };
  *
  *  - **The Arabic webfont, ~205 KB on every page**, five faces of IBM Plex
  *    Sans Arabic. Four weights is what the design uses.
- *  - **The Screen mocks, ~370 KB on the home and product pages.** Below 700px
- *    each is drawn 1040 CSS pixels wide and panned across (tickets 08 and 12),
- *    so a phone is sent the widest copy, and every panel is fetched at once
- *    because a panel behind a tab is `display: none` and would otherwise
- *    arrive blank in front of the visitor (`screen-mock-picture.tsx`).
+ *  - **The Screen mocks, on the home and product pages.** Every panel is
+ *    fetched at once, because a panel behind a tab is `display: none` and
+ *    would otherwise arrive blank in front of the visitor
+ *    (`screen-mock-picture.tsx`). They were ~370 KB a page when a phone was
+ *    sent each one 1040 CSS pixels wide to pan across (tickets 08 and 12);
+ *    since ticket 78 a phone is sent each one's Phone crop instead, about a
+ *    third of the weight, and the whole screen only when a visitor taps.
  *
  * **Every Arabic page carries 80 KB more for its labels' face** — Thmanyah
  * Sans Regular, 76 KB, the founder's choice (ADR-0018). One weight, so one

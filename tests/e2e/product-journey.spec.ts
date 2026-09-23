@@ -397,9 +397,10 @@ for (const viewport of [
 
     const placed = await journey(page).evaluate((section) =>
       [...section.querySelectorAll('.ui')].map((ui) => {
-        // The box the visitor sees the screen in: on a phone that is the
-        // window it pans behind, not the full 1040px picture.
-        const screen = ui.querySelector('img')!.parentElement!.getBoundingClientRect();
+        // The box the visitor sees the screen in: the window it stands in,
+        // which on a phone is the Phone crop's own shape, or the window a
+        // replaced screen pans behind — never a 1040px picture.
+        const screen = ui.querySelector('.vs-shot-wrap')!.getBoundingClientRect();
         const range = document.createRange();
         range.selectNodeContents(ui.querySelector('.shot-cap')!);
         const words = range.getBoundingClientRect();
@@ -414,22 +415,23 @@ for (const viewport of [
   });
 }
 
-test('on a phone each screen is shown full size, to be panned across', async ({ page }) => {
+test('on a phone each screen is its Phone crop, drawn whole across its window', async ({ page }) => {
+  // Ticket 78 in place of tickets 08 and 12's 1040px pan: the part of the
+  // screen that matters, whole, and a tap opens the rest (`phone-crops.spec.ts`).
+  // A replaced screen, which has no crop, still pans (`product-text.spec.ts`).
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto('/product');
 
   const picture = journey(page).getByRole('img', { name: PANELS[0].description });
   await picture.scrollIntoViewIfNeeded();
-  expect((await picture.boundingBox())?.width).toBe(1040);
-
-  const panned = await picture.evaluate((image) => {
-    const window = image.parentElement!;
-    const before = window.scrollLeft;
-    // Right to left, so the rest of the screen is to the left.
-    window.scrollBy({ left: -300 });
-    return { canPan: window.scrollWidth > window.clientWidth, moved: window.scrollLeft !== before };
+  const drawn = await picture.evaluate((image) => {
+    const window = image.closest('.vs-shot-wrap')!;
+    const [shot, frame] = [image.getBoundingClientRect(), window.getBoundingClientRect()];
+    return { fills: Math.abs(shot.width - frame.width) < 1, shape: shot.width / shot.height, hidden: window.scrollWidth - window.clientWidth };
   });
-  expect(panned).toEqual({ canPan: true, moved: true });
+  expect(drawn.fills).toBe(true);
+  expect(drawn.shape).toBeCloseTo(520 / 650, 2);
+  expect(drawn.hidden).toBeLessThanOrEqual(0);
 });
 
 test.describe('layout integrity', () => {

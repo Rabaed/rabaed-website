@@ -27,6 +27,11 @@
  * - **The screen does not widen past the content column**, as the ticket's
  *   wording asks, because no Reference page does that (ADR-0005). This
  *   comparison is what holds it to the Reference site instead.
+ * - **A Phone crop in place of the pan** (ticket 78, ADR-0022). At 700px and
+ *   narrower the Reference site's stage is 650px tall and pans a screen 1040px
+ *   wide; here it holds the screen's Phone crop, whole, across the column. The
+ *   stage's height and the screens' boxes are not compared there; the stage's
+ *   place and width are, and `phone-crops.spec.ts` holds the crop's shape.
  */
 import { test, expect } from '@playwright/test';
 import { measureRegion, type Region } from './geometry';
@@ -37,7 +42,10 @@ import {
   type ReferenceSite,
 } from './reference-site';
 
-const REGIONS: readonly Region[] = [
+/** At 700px and narrower the stage holds a Phone crop rather than a 1040px screen to pan (ticket 78). */
+function regions(viewport: { width: number }): readonly Region[] {
+  const crop = viewport.width <= 700;
+  return [
   {
     name: 'the four-units section',
     root: '#jt',
@@ -54,8 +62,8 @@ const REGIONS: readonly Region[] = [
       // In the Arabic face, where the Reference site uses DM Mono.
       { selector: '.jt-s .n.out', omit: ['font'] },
       '.jt-s h3',
-      '.jt-stage',
-      '.jt-shot',
+      { selector: '.jt-stage', omit: crop ? ['height'] : [] },
+      { selector: '.jt-shot', omit: crop ? ['left', 'width', 'height'] : [] },
       // The caption above it moves it down the section.
       { selector: '.tz-foot', omit: ['top'] },
     ],
@@ -65,7 +73,8 @@ const REGIONS: readonly Region[] = [
     root: '#jt .tz-foot',
     parts: ['.tz-more', '.tz-more span'],
   },
-];
+  ];
+}
 
 test.describe('the four-units section matches the Reference site', () => {
   let site: ReferenceSite;
@@ -83,7 +92,7 @@ test.describe('the four-units section matches the Reference site', () => {
       const pages = await openBothPages(browser, baseURL!, site, viewport);
 
       try {
-        for (const region of REGIONS) {
+        for (const region of regions(viewport)) {
           expect(await measureRegion(pages.rebuilt, region), region.name).toEqual(
             await measureRegion(pages.reference, region),
           );

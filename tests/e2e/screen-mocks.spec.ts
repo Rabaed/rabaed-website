@@ -25,6 +25,10 @@
  *     Both skip a mock an Editor has replaced in the admin (ticket 57): the
  *     pages show the replacement, so a stale export harms nothing (spec:
  *     Screen mocks).
+ *
+ *     Each Phone crop (ticket 78) is held to its whole picture, not to the
+ *     studio: it must be exactly the pixels of its box in the committed
+ *     image, so a crop is as current as the picture it was cut from.
  *  3. The studio is not indexable. It is a private route that exists to be
  *     photographed, and its contents duplicate pages that are meant to rank.
  *  4. The English set is the Arabic one translated and mirrored, and nothing
@@ -40,7 +44,13 @@ import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import sharp from 'sharp';
 import { openReferencePage, startReferenceSite, type ReferenceSite } from './reference-site';
-import { SCREEN_MOCKS, screenMockImagePath, studioPath } from '../../src/screen-mocks/registry';
+import {
+  phoneCropBox,
+  phoneCropImagePath,
+  SCREEN_MOCKS,
+  screenMockImagePath,
+  studioPath,
+} from '../../src/screen-mocks/registry';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 
@@ -91,6 +101,8 @@ type ExportRecord = {
   height: number;
   /** SHA-256 of the markup this image was rendered from. */
   source: string;
+  /** The box its Phone crop was cut from, in the exported image's pixels (ticket 78). */
+  phoneCrop?: { x: number; y: number; width: number; height: number };
 };
 
 /**
@@ -284,6 +296,48 @@ test.describe('screen mocks', () => {
           width: mock.width * mock.scale,
           height: mock.height * mock.scale,
         });
+      });
+
+      test(`${locale}/${mock.id} has a Phone crop, cut from its exported image`, async () => {
+        // Not skipped for a mock an Editor has replaced: the crop still has
+        // to exist for the day the replacement is taken away (ticket 78).
+        const manifest = JSON.parse(
+          await readFile(path.join(repoRoot, 'src', 'screen-mocks', 'exported.json'), 'utf8'),
+        ) as { images: ExportRecord[] };
+        const record = manifest.images.find((image) => image.locale === locale && image.id === mock.id);
+        const box = phoneCropBox(locale, mock);
+        const scaled = {
+          x: box.x * mock.scale,
+          y: box.y * mock.scale,
+          width: box.width * mock.scale,
+          height: box.height * mock.scale,
+        };
+        expect(record?.phoneCrop, `${locale}/${mock.id} has no Phone crop on record — run "npm run mocks:export"`).toEqual(
+          scaled,
+        );
+
+        // The crop is the whole screen's own pixels, not a second picture that
+        // could drift from it: both are lossless, so the region matches exactly.
+        const decode = (file: string, region?: typeof scaled) => {
+          const image = sharp(path.join(repoRoot, 'public', file));
+          return (region
+            ? image.extract({ left: region.x, top: region.y, width: region.width, height: region.height })
+            : image
+          )
+            .ensureAlpha()
+            .raw()
+            .toBuffer({ resolveWithObject: true });
+        };
+        const crop = await decode(phoneCropImagePath(locale, mock.id));
+        expect({ width: crop.info.width, height: crop.info.height }).toEqual({
+          width: scaled.width,
+          height: scaled.height,
+        });
+        const region = await decode(screenMockImagePath(locale, mock.id), scaled);
+        expect(
+          pixelmatch(region.data, crop.data, undefined, scaled.width, scaled.height, { threshold: 0 }),
+          `${locale}/${mock.id}'s Phone crop is not the box it should be cut from — run "npm run mocks:export"`,
+        ).toBe(0);
       });
 
       test(`@pixel ${locale}/${mock.id}'s exported image is what the studio renders today`, async ({

@@ -6,112 +6,208 @@
       "id": "correspondence",
       "width": 2880,
       "height": 1800,
-      "source": "06e56e60f32885e4e706a4fbdc21041e25f48ee369d48d0baf45bb19c776523c"
+      "source": "06e56e60f32885e4e706a4fbdc21041e25f48ee369d48d0baf45bb19c776523c",
+      "phoneCrop": {
+        "x": 200,
+        "y": 460,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "kanban",
       "width": 2880,
       "height": 1800,
-      "source": "716ef1d2a139b08f08f7ee23702dbfa2215bbdc1a36e08f8beed50d7512b7644"
+      "source": "716ef1d2a139b08f08f7ee23702dbfa2215bbdc1a36e08f8beed50d7512b7644",
+      "phoneCrop": {
+        "x": 90,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "daily-report",
       "width": 2880,
       "height": 1800,
-      "source": "ce112d69d15af6c88a23ddf022704edcd685284805920aa9479e0e23efb8a008"
+      "source": "ce112d69d15af6c88a23ddf022704edcd685284805920aa9479e0e23efb8a008",
+      "phoneCrop": {
+        "x": 94,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "documents",
       "width": 2880,
       "height": 1800,
-      "source": "d68722f8869bbc5b2bd7f947e396bdcde57dc7484f20bbe09a4b079560290ecd"
+      "source": "d68722f8869bbc5b2bd7f947e396bdcde57dc7484f20bbe09a4b079560290ecd",
+      "phoneCrop": {
+        "x": 86,
+        "y": 460,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "stamped-sheet",
       "width": 2880,
       "height": 1800,
-      "source": "c2081b810bc17857da3d2cb8cb98797e710fac9c3fba6d73dd3fc744ac326bf5"
+      "source": "c2081b810bc17857da3d2cb8cb98797e710fac9c3fba6d73dd3fc744ac326bf5",
+      "phoneCrop": {
+        "x": 24,
+        "y": 480,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "overview",
       "width": 2880,
       "height": 1800,
-      "source": "3b530f22204388cc5b3fb5996c7f01bc1fbfbc0eeadf7345bafac1f7e0cb8a5f"
+      "source": "3b530f22204388cc5b3fb5996c7f01bc1fbfbc0eeadf7345bafac1f7e0cb8a5f",
+      "phoneCrop": {
+        "x": 1330,
+        "y": 460,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "approvals-table",
       "width": 2880,
       "height": 1800,
-      "source": "67b35dadabdacdd53792fd2ac0a05a53b36aaa3eb6e95c1d4df027ff21214750"
+      "source": "67b35dadabdacdd53792fd2ac0a05a53b36aaa3eb6e95c1d4df027ff21214750",
+      "phoneCrop": {
+        "x": 90,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "ar",
       "id": "submittal",
       "width": 2880,
       "height": 1800,
-      "source": "beb2351706d0cdbc82f3da1b5ffce053bbe0c0fa734b9fe8a1500b6284ac2c12"
+      "source": "beb2351706d0cdbc82f3da1b5ffce053bbe0c0fa734b9fe8a1500b6284ac2c12",
+      "phoneCrop": {
+        "x": 94,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "correspondence",
       "width": 2880,
       "height": 1800,
-      "source": "e3e43609d5def20a22f6ff56519f021985397f7a5ed1a4ef9f3280fab602edba"
+      "source": "e3e43609d5def20a22f6ff56519f021985397f7a5ed1a4ef9f3280fab602edba",
+      "phoneCrop": {
+        "x": 1640,
+        "y": 460,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "kanban",
       "width": 2880,
       "height": 1800,
-      "source": "4b4b6189b886a0ecd58be221b2f6e33c1d04df8b589af939eb33dd79994c792c"
+      "source": "4b4b6189b886a0ecd58be221b2f6e33c1d04df8b589af939eb33dd79994c792c",
+      "phoneCrop": {
+        "x": 1750,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "daily-report",
       "width": 2880,
       "height": 1800,
-      "source": "550b09f8d5e47ab4b633e07d6cd26f5a7e3278138bd687d9aa186fd3f5edf44e"
+      "source": "550b09f8d5e47ab4b633e07d6cd26f5a7e3278138bd687d9aa186fd3f5edf44e",
+      "phoneCrop": {
+        "x": 1746,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "documents",
       "width": 2880,
       "height": 1800,
-      "source": "80179dcba97e492e68d0b576a1aede7a7e7d08810ecb4d6566272a3882cc0063"
+      "source": "80179dcba97e492e68d0b576a1aede7a7e7d08810ecb4d6566272a3882cc0063",
+      "phoneCrop": {
+        "x": 1754,
+        "y": 460,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "stamped-sheet",
       "width": 2880,
       "height": 1800,
-      "source": "1e354542f4bc78d5904966f7b93d910e3dc69cfb8f49a24ed52dcef3cf9fab71"
+      "source": "1e354542f4bc78d5904966f7b93d910e3dc69cfb8f49a24ed52dcef3cf9fab71",
+      "phoneCrop": {
+        "x": 1816,
+        "y": 480,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "overview",
       "width": 2880,
       "height": 1800,
-      "source": "2bffcdfbb8fa190395914c4b09f63dd9e7a6daefd12d1a67a89d2cb607dc8d21"
+      "source": "2bffcdfbb8fa190395914c4b09f63dd9e7a6daefd12d1a67a89d2cb607dc8d21",
+      "phoneCrop": {
+        "x": 510,
+        "y": 460,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "approvals-table",
       "width": 2880,
       "height": 1800,
-      "source": "5920289ea470cf5e468f8005b2244d89e4f6348e80595f66ac1d290dfbc7ec5e"
+      "source": "5920289ea470cf5e468f8005b2244d89e4f6348e80595f66ac1d290dfbc7ec5e",
+      "phoneCrop": {
+        "x": 1750,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     },
     {
       "locale": "en",
       "id": "submittal",
       "width": 2880,
       "height": 1800,
-      "source": "c0f5f9d7059bdd5dbdc2cabd519cc92cabfc4b4e205f076fed565f6dcb15ca48"
+      "source": "c0f5f9d7059bdd5dbdc2cabd519cc92cabfc4b4e205f076fed565f6dcb15ca48",
+      "phoneCrop": {
+        "x": 1746,
+        "y": 500,
+        "width": 1040,
+        "height": 1300
+      }
     }
   ]
 }
