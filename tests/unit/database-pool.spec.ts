@@ -19,7 +19,7 @@
 import { test, expect } from '@playwright/test';
 import { runProbe } from './payload-probe';
 
-type Pool = { max: number | null; connectionTimeoutMillis: number | null };
+type Pool = { max: number | null; connectionTimeoutMillis: number | null; idleTimeoutMillis: number | null };
 
 /**
  * The pool the config hands the adapter under `environment`. Every value is a
@@ -43,23 +43,26 @@ function deployedAt(address: string): Record<string, string> {
   };
 }
 
+/** The pool every deployment should be given. */
+const DEPLOYED: Pool = { max: 5, connectionTimeoutMillis: 10_000, idleTimeoutMillis: 10_000 };
+
 const TRANSACTION_POOLER = 'postgres://postgres.unused:unused@aws-0-unused.pooler.supabase.com:6543/postgres';
 
 // Loading a Payload config is slower than the test runner's own deadline
 // expects, and this does it several times.
 test.slow();
 
-test('a deployment holds at most five connections, and waits at most ten seconds for one', () => {
-  expect(poolUnder(deployedAt(TRANSACTION_POOLER))).toEqual({ max: 5, connectionTimeoutMillis: 10_000 });
+test('a deployment holds at most five connections, waits at most ten seconds for one, and lets one go after ten idle seconds', () => {
+  expect(poolUnder(deployedAt(TRANSACTION_POOLER))).toEqual(DEPLOYED);
 });
 
 test('a deployment accepts the dedicated pooler Supabase’s paid plans add, which is transaction mode too', () => {
   const dedicated = 'postgres://postgres:unused@db.unused.supabase.co:6543/postgres';
-  expect(poolUnder(deployedAt(dedicated))).toEqual({ max: 5, connectionTimeoutMillis: 10_000 });
+  expect(poolUnder(deployedAt(dedicated))).toEqual(DEPLOYED);
 });
 
 test('the test server keeps pg’s own pool', () => {
-  expect(poolUnder({ VERCEL_ENV: '' })).toEqual({ max: null, connectionTimeoutMillis: null });
+  expect(poolUnder({ VERCEL_ENV: '' })).toEqual({ max: null, connectionTimeoutMillis: null, idleTimeoutMillis: null });
 });
 
 /**

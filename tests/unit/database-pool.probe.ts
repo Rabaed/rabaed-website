@@ -12,8 +12,14 @@ import config from '../../src/payload.config';
 
 const { db } = await config;
 const adapter = db.init({ payload: {} as never }) as unknown as {
-  poolOptions: { max?: number; connectionTimeoutMillis?: number };
+  poolOptions: { max?: number; connectionTimeoutMillis?: number; idleTimeoutMillis?: number };
 };
 
-const { max, connectionTimeoutMillis } = adapter.poolOptions;
-console.log(JSON.stringify({ max: max ?? null, connectionTimeoutMillis: connectionTimeoutMillis ?? null }));
+const { max, connectionTimeoutMillis, idleTimeoutMillis } = adapter.poolOptions;
+console.log(
+  JSON.stringify({
+    max: max ?? null,
+    connectionTimeoutMillis: connectionTimeoutMillis ?? null,
+    idleTimeoutMillis: idleTimeoutMillis ?? null,
+  }),
+);

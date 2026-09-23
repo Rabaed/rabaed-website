@@ -249,7 +249,9 @@ things keep that from running out on a busy day:
   That is the trade: one server handles many visitors at once, so on a very
   busy server a form or an editor's save can now fail after ten seconds, where
   before it would have waited, perhaps for minutes, perhaps for good. A form
-  that fails tells the visitor to try again.
+  that fails tells the visitor to try again. A connection nobody has used
+  for ten seconds is closed, so a server that has gone quiet gives its share
+  back.
   The numbers live in `databasePool` in `src/cms/environment.ts`. Local
   servers and the tests keep `pg`'s own ten, with no wait limit.
 

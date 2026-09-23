@@ -31,10 +31,13 @@ export function databaseUrl(): string {
  * Five, because the adapter keeps one checked out for the server's lifetime to
  * hear a dropped connection, leaving four for page builds, the admin and the
  * forms. Ten seconds is far longer than any query here takes: past it the
- * request fails, and a page with a built copy goes on serving it.
- * `docs/deployment.md` sets these against Supabase's limits.
+ * request fails, and a page with a built copy goes on serving it. A
+ * connection left idle for ten seconds is closed, so a server that has gone
+ * quiet stops holding its share: `pg`'s own default, written here so that it
+ * is a decision rather than an accident. `docs/deployment.md` sets these
+ * against Supabase's limits.
  */
-const DEPLOYED_POOL = { max: 5, connectionTimeoutMillis: 10_000 } as const;
+const DEPLOYED_POOL = { max: 5, connectionTimeoutMillis: 10_000, idleTimeoutMillis: 10_000 } as const;
 
 /**
  * The pool the Postgres adapter opens its connections with. Locally, `pg`'s
