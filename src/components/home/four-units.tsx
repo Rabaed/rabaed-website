@@ -1,7 +1,7 @@
 import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
 import type { PageLink } from '@/components/page-link';
-import { ScreenMockImage, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
+import { PanningScreen, ScreenMockImage, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
 import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 export type UnitTab = {
@@ -110,20 +110,25 @@ export function FourUnits({
             they share one cell, so the caption sits under the screen rather
             than under whichever of the two columns is taller. */}
         <div className="jt-view">
-          <div className="jt-stage">
-            {content.tabs.map((unit, index) => (
-              <div
-                key={index}
-                id={`jt-panel-${index}`}
-                role="tabpanel"
-                aria-labelledby={`jt-tab-${index}`}
-                className={unitTabAppearance(index, FIRST_CHOSEN).panelClass}
-              >
-                {/* Below 700px the screen is shown at 1040px and panned
-                    across; above it, the stage is never wider than 820px. */}
-                <ScreenMockImage content={unit.screen} sizes="(max-width: 700px) 1040px, 820px" />
-              </div>
-            ))}
+          {/* The frame the swipe hint sits in, over the foot of the stage, on
+              a phone (ticket 77). It draws nothing of its own: the stage's
+              margins pass through it, so the stage sits where it always has. */}
+          <div className="jt-pan">
+            <PanningScreen locale={content.tabs[0].screen.locale} className="jt-stage">
+              {content.tabs.map((unit, index) => (
+                <div
+                  key={index}
+                  id={`jt-panel-${index}`}
+                  role="tabpanel"
+                  aria-labelledby={`jt-tab-${index}`}
+                  className={unitTabAppearance(index, FIRST_CHOSEN).panelClass}
+                >
+                  {/* Below 700px the screen is shown at 1040px and panned
+                      across; above it, the stage is never wider than 820px. */}
+                  <ScreenMockImage content={unit.screen} sizes="(max-width: 700px) 1040px, 820px" />
+                </div>
+              ))}
+            </PanningScreen>
           </div>
           <div className="jt-hints" aria-hidden="true">
             {content.tabs.map((unit, index) => (

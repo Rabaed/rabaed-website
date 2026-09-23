@@ -69,6 +69,8 @@ import { REFERRAL_PAGE_SEED } from '../../src/migrations/referral-page-import/se
 import { REFERRAL_PAGE_WORDS } from '../../src/migrations/referral-page-import/words';
 import { REFERRAL_SIGNUP_SEED } from '../../src/migrations/referral-signup-import/seed';
 import { REFERRAL_SIGNUP_WORDS } from '../../src/migrations/referral-signup-import/words';
+import { SWIPE_HINT_SEED } from '../../src/migrations/screen-mock-swipe-hint/seed';
+import { SWIPE_HINT } from '../../src/migrations/screen-mock-swipe-hint/words';
 import { SEARCH_SETTINGS_SEED } from '../../src/migrations/search-settings-import/seed';
 import { SEARCH_SETTINGS } from '../../src/migrations/search-settings-import/words';
 import { SITE_WORDS_SEED } from '../../src/migrations/site-words-import/seed';
@@ -150,6 +152,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     seed: PARTNERSHIP_APPLICATION_SEED,
   },
   { name: 'Pour Tracker download form', words: TOOL_DOWNLOAD_WORDS, seed: TOOL_DOWNLOAD_SEED },
+  { name: 'the swipe hint over a Screen mock', words: SWIPE_HINT, seed: SWIPE_HINT_SEED },
   { name: 'launch articles', words: ARTICLE_PER_QUESTION_KIND, seed: LAUNCH_ARTICLES_SEED },
   {
     name: 'launch articles in English',

@@ -259,7 +259,7 @@ test('on a short window the heading, the panel and its screen all fit', async ({
       const inside = panel.getBoundingClientRect();
       const column = panel.querySelector('.ui')!.getBoundingClientRect();
       const screen = panel.querySelector('img')!.getBoundingClientRect();
-      const caption = panel.querySelector('.ui p')!.getBoundingClientRect();
+      const caption = panel.querySelector('.ui .shot-cap')!.getBoundingClientRect();
       // The picture drawn inside its box, which keeps the mock's 1440×900.
       const drawnWidth = Math.min(screen.width, screen.height * 1.6);
       return {
@@ -401,7 +401,7 @@ for (const viewport of [
         // window it pans behind, not the full 1040px picture.
         const screen = ui.querySelector('img')!.parentElement!.getBoundingClientRect();
         const range = document.createRange();
-        range.selectNodeContents(ui.querySelector('p')!);
+        range.selectNodeContents(ui.querySelector('.shot-cap')!);
         const words = range.getBoundingClientRect();
         return {
           centred: Math.abs((words.left + words.right) / 2 - (screen.left + screen.right) / 2) < 2,

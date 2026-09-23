@@ -4588,6 +4588,15 @@ export interface SiteWord {
       en?: string | null;
     };
   };
+  screenMocks: {
+    /**
+     * Over the foot of the picture on a phone only, and gone after the first swipe.
+     */
+    swipeHint: {
+      ar: string;
+      en?: string | null;
+    };
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -8470,6 +8479,16 @@ export interface SiteWordsSelect<T extends boolean = true> {
               en?: T;
             };
         homeLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  screenMocks?:
+    | T
+    | {
+        swipeHint?:
           | T
           | {
               ar?: T;

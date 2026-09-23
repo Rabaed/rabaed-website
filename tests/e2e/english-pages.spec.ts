@@ -216,6 +216,21 @@ test('previewed, each English page is the whole page, in English, left to right'
   expect(eyebrows, 'no English page has an eyebrow').toBeGreaterThan(0);
 });
 
+test('previewed on a phone, the English Screen mocks say they can be swiped, in English', async ({ page }) => {
+  await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+  for (const slug of ['home-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
+    await approve(page.request, slug, 'draft');
+  }
+  await approveSiteWords(page.request, 'draft');
+  await page.setViewportSize({ width: 390, height: 812 });
+  await page.goto(`/api/preview?path=${encodeURIComponent('/en')}`);
+
+  // Ticket 77's hint, from the English the site words proposal carries.
+  const hint = page.locator('#jt .pan-hint');
+  await hint.scrollIntoViewIfNeeded();
+  await expect(hint).toHaveText('Swipe to see the whole screen');
+});
+
 test.describe('the comparison', () => {
   // The seam sweeps once by itself when it first comes into view, which a
   // test pressing its keys would be racing; with reduced motion it never does
