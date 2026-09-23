@@ -9,6 +9,7 @@
  * see "The CMS" in `docs/deployment.md`.
  */
 import path from 'node:path';
+import type { PoolConfig } from 'pg';
 import { isPubliclyDeployed } from '../lib/environment';
 
 function required(name: string, what: string): string {
@@ -23,32 +24,62 @@ export function databaseUrl(): string {
 }
 
 /**
- * The pool the Postgres adapter opens its connections with (ticket 83).
+ * How many connections each server running a deployment may hold, and how
+ * long a request there waits for a free one (ticket 83). `pg`'s defaults are
+ * ten and for ever, and every server Vercel starts opens a pool of its own.
  *
- * `pg`'s defaults allow ten connections and no end to a wait for a free one.
- * Every server Vercel runs the site on opens a pool of its own, so under a
- * spike those ten each are what Supabase is asked for, and a request that
- * finds its server's all busy hangs until Vercel's function limit ends it
- * minutes later.
- *
- * On a deployment, then, five, and ten seconds. Five is room for one server's
- * work: the adapter keeps one of them checked out for as long as the server
- * lives, to hear a dropped connection, which leaves four for page builds, the
- * admin and the forms, and a page build asks for several at once. Against the
- * 200 clients Supabase's pooler takes on its smaller plans, it is forty
- * servers where the default was twenty — `docs/deployment.md` says why the
- * pooler address matters. Ten seconds is far longer than any query here takes
- * and far shorter than a visitor waits: past it the request fails, and a page
- * that already has a built copy goes on serving it.
- *
- * Locally, `pg`'s own. The test server's suites ask for many pages at once and
- * lean on its ten connections (ticket 70); a ceiling meant for a fleet of
- * servers would only starve the one.
+ * Five, because the adapter keeps one checked out for the server's lifetime to
+ * hear a dropped connection, leaving four for page builds, the admin and the
+ * forms. Ten seconds is far longer than any query here takes: past it the
+ * request fails, and a page with a built copy goes on serving it.
+ * `docs/deployment.md` sets these against Supabase's limits.
  */
-export function databasePool(): { connectionString: string; max?: number; connectionTimeoutMillis?: number } {
+const DEPLOYED_POOL = { max: 5, connectionTimeoutMillis: 10_000 } as const;
+
+/**
+ * The pool the Postgres adapter opens its connections with. Locally, `pg`'s
+ * own: the test server's suites ask for many pages at once and lean on its
+ * ten (ticket 70), and a ceiling meant for a fleet of servers would only
+ * starve the one.
+ */
+export function databasePool(): PoolConfig {
   const connectionString = databaseUrl();
   if (!isPubliclyDeployed()) return { connectionString };
-  return { connectionString, max: 5, connectionTimeoutMillis: 10_000 };
+  refuseSupabaseOutsideTransactionPooler(connectionString);
+  return { connectionString, ...DEPLOYED_POOL };
+}
+
+/**
+ * Supabase offers one database at three addresses: directly, and through its
+ * pooler in session mode or in transaction mode. Only the last shares a few
+ * real connections among many servers; the other two give each connection a
+ * server opens one of the database's own, which is what `DEPLOYED_POOL` is
+ * there to keep few. So a deployment on either is refused at start-up, rather
+ * than found out on a busy day. The founder confirmed on 24 September 2026
+ * that production and the Preview environment both use the transaction pooler.
+ *
+ * An address that is not Supabase's is let through: ADR-0004 chose Supabase,
+ * and a move from it would come with its own advice.
+ *
+ * The refusal never repeats the address, which carries the database password.
+ */
+function refuseSupabaseOutsideTransactionPooler(connectionString: string): void {
+  let address: URL;
+  try {
+    address = new URL(connectionString);
+  } catch {
+    return;
+  }
+  const { hostname, port } = address;
+  if (!hostname.endsWith('.supabase.co') && !hostname.endsWith('.supabase.com')) return;
+  // 6543 is transaction mode on the shared pooler and on the dedicated one
+  // Supabase's paid plans add at the database's own address.
+  if (port === '6543') return;
+
+  const found = hostname.endsWith('.pooler.supabase.com') ? 'the pooler in session mode' : 'a direct connection';
+  throw new Error(
+    `DATABASE_URL on this deployment is ${found}, not Supabase's transaction pooler. In the Supabase project, open Connect → Transaction pooler and put that address, with the database password, in DATABASE_URL in Vercel under Settings → Environment Variables for the "${process.env.VERCEL_ENV}" environment, then redeploy. See "Database connections" in docs/deployment.md.`,
+  );
 }
 
 /** Signs editors' login sessions. One long random value per environment. */

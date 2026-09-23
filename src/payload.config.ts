@@ -116,7 +116,6 @@ export default buildConfig({
   ],
 
   db: postgresAdapter({
-    // A ceiling and a wait limit on a deployment (ticket 83).
     pool: databasePool(),
     // Migrations everywhere, including development, so that the schema a
     // developer builds against is the schema production gets.

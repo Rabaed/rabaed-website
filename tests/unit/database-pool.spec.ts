@@ -1,6 +1,6 @@
 /**
- * A deployment's database connections have a ceiling, and a wait for one has
- * an end (ticket 83).
+ * A deployment's database connections have a ceiling, a wait for one has an
+ * end, and they go through Supabase's transaction pooler (ticket 83).
  *
  * Every server Vercel runs the site on opens its own pool of connections, and
  * `pg`'s defaults give each one ten and let a request wait for a free one for
@@ -13,17 +13,11 @@
  * the same question must come back with `pg`'s own pool — the suites lean on
  * those ten connections (ticket 70), and nothing here is meant to change them.
  *
- * Each load runs in a process of its own, through Payload's own runner, as
- * `cms-boots-without-jsdom.spec.ts` does and for the same reasons: what the
- * config reads from its environment is decided once, when it is first loaded.
+ * Each load runs in a process of its own (`payload-probe.ts` says why), as
+ * `cms-boots-without-jsdom.spec.ts` does.
  */
 import { test, expect } from '@playwright/test';
-import { spawnSync } from 'node:child_process';
-import path from 'node:path';
-
-const repoRoot = path.resolve(import.meta.dirname, '..', '..');
-const PROBE = path.join('tests', 'unit', 'database-pool.probe.ts');
-const PAYLOAD_BIN = path.join('node_modules', 'payload', 'bin.js');
+import { runProbe } from './payload-probe';
 
 type Pool = { max: number | null; connectionTimeoutMillis: number | null };
 
@@ -33,37 +27,67 @@ type Pool = { max: number | null; connectionTimeoutMillis: number | null };
  * variable set (`src/cms/environment.ts`).
  */
 function poolUnder(environment: Record<string, string>): Pool {
-  const { status, stdout, stderr } = spawnSync(process.execPath, [PAYLOAD_BIN, 'run', PROBE], {
-    encoding: 'utf8',
-    cwd: repoRoot,
-    env: {
-      ...process.env,
-      DATABASE_URL: 'postgres://unused:unused@127.0.0.1:1/unused',
-      PAYLOAD_SECRET: 'unused-in-this-test',
-      ...environment,
-    },
-  });
-
-  if (status !== 0) throw new Error(`loading the config failed:\n${stdout}\n${stderr}`);
-  return JSON.parse(stdout.trim().split(/\r?\n/).at(-1) ?? '') as Pool;
+  return JSON.parse(runProbe('database-pool.probe.ts', environment)) as Pool;
 }
 
-// Loading a Payload config is slower than the test runner's own deadline
-// expects, and this does it twice.
-test.slow();
-
-test('a deployment holds at most five connections, and waits at most ten seconds for one', () => {
-  const pool = poolUnder({
+/** A Vercel deployment's variables, every one a stand-in, with `DATABASE_URL` at `address`. */
+function deployedAt(address: string): Record<string, string> {
+  return {
     VERCEL_ENV: 'production',
+    DATABASE_URL: address,
     S3_BUCKET: 'unused',
     S3_ENDPOINT: 'https://unused.invalid',
     S3_REGION: 'unused',
     S3_ACCESS_KEY_ID: 'unused',
     S3_SECRET_ACCESS_KEY: 'unused',
-  });
-  expect(pool).toEqual({ max: 5, connectionTimeoutMillis: 10_000 });
+  };
+}
+
+const TRANSACTION_POOLER = 'postgres://postgres.unused:unused@aws-0-unused.pooler.supabase.com:6543/postgres';
+
+// Loading a Payload config is slower than the test runner's own deadline
+// expects, and this does it several times.
+test.slow();
+
+test('a deployment holds at most five connections, and waits at most ten seconds for one', () => {
+  expect(poolUnder(deployedAt(TRANSACTION_POOLER))).toEqual({ max: 5, connectionTimeoutMillis: 10_000 });
+});
+
+test('a deployment accepts the dedicated pooler Supabase’s paid plans add, which is transaction mode too', () => {
+  const dedicated = 'postgres://postgres:unused@db.unused.supabase.co:6543/postgres';
+  expect(poolUnder(deployedAt(dedicated))).toEqual({ max: 5, connectionTimeoutMillis: 10_000 });
 });
 
 test('the test server keeps pg’s own pool', () => {
   expect(poolUnder({ VERCEL_ENV: '' })).toEqual({ max: null, connectionTimeoutMillis: null });
+});
+
+/**
+ * Supabase offers three addresses for one database, and only the transaction
+ * pooler shares a few connections among many servers. The other two hold one
+ * per connection each server opens, which is what the ceiling above is there
+ * to keep small. The founder confirmed on 24 September 2026 that production
+ * and the Preview environment both use the pooler; this keeps it that way.
+ */
+test.describe('a deployment refuses a Supabase address other than the transaction pooler', () => {
+  for (const [name, address] of [
+    ['a direct connection', 'postgres://postgres:unused@db.unused.supabase.co:5432/postgres'],
+    ['the pooler’s session mode', 'postgres://postgres.unused:unused@aws-0-unused.pooler.supabase.com:5432/postgres'],
+  ]) {
+    test(name, () => {
+      expect(() => poolUnder(deployedAt(address))).toThrow(/DATABASE_URL.*transaction pooler/s);
+    });
+  }
+
+  test('and never repeats the address, which carries the database password', () => {
+    const address = 'postgres://postgres:the-password@db.unused.supabase.co:5432/postgres';
+    let refusal = '';
+    try {
+      poolUnder(deployedAt(address));
+    } catch (error) {
+      refusal = String(error);
+    }
+    expect(refusal).toMatch(/transaction pooler/);
+    expect(refusal).not.toContain('the-password');
+  });
 });

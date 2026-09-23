@@ -246,6 +246,10 @@ things keep that from running out on a busy day:
   servers instead of forty. Without the ten seconds, a request that found its
   server's connections all busy would wait for minutes. Past the ten seconds
   it fails, and a page that was already built goes on showing its last copy.
+  That is the trade: one server handles many visitors at once, so on a very
+  busy server a form or an editor's save can now fail after ten seconds, where
+  before it would have waited, perhaps for minutes, perhaps for good. A form
+  that fails tells the visitor to try again.
   The numbers live in `databasePool` in `src/cms/environment.ts`. Local
   servers and the tests keep `pg`'s own ten, with no wait limit.
 
@@ -258,6 +262,12 @@ pooler's other mode, which holds a real connection per server), replace the
 whole value with the one under **Connect → Transaction pooler** in that
 Supabase project. Then redeploy. As in step 6, the value never goes into a
 chat window or a terminal.
+
+Both were checked on 24 September 2026, and the site now checks it for
+itself: a deployment whose address is a direct connection or the pooler's
+other mode fails to build, with a message saying which it found and what to
+put there instead. The live site goes on running its previous version until
+the address is fixed and the deployment is redeployed.
 
 ### Legal documents
 
