@@ -19,7 +19,7 @@ export async function settle(page: Page) {
  * window's — the Reference site's own measure, which its cycle is written
  * against — because the box that holds is the window's height. Below 981px
  * the box also carries the paragraph that follows the card, so it lets go
- * sooner than that, by the paragraph's height (ticket 80).
+ * sooner than that, by the paragraph and the room around it (ticket 80).
  */
 export async function scrollToProgress(page: Page, progress: number) {
   await page.evaluate((through) => {

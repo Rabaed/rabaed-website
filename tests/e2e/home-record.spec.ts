@@ -130,8 +130,8 @@ async function walkThroughTheHold(page: Page) {
 
 /**
  * The section holds still for as far as it does on a desktop window — 120% of
- * the window, the 220vh section less its window-tall box — and every type,
- * then the stamp, comes while it holds.
+ * the window, which there is the 220vh section less its window-tall box — and
+ * every type, then the stamp, comes while it holds.
  */
 async function expectItHolds(page: Page) {
   const { moments, step, tall } = await walkThroughTheHold(page);
@@ -269,9 +269,9 @@ test.describe('with reduced motion, below 981px', () => {
   });
 });
 
-// Below 981px the section is as tall as what is in it, and the trails wrap to
-// different numbers of lines. A card that grew and shrank with each type would
-// push the rest of the page up and down under the visitor's thumb, and leave
+// Below 981px the trails wrap to different numbers of lines, and what the
+// section holds is centred in the screen. A card that grew and shrank with each
+// type would move all of it up and down under the visitor's thumb, and leave
 // every scroll position measured against the section's old height stale.
 for (const viewport of [
   { width: 360, height: 900 },
@@ -428,19 +428,24 @@ test('the section still works after leaving the page and coming back', async ({ 
 test.describe('with reduced motion', () => {
   test.use({ contextOptions: { reducedMotion: 'reduce' } });
 
-  test('the chosen trail is there at once, without fading in', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/');
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 664 },
+  ]) {
+    test(`at ${viewport.width}x${viewport.height} the chosen trail is there at once, without fading in`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
 
-    await scrollToProgress(page, 0.38);
-    const opacities = await section(page).evaluate((element) =>
-      [...element.querySelectorAll('.rec-card :not([hidden]) > .h b, .rec-card :not([hidden]) > .tl > li')].map(
-        (part) => getComputedStyle(part).opacity,
-      ),
-    );
-    expect(opacities).toEqual(['1', '1', '1', '1', '1']);
-    await expectShowing(page, 1);
-  });
+      await scrollToProgress(page, 0.38);
+      const opacities = await section(page).evaluate((element) =>
+        [...element.querySelectorAll('.rec-card :not([hidden]) > .h b, .rec-card :not([hidden]) > .tl > li')].map(
+          (part) => getComputedStyle(part).opacity,
+        ),
+      );
+      expect(opacities).toEqual(['1', '1', '1', '1', '1']);
+      await expectShowing(page, 1);
+    });
+  }
 
 });
 
@@ -448,9 +453,12 @@ for (const motion of ['no-preference', 'reduce'] as const) {
   test.describe(`with motion ${motion === 'reduce' ? 'reduced' : 'on'}`, () => {
     test.use({ contextOptions: { reducedMotion: motion } });
 
+    // 360x640 as well since ticket 80: the tighter phone layout, and a switch
+    // that comes further into the hold, on the smallest screen it holds on.
     for (const viewport of [
       { width: 1440, height: 900 },
       { width: 390, height: 900 },
+      { width: 360, height: 640 },
     ]) {
       test(`at ${viewport.width}x${viewport.height} every word can be read wherever the visitor stops`, async ({ page }) => {
         // Blended under the scroll, as on the Reference site, the section

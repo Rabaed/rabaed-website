@@ -70,39 +70,41 @@ function contentRegion(viewport: { width: number }): Region {
   const narrow = viewport.width <= 980;
   const phone = viewport.width <= 700;
   const holdsTallest: Measurement[] = narrow ? ['height'] : [];
-  /** Centred in the screen with the paragraph after the card, rather than stacked from the top. */
+  /** Below 981px: centred in the screen with the paragraph after the card, rather than stacked from the top. */
   const held: Measurement[] = narrow ? ['top'] : [];
-  /** Given a smaller face, or less room, to fit a phone's screen. */
-  const tightened = (...measurements: Measurement[]): Measurement[] => [...held, ...(phone ? measurements : [])];
-  const resized = tightened('left', 'width', 'height', 'font');
+  /** Below 701px as well: what the tighter phone layout changes about a part, by a smaller face or less room. */
+  const heldAndOnPhones = (...measurements: Measurement[]): Measurement[] => [...held, ...(phone ? measurements : [])];
   return {
     name: 'what is in the Record section',
     root: '#record .rec-grid',
     omitFromRoot: holdsTallest,
     parts: [
       { selector: '.eyebrow', omit: held },
-      { selector: 'h2', omit: tightened('height', 'font') },
-      { selector: '.fourq', omit: tightened('height', 'font') },
-      { selector: '.fourq span', omit: resized },
+      { selector: 'h2', omit: heldAndOnPhones('height', 'font') },
+      { selector: '.fourq', omit: heldAndOnPhones('height', 'font') },
+      { selector: '.fourq span', omit: heldAndOnPhones('left', 'width', 'height', 'font') },
       { selector: '.lead', omit: held },
-      { selector: '.rec-types', omit: tightened('height') },
+      { selector: '.rec-types', omit: heldAndOnPhones('height') },
       // DELIBERATE DIVERGENCE (ticket 36, ADR-0011): the Reference site dims an
       // unchosen chip to `.32`, which over the dark ground leaves its words at
       // 2.7:1 — unreadable. Here they are dimmed to `.5`, the lowest value that
       // reaches the standard. Everything else about the chips is still
       // compared, the chosen one included.
-      { selector: '.rec-types span', omit: ['opacity', ...resized] },
+      { selector: '.rec-types span', omit: ['opacity', ...heldAndOnPhones('left', 'width', 'height', 'font')] },
       { selector: '.rec-card', omit: [...holdsTallest, ...held] },
-      { selector: '.rec-card .doc', omit: [...holdsTallest, ...tightened('left', 'width')] },
-      { selector: `${SHOWING} .h`, omit: resized },
-      { selector: `${SHOWING} .h b`, omit: resized },
-      { selector: `${SHOWING} .tl`, omit: resized },
-      { selector: `${SHOWING} .tl > li`, omit: resized },
-      { selector: `${SHOWING} .tl > li > i`, omit: resized },
-      { selector: `${SHOWING} .tl .a`, omit: resized },
-      { selector: `${SHOWING} .tl .b`, omit: resized },
-      { selector: `${SHOWING} .tl .time`, omit: resized },
-      { selector: '.rec-card .stamp', omit: narrow ? resized : [] },
+      { selector: '.rec-card .doc', omit: [...holdsTallest, ...heldAndOnPhones('left', 'width')] },
+      { selector: `${SHOWING} .h`, omit: heldAndOnPhones('left', 'width', 'height') },
+      { selector: `${SHOWING} .h b`, omit: heldAndOnPhones('left', 'width', 'height', 'font') },
+      { selector: `${SHOWING} .tl`, omit: heldAndOnPhones('left', 'width', 'height') },
+      { selector: `${SHOWING} .tl > li`, omit: heldAndOnPhones('left', 'width', 'height', 'font') },
+      // The dot keeps its size: the card only has less room around it, and the
+      // step's shorter line height reaches it by inheritance.
+      { selector: `${SHOWING} .tl > li > i`, omit: heldAndOnPhones('left', 'font') },
+      { selector: `${SHOWING} .tl .a`, omit: heldAndOnPhones('left', 'width', 'height', 'font') },
+      { selector: `${SHOWING} .tl .b`, omit: heldAndOnPhones('left', 'width', 'height', 'font') },
+      // The time keeps its width: set on one line, only its line height and place change.
+      { selector: `${SHOWING} .tl .time`, omit: heldAndOnPhones('left', 'height', 'font') },
+      { selector: '.rec-card .stamp', omit: heldAndOnPhones('left', 'width', 'height', 'font') },
     ],
   };
 }

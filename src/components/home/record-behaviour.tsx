@@ -36,8 +36,9 @@ const LIT_FROM = '12.5% top';
  *   run and a quick swipe passes the Record by. Here it holds for as far as
  *   on a desktop window, and the types follow the same stretch. The box that
  *   holds also carries the paragraph after the card, below the screen, so it
- *   lets go before the section's foot meets the window's by the paragraph's
- *   height, and the stretch is measured as the section less the box.
+ *   lets go before the section's foot meets the window's, by the paragraph
+ *   and the room around it, and the stretch is measured as the section less
+ *   the box.
  * - **The section does not blend from dark to light under the scroll.** The
  *   Reference site scrubs its ground and its words towards each other over its
  *   first quarter, and they meet in a grey against which nothing can be read —

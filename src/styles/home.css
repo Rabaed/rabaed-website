@@ -351,7 +351,7 @@
    captured at — the two are the same box. Where it does not, on a phone, the
    Reference site's copy hangs over the section above and the foot of its card
    is covered by the section below; here the section grows to hold it. Below
-   981px it is also given the page's section padding: see the end of this
+   981px the box is padded and laid out differently: see the end of this
    block. */
 #record .sticky { position: sticky; top: 0; height: auto; min-height: 100vh; display: flex; align-items: center }
 .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; width: 100% }
@@ -443,41 +443,47 @@
      browser's bars showing, which does not change as they hide: in `vh`,
      the bars' largest screen, the box would hang below the foot of a phone's
      screen until they hid, and in `dvh` it would change size under the
-     visitor's thumb as they did. */
+     visitor's thumb as they did. A browser too old for `svh` — Safari before
+     iOS 15.4 — drops these rules, and the section there does not hold. */
   #record { min-height: 0; --rec-header: 75px }
   #record::after { content: ""; display: block; height: 120svh }
-  /* The padding below is the one every other section has, so the paragraph
-     is not left against the section after it. */
+  /* Clear of the fixed header — its 74px row and its 1px rule, 66px and the
+     rule below 701px (`shell.css`, `responsive.css`) — and at the foot the
+     padding every other section has, so the paragraph is not left against
+     the section after it. */
   #record .sticky { min-height: 0; padding-block: var(--rec-header) var(--sp) }
   /* The copy's parts, laid out in the grid themselves so the paragraph can
      follow the card. Two flexible rows either side of what is held share
      whatever the screen has left, and a row-spanning stretch holds those
-     rows to at least the screen below the header, so the paragraph always
-     begins below its foot. */
+     rows to at least the screen below the header, so what is held is
+     centred there. The row after them is as tall as the bars a phone's
+     browser hides as the visitor scrolls, and nothing anywhere else, so the
+     paragraph still begins below the foot of the screen once they have
+     gone. */
   .rec-grid {
     grid-template-columns: 1fr;
-    grid-template-rows: [held-start] minmax(8px, 1fr) repeat(5, auto) minmax(8px, 1fr) [held-end] auto;
+    grid-template-rows: [held-start] minmax(8px, 1fr) repeat(5, auto) minmax(8px, 1fr) [held-end] calc(100lvh - 100svh) auto;
+    grid-template-areas: "." "eyebrow" "heading" "questions" "types" "card" "." "." "lead";
     row-gap: 0;
   }
+  /* Placed in the column outright, as the parts are by their areas: placed by
+     row alone, it would be put beside them rather than behind them. */
   .rec-grid::before { content: ""; grid-row: held; grid-column: 1; min-height: calc(100svh - var(--rec-header)) }
   .rec-copy { display: contents }
-  /* Placed in the column outright, as the stretch is: a part placed by row
-     alone would be put beside the stretch rather than over it. */
-  .rec-grid > *, .rec-copy > * { grid-column: 1 }
-  #record .eyebrow { grid-row: 2 }
-  #record h2 { grid-row: 3 }
-  #record .fourq { grid-row: 4 }
-  #record .rec-types { grid-row: 5 }
-  #record .rec-card { grid-row: 6; margin-top: 28px }
-  #record .lead { grid-row: 8; margin: 28px 0 0 }
+  #record .eyebrow { grid-area: eyebrow }
+  #record h2 { grid-area: heading }
+  #record .fourq { grid-area: questions }
+  #record .rec-types { grid-area: types }
+  /* The gap the two columns had between them, now above the card. */
+  #record .rec-card { grid-area: card; margin-top: 56px }
+  #record .lead { grid-area: lead; margin: 28px 0 0 }
   /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the five trails share one
      space, and the ones not showing keep their room without being seen or
-     read aloud. The trails wrap to different numbers of lines, and a section
-     as tall as its content would otherwise grow and shrink as they change —
-     pushing the rest of the page up and down under the visitor's thumb, and
-     leaving every scroll position measured against its old height. On a
-     desktop window the section's height does not follow its content, so there
-     the card changes with its trail, as on the Reference site. */
+     read aloud. The trails wrap to different numbers of lines, and a card
+     that followed them would move everything the section holds up and down
+     as they change, centred as it is, under the visitor's thumb. On a
+     desktop window the card changes with its trail, as on the Reference
+     site. */
   .rec-trails { display: grid }
   .rec-entry { grid-area: 1 / 1 }
   .rec-entry[hidden] { display: block; visibility: hidden }
