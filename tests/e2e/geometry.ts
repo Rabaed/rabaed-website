@@ -188,3 +188,27 @@ export async function sidewaysOverflow(page: Page) {
     return doc.scrollWidth - doc.clientWidth;
   });
 }
+
+/**
+ * The most `sidewaysOverflow` reached in any frame over the next `ms`
+ * milliseconds. For overflow an animation causes and then takes back: the
+ * before-and-after hint's lasted about 600ms (ticket 74), which a poll every
+ * 250ms can all but miss.
+ */
+export async function widestSidewaysOverflow(page: Page, ms: number) {
+  return page.evaluate(
+    (duration) =>
+      new Promise<number>((resolve) => {
+        let most = -Infinity;
+        const started = performance.now();
+        const tick = () => {
+          const doc = document.documentElement;
+          most = Math.max(most, doc.scrollWidth - doc.clientWidth);
+          if (performance.now() - started < duration) requestAnimationFrame(tick);
+          else resolve(most);
+        };
+        requestAnimationFrame(tick);
+      }),
+    ms,
+  );
+}

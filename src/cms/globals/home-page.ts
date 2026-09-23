@@ -174,8 +174,9 @@ const COMMITMENT: Block = {
  * limits are what still fits there with every word at its longest, which
  * `tests/e2e/home-text.spec.ts` checks.
  *
- * Where each link lands stays in code — `#demo`, `#journey`, the product and
- * start pages — so an Editor changes what a button says, never where it goes.
+ * Where each link lands stays in code — `#demo`, the four units (`#jt`), the
+ * product and start pages — so an Editor changes what a button says, never
+ * where it goes.
  */
 export const HomePage = pageGlobal({
   slug: 'home-page',
@@ -212,7 +213,10 @@ export const HomePage = pageGlobal({
           fields: [
             wordsField('primaryLabel', { ar: 'الزر الأول', en: 'First button' }, 30, { description: TO_DEMO }),
             wordsField('secondaryLabel', { ar: 'الزر الثاني', en: 'Second button' }, 30, {
-              description: { ar: 'الزر المحدَّد بإطار بجانب الأول.', en: 'The outlined button beside the first.' },
+              description: {
+                ar: 'الزر المحدَّد بإطار بجانب الأول. ينزل بالزائر إلى قسم الوحدات الأربع، ويختفي ما دام ذلك القسم مخفياً.',
+                en: 'The outlined button beside the first. It takes the visitor down to the four units, and is hidden while that section is hidden.',
+              },
             }),
           ],
         },
