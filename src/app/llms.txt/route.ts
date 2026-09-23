@@ -35,10 +35,13 @@ import type { CaseStudy, Post } from '@/payload-types';
  *
  * **Arabic first, then English** (ticket 82). The English half lists what is
  * published in English by the sitemap's rule (`src/app/sitemap.ts`): a
- * marketing page once it is, the English blog and case studies indexes once
- * each has something to list, and nothing before — so the file never points
- * an assistant at a notice or a placeholder. The legal documents are Arabic
- * alone, their Arabic being binding (spec: Out of Scope).
+ * marketing page once it is published in English, the English blog and case
+ * studies indexes once each has something to list, and nothing before — so
+ * the file never points an assistant at a notice or a placeholder. One step
+ * stricter than the sitemap: an index whose lead is not published in the
+ * language is left out, since this file quotes the lead and the sitemap does
+ * not. The legal documents are Arabic alone, their Arabic being binding
+ * (spec: Out of Scope).
  *
  * The Arabic home page is the site, and the heading and summary at the top of
  * the file describe it; it is not listed again among the pages. The English
@@ -73,9 +76,11 @@ const HEADINGS = {
 } as const satisfies Record<Locale, unknown>;
 
 /**
- * The marketing pages, each with what reads it in a language — the sitemap's
- * list. The home page leads the English pages and is left out of the Arabic,
- * whose home page the file's heading describes.
+ * The marketing pages, each with what reads it in a language — a copy of the
+ * sitemap's list, as `MARKETING_PAGES` in `src/app/sitemap.ts`, until ticket
+ * 92 gives the site one registry of its pages for both to read. The home page
+ * leads the English pages and is left out of the Arabic, whose home page the
+ * file's heading describes.
  */
 const MARKETING_PAGES: readonly { readonly path: string; readonly read: (locale: Locale) => Promise<{ readonly meta: PageMeta }> }[] = [
   { path: '/', read: getHomePage },
@@ -123,15 +128,14 @@ async function pageEntries(
   const read = (page: (typeof MARKETING_PAGES)[number]) => (locale === 'en' ? inEnglish(page.read) : page.read(locale));
   const marketing = MARKETING_PAGES.filter((page) => locale === 'en' || page.path !== '/');
   // The line under an index's heading, which is also its search description —
-  // in the CMS since ticket 59. Read only for an index with something to list,
-  // and `null` where its entry is not published in this language, when the
-  // index is left out rather than the file failing.
-  const lead = (index: 'blog' | 'caseStudies', listed: boolean) =>
-    listed ? contentOrNull(getIndexLead(locale, index)) : Promise.resolve(null);
+  // in the CMS since ticket 59 — or `null` where its entry is not published in
+  // this language, when the index is left out rather than the file failing.
+  // Read only for an index with something to list.
+  const leadOf = (index: 'blog' | 'caseStudies') => contentOrNull(getIndexLead(locale, index));
   const [contents, blogLead, caseStudiesLead] = await Promise.all([
     Promise.all(marketing.map(read)),
-    lead('blog', locale === 'ar' || posts.length > 0),
-    lead('caseStudies', caseStudies.length > 0),
+    locale === 'ar' || posts.length > 0 ? leadOf('blog') : null,
+    caseStudies.length > 0 ? leadOf('caseStudies') : null,
   ]);
 
   const pages = marketing.flatMap((page, index): Entry[] => {
