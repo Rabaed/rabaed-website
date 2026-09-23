@@ -43,6 +43,25 @@ const MAIL_OUTCOMES = [
 ];
 
 /**
+ * What became of the applicant's confirmation: a mail's outcomes, and two of
+ * its own (ticket 81, ADR-0022) — withheld because the address or the site had
+ * been sent as many as `CONFIRMATION_LIMIT` allows, so the team replies by
+ * hand; and sending, from the moment it is counted against that limit to the
+ * moment its outcome is known, so the record never says sent before it is.
+ */
+const CONFIRMATION_OUTCOMES = [
+  ...MAIL_OUTCOMES,
+  {
+    value: 'withheld',
+    label: {
+      ar: 'لم تُرسل — بلغ هذا البريد أو الموقع حدّ رسائل التأكيد، فالرد يدوي',
+      en: 'Not sent — this address or the site reached its confirmation limit; reply by hand',
+    },
+  },
+  { value: 'sending', label: { ar: 'قيد الإرسال', en: 'Being sent' } },
+];
+
+/**
  * Every request sent from a form on the site (spec: Forms), stored before
  * anything is emailed about it, so that nothing depends on an inbox.
  *
@@ -187,7 +206,7 @@ export const FormSubmissions: CollectionConfig = {
     {
       name: 'confirmation',
       type: 'select',
-      options: MAIL_OUTCOMES,
+      options: CONFIRMATION_OUTCOMES,
       label: { ar: 'تأكيد مقدّم الطلب', en: 'Applicant confirmation' },
       admin: { readOnly: true, position: 'sidebar' },
     },

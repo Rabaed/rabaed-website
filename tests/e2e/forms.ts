@@ -63,7 +63,7 @@ export type StoredSubmission = {
   answers: { field: string; label: string; value: string; option: string | null }[];
   documents: { field: string; label: string; fileName: string; contentType: string; size: number; key: string; link: string }[];
   alert: 'sent' | 'skipped' | 'failed' | null;
-  confirmation: 'sent' | 'skipped' | 'failed' | null;
+  confirmation: 'sent' | 'skipped' | 'failed' | 'withheld' | null;
 };
 
 /**
