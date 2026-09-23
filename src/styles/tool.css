@@ -82,10 +82,10 @@
 /* ---- what it needs ---- */
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the requirement cards'
    labels «النظام», «التجربة الكاملة», «وضع مبسّط» are Arabic, and `.rt-c .k`
-   sets DM Mono, which has no Arabic glyphs. Here they keep the Arabic face.
-   The letter-spacing is the Reference site's; whether Arabic labels keep it
-   is bug 45's decision. The numbered cards above keep DM Mono. */
+   sets DM Mono, which has no Arabic glyphs. Here they are in the label face,
+   untracked (ADR-0018). The numbered cards above keep DM Mono. */
 #req .rt-c .k { font-family: inherit }
+:where([dir="rtl"]) #req .rt-c .k { font-family: var(--label-face); letter-spacing: 0 }
 
 /* ---- where the files live ---- */
 .tl-2 { display: grid; grid-template-columns: 1.02fr .98fr; gap: 46px; align-items: start }

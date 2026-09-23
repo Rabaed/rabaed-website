@@ -82,6 +82,8 @@
    page's is English, and reads left to right (ticket 42). */
 #journey .num.out { font-family: inherit; direction: rtl; letter-spacing: .02em; background: rgba(249, 87, 56, .12); border: 1px solid rgba(249, 87, 56, .3); border-radius: 999px; padding: 3px 12px; font-size: 12px }
 [dir="ltr"] #journey .num.out { direction: ltr }
+/* In the label face, untracked (ADR-0018). */
+:where([dir="rtl"]) #journey .num.out { font-family: var(--label-face); letter-spacing: 0 }
 #journey .panel h3 { font-size: 30px; margin: 10px 0 12px }
 #journey .tag { font-size: 22px; font-weight: 600; line-height: 1.5; margin-bottom: 16px }
 #journey .panel p { color: var(--dark-muted); font-size: 15px; margin: 0 }
@@ -208,6 +210,9 @@
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: Arabic set in DM Mono there.
    So are «ما يعبر رسمياً» and the note's two headings below. */
 #inner .priv-tag { position: absolute; top: -11px; inset-inline-start: 14px; background: #fff; padding: 0 8px; font-family: inherit; font-size: 10.5px; letter-spacing: .06em; color: var(--muted) }
+/* In the label face, untracked (ADR-0018), with «ما يعبر رسمياً» and the note's
+   two headings below. */
+:where([dir="rtl"]) #inner .priv-tag { font-family: var(--label-face); letter-spacing: 0 }
 #inner .steps-v { list-style: none; padding: 0; margin: 0; position: relative }
 /* The dashed line joining the three reviewers, behind their numbers. */
 #inner .steps-v:before { content: ""; position: absolute; top: 20px; bottom: 20px; inset-inline-start: 12px; width: 1.5px; background: repeating-linear-gradient(to bottom, var(--line) 0 4px, transparent 4px 9px) }
@@ -222,6 +227,7 @@
 
 #inner .org .out { margin-top: auto; border-top: 1px dashed var(--line); padding-top: 12px; font-size: 13.5px; color: var(--muted) }
 #inner .org .out b { color: var(--acc-ink); font-weight: 600; display: block; font-size: 12px; font-family: inherit; letter-spacing: .06em; margin-bottom: 4px }
+:where([dir="rtl"]) #inner .org .out b { font-family: var(--label-face); letter-spacing: 0; font-weight: 400 }
 #inner .cross { display: flex; align-items: center; justify-content: center; padding: 0 6px }
 #inner .cross span { font-size: 26px; color: var(--acc); line-height: 1 }
 
@@ -229,6 +235,7 @@
 #inner .inner-note div { background: var(--soft); border-radius: 12px; padding: 16px 18px; font-size: 14.5px }
 #inner .inner-note b { color: var(--ink) }
 #inner .inner-note .k { display: block; font-family: inherit; font-size: 11px; letter-spacing: .08em; color: var(--acc-ink); margin-bottom: 6px }
+:where([dir="rtl"]) #inner .inner-note .k { font-family: var(--label-face); letter-spacing: 0 }
 
 @media (max-width: 980px) {
   #inner .orgs { grid-template-columns: 1fr; gap: 14px }

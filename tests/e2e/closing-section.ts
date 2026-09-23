@@ -24,8 +24,11 @@ export const CLOSING_SECTION: Region = {
     'h2',
     '.tail-steps',
     '.tail-steps li',
-    '.tail-steps b',
-    '.tail-steps span',
+    // In Thmanyah Sans Regular, where the Reference site's is bold (ADR-0018):
+    // its typeface is left out, its place and size are still held.
+    { selector: '.tail-steps b', omit: ['font'] },
+    // The step's text, not the numeral's `.mono` inside the label (ADR-0018).
+    '.tail-steps li > span',
     '.tail-more',
     { selector: '#demo', omit: ['height'] },
     ...DEMO_REQUEST_FORM_PARTS,

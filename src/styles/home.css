@@ -256,6 +256,8 @@
    site sets it in DM Mono, a face with no Arabic glyphs, so it falls through to
    the browser's last-resort monospace. The spec forbids that outright. */
 .jt-s .n.out { font-family: inherit; direction: rtl; letter-spacing: .02em }
+/* In the label face, untracked (ADR-0018). */
+:where([dir="rtl"]) .jt-s .n.out { font-family: var(--label-face); letter-spacing: 0 }
 /* An English page's word is English, «The output» (ticket 42). */
 [dir="ltr"] .jt-s .n.out { direction: ltr }
 .jt-s h3 { font-size: 15px; margin: 0; font-weight: 600; line-height: 1.5 }

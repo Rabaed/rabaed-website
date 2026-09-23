@@ -91,6 +91,19 @@ a { color: inherit; text-decoration: none }
 .mono { font-family: "DM Mono", monospace }
 .eyebrow { font-family: "DM Mono", monospace; font-size: 12px; letter-spacing: .12em; color: var(--acc-ink); margin-bottom: 14px }
 
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the founder's (ADR-0018):
+   an Arabic label is set in Thmanyah Sans, untracked. The Reference site sets
+   its labels in DM Mono, which has no Arabic glyphs, so every eyebrow on it
+   fell to the browser's last-resort monospace, its joined letters pulled apart
+   by the tracking (bug 45). `--label-face` is that face with the page's own
+   Arabic stack behind it; the labels on the other sheets that share the
+   eyebrow's voice use it too. An English page's labels keep DM Mono and its
+   tracking — for Latin it is the right face. `:where` adds nothing to the
+   rule's weight, so this wins by coming after the rule it overrides and
+   nothing else changes rank. */
+:root { --label-face: "Thmanyah Sans", "IBM Plex Sans Arabic", "Arabic stand-in", "Tajawal", system-ui, sans-serif }
+:where([dir="rtl"]) .eyebrow { font-family: var(--label-face); letter-spacing: 0 }
+
 h1, h2, h3 { margin: 0; font-weight: 700; line-height: 1.3 }
 h2 { font-size: 38px; margin-bottom: 12px }
 .lead { font-size: 18px; color: var(--dark-muted); max-width: 720px; margin: 0 0 28px }
