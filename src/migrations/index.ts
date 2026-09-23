@@ -39,6 +39,8 @@ import * as migration_20260921_101500_import_launch_articles from './20260921_10
 import * as migration_20260921_110900_answer_first_openers from './20260921_110900_answer_first_openers';
 import * as migration_20260921_111500_propose_answer_first_copy from './20260921_111500_propose_answer_first_copy';
 import * as migration_20260923_090000_propose_english_site_words from './20260923_090000_propose_english_site_words';
+import * as migration_20260923_100000_english_screen_mock_pictures from './20260923_100000_english_screen_mock_pictures';
+import * as migration_20260923_100100_propose_english_screen_mock_words from './20260923_100100_propose_english_screen_mock_words';
 
 export const migrations = [
   {
@@ -245,5 +247,15 @@ export const migrations = [
     up: migration_20260923_090000_propose_english_site_words.up,
     down: migration_20260923_090000_propose_english_site_words.down,
     name: '20260923_090000_propose_english_site_words',
+  },
+  {
+    up: migration_20260923_100000_english_screen_mock_pictures.up,
+    down: migration_20260923_100000_english_screen_mock_pictures.down,
+    name: '20260923_100000_english_screen_mock_pictures',
+  },
+  {
+    up: migration_20260923_100100_propose_english_screen_mock_words.up,
+    down: migration_20260923_100100_propose_english_screen_mock_words.down,
+    name: '20260923_100100_propose_english_screen_mock_words',
   },
 ];

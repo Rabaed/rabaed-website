@@ -18,6 +18,8 @@
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage } from './cms';
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
+import { ENGLISH_SCREEN_MOCK_DESCRIPTIONS } from '../../src/migrations/english-screen-mock-words/words';
+import { SCREEN_MOCKS } from '../../src/screen-mocks/registry';
 
 test.describe.configure({ mode: 'default' });
 
@@ -41,7 +43,7 @@ type ClosingEntry = {
   languages: string[];
   closing: { eyebrow: Words; heading: Words; steps: { label: Words; text: Words }[]; moreLabel: Words };
 };
-type MockFields = { picture: number | null; description: Words };
+type MockFields = { picture: number | null; englishPicture?: number | null; description: Words };
 type MocksEntry = { languages: string[] } & { [mock: string]: MockFields };
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
@@ -336,6 +338,36 @@ test('a replaced screen shows, described in its own words, on every page that sh
   }
 });
 
+test('a replacement for the English pages leaves the Arabic pages showing theirs', async ({ page }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+  // A screen's words are in its picture, so each language has its own
+  // replacement (ticket 41): this one is for the English pages alone.
+  const englishPicture = await uploadImage(page.request, 'English correspondence screen', { width: 2880, height: 1800 });
+
+  try {
+    const saved = await save(
+      page.request,
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, englishPicture } },
+      'draft',
+    );
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    for (const [path, section] of [
+      ['/product', '#journey'],
+      ['/', '#jt'],
+    ]) {
+      await preview(page, path);
+      const image = page.locator(section).locator('img[data-screen-mock="correspondence"]');
+      await expect(image, path).toHaveAttribute('src', /screen-mocks%2Far%2Fcorrespondence\.webp/);
+      await expect(image, path).toHaveAttribute('alt', mocks.correspondence.description.ar);
+    }
+  } finally {
+    await discardDraft(page.request, 'screen-mocks');
+  }
+});
+
 test('the CMS refuses what the product page, the closing section and the screens cannot carry', async ({ page }) => {
   await logInByApi(page.request, PRODUCT_EDITOR);
   const product = await published<ProductEntry>(page.request, 'product-page');
@@ -423,6 +455,12 @@ test('the CMS refuses what the product page, the closing section and the screens
       'screen-mocks',
       { ...mocks, correspondence: { ...mocks.correspondence, picture: tooSmall } },
       'correspondence.picture',
+    ],
+    [
+      'an English pages replacement of another shape',
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, englishPicture: otherShape } },
+      'correspondence.englishPicture',
     ],
     [
       'a screen with no description',
@@ -608,4 +646,56 @@ test('a change to the product page published reaches visitors', async ({ page, r
     const restored = await save(page.request, 'product-page', entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);
   }
+});
+
+/**
+ * The English descriptions, among the entry's versions (ticket 41): this suite
+ * drafts and discards all the while, so the proposal is seldom still the
+ * newest version by the time a test looks.
+ */
+async function englishProposal(editor: APIRequestContext): Promise<MocksEntry> {
+  const response = await editor.get(
+    '/api/globals/screen-mocks/versions?where[version._status][equals]=draft&sort=-updatedAt&depth=0&limit=100',
+  );
+  expect(response.ok(), await response.text()).toBe(true);
+  const drafts = (await response.json()).docs as { version: MocksEntry }[];
+  const proposal = drafts.find(
+    ({ version }) => version.correspondence?.description.en === ENGLISH_SCREEN_MOCK_DESCRIPTIONS.correspondence,
+  );
+  expect(proposal, 'no draft carries the English descriptions proposed').toBeTruthy();
+  return fields(proposal!.version);
+}
+
+test('the English descriptions of the screens wait as a draft, and the CMS publishes every word of them', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+  const proposal = await englishProposal(page.request);
+
+  // In English as well as Arabic, each screen described in both, and the
+  // Arabic untouched: the draft is the published entry with English added.
+  expect(proposal.languages).toEqual(['ar', 'en']);
+  for (const mock of SCREEN_MOCKS) {
+    const field = screenMockFieldName(mock.id);
+    expect(proposal[field]!.description.en, mock.id).toBe(ENGLISH_SCREEN_MOCK_DESCRIPTIONS[mock.id]);
+    expect(proposal[field]!.description.ar, mock.id).toBe(mocks[field]!.description.ar);
+  }
+
+  // Nothing a visitor reads is in it.
+  expect(await visitorHtml(request, '/product')).not.toContain(ENGLISH_SCREEN_MOCK_DESCRIPTIONS.correspondence);
+
+  // And the CMS takes it as it stands, when the founder presses Publish: every
+  // English word fits its place. Published, then put straight back. Nothing a
+  // visitor or another suite reads changes in between: the Arabic is the
+  // published Arabic, and no page shows a screen in English until ticket 42.
+  try {
+    const publishing = await save(page.request, 'screen-mocks', proposal, 'published');
+    expect(publishing.ok(), await publishing.text()).toBe(true);
+  } finally {
+    const restored = await save(page.request, 'screen-mocks', mocks, 'published');
+    expect(restored.ok(), await restored.text()).toBe(true);
+  }
+  expect(await published<MocksEntry>(page.request, 'screen-mocks')).toEqual(mocks);
 });

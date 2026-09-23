@@ -372,11 +372,14 @@ are still in code. The migrations import each entry's words once, as they were.
 - **Screen mocks** holds each screen's picture and what it shows in words: read
   out by screen readers and written under the picture, wherever a page shows
   it. With no picture chosen, the page shows the image exported from the
-  studio. A replacement must be 1440×900, or larger in the same proportions
-  (2880×1800 is sharpest); describe the new picture when replacing one, and
-  remove it to bring the exported image back. Which screen a panel or a party
-  shows is chosen on the page; what a mock depicts is a developer's to change,
-  through the studio and `npm run mocks:export`.
+  studio — the Arabic screens on Arabic pages, the English ones on English
+  pages. A replacement is chosen for each language separately, because a
+  screen's words are in its picture: **Replacement picture, Arabic pages** and
+  **Replacement picture, English pages**. It must be 1440×900, or larger in the
+  same proportions (2880×1800 is sharpest); describe the new picture when
+  replacing one, and remove it to bring the exported image back. Which screen a
+  panel or a party shows is chosen on the page; what a mock depicts is a
+  developer's to change, through the studio and `npm run mocks:export`.
 - On a window just tall enough for the product page's units to travel
   sideways, a panel is only as tall as the window, so its title, line and text
   hold only what fits there.
@@ -476,6 +479,33 @@ referral and partnership pages — are not in English until ticket 42 writes
 them: their English address says so and offers the Arabic. The Terms, the Privacy Policy and the Referral Program's
 terms are never translated — the Arabic is binding — and their English address
 says that too.
+
+### The English screen descriptions, waiting for a decision
+
+**Every screen now has an English picture, and English words describing it
+are sitting in the CMS as a draft** (ticket 41). Each screen picture on the site
+is described in words — read out by screen readers and written under the
+picture — and an English page needs those words in English.
+
+**Why it waits for you.** The words are yours, as the header's were. Nothing a
+visitor sees changes when you publish: no English page shows a screen until
+ticket 42 writes the English home and product pages. Publishing now means they
+arrive with their descriptions ready.
+
+**What is proposed.** Each description is the Arabic one's meaning — for
+example *What the owner sees in Rabaed: one project dashboard with its approval
+indicators and the project's parties*.
+
+**To take it:**
+
+1. Open **شاشات المنصة**. What you see is the proposal — English beside every
+   description, and **الإنجليزية** listed under **منشورة باللغات**.
+2. Read it, and change anything you disagree with. The Arabic is untouched.
+3. **Publish changes.**
+
+As with the header, the entry holds one proposal at a time: publish another
+change to the screens first, and you will find the proposal under **Versions**,
+where **Restore** brings it back.
 
 ### Referral Program values
 

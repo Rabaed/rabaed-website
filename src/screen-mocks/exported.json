@@ -56,6 +56,62 @@
       "width": 2880,
       "height": 1800,
       "source": "beb2351706d0cdbc82f3da1b5ffce053bbe0c0fa734b9fe8a1500b6284ac2c12"
+    },
+    {
+      "locale": "en",
+      "id": "correspondence",
+      "width": 2880,
+      "height": 1800,
+      "source": "e3e43609d5def20a22f6ff56519f021985397f7a5ed1a4ef9f3280fab602edba"
+    },
+    {
+      "locale": "en",
+      "id": "kanban",
+      "width": 2880,
+      "height": 1800,
+      "source": "4b4b6189b886a0ecd58be221b2f6e33c1d04df8b589af939eb33dd79994c792c"
+    },
+    {
+      "locale": "en",
+      "id": "daily-report",
+      "width": 2880,
+      "height": 1800,
+      "source": "550b09f8d5e47ab4b633e07d6cd26f5a7e3278138bd687d9aa186fd3f5edf44e"
+    },
+    {
+      "locale": "en",
+      "id": "documents",
+      "width": 2880,
+      "height": 1800,
+      "source": "80179dcba97e492e68d0b576a1aede7a7e7d08810ecb4d6566272a3882cc0063"
+    },
+    {
+      "locale": "en",
+      "id": "stamped-sheet",
+      "width": 2880,
+      "height": 1800,
+      "source": "1e354542f4bc78d5904966f7b93d910e3dc69cfb8f49a24ed52dcef3cf9fab71"
+    },
+    {
+      "locale": "en",
+      "id": "overview",
+      "width": 2880,
+      "height": 1800,
+      "source": "2bffcdfbb8fa190395914c4b09f63dd9e7a6daefd12d1a67a89d2cb607dc8d21"
+    },
+    {
+      "locale": "en",
+      "id": "approvals-table",
+      "width": 2880,
+      "height": 1800,
+      "source": "5920289ea470cf5e468f8005b2244d89e4f6348e80595f66ac1d290dfbc7ec5e"
+    },
+    {
+      "locale": "en",
+      "id": "submittal",
+      "width": 2880,
+      "height": 1800,
+      "source": "c0f5f9d7059bdd5dbdc2cabd519cc92cabfc4b4e205f076fed565f6dcb15ca48"
     }
   ]
 }

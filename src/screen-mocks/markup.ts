@@ -28,9 +28,9 @@ export async function readScreenMockMarkup(locale: Locale, mock: ScreenMock): Pr
 }
 
 /**
- * The locales that actually have a set of mocks on disk. Arabic today; English
- * when ticket 41 produces it. Read rather than declared, so a half-finished
- * locale cannot be announced by a constant nobody updated.
+ * The locales that actually have a set of mocks on disk: Arabic, and English
+ * since ticket 41. Read rather than declared, so a half-finished locale cannot
+ * be announced by a constant nobody updated.
  */
 export async function screenMockLocales(): Promise<Locale[]> {
   const entries = await readdir(mocksDir, { withFileTypes: true });
