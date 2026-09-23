@@ -1,8 +1,8 @@
 /**
  * The home page's opening screen and the Trust strip under it (ticket 06).
  *
- * What a visitor can observe: a hero that fills the window at desktop widths
- * and stops trying to below them, a document that actually travels between the
+ * What a visitor can observe: a hero that shares the first screen with the
+ * Trust strip at desktop widths and stops trying to below them, a document that actually travels between the
  * three parties, a strip of client marks that moves and stops under the
  * pointer, and a name in text where a mark fails to arrive.
  *
@@ -36,29 +36,74 @@ async function railOffset(page: Page) {
 }
 
 test.describe('the hero', () => {
-  test('fills the window at desktop widths and no more than its content below them', async ({
-    page,
-  }) => {
+  // Ticket 71 and ADR-0019. The Reference site's hero is the window's height,
+  // so a tall monitor filled the first screen with dark space around content
+  // that does not grow. Now the first screen holds the hero *and* the Trust
+  // strip under it, wherever the window is tall enough for both, and the hero
+  // stops at 860px however tall the window gets.
+  test('shares the first screen with the Trust strip, and stops at 860px', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
 
-    const height = async () => (await page.locator('#hero').boundingBox())!.height;
+    const measure = () =>
+      page.evaluate(() => ({
+        hero: document.querySelector('#hero')!.getBoundingClientRect().height,
+        stripBottom: document.querySelector('#hero + .logos')!.getBoundingClientRect().bottom,
+      }));
 
-    // 100vh, exactly: the first thing a visitor sees is the whole promise and
-    // nothing of what follows it.
+    // About 900px tall: the hero ends where the strip's whole height still
+    // fits, so the strip sits along the bottom edge of the first screen.
     await page.setViewportSize({ width: 1280, height: 900 });
-    expect(await height()).toBe(900);
+    let { hero, stripBottom } = await measure();
+    expect(hero).toBeLessThan(900);
+    expect(stripBottom).toBeCloseTo(900, 0);
 
-    // ...with a 760px floor under it, so a short-but-not-tiny desktop window
-    // scrolls rather than crushing the diagram. 750px is between the floor and
-    // the 700px height query that lowers it.
-    await page.setViewportSize({ width: 1280, height: 750 });
-    expect(await height()).toBe(760);
+    // The founder's 1920×1080, and a 1440p monitor: 860px, and the strip
+    // inside the first screen with room to spare.
+    for (const viewport of [
+      { width: 1920, height: 1080 },
+      { width: 2560, height: 1440 },
+    ]) {
+      await page.setViewportSize(viewport);
+      ({ hero, stripBottom } = await measure());
+      expect(hero, `the hero at ${viewport.width}x${viewport.height}`).toBe(860);
+      expect(stripBottom, `the strip at ${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(viewport.height);
+    }
+
+    // The 760px floor is unchanged, so a short-but-not-tiny desktop window
+    // scrolls rather than crushing the diagram, and the strip starts under the
+    // fold as it always has. 750px is between the floor and the 700px height
+    // query that lowers it; 840px is where hero and strip no longer both fit.
+    for (const height of [750, 840]) {
+      await page.setViewportSize({ width: 1280, height });
+      expect((await measure()).hero, `the hero at 1280x${height}`).toBe(760);
+    }
+
+    // The short-window rule still holds the hero to the window, as it did.
+    await page.setViewportSize({ width: 1280, height: 700 });
+    expect((await measure()).hero).toBe(700);
 
     // Below 981px the grid stacks, and a fixed height would put the diagram
     // outside a section that clips its overflow. It takes the height it needs.
     await page.setViewportSize({ width: 980, height: 900 });
-    expect(await height()).toBeGreaterThan(900);
+    expect((await measure()).hero).toBeGreaterThan(900);
+  });
+
+  test('is the window’s height, up to 860px, where no Trust strip follows it', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+
+    // An Editor can switch the strip off. Publishing that here would change
+    // the home page under every suite running beside this one, so the strip
+    // is taken out of this page alone: what is under test is the hero's rule,
+    // which reads only whether the strip is there.
+    await page.evaluate(() => document.querySelector('#hero + .logos')!.remove());
+    const height = async () => (await page.locator('#hero').boundingBox())!.height;
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    expect(await height()).toBe(800);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    expect(await height()).toBe(860);
   });
 
   test('carries the whole opening screen in the server response', async ({ request }) => {

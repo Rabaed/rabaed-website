@@ -27,8 +27,10 @@
   --dark-muted: #9AA0B4;
   --green: #1D9E75;
   --gold: #CCA840;
-  /* The vertical rhythm every section is padded with. */
-  --sp: clamp(56px, 8vh, 96px);
+  /* The vertical rhythm every section is padded with. The Reference site's
+     ceiling is 96px; it is 72px here (ADR-0019), so a tall screen stops adding
+     space between sections. At 900px tall and less nothing changes. */
+  --sp: clamp(56px, 8vh, 72px);
 
   /* ---- the two inks, and the one deliberate divergence in this file ---- */
   /* ADR-0011. The accent is the brand's, and on the dark grounds it is

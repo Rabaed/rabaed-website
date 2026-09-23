@@ -47,6 +47,20 @@ const DELIBERATELY_DIFFERENT: readonly {
   allowance?: (rebuilt: Page) => Promise<Allowance>;
 }[] = [
   {
+    section: 'hero',
+    where: ({ width, height }) => width > 980 && height > 700,
+    why: 'Ticket 71 and ADR-0019: the Reference site\'s hero is the window\'s height; this one is the window less the Trust strip under it, between its 760px floor and 860px, so that the strip is on the first screen and a tall monitor is not left mostly empty.',
+    // Exactly that, and so shorter than the Reference site's: the strip's own
+    // rendered height is what the hero is meant to leave room for.
+    allowance: (rebuilt) =>
+      rebuilt.evaluate(() => {
+        const tall = innerHeight;
+        const strip = document.querySelector('#hero + .logos')!.getBoundingClientRect().height;
+        const taller = Math.min(Math.max(760, tall - strip), 860) - Math.max(tall, 760);
+        return { atLeast: taller, atMost: taller };
+      }),
+  },
+  {
     section: '.logos.dark',
     where: ({ width }) => width <= 980,
     why: 'Ticket 06: the Trust strip is a rail of one row that moves, where the Reference site lets its logos wrap onto as many rows as they need; below 981px they need more than one.',
