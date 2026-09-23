@@ -1,4 +1,4 @@
-import { LOCALE_CODES, localePath, type Locale } from '@/lib/locales';
+import { LOCALE_CODES, LOCALES, localePath, type Locale } from '@/lib/locales';
 
 /**
  * The link that takes a visitor to this page in the other language (ticket 40).
@@ -55,6 +55,26 @@ const WORDS = {
  */
 type Variant = 'bar' | 'panel';
 
+/**
+ * The panel's note, which the link names as its description. One per page:
+ * the bar has no note, and there is one panel.
+ */
+const NOTE_ID = 'mlang-n';
+
+/**
+ * A small globe, beside the language's name in the panel (ticket 76), so the
+ * link reads as a way to another language rather than as one more menu link.
+ * Decorative: the words beside it already say what the link is.
+ */
+function Globe() {
+  return (
+    <svg className="mlang-g" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M1.5 8h13M8 1.5c1.9 1.8 2.8 4 2.8 6.5S9.9 12.7 8 14.5M8 1.5C6.1 3.3 5.2 5.5 5.2 8s.9 4.7 2.8 6.5" />
+    </svg>
+  );
+}
+
 export function LanguageSwitcher({
   locale,
   path,
@@ -81,10 +101,11 @@ export function LanguageSwitcher({
   const words = WORDS[other];
   const here = locales.includes(other);
   const href = localePath(other, here ? path : '/');
+  const panel = variant === 'panel';
 
-  return (
+  const link = (
     <a
-      className={variant === 'bar' ? 'lang' : 'mlang'}
+      className={panel ? 'mlang' : 'lang'}
       href={href}
       // The language of the words on the link, not of the page it leads to —
       // though here they are the same — so a screen reader pronounces
@@ -93,13 +114,32 @@ export function LanguageSwitcher({
       hrefLang={other}
       // Read by `NavBehaviour`, which remembers the choice when it is followed.
       data-language={other}
-      // The accessible name carries the explanation on both variants, because
-      // the bar has no room to show it and a link whose only difference is
-      // where it goes is not one a screen reader can tell apart.
-      aria-label={here ? undefined : `${words.name} — ${words.missing}`}
+      // The explanation reaches a screen reader on both variants, because a
+      // link whose only difference is where it goes is not one it can tell
+      // apart. The bar has no room to show it, so it is the link's name there;
+      // the panel shows it, so there it is the link's description, and read
+      // once rather than twice.
+      aria-label={here || panel ? undefined : `${words.name} — ${words.missing}`}
+      aria-describedby={here || !panel ? undefined : NOTE_ID}
     >
+      {panel ? <Globe /> : null}
       {words.name}
-      {!here && variant === 'panel' ? <small className="mlang-n">{words.missing}</small> : null}
     </a>
+  );
+
+  if (here || !panel) return link;
+
+  // In the panel the note sits under the row the link shares with Login,
+  // across the panel's width (ticket 76) — so it is the link's sibling, not
+  // inside it, and the row wraps it onto a line of its own. It is written in
+  // the other language, so it runs in that language's direction too: an
+  // English sentence laid out right to left puts its full stop at the start.
+  return (
+    <>
+      {link}
+      <small className="mlang-n" id={NOTE_ID} lang={other} dir={LOCALES[other].dir}>
+        {words.missing}
+      </small>
+    </>
   );
 }

@@ -96,6 +96,7 @@
 .nav.open .navtog i:before { transform: translateY(6px) rotate(45deg) }
 .nav.open .navtog i:after { transform: translateY(-6px) rotate(-45deg) }
 .mnav { display: none }
+.mscrim { display: none }
 
 /* The header's own breakpoint, and the site's is 981px (ticket 40).
    They were the same number until the language switcher joined the row, and
@@ -157,18 +158,57 @@
 
   .mnav a { display: block; padding: 14px 2px; font-size: 16px; color: var(--dark-muted); border-top: 1px solid var(--dark-line) }
   .mnav a.on { color: #fff; font-weight: 600 }
-  .mnav .mlogin { margin-top: 14px; text-align: center; border: 1px solid var(--dark-line); border-radius: 999px; padding: 13px; color: #fff; font-size: 15px }
   .nav.on-light .mnav a { color: var(--muted); border-top-color: var(--line) }
   .nav.on-light .mnav a.on { color: var(--ink) }
+
+  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate (ADR-0020, ticket 76).
+     The Reference site ends its panel with a full-width sign-in pill, and the
+     switcher ticket 40 added came after it on a line of its own, dressed as a
+     menu link. On a phone the two stacked read as a mistake, so they share one
+     row: Login at the start (right in Arabic), the language at the end, and
+     the note a page with no translation carries wrapped onto a line of its
+     own under both, across the panel. */
+  .mnav .mrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 14px }
+
+  /* Login as the desktop header draws it — an outlined pill sized to its
+     words — in the panel's own ink and size. */
+  .mnav .mlogin { display: inline-flex; align-items: center; border: 1px solid var(--dark-line); border-radius: 999px; padding: 9px 18px; color: #fff; font-size: 15px; white-space: nowrap }
   .nav.on-light .mnav .mlogin { border-color: var(--line); color: var(--ink) }
 
-  /* The switcher in the panel, where there is room to say why it leads to a
-     home page rather than to this page in the other language. */
-  .mnav .mlang { font-size: 15px }
+  /* The switcher in the panel: a globe and the language's name, with none of
+     a menu link's line above it. */
+  .mnav .mlang { display: inline-flex; align-items: center; gap: 7px; padding: 9px 2px; border-top: 0; font-size: 15px; white-space: nowrap; position: relative }
+  .mnav .mlang-g { flex: none; fill: none; stroke: currentColor; stroke-width: 1.2 }
   .mnav .mlang[data-remembered] { color: #fff }
-  .mnav .mlang .mlang-n { display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.45; color: var(--dark-muted) }
+  /* The mark ADR-0014 gives the language this browser last chose — the bar's
+     dot, in the same place relative to the words. */
+  .mnav .mlang[data-remembered]:after { content: ""; position: absolute; inset-inline-end: -4px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--acc) }
   .nav.on-light .mnav .mlang[data-remembered] { color: var(--ink) }
-  .nav.on-light .mnav .mlang .mlang-n { color: var(--muted) }
+
+  /* Where a page has no translation, why the link leads to a home page. */
+  .mnav .mlang-n { flex-basis: 100%; font-size: 12.5px; line-height: 1.45; color: var(--dark-muted) }
+  .nav.on-light .mnav .mlang-n { color: var(--muted) }
+
+  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate (ADR-0020, ticket 76).
+     The Reference site's panel hangs over the page at full strength, the page
+     scrolls under it, and a tap on it does nothing. Here the page below the
+     open panel is dimmed and a tap on it closes the panel (nav-behaviour.tsx).
+     It hangs from the header's lower edge — the panel's, once it is open —
+     and follows the panel down as it grows. `.nav` is fixed, so this is placed
+     against it rather than against the window. */
+  .mscrim { display: block; position: absolute; top: calc(100% + 1px); inset-inline: 0; height: 100dvh; background: rgba(8, 9, 12, .55); opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s }
+  .nav.open .mscrim { opacity: 1; visibility: visible }
+
+  /* And the page holds still under it. Hiding the overflow leaves the scroll
+     position where it was, so closing the panel returns the visitor to the
+     line they were reading. No gutter is reserved for the scrollbar it hides:
+     a phone's scrollbar takes no room, and `scrollbar-gutter` would reserve
+     one anyway wherever scrollbars are hidden rather than overlaid — narrowing
+     the open header by 15px against the Reference site. The panel still
+     scrolls within itself on a short screen, without handing the scroll on
+     to the page. */
+  html:has(.nav.open) { overflow: hidden }
+  .nav.open .mnav { overscroll-behavior: contain }
 }
 
 .mnav .msub { border-top: 1px solid var(--dark-line); padding: 13px 0 4px }
