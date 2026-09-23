@@ -1,4 +1,5 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
+import { Inline, numeralsInMono } from '@/components/inline-text';
 import type { PageLink } from '@/components/page-link';
 import type { FormPageWording } from '@/forms/definition';
 import type { DemoRequestField } from '@/forms/demo-request';
@@ -45,7 +46,11 @@ export function ClosingSection({
           <ul className="tail-steps">
             {content.steps.map((step, index) => (
               <li key={index}>
-                <b>{step.label}</b>
+                {/* The Arabic in the label face and the numeral in DM Mono,
+                    as on the step cards (ADR-0018). */}
+                <b>
+                  <Inline text={numeralsInMono(step.label)} />
+                </b>
                 <span>{step.text}</span>
               </li>
             ))}

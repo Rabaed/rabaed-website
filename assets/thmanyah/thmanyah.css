@@ -1,0 +1,42 @@
+/**
+ * Thmanyah Sans, by thmanyah Publishing and Distribution (https://thmanyah.com),
+ * under their own licence — LICENSE.pdf, beside this file. Not an open font:
+ * see ADR-0018 before copying these files anywhere else.
+ *
+ * The small Arabic labels' face (bug 45): the eyebrow over a section's heading
+ * and the labels that share its voice. Latin labels, and every English page,
+ * keep DM Mono.
+ *
+ * The file is thmanyah's own, byte for byte and under its own name, so anyone
+ * who inspects the page sees whose face it is. Not in `assets/fonts/`:
+ * `npm run fonts:sync` empties that folder and writes it again.
+ *
+ * **One weight, Regular, and every label is set in it** — the founder's
+ * choice. Each of thmanyah's files is about 76 KB, twice an IBM Plex Sans
+ * Arabic face, because the licence forbids cutting a file down to the letters
+ * a page uses. So a second weight is a second 76 KB on every page that has a
+ * bold label. Each label's rule asks for 400, and `fonts.spec.ts` fails on any
+ * Arabic label that asks this family for more — the browser would fake a bold
+ * out of this face rather than fetch one.
+ *
+ * **Lined up as IBM Plex Sans Arabic is.** Thmanyah reserves 100% of its size
+ * above the baseline and 25% below; IBM Plex Sans Arabic, 108.5% and 41.5%.
+ * Where a line holds two faces — a label's Arabic beside its DM Mono numeral,
+ * a pill sitting on a line of body text — the line's height and the pill's
+ * place follow those figures, and with Thmanyah's own they came out 1px to 4px
+ * off the Reference site's, pushing everything below them. With IBM Plex's,
+ * the labels sit exactly where the Arabic face they replaced sat. This moves
+ * no glyph within the face and changes nothing in the file: it is the line
+ * box the browser builds around it, as `size-adjust` is for ADR-0012's
+ * stand-in. The figures are measured, by `fontBoundingBoxAscent` and
+ * `fontBoundingBoxDescent` on each face's own file.
+ */
+@font-face {
+  font-family: 'Thmanyah Sans';
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 108.5%;
+  descent-override: 41.5%;
+  font-weight: 400;
+  src: url(./thmanyahsans-Regular.woff2) format('woff2');
+}

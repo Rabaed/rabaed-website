@@ -50,3 +50,70 @@ test('Arabic text renders in a face that covers Arabic', async ({ page }) => {
 
   expect(loaded).toBe(true);
 });
+
+/**
+ * The faces Arabic text may be set in. DM Mono and the English face have no
+ * Arabic glyphs, so Arabic given either silently falls through to whatever the
+ * browser has — the defect bug 45 found on every eyebrow (spec: Design system).
+ * Only the first family is read: it is the one the page asked for, and the
+ * rest of the stack is there for the moments before it arrives.
+ */
+const ARABIC_FACES = ['IBM Plex Sans Arabic', 'Thmanyah Sans'];
+
+/**
+ * Tracking a label's width out, as the Reference site's labels are at .06em to
+ * .14em, pulls joined Arabic letters apart, so an Arabic label is untracked
+ * (ADR-0018). The Reference site's headings are drawn in by .01em to .02em and
+ * a few phrases let out by as much: too little to part a join, and the design's.
+ */
+const LABEL_TRACKING = 0.05;
+
+/** The phone and the desktop the baselines were captured at. */
+const WIDTHS = [390, 1440];
+
+for (const route of ROUTES.filter((r) => r.locale === 'ar')) {
+  for (const width of WIDTHS) {
+    test(`${route.path} at ${width}px sets its Arabic in an Arabic face, untracked`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(route.path);
+
+      const misset = await page.evaluate(({ faces, labelTracking }) => {
+        const arabic = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/;
+        const found: string[] = [];
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const text = node.textContent ?? '';
+          const element = node.parentElement;
+          if (!element || !arabic.test(text)) continue;
+          // Structured data and scripts carry Arabic that is never drawn.
+          if (element.closest('script, style, template, noscript')) continue;
+          const style = getComputedStyle(element);
+          const face = style.fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '');
+          const tracked = parseFloat(style.letterSpacing) >= labelTracking * parseFloat(style.fontSize);
+          // Thmanyah Sans is served in Regular alone, so a heavier label
+          // would be a bold the browser fakes (ADR-0018).
+          const faked = face === 'Thmanyah Sans' && style.fontWeight !== '400';
+          if (faces.includes(face) && !tracked && !faked) continue;
+          const where = element.className ? `${element.localName}.${String(element.className).split(' ').join('.')}` : element.localName;
+          found.push(
+            `${where} «${text.trim().slice(0, 30)}»: ${face}${tracked ? `, letter-spacing ${style.letterSpacing}` : ''}${faked ? `, weight ${style.fontWeight}` : ''}`,
+          );
+        }
+        return found;
+      }, { faces: ARABIC_FACES, labelTracking: LABEL_TRACKING });
+
+      expect(misset).toEqual([]);
+    });
+  }
+}
+
+test('the Arabic labels load Thmanyah Sans', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => document.fonts.ready);
+
+  const loaded = await page.evaluate(() =>
+    [...document.fonts].some((face) => face.status === 'loaded' && face.family.replace(/["']/g, '') === 'Thmanyah Sans'),
+  );
+
+  expect(loaded).toBe(true);
+});

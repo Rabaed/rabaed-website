@@ -24,8 +24,9 @@
  *   referral page's comparison explains.
  *
  *   The path's stage labels «المرحلة 01» are *not* among them: they are
- *   `.tail-steps b`, the rule the home and product pages' closing steps share, and keep
- *   DM Mono until bug 45 decides for all of them. They are measured in full.
+ *   `.tail-steps b`, the rule the home and product pages' closing steps share,
+ *   set in Thmanyah Sans Regular where the Reference site's is bold
+ *   (ADR-0018). Their typeface is left out; their size and place are held.
  * - **The submit button is disabled** until the application is complete
  *   (ticket 29), so an empty form draws it in the Reference site's own
  *   disabled style, as the referral page's does: its colours and height are
@@ -114,7 +115,8 @@ const REGIONS: readonly Region[] = [
       '.tz-more span',
       '.tail-steps',
       '.tail-steps li',
-      '.tail-steps li > b',
+      // Thmanyah Sans Regular where the Reference site's is bold (ADR-0018).
+      { selector: '.tail-steps li > b', omit: ['font'] },
       '.tail-steps li > span',
       '.tail-steps .ph',
     ],
