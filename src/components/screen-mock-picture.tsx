@@ -74,7 +74,7 @@ export async function ScreenMockImage({
   const loading = eager ? { loading: 'eager', fetchPriority: 'low' } as const : {};
 
   const replacement = content.replacement;
-  const whole = replacement?.url ? null : await getWholeScreenWords(content.locale);
+  const wholeWords = replacement?.url ? null : await getWholeScreenWords(content.locale);
   if (replacement?.url) {
     const copies = [replacement.sizes?.small, replacement.sizes?.medium, replacement.sizes?.large].flatMap((copy) =>
       copy?.url && copy.width ? [`${copy.url} ${copy.width}w`] : [],
@@ -96,7 +96,7 @@ export async function ScreenMockImage({
   }
 
   const exported = screenMockImagePath(content.locale, entry.id);
-  if (!whole) {
+  if (!wholeWords) {
     return (
       <Image
         className={className}
@@ -146,7 +146,7 @@ export async function ScreenMockImage({
         width={entry.width}
         height={entry.height}
         description={content.description}
-        words={whole}
+        words={wholeWords}
       />
     </>
   );

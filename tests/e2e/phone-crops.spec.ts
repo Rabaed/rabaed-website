@@ -203,6 +203,34 @@ test.describe('the whole screen, opened from its crop', () => {
   });
 });
 
+test('a screen opened the moment another is closed stays open, and leaves no step behind', async ({ page }) => {
+  await page.setViewportSize(PHONE);
+  await page.goto('/');
+  await page.goto('/product');
+  const [first, second] = [page.locator('#journey .ui').nth(0), page.locator('#journey .ui').nth(1)];
+  await first.scrollIntoViewIfNeeded();
+  await first.getByRole('button', { name: OPEN }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+
+  // Closed, and the next opened at once, before the first's step has come off.
+  await second.getByRole('button', { name: OPEN }).evaluate((button: HTMLElement) => {
+    document.querySelector<HTMLDialogElement>('dialog[open]')!.close();
+    button.click();
+  });
+  const opened = page.getByRole('dialog', { name: (await second.locator('img[data-screen-mock]').getAttribute('alt'))! });
+  await expect(opened).toBeVisible();
+  // Still open once everything has landed.
+  await page.waitForTimeout(500);
+  await expect(opened).toBeVisible();
+
+  // One step for the one screen open: back closes it, and back again leaves.
+  await page.goBack();
+  await expect(opened).toBeHidden();
+  await expect(page).toHaveURL(/\/product$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+});
+
 test('the words on a crop are in the first response, before any script runs', async ({ request }) => {
   for (const path of ['/', '/product']) {
     expect(await (await request.get(path)).text(), path).toContain(OPEN);

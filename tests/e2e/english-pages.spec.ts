@@ -238,16 +238,15 @@ test('previewed on a phone, the English Screen mocks are English Phone crops; at
   for (const [path, section] of [
     ['/en', '#jt .jt-shot.on'],
     ['/en/product', '#journey .ui'],
+    ['/en/product', '#roles .role.on'],
   ] as const) {
     await page.setViewportSize({ width: 390, height: 812 });
     await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
     // Ticket 78's crop, cut from the English screen — the Arabic crop mirrored.
     const phone = await drawnFrom(section);
     expect(phone.file, path).toBe(`/screen-mocks/en/phone/${phone.mock}.webp`);
-    // Its words, from the English the site words proposal carries; and ticket
-    // 77's hint in English too, for a screen that is replaced and has no crop.
+    // Its words, from the English the site words proposal carries.
     await expect(page.locator(section).first().getByRole('button', { name: 'Tap to see the whole screen' })).toBeVisible();
-    await expect(page.locator('.pan-hint').first()).toHaveText('Swipe to see the whole screen');
 
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.reload();

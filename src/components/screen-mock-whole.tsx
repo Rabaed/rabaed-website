@@ -1,10 +1,37 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { WholeScreenWords } from '@/content/site-words';
 
-/** Marks the step in the browser's history that an opened screen adds. */
+/**
+ * Marks the step in the browser's history that an opened screen adds, with
+ * the id of the screen it is: each screen acts on its own step and no other's.
+ */
 const OPENED = 'screenMockWhole';
+
+/** The screen whose step the browser is on, if any. */
+const stepOf = (): string | undefined => window.history.state?.[OPENED];
+
+/**
+ * The step a closed screen is taking back off, until it has: `history.back()`
+ * lands a moment after it is called. A screen opened in that moment would
+ * add its own step first and then be closed by the one landing.
+ */
+let leaving: Promise<void> | null = null;
+
+/** Takes an opened screen's step back off, and says when it has. */
+function leave(): void {
+  leaving = new Promise((done) => {
+    window.addEventListener(
+      'popstate',
+      // After every other listener has heard it: one of them may be the
+      // screen that is closing.
+      () => setTimeout(() => ((leaving = null), done())),
+      { once: true },
+    );
+  });
+  window.history.back();
+}
 
 /**
  * The button over a Phone crop, and the whole screen it opens (ticket 78,
@@ -46,6 +73,7 @@ export function ScreenMockWhole({
   description: string;
   words: WholeScreenWords;
 }) {
+  const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   const [opened, setOpened] = useState(false);
   const [zoomed, setZoomed] = useState(false);
@@ -54,13 +82,16 @@ export function ScreenMockWhole({
     const box = dialog.current;
     if (!box) return;
 
-    // Going back took the step off already; closing must not take another.
+    // Going back took this screen's step off already; closing must not take
+    // another.
     const back = () => {
-      if (box.open) box.close('back');
+      if (box.open && stepOf() !== id) box.close('back');
     };
+    // Its own step only: a screen opened in the moment this one closed has
+    // taken the step over, and keeps it.
     const closed = () => {
       setZoomed(false);
-      if (box.returnValue !== 'back' && window.history.state?.[OPENED]) window.history.back();
+      if (box.returnValue !== 'back' && stepOf() === id) leave();
     };
 
     window.addEventListener('popstate', back);
@@ -69,15 +100,20 @@ export function ScreenMockWhole({
       window.removeEventListener('popstate', back);
       box.removeEventListener('close', closed);
     };
-  }, []);
+  }, [id]);
 
-  const open = () => {
+  const open = async () => {
+    if (leaving) await leaving;
     const box = dialog.current;
     if (!box || box.open) return;
     setOpened(true);
     box.returnValue = '';
     box.showModal();
-    window.history.pushState({ [OPENED]: true }, '');
+    // Already on a screen's step — one closing as this opens, or one a visitor
+    // went back past and forward onto again — this screen takes it over, so
+    // there is only ever one, and closing leaves none behind.
+    if (stepOf()) window.history.replaceState({ [OPENED]: id }, '');
+    else window.history.pushState({ [OPENED]: id }, '');
   };
 
   return (

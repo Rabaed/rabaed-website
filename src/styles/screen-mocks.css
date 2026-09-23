@@ -128,6 +128,9 @@ picture:has(> [data-screen-mock]) { display: contents }
 /* The screen pans inside the cover, never the page behind it. `margin: auto`
    centres it while it fits and lets it start at its own edge once zoomed. */
 .shot-whole-view { display: flex; overflow: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom) }
-.shot-whole-view img { display: block; margin: auto; width: 100%; height: auto; max-width: none; cursor: zoom-in }
-.shot-whole-view[data-zoomed="true"] img { width: 1440px; cursor: zoom-out }
+/* Held by the cover as well as the view: the home page's own rule for a
+   screen's picture, `.jt-shot img`, reaches this one too, and is as specific
+   as the view's alone. */
+.shot-whole .shot-whole-view img { display: block; margin: auto; width: 100%; height: auto; max-width: none; cursor: zoom-in }
+.shot-whole .shot-whole-view[data-zoomed="true"] img { width: 1440px; cursor: zoom-out }
 html:has(.shot-whole[open]) { overflow: hidden }
