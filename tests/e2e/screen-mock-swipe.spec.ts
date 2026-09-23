@@ -7,10 +7,12 @@
  * carries a hint, «اسحب لرؤية الشاشة كاملة», and fades out whichever edge has
  * more of the screen behind it.
  *
- * The fade is read as the two widths the stylesheet draws it by, at the edge
- * where panning begins and the edge it goes towards, because a mask is not
- * something the page can be asked to describe any other way. Everything else
- * is what a visitor sees: whether the hint is showing, and what it says.
+ * The fade is read off the mask the box is drawn through, as how far in from
+ * its left and right edges the picture is faded: the edges a visitor sees,
+ * not the stylesheet's own names for them. These pages read right to left, so
+ * panning begins at the right-hand edge and the rest of the screen is to the
+ * left. Everything else is what a visitor sees: whether the hint is showing,
+ * and what it says.
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
 
@@ -28,16 +30,21 @@ const PANS = [
 /** The box inside a frame that pans. */
 const pan = (frame: Locator) => frame.locator('[data-pan]');
 
-/** The fade at each edge, in pixels: where panning begins, and where it goes. */
-async function fades(frame: Locator): Promise<{ start: string; end: string }> {
-  return pan(frame).evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      start: style.getPropertyValue('--pan-fade-start').trim(),
-      end: style.getPropertyValue('--pan-fade-end').trim(),
-    };
-  });
+/**
+ * How far in from each edge the picture fades, in pixels. The mask is a
+ * gradient from left to right, `transparent, black <left>, black
+ * calc(100% - <right>), transparent`, and a width of nothing is written as the
+ * edge itself.
+ */
+async function fades(frame: Locator): Promise<{ left: number; right: number }> {
+  const mask = await pan(frame).evaluate((element) => getComputedStyle(element).maskImage);
+  const stops = /rgb\(0, 0, 0\) ([\d.]+)px, rgb\(0, 0, 0\) (?:100%|calc\(100% - ([\d.]+)px\))/.exec(mask);
+  expect(stops, `a mask that is not a fade at both edges: ${mask}`).not.toBeNull();
+  return { left: Math.round(Number(stops![1])), right: Math.round(Number(stops![2] ?? 0)) };
 }
+
+/** At rest, the far edge — the left, right to left — fades and the near one does not. */
+const AT_REST = { left: 36, right: 0 };
 
 /** Swipes a pan as far as `share` of the way along, as a finger would take it. */
 async function swipe(frame: Locator, share: number): Promise<void> {
@@ -84,7 +91,7 @@ for (const { page: path, where, frames } of PANS) {
 
       // At rest the screen shows from where it begins, so the far edge fades
       // and the near one does not.
-      await expect.poll(() => fades(frame)).toEqual({ start: '0px', end: '36px' });
+      await expect.poll(() => fades(frame)).toEqual(AT_REST);
     });
 
     test('moves the fade as it is swiped, and the hint goes once it has been', async ({ page }) => {
@@ -92,16 +99,16 @@ for (const { page: path, where, frames } of PANS) {
 
       await swipe(frame, 0.5);
       // Part of the way along, there is more of the screen at both edges.
-      await expect.poll(() => fades(frame)).toEqual({ start: '36px', end: '36px' });
+      await expect.poll(() => fades(frame)).toEqual({ left: 36, right: 36 });
       await expect(frame.locator('.pan-hint')).toHaveCSS('opacity', '0');
 
       await swipe(frame, 1);
       // At the far edge there is nothing more that way.
-      await expect.poll(() => fades(frame)).toEqual({ start: '36px', end: '0px' });
+      await expect.poll(() => fades(frame)).toEqual({ left: 0, right: 36 });
 
       await swipe(frame, 0);
       // Back where it began, and the hint does not come back: it has been read.
-      await expect.poll(() => fades(frame)).toEqual({ start: '0px', end: '36px' });
+      await expect.poll(() => fades(frame)).toEqual(AT_REST);
       await expect(frame.locator('.pan-hint')).toHaveCSS('opacity', '0');
     });
 
@@ -135,6 +142,24 @@ test('only the swiped screen loses its hint', async ({ page }) => {
   await swipe(frames.first(), 0.5);
   await expect(frames.first().locator('.pan-hint')).toHaveCSS('opacity', '0');
   await expect(frames.nth(1).locator('.pan-hint')).toHaveCSS('opacity', '1');
+});
+
+test('each of the four units is a screen of its own: choosing another starts it afresh, hint and all', async ({ page }) => {
+  await page.setViewportSize(PHONE);
+  const frame = await open(page, '/', '#jt .jt-pan');
+  const hint = frame.locator('.pan-hint');
+
+  await swipe(frame, 0.5);
+  await expect(hint).toHaveCSS('opacity', '0');
+
+  // The six units share the one box. A screen the visitor has not swiped yet
+  // is shown from where it begins, and says it can be.
+  await page.locator('#jt [role="tab"]').nth(2).click();
+  await expect(hint).toHaveCSS('opacity', '1');
+  await expect.poll(() => fades(frame)).toEqual(AT_REST);
+
+  await swipe(frame, 0.5);
+  await expect(hint).toHaveCSS('opacity', '0');
 });
 
 test('the hint is in the first response, before any script runs', async ({ request }) => {

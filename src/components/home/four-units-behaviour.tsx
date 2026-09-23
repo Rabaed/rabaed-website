@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
+import { SCREEN_MOCK_CHANGED } from '@/components/screen-mock-pan';
 import { readingDirectionOf } from '@/lib/reading-direction';
 import { listenToTabs } from '@/lib/tab-strip';
 
@@ -28,7 +29,15 @@ export function FourUnitsBehaviour() {
     const hints = [...section.querySelectorAll<HTMLElement>('.jt-hint')];
     if (tabs.length === 0 || panels.length !== tabs.length || hints.length !== tabs.length) return;
 
+    const stage = section.querySelector<HTMLElement>('[data-pan]');
+    let shown = FIRST_CHOSEN;
+
     const show = (chosen: number) => {
+      // A different unit's screen: on a phone it starts where panning begins,
+      // with its own swipe hint (ticket 77). The pointer arriving over the
+      // tab already shown, as a tap's first event does, changes nothing.
+      if (chosen !== shown) stage?.dispatchEvent(new Event(SCREEN_MOCK_CHANGED));
+      shown = chosen;
       tabs.forEach((tab, index) => {
         const look = unitTabAppearance(index, chosen);
         tab.className = look.tabClass;

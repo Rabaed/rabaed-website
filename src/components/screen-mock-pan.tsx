@@ -10,6 +10,14 @@ import { useEffect, useRef, type ReactNode } from 'react';
 const SWIPED = 24;
 
 /**
+ * Sent to a panning box when the Screen mock in it is replaced by another: the
+ * home page's six units share one box, and choosing a unit shows a screen the
+ * visitor has not swiped yet. The box goes back to where panning begins and
+ * the hint shows again, so each screen is met as the first one was.
+ */
+export const SCREEN_MOCK_CHANGED = 'screen-mock-changed';
+
+/**
  * The box a Screen mock pans in on a phone, and the hint that says it can be
  * swiped (ticket 77).
  *
@@ -32,6 +40,11 @@ const SWIPED = 24;
  *
  * Above 700px nothing pans, and the stylesheet shows neither the hint nor a
  * fade.
+ *
+ * **DIVERGENCE FROM THE REFERENCE SITE, deliberate:** it pans the same box
+ * with neither a hint nor a fade. The founder asked for both on 23 September
+ * 2026, when a phone showed a third of a screen and said nothing about the
+ * rest.
  */
 export function ScreenMockPan({
   className,
@@ -50,7 +63,6 @@ export function ScreenMockPan({
     const box = pan.current;
     if (!box) return;
 
-    let swiped = false;
     const read = () => {
       // Right to left, `scrollLeft` runs from 0 to minus the hidden width, so
       // how far along the box is panned is its size either way.
@@ -58,19 +70,23 @@ export function ScreenMockPan({
       const along = Math.abs(box.scrollLeft);
       box.dataset.moreStart = String(along > 1);
       box.dataset.moreEnd = String(hidden - along > 1);
-      if (!swiped && along > SWIPED) {
-        swiped = true;
-        box.dataset.swiped = 'true';
-      }
+      if (!box.dataset.swiped && along > SWIPED) box.dataset.swiped = 'true';
+    };
+    const changed = () => {
+      delete box.dataset.swiped;
+      box.scrollTo({ left: 0, behavior: 'instant' });
+      read();
     };
 
     read();
     box.addEventListener('scroll', read, { passive: true });
+    box.addEventListener(SCREEN_MOCK_CHANGED, changed);
     // Turning a phone, or a window crossing 700px, changes how much is hidden.
     window.addEventListener('resize', read);
 
     return () => {
       box.removeEventListener('scroll', read);
+      box.removeEventListener(SCREEN_MOCK_CHANGED, changed);
       window.removeEventListener('resize', read);
       delete box.dataset.moreStart;
       delete box.dataset.moreEnd;
