@@ -13,6 +13,13 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { dragSeam, readSeam, sampleSeamOnScreen, seamOnScreen } from './before-after';
+import { sidewaysOverflow, widestSidewaysOverflow } from './geometry';
+
+/**
+ * Phone widths, where the comparison sits 20px from the screen's edge and its
+ * 52px knob, centred on the seam, would otherwise hang past it (ticket 74).
+ */
+const PHONE_WIDTHS = [360, 390, 430, 560] as const;
 
 /** A phrase from each step's two faces, in order. */
 const STEPS = [
@@ -164,6 +171,37 @@ test.describe('with reduced motion, so the hint does not move the seam', () => {
     await expectVerdict(page, 'usual');
   });
 
+  for (const width of PHONE_WIDTHS) {
+    test(`at ${width}px the seam at either end never pushes the page sideways`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      const comparison = page.locator('#ba .cmp');
+      await comparison.scrollIntoViewIfNeeded();
+      const box = (await comparison.boundingBox())!;
+      const y = box.y + box.height / 2;
+
+      // Dragged past each end: while held, when the knob is drawn larger, and
+      // after letting go, with the pointer still over it.
+      for (const [end, x] of [['left', box.x - 40], ['right', box.x + box.width + 40]] as const) {
+        await page.mouse.move(box.x + box.width / 2, y);
+        await page.mouse.down();
+        await page.mouse.move(x, y, { steps: 8 });
+        expect(await sidewaysOverflow(page), `held at the ${end} end`).toBeLessThanOrEqual(0);
+        await page.mouse.up();
+        expect(await sidewaysOverflow(page), `let go at the ${end} end`).toBeLessThanOrEqual(0);
+      }
+
+      // Stepped there by the arrow keys.
+      await handle(page).focus();
+      for (let press = 0; press < 20; press += 1) await page.keyboard.press('ArrowLeft');
+      expect(await announced(page)).toBe(0);
+      expect(await sidewaysOverflow(page), 'stepped to the left end').toBeLessThanOrEqual(0);
+      for (let press = 0; press < 20; press += 1) await page.keyboard.press('ArrowRight');
+      expect(await announced(page)).toBe(100);
+      expect(await sidewaysOverflow(page), 'stepped to the right end').toBeLessThanOrEqual(0);
+    });
+  }
+
   test('the seam does not sweep across by itself', async ({ page }) => {
     await page.goto('/');
     await scrollToComparison(page);
@@ -223,6 +261,21 @@ test('once, when the comparison first comes into view, the seam sweeps across an
   await scrollToComparison(page);
   expect(new Set(await sampleSeamOnScreen(page, 2500))).toEqual(new Set([50]));
 });
+
+for (const width of PHONE_WIDTHS) {
+  test(`at ${width}px the hint's sweep never pushes the page sideways`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    await scrollToComparison(page);
+
+    // The whole hint: 0.3s before it starts, 1.8s to the far end, a 0.35s
+    // pause there — where the knob hung past the screen's edge — and 0.8s
+    // back to the middle.
+    const [widest, seam] = await Promise.all([widestSidewaysOverflow(page, 3500), sampleSeamOnScreen(page, 3500)]);
+    expect(Math.min(...seam), 'the sweep reached the left end').toBeLessThanOrEqual(1);
+    expect(widest).toBeLessThanOrEqual(0);
+  });
+}
 
 test('taking hold of the seam stops the hint', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
