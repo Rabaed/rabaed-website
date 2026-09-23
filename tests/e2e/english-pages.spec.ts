@@ -333,6 +333,36 @@ test.describe('published in English', () => {
     expect(await (await request.get('/en/product')).text()).toContain('This page is not available in English yet.');
   });
 
+  // An assistant asked about Rabaed in English is pointed at the English page,
+  // by the same rule the sitemap follows (ticket 82).
+  test('llms.txt lists the English start page, in English and as the page describes itself, and nothing not yet in English', async ({
+    request,
+    page,
+    baseURL,
+  }) => {
+    const entry = (llms: string) => llms.split('\n').find((line) => line.startsWith(`- [`) && line.includes(`](${baseURL}/en/start)`));
+    await reaching('/en/start in llms.txt', async () => entry(await (await request.get('/llms.txt')).text()) !== undefined).toBe(true);
+    const llms = await (await request.get('/llms.txt')).text();
+    const line = entry(llms)!;
+
+    await page.goto('/en/start');
+    const declared = await page.locator('meta[name="description"]').getAttribute('content');
+    expect(line.endsWith(`): ${declared}`), `${line}\n  page: ${declared}`).toBe(true);
+    expect(line).not.toMatch(ARABIC);
+
+    // After the Arabic, under an English heading, with the company described
+    // in English above it.
+    const heading = llms.indexOf('## Pages in English');
+    expect(heading).toBeGreaterThan(llms.indexOf('## الصفحات'));
+    expect(llms.indexOf(line)).toBeGreaterThan(heading);
+    expect(llms).toContain('The operating system for construction projects');
+
+    // Only what is published in English: the product page's English waits,
+    // and the legal documents' binding Arabic is never in English.
+    expect(llms).not.toContain(`](${baseURL}/en/product)`);
+    expect(llms).not.toMatch(new RegExp(`\\]\\(${baseURL}/en/(terms|privacy|referral-terms)\\)`));
+  });
+
   test('a request sent from the English page is answered, confirmed and recorded in English', async ({ page, request }) => {
     await logInByApi(request, ENGLISH_PAGES_EDITOR);
     // The alert address is the Arabic entry's, one for both languages. While

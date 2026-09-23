@@ -165,8 +165,11 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   const listed = [...llms.matchAll(/^- \[[^\]]+\]\(([^)]+)\):/gm)].map(([, url]) => url);
 
   // The Arabic site's pages, each once. The home page is the file's own
-  // heading rather than an entry; `/en` waits for English (ticket 42); and the
-  // Screen mock studio is never listed (ticket 05).
+  // heading rather than an entry, and the Screen mock studio is never listed
+  // (ticket 05). An English page joins once it is published in English (ticket
+  // 82) — in this database none is, but `english-pages.spec.ts` publishes one
+  // beside this suite and holds the file to it, so the English are left out of
+  // the comparison below as the case studies are.
   const expected = [
     '/product',
     '/start',
@@ -182,7 +185,9 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   // comparison rather than asserted against: an article, a case study, and the
   // case studies index that appears with the first of them (ticket 24). What
   // stays is the fixed set, which nothing published can add to or take from.
-  const pages = listed.filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'));
+  const pages = listed
+    .filter((url) => !url.startsWith(absolute(baseURL!, '/en/')) && url !== absolute(baseURL!, '/en'))
+    .filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'));
   expect([...pages].sort()).toEqual(expected.map((path) => absolute(baseURL!, path)).sort());
   expect(listed.filter((url) => url.includes('/studio'))).toEqual([]);
 });
@@ -261,6 +266,61 @@ test('an article published in the CMS joins llms.txt, and leaves it again when i
     expect(await (await fetchOk(request, '/llms.txt')).text()).toContain(
       `- [${title}](${absolute(baseURL!, `/blog/${slug}`)}): ${summary}`,
     );
+  } finally {
+    if (created !== null) await page.request.delete(`/api/posts/${created}`);
+    await page.request.delete(`/api/media/${cover}`);
+  }
+
+  await expect.poll(async () => (await request.get('/llms.txt')).text()).not.toContain(title);
+});
+
+/** An opening answer of 44 words, in English (ticket 23). */
+const ENGLISH_ANSWER =
+  'Rabaed is a Saudi platform that brings the owner, the consultant and the contractor onto one documented record of every request and approval on a construction project, so nothing is lost in a chat thread and every party knows what is waiting on whom.';
+
+// The English articles were written for the questions an assistant is asked in
+// English (ticket 43), so the file points at them at their English address,
+// under the English heading, with the English blog index beside them (ticket 82).
+test('an article published in English joins llms.txt at its English address, and leaves it again when it is deleted', async ({
+  page,
+  request,
+  baseURL,
+}) => {
+  await logInByApi(page.request, CRAWLERS_EDITOR);
+  const cover = await uploadImage(page.request, 'A cover image for the AI crawler test');
+  const slug = `crawlers-en-${Date.now().toString(36)}`;
+  const title = `An AI crawler test article ${slug}`;
+  const summary = 'The summary as written in the editor, and the line that should appear in llms.txt.';
+  let created: number | null = null;
+
+  try {
+    const response = await page.request.post('/api/posts', {
+      data: {
+        locale: 'en',
+        title,
+        slug,
+        summary,
+        answer: ENGLISH_ANSWER,
+        author: 'Test author',
+        body: richText('A paragraph of the test article.', 'en'),
+        coverImage: cover,
+        publishedAt: '2026-09-20T12:00:00.000Z',
+        _status: 'published',
+      },
+    });
+    expect(response.ok(), await response.text()).toBe(true);
+    created = (await response.json()).doc.id as number;
+
+    await expect.poll(async () => (await request.get('/llms.txt')).text()).toContain(title);
+    const llms = await (await fetchOk(request, '/llms.txt')).text();
+    const line = `- [${title}](${absolute(baseURL!, `/en/blog/${slug}`)}): ${summary}`;
+    expect(llms).toContain(line);
+    expect(llms.indexOf(line)).toBeGreaterThan(llms.indexOf('## Articles in English'));
+    expect(llms.indexOf('## Articles in English')).toBeGreaterThan(llms.indexOf('## المقالات'));
+    // The English blog index has something to list now, so it is listed too.
+    expect(llms).toMatch(new RegExp(`^- \\[The Rabaed blog\\]\\(${absolute(baseURL!, '/en/blog')}\\): `, 'm'));
+    // Its Arabic twin is not in it: the article is English only.
+    expect(llms).not.toContain(`](${absolute(baseURL!, `/blog/${slug}`)})`);
   } finally {
     if (created !== null) await page.request.delete(`/api/posts/${created}`);
     await page.request.delete(`/api/media/${cover}`);
