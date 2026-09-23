@@ -43,6 +43,8 @@ import { ENGLISH_PAGES_SEED } from '../../src/migrations/english-pages/seed';
 import { ENGLISH_SITE_WORDS_SEED } from '../../src/migrations/english-site-words/seed';
 import { ENGLISH_SITE_WORDS } from '../../src/migrations/english-site-words/words';
 import { IMPORTED_FAQ_ENTRIES } from '../../src/migrations/faq-import/entries';
+import { FOOTER_DIRECTORY_SEED } from '../../src/migrations/footer-directory/seed';
+import { FOOTER_DIRECTORY } from '../../src/migrations/footer-directory/words';
 import { FAQ_ENTRIES_SEED } from '../../src/migrations/faq-import/seed';
 import { HOME_PAGE_SEED } from '../../src/migrations/home-page-import/seed';
 import { HOME_PAGE_WORDS } from '../../src/migrations/home-page-import/words';
@@ -126,6 +128,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     seed: ENGLISH_PAGES_SEED,
   },
   { name: 'the English form wording', words: ENGLISH_FORM_WORDING, seed: ENGLISH_FORM_WORDING_SEED },
+  { name: 'the Footer directory', words: FOOTER_DIRECTORY, seed: FOOTER_DIRECTORY_SEED },
   {
     name: 'Trust strip',
     words: [TRUST_STRIP_LOGOS, TRUST_STRIP_WORDS],

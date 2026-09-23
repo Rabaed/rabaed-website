@@ -77,9 +77,6 @@ const FOOTER_PARTS = [
   '.social a:nth-child(1)',
   '.social a:nth-child(5)',
   '.foot-bar',
-  '.foot-legal',
-  '.foot-legal a:nth-child(1)',
-  '.foot-legal a:nth-child(2)',
 ];
 
 /**
@@ -93,6 +90,36 @@ const FOOTER_PARTS = [
  * more. See `src/components/site-footer.tsx`.
  */
 const DIVERGENT = '.foot-bar > div:last-child';
+
+/**
+ * The footer's own deliberate divergence, the founder's decision of 23
+ * September 2026 (ticket 75, ADR-0020).
+ *
+ * The Reference site's footer ends in a bar holding a row of two legal links
+ * and the rights line. The rebuild's has the Footer directory above that bar,
+ * and the two links are in its Legal column rather than in the bar. So the
+ * footer gives up its height, and the bar gives up where it starts and how
+ * tall it is — it holds the rights line alone, where the Reference site's
+ * held the link row too. The rights line gives up the row it sat on, which
+ * was the link row's: centred beside it on a wide screen, wrapped under it on
+ * a phone.
+ *
+ * Everything above the directory — the wordmark, the tagline, the icons, each
+ * placed from the footer's top — is still held exactly, and so are the bar's
+ * width, its rule and its colours, and the rights line's height. The
+ * directory is compared against nothing, having nothing to compare against;
+ * `tests/e2e/site-words.spec.ts` holds it instead.
+ */
+function dropDirectoryShift(measurement: Record<string, unknown>) {
+  const give = (key: string, ...fields: string[]) => {
+    const part = measurement[key];
+    if (part && typeof part === 'object') for (const field of fields) delete (part as Record<string, unknown>)[field];
+  };
+  give('self', 'height');
+  give('.foot-bar', 'top', 'height');
+  give(DIVERGENT, 'top');
+  return measurement;
+}
 
 /**
  * The header's own deliberate divergences, both ticket 40's and both the
@@ -330,8 +357,8 @@ test.describe('the shell matches the Reference site', () => {
           );
         }
 
-        expect(await measure(rebuilt, 'footer', FOOTER_PARTS), 'footer').toEqual(
-          await measure(reference, 'footer', FOOTER_PARTS),
+        expect(dropDirectoryShift(await measure(rebuilt, 'footer', FOOTER_PARTS)), 'footer').toEqual(
+          dropDirectoryShift(await measure(reference, 'footer', FOOTER_PARTS)),
         );
       } finally {
         await referenceContext.close();

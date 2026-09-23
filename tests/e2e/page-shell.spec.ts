@@ -77,7 +77,9 @@ test.describe('the Partnerships dropdown', () => {
 
   test('starts closed', async ({ page }) => {
     await expect(page.locator('.nsub-t')).toHaveAttribute('aria-expanded', 'false');
-    await expect(page.getByRole('link', { name: /برنامج الإحالة/ }).first()).toBeHidden();
+    // In the dropdown: the Footer directory shows the same link, and always
+    // has it showing (ticket 75).
+    await expect(page.locator('.nsub-p').getByRole('link', { name: /برنامج الإحالة/ })).toBeHidden();
   });
 
   test('closes on a second click, having opened when the pointer arrived', async ({ page }) => {

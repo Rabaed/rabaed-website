@@ -1,8 +1,9 @@
 import { hasPublishedCaseStudies } from '@/cms/case-studies';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import { ARABIC_ONLY_PAGES } from '@/content/arabic-only-pages';
 import { ContentNotInLocale } from '@/content/pages/page-content';
 import { CASE_STUDIES_PATH } from '@/lib/case-study-paths';
-import { localePath, type Locale } from '@/lib/locales';
+import { DEFAULT_LOCALE, localePath, type Locale } from '@/lib/locales';
 
 /**
  * The words every page shares, in `locale`: the header's menu, the footer's
@@ -39,9 +40,19 @@ export type HeaderContent = {
   readonly demoLabel: string;
 };
 
+/**
+ * A link in the Footer directory. `hrefLang` names the language of the page it
+ * leads to where that is not the language being read: an English page's link
+ * to a legal document, which is in Arabic alone.
+ */
+export type DirectoryLink = NavLink & { readonly hrefLang?: Locale };
+
+/** A column of the Footer directory: its heading, and its links in order. */
+export type DirectoryColumn = { readonly heading: string; readonly links: readonly DirectoryLink[] };
+
 export type FooterContent = {
   readonly tagline: string;
-  readonly legalLinks: readonly NavLink[];
+  readonly directory: readonly DirectoryColumn[];
   readonly rights: string;
 };
 
@@ -59,6 +70,16 @@ export type NotFoundContent = {
 function href(locale: Locale, destination: string): string {
   return destination.startsWith('/') ? localePath(locale, destination) : destination;
 }
+
+/**
+ * Whether a link is drawn yet: the case studies link waits for its language's
+ * first published story, in the header and the Footer directory alike, so an
+ * Editor never has to remember to add it.
+ */
+const shownWith =
+  (caseStudies: boolean) =>
+  (link: { readonly path: string }): boolean =>
+    caseStudies || link.path !== CASE_STUDIES_PATH;
 
 /**
  * Whether the header and footer can be drawn in `locale`: whether the words
@@ -92,7 +113,7 @@ export async function getHeader(locale: Locale): Promise<HeaderContent> {
 
   return {
     links: header.links
-      .filter((link) => caseStudies || link.path !== CASE_STUDIES_PATH)
+      .filter(shownWith(caseStudies))
       .map((link) => ({ path: link.path, href: href(locale, link.path), label: words(link.label) })),
     partnershipsLabel: words(header.partnershipsLabel),
     partnerships: header.partnerships.map((link) => ({
@@ -106,18 +127,49 @@ export async function getHeader(locale: Locale): Promise<HeaderContent> {
   };
 }
 
-/** The footer's words in `locale`. Its contact points are site settings (ticket 19). */
+/** The pages in Arabic alone: the legal documents, which are never translated. */
+const ARABIC_ONLY_PATHS = new Set(Object.values(ARABIC_ONLY_PAGES).map((page) => page.path));
+
+/**
+ * Where a Footer directory link leads. A legal document is in Arabic alone, so
+ * an English page's link to it goes straight to the Arabic rather than to the
+ * English address that only says so — the founder's choice (ADR-0020), and the
+ * link's English label says the page is in Arabic.
+ */
+function directoryLink(locale: Locale, path: string, label: string): DirectoryLink {
+  // `/terms/` is `/terms`: the CMS lets an Editor end a path with a slash.
+  if (locale !== DEFAULT_LOCALE && ARABIC_ONLY_PATHS.has(path.replace(/(.)\/+$/, '$1'))) {
+    return { path, href: localePath(DEFAULT_LOCALE, path), label, hrefLang: DEFAULT_LOCALE };
+  }
+  return { path, href: href(locale, path), label };
+}
+
+/**
+ * The footer's words in `locale`, and its Footer directory (ticket 75). Its
+ * contact points are site settings (ticket 19).
+ *
+ * The case studies link waits for its first published story in `locale`, as
+ * the header's does, so an Editor never has to remember to add it; a column
+ * that loses every link that way is not drawn at all, rather than drawn as a
+ * heading over nothing.
+ */
 export async function getFooter(locale: Locale): Promise<FooterContent> {
-  const { footer } = await pageEntry('site-words', locale);
+  const [{ footer }, caseStudies] = await Promise.all([
+    pageEntry('site-words', locale),
+    hasPublishedCaseStudies(locale),
+  ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   return {
     tagline: words(footer.tagline),
-    legalLinks: footer.legalLinks.map((link) => ({
-      path: link.path,
-      href: href(locale, link.path),
-      label: words(link.label),
-    })),
+    directory: footer.columns
+      .map((column) => ({
+        heading: words(column.heading),
+        links: column.links
+          .filter(shownWith(caseStudies))
+          .map((link) => directoryLink(locale, link.path, words(link.label))),
+      }))
+      .filter((column) => column.links.length > 0),
     rights: words(footer.rights),
   };
 }
