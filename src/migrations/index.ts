@@ -46,8 +46,9 @@ import * as migration_20260923_120001_propose_english_form_wording from './20260
 import * as migration_20260923_120002_propose_english_pages from './20260923_120002_propose_english_pages';
 import * as migration_20260923_130000_import_english_launch_articles from './20260923_130000_import_english_launch_articles';
 import * as migration_20260923_150000_publish_proof_figure_sources from './20260923_150000_publish_proof_figure_sources';
-import * as migration_20260923_185202_screen_mock_swipe_hint from './20260923_185202_screen_mock_swipe_hint';
-import * as migration_20260923_185203_publish_screen_mock_swipe_hint from './20260923_185203_publish_screen_mock_swipe_hint';
+import * as migration_20260923_180726_footer_directory from './20260923_180726_footer_directory';
+import * as migration_20260923_193054_screen_mock_swipe_hint from './20260923_193054_screen_mock_swipe_hint';
+import * as migration_20260923_193055_publish_screen_mock_swipe_hint from './20260923_193055_publish_screen_mock_swipe_hint';
 
 export const migrations = [
   {
@@ -291,13 +292,18 @@ export const migrations = [
     name: '20260923_150000_publish_proof_figure_sources',
   },
   {
-    up: migration_20260923_185202_screen_mock_swipe_hint.up,
-    down: migration_20260923_185202_screen_mock_swipe_hint.down,
-    name: '20260923_185202_screen_mock_swipe_hint',
+    up: migration_20260923_180726_footer_directory.up,
+    down: migration_20260923_180726_footer_directory.down,
+    name: '20260923_180726_footer_directory',
   },
   {
-    up: migration_20260923_185203_publish_screen_mock_swipe_hint.up,
-    down: migration_20260923_185203_publish_screen_mock_swipe_hint.down,
-    name: '20260923_185203_publish_screen_mock_swipe_hint',
+    up: migration_20260923_193054_screen_mock_swipe_hint.up,
+    down: migration_20260923_193054_screen_mock_swipe_hint.down,
+    name: '20260923_193054_screen_mock_swipe_hint',
+  },
+  {
+    up: migration_20260923_193055_publish_screen_mock_swipe_hint.up,
+    down: migration_20260923_193055_publish_screen_mock_swipe_hint.down,
+    name: '20260923_193055_publish_screen_mock_swipe_hint',
   },
 ];

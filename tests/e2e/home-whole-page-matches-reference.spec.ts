@@ -80,7 +80,7 @@ const DELIBERATELY_DIFFERENT: readonly {
   {
     section: 'record',
     where: ({ width }) => width <= 980,
-    why: 'Ticket 09: below 981px the section is padded and as tall as its content, where the Reference site holds it to the window and lets the content spill over the sections either side.',
+    why: 'Ticket 09, ticket 80 and ADR-0021: below 981px the Reference site stops holding the section, holds it to the window, and lets the content spill over the sections either side. Here it holds still as on a desktop window, for 120% of the screen after a box that fits what it holds between the header and the foot of the screen and carries the paragraph below that.',
   },
   {
     section: 'calc',
@@ -97,6 +97,22 @@ const DELIBERATELY_DIFFERENT: readonly {
     where: () => true,
     why: 'Ticket 11: the demo request button is disabled until ticket 27 gives the form somewhere to send, and a disabled button has a 1px border above and below that the Reference site\'s does not.',
     allowance: async () => ({ atLeast: 2, atMost: 2 }),
+  },
+  {
+    section: 'footer',
+    where: () => true,
+    why: 'Ticket 75 and ADR-0020: the Footer directory stands between the social icons and the rights line, and the Reference site\'s row of two legal links, which is its Legal column now, is gone from the bar under it. The footer is taller by the directory, less that row: on a wide screen the row stood beside the rights line and was 15px taller than it; below 701px the rights line wrapped under it, 20px below.',
+    allowance: (rebuilt) =>
+      rebuilt.evaluate(() => {
+        const directory = document.querySelector('footer .foot-dir')!;
+        const added = directory.getBoundingClientRect().height + parseFloat(getComputedStyle(directory).marginTop);
+        const line = document.querySelector('.foot-bar > div:last-child')!.getBoundingClientRect().height;
+        // The Reference site's link row: a line of the same text, padded 7px
+        // above and below, over a 1px border.
+        const row = line + 15;
+        const removed = matchMedia('(max-width: 700px)').matches ? row + 20 : row - line;
+        return { atLeast: added - removed, atMost: added - removed };
+      }),
   },
 ];
 

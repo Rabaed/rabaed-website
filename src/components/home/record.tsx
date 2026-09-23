@@ -49,6 +49,8 @@ export type HomeRecordSectionContent = {
  * `.rec-entry`; `.doc`'s rules reach through it. `.rec-trails` holds the five
  * together so that below 981px they can share one space, as tall as the
  * tallest, and the card keeps its height whichever is showing (`home.css`).
+ * `.rec-copy` names the copy's column so that below 981px its parts can be laid
+ * out on their own, with the paragraph after the card (ticket 80, ADR-0021).
  *
  * It is not a `.light` section, though it ends light: the Reference site keeps
  * the header dark over it, until the section after it begins.
@@ -69,7 +71,7 @@ export function RecordSection({
       <div className="sticky">
         <div className="wrap">
           <div className="rec-grid">
-            <div>
+            <div className="rec-copy">
               <div className="eyebrow">{content.eyebrow}</div>
               <h2>
                 {content.heading.map((line, index) => (

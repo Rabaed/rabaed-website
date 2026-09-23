@@ -4,7 +4,7 @@ import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-po
  * Gives the words every page shares a place for the hint a phone shows over
  * each Screen mock (ticket 77): «اسحب لرؤية الشاشة كاملة», in both languages.
  *
- * Empty here. `20260923_185203_publish_screen_mock_swipe_hint` writes the
+ * Empty here. `20260923_193055_publish_screen_mock_swipe_hint` writes the
  * words in.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {

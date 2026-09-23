@@ -44,6 +44,23 @@ const MENU_LINKS = 4;
 const SIGN_IN_LABEL = 12;
 const DEMO_LABEL = 15;
 
+/**
+ * The Footer directory (ticket 75, ADR-0020): up to four columns of up to six
+ * links. Four columns side by side is what the widest footer lays out and a
+ * phone sits two by two; six links is two more than the fullest column the
+ * site launched with, so a page added later has a place without a column
+ * growing into a list nobody reads.
+ *
+ * A column is a quarter of the footer on a desktop and half of it on a phone,
+ * so its words wrap rather than overflow: the heading's limit is about twice
+ * «البرامج», and a label's leaves room for «Terms and conditions (Arabic)»,
+ * the longest the site has, at 29.
+ */
+const FOOTER_COLUMNS = 4;
+const FOOTER_LINKS = 6;
+const FOOTER_HEADING = 20;
+const FOOTER_LABEL = 40;
+
 export const SiteWords = pageGlobal({
   slug: 'site-words',
   label: { ar: 'كلمات الموقع المشتركة', en: 'Site-wide words' },
@@ -124,19 +141,43 @@ export const SiteWords = pageGlobal({
       },
       // The footer stacks its lines and wraps them, so these are about twice
       // today's words rather than a measured edge: the tagline is 50
-      // characters, the rights line 26, and the longest link label 15.
+      // characters and the rights line 26.
       fields: [
         wordsField('tagline', { ar: 'السطر تحت الشعار', en: 'Line under the logo' }, 70),
         listField({
-          name: 'legalLinks',
+          name: 'columns',
           labels: {
-            singular: { ar: 'رابط', en: 'Link' },
-            plural: { ar: 'روابط الشروط والخصوصية', en: 'Terms and privacy links' },
+            singular: { ar: 'عمود', en: 'Column' },
+            plural: { ar: 'أعمدة الروابط', en: 'Link columns' },
           },
-          rows: { min: 1, max: 4 },
+          rows: { min: 1, max: FOOTER_COLUMNS },
+          description: {
+            ar: 'روابط أسفل كل صفحة، تصل منها إلى كل صفحة في الموقع. رابط «قصص العملاء» لا يظهر قبل نشر أول قصة بلغة الصفحة.',
+            en: 'The links at the foot of every page, through which every page of the site can be reached. The case studies link does not show until the first story is published in the page’s language.',
+          },
           fields: [
-            wordsField('label', { ar: 'الكلمة', en: 'Label' }, 30),
-            addressField('path', { ar: 'الوجهة', en: 'Goes to' }),
+            wordsField('heading', { ar: 'عنوان العمود', en: 'Column heading' }, FOOTER_HEADING),
+            listField({
+              name: 'links',
+              labels: {
+                singular: { ar: 'رابط', en: 'Link' },
+                plural: { ar: 'روابط العمود', en: 'Column links' },
+              },
+              rows: { min: 1, max: FOOTER_LINKS },
+              description: {
+                ar: 'بالترتيب الذي تظهر به. اسحبها لإعادة ترتيبها.',
+                en: 'In the order they show. Drag them to reorder.',
+              },
+              fields: [
+                wordsField('label', { ar: 'الكلمة', en: 'Label' }, FOOTER_LABEL, {
+                  description: {
+                    ar: 'الشروط والأحكام وسياسة الخصوصية وشروط برنامج الإحالة بالعربية وحدها، وروابطها في الصفحات الإنجليزية تنقل إلى العربية: اذكر ذلك في الكلمة الإنجليزية، مثل (Arabic).',
+                    en: 'The terms, the privacy policy and the Referral Terms are in Arabic only, and their links on English pages lead to the Arabic: say so in the English label, as in (Arabic).',
+                  },
+                }),
+                addressField('path', { ar: 'الوجهة', en: 'Goes to' }),
+              ],
+            }),
           ],
         }),
         wordsField('rights', { ar: 'سطر الحقوق', en: 'Rights line' }, 60, {

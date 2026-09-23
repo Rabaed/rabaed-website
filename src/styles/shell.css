@@ -228,10 +228,27 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .social a { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--dark-line); display: flex; align-items: center; justify-content: center; color: var(--dark-muted); transition: color .22s, border-color .22s, background .22s }
 .social a:hover { color: #fff; border-color: var(--acc); background: var(--acc) }
 .foot-bar { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--dark-line) }
-.foot-legal { display: flex; gap: 22px; align-items: center; flex-wrap: wrap }
-.foot-legal a { color: var(--dark-muted); text-decoration: none; border-bottom: 1px solid transparent; transition: color .22s, border-color .22s }
-.foot-legal a:hover { color: #fff; border-color: var(--acc) }
-@media (max-width: 700px) { footer .wrap { justify-content: center; text-align: center } .foot-legal { justify-content: center } }
+/* The rights line keeps the Reference site's place at the end of the row,
+   where it sat after the legal links that are now the directory's Legal
+   column (ADR-0020). Before the phone rule below, which centres it. */
+footer .foot-bar { justify-content: flex-end }
+@media (max-width: 700px) { footer .wrap { justify-content: center; text-align: center } }
+
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the founder's
+   (ADR-0020): the Footer directory, which the Reference site's footer has
+   none of. Four columns side by side, two by two below 981px — Rabaed and
+   Programmes on top, Resources and Legal below. After the phone rule above,
+   so that a directory read down its columns stays aligned to their start
+   while the lines around it centre themselves. Its headings are labels, in
+   the eyebrow's voice: DM Mono and tracked in English, the label face and
+   untracked in Arabic (ADR-0018). */
+footer .foot-dir { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 24px; align-items: start; margin-top: 30px; text-align: start }
+.foot-col h2 { margin: 0 0 6px; font-family: "DM Mono", monospace; font-size: 11px; font-weight: 400; line-height: 1.5; letter-spacing: .14em; text-transform: uppercase; color: var(--acc-ink) }
+:where([dir="rtl"]) .foot-col h2 { font-family: var(--label-face); font-size: 12.5px; letter-spacing: 0 }
+.foot-col ul { list-style: none; margin: 0; padding: 0 }
+.foot-col a { color: var(--dark-muted); border-bottom: 1px solid transparent; transition: color .22s, border-color .22s }
+.foot-col a:hover { color: #fff; border-color: var(--acc) }
+@media (max-width: 980px) { footer .foot-dir { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 
 /* ---- the compact page hero ---- */
 /* Every page below the home page opens with this. Its top padding is what

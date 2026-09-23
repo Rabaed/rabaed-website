@@ -16,6 +16,7 @@
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { SITE_WORDS_EDITOR, logInByApi } from './cms';
+import { ROUTES } from './routes';
 
 test.describe.configure({ mode: 'default' });
 
@@ -26,6 +27,7 @@ const LEADS = '/api/globals/index-leads';
 type Words = { ar: string; en?: string | null };
 type Link = { label: Words; path: string };
 type Group = Link & { summary: Words };
+type Column = { heading: Words; links: Link[] };
 type SiteWords = {
   languages: string[];
   header: {
@@ -36,7 +38,7 @@ type SiteWords = {
     signInUrl: string;
     demoLabel: Words;
   };
-  footer: { tagline: Words; legalLinks: Link[]; rights: Words };
+  footer: { tagline: Words; columns: Column[]; rights: Words };
   notFound: { heading: Words; lead: Words; homeLabel: Words };
   screenMocks: { swipeHint: Words };
 };
@@ -59,7 +61,13 @@ function fields(entry: SiteWords) {
       links: header.links.map(({ label, path }) => ({ label, path })),
       partnerships: header.partnerships.map(({ label, summary, path }) => ({ label, summary, path })),
     },
-    footer: { ...footer, legalLinks: footer.legalLinks.map(({ label, path }) => ({ label, path })) },
+    footer: {
+      ...footer,
+      columns: footer.columns.map(({ heading, links }) => ({
+        heading,
+        links: links.map(({ label, path }) => ({ label, path })),
+      })),
+    },
     notFound,
     screenMocks,
   };
@@ -108,7 +116,12 @@ test('every page shows the header and footer the CMS has published', async ({ pa
     expect(html, path).toContain(entry.header.signInUrl);
     expect(html, path).toContain(entry.footer.tagline.ar);
     expect(html, path).toContain(entry.footer.rights.ar);
-    for (const link of entry.footer.legalLinks) expect(html, path).toContain(link.label.ar);
+    for (const column of entry.footer.columns) {
+      expect(html, path).toContain(column.heading.ar);
+      for (const link of column.links) {
+        if (link.path !== '/case-studies') expect(html, path).toContain(link.label.ar);
+      }
+    }
   }
 });
 
@@ -281,13 +294,15 @@ async function sharesARow(page: Page): Promise<boolean> {
   });
 }
 
-test('a label longer than the header carries, an address that is not an address, and an empty menu are refused', async ({
+test('a label longer than the header carries, an address that is not an address, an empty menu and an overfull footer are refused', async ({
   page,
 }) => {
   await logInByApi(page.request, SITE_WORDS_EDITOR);
   const entry = fields(await published(page.request));
   const link = { label: arabic('رابط'), path: '/product' };
   const withLinks = (links: Link[]) => ({ ...entry, header: { ...entry.header, links } });
+  const column: Column = { heading: arabic('عمود'), links: [link] };
+  const withColumns = (columns: Column[]) => ({ ...entry, footer: { ...entry.footer, columns } });
 
   const refused = {
     'a label longer than the header carries': withLinks([{ ...link, label: arabic('م'.repeat(12)) }]),
@@ -300,6 +315,11 @@ test('a label longer than the header carries, an address that is not an address,
     'five links': withLinks(Array.from({ length: 5 }, () => link)),
     'an empty label': withLinks([{ ...link, label: arabic('') }]),
     'a label of spaces': withLinks([{ ...link, label: arabic('   ') }]),
+    'five footer columns': withColumns(Array.from({ length: 5 }, () => column)),
+    'seven links in a footer column': withColumns([{ ...column, links: Array.from({ length: 7 }, () => link) }]),
+    'a footer column with no links': withColumns([{ ...column, links: [] }]),
+    'no footer columns at all': withColumns([]),
+    'a footer column with no heading': withColumns([{ ...column, heading: arabic('') }]),
     'published in English with no English words': { ...entry, languages: ['ar', 'en'] },
     'no Arabic': { ...entry, languages: ['en'] },
   };
@@ -344,7 +364,17 @@ const ENGLISH = {
   signInLabel: 'Sign in',
   demoLabel: 'Book a demo',
   tagline: 'Operating system for construction projects · Riyadh · rabaedapp.com',
-  legalLinks: { '/terms': 'Terms and conditions', '/privacy': 'Privacy policy' },
+  /** The Footer directory's, proposed with the rest by ticket 75's migration. */
+  columns: {
+    Rabaed: { '/': 'Home', '/product': 'Product', '/start': 'Get started', '/tool': 'Pour Tracker' },
+    Programs: { '/referral': 'Referral Program', '/partnership': 'Partnership Program' },
+    Resources: { '/blog': 'Blog', '/case-studies': 'Customer stories' },
+    Legal: {
+      '/terms': 'Terms and conditions (Arabic)',
+      '/privacy': 'Privacy policy (Arabic)',
+      '/referral-terms': 'Referral Terms (Arabic)',
+    },
+  },
   rights: 'Rabaed · All rights reserved',
 };
 
@@ -385,7 +415,9 @@ test('the English words wait in the CMS as a draft, every one of them written', 
   for (const group of version.header.partnerships) expect(group.summary.en, group.path).toBeTruthy();
   expect(version.header.signInLabel.en).toBe(ENGLISH.signInLabel);
   expect(version.footer.tagline.en).toBe(ENGLISH.tagline);
-  expect(english(version.footer.legalLinks)).toEqual(ENGLISH.legalLinks);
+  expect(
+    Object.fromEntries(version.footer.columns.map((column) => [column.heading.en, english(column.links)])),
+  ).toEqual(ENGLISH.columns);
   expect(version.footer.rights.en).toBe(ENGLISH.rights);
   for (const words of Object.values(version.notFound)) expect(words.en).toBeTruthy();
 
@@ -440,11 +472,11 @@ test('previewed, English pages have the English header and footer, and switch to
       const footer = page.locator('footer');
       await expect(footer, path).toContainText(ENGLISH.tagline);
       await expect(footer, path).toContainText(ENGLISH.rights);
-      // The legal documents are Arabic only, and their English address says so.
-      await expect(footer.getByRole('link', { name: ENGLISH.legalLinks['/terms'] }), path).toHaveAttribute(
-        'href',
-        '/en/terms',
-      );
+      // The legal documents are Arabic only, so the footer leads straight to
+      // the Arabic, and says so (ADR-0020).
+      const terms = footer.getByRole('link', { name: ENGLISH.columns.Legal['/terms'] });
+      await expect(terms, path).toHaveAttribute('href', '/terms');
+      await expect(terms, path).toHaveAttribute('hreflang', 'ar');
       await expect(footer.getByRole('link', { name: 'LinkedIn' }), path).toHaveCount(1);
     }
   } finally {
@@ -522,5 +554,205 @@ test('a change published reaches visitors', async ({ page, request }) => {
   } finally {
     const restored = await save(page.request, entry, 'published');
     expect(restored.ok(), await restored.text()).toBe(true);
+  }
+});
+
+/**
+ * The Footer directory (ticket 75, ADR-0020): the columns of links at the
+ * foot of every page, through which every page of the site can be reached.
+ * Not the sitemap, which is the file search engines read.
+ *
+ * What the migration wrote is restated here rather than imported, for the
+ * reason `routes.ts` gives. The case studies link is left out: no story is
+ * published while this suite runs, and the link waits for the first
+ * (`case-studies.spec.ts` publishes one and finds it).
+ */
+const DIRECTORY = [
+  {
+    heading: 'ربائد',
+    links: [
+      ['الرئيسية', '/'],
+      ['المنتج', '/product'],
+      ['ابدأ', '/start'],
+      ['متتبّع الصبّات', '/tool'],
+    ],
+  },
+  {
+    heading: 'البرامج',
+    links: [
+      ['برنامج الإحالة', '/referral'],
+      ['برنامج الشراكات', '/partnership'],
+    ],
+  },
+  { heading: 'المصادر', links: [['المدونة', '/blog']] },
+  {
+    heading: 'قانوني',
+    links: [
+      ['الشروط والأحكام', '/terms'],
+      ['سياسة الخصوصية', '/privacy'],
+      ['شروط برنامج الإحالة', '/referral-terms'],
+    ],
+  },
+];
+
+/** The directory as a visitor's browser has it: each column's heading, and its links' words and addresses in order. */
+function readDirectory(page: Page, name: string) {
+  return page
+    .locator('footer')
+    .getByRole('navigation', { name })
+    .evaluate((directory) =>
+      [...directory.children].map((column) => ({
+        heading: column.querySelector('h2')?.textContent,
+        links: [...column.querySelectorAll('a')].map((link) => [link.textContent, link.getAttribute('href')]),
+      })),
+    );
+}
+
+test('every Arabic page’s footer is the Footer directory: four columns, in order', async ({ page }) => {
+  for (const { path } of ROUTES.filter((route) => route.locale === 'ar')) {
+    await page.goto(path);
+    expect(await readDirectory(page, 'روابط الموقع'), path).toEqual(DIRECTORY);
+  }
+
+  // Above it and below it, the footer is what it was: the wordmark, the
+  // tagline and the icons, then the rights line.
+  const footer = page.locator('footer');
+  expect(await footer.evaluate((element) => [...element.children].map((child) => child.className))).toEqual([
+    'wrap',
+    'wrap foot-dir',
+    'wrap foot-bar',
+  ]);
+  await expect(footer.locator('.social a')).toHaveCount(5);
+  await expect(footer.locator('.foot-bar')).toContainText('© 2026');
+});
+
+test('previewed, the English footer is the same four columns in English, and its legal links lead to the Arabic', async ({
+  page,
+}) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  await restore(page.request, await englishProposal(page.request));
+
+  try {
+    for (const path of ['/en', '/en/blog']) {
+      await preview(page, path);
+      expect(await readDirectory(page, 'Site links'), path).toEqual([
+        {
+          heading: 'Rabaed',
+          links: [
+            ['Home', '/en'],
+            ['Product', '/en/product'],
+            ['Get started', '/en/start'],
+            ['Pour Tracker', '/en/tool'],
+          ],
+        },
+        {
+          heading: 'Programs',
+          links: [
+            ['Referral Program', '/en/referral'],
+            ['Partnership Program', '/en/partnership'],
+          ],
+        },
+        // No English case study is published, so no Customer stories.
+        { heading: 'Resources', links: [['Blog', '/en/blog']] },
+        {
+          heading: 'Legal',
+          links: [
+            ['Terms and conditions (Arabic)', '/terms'],
+            ['Privacy policy (Arabic)', '/privacy'],
+            ['Referral Terms (Arabic)', '/referral-terms'],
+          ],
+        },
+      ]);
+
+      // The three legal documents are in Arabic alone, and their links say so
+      // to a browser and a crawler as well as in their words; no other link
+      // claims a language of its own.
+      const marked = page.locator('footer nav a[hreflang]');
+      await expect(marked, path).toHaveCount(3);
+      for (const link of await marked.all()) await expect(link, path).toHaveAttribute('hreflang', 'ar');
+      await expect(marked.first(), path).toHaveAttribute('href', '/terms');
+    }
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
+test('on a phone the Footer directory sits two by two, and on a desktop four across', async ({ page }) => {
+  /** Each column's box, in the order the directory lists them. */
+  const columns = () =>
+    page.locator('footer nav .foot-col').evaluateAll((elements) =>
+      elements.map((element) => {
+        const box = element.getBoundingClientRect();
+        return { top: Math.round(box.top), left: Math.round(box.left), right: Math.round(box.right) };
+      }),
+    );
+  const sideways = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+  await page.goto('/');
+  for (const width of [360, 390, 768, 980]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [rabaed, programmes, resources, legal] = await columns();
+    // Rabaed and Programmes on top, Resources and Legal below, each row read
+    // from the right, as the page is.
+    expect(programmes.top, `${width}px: Programmes beside Rabaed`).toBe(rabaed.top);
+    expect(legal.top, `${width}px: Legal beside Resources`).toBe(resources.top);
+    expect(resources.top, `${width}px: the second row below the first`).toBeGreaterThan(rabaed.top);
+    expect(programmes.right, `${width}px: Programmes to the left of Rabaed`).toBeLessThanOrEqual(rabaed.left);
+    expect(legal.right, `${width}px: Legal to the left of Resources`).toBeLessThanOrEqual(resources.left);
+    expect(resources.left, `${width}px: the two rows line up`).toBe(rabaed.left);
+    expect(await sideways(), `${width}px: the page scrolls sideways`).toBe(0);
+  }
+
+  for (const width of [981, 1280, 1600]) {
+    await page.setViewportSize({ width, height: 900 });
+    const boxes = await columns();
+    expect(new Set(boxes.map((box) => box.top)).size, `${width}px: four across`).toBe(1);
+    const lefts = boxes.map((box) => box.left);
+    expect(lefts, `${width}px: from the right, in order`).toEqual([...lefts].sort((a, b) => b - a));
+  }
+});
+
+test('an Editor renames a column, and rewords, reorders, adds and removes its links, in preview and not for visitors', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  const entry = fields(await published(page.request));
+  const [rabaed, ...rest] = entry.footer.columns;
+  const renamed = 'عن ربائد';
+  const reworded = 'جولة في المنتج';
+  // The product link reworded and moved to the top, the tool page's removed,
+  // and a page the header has no room for added at the end.
+  const edited: Column = {
+    heading: arabic(renamed),
+    links: [
+      { label: arabic(reworded), path: '/product' },
+      ...rabaed.links.filter((link) => link.path !== '/product' && link.path !== '/tool'),
+      { label: arabic('مقالات أقدم'), path: '/blog/page/2' },
+    ],
+  };
+
+  try {
+    const saved = await save(page.request, { ...entry, footer: { ...entry.footer, columns: [edited, ...rest] } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await preview(page, '/start');
+    const [first, ...others] = await readDirectory(page, 'روابط الموقع');
+    expect(first).toEqual({
+      heading: renamed,
+      links: [
+        [reworded, '/product'],
+        ['الرئيسية', '/'],
+        ['ابدأ', '/start'],
+        ['مقالات أقدم', '/blog/page/2'],
+      ],
+    });
+    expect(others).toEqual(DIRECTORY.slice(1));
+
+    const html = await visitorHtml(request, '/start');
+    expect(html).not.toContain(renamed);
+    expect(html).not.toContain(reworded);
+  } finally {
+    await discardDraft(page.request);
   }
 });

@@ -4,20 +4,20 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **The founder sees it before it merges.** The pull request is not merged until they have opened its preview deployment on their desktop and their phone, looked at the footer in both languages, and said yes to the column headings and link words.
 
-- [ ] Every Arabic page's footer shows the four columns below, in this order, with these links
-- [ ] Every English page's footer shows the same four columns, in English, once the English site words are published (as the header and footer already wait today)
-- [ ] The Customer stories link is absent in a language with no published case study, and appears in that language once one is published, with no Editor action
-- [ ] The English Legal column links straight to the Arabic Terms, Privacy and Referral Terms pages, and each label says the page is in Arabic
-- [ ] On a phone, the columns sit two by two: Rabaed and Programmes on top, Resources and Legal below
-- [ ] The wordmark, tagline, social icons and rights line are unchanged, above and below the directory as now
-- [ ] In the CMS, an Editor can rename a column, and add, remove, reorder or re-word its links, up to 4 columns and 6 links per column; the CMS refuses a fifth column or a seventh link
-- [ ] Existing CMS content survives: the two Terms and Privacy links an Editor may already have edited end up in the Legal column, not lost
-- [ ] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure the footer point at it
-- [ ] Tests cover: the columns and links in both languages, the Customer stories link hiding and appearing, the CMS limits, and the two-by-two phone layout
+- [x] Every Arabic page's footer shows the four columns below, in this order, with these links
+- [x] Every English page's footer shows the same four columns, in English, once the English site words are published (as the header and footer already wait today)
+- [x] The Customer stories link is absent in a language with no published case study, and appears in that language once one is published, with no Editor action
+- [x] The English Legal column links straight to the Arabic Terms, Privacy and Referral Terms pages, and each label says the page is in Arabic
+- [x] On a phone, the columns sit two by two: Rabaed and Programmes on top, Resources and Legal below
+- [x] The wordmark, tagline, social icons and rights line are unchanged, above and below the directory as now
+- [x] In the CMS, an Editor can rename a column, and add, remove, reorder or re-word its links, up to 4 columns and 6 links per column; the CMS refuses a fifth column or a seventh link
+- [x] Existing CMS content survives: the two Terms and Privacy links an Editor may already have edited end up in the Legal column, not lost
+- [x] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure the footer point at it
+- [x] Tests cover: the columns and links in both languages, the Customer stories link hiding and appearing, the CMS limits, and the two-by-two phone layout
 
 ## Comments
 
@@ -59,3 +59,10 @@ The four columns. The Arabic words are proposals the founder approves in the pre
 **The ADR:** the Reference site's footer has no columns; this adds a directory it has none of. It says why (pages reachable from nowhere, a header with no room), what an Editor can change and the limits, and the English Legal choice. Follow ADR-0013 and ADR-0015: narrow the footer comparison by name rather than drop it. ADR numbers collide between parallel sessions; take the next free number and renumber at merge if another lane took it.
 
 **Tests to expect to change:** every page's visual baselines (the footer is on all of them), and the footer comparisons against the Reference site at every width. Keep what still matches (wordmark, tagline, icons, rights line) held exactly, and give up only the footer's height and the link row, by name. The CMS change needs a migration that moves existing Terms and Privacy rows into the Legal column. A preview deployment built before that migration has run needs redeploying before the founder looks at it.
+
+> *Resolved by the agent that built it, 23 September 2026.*
+
+Built as the brief describes; ADR-0020 records it. Two things the founder should know:
+
+- **The Customer stories link appearing in English** is not tested on its own. The Arabic test publishes a case study and finds the link in the footer, and English uses the same check, keyed by language. In English only the link's absence is tested, in a preview of the English words.
+- **The migration writes the English into the published entry as well as the draft.** It cannot tell whether the English site words have already been published. If they have not, nobody reads these words until they are. If they have, the directory's English goes live with the migration, because the alternative is blank links. On the test and development databases, the Terms and Privacy rows moved into the Legal column keeping their ids and their words.
