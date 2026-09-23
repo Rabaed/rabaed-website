@@ -35,6 +35,14 @@ _Avoid_: prototype, old site, v1.
 A depiction of a Rabaed app screen shown on the marketing site. Exists in the Reference site as hand-written HTML; in the rebuild it becomes an exported image. Not a photograph of the real app, which does not exist yet.
 _Avoid_: screenshot (implies a real app), mockup, demo.
 
+**Phone crop**:
+A second picture of a Screen mock, zoomed in on the part of the screen that matters, shown in its place on a phone, where the whole screen would be too small to read. Tapping it shows the whole screen. A cut from the same screen, never a phone-app layout, which would depict an app that does not exist.
+_Avoid_: mobile screenshot, mobile version (both suggest a phone app).
+
+**Footer directory**:
+The columns of links at the foot of every page, through which every page of the Marketing site can be reached, including those the header has no room for. Its columns and links are an Editor's.
+_Avoid_: sitemap, which is the file search engines read (`/sitemap.xml`), a different thing with a different audience.
+
 **Trust strip** (شريط الثقة):
 The moving bar of client and partner logos. Content managed in the CMS so logos can be added over time.
 
