@@ -1,4 +1,4 @@
-# 74: The Record section holds on phones and tablets, as it does on desktop
+# 80: The Record section holds on phones and tablets, as it does on desktop
 
 **What to build:** On a phone or tablet the home page's Record section stops in place, the way it already does on desktop, while the five request types cycle through (letter, material approval, inspection request, schedule update, payment certificate) and the «سجل كامل» stamp lands. Only then does the page move on. Today a visitor below 981px wide can swipe straight past the section in half a second and never see the Record, which is the product's core promise. The section holds for about the same scrolling distance as desktop: roughly one and a half thumb swipes.
 
