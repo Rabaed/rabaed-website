@@ -51,7 +51,6 @@ test.describe('the English pages’ words', () => {
         'referral-page',
         'partnership-page',
         'closing-section',
-        'screen-mocks',
         'trust-strip',
         'search-settings',
       ]),

@@ -26,7 +26,10 @@ import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 
 test.describe.configure({ mode: 'default' });
 
-/** Every entry an English page reads, and so every entry proposed in English. */
+/**
+ * Every entry an English page reads beside the header and footer: this
+ * ticket's proposals, and the Screen mocks, whose English is ticket 41's.
+ */
 const ENTRIES = [
   'home-page',
   'product-page',
@@ -139,7 +142,7 @@ test.afterEach(async ({ page }) => {
 test('every entry the English pages read waits as a draft, with every word of it in English', async ({ request }) => {
   await logInByApi(request, ENGLISH_PAGES_EDITOR);
 
-  for (const slug of ENTRIES) {
+  for (const slug of ENTRIES.filter((each) => each !== 'screen-mocks')) {
     const proposed = await proposal(request, slug);
     // English is not ticked: ticking it is the founder's approval, and an
     // Arabic edit published on top of the draft must not publish its English.

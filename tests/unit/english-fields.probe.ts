@@ -18,7 +18,6 @@ import { HomePage } from '../../src/cms/globals/home-page';
 import { PartnershipPage } from '../../src/cms/globals/partnership-page';
 import { ProductPage } from '../../src/cms/globals/product-page';
 import { ReferralPage } from '../../src/cms/globals/referral-page';
-import { ScreenMocks } from '../../src/cms/globals/screen-mocks';
 import { SearchSettings } from '../../src/cms/globals/search-settings';
 import { StartPage } from '../../src/cms/globals/start-page';
 import { ToolPage } from '../../src/cms/globals/tool-page';
@@ -34,7 +33,6 @@ const ENTRIES: Readonly<Record<string, GlobalConfig>> = {
   'referral-page': ReferralPage,
   'partnership-page': PartnershipPage,
   'closing-section': ClosingSection,
-  'screen-mocks': ScreenMocks,
   'trust-strip': TrustStripLogos,
   'search-settings': SearchSettings,
 };

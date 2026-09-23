@@ -170,11 +170,6 @@ export const MARKS: Readonly<Record<string, { readonly column: string; readonly 
     column: 'version_closing_heading_en',
     english: 'Our team on your site. All three parties on the platform within days.',
   },
-  '_screen_mocks_v': {
-    column: 'version_correspondence_description_en',
-    english:
-      'Rabaed’s official correspondence screen: letters with reference numbers, reply statuses and how long each has waited between the parties',
-  },
   '_trust_strip_v': { column: 'version_strip_caption_en', english: 'Parties using Rabaed right now' },
   '_search_settings_v': { column: 'version_home_title_en', english: 'Rabaed · Three parties. One record.' },
 };

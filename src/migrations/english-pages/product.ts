@@ -1,6 +1,6 @@
 /**
  * The product page's English (ticket 42), with the closing section it shares
- * with the home page and what each Screen mock shows, in the shape of their
+ * with the home page, in the shape of their
  * Arabic as it was imported (`../product-page-import/words.ts`), word for
  * word in the same places. Only the words are here: a screen, a unit's being
  * the last, the arrow between two parties is the Arabic entry's own.
@@ -150,19 +150,4 @@ export const ENGLISH_CLOSING_SECTION = {
     { label: 'Guarantee', text: '60 days from activation — or we refund the full amount, and hand you a complete copy of the record.' },
   ],
   moreLabel: 'Details and FAQs →',
-};
-
-/** What each Screen mock shows, in words: its picture's description and the caption under it. */
-export const ENGLISH_SCREEN_MOCK_DESCRIPTIONS = {
-  correspondence:
-    'Rabaed’s official correspondence screen: letters with reference numbers, reply statuses and how long each has waited between the parties',
-  kanban:
-    'Rabaed’s approvals kanban: draft, internal review on the contractor’s engineer and project manager tracks, then awaiting approval, and approved',
-  'daily-report':
-    'A daily report in Rabaed: weather and site, tables of the management team and labour by headcount and hours, and the day’s activities and photos',
-  documents: 'Rabaed’s document repository: folders, and a table of files by revision, type, source ID and who uploaded them',
-  'stamped-sheet': 'Rabaed’s stamped approval sheet: four signatures by role, company and time, approval code B, and the stamp',
-  overview: 'What the owner sees in Rabaed: one project dashboard, with approval indicators and the project’s parties',
-  'approvals-table': 'What the consultant sees in Rabaed: the table of approvals and requests by status, discipline and type',
-  submittal: 'What the contractor sees in Rabaed: the request’s details, and the approvals section with the name and time of everyone who acted',
 };

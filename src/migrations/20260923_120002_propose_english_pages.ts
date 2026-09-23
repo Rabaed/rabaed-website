@@ -4,9 +4,10 @@ import { ENGLISH_PAGES_SEED, ENGLISH_PAGES_UNSEED } from './english-pages/seed';
 /**
  * Puts the English of the six marketing pages in front of the founder, as
  * drafts (ticket 42): a draft of each entry the pages read — the six pages'
- * own, the closing section, the Screen mocks, the Trust strip and the search
- * settings — with its English written in, and a draft English question for
- * each Arabic one. English is not ticked among an entry's languages: ticking it
+ * own, the closing section, the Trust strip and the search settings — with its
+ * English written in, and a draft English question for each Arabic one. The
+ * header and footer's English is ticket 40's proposal, and the Screen mocks'
+ * ticket 41's. English is not ticked among an entry's languages: ticking it
  * is the founder's approval, and nothing else publishes a page in English.
  *
  * The ticket asks that every page be drafted for the founder and published

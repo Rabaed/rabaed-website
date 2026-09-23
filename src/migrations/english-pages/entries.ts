@@ -5,14 +5,14 @@
  *
  * Every entry a marketing page reads is here, because a page is published in
  * English only once everything it reads is (`src/content/pages/*.ts`): the six
- * pages' own, the closing section, the Screen mocks, the Trust strip and the
- * search settings. The words every page shares — the header and the footer —
- * are ticket 40's, proposed already.
+ * pages' own, the closing section, the Trust strip and the search settings.
+ * Two more are proposed by tickets of their own: the words every page shares —
+ * the header and the footer — by ticket 40, and the Screen mocks' by ticket 41.
  */
 import { SECTION_OPENERS } from '../answer-first-proposal/words';
 import { HOME_PAGE_WORDS } from '../home-page-import/words';
 import { PARTNERSHIP_PAGE_WORDS } from '../partnership-page-import/words';
-import { CLOSING_SECTION_WORDS, PRODUCT_PAGE_WORDS, SCREEN_MOCK_DESCRIPTIONS } from '../product-page-import/words';
+import { CLOSING_SECTION_WORDS, PRODUCT_PAGE_WORDS } from '../product-page-import/words';
 import { REFERRAL_PAGE_WORDS } from '../referral-page-import/words';
 import { SEARCH_SETTINGS } from '../search-settings-import/words';
 import { START_PAGE_WORDS } from '../start-page-import/words';
@@ -21,7 +21,7 @@ import { TRUST_STRIP_LOGOS, TRUST_STRIP_WORDS } from '../trust-strip-import/logo
 import { ENGLISH_HOME_PAGE } from './home';
 import { dictionary, pairs, type Pair } from './pairs';
 import { ENGLISH_PARTNERSHIP_PAGE } from './partnership';
-import { ENGLISH_CLOSING_SECTION, ENGLISH_PRODUCT_PAGE, ENGLISH_SCREEN_MOCK_DESCRIPTIONS } from './product';
+import { ENGLISH_CLOSING_SECTION, ENGLISH_PRODUCT_PAGE } from './product';
 import { ENGLISH_REFERRAL_PAGE } from './referral';
 import { ENGLISH_SEARCH_SETTINGS, ENGLISH_SECTION_OPENERS, ENGLISH_TRUST_STRIP } from './shared';
 import { ENGLISH_START_PAGE } from './start';
@@ -32,18 +32,6 @@ export type EnglishEntry = {
   readonly slug: string;
   readonly twins: readonly (readonly [arabic: unknown, english: unknown])[];
 };
-
-/**
- * The Screen mocks' descriptions, keyed as the entry keys its tabs: a mock's
- * id in camel case, `daily-report` as `dailyReport`. The rule is written out
- * here rather than read from `src/cms/screen-mock-fields.ts`, and the mocks
- * are the frozen import's rather than the registry's, so that nothing added to
- * the site later changes what this migration proposes.
- */
-function screenMocks(descriptions: Readonly<Record<string, string>>) {
-  const tab = (id: string) => id.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase());
-  return Object.fromEntries(Object.entries(descriptions).map(([id, description]) => [tab(id), { description }]));
-}
 
 export const ENGLISH_ENTRIES: readonly EnglishEntry[] = [
   {
@@ -72,10 +60,6 @@ export const ENGLISH_ENTRIES: readonly EnglishEntry[] = [
   { slug: 'referral-page', twins: [[REFERRAL_PAGE_WORDS, ENGLISH_REFERRAL_PAGE]] },
   { slug: 'partnership-page', twins: [[PARTNERSHIP_PAGE_WORDS, ENGLISH_PARTNERSHIP_PAGE]] },
   { slug: 'closing-section', twins: [[{ closing: CLOSING_SECTION_WORDS }, { closing: ENGLISH_CLOSING_SECTION }]] },
-  {
-    slug: 'screen-mocks',
-    twins: [[screenMocks(SCREEN_MOCK_DESCRIPTIONS), screenMocks(ENGLISH_SCREEN_MOCK_DESCRIPTIONS)]],
-  },
   {
     slug: 'trust-strip',
     twins: [
