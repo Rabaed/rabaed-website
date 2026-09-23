@@ -31920,42 +31920,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "screen_mocks_open_whole_ar": {
-          "name": "screen_mocks_open_whole_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "screen_mocks_open_whole_en": {
-          "name": "screen_mocks_open_whole_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "screen_mocks_close_whole_ar": {
-          "name": "screen_mocks_close_whole_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "screen_mocks_close_whole_en": {
-          "name": "screen_mocks_close_whole_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "screen_mocks_zoom_whole_ar": {
-          "name": "screen_mocks_zoom_whole_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "screen_mocks_zoom_whole_en": {
-          "name": "screen_mocks_zoom_whole_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "screen_mocks_swipe_hint_ar": {
           "name": "screen_mocks_swipe_hint_ar",
           "type": "varchar",
@@ -32610,42 +32574,6 @@
         },
         "version_not_found_home_label_en": {
           "name": "version_not_found_home_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_screen_mocks_open_whole_ar": {
-          "name": "version_screen_mocks_open_whole_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_screen_mocks_open_whole_en": {
-          "name": "version_screen_mocks_open_whole_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_screen_mocks_close_whole_ar": {
-          "name": "version_screen_mocks_close_whole_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_screen_mocks_close_whole_en": {
-          "name": "version_screen_mocks_close_whole_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_screen_mocks_zoom_whole_ar": {
-          "name": "version_screen_mocks_zoom_whole_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_screen_mocks_zoom_whole_en": {
-          "name": "version_screen_mocks_zoom_whole_en",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -35066,7 +34994,8 @@
       "values": [
         "sent",
         "skipped",
-        "failed"
+        "failed",
+        "withheld"
       ]
     },
     "public.enum_site_settings_status": {
@@ -35814,6 +35743,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "1c80cd95-febc-4700-b45b-5ab32433b91b",
+  "id": "d3db5f71-7e4c-47d5-8e3f-5a36aeb4457f",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

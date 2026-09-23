@@ -49,8 +49,10 @@ import * as migration_20260923_150000_publish_proof_figure_sources from './20260
 import * as migration_20260923_180726_footer_directory from './20260923_180726_footer_directory';
 import * as migration_20260923_193054_screen_mock_swipe_hint from './20260923_193054_screen_mock_swipe_hint';
 import * as migration_20260923_193055_publish_screen_mock_swipe_hint from './20260923_193055_publish_screen_mock_swipe_hint';
-import * as migration_20260923_220343_screen_mock_whole_screen from './20260923_220343_screen_mock_whole_screen';
-import * as migration_20260923_220344_publish_screen_mock_whole_screen from './20260923_220344_publish_screen_mock_whole_screen';
+import * as migration_20260923_222518_form_confirmation_withheld from './20260923_222518_form_confirmation_withheld';
+import * as migration_20260923_223657_form_confirmation_sending from './20260923_223657_form_confirmation_sending';
+import * as migration_20260923_230515_screen_mock_whole_screen from './20260923_230515_screen_mock_whole_screen';
+import * as migration_20260923_230516_publish_screen_mock_whole_screen from './20260923_230516_publish_screen_mock_whole_screen';
 
 export const migrations = [
   {
@@ -309,13 +311,23 @@ export const migrations = [
     name: '20260923_193055_publish_screen_mock_swipe_hint',
   },
   {
-    up: migration_20260923_220343_screen_mock_whole_screen.up,
-    down: migration_20260923_220343_screen_mock_whole_screen.down,
-    name: '20260923_220343_screen_mock_whole_screen',
+    up: migration_20260923_222518_form_confirmation_withheld.up,
+    down: migration_20260923_222518_form_confirmation_withheld.down,
+    name: '20260923_222518_form_confirmation_withheld',
   },
   {
-    up: migration_20260923_220344_publish_screen_mock_whole_screen.up,
-    down: migration_20260923_220344_publish_screen_mock_whole_screen.down,
-    name: '20260923_220344_publish_screen_mock_whole_screen',
+    up: migration_20260923_223657_form_confirmation_sending.up,
+    down: migration_20260923_223657_form_confirmation_sending.down,
+    name: '20260923_223657_form_confirmation_sending',
+  },
+  {
+    up: migration_20260923_230515_screen_mock_whole_screen.up,
+    down: migration_20260923_230515_screen_mock_whole_screen.down,
+    name: '20260923_230515_screen_mock_whole_screen',
+  },
+  {
+    up: migration_20260923_230516_publish_screen_mock_whole_screen.up,
+    down: migration_20260923_230516_publish_screen_mock_whole_screen.down,
+    name: '20260923_230516_publish_screen_mock_whole_screen',
   },
 ];

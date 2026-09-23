@@ -23,6 +23,7 @@
  * Messages are restated here rather than imported from the form definitions,
  * for the reason `routes.ts` gives.
  */
+import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -82,8 +83,32 @@ async function sendDemoRequest(page: Page, path: string, applicant: { email: str
 async function settledSubmission(request: APIRequestContext, email: string): Promise<StoredSubmission> {
   await expect
     .poll(async () => (await submissionsFrom(request, email)).map((each) => each.confirmation))
-    .toEqual([expect.stringMatching(/^(sent|skipped|failed)$/)]);
+    .toEqual([expect.stringMatching(/^(sent|skipped|failed|withheld)$/)]);
   return (await submissionsFrom(request, email))[0];
+}
+
+/**
+ * A valid demo request sent straight to the server, as a script would send it
+ * rather than a person at the form: its answer, and nothing waited for.
+ */
+async function postDemoRequest(
+  request: APIRequestContext,
+  baseURL: string,
+  applicant: { email: string; ip: string; name?: string; locale?: 'en' },
+): Promise<{ outcome: string }> {
+  const response = await request.post(`/api/forms/demo-request${applicant.locale ? `?locale=${applicant.locale}` : ''}`, {
+    headers: { origin: baseURL, 'x-forwarded-for': applicant.ip },
+    multipart: {
+      name: applicant.name ?? APPLICANT.name,
+      email: applicant.email,
+      role: 'owner',
+      phone: APPLICANT.phone,
+      submissionToken: randomUUID(),
+      [TRAP_FIELD]: '',
+    },
+  });
+  expect(response.ok(), await response.text()).toBe(true);
+  return response.json();
 }
 
 for (const placement of DEMO_PLACEMENTS) {
@@ -213,6 +238,22 @@ test.describe('the demo request form, on the server', () => {
 
     await sendDemoRequest(page, '/start', uniqueApplicant('demo-limit'));
   });
+
+  // Counted and then stored, eight requests sent at once would each count
+  // none before them, and all eight would be stored (ticket 81).
+  test('requests sent from one network address at the same moment: five are stored within the hour, and the rest refused', async ({
+    request,
+    baseURL,
+  }) => {
+    const { ip } = uniqueApplicant('demo-burst');
+    const emails = Array.from({ length: 8 }, () => uniqueApplicant('demo-burst').email);
+
+    const outcomes = await Promise.all(emails.map((email) => postDemoRequest(request, baseURL!, { email, ip })));
+
+    expect(outcomes.map(({ outcome }) => outcome).sort()).toEqual([...Array(5).fill('received'), ...Array(3).fill('refused')]);
+    const stored = await Promise.all(emails.map((email) => submissionsFrom(request, email)));
+    expect(stored.flat()).toHaveLength(5);
+  });
 });
 
 /**
@@ -239,9 +280,22 @@ test.describe('mail and wording from the admin', () => {
     return settings;
   }
 
+  /**
+   * Publishes the settings as the form editor. A sign-in to that editor
+   * elsewhere in the run can erase this one's session (`cms.ts`), and the
+   * publish is then refused as if nobody were signed in: so it is signed in
+   * afresh and asked again, as `readerGet` does.
+   */
   async function publishSettings(request: APIRequestContext, settings: Settings): Promise<void> {
-    const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
-    expect(response.ok(), await response.text()).toBe(true);
+    for (let attempt = 1; ; attempt++) {
+      const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
+      const lostSession = response.status() === 401 || response.status() === 403;
+      if (!lostSession || attempt === 3) {
+        expect(response.ok(), await response.text()).toBe(true);
+        return;
+      }
+      await logInByApi(request, FORM_EDITOR);
+    }
   }
 
   test('while no alert address is set, a request is still stored, and no mail at all is sent', async ({
@@ -291,6 +345,83 @@ test.describe('mail and wording from the admin', () => {
       expect(confirmation.text).toContain('سيتواصل معك فريقنا خلال يوم عمل لتحديد الموعد.');
 
       expect(stored).toMatchObject({ alert: 'sent', confirmation: 'sent' });
+    } finally {
+      await publishSettings(request, original);
+    }
+  });
+
+  // A confirmation goes to whatever address was typed, so each address is sent
+  // only so many, or the forms would mail a stranger as often as a script
+  // liked (ticket 81). Sent at once, and cased two ways, as a script would.
+  test('one address is sent three confirmations a day at most, however its requests are sent; every request is still stored and alerted', async ({
+    request,
+    baseURL,
+  }) => {
+    await logInByApi(request, FORM_EDITOR);
+    const original = await readSettings(request);
+    const team = uniqueApplicant('team').email;
+    const { email } = uniqueApplicant('demo-capped');
+    const shouted = email.toUpperCase();
+    const spellings = [email, shouted, email, shouted, email];
+
+    try {
+      await publishSettings(request, { ...original, alertAddress: team });
+      const outcomes = await Promise.all(
+        spellings.map((address) => postDemoRequest(request, baseURL!, { email: address, ip: uniqueApplicant('demo-capped').ip })),
+      );
+      expect(outcomes.map(({ outcome }) => outcome)).toEqual(Array(5).fill('received'));
+
+      const stored = async () => [...(await submissionsFrom(request, email)), ...(await submissionsFrom(request, shouted))];
+      await expect
+        .poll(async () => (await stored()).map(({ confirmation }) => confirmation).sort())
+        .toEqual(['sent', 'sent', 'sent', 'withheld', 'withheld']);
+      expect((await stored()).map(({ alert }) => alert)).toEqual(Array(5).fill('sent'));
+
+      expect([...(await mailTo(email)), ...(await mailTo(shouted))]).toHaveLength(3);
+      const alerts = (await mailTo(team)).filter((mail) => mail.replyTo?.toLowerCase() === email);
+      expect(alerts).toHaveLength(5);
+    } finally {
+      await publishSettings(request, original);
+    }
+  });
+
+  // What goes in the greeting is what the visitor typed, so a "name" carrying
+  // an advert would be Rabaed's mailbox sending it (ticket 81). The team's
+  // alert still says what was typed.
+  test('a name that is not a name is left out of the greeting, which still reads right; a name is kept as typed', async ({
+    request,
+    baseURL,
+  }) => {
+    const ADVERT = 'اربح ٥٠٠٠ ريال الآن: www.win-now.example';
+    await logInByApi(request, FORM_EDITOR);
+    const original = await readSettings(request);
+    const team = uniqueApplicant('team').email;
+
+    try {
+      await publishSettings(request, { ...original, alertAddress: team });
+      const advert = uniqueApplicant('demo-advert');
+      const english = uniqueApplicant('demo-advert-en');
+      const titled = uniqueApplicant('demo-titled');
+      await postDemoRequest(request, baseURL!, { ...advert, name: ADVERT });
+      await postDemoRequest(request, baseURL!, { ...english, name: 'Visit https://win-now.example', locale: 'en' });
+      await postDemoRequest(request, baseURL!, { ...titled, name: 'م. سارة القحطاني' });
+
+      await expect.poll(() => mailTo(advert.email)).toHaveLength(1);
+      const [greeted] = await mailTo(advert.email);
+      expect(greeted.text).toContain('مرحباً،');
+      expect(greeted.text).not.toContain('win-now');
+      expect(greeted.text).not.toContain('٥٠٠٠');
+
+      await expect.poll(() => mailTo(english.email)).toHaveLength(1);
+      const [hello] = await mailTo(english.email);
+      expect(hello.text).toContain('Hello,');
+      expect(hello.text).not.toContain('win-now');
+
+      await expect.poll(() => mailTo(titled.email)).toHaveLength(1);
+      expect((await mailTo(titled.email))[0].text).toContain('مرحباً م. سارة القحطاني،');
+
+      await expect.poll(async () => (await mailTo(team)).filter((mail) => mail.replyTo === advert.email)).toHaveLength(1);
+      expect((await mailTo(team)).find((mail) => mail.replyTo === advert.email)!.text).toContain(ADVERT);
     } finally {
       await publishSettings(request, original);
     }

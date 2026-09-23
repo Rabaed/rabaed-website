@@ -5,7 +5,7 @@ import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-po
  * on the whole screen it opens (ticket 78): «اضغط لرؤية الشاشة كاملة», and the
  * opened screen's «إغلاق» and «تكبير», in both languages.
  *
- * Empty here. `20260923_220344_publish_screen_mock_whole_screen` writes the
+ * Empty here. `20260923_230516_publish_screen_mock_whole_screen` writes the
  * words in.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
