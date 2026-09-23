@@ -21,12 +21,30 @@
  * beside it there publish too, and a publish of theirs landing in this test's
  * wait would rebuild `/tool` for it — so in the full suite this is a guard,
  * and the proof that it fails without the second mark is a run of it alone.
+ *
+ * **The hold is bounded, and has to be** (ticket 70). Each build waiting on the
+ * lock holds one of the server's ten database connections while it waits, and
+ * the suites beside this one ask for pages all the while. Once ten builds are
+ * waiting, the publish below has no connection to publish with: it waits for
+ * the lock, and the lock waits for it. Nothing ended that but this test's two
+ * minutes, and every page asked for in them waited too — on 23 September 2026,
+ * beside another checkout's suite on the same machine, that took five tests of
+ * the suites beside it down with this one. So the lock lets go at
+ * `HELD_AT_MOST` whatever the test is doing, and the test then fails in words
+ * that say so.
  */
 import { test, expect, type APIRequestContext, type APIResponse } from '@playwright/test';
 import pg from 'pg';
 import { STALE_RENDER_EDITOR, logInByApi, reachesVisitors } from './cms';
 
 const GLOBAL = '/api/globals/tool-page';
+
+/**
+ * The longest the site settings are held, whatever happens. A hold is about
+ * four seconds — the build seen arriving, half a second, the publish, three
+ * seconds — and every page being built waits for as long as it lasts.
+ */
+const HELD_AT_MOST = 10_000;
 
 type Words = { ar: string; en: string | null };
 type ToolPage = { upsell: { lead: Words } } & Record<string, unknown>;
@@ -36,9 +54,30 @@ type ToolPage = { upsell: { lead: Words } } & Record<string, unknown>;
  * starts it and `scripts/local-database.mjs` names it. Restated rather than
  * imported, for the reason `routes.ts` gives.
  */
-function testDatabase(baseURL: string): pg.Client {
+function testDatabase(baseURL: string, settings: pg.ClientConfig = {}): pg.Client {
   const port = Number(new URL(baseURL).port) + 2000;
-  return new pg.Client({ connectionString: `postgres://postgres:postgres@127.0.0.1:${port}/rabaed` });
+  return new pg.Client({ connectionString: `postgres://postgres:postgres@127.0.0.1:${port}/rabaed`, ...settings });
+}
+
+/**
+ * Lets go of the lock `database` holds — once, when the test asks or at
+ * `HELD_AT_MOST`, whichever comes first. `overran` says it was the ceiling.
+ */
+function holdAtMost(database: pg.Client) {
+  let released: Promise<unknown> | undefined;
+  const hold = {
+    overran: false,
+    letGo: () => {
+      clearTimeout(ceiling);
+      // Nothing was written: ending the transaction is only letting go.
+      return (released ??= database.query('ROLLBACK').catch(() => undefined));
+    },
+  };
+  const ceiling = setTimeout(() => {
+    hold.overran = true;
+    void hold.letGo();
+  }, HELD_AT_MOST);
+  return hold;
 }
 
 /** What the CMS adds to an entry and its list rows, which is not sent back — as `tool-page-text.spec.ts` has it. */
@@ -56,8 +95,12 @@ function fields<T>(value: T): T {
   return value;
 }
 
+/**
+ * Given its own deadline: one that outlives the ceiling, so a publish the lock
+ * held up is answered once the ceiling lets go, but never the test's two minutes.
+ */
 async function publish(editor: APIRequestContext, entry: ToolPage): Promise<void> {
-  const response = await editor.post(GLOBAL, { data: { ...entry, _status: 'published' } });
+  const response = await editor.post(GLOBAL, { data: { ...entry, _status: 'published' }, timeout: HELD_AT_MOST + 10_000 });
   expect(response.ok(), await response.text()).toBe(true);
 }
 
@@ -71,9 +114,19 @@ test('a change published while a page is being built still reaches that page', a
   // Two connections: one holds the lock, the other watches. Postgres answers
   // `pg_stat_activity` from one snapshot for the whole of a transaction, so the
   // connection holding the lock would never see the build arrive.
-  const database = testDatabase(baseURL!);
-  const watcher = testDatabase(baseURL!);
-  let locked = false;
+  //
+  // Postgres bounds the hold as well, should this process stall where the
+  // ceiling cannot act: the lock is given up on rather than queued for, because
+  // an exclusive lock still waiting holds up every reader behind it as surely
+  // as one granted; and the session holding it is ended soon after the ceiling.
+  const database = testDatabase(baseURL!, {
+    lock_timeout: 2_000,
+    idle_in_transaction_session_timeout: HELD_AT_MOST + 2_000,
+  });
+  // Postgres ending that session is the backstop at work, not a failure of its own.
+  database.on('error', () => undefined);
+  const watcher = testDatabase(baseURL!, { statement_timeout: 2_000 });
+  let hold: ReturnType<typeof holdAtMost> | undefined;
   let building: Promise<APIResponse> | undefined;
   try {
     await Promise.all([database.connect(), watcher.connect()]);
@@ -84,8 +137,8 @@ test('a change published while a page is being built still reaches that page', a
     // The site settings held: a build of /tool reads the tool page's words, then waits.
     await database.query('BEGIN');
     await database.query('LOCK TABLE "site_settings" IN ACCESS EXCLUSIVE MODE');
-    locked = true;
-    building = request.get('/tool');
+    hold = holdAtMost(database);
+    building = request.get('/tool', { timeout: HELD_AT_MOST + 20_000 });
     await expect
       .poll(
         async () =>
@@ -95,7 +148,8 @@ test('a change published while a page is being built still reaches that page', a
                 WHERE wait_event_type = 'Lock' AND query LIKE '%site_settings%'`,
             )
           ).rows[0]!.waiting,
-        { message: 'a build of /tool waiting on the site settings' },
+        // A tenth of a second when all is well; the rest of the ceiling is the publish's.
+        { message: 'a build of /tool waiting on the site settings', timeout: 3_000 },
       )
       .toBeGreaterThan(0);
     // The suites beside this one build pages too, and any of them may be what
@@ -110,8 +164,13 @@ test('a change published while a page is being built still reaches that page', a
     // the publish.
     await publish(page.request, reworded);
     await new Promise((resolve) => setTimeout(resolve, 3000));
-    await database.query('COMMIT');
-    locked = false;
+    await hold.letGo();
+    expect(
+      hold.overran,
+      `the site settings were let go at the ${HELD_AT_MOST}ms ceiling, not by this test: the wait for /tool's build ` +
+        `or the publish ran long — most likely every one of the server's database connections was held by a build ` +
+        `waiting on the lock, leaving the publish none. Run this test alone, or on a machine not running another suite.`,
+    ).toBe(false);
 
     // The build that was held answered with the words from before, or this
     // test set up no race and would pass without testing anything.
@@ -125,7 +184,7 @@ test('a change published while a page is being built still reaches that page', a
   } finally {
     // The words go back whatever happened above, before anything that could throw.
     try {
-      if (locked) await database.query('ROLLBACK');
+      await hold?.letGo();
       await building?.catch(() => undefined);
     } finally {
       await Promise.allSettled([database.end(), watcher.end()]);
