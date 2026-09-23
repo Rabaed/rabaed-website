@@ -16,18 +16,23 @@
 
 /* ---- hero ---- */
 
-/* The first screen holds the hero and the Trust strip under it (ticket 71,
-   ADR-0019), where the Reference site's hero is the whole window. So the hero
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the founder's
+   (ticket 71, ADR-0019): the Reference site's hero is the whole window. Here
+   the first screen holds the hero and the Trust strip under it, so the hero
    is the window less the strip, with a floor under it so the diagram is never
    squeezed flat, and a ceiling so a tall monitor stops adding dark space
    around content that does not grow. The strip's height is its padding, its
-   one row and its top border, from the same properties that size it below;
-   with no strip after the hero there is nothing to leave room for. Top padding
+   one row and its top border, from the same properties that size it below —
+   and 44px is also the tallest the CMS lets an Editor draw a mark
+   (`BAR_HEIGHT`). With motion turned down the marks wrap instead of travelling,
+   and where the list needs a second row that row starts under the fold — at
+   launch, only just above 980px wide; ADR-0019 says why that is accepted. With no strip
+   after the hero there is nothing to leave room for. Top padding
    clears the fixed header. Below 981px, and in a short desktop window, other
    rules take over — see the end of this file. */
 :root { --logos-pad: 28px; --logos-row: 44px }
-#hero { --under: calc(2 * var(--logos-pad) + var(--logos-row) + 1px); --hero-h: clamp(760px, 100vh - var(--under), 860px); height: var(--hero-h); padding-top: 110px; overflow: hidden }
-#hero:not(:has(+ .logos)) { --under: 0px }
+#hero { --strip-h: calc(2 * var(--logos-pad) + var(--logos-row) + 1px); --hero-h: clamp(760px, 100vh - var(--strip-h), 860px); height: var(--hero-h); padding-top: 110px; overflow: hidden }
+#hero:not(:has(+ .logos)) { --strip-h: 0px }
 #hero .glow { position: absolute; inset-block: auto -30%; inset-inline: -10% auto; width: 60vw; height: 60vw; background: radial-gradient(closest-side, rgba(249, 87, 56, .28), transparent 70%); pointer-events: none }
 #hero .glow2 { position: absolute; inset-block-start: -20%; inset-inline-end: -10%; width: 40vw; height: 40vw; background: radial-gradient(closest-side, rgba(255, 255, 255, .06), transparent 70%); pointer-events: none }
 

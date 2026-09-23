@@ -14,42 +14,64 @@
 import { test, expect, type Page } from '@playwright/test';
 import { ROUTES } from './routes';
 
-/** The sections padded by the shared spacing — `.pad`, and the two that set it themselves. */
-const SPACED = '.pad, #pain, #custom';
+/**
+ * The sections padded by the shared spacing, and what each is padded by, as a
+ * multiple of it. `.pad` and the two that set it themselves take it top and
+ * bottom; the compact page hero clears the header with a fixed top and takes
+ * it underneath; the article list, an article and a legal page open with a
+ * little less of it.
+ */
+const SPACED = [
+  { selector: '.pad, #pain, #custom', top: 1, bottom: 1 },
+  { selector: '.phero', top: null, bottom: 1 },
+  { selector: '.entry-list, .entry, .legal', top: 0.9, bottom: 1 },
+] as const;
 
-function spacing(page: Page) {
-  return page.locator(SPACED).evaluateAll((sections) =>
-    sections.map((section) => {
-      const style = getComputedStyle(section);
-      return {
-        section: section.id || section.className,
-        top: parseFloat(style.paddingTop),
-        bottom: parseFloat(style.paddingBottom),
-      };
-    }),
-  );
-}
+const round = (n: number) => Math.round(n * 100) / 100;
 
-test('stops growing at 72px on a tall screen, on every page that uses it', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-
-  let counted = 0;
-  for (const route of ROUTES) {
-    await page.goto(route.path);
-    for (const { section, top, bottom } of await spacing(page)) {
-      expect({ section, top, bottom }, route.path).toEqual({ section, top: 72, bottom: 72 });
-      counted++;
+/** Every spaced section on the page, with the padding it should have at the ceiling beside what it has. */
+async function spacing(page: Page, ceiling: number) {
+  const found = [];
+  for (const { selector, top, bottom } of SPACED) {
+    const measured = await page.locator(selector).evaluateAll((sections) =>
+      sections.map((section) => {
+        const style = getComputedStyle(section);
+        return {
+          section: section.id || section.className,
+          top: Math.round(parseFloat(style.paddingTop) * 100) / 100,
+          bottom: Math.round(parseFloat(style.paddingBottom) * 100) / 100,
+        };
+      }),
+    );
+    for (const section of measured) {
+      found.push({
+        actual: { section: section.section, top: top === null ? null : section.top, bottom: section.bottom },
+        expected: { section: section.section, top: top === null ? null : round(ceiling * top), bottom: ceiling * bottom },
+      });
     }
   }
-  // A selector that matched nothing would pass the loop above on every page.
-  expect(counted).toBeGreaterThan(10);
+  return found;
+}
 
-  await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/');
-  for (const { section, top } of await spacing(page)) {
-    expect({ section, top }).toEqual({ section, top: 72 });
-  }
-});
+for (const viewport of [
+  { width: 1920, height: 1080 },
+  { width: 2560, height: 1440 },
+]) {
+  test(`stops growing at 72px at ${viewport.width}x${viewport.height}, on every page that uses it`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+
+    let counted = 0;
+    for (const route of ROUTES) {
+      await page.goto(route.path);
+      for (const { actual, expected } of await spacing(page, 72)) {
+        expect(actual, route.path).toEqual(expected);
+        counted++;
+      }
+    }
+    // A selector that matched nothing would pass the loop above on every page.
+    expect(counted).toBeGreaterThan(10);
+  });
+}
 
 test('is unchanged at the heights the Reference comparisons are taken at', async ({ page }) => {
   await page.goto('/');
@@ -61,7 +83,7 @@ test('is unchanged at the heights the Reference comparisons are taken at', async
     [600, 56],
   ]) {
     await page.setViewportSize({ width: 1280, height });
-    const [first] = await spacing(page);
-    expect(first.top, `at 1280x${height}`).toBeCloseTo(expected, 1);
+    const [first] = await spacing(page, expected);
+    expect(first.actual.top, `at 1280x${height}`).toBeCloseTo(expected, 1);
   }
 });

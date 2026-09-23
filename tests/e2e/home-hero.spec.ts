@@ -2,9 +2,10 @@
  * The home page's opening screen and the Trust strip under it (ticket 06).
  *
  * What a visitor can observe: a hero that shares the first screen with the
- * Trust strip at desktop widths and stops trying to below them, a document that actually travels between the
- * three parties, a strip of client marks that moves and stops under the
- * pointer, and a name in text where a mark fails to arrive.
+ * Trust strip at desktop widths and stops trying to below them, a document
+ * that actually travels between the three parties, a strip of client marks
+ * that moves and stops under the pointer, and a name in text where a mark
+ * fails to arrive.
  *
  * Whether it *looks* like the Reference site is a different question, and
  * `home-matches-reference.spec.ts` is where it is asked.
@@ -71,9 +72,10 @@ test.describe('the hero', () => {
     }
 
     // The 760px floor is unchanged, so a short-but-not-tiny desktop window
-    // scrolls rather than crushing the diagram, and the strip starts under the
-    // fold as it always has. 750px is between the floor and the 700px height
-    // query that lowers it; 840px is where hero and strip no longer both fit.
+    // scrolls rather than crushing the diagram. Between the floor and 861px
+    // tall, where hero and strip no longer both fit, the strip starts inside
+    // the window and finishes below it: at 840px, 80px of it shows. 750px is
+    // between the floor and the 700px height query that lowers it.
     for (const height of [750, 840]) {
       await page.setViewportSize({ width: 1280, height });
       expect((await measure()).hero, `the hero at 1280x${height}`).toBe(760);
@@ -87,6 +89,27 @@ test.describe('the hero', () => {
     // outside a section that clips its overflow. It takes the height it needs.
     await page.setViewportSize({ width: 980, height: 900 });
     expect((await measure()).hero).toBeGreaterThan(900);
+  });
+
+  // With motion turned down the marks wrap instead of travelling (ticket 06),
+  // so the strip is only as short as the hero allows for while the list fits
+  // on one row. The list the site launches with does from 1024px wide, the
+  // narrowest baseline desktop. Just above 980px it takes a second row, which
+  // starts under the fold — ADR-0019 says why that is accepted. This fails the
+  // day the list stops fitting at 1024px.
+  test('leaves the whole strip on the first screen with motion turned down', async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+
+    for (const width of [1024, 1280, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      const stripBottom = await page.locator('#hero + .logos').evaluate((strip) => strip.getBoundingClientRect().bottom);
+      expect(stripBottom, `the strip at ${width}x900`).toBeCloseTo(900, 0);
+    }
+
+    await context.close();
   });
 
   test('is the window’s height, up to 860px, where no Trust strip follows it', async ({ page }) => {

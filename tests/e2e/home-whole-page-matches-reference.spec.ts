@@ -54,10 +54,10 @@ const DELIBERATELY_DIFFERENT: readonly {
     // rendered height is what the hero is meant to leave room for.
     allowance: (rebuilt) =>
       rebuilt.evaluate(() => {
-        const tall = innerHeight;
         const strip = document.querySelector('#hero + .logos')!.getBoundingClientRect().height;
-        const taller = Math.min(Math.max(760, tall - strip), 860) - Math.max(tall, 760);
-        return { atLeast: taller, atMost: taller };
+        const hero = Math.min(Math.max(760, innerHeight - strip), 860);
+        const reference = Math.max(innerHeight, 760);
+        return { atLeast: hero - reference, atMost: hero - reference };
       }),
   },
   {
