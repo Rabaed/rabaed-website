@@ -319,6 +319,16 @@ You do not have to publish all six, or any of them. Publish the ones you stand
 behind, leave the rest as drafts, and delete any you do not want. Nothing on the
 site depends on a particular article existing.
 
+**Each of the six is also waiting in English** (ticket 43): a draft at the same
+address, under `/en/blog/`, translated from the Arabic, with the English Screen
+mock of the same screen as its cover. In the **Blog** list the **Translation**
+column shows which articles have their English and whether it is published.
+Publishing one is the same four steps — the author's name, today's date,
+Preview, Publish changes — and the English article's links lead to the English
+pages, except the Terms, which stay in Arabic. **If you correct an Arabic
+article, correct its English too**: the column says an English one exists, not
+that the two still say the same thing.
+
 ### Page text
 
 Page words are edited under **Pages**: **Start page** (ticket 53), **Tool page**

@@ -33,6 +33,8 @@ import { CONTACT_POINTS_SEED } from '../../src/migrations/contact-points-import/
 import { CONTACT_POINTS } from '../../src/migrations/contact-points-import/words';
 import { DEMO_REQUEST_SEED } from '../../src/migrations/demo-request-import/seed';
 import { DEMO_REQUEST_WORDS } from '../../src/migrations/demo-request-import/words';
+import { ENGLISH_ARTICLE_PER_QUESTION_KIND } from '../../src/migrations/english-launch-articles/articles';
+import { ENGLISH_LAUNCH_ARTICLES_SEED } from '../../src/migrations/english-launch-articles/seed';
 import { ENGLISH_FORM_WORDING_SEED } from '../../src/migrations/english-form-wording/seed';
 import { ENGLISH_FORM_WORDING } from '../../src/migrations/english-form-wording/words';
 import { ENGLISH_ENTRIES } from '../../src/migrations/english-pages/entries';
@@ -146,6 +148,11 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
   },
   { name: 'Pour Tracker download form', words: TOOL_DOWNLOAD_WORDS, seed: TOOL_DOWNLOAD_SEED },
   { name: 'launch articles', words: ARTICLE_PER_QUESTION_KIND, seed: LAUNCH_ARTICLES_SEED },
+  {
+    name: 'launch articles in English',
+    words: ENGLISH_ARTICLE_PER_QUESTION_KIND,
+    seed: ENGLISH_LAUNCH_ARTICLES_SEED,
+  },
 ];
 
 /**
@@ -197,7 +204,11 @@ test.describe('data migrations', () => {
     // The two that put a file into the CMS. Named here so that the rule above
     // cannot be read as "no migration ever calls Payload": it is "no migration
     // writes *rows* through Payload".
-    for (const name of ['20260920_204226_import_trust_strip', '20260921_101500_import_launch_articles']) {
+    for (const name of [
+      '20260920_204226_import_trust_strip',
+      '20260921_101500_import_launch_articles',
+      '20260923_130000_import_english_launch_articles',
+    ]) {
       expect(await upOf(name), `${name} no longer uploads its files`).toContain("collection: 'media'");
     }
   });

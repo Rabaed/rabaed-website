@@ -1,7 +1,8 @@
 /**
  * The launch articles (ticket 38): six Arabic articles waiting in the CMS for
  * Ahmed to read, put his name on and publish — one for each kind of question
- * an answer engine breaks a question into (HANDOFF §6.5).
+ * an answer engine breaks a question into (HANDOFF §6.5) — and each of them in
+ * English beside it at the same slug (ticket 43).
  *
  * They are imported as **drafts** by `20260921_101500_import_launch_articles`,
  * so on a fresh database they are already there and no visitor can reach one.
@@ -56,9 +57,11 @@ async function visit(request: APIRequestContext, path: string) {
   return { status: response.status(), html: await response.text() };
 }
 
-/** One launch article as the CMS holds it, drafts included. */
-async function draftArticle(editor: APIRequestContext, slug: string) {
-  const response = await editor.get(`/api/posts?draft=true&depth=0&where[slug][equals]=${slug}`);
+/** One launch article as the CMS holds it, drafts included: the Arabic, or its English at the same slug. */
+async function draftArticle(editor: APIRequestContext, slug: string, locale: 'ar' | 'en' = 'ar') {
+  const response = await editor.get(
+    `/api/posts?draft=true&depth=0&where[slug][equals]=${slug}&where[locale][equals]=${locale}`,
+  );
   expect(response.ok(), await response.text()).toBe(true);
   const { docs } = await response.json();
   expect(docs, slug).toHaveLength(1);
@@ -78,8 +81,21 @@ async function draftArticle(editor: APIRequestContext, slug: string) {
 async function coverImage(editor: APIRequestContext, id: number) {
   const response = await editor.get(`/api/media/${id}`);
   expect(response.ok(), await response.text()).toBe(true);
-  return (await response.json()) as { alt: string; url: string; mimeType: string };
+  return (await response.json()) as { alt: string; url: string; mimeType: string; filename: string };
 }
+
+/**
+ * The six in English (ticket 43): each at its Arabic's slug, and words only
+ * that article's English would carry.
+ */
+const EXPECTED_ENGLISH = [
+  { slug: 'what-is-rabaed', phrases: ['Rabaed is a Saudi platform', 'the Owner, the Consultant and the Contractor'] },
+  { slug: 'rabaed-vs-whatsapp-email-excel', phrases: ['WhatsApp', 'email', 'Excel'] },
+  { slug: 'from-request-to-approval', phrases: ['five steps', 'automatic receipt'] },
+  { slug: 'engineering-office-five-projects', phrases: ['five projects', 'representative case'] },
+  { slug: 'what-if-the-contractor-refuses', phrases: ['used against', 'who owns the data'] },
+  { slug: 'who-is-behind-rabaed', phrases: ['شركة ربائد البناء', '7050078786', 'Riyadh'] },
+] as const;
 
 /** Words as both Arabic and English count them: what stands between the spaces. */
 const words = (text: string) => text.trim().split(/\s+/).length;
@@ -128,6 +144,54 @@ test('the six launch articles are in the CMS as drafts, and no visitor can reach
     expect(index.html, slug).not.toContain(`/blog/${slug}`);
     expect(sitemap.html, slug).not.toContain(`/blog/${slug}`);
     expect(llms.html, slug).not.toContain(`/blog/${slug}`);
+  }
+});
+
+test('each article waits in English too: a draft at its slug, with an English cover and English links', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
+
+  for (const { slug, phrases } of EXPECTED_ENGLISH) {
+    const article = await draftArticle(page.request, slug, 'en');
+
+    // The same gate as the Arabic: a draft, the byline left for a person.
+    expect(article._status, slug).toBe('draft');
+    expect(article.author, slug).toBe('');
+    expect(words(article.answer), slug).toBeGreaterThanOrEqual(30);
+    expect(words(article.answer), slug).toBeLessThanOrEqual(60);
+
+    // Its own cover: the English Screen mock, under a name of its own rather
+    // than the Arabic cover's, described in English.
+    expect(article.coverImage, slug).toEqual(expect.any(Number));
+    const arabic = await draftArticle(page.request, slug, 'ar');
+    expect(article.coverImage, slug).not.toBe(arabic.coverImage);
+    const cover = await coverImage(page.request, article.coverImage!);
+    expect(cover.filename, slug).toMatch(/-en\.webp$/);
+    expect(cover.alt, slug).toContain('Rabaed');
+    const served = await request.get(cover.url);
+    expect(served.status(), `${slug}: ${cover.url}`).toBe(200);
+    expect(served.headers()['content-type'], slug).toMatch(/^image\//);
+
+    // Read as Ahmed previews it: its words, left to right, and every link to
+    // a page of the site going to that page's English address — save the
+    // Terms, which are only ever Arabic.
+    await page.goto(`/api/preview?path=/en/blog/${slug}`);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(article.title);
+    expect(await openingParagraph(page), slug).toBe(article.answer);
+    const body = (await page.locator('article').first().textContent()) ?? '';
+    for (const phrase of phrases) expect(body, `${slug}: «${phrase}»`).toContain(phrase);
+    const links = await page
+      .locator('article a[href^="/"]')
+      .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('href')!));
+    expect(links.length, `${slug}: its links to the site's pages`).toBeGreaterThan(0);
+    for (const href of links) {
+      expect(href.startsWith('/en/') || href === '/terms', `${slug}: ${href}`).toBe(true);
+    }
+
+    // And nowhere a visitor can find it.
+    expect((await visit(request, `/en/blog/${slug}`)).status, slug).toBe(404);
   }
 });
 
