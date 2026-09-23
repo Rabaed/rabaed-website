@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** resolved — built on 23 September 2026 (ADR-0019); the pull request waits for the founder to approve its preview, below
+**Status:** resolved — the founder looked at the preview on their 1920×1080 screen on 23 September 2026 and approved it (ADR-0019)
 
 **The founder sees it before it merges.** The pull request is not merged until they have opened its preview deployment on their own 1920×1080 screen, scrolled the home page and at least one other page, and said yes.
 
