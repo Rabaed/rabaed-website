@@ -4,20 +4,20 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved — the founder looked at the preview on their 1920×1080 screen on 23 September 2026 and approved it (ADR-0019)
 
 **The founder sees it before it merges.** The pull request is not merged until they have opened its preview deployment on their own 1920×1080 screen, scrolled the home page and at least one other page, and said yes.
 
-- [ ] At 1920×1080 and at 2560×1440, the hero is 860px tall and the whole Trust strip is inside the first screen
-- [ ] At a desktop window about 900px tall, the hero ends where the Trust strip's full height still fits above the fold, so the strip sits along the bottom edge of the first screen
-- [ ] The hero is never shorter than its current floor (760px on desktop): below the height where hero and strip can both fit, the strip starts just under the fold, as now
-- [ ] With the Trust strip switched off in the CMS, the hero is the full window height, up to 860px
-- [ ] At 1080px and 1440px tall, the space above and below each section is 72px, on every page that uses the shared section spacing
-- [ ] At 900px tall and below the section spacing is unchanged (the shared rule already works out to 72px or less there)
-- [ ] Below 981px wide, and in the short-window rule for desktops 700px tall or less, the hero is unchanged
-- [ ] The Record section is unchanged: it still fills the window while it is pinned
-- [ ] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure the hero point at it
-- [ ] New tests cover the hero's height, the Trust strip being above the fold, and the section spacing, at 1080px and 1440px tall
+- [x] At 1920×1080 and at 2560×1440, the hero is 860px tall and the whole Trust strip is inside the first screen
+- [x] At a desktop window about 900px tall, the hero ends where the Trust strip's full height still fits above the fold, so the strip sits along the bottom edge of the first screen
+- [x] The hero is never shorter than its current floor (760px on desktop): below the height where hero and strip can both fit, the strip starts just under the fold, as now
+- [x] With the Trust strip switched off in the CMS, the hero is the full window height, up to 860px
+- [x] At 1080px and 1440px tall, the space above and below each section is 72px, on every page that uses the shared section spacing
+- [x] At 900px tall and below the section spacing is unchanged (the shared rule already works out to 72px or less there)
+- [x] Below 981px wide, and in the short-window rule for desktops 700px tall or less, the hero is unchanged
+- [x] The Record section is unchanged: it still fills the window while it is pinned
+- [x] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure the hero point at it
+- [x] New tests cover the hero's height, the Trust strip being above the fold, and the section spacing, at 1080px and 1440px tall
 
 ## Comments
 

@@ -1,8 +1,9 @@
 /**
  * The home page's own sections, taken from `reference/site/index.html`: the
- * full-height hero and the Trust strip below it (ticket 06), the two card decks
- * (ticket 07), the four units (ticket 08), the Record (ticket 09), and the
- * before-and-after comparison and the delay-cost calculator (ticket 10).
+ * hero and the Trust strip below it (ticket 06; the two share the first
+ * screen since ticket 71), the two card decks (ticket 07), the four units
+ * (ticket 08), the Record (ticket 09), and the before-and-after comparison
+ * and the delay-cost calculator (ticket 10).
  *
  * Imported after `shell.css` and before `responsive.css`, which has to stay
  * last for the reason written at the top of it. Nothing here collides with a
@@ -15,14 +16,27 @@
 
 /* ---- hero ---- */
 
-/* Full height, with a floor under it so the diagram is never squeezed flat,
-   and top padding that clears the fixed header. Below 981px both give way to
-   the content's own height — see the end of this file. */
-#hero { height: 100vh; min-height: 760px; padding-top: 110px; overflow: hidden }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the founder's
+   (ticket 71, ADR-0019): the Reference site's hero is the whole window. Here
+   the first screen holds the hero and the Trust strip under it, so the hero
+   is the window less the strip, with a floor under it so the diagram is never
+   squeezed flat, and a ceiling so a tall monitor stops adding dark space
+   around content that does not grow. The strip's height is its padding, its
+   one row and its top border, from the same properties that size it below —
+   and 44px is also the tallest the CMS lets an Editor draw a mark
+   (`BAR_HEIGHT`). With motion turned down the marks wrap instead of travelling,
+   and where the list needs a second row that row starts under the fold — at
+   launch, only just above 980px wide; ADR-0019 says why that is accepted. With no strip
+   after the hero there is nothing to leave room for. Top padding
+   clears the fixed header. Below 981px, and in a short desktop window, other
+   rules take over — see the end of this file. */
+:root { --logos-pad: 28px; --logos-row: 44px }
+#hero { --strip-h: calc(2 * var(--logos-pad) + var(--logos-row) + 1px); --hero-h: clamp(760px, 100vh - var(--strip-h), 860px); height: var(--hero-h); padding-top: 110px; overflow: hidden }
+#hero:not(:has(+ .logos)) { --strip-h: 0px }
 #hero .glow { position: absolute; inset-block: auto -30%; inset-inline: -10% auto; width: 60vw; height: 60vw; background: radial-gradient(closest-side, rgba(249, 87, 56, .28), transparent 70%); pointer-events: none }
 #hero .glow2 { position: absolute; inset-block-start: -20%; inset-inline-end: -10%; width: 40vw; height: 40vw; background: radial-gradient(closest-side, rgba(255, 255, 255, .06), transparent 70%); pointer-events: none }
 
-.hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 40px; align-items: center; height: calc(100vh - 110px); min-height: 650px }
+.hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 40px; align-items: center; height: calc(var(--hero-h) - 110px); min-height: 650px }
 .hero-copy h1 { font-size: 54px; letter-spacing: -.01em }
 .hero-copy h1 span { color: var(--acc) }
 .hero-copy .lead { margin-top: 18px }
@@ -73,7 +87,7 @@
 /* The rail travels; the label that names it does not. The Reference site lets
    the whole bar wrap instead — see `src/components/home/trust-strip.tsx` for
    why this one does not. */
-.logos { padding: 28px 0; border-top: 1px solid var(--dark-line) }
+.logos { padding: var(--logos-pad) 0; border-top: 1px solid var(--dark-line) }
 .logos .wrap { display: flex; gap: 26px; align-items: center; color: var(--dark-muted); font-size: 13.5px }
 .logos .lbl { flex: none; font-size: 12px; color: var(--dark-muted); opacity: .8 }
 
@@ -95,7 +109,7 @@
 .logos-track { display: flex; width: max-content }
 .logos-row { display: flex; align-items: center; gap: 26px; padding-inline-end: 26px }
 
-.logos .slot { display: inline-flex; align-items: center; height: 44px; flex: none }
+.logos .slot { display: inline-flex; align-items: center; height: var(--logos-row); flex: none }
 /* Height is set per logo in the markup, because it is a property of the mark
    rather than of the strip (src/content/trust-strip.ts). */
 .logos .slot img { width: auto; max-width: 118px; object-fit: contain; display: block; opacity: .62; filter: brightness(0) invert(1); transition: opacity .25s, filter .25s }
@@ -592,7 +606,9 @@
    furniture eating the screen. Everything shrinks a step so the diagram and
    the copy still both fit above the fold. */
 @media (min-width: 981px) and (max-height: 700px) {
-  #hero { min-height: 590px; padding-top: 94px }
+  /* The window's height, as the Reference site has it. At this height the
+     hero's floor would leave no room for the strip anyway. */
+  #hero { --hero-h: 100vh; min-height: 590px; padding-top: 94px }
   .hero-grid { height: calc(100vh - 94px); min-height: 470px; gap: 32px }
   .hero-copy h1 { font-size: 44px }
   .hero-copy .lead { margin-top: 14px; font-size: 15px }

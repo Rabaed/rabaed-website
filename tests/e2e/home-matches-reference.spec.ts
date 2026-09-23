@@ -22,6 +22,14 @@
  * ticket that departs from the Reference site by design — a travelling rail
  * where the Reference site wraps — and `home-hero.spec.ts` is where that
  * behaviour is held to the spec.
+ *
+ * **Nor is the hero's height, at a desktop window taller than 700px.** There
+ * the Reference site's hero is the window's height, and this one leaves room
+ * for the Trust strip under it and stops at 860px (ticket 71, ADR-0019).
+ * `home-hero.spec.ts` holds that height to the spec; here the Reference
+ * site's hero is given the same height before it is measured, so that every
+ * part inside it is still compared with the Reference site's — which is what
+ * says the only thing that changed is how tall the box around them is.
  */
 import { test, expect, type Page } from '@playwright/test';
 import {
@@ -76,6 +84,18 @@ const HERO_PARTS = [
  * occupies and the height it takes, and nothing more. See `tokens.css`.
  */
 const DIVERGENT = '.guar';
+
+/**
+ * Gives the Reference site's hero the rebuilt hero's height, the way the
+ * Reference site's own rules would lay it out at that height: the grid inside
+ * it is the hero less the 110px that clears the header.
+ */
+async function matchHeroHeight(reference: Page, rebuilt: Page) {
+  const height = await rebuilt.locator('#hero').evaluate((hero) => hero.getBoundingClientRect().height);
+  await reference.addStyleTag({
+    content: `#hero { height: ${height}px } .hero-grid { height: ${height - 110}px }`,
+  });
+}
 
 async function measure(page: Page, parts: readonly string[]) {
   await installReadings(page);
@@ -141,6 +161,8 @@ test.describe('the hero matches the Reference site', () => {
         // what says the hero has settled — on either site.
         await expect(reference.locator('#h-status')).toHaveText('موثّق ومؤرخ');
         await expect(rebuilt.locator('#h-status')).toHaveText('موثّق ومؤرخ');
+
+        if (viewport.width > 980 && viewport.height > 700) await matchHeroHeight(reference, rebuilt);
 
         expect(await measure(rebuilt, HERO_PARTS), 'hero').toEqual(
           await measure(reference, HERO_PARTS),

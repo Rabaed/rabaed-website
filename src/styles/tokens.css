@@ -27,10 +27,14 @@
   --dark-muted: #9AA0B4;
   --green: #1D9E75;
   --gold: #CCA840;
-  /* The vertical rhythm every section is padded with. */
-  --sp: clamp(56px, 8vh, 96px);
+  /* The vertical rhythm every section is padded with.
+     DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the founder's
+     (ADR-0019): the Reference site's ceiling is 96px, so where two sections
+     meet a tall screen is given 192px of nothing. It is 72px here. At 900px
+     tall and less, 8% of the window is 72px or less, so nothing changes. */
+  --sp: clamp(56px, 8vh, 72px);
 
-  /* ---- the two inks, and the one deliberate divergence in this file ---- */
+  /* ---- the two inks, and a deliberate divergence ---- */
   /* ADR-0011. The accent is the brand's, and on the dark grounds it is
      readable: #F95738 on --dark is 5.6:1. On a pale ground it is not — 3.3:1
      on white, 2.7:1 on its own tint — and small orange labels are all over
