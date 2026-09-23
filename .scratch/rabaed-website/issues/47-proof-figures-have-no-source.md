@@ -23,7 +23,7 @@ The founders' list of cleared commitments covers the Trust strip logos, the 60-d
 
 **Blocks:** 39 (go live) — as a decision, not as a safety net. See below.
 
-**Status:** ready-for-human
+**Status:** resolved — the source is written and published by migration, on the founder's instruction of 23 September 2026; the four cards reach production with the deploy that follows the merge
 
 ## They cannot reach a visitor in the meantime
 
@@ -63,8 +63,8 @@ The Reference site's section carries a testimonial slot under the lead: a play b
 
 ## Done when
 
-- [ ] Every figure on the proof deck has a recorded `source`, has been replaced by something attributable, or has been removed
-- [ ] The decision is written into each figure's **Where the figure comes from** field in the CMS's Home page entry (ticket 58), so the next person to edit a card sees it
+- [x] Every figure on the proof deck has a recorded `source`, has been replaced by something attributable, or has been removed
+- [x] The decision is written into each figure's **Where the figure comes from** field in the CMS's Home page entry (ticket 58), so the next person to edit a card sees it
 - [x] `tests/e2e/home-card-decks.spec.ts` and `tests/e2e/home-decks-match-reference.spec.ts` updated if the deck's cards change
 
 ## Comments
@@ -94,3 +94,14 @@ All four come from one case study with one customer, a real estate developer who
 Then publish, and check the preview's home page: the deck should count "/ 6".
 
 So the ticket moves from `needs-info` to `ready-for-human`: the question is answered, and the two boxes left are CMS edits only the founder can sign in to make. It is resolved once they are published. The third box needs nothing: the deck keeps its six cards.
+
+**Published by migration, on the founder's instruction (23 September 2026).** His words: write the source as a really small, very short comment, put it in the CMS, and release it. So `20260923_150000_publish_proof_figure_sources` writes one line into all four figures' **Where the figure comes from** field:
+
+> دراسة حالة لعميل مطوّر عقاري لا يُذكر اسمه بطلبه: مشروعه على ربائد مقابل مشروع آخر له يُدار يدوياً بإكسل، نحو تسعة أشهر، قاسه الطرفان ووافق العميل على نشر الأرقام.
+
+- **A migration, because nobody here can sign in to the live CMS.** It runs when production builds, before the pages are made, so the deploy that follows the merge is the one that shows the four cards. The preview database is migrated by hand, as `docs/deployment.md` says, before a preview shows them.
+- **A card is found by the figure it states, and given the source only while it has none.** A figure an Editor has changed since is a different claim, and a source written in the meantime is his.
+- **Written into what is published, and into the newest version and the newest published one.** The home page has drafts waiting (ticket 35's openers, ticket 42's English), and the newest of them keeps its place with the source in it, rather than being pushed aside by a version of the migration's. Otherwise publishing that draft later would take the cards off again. Older versions are history and are left alone. `tests/e2e/proof-figure-sources.spec.ts` reads both, and fails on the draft if the second half of the migration is removed — checked by removing it.
+- **And the first card's basis, on the founder's approval the same day** (step 2 above). The 3.6× card said «مقارنةً بالدورة الورقية على المشروع نفسه» — one project before and after — while the figures compare two of the customer's projects; the missing source had kept that off the site. It now says «مقارنةً بمشروع آخر للعميل يُدار يدوياً», and its English, drafted by ticket 42 as «Against the paper cycle on the same project», says «Against the client’s other project, run by hand». Each only while it still reads as imported, in what is published and the same two versions; the test holds both languages. Step 3, a line in the section's lead, was not asked for and is not done.
+- **The preview's database is not written by this merge.** It is migrated by hand (`npm run cms:migrate` against it, `docs/deployment.md`), and a preview shows the cards only after that.
+- **Two suites still hold the figures out of other copy.** `answer-first-copy.spec.ts` and `launch-articles.spec.ts` call them `UNSOURCED_FIGURES` and assert that no rewritten answer and no launch article states them. The name is now out of date, but the rule may still be right — a figure from one customer's project is a card's claim with its basis under it, not a sentence to repeat elsewhere — and that is the founder's to decide, so both are left as they are.

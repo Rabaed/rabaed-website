@@ -160,6 +160,12 @@ export const STALE_RENDER_EDITOR = {
   password: 'test-editor-password-64',
 } as const;
 
+/** The proof figures' sources suite's own account (ticket 47), for the same reason as `BLOG_EDITOR`. */
+export const PROOF_FIGURES_EDITOR = {
+  email: 'proof-figures-editor@rabaed.test',
+  password: 'test-editor-password-47',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -184,6 +190,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   ANSWER_FIRST_EDITOR,
   ENGLISH_PAGES_EDITOR,
   STALE_RENDER_EDITOR,
+  PROOF_FIGURES_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
