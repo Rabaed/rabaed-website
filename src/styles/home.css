@@ -336,7 +336,8 @@
 
 /* Kept together here, media queries included, for the same reason as the four
    units. The section is 220vh tall and its content holds still in a window-
-   tall box while the visitor scrolls through it. The switch to the light
+   tall box while the visitor scrolls through it — below 981px as well, where
+   the box is built differently (the end of this block). The switch to the light
    treatment and the record showing are moved from
    `src/components/home/record-behaviour.tsx`; the colours are set here. */
 #record { min-height: 220vh; background: var(--dark); color: var(--dark-text); transition: background-color .4s, color .4s }
@@ -419,16 +420,52 @@
 }
 
 @media (max-width: 980px) {
-  /* One column, and no scrolling held in place: the section is as tall as the
-     window, or as its content where that is taller. */
-  #record { min-height: 0 }
-  .rec-grid { grid-template-columns: 1fr }
-  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the padding every other
-     section has. Grown to hold its content, the section would otherwise put
-     its heading against the section above and the foot of the card — shadow
-     cut off — against the section below; and at 768px the Reference site's
-     own box leaves the content 30px from either edge. */
-  #record .sticky { padding-block: var(--sp) }
+  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 80, ADR-0021):
+     the section holds still here too, for as far as on a desktop window —
+     120% of the screen. The Reference site stops holding it below 981px, and
+     a quick swipe goes straight past the Record without seeing it.
+
+     A box cannot hold still if it is taller than the screen, and on a phone
+     the copy and the card together are twice as tall. So the box holds the
+     eyebrow, the heading, the four questions, the chips and the card,
+     centred between the header and the foot of the screen, and the
+     paragraph follows the card, below the screen for as long as the section
+     holds, and scrolls into view as it lets go. The founder chose that over
+     leaving the paragraph out, on 23 September 2026.
+
+     The held stretch comes after the box rather than around it, so the box
+     can be taller than the screen by the paragraph and still hold for the
+     same distance. Screen heights are `svh`, the screen with a phone
+     browser's bars showing, which does not change as they hide: in `vh`,
+     the bars' largest screen, the box would hang below the foot of a phone's
+     screen until they hid, and in `dvh` it would change size under the
+     visitor's thumb as they did. */
+  #record { min-height: 0; --rec-header: 75px }
+  #record::after { content: ""; display: block; height: 120svh }
+  /* The padding below is the one every other section has, so the paragraph
+     is not left against the section after it. */
+  #record .sticky { min-height: 0; padding-block: var(--rec-header) var(--sp) }
+  /* The copy's parts, laid out in the grid themselves so the paragraph can
+     follow the card. Two flexible rows either side of what is held share
+     whatever the screen has left, and a row-spanning stretch holds those
+     rows to at least the screen below the header, so the paragraph always
+     begins below its foot. */
+  .rec-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: [held-start] minmax(8px, 1fr) repeat(5, auto) minmax(8px, 1fr) [held-end] auto;
+    row-gap: 0;
+  }
+  .rec-grid::before { content: ""; grid-row: held; grid-column: 1; min-height: calc(100svh - var(--rec-header)) }
+  .rec-copy { display: contents }
+  /* Placed in the column outright, as the stretch is: a part placed by row
+     alone would be put beside the stretch rather than over it. */
+  .rec-grid > *, .rec-copy > * { grid-column: 1 }
+  #record .eyebrow { grid-row: 2 }
+  #record h2 { grid-row: 3 }
+  #record .fourq { grid-row: 4 }
+  #record .rec-types { grid-row: 5 }
+  #record .rec-card { grid-row: 6; margin-top: 28px }
+  #record .lead { grid-row: 8; margin: 28px 0 0 }
   /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the five trails share one
      space, and the ones not showing keep their room without being seen or
      read aloud. The trails wrap to different numbers of lines, and a section
@@ -440,6 +477,27 @@
   .rec-trails { display: grid }
   .rec-entry { grid-area: 1 / 1 }
   .rec-entry[hidden] { display: block; visibility: hidden }
+}
+
+@media (max-width: 700px) {
+  /* DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 80, ADR-0021): a
+     tighter section on a phone, so what it holds fits between the header —
+     66px here, and its rule — and the foot of a 360×640 screen: a Galaxy S24
+     with Chrome's bars showing. The heading, the chips and the card's words
+     are smaller, and the card and its trail closer set. None of the five
+     types is left out. */
+  #record { --rec-header: 67px }
+  #record .eyebrow { margin-bottom: 6px }
+  .rec-grid h2 { font-size: 28px; margin-bottom: 6px }
+  #record .fourq { margin-top: 4px; font-size: 14px }
+  #record .rec-types { margin-top: 14px; gap: 6px }
+  #record .rec-types span { font-size: 12px; line-height: 1.5; padding: 3px 10px }
+  #record .rec-card { margin-top: 16px; padding: 12px }
+  #record .doc { padding: 0 }
+  #record .doc .h { margin-bottom: 4px }
+  #record .rec-card .h b { font-size: 14px; line-height: 1.5 }
+  #record .tl li { padding: 5px 0; line-height: 1.35 }
+  #record .stamp { margin-top: 8px; padding: 4px 12px; line-height: 1.5 }
 }
 
 /* ---- the before-and-after ---- */

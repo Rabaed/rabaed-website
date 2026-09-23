@@ -12,7 +12,7 @@
  * before and after their change, and on a desktop window which transaction
  * type is marked and whether the stamp is on at points through the cycle.
  *
- * Three deliberate differences shape the comparison, each left out only where
+ * Four deliberate differences shape the comparison, each left out only where
  * it reaches:
  *
  * - **Every type's trail is in the page**, where the Reference site has one and
@@ -23,10 +23,17 @@
  *   it.** The Reference site holds it to the window's height with no padding,
  *   so on a phone its copy and card spill over the sections either side, and
  *   on a tablet they sit 30px from its edges. There, the section's height and
- *   where its content sits in it are not compared; everything inside the
- *   content still is, at all sixteen viewports. Below 981px the types also
- *   follow the card rather than the section, because the Reference site's
- *   cycle has no room to run there, so the cycle is compared on desktop
+ *   where its content sits in it are not compared.
+ * - **Below 981px the section holds still, as on a desktop window** (ticket
+ *   80, ADR-0021), where the Reference site stops holding it. What it holds is
+ *   centred between the header and the foot of the screen, and the paragraph
+ *   follows the card, below the screen while it holds, so there nothing is
+ *   compared for how far down the content it sits. Below 701px the section is
+ *   also tighter set so what it holds fits a phone's screen: a smaller
+ *   heading, chips and card words, and a card with less room inside. Those
+ *   parts give up their sizes and places there, and keep their colours and
+ *   what shows. The cycle follows the held stretch rather than the Reference
+ *   site's, which has no room to run there, so it is compared on desktop
  *   windows only.
  * - **The section does not blend under the scroll** (ticket 69). The
  *   Reference site's blend passes through a grey no text can be read on; here
@@ -49,41 +56,53 @@ import {
 const SHOWING = '.rec-card :not([hidden]) >';
 
 /**
- * Everything in the section. Below 981px the card is as tall as its tallest
- * trail rather than the one showing, so there its height, the height of the
- * content around it, and where the stamp under the trails sits, are left out;
- * every part of the trail itself is not.
+ * Everything in the section.
+ *
+ * Below 981px the card is as tall as its tallest trail rather than the one
+ * showing, so there its height, the height of the content around it, and
+ * where the stamp under the trails sits, are left out. And the section holds
+ * there (ticket 80, ADR-0021): nothing's height down the content is compared,
+ * and below 701px what the tighter phone layout resizes is left out as well.
+ * Every part is still counted, and its colours and whether it shows compared,
+ * at all sixteen viewports.
  */
 function contentRegion(viewport: { width: number }): Region {
-  const holdsTallest: Measurement[] = viewport.width <= 980 ? ['height'] : [];
+  const narrow = viewport.width <= 980;
+  const phone = viewport.width <= 700;
+  const holdsTallest: Measurement[] = narrow ? ['height'] : [];
+  /** Centred in the screen with the paragraph after the card, rather than stacked from the top. */
+  const held: Measurement[] = narrow ? ['top'] : [];
+  /** Given a smaller face, or less room, to fit a phone's screen. */
+  const tightened = (...measurements: Measurement[]): Measurement[] => [...held, ...(phone ? measurements : [])];
+  const resized = tightened('left', 'width', 'height', 'font');
   return {
     name: 'what is in the Record section',
     root: '#record .rec-grid',
     omitFromRoot: holdsTallest,
     parts: [
-      '.eyebrow',
-      'h2',
-      '.fourq',
-      '.fourq span',
-      '.lead',
-      '.rec-types',
+      { selector: '.eyebrow', omit: held },
+      { selector: 'h2', omit: tightened('height', 'font') },
+      { selector: '.fourq', omit: tightened('height', 'font') },
+      { selector: '.fourq span', omit: resized },
+      { selector: '.lead', omit: held },
+      { selector: '.rec-types', omit: tightened('height') },
       // DELIBERATE DIVERGENCE (ticket 36, ADR-0011): the Reference site dims an
       // unchosen chip to `.32`, which over the dark ground leaves its words at
       // 2.7:1 — unreadable. Here they are dimmed to `.5`, the lowest value that
       // reaches the standard. Everything else about the chips is still
       // compared, the chosen one included.
-      { selector: '.rec-types span', omit: ['opacity'] as Measurement[] },
-      { selector: '.rec-card', omit: holdsTallest },
-      { selector: '.rec-card .doc', omit: holdsTallest },
-      `${SHOWING} .h`,
-      `${SHOWING} .h b`,
-      `${SHOWING} .tl`,
-      `${SHOWING} .tl > li`,
-      `${SHOWING} .tl > li > i`,
-      `${SHOWING} .tl .a`,
-      `${SHOWING} .tl .b`,
-      `${SHOWING} .tl .time`,
-      { selector: '.rec-card .stamp', omit: viewport.width <= 980 ? ['top'] : [] },
+      { selector: '.rec-types span', omit: ['opacity', ...resized] },
+      { selector: '.rec-card', omit: [...holdsTallest, ...held] },
+      { selector: '.rec-card .doc', omit: [...holdsTallest, ...tightened('left', 'width')] },
+      { selector: `${SHOWING} .h`, omit: resized },
+      { selector: `${SHOWING} .h b`, omit: resized },
+      { selector: `${SHOWING} .tl`, omit: resized },
+      { selector: `${SHOWING} .tl > li`, omit: resized },
+      { selector: `${SHOWING} .tl > li > i`, omit: resized },
+      { selector: `${SHOWING} .tl .a`, omit: resized },
+      { selector: `${SHOWING} .tl .b`, omit: resized },
+      { selector: `${SHOWING} .tl .time`, omit: resized },
+      { selector: '.rec-card .stamp', omit: narrow ? resized : [] },
     ],
   };
 }

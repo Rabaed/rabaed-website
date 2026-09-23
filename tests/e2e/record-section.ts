@@ -13,16 +13,25 @@ export async function settle(page: Page) {
 }
 
 /**
- * Scrolls to `progress` through the section on a desktop window, where it holds
- * still while the visitor scrolls: 0 where its top meets the window's top, 1
- * where its bottom meets the window's bottom — the Reference site's own
- * measure, which its cycle is written against.
+ * Scrolls to `progress` through the stretch the section holds still for: 0
+ * where its top meets the window's top and it begins to hold, 1 where it lets
+ * go. On a desktop window that ends where the section's bottom meets the
+ * window's — the Reference site's own measure, which its cycle is written
+ * against — because the box that holds is the window's height. Below 981px
+ * the box also carries the paragraph that follows the card, so it lets go
+ * sooner than that, by the paragraph's height (ticket 80).
  */
 export async function scrollToProgress(page: Page, progress: number) {
   await page.evaluate((through) => {
-    const section = document.getElementById('record')!;
-    const top = section.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo(0, Math.round(top + through * (section.offsetHeight - window.innerHeight)));
+    window.scrollTo(0, Math.round(heldFrom() + through * heldFor()));
+
+    function heldFrom() {
+      return document.getElementById('record')!.getBoundingClientRect().top + window.scrollY;
+    }
+    function heldFor() {
+      const section = document.getElementById('record')!;
+      return section.offsetHeight - section.querySelector<HTMLElement>('.sticky')!.offsetHeight;
+    }
   }, progress);
   await settle(page);
 }

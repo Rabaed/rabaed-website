@@ -1,0 +1,26 @@
+# The Record section holds on phones too
+
+On a desktop window the home page's Record section holds still while the visitor scrolls: it is 220% of the window tall around a window-tall box, so for 120% of the window's height of scrolling the copy and the card stay put while the five request types cycle through and «سجل كامل» is stamped. Below 981px wide the Reference site resets the section to the height of its content. There it has nowhere to hold, and a quick swipe on a phone goes straight past it in half a second. Ticket 09 carried that reset over, and gave the phone a cycle that followed the card across the screen instead, which the same swipe also skips.
+
+The Record is the product's core promise. The founder tried the site on a phone on 23 September 2026 and asked for the hold there too. This overrules the Reference site's reset of the section below 981px (`reference/site/index.html`):
+
+**Below 981px the section holds for the same distance as on a desktop window, 120% of the screen**, and the types and the stamp follow that stretch, as they do on desktop. Phones and tablets are treated alike. The founder chose this over the cycle that followed the card.
+
+**What the section holds has to fit one screen.** A box taller than the screen cannot hold still, because part of it stays out of sight for the whole stretch. On a phone the copy and the card together are about twice the screen's height, so two things change below 981px:
+
+- **The paragraph follows the card.** While the section holds, the screen shows the eyebrow, the heading, the four questions, the five type chips and the card, centred between the header and the foot of the screen. The paragraph sits below the card and scrolls into view as the section lets go. The founder chose this on 23 September 2026 over leaving the paragraph out on phones, and over putting it before the heading. It also lists the five types the chips show, so nothing is lost while it waits.
+- **Below 701px the section is set tighter**: a 28px heading, smaller chips and card words, and a card with less room inside, so that what it holds fits a 360×640 screen with its 67px header. None of the five types is left out.
+
+The founder named the phones that matter: iPhones and Samsungs, and nothing smaller. The sizes held to are a Galaxy S24 in Chrome with its bars showing (360×640, about what it shows), an iPhone 12 to 15 with Safari's bars showing (390×664), and a tablet held upright (768×1024).
+
+**Screen heights are measured with the browser's bars showing** (`svh`). That height does not change when a phone's address bar hides mid-scroll, so the hold neither jumps nor resizes under the visitor's thumb. Sized to the larger screen the bars leave when hidden, the box would hang below the foot of the screen until they hid. Sized to the screen as it changes, it would grow and shrink as they moved.
+
+## Consequences
+
+- **The box that holds is taller than the screen by the paragraph.** The held stretch is added after the box rather than around it, so the hold is still 120% of the screen, and the section is taller than 220% of it by the paragraph and its padding. The cycle is measured as the section less the box, which on a desktop window is the Reference site's own measure, because there the box is the window's height.
+- **Desktop is unchanged**, from 981px up.
+- **The Reference comparisons below 981px give up by name what this moves, and keep the rest.** In `tests/e2e/home-record-match-reference.spec.ts`, every part of the section gives up its position down the content below 981px, because the content is centred in the screen and the paragraph has moved. Below 701px the parts the tighter layout resizes also give up their sizes, faces and positions across: the heading, the four questions, the chips, and everything inside the card. Every part is still counted, and its colours, visibility and opacity compared, at all sixteen viewports. The whole-page comparison already excluded the section's height below 981px, and now gives this as the reason as well. The cycle is still compared on desktop windows only, because the Reference site's cycle has nowhere to run below 981px.
+- **The switch to the light treatment is unchanged** (ticket 69): 12.5% of the way into the section, with the same contrast rule. The section is now longer below 981px, so that point comes a little further into the hold than on a desktop window, about 28% of the way rather than 23%.
+- **With reduced motion the section still holds and the types still follow the scroll**, as on desktop. Only the fades and the colour switch are instant.
+- **A phone held sideways is not designed for.** It is below 981px wide but a few hundred pixels tall, too short to hold what the section shows. There the box is taller than the screen, and its lower part stays out of sight while the section holds. The same is true of a desktop window too short for the section's content, and was before this change.
+- **The fit depends on the words.** The section's words and its list of types are the Editor's to change, and six types or a longer title can add a row. The tests hold the fit with the words the site launches with.

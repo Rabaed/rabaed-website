@@ -6,20 +6,20 @@
 
 *Filed as 74; renumbered to 80 on 23 September 2026 because the before-and-after knob bug also took 74 and reached `main` first.*
 
-**Status:** ready-for-agent
+**Status:** resolved — built on `ticket-80`; the pull request waits for the founder to try it on a phone
 
 **The founder sees it before it merges.** The pull request is not merged until they have opened its preview deployment on their own phone, scrolled through the Record section slowly and quickly, and said yes.
 
-- [ ] Below 981px wide, the Record section holds in place while all five request types show and the stamp lands, then releases
-- [ ] The held distance is the same as desktop's (the section is as tall, relative to the screen, as it is at 981px and up)
-- [ ] Everything the held section shows fits inside one phone screen at 360×640, 390×664 (a phone with its browser bars showing) and 768×1024, so nothing is cut off while the section is held
-- [ ] The hold does not jump or stutter when a phone browser's address bar shows or hides mid-scroll
-- [ ] The five types follow the scroll through the held stretch on phones, as they do on desktop, and no longer follow the card crossing the screen
-- [ ] Ticket 69's rule still holds below 981px: every word reads at 4.5:1 or better at every stopping point
-- [ ] With reduced motion, the section still holds and the types still follow the scroll, as on desktop; only the blends stay instant
-- [ ] Desktop (981px and up) is unchanged
-- [ ] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure this section below 981px point at it
-- [ ] Tests cover the hold below 981px: the section stays in place across the held stretch, all five types are reached, and the stamp lands before it releases
+- [x] Below 981px wide, the Record section holds in place while all five request types show and the stamp lands, then releases
+- [x] The held distance is the same as desktop's: 120% of the screen. The section itself is taller than 220% of the screen by the paragraph, which now follows the card (see "What was built")
+- [x] Everything the held section shows fits inside one phone screen at 360×640, 390×664 (a phone with its browser bars showing) and 768×1024, so nothing is cut off while the section is held
+- [x] The hold does not jump or stutter when a phone browser's address bar shows or hides mid-scroll. This is by construction, since every screen height is `svh`, and it is for the founder's phone to confirm: no browser the suite drives has bars that hide
+- [x] The five types follow the scroll through the held stretch on phones, as they do on desktop, and no longer follow the card crossing the screen
+- [x] Ticket 69's rule still holds below 981px: every word reads at 4.5:1 or better at every stopping point
+- [x] With reduced motion, the section still holds and the types still follow the scroll, as on desktop; only the blends stay instant
+- [x] Desktop (981px and up) is unchanged
+- [x] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure this section below 981px point at it
+- [x] Tests cover the hold below 981px: the section stays in place across the held stretch, all five types are reached, and the stamp lands before it releases
 
 ## Comments
 
@@ -46,3 +46,22 @@
 **The ADR:** it overrules the Reference site's mobile reset of this section, so a later reader comparing the build against `reference/` does not match it back. It says a phone visitor could swipe past the Record without seeing it, that the founder chose a hold over a card-driven cycle, and that the hold is the same distance as on desktop. Follow ADR-0013 and ADR-0015: narrow the comparison by name rather than loosen it. ADR numbers collide between parallel sessions; take the next free number and renumber at merge if another lane took it.
 
 **Tests to expect to change:** the Record section's Reference comparisons below 981px (the home Record reference-match suite), where the section is now taller and holds. Record the difference by name, pointing at this ticket and the ADR. Ticket 09's claim that "nothing here pins or adds scrolling" is already untrue on desktop because of the CSS sticky box; do not repeat it.
+
+### Decided with the founder while building (23 September 2026)
+
+- **The phones that matter are iPhones and Samsungs, and nothing smaller.** Measured, the section's copy and card together are about 1,100px tall at 360px wide, and neither smaller gaps nor a shorter card nor a shortened paragraph brought them under a 360×640 screen with its header. A Galaxy S24 in Chrome with its bars showing is about that size.
+- **The paragraph follows the card below 981px.** While the section holds, the screen shows the eyebrow, the heading, the four questions, the five chips and the card. The paragraph comes after the card, below the screen for as long as the section holds, and scrolls into view as it lets go. The founder chose this over leaving the paragraph out on phones, and over putting it before the heading.
+
+### What was built
+
+Below 981px «السجل الموثّق» now holds still for 120% of the screen, as it does on a desktop window. The five types follow that stretch, and the stamp lands before the section lets go. With reduced motion it holds all the same, and only the fades are instant. Nothing changes from 981px up. ADR-0021 records the decision. It overrules the Reference site's reset of the section below 981px. (ADR-0020 was taken in the meantime by ticket 76's lane.)
+
+**How it holds.** On a desktop window the section is 220% of the window around a window-tall box. Below 981px the box also carries the paragraph under the card, so it is taller than the screen, and a 120svh stretch is added after it (`#record::after`) rather than making the section 220% tall. The box still holds for 120% of the screen. What it holds sits in a grid: the copy's column steps aside (`display: contents`), its parts are placed in the rows around the card, and a row-spanning stretch at least the screen's height below the header keeps two flexible rows either side of them. So what is held is centred between the header and the foot of the screen, and the paragraph always begins below the foot. The cycle below 981px starts where the section's top meets the window's and runs for the section less the box, which is the held stretch. On a desktop window that is the Reference site's own measure, which the desktop keeps.
+
+**Screen heights are `svh`**, the screen with a phone browser's bars showing. It does not change when the address bar hides, so the box neither hangs below the foot of the screen nor changes size mid-scroll. ScrollTrigger already ignores the resize a touch browser fires when its bars move.
+
+**Below 701px the section is set tighter** so what it holds fits a 360×640 screen with its 67px header: a 28px heading, 14px questions, 12px chips on shorter lines, a card with 12px of room inside rather than 42px, a 14px trail title, and closer steps. At 360×640 the card's foot sits 13px above the foot of the screen, at 390×664 it is 52px, and at 768×1024 it is 112px, where the tablet keeps the section's desktop type.
+
+**Tests.** `home-record.spec.ts` walks each of the three sizes through the hold in 16px steps. The box holds from where the section's top meets the window's, for 120% of the window, then lets go. Nothing moves on before it holds, all five types come in turn while it holds, and the stamp is on before it lets go. The walk runs again with reduced motion at 390×664. A second test at each size checks, at the start, middle and end of the hold, that the eyebrow is below the header, the card's foot is inside the window, and the paragraph is below it, and that the paragraph then comes fully into view. Both failed on the code before this change at all three sizes, seven tests in all. `scrollToProgress` in `record-section.ts` now measures the held stretch as the section less its box, which is the old measure on a desktop window, so the desktop cycle, the ticket 69 contrast walk and the resize test all read the same stretch at every width. The card-crossing walk-through they used below 981px is gone.
+
+**The Reference comparisons** (`home-record-match-reference.spec.ts`) give up, by name, what this moves below 981px: every part's position down the content. Below 701px they also give up what the tighter layout resizes: the heading's, the questions' and the chips' faces and sizes, and the size and place of everything inside the card. Every part is still counted, and its colours, visibility and opacity compared, at all sixteen viewports. The whole-page comparison's exclusion of the section's height below 981px now gives this ticket as a reason too.

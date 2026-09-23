@@ -1,8 +1,8 @@
 /**
  * The home page's Record section (ticket 09): as the visitor scrolls through
- * it, the section turns from dark to light and the card beside the copy shows
- * the trail each transaction type leaves in the Record, ending stamped
- * complete.
+ * it, the section holds still, turns from dark to light, and the card beside
+ * the copy shows the trail each transaction type leaves in the Record, ending
+ * stamped complete — on a phone as on a desktop (ticket 80, ADR-0021).
  *
  * Asserted through what a visitor meets: which type is marked and whose trail
  * can be read, what colour the section and the header are, whether the words
@@ -43,15 +43,13 @@ async function scrollTo(page: Page, y: number) {
   await settle(page);
 }
 
-/** Where the section and its card are on the page, and how tall the window is. */
+/** Where the section is on the page, and how tall it and the window are. */
 function measure(page: Page) {
   return section(page).evaluate((element) => {
     const box = element.getBoundingClientRect();
-    const card = element.querySelector('.rec-card')!.getBoundingClientRect();
     return {
       top: box.top + window.scrollY,
       height: box.height,
-      cardCentre: card.top + card.height / 2 + window.scrollY,
       window: window.innerHeight,
     };
   });
@@ -95,8 +93,8 @@ async function expectStamped(page: Page, stamped: boolean) {
     .toBe(stamped);
 }
 
-/** The desktop cycle, at a point inside each type's share and either side of the stamp. */
-async function expectTheDesktopCycle(page: Page) {
+/** The cycle, at a point inside each type's share of the held stretch and either side of the stamp. */
+async function expectTheCycle(page: Page) {
   for (const [progress, chosen, stamped] of [
     [0.05, 0, false],
     [0.38, 1, false],
@@ -113,27 +111,60 @@ async function expectTheDesktopCycle(page: Page) {
 }
 
 /**
- * Scrolls from where the section enters the window to where it leaves, in
- * small steps, noting each type as it first appears and where the card was at
- * that moment.
+ * Scrolls from a little above the section to well past the stretch it holds
+ * for, in small steps, noting at each where the box that holds is and which
+ * type the card shows.
  */
-async function walkThrough(page: Page, direction: 'down' | 'up') {
-  const { top, height, window: tall } = await measure(page);
-  const from = top - tall;
-  const to = top + height;
-  const step = 24;
-  const seen: { chosen: number; stamped: boolean; cardInView: boolean }[] = [];
+async function walkThroughTheHold(page: Page) {
+  const { top, window: tall } = await measure(page);
+  const step = 16;
+  const moments: { y: number; boxTop: number; chosen: number; stamped: boolean }[] = [];
 
-  for (let offset = 0; offset <= to - from; offset += step) {
-    await scrollTo(page, direction === 'down' ? from + offset : to - offset);
-    const state = await readCycle(page);
-    const last = seen.at(-1);
-    if (last?.chosen === state.chosen && last.stamped === state.stamped) continue;
-    const { cardCentre } = await measure(page);
-    const scrolled = await page.evaluate(() => window.scrollY);
-    seen.push({ ...state, cardInView: cardCentre > scrolled && cardCentre < scrolled + tall });
+  for (let y = top - 4 * step; y <= top + 1.2 * tall + 12 * step; y += step) {
+    await scrollTo(page, y);
+    const boxTop = await section(page).evaluate((element) => element.querySelector('.sticky')!.getBoundingClientRect().top);
+    moments.push({ y: y - top, boxTop, ...(await readCycle(page)) });
   }
-  return seen;
+  return { moments, step, tall };
+}
+
+/**
+ * The section holds still for as far as it does on a desktop window — 120% of
+ * the window, the 220vh section less its window-tall box — and every type,
+ * then the stamp, comes while it holds.
+ */
+async function expectItHolds(page: Page) {
+  const { moments, step, tall } = await walkThroughTheHold(page);
+  const held = moments.filter((moment) => Math.abs(moment.boxTop) < 0.5);
+  expect(held.length, 'it holds at all').toBeGreaterThan(0);
+  const heldFor = held.at(-1)!.y - held[0].y;
+
+  expect(held[0].y, "begins to hold where its top meets the window's").toBeLessThanOrEqual(step);
+  expect(heldFor, 'holds for 120% of the window').toBeGreaterThanOrEqual(1.2 * tall - 2 * step);
+  expect(heldFor, 'holds for 120% of the window').toBeLessThanOrEqual(1.2 * tall + step);
+  expect(moments.at(-1)!.boxTop, 'and then lets go').toBeLessThan(0);
+
+  const before = moments.filter((moment) => moment.y < 0);
+  expect(before.every((moment) => moment.chosen === 0 && !moment.stamped), 'nothing moves on before it holds').toBe(true);
+
+  const shown = held.map((moment) => moment.chosen).filter((chosen, index, all) => chosen !== all[index - 1]);
+  expect(shown, 'every type, in turn, while it holds').toEqual([0, 1, 2, 3, 4]);
+  expect(held.at(-1)!.stamped, 'stamped before it lets go').toBe(true);
+}
+
+/** Where the header ends and the window does, and where the first and last things the section holds, and the paragraph after them, are. */
+function readTheHeldScreen(page: Page) {
+  return section(page).evaluate((element) => {
+    const box = (selector: string) => element.querySelector(selector)!.getBoundingClientRect();
+    return {
+      header: document.querySelector('.nav')!.getBoundingClientRect().bottom,
+      window: window.innerHeight,
+      firstHeld: box('.eyebrow').top,
+      lastHeld: box('.rec-card').bottom,
+      lead: box('.lead').top,
+      leadBottom: box('.lead').bottom,
+    };
+  });
 }
 
 test('the whole section is in the first response', async ({ request }) => {
@@ -175,31 +206,68 @@ for (const viewport of [
   test(`at ${viewport.width}x${viewport.height} the types follow the scroll, and the stamp comes last`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
-    await expectTheDesktopCycle(page);
+    await expectTheCycle(page);
   });
 }
 
-// The Reference site's own trigger has no room to run below 981px, where the
-// section is one window tall, so it jumps from the first type to the stamped
-// last. Here the types follow the card across the window instead.
-for (const viewport of [
-  { width: 390, height: 900 },
-  { width: 768, height: 900 },
-]) {
-  test(`at ${viewport.width}x${viewport.height} every type is shown in turn while the card is in view`, async ({ page }) => {
+/**
+ * The phones and the tablet the section must hold on below 981px: a Galaxy
+ * S24 and an iPhone 12 to 15 with their browsers' bars showing, and a tablet
+ * held upright. Smaller phones than these are not designed for (ticket 80).
+ */
+const PHONES_AND_TABLETS = [
+  { width: 360, height: 640 },
+  { width: 390, height: 664 },
+  { width: 768, height: 1024 },
+];
+
+// DIVERGENCE FROM THE REFERENCE SITE, deliberate (ticket 80, ADR-0021): below
+// 981px the Reference site stops holding the section, so a quick swipe goes
+// straight past the Record. Here it holds as it does on a desktop window.
+for (const viewport of PHONES_AND_TABLETS) {
+  test(`at ${viewport.width}x${viewport.height} the section holds while every type shows and the stamp lands, then lets go`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    await expectItHolds(page);
+  });
 
-    const down = await walkThrough(page, 'down');
-    expect(down.map((moment) => moment.chosen)).toEqual([0, 1, 2, 3, 4, 4]);
-    expect(down.map((moment) => moment.stamped)).toEqual([false, false, false, false, false, true]);
-    // Each change after the first happens where the visitor can see it.
-    expect(down.slice(1).every((moment) => moment.cardInView)).toBe(true);
+  test(`at ${viewport.width}x${viewport.height} everything the section holds fits between the header and the foot of the window`, async ({ page }) => {
+    // A box taller than the window cannot hold still: some of it would be
+    // out of sight for the whole stretch. So the paragraph, which will not
+    // fit on a phone as well, follows the card, below the window while the
+    // section holds, and comes into view as it lets go.
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
 
-    const up = await walkThrough(page, 'up');
-    expect(up.map((moment) => moment.chosen)).toEqual([4, 4, 3, 2, 1, 0]);
+    for (const progress of [0, 0.5, 1]) {
+      await scrollToProgress(page, progress);
+      const screen = await readTheHeldScreen(page);
+      const where = `at ${progress} of the held stretch: ${JSON.stringify(screen)}`;
+      expect(screen.firstHeld, where).toBeGreaterThanOrEqual(screen.header);
+      expect(screen.lastHeld, where).toBeLessThanOrEqual(screen.window);
+      expect(screen.lead, where).toBeGreaterThanOrEqual(screen.window);
+    }
+
+    const held = await readTheHeldScreen(page);
+    await scrollTo(page, (await page.evaluate(() => window.scrollY)) + held.leadBottom - held.window + 24);
+    const after = await readTheHeldScreen(page);
+    expect(after.lead, 'the paragraph comes into view once the section lets go').toBeGreaterThanOrEqual(after.header);
+    expect(after.leadBottom, 'the paragraph comes into view once the section lets go').toBeLessThanOrEqual(after.window);
   });
 }
+
+test.describe('with reduced motion, below 981px', () => {
+  test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
+  test('the section still holds, and the types still follow the scroll', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 664 });
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    await expectItHolds(page);
+  });
+});
 
 // Below 981px the section is as tall as what is in it, and the trails wrap to
 // different numbers of lines. A card that grew and shrank with each type would
@@ -329,11 +397,10 @@ test('the cycle is measured again when the window changes size', async ({ page }
   await expectShowing(page, 1);
 
   await page.setViewportSize({ width: 1024, height: 700 });
-  await expectTheDesktopCycle(page);
+  await expectTheCycle(page);
 
   await page.setViewportSize({ width: 390, height: 900 });
-  const down = await walkThrough(page, 'down');
-  expect(down.map((moment) => moment.chosen)).toEqual([0, 1, 2, 3, 4, 4]);
+  await expectTheCycle(page);
 });
 
 test('the section still works after leaving the page and coming back', async ({ page }) => {
@@ -354,7 +421,7 @@ test('the section still works after leaving the page and coming back', async ({ 
   await page.goBack();
   await page.waitForURL((url) => url.pathname === '/');
 
-  await expectTheDesktopCycle(page);
+  await expectTheCycle(page);
   expect(problems).toEqual([]);
 });
 
@@ -410,10 +477,8 @@ for (const motion of ['no-preference', 'reduce'] as const) {
           expect(undecided, where).toBe('');
         }
 
-        // The end of the cycle: the section's foot at the window's on a desktop
-        // window, the card's centre past 15% of the window's height below one.
-        const { cardCentre } = await measure(page);
-        await scrollTo(page, viewport.width > 980 ? top + height - tall : cardCentre - tall * 0.1);
+        // The end of the cycle, where the section lets go.
+        await scrollToProgress(page, 1);
         await expectStamped(page, true);
         await waitForStillness(page);
         const { violations, undecided } = await axeFindings(page, '#record');
