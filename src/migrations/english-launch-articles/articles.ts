@@ -22,8 +22,8 @@
  * «30 minutes»; the product's words are `CONTEXT.md`'s — the Owner, the
  * Consultant and the Contractor, the Record, the Referral Program and the
  * Partnership Program. A link goes to the English address of the page, which
- * answers with an offer of the Arabic until ticket 42 writes it — except the
- * Terms, which are Arabic-only and binding in Arabic.
+ * answers with an offer of the Arabic until that page's English is published
+ * (ticket 42) — except the Terms, which are Arabic-only and binding in Arabic.
  *
  * The company's registered name is given as it is registered, in Arabic: it
  * has no English form in `src/content/company.ts`, and inventing one would be

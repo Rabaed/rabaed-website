@@ -45,8 +45,9 @@ its author for now — his words: a trial for the company's team to look over,
 who will unpublish it and put up the real articles, and check these, once they
 have. Checked from outside the same day: it is at `/blog/what-is-rabaed` with
 its cover, and its article data names a person, `Mohamed Alhalees`. Its date is
-still the one it was drafted on, 21 September. Its English follows from ticket
-43 once that is deployed.
+still the one it was drafted on, 21 September. The founder asked for the trial
+in both languages; its English is ticket 43's draft of the same article, once
+that is deployed.
 
 The three open boxes stay open: they are about the real articles, whose
 approval and byline are Ahmed's, not about the trial.

@@ -54,18 +54,27 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 }
 
 /**
- * The six English articles, by their addresses, and the covers uploaded for
- * them, found by name. The covers go through `payload.delete`, so that their
- * stored files go with the rows — on a deployment they are in Supabase
- * Storage, which no `DELETE` reaches.
+ * Only what this put there, as the Arabic import's rollback: the six English
+ * articles that are still the untouched drafts it made — never published, no
+ * author — and the covers uploaded for them that no remaining article uses. An
+ * English article an Editor wrote, or put a name on, stays, and so does its
+ * cover.
+ *
+ * The covers go through `payload.delete`, so that their stored files go with
+ * the rows — on a deployment they are in Supabase Storage, which no `DELETE`
+ * reaches.
  */
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
   const slugs = sql.join(
     ARTICLES.map((article) => sql`${article.slug}`),
     sql`, `,
   );
-  await db.execute(sql`DELETE FROM "_posts_v" WHERE "version_slug" IN (${slugs}) AND "version_locale" = 'en'`);
-  await db.execute(sql`DELETE FROM "posts" WHERE "slug" IN (${slugs}) AND "locale" = 'en'`);
+  const untouched = sql`
+    SELECT "id" FROM "posts"
+     WHERE "slug" IN (${slugs}) AND "locale" = 'en' AND "_status" = 'draft' AND "author" = ''
+       AND NOT EXISTS (SELECT 1 FROM "_posts_v" v WHERE v."parent_id" = "posts"."id" AND v."version__status" = 'published')`;
+  await db.execute(sql`DELETE FROM "_posts_v" WHERE "parent_id" IN (${untouched})`);
+  await db.execute(sql`DELETE FROM "posts" WHERE "id" IN (${untouched})`);
 
   const covers = await payload.find({
     collection: 'media',
@@ -75,6 +84,8 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
     req,
   });
   for (const cover of covers.docs) {
+    const used = await db.execute(sql`SELECT 1 FROM "posts" WHERE "cover_image_id" = ${cover.id} LIMIT 1`);
+    if (used.rows.length > 0) continue;
     await payload.delete({ collection: 'media', id: cover.id, context: { [SKIP_REVALIDATION]: true }, req });
   }
 }

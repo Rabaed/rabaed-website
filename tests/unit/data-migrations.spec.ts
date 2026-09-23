@@ -201,7 +201,7 @@ test.describe('data migrations', () => {
   });
 
   test('upload their files through Payload, since no INSERT can', async () => {
-    // The two that put a file into the CMS. Named here so that the rule above
+    // The three that put a file into the CMS. Named here so that the rule above
     // cannot be read as "no migration ever calls Payload": it is "no migration
     // writes *rows* through Payload".
     for (const name of [

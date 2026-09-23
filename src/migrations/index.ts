@@ -276,7 +276,8 @@ export const migrations = [
     up: migration_20260923_120002_propose_english_pages.up,
     down: migration_20260923_120002_propose_english_pages.down,
     name: '20260923_120002_propose_english_pages',
-  },  {
+  },
+  {
     up: migration_20260923_130000_import_english_launch_articles.up,
     down: migration_20260923_130000_import_english_launch_articles.down,
     name: '20260923_130000_import_english_launch_articles',

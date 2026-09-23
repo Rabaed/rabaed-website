@@ -40,7 +40,7 @@ cross — and every merge so far has waited for green.
 
 GitHub will not let a pull request with failing tests be merged — but only on a paid plan. On the Free organisation plan for a private repository the API answers: `Upgrade to GitHub Pro or make this repository public to enable this feature.` Making the repository public is not an option.
 
-- [ ] Decide: upgrade the `Rabaed` organisation to the GitHub Team plan, or accept the convention of never merging a pull request showing a red cross
+- [x] Decide: upgrade the `Rabaed` organisation to the GitHub Team plan, or accept the convention of never merging a pull request showing a red cross — decided: upgrade, after launch; the convention until then
 - [ ] If upgrading, apply the prepared rule:
 
 ```bash

@@ -717,11 +717,11 @@ That cost two tickets a workaround each (33 and 26) before ticket 63 closed it.
 The one exception is an **upload**. A file has to be converted and written to
 storage, which no `INSERT` can do, so a migration that brings in a picture
 still creates it with `payload.create({ collection: 'media', … })` — and a
-field added to Images can still stop a fresh database there. Two do: the Trust
-strip's marks and the launch articles' covers. Each uploads its pictures first
-and then runs the SQL for the rows that point at them, which finds each picture
-by its file name rather than by the id it had the day it was frozen (`excludes`
-in `IMPORTS`).
+field added to Images can still stop a fresh database there. Three do: the
+Trust strip's marks, and the launch articles' covers in Arabic and in English.
+Each uploads its pictures first and then runs the SQL for the rows that point
+at them, which finds each picture by its file name rather than by the id it had
+the day it was written (`excludes` in `IMPORTS`, for the two the freezer made).
 
 To write one:
 

@@ -89,12 +89,20 @@ async function coverImage(editor: APIRequestContext, id: number) {
  * that article's English would carry.
  */
 const EXPECTED_ENGLISH = [
-  { slug: 'what-is-rabaed', phrases: ['Rabaed is a Saudi platform', 'the Owner, the Consultant and the Contractor'] },
-  { slug: 'rabaed-vs-whatsapp-email-excel', phrases: ['WhatsApp', 'email', 'Excel'] },
-  { slug: 'from-request-to-approval', phrases: ['five steps', 'automatic receipt'] },
-  { slug: 'engineering-office-five-projects', phrases: ['five projects', 'representative case'] },
-  { slug: 'what-if-the-contractor-refuses', phrases: ['used against', 'who owns the data'] },
-  { slug: 'who-is-behind-rabaed', phrases: ['شركة ربائد البناء', '7050078786', 'Riyadh'] },
+  {
+    slug: 'what-is-rabaed',
+    cover: 'stamped-sheet-en.webp',
+    phrases: ['Rabaed is a Saudi platform', 'the Owner, the Consultant and the Contractor'],
+  },
+  { slug: 'rabaed-vs-whatsapp-email-excel', cover: 'correspondence-en.webp', phrases: ['WhatsApp', 'email', 'Excel'] },
+  { slug: 'from-request-to-approval', cover: 'kanban-en.webp', phrases: ['five steps', 'automatic receipt'] },
+  {
+    slug: 'engineering-office-five-projects',
+    cover: 'approvals-table-en.webp',
+    phrases: ['five projects', 'representative case'],
+  },
+  { slug: 'what-if-the-contractor-refuses', cover: 'submittal-en.webp', phrases: ['used against', 'who owns the data'] },
+  { slug: 'who-is-behind-rabaed', cover: 'overview-en.webp', phrases: ['شركة ربائد البناء', '7050078786', 'Riyadh'] },
 ] as const;
 
 /** Words as both Arabic and English count them: what stands between the spaces. */
@@ -153,7 +161,7 @@ test('each article waits in English too: a draft at its slug, with an English co
 }) => {
   await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
 
-  for (const { slug, phrases } of EXPECTED_ENGLISH) {
+  for (const { slug, cover: coverFile, phrases } of EXPECTED_ENGLISH) {
     const article = await draftArticle(page.request, slug, 'en');
 
     // The same gate as the Arabic: a draft, the byline left for a person.
@@ -162,13 +170,13 @@ test('each article waits in English too: a draft at its slug, with an English co
     expect(words(article.answer), slug).toBeGreaterThanOrEqual(30);
     expect(words(article.answer), slug).toBeLessThanOrEqual(60);
 
-    // Its own cover: the English Screen mock, under a name of its own rather
-    // than the Arabic cover's, described in English.
+    // Its own cover: the English Screen mock of the screen it is about, under a
+    // name of its own rather than the Arabic cover's, described in English.
     expect(article.coverImage, slug).toEqual(expect.any(Number));
     const arabic = await draftArticle(page.request, slug, 'ar');
     expect(article.coverImage, slug).not.toBe(arabic.coverImage);
     const cover = await coverImage(page.request, article.coverImage!);
-    expect(cover.filename, slug).toMatch(/-en\.webp$/);
+    expect(cover.filename, slug).toBe(coverFile);
     expect(cover.alt, slug).toContain('Rabaed');
     const served = await request.get(cover.url);
     expect(served.status(), `${slug}: ${cover.url}`).toBe(200);
