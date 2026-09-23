@@ -4060,9 +4060,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4077,9 +4085,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4094,9 +4110,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4111,9 +4135,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4128,9 +4160,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4145,9 +4185,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4162,9 +4210,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -4179,9 +4235,17 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    phoneCrop?: (number | null) | Media;
+    /**
      * With an English interface, 1440×900 or larger in the same proportions. Remove it to bring back the English exported image.
      */
     englishPicture?: (number | null) | Media;
+    /**
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     */
+    englishPhoneCrop?: (number | null) | Media;
     /**
      * Read out by screen readers, and written under the picture. If you replace the picture, describe the new one.
      */
@@ -7930,7 +7994,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -7942,7 +8008,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -7954,7 +8022,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -7966,7 +8036,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -7978,7 +8050,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -7990,7 +8064,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -8002,7 +8078,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {
@@ -8014,7 +8092,9 @@ export interface ScreenMocksSelect<T extends boolean = true> {
     | T
     | {
         picture?: T;
+        phoneCrop?: T;
         englishPicture?: T;
+        englishPhoneCrop?: T;
         description?:
           | T
           | {

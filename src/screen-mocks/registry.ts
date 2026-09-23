@@ -126,6 +126,16 @@ export function phoneCropImagePath(locale: Locale, id: string): string {
 }
 
 /**
+ * The size the export makes a mock's Phone crop at, in pixels: the crop's box
+ * at the mock's scale. A crop an Editor uploads in the CMS is held to this or
+ * larger, in the same shape (ticket 79), as sharp on a dense screen as the
+ * export's.
+ */
+export function phoneCropExportSize(mock: ScreenMock) {
+  return { width: PHONE_CROP.width * mock.scale, height: PHONE_CROP.height * mock.scale };
+}
+
+/**
  * The box a mock's Phone crop is cut from, in one language's screen, in stage
  * pixels.
  *
