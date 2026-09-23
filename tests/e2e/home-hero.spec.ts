@@ -149,6 +149,40 @@ test.describe('the hero', () => {
     }
   });
 
+  // The Reference site's second button points at `#journey`, which its home
+  // page does not have, so it went nowhere (ticket 73).
+  for (const [name, viewport] of [
+    ['on a desktop', { width: 1440, height: 900 }],
+    ['on a phone', { width: 390, height: 844 }],
+  ] as const) {
+    for (const javaScriptEnabled of [true, false]) {
+      test(`«استكشف المنصة ↓» takes the visitor down to the four units, clear of the header, ${name}${javaScriptEnabled ? '' : ' with JavaScript off'}`, async ({ browser }) => {
+        const context = await browser.newContext({ viewport, javaScriptEnabled });
+        const page = await context.newPage();
+        try {
+          await page.goto('/');
+          await page.getByRole('link', { name: /استكشف المنصة/ }).click();
+
+          const units = page.locator('#jt');
+          const header = await page.locator('.nav').boundingBox();
+          // Every place the site jumps to stops 78px down: the desktop header's
+          // 75px and a little more. Below 700px wide the header is 67px, so the
+          // gap under it is wider there, and the stop is the same.
+          await expect.poll(async () => (await units.boundingBox())!.y, 'the four units come up to the header').toBeLessThanOrEqual(78 + 1);
+          // Not scrolled past, and neither the eyebrow nor the heading under
+          // the header.
+          expect((await units.boundingBox())!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1);
+          for (const part of [units.locator('.eyebrow'), units.locator('h2')]) {
+            expect((await part.boundingBox())!.y).toBeGreaterThanOrEqual(header!.y + header!.height);
+            await expect(part).toBeInViewport();
+          }
+        } finally {
+          await context.close();
+        }
+      });
+    }
+  }
+
   test('starts the document at the Contractor, with the first status beside it', async ({
     browser,
   }) => {

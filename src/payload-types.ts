@@ -3377,7 +3377,7 @@ export interface HomePage {
       en?: string | null;
     };
     /**
-     * The outlined button beside the first.
+     * The outlined button beside the first. It takes the visitor down to the four units, and is hidden while that section is hidden.
      */
     secondaryLabel: {
       ar: string;

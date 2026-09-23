@@ -244,7 +244,11 @@
 
 /* Kept together here, media queries included, because its rules and their
    overrides only make sense read side by side. */
-#jt { border-top: 1px solid var(--dark-line) }
+/* ENHANCEMENT OVER THE REFERENCE SITE (ticket 73): the hero's «استكشف
+   المنصة ↓» lands here, where the Reference site's points at a section its
+   home page does not have. The header is fixed over the top of the window, so
+   stop below it, as every other place the site jumps to does. */
+#jt { border-top: 1px solid var(--dark-line); scroll-margin-top: 78px }
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: the opening answer HANDOFF
    §6.4 asks this section for (ticket 35), which the Reference site has not got.
    It is drawn only once an Editor writes one, so nothing here changes the page
