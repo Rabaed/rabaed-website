@@ -4,7 +4,8 @@ import type { Page } from '@playwright/test';
  * Reading the home page's delay-cost calculator (ticket 10) — shared by the
  * spec that asserts its behaviour and the one that compares it with the
  * Reference site, whose markup carries the same class names for every part
- * read here.
+ * read here. The comparison leaves out how the tracks are painted, which the
+ * rebuild does differently (ticket 72).
  */
 
 /**

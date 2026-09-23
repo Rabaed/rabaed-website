@@ -12,8 +12,12 @@
  * **In use**, with the seam dragged to the same points on both sites — through
  * and either side of the band where a step turns over — every face's opacity
  * and transform, the verdicts, the tags and what the handle announces; the
- * same after the arrow keys; and the calculator's words, figures and track
- * colouring after the same slider settings.
+ * same after the arrow keys; and the calculator's words and figures after the
+ * same slider settings.
+ *
+ * Not its track colouring: the Reference site's fill agrees with its thumb only
+ * at the middle of the bar, and the rebuild's ends under the thumb wherever it
+ * is (ticket 72), an enhancement `home-calculator.spec.ts` holds.
  *
  * One deliberate difference shapes the comparison: **Arabic set in DM Mono.**
  * The Reference site sets «84,405 ر.س», «7 أيام» and the other slider
@@ -94,6 +98,8 @@ function calculatorRegion(costWrapsOnlyOnReference: boolean): Region {
       // In the Arabic face beside DM Mono numbers, where the Reference site sets
       // it all in DM Mono.
       { selector: '.lr b', omit: ['font', 'left', 'width'] },
+      // Held whole, though the slider has lost its side padding (ticket 72):
+      // the padding is inside its box, which is the same size either way.
       '.rng',
       { selector: '.calc .out', omit: taller },
       { selector: '.calc .out small', omit: pushedDown },
@@ -102,6 +108,16 @@ function calculatorRegion(costWrapsOnlyOnReference: boolean): Region {
       { selector: '.calc .out .btn', omit: pushedDown },
     ],
   };
+}
+
+/**
+ * What the calculator says, without how its tracks are painted: the rebuild
+ * fills each track to the middle of its thumb, which the Reference site does
+ * not (ticket 72), and `home-calculator.spec.ts` holds the fill to the thumb.
+ */
+async function readFigures(page: Page) {
+  const { tracks, ...figures } = await readCalculator(page);
+  return { ...figures, values: tracks.map((track) => track.value) };
 }
 
 /** How many lines the calculator's cost takes. */
@@ -135,7 +151,7 @@ test.describe('the before-and-after section and the calculator match the Referen
           );
         }
         expect(await readSeam(pages.rebuilt)).toEqual(await readSeam(pages.reference));
-        expect(await readCalculator(pages.rebuilt)).toEqual(await readCalculator(pages.reference));
+        expect(await readFigures(pages.rebuilt)).toEqual(await readFigures(pages.reference));
       } finally {
         await pages.close();
       }
@@ -185,7 +201,7 @@ test.describe('the before-and-after seam turns the steps over as on the Referenc
   });
 });
 
-test('the calculator gives the Reference site\'s figures, and colours its tracks the same, as the sliders move', async ({ browser, baseURL }) => {
+test('the calculator gives the Reference site\'s figures as the sliders move', async ({ browser, baseURL }) => {
   const pages = await openBothPages(browser, baseURL!, site, { width: 1440, height: 900 });
 
   try {
@@ -203,12 +219,12 @@ test('the calculator gives the Reference site\'s figures, and colours its tracks
       // A reading by its number alone: the founders chose Arabic's words after a
       // count over the Reference site's «1 أيام» and «6 شهراً» (ticket 58), which
       // `home-calculator.spec.ts` holds.
-      const byNumbers = ({ readings, ...rest }: Awaited<ReturnType<typeof readCalculator>>) => ({
+      const byNumbers = ({ readings, ...rest }: Awaited<ReturnType<typeof readFigures>>) => ({
         ...rest,
         readings: readings.map((reading) => reading.split(' ')[0]),
       });
-      expect(byNumbers(await readCalculator(pages.rebuilt)), settings.join(' / ')).toEqual(
-        byNumbers(await readCalculator(pages.reference)),
+      expect(byNumbers(await readFigures(pages.rebuilt)), settings.join(' / ')).toEqual(
+        byNumbers(await readFigures(pages.reference)),
       );
     }
   } finally {

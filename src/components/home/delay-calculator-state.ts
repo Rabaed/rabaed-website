@@ -97,10 +97,18 @@ export function calculatorDisplay(settings: DelayCostInputs, words: CalculatorWo
     ] satisfies Figure[],
     cost: { number: formatRiyals(cost.total), word: words.currency } satisfies Figure,
     breakdown: `${words.breakdown.financing} ${formatRiyals(cost.financing)} + ${words.breakdown.siteOverhead} ${formatRiyals(cost.siteOverhead)}`,
-    /** Each slider's track, filled in the brand colour up to its thumb — the Reference site's own gradient. */
+    /**
+     * Each slider's track, filled in the brand colour up to the middle of its
+     * thumb. The thumb's middle travels from half a thumb in from one end to
+     * half a thumb short of the other, so the fill is measured along that
+     * travel. **An enhancement over the Reference site** (ticket 72), whose
+     * fill is measured along the whole bar and so meets the thumb at the
+     * middle alone. `--thumb-size` is set beside the thumb in the stylesheet.
+     */
     tracks: SLIDERS.map((range, index) => {
-      const filled = ((values[index] - range.min) / (range.max - range.min)) * 100;
-      return `linear-gradient(to right, var(--acc) ${filled}%, var(--line) ${filled}%)`;
+      const share = (values[index] - range.min) / (range.max - range.min);
+      const edge = `calc(var(--thumb-size) / 2 + ${share} * (100% - var(--thumb-size)))`;
+      return `linear-gradient(to right, var(--acc) ${edge}, var(--line) ${edge})`;
     }),
   };
 }
