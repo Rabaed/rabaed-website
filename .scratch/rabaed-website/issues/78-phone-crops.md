@@ -8,15 +8,15 @@
 
 **The founder approves the crops before they are built in, and sees the result before it merges.** First, show them each proposed crop next to its whole screen (a studio page on a preview deployment will do) and take their yes or their changes, crop by crop. Then the pull request is not merged until they have opened its preview on their own phone and said yes.
 
-- [ ] Each of the eight Screen mocks has a Phone crop in Arabic, approved by the founder
-- [ ] Each English Phone crop is its Arabic crop mirrored, the way the English Screen mocks mirror the Arabic ones (ticket 41)
-- [ ] All eight crops share one shape, chosen for a phone screen and approved with the crops
+- [x] Each of the eight Screen mocks has a Phone crop in Arabic, approved by the founder
+- [x] Each English Phone crop is its Arabic crop mirrored, the way the English Screen mocks mirror the Arabic ones (ticket 41)
+- [x] All eight crops share one shape, chosen for a phone screen and approved with the crops
 - [ ] At 700px wide and narrower, the home and product pages show the Phone crop in place of the whole screen; wider than 700px nothing changes, tablets included
-- [ ] The crops are made from the same studio source as the whole screens, by the export script, so re-running the export remakes both
+- [x] The crops are made from the same studio source as the whole screens, by the export script, so re-running the export remakes both
 - [ ] Tapping a Phone crop opens the whole screen over the page, where it can be zoomed and panned, with a close control; Escape and the phone's back gesture close it too
 - [ ] A phone downloads the crop, not the whole screen, until the visitor taps
 - [ ] The crop carries the Screen mock's existing description and caption (ADR-0002); the tap target says it opens the whole screen
-- [ ] A new ADR in `docs/adr/` records the decision (see below)
+- [x] A new ADR in `docs/adr/` records the decision (see below)
 - [ ] Tests cover: the crop at 390px and the whole screen at 768px, in both languages; opening and closing the whole screen; and an export check that every Screen mock has a crop in each language
 
 ## Comments
@@ -44,3 +44,7 @@
 **The ADR:** ADR-0002 made Screen mocks exported images and accepted that a picture cannot reflow. This records the answer for phones: a second export per Screen mock, cut from the same screen, with the reasons the founder chose it over the two alternatives above. ADR numbers collide between parallel sessions; take the next free number and renumber at merge if another lane took it.
 
 **Out of scope:** Editors uploading their own Phone crop; that is ticket 79. Until 79, a Screen mock whose picture an Editor has replaced in the CMS shows the whole replaced picture with ticket 77's hint on phones, never the exported crop of the old picture.
+
+### 24 September 2026: the founder approved the crops
+
+The eight proposed crops were shown to the founder beside their whole screens, in both languages, on a review page. The shape was portrait, 520×650 of the 1440×900 screen. The founder approved all eight and the shape. For the stamped sheet they chose the crop that keeps the «أربع توقيعات على ورقة واحدة» card whole and loses the stamp. The positions are in `src/screen-mocks/registry.ts` and the decision is ADR-0022.
