@@ -4,7 +4,7 @@
 
 **Blocked by:** 23, 40, 41
 
-**Status:** ready-for-agent
+**Status:** ready-for-human — the six English launch articles wait in the CMS as drafts, covers and all; publishing them is the founder's, see below
 
 - [ ] Launch articles translated and published in English
 - [ ] Case studies translated where any are published
@@ -67,3 +67,29 @@ Two things for whoever takes part 2:
 - **An Arabic article Ahmed corrects while reviewing wants the same correction
   in its English.** The Translation column says an English one exists, not that
   the two still agree.
+
+**Part 2, 23 September 2026: the six in English, loaded as drafts.** Ticket 41's
+English Screen mocks merged, so `20260923_130000_import_english_launch_articles`
+puts each article into the CMS in English at its Arabic's slug — a draft with
+the author empty, dated the day it was translated, its cover the English
+Screen mock of the same screen, uploaded as `<screen>-en.webp` and described in
+ticket 41's English words.
+
+- **Written to the data-migration rule, but not by the freezer.** The Arabic
+  articles already fill the posts tables, which `cms:freeze-seed` refuses, and
+  the ids it would freeze could already belong to an Editor's own posts on
+  production. So `english-launch-articles/seed.ts` builds the statements from
+  the words, as tickets 35, 40 and 41 built theirs: every post takes the next id
+  there is, its version is copied from it, its cover is found by name, and an
+  article already written in English at its slug is left alone — no draft, no
+  cover.
+- **Held by** `launch-articles.spec.ts` (each English draft: its gate, its own
+  cover, its opening answer, its words, every link to an English page or the
+  Terms, and no visitor reaching it) and `data-migrations.spec.ts` (the seed
+  writes every word of `articles.ts`; the only Payload call is the uploads).
+  `npm run cms:migrate-fresh` runs the chain from nothing.
+
+**What is left is the founder's**, the three open boxes: publishing the English
+articles (the founder published one of the Arabic as a trial on 23 September,
+and its English follows once this is deployed), Ahmed's review, and case studies
+once one is published.

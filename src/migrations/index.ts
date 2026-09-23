@@ -44,6 +44,7 @@ import * as migration_20260923_100100_propose_english_screen_mock_words from './
 import * as migration_20260923_120000_english_form_wording from './20260923_120000_english_form_wording';
 import * as migration_20260923_120001_propose_english_form_wording from './20260923_120001_propose_english_form_wording';
 import * as migration_20260923_120002_propose_english_pages from './20260923_120002_propose_english_pages';
+import * as migration_20260923_130000_import_english_launch_articles from './20260923_130000_import_english_launch_articles';
 
 export const migrations = [
   {
@@ -275,5 +276,10 @@ export const migrations = [
     up: migration_20260923_120002_propose_english_pages.up,
     down: migration_20260923_120002_propose_english_pages.down,
     name: '20260923_120002_propose_english_pages',
+  },
+  {
+    up: migration_20260923_130000_import_english_launch_articles.up,
+    down: migration_20260923_130000_import_english_launch_articles.down,
+    name: '20260923_130000_import_english_launch_articles',
   },
 ];

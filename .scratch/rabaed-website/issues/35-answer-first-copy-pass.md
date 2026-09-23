@@ -4,12 +4,12 @@
 
 **Blocked by:** 53, 54, 55, 56, 57, 58
 
-**Status:** ready-for-human — every rewrite is written and waiting in the CMS as a draft; publishing them needs the founder's approval, see below
+**Status:** resolved — the founder and Ahmed approved every rewrite and the founder published them, 23 September 2026
 
 - [x] Each major section opens with a self-contained 30–60 word answer
 - [x] Applied across the Home and Product sections the handoff names, and across every FAQ answer
 - [x] Comparison content added where it is weakest: Rabaed against WhatsApp, email and spreadsheets — the most-asked question and the biggest current gap
-- [ ] Every rewrite is proposed to Ahmed for approval before publishing; the words are his
+- [x] Every rewrite is proposed to Ahmed for approval before publishing; the words are his
 - [x] **No figure, percentage, client count or testimonial is invented.** Claims are added only when supplied and attributable
 - [x] Changes are made through the CMS, not in code
 
@@ -44,3 +44,10 @@ Every statement is guarded, **per paragraph rather than per page**: each carries
 **One catch worth knowing, and it is Payload's.** A page's entry holds one draft at a time. Publishing anything else on the home or product page before reading the proposal moves it into **Versions** rather than losing it, but it is no longer what the entry opens on. `docs/deployment.md` says so where the founder will read it, and `answer-first-copy.spec.ts` looks for each proposal among the entry's versions rather than as the latest one — which is also what makes it safe to run beside the two suites that edit those entries all the while.
 
 **Nothing for the founder before merging** beyond the usual: a separate preview database needs `npm run cms:migrate` against it, as `docs/deployment.md` says, before this pull request's preview can build.
+
+**Published, 23 September 2026.** The founder and Ahmed decided to take the
+whole proposal as it stood — the four opening paragraphs and every FAQ
+rewrite and new question — and the founder published it on production. The
+company's own team reviews the live site and changes anything it wants with
+Ahmed in the CMS, as with every other word. Checked from outside the same day:
+both home page openers are on the live home page.

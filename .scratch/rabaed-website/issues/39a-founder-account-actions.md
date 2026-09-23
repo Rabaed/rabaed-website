@@ -6,7 +6,7 @@
 
 **When:** the founder decided on 12 September 2026 to do **part 1, connecting Vercel, once ticket 04 is merged** — bringing it forward from the end of Stage 1, so that preview links exist for the page-by-page rebuild in tickets 05 onward. Part 2, the GitHub plan decision, stays at the end of Stage 1 alongside ticket 39.
 
-**Status:** parts 1 and 3 done (12 and 20 September 2026); parts 2 and 4 outstanding. Part 5 is not a task that finishes — it is a check to run before certain merges, from now on.
+**Status:** parts 1, 3 and 4 done; **part 2 is backlog, after launch, and blocks nothing** (the founder's call, 23 September 2026). Part 5 is not a task that finishes — it is a check to run before certain merges, from now on.
 
 Full instructions, in plain language, are in [`docs/deployment.md`](../../../docs/deployment.md).
 
@@ -15,7 +15,7 @@ Full instructions, in plain language, are in [`docs/deployment.md`](../../../doc
 - [x] Sign in to Vercel with the company GitHub account and import `Rabaed/rabaed-website`
 - [x] Install the Vercel GitHub app for the `Rabaed` organisation
 - [x] Accept every build setting as detected — Next.js needs no configuration from us, and no environment variable has to be set
-- [ ] Confirm a pull request now gets its own preview link in a comment
+- [x] Confirm a pull request now gets its own preview link in a comment — every pull request from #65 to #74 carried one from the Vercel bot (23 September 2026)
 
 **Done.** A production deployment of `8a64ad9` succeeded on 12 September 2026 at `rabaed-website-iourhxa1e-rabaed.vercel.app`, reported back to GitHub as a successful Production deployment.
 
@@ -32,9 +32,15 @@ Protection does not apply to a production custom domain, so pointing `rabaedapp.
 
 ## 2. Decide how a failing test blocks a merge
 
+**Backlog — after launch, and not a blocker for anything, ticket 39 included.**
+The founder's call on 23 September 2026: the organisation is upgraded to GitHub
+Team once the product has launched, and the rule below applied then. Until
+then the convention stands — no pull request is merged while it shows a red
+cross — and every merge so far has waited for green.
+
 GitHub will not let a pull request with failing tests be merged — but only on a paid plan. On the Free organisation plan for a private repository the API answers: `Upgrade to GitHub Pro or make this repository public to enable this feature.` Making the repository public is not an option.
 
-- [ ] Decide: upgrade the `Rabaed` organisation to the GitHub Team plan, or accept the convention of never merging a pull request showing a red cross
+- [x] Decide: upgrade the `Rabaed` organisation to the GitHub Team plan, or accept the convention of never merging a pull request showing a red cross — decided: upgrade, after launch; the convention until then
 - [ ] If upgrading, apply the prepared rule:
 
 ```bash
@@ -51,7 +57,7 @@ On 20 September 2026 the preview database's connection string and `PAYLOAD_SECRE
 - [x] **`PAYLOAD_SECRET` rotated** (20 September 2026)
 - [x] **Database password reset** in Supabase, and `DATABASE_URL` updated in Vercel (20 September 2026)
 - [x] **Redeployed** afterwards: an environment variable only takes effect on a new build, and the build that carried this ticket's own change is the one that proved both values — it migrates production's database before it builds the pages
-- [ ] **Clear the command from the shell history** on the machine it was typed on
+- [x] **Clear the command from the shell history** on the machine it was typed on — the founder, 23 September 2026
 
 **Nothing in the CMS is encrypted with `PAYLOAD_SECRET`**, so rotating it loses no content and no password: Editors sign in again with the same passwords. It does sign out everyone, invalidate any document link already opened from a form submission (they last ten minutes anyway), and reset the few-minute window the forms use to refuse repeat submissions.
 
@@ -63,9 +69,9 @@ Raised by ticket 34 on 21 September 2026. The site already carries both; they
 report nothing until the two features are turned on for the project, and
 nothing has to be deployed afterwards.
 
-- [ ] In the Vercel dashboard, on `rabaed-website`: **Analytics → Web Analytics → Enable**
-- [ ] And **Speed Insights → Enable**
-- [ ] Open the production site, then the project's **Analytics** tab, and confirm the visit appears
+- [x] In the Vercel dashboard, on `rabaed-website`: **Analytics → Web Analytics → Enable**
+- [x] And **Speed Insights → Enable**
+- [x] Open the production site, then the project's **Analytics** tab, and confirm the visit appears — the founder sees the graphs, 23 September 2026
 
 Step by step, in plain language, in [`docs/deployment.md`](../../../docs/deployment.md) under *One-time setup*. What is collected, in the words the Privacy Policy will use, is [`docs/analytics.md`](../../../docs/analytics.md) — ticket 37's to fold in.
 
