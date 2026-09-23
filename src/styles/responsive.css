@@ -50,5 +50,7 @@
   .wrap { padding: 0 20px }
 }
 
-/* Tap target: 13px of text alone is a 17px-tall link. */
-.foot-legal a { display: inline-block; padding: 7px 0 }
+/* Tap target: 13px of text alone is a 17px-tall link. The Reference site
+   padded its two legal links 7px; the Footer directory stacks its links,
+   where 4px makes each a 32px target and a column still reads as a list. */
+.foot-col a { display: inline-block; padding: 4px 0 }

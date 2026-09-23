@@ -4539,12 +4539,28 @@ export interface SiteWord {
       ar: string;
       en?: string | null;
     };
-    legalLinks: {
-      label: {
+    /**
+     * The links at the foot of every page, through which every page of the site can be reached. The case studies link does not show until the first story is published in the page’s language.
+     */
+    columns: {
+      heading: {
         ar: string;
         en?: string | null;
       };
-      path: string;
+      /**
+       * In the order they show. Drag them to reorder.
+       */
+      links: {
+        /**
+         * The terms, the privacy policy and the Referral Terms are in Arabic only, and their links on English pages lead to the Arabic: say so in the English label, as in (Arabic).
+         */
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        path: string;
+        id?: string | null;
+      }[];
       id?: string | null;
     }[];
     /**
@@ -8408,16 +8424,27 @@ export interface SiteWordsSelect<T extends boolean = true> {
               ar?: T;
               en?: T;
             };
-        legalLinks?:
+        columns?:
           | T
           | {
-              label?:
+              heading?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              path?: T;
+              links?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    path?: T;
+                    id?: T;
+                  };
               id?: T;
             };
         rights?:

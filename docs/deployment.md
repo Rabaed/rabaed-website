@@ -465,7 +465,9 @@ Three are not the obvious English, because the obvious one does not fit:
 **Customers** for «قصص العملاء» («Case studies» is a letter too long for the
 menu), **Partners** for «الشراكات», and **Book a demo** for «احجز عرضاً حياً».
 The footer's line is *Operating system for construction projects · Riyadh ·
-rabaedapp.com*.
+rabaedapp.com*. The footer's four columns of links (ticket 75) are headed
+*Rabaed*, *Programs*, *Resources* and *Legal*; the three legal links say
+*(Arabic)* and lead straight to the Arabic document, which is never translated.
 
 **To take it:**
 
