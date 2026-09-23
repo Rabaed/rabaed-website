@@ -23,7 +23,7 @@ The founders' list of cleared commitments covers the Trust strip logos, the 60-d
 
 **Blocks:** 39 (go live) — as a decision, not as a safety net. See below.
 
-**Status:** needs-info
+**Status:** ready-for-human
 
 ## They cannot reach a visitor in the meantime
 
@@ -65,4 +65,32 @@ The Reference site's section carries a testimonial slot under the lead: a play b
 
 - [ ] Every figure on the proof deck has a recorded `source`, has been replaced by something attributable, or has been removed
 - [ ] The decision is written into each figure's **Where the figure comes from** field in the CMS's Home page entry (ticket 58), so the next person to edit a card sees it
-- [ ] `tests/e2e/home-card-decks.spec.ts` and `tests/e2e/home-decks-match-reference.spec.ts` updated if the deck's cards change
+- [x] `tests/e2e/home-card-decks.spec.ts` and `tests/e2e/home-decks-match-reference.spec.ts` updated if the deck's cards change
+
+## Comments
+
+**Decided by the founder, 23 September 2026: the first way out, a source, for all four figures.**
+
+All four come from one case study with one customer, a real estate developer whose logo is on the Trust strip. The customer asked not to be named, so no card, no source and no case study may name them. The comparison is between two of that customer's projects over about nine months: one run on Rabaed, and one the customer still runs by hand, with its logs kept in Excel. Rabaed and the customer measured it together. The customer has already consented to the figures being published. A written case study is being prepared for the site's case studies (ticket 24), and is waiting on the customer's review and consent before it can be published.
+
+**What is left is the founder's, in the CMS**, because it is the CMS entry that decides: ticket 58 made the source field the only thing that puts a figure on the site. No code changes.
+
+1. **Write the source into each of the four figures**, in the Home page entry's figures section, on the live CMS and on the preview's, which is a separate database. The same text serves all four, since they share a source:
+
+   > دراسة حالة مع عميل من المطوّرين العقاريين (أحد شعارات شريط الثقة، ولا يُذكر اسمه بطلب منه). قورن مشروع له يعمل على ربائد بمشروع آخر له ما زال يُدار يدوياً بسجلات إكسل، على مدى تسعة أشهر تقريباً. قاسه فريق ربائد والعميل معاً، ووافق العميل على نشر الأرقام.
+
+   About 230 characters, inside the field's 300. Visitors never see it. The start and end months, if they can be found, make it stronger than "about nine months".
+
+2. **Correct the first card's basis.** «مقارنةً بالدورة الورقية على المشروع نفسه» says the figure compares the same project before and after. It compares two projects. Proposed, inside the field's 48 characters:
+
+   > مقارنةً بمشروع آخر للعميل يُدار يدوياً
+
+   The other three bases — «زمن الوصول إلى آخر نسخة معتمدة», «من ساعات فريق المشروع الأسبوعية», «اكتمال أثر كل معاملة: من أرسل، من اعتمد، ومتى» — say what was measured, and stay true.
+
+3. **Say it is one project**, as this ticket asks of a single-project figure. The cards have no room for it, so the section's lead carries it. Proposed, inside the lead's 250 characters:
+
+   > الفرق بين إجراء يدوي مشتّت وإجراء واحد موثّق — أرقام من مشروع أحد عملائنا من المطوّرين العقاريين على مدى تسعة أشهر، مقارنةً بمشروع آخر له يُدار يدوياً.
+
+Then publish, and check the preview's home page: the deck should count "/ 6".
+
+So the ticket moves from `needs-info` to `ready-for-human`: the question is answered, and the two boxes left are CMS edits only the founder can sign in to make. It is resolved once they are published. The third box needs nothing: the deck keeps its six cards.
