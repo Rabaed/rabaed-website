@@ -248,7 +248,7 @@ Tests run against the built application with a seeded test database and test sto
 - **Stage 2 items**, tracked separately: the English site, English Screen mock exports, and English blog and case study translations.
 - **Later phase**: building whole new pages from blocks in the CMS. Stage 1 lets Ahmed edit every existing page, including its lists and which sections show, but not reorder sections or invent new page types.
 - English translations of the Terms, Privacy Policy and Referral Terms. Arabic is binding; translating them is a lawyer's job, not this build's.
-- Redesigning the Pour Tracker. It ships as-is with only the brand spelling corrected, keeping its own claymorphic look and its existing bilingual switcher. Restyling it to match the site is a later, separate piece of work.
+- Redesigning the Pour Tracker. It ships as-is, keeping its own claymorphic look and its existing bilingual switcher. Restyling it to match the site is a later, separate piece of work. (Ticket 49: the real tool ships byte for byte, not even with a spelling corrected, because a changed copy calls itself unofficial; its brand spelling is right as delivered.)
 - Migrating existing search rankings. Nothing is published today, so there is nothing to redirect and no ranking to preserve.
 - Invented statistics, testimonials, ratings or client counts.
 - Native mobile applications.

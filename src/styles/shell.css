@@ -259,5 +259,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
    script, stopping 78px short so the fixed header does not cover the form;
    this stops in the same place with no script at all. The Reference site's
    script stops short of every in-page anchor, not just this one; each later
-   anchor target wants the same margin when it is built. */
-#demo { scroll-margin-top: 78px }
+   anchor target wants the same margin when it is built. `#contact` is the
+   section around the form, where the downloaded Pour Tracker's own link to the
+   cloud version lands (ticket 49): its file cannot be changed to say `#demo`. */
+#demo, #contact { scroll-margin-top: 78px }

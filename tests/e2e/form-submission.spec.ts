@@ -28,6 +28,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi, reaching } from './cms';
+import { POUR_TRACKER, checksumOf } from './pour-tracker';
 import { TRAP_FIELD } from '../../src/forms/definition';
 import {
   APPLICANT,
@@ -918,7 +919,7 @@ test.describe('the partnership application, alerted and confirmed', () => {
 test.describe('the Pour Tracker download', () => {
   const FORM = 'بيانات التحميل';
   const RECEIVED = 'تم — التحميل بدأ';
-  const FILE = 'Rabaed-Pour-Tracker.html';
+  const FILE = POUR_TRACKER.name;
 
   const downloadForm = (page: Page) => page.getByRole('form', { name: FORM });
   const downloadButton = (form: Locator) => form.locator('button[type="submit"]');
@@ -969,9 +970,7 @@ test.describe('the Pour Tracker download', () => {
     // The file itself, not merely a download event: what arrives is the tool.
     const saved = testInfo.outputPath(FILE);
     await file.saveAs(saved);
-    const delivered = await readFile(saved, 'utf8');
-    expect(delivered).toContain('ربائد');
-    expect(delivered.length, 'the delivered file is empty').toBeGreaterThan(1000);
+    expect(checksumOf(await readFile(saved)), 'the delivered file is not the released tool').toBe(POUR_TRACKER.sha256);
 
     expect(order[0], `what happened: ${order.join(', ')}`).toBe('submitted');
     expect(order).toContain('delivered');
