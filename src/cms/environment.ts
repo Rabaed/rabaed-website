@@ -22,6 +22,35 @@ export function databaseUrl(): string {
   return required('DATABASE_URL', 'It is the connection string of the Postgres database the CMS stores content in.');
 }
 
+/**
+ * The pool the Postgres adapter opens its connections with (ticket 83).
+ *
+ * `pg`'s defaults allow ten connections and no end to a wait for a free one.
+ * Every server Vercel runs the site on opens a pool of its own, so under a
+ * spike those ten each are what Supabase is asked for, and a request that
+ * finds its server's all busy hangs until Vercel's function limit ends it
+ * minutes later.
+ *
+ * On a deployment, then, five, and ten seconds. Five is room for one server's
+ * work: the adapter keeps one of them checked out for as long as the server
+ * lives, to hear a dropped connection, which leaves four for page builds, the
+ * admin and the forms, and a page build asks for several at once. Against the
+ * 200 clients Supabase's pooler takes on its smaller plans, it is forty
+ * servers where the default was twenty — `docs/deployment.md` says why the
+ * pooler address matters. Ten seconds is far longer than any query here takes
+ * and far shorter than a visitor waits: past it the request fails, and a page
+ * that already has a built copy goes on serving it.
+ *
+ * Locally, `pg`'s own. The test server's suites ask for many pages at once and
+ * lean on its ten connections (ticket 70); a ceiling meant for a fleet of
+ * servers would only starve the one.
+ */
+export function databasePool(): { connectionString: string; max?: number; connectionTimeoutMillis?: number } {
+  const connectionString = databaseUrl();
+  if (!isPubliclyDeployed()) return { connectionString };
+  return { connectionString, max: 5, connectionTimeoutMillis: 10_000 };
+}
+
 /** Signs editors' login sessions. One long random value per environment. */
 export function payloadSecret(): string {
   return required('PAYLOAD_SECRET', 'It signs editors’ login sessions.');

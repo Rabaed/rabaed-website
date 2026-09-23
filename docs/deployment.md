@@ -177,7 +177,8 @@ or production deployments stop.
    company password manager.
 2. **Database address.** In the project, **Connect → Transaction pooler**, copy
    the connection string and put the database password into it. This is
-   `DATABASE_URL`.
+   `DATABASE_URL`. It must be the transaction pooler, not the direct
+   connection: "Database connections" below says why.
 3. **Image storage.** **Storage → New bucket**, named `media`, set to public:
    the images on the site are public anyway. Then **Storage → Settings → S3
    connection**: note the endpoint and region, and create an access key. These
@@ -227,6 +228,36 @@ or production deployments stop.
 
    The second command prints a temporary password once. Hand it over privately;
    Ahmed changes it after signing in. Close the terminal afterwards.
+
+### Database connections
+
+Vercel runs the site on as many servers as its traffic needs, starting more
+during a spike, and each one opens its own connections to the database. Two
+things keep that from running out on a busy day:
+
+- **The address is Supabase's transaction pooler** (step 2 above). The pooler
+  stands between the servers and the database and shares a few real database
+  connections among many servers. Supabase's smaller plans take 200 servers'
+  connections through it, against 60 connected to the database directly, and
+  Supabase recommends it for exactly this kind of hosting.
+- **Each server holds at most five connections**, and a request waits at most
+  ten seconds for one before it gives up (ticket 83). Without the limit each
+  server would hold ten, so the pooler's 200 would be used up by twenty
+  servers instead of forty. Without the ten seconds, a request that found its
+  server's connections all busy would wait for minutes. Past the ten seconds
+  it fails, and a page that was already built goes on showing its last copy.
+  The numbers live in `databasePool` in `src/cms/environment.ts`. Local
+  servers and the tests keep `pg`'s own ten, with no wait limit.
+
+**To check the address**, in Vercel open **Settings → Environment Variables**,
+reveal `DATABASE_URL` for **Production**, and read only the part after the
+`@`. It should end in `pooler.supabase.com:6543/postgres`. Then do the same for
+**Preview**, which is a separate Supabase project. If either shows
+`supabase.co:5432` (a direct connection) or `pooler.supabase.com:5432` (the
+pooler's other mode, which holds a real connection per server), replace the
+whole value with the one under **Connect → Transaction pooler** in that
+Supabase project. Then redeploy. As in step 6, the value never goes into a
+chat window or a terminal.
 
 ### Legal documents
 

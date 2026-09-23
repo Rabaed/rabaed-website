@@ -22,7 +22,7 @@ import { Media } from './cms/collections/media';
 import { Posts } from './cms/collections/posts';
 import { SharingImages } from './cms/collections/sharing-images';
 import { Users } from './cms/collections/users';
-import { databaseUrl, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
+import { databasePool, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { AiCrawlers } from './cms/globals/ai-crawlers';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
@@ -116,7 +116,8 @@ export default buildConfig({
   ],
 
   db: postgresAdapter({
-    pool: { connectionString: databaseUrl() },
+    // A ceiling and a wait limit on a deployment (ticket 83).
+    pool: databasePool(),
     // Migrations everywhere, including development, so that the schema a
     // developer builds against is the schema production gets.
     push: false,
