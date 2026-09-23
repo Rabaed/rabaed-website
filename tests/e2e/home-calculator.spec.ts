@@ -9,11 +9,15 @@
  *
  * The formula itself is tested directly in `tests/unit/delay-cost.spec.ts`;
  * this spec asks only that the sliders reach it. Whether the calculator looks
- * like the Reference site, track colouring included, is asked in
- * `home-before-after-and-calculator-match-reference.spec.ts`.
+ * like the Reference site is asked in
+ * `home-before-after-and-calculator-match-reference.spec.ts`; how far each
+ * track is filled is asked here, because the fill follows the thumb where the
+ * Reference site's does not (ticket 72).
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { PNG } from 'pngjs';
 import { readCalculator } from './delay-calculator';
+import { sidewaysOverflow } from './geometry';
 
 const calculator = (page: Page) => page.locator('#calc');
 const slider = (page: Page, name: string) => calculator(page).getByRole('slider', { name: new RegExp(name) });
@@ -208,3 +212,90 @@ test('with JavaScript off, the sliders show their starting positions filled in',
   expect(off.tracks.every((track) => track.painted.startsWith('linear-gradient'))).toBe(true);
   expect(off).toEqual(await read(true));
 });
+
+/**
+ * Where a slider is drawn, read off its pixels along the bar's middle row: the
+ * bar's two ends, the thumb's two edges, found by its white ring, and where
+ * the orange fill ends. The thumb's inside, which covers the end of the fill,
+ * is made see-through for the one screenshot, so that everything is read from
+ * the same picture; its ring is kept. Positions are in pixels from the bar's
+ * left end, and `width` is the bar's.
+ *
+ * At phone width the home page briefly grows a few pixels wider than the
+ * window while its animations run. The page reads right to left, so the extra
+ * width opens on the left, and a screenshot taken then is cut from a place that
+ * many pixels to one side of the slider. So the screenshot waits for the page
+ * to fit the window again, and the bar is still measured from its own ends
+ * rather than the screenshot's, which are rounded out to whole pixels.
+ */
+async function readSliderPixels(control: Locator) {
+  const page = control.page();
+  const seeThrough = await page.addStyleTag({
+    content: `#calc .rng::-webkit-slider-thumb { background: transparent; box-shadow: none }`,
+  });
+  let shot: Buffer | undefined;
+  await expect
+    .poll(async () => {
+      if ((await sidewaysOverflow(page)) > 0) return false;
+      shot = await control.screenshot({ animations: 'disabled' });
+      return (await sidewaysOverflow(page)) <= 0;
+    }, { message: 'the page fits the window while the slider is photographed' })
+    .toBe(true);
+  await seeThrough.evaluate((style) => (style as HTMLStyleElement).remove());
+  const png = PNG.sync.read(shot!);
+
+  const y = Math.floor(png.height / 2);
+  const pixel = (x: number) => [...png.data.subarray((y * png.width + x) * 4, (y * png.width + x) * 4 + 3)];
+  const columns = [...Array(png.width).keys()];
+  /** The thumb's ring and the card behind the bar. */
+  const isWhite = (x: number) => pixel(x).every((channel) => channel > 250);
+  /** The accent, #F95738, and nothing near the pale grey of the unfilled bar. */
+  const isAccent = (x: number) => {
+    const [r, g, b] = pixel(x);
+    return r > 220 && g < 130 && b < 100;
+  };
+
+  // The bar's grey border is its first and last column that is not white.
+  const bar = columns.filter((x) => !isWhite(x));
+  const [barLeft, barRight] = [bar[0], bar.at(-1)! + 1];
+  const ring = columns.filter((x) => x > barLeft && x < barRight - 1 && isWhite(x));
+  const orange = columns.filter(isAccent);
+
+  return {
+    width: barRight - barLeft,
+    thumbLeft: ring[0] - barLeft,
+    thumbRight: ring.at(-1)! + 1 - barLeft,
+    fillEnd: orange.length === 0 ? 0 : orange.at(-1)! + 1 - barLeft,
+  };
+}
+
+// The Reference site paints the fill across the whole bar but lets the thumb
+// travel only inside the bar's padding, so the two agree at the middle alone:
+// near the start the thumb runs ahead of an empty fill, and at the end it stops
+// short of the bar's edge (ticket 72).
+for (const width of [1440, 390]) {
+  test(`at ${width}px, each slider's thumb reaches both ends of its bar, and the fill ends under the thumb's middle`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+
+    for (const [control, { min, max, between }] of [
+      [projectValue(page), { min: '1000000', max: '300000000', between: '71000000' }],
+      [delayDays(page), { min: '1', max: '60', between: '9' }],
+      [duration(page), { min: '6', max: '48', between: '40' }],
+    ] as const) {
+      await control.scrollIntoViewIfNeeded();
+      for (const value of [min, max, between]) {
+        await control.fill(value);
+        await control.blur();
+        const drawn = await readSliderPixels(control);
+        const where = `${await control.getAttribute('aria-valuetext')}`;
+
+        expect(Math.abs(drawn.fillEnd - (drawn.thumbLeft + drawn.thumbRight) / 2), `${where}: fill against the thumb's middle`).toBeLessThanOrEqual(1);
+        // Past the bar's 1px border, and a pixel either way for the ring's
+        // anti-aliased edge.
+        if (value === min) expect(drawn.thumbLeft, `${where}: thumb at the left end`).toBeLessThanOrEqual(2);
+        if (value === max) expect(drawn.width - drawn.thumbRight, `${where}: thumb at the right end`).toBeLessThanOrEqual(2);
+      }
+    }
+  });
+}

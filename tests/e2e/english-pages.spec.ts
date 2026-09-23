@@ -173,6 +173,7 @@ test('previewed, each English page is the whole page, in English, left to right'
   for (const slug of ENTRIES) await approve(page.request, slug, 'draft');
   await approveSiteWords(page.request, 'draft');
 
+  let eyebrows = 0;
   for (const path of PAGES) {
     // The page itself, not the notice that stands for it. `stale-render.spec.ts`
     // runs beside this and publishes the tool page from its published words,
@@ -205,7 +206,14 @@ test('previewed, each English page is the whole page, in English, left to right'
     // Nothing wider than the window.
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow, `${path} overflows`).toBeLessThanOrEqual(0);
+
+    // Its labels keep DM Mono, the right face for Latin: Thmanyah Sans is the
+    // Arabic labels' face alone (ADR-0018).
+    const faces = await page.locator('.eyebrow').evaluateAll((labels) => labels.map((label) => getComputedStyle(label).fontFamily));
+    for (const face of faces) expect(face, `${path}: an eyebrow`).toMatch(/^"DM Mono"/);
+    eyebrows += faces.length;
   }
+  expect(eyebrows, 'no English page has an eyebrow').toBeGreaterThan(0);
 });
 
 test.describe('the comparison', () => {

@@ -69,6 +69,12 @@ export const EVERYTHING_BUT_ACROSS: readonly Measurement[] = ['top', 'height', '
  * reports the whole declared stack whatever is rendering, so left in they
  * would fail every comparison against a Reference site that does not declare
  * them, while saying nothing about what either page is set in.
+ *
+ * **The label face (ADR-0018).** An Arabic label is set in Thmanyah Sans where
+ * the Reference site sets DM Mono, which has no Arabic glyphs. It reads as the
+ * DM Mono it replaced, as the colours do, so a comparison still holds the
+ * label's weight, size and line height — and Thmanyah turning up where the
+ * Reference site set the body face still fails, as DM Mono there would.
  */
 const READINGS = `window.__readings = (style) => {
   const recoloured = ${JSON.stringify([
@@ -89,11 +95,12 @@ const READINGS = `window.__readings = (style) => {
   const textChanged = color !== style.color;
   // All four edges: a rule on one side is invisible to a reading of another.
   const border = [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor].join(' ');
+  const family = style.fontFamily.startsWith('"Thmanyah Sans"') ? '"DM Mono", monospace' : style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, '');
   return {
     color,
     background: textChanged ? asReference(style.backgroundColor) : style.backgroundColor,
     borderColor: textChanged ? asReference(border) : border,
-    font: style.fontWeight + ' ' + style.fontSize + '/' + style.lineHeight + ' ' + style.fontFamily.replace(/"Arabic stand-in[^"]*", /g, ''),
+    font: style.fontWeight + ' ' + style.fontSize + '/' + style.lineHeight + ' ' + family,
   };
 };`;
 

@@ -59,19 +59,24 @@ const SLOW_4G = { downloadKbps: 1600, latencyMs: 150 };
  *    so a phone is sent the widest copy, and every panel is fetched at once
  *    because a panel behind a tab is `display: none` and would otherwise
  *    arrive blank in front of the visitor (`screen-mock-picture.tsx`).
+ *
+ * **Every Arabic page carries 80 KB more for its labels' face** — Thmanyah
+ * Sans Regular, 76 KB, the founder's choice (ADR-0018). One weight, so one
+ * file; and a whole one, because its licence forbids cutting it down. The
+ * English pages set their labels in DM Mono and never fetch it.
  */
 const BUDGET_KB: Record<string, number> = {
-  '/': 950,
-  '/product': 900,
-  '/start': 560,
-  '/tool': 440,
-  '/referral': 520,
-  '/partnership': 510,
-  '/blog': 420,
+  '/': 1030,
+  '/product': 980,
+  '/start': 640,
+  '/tool': 520,
+  '/referral': 600,
+  '/partnership': 590,
+  '/blog': 500,
   '/en/blog': 420,
-  '/terms': 420,
-  '/privacy': 420,
-  '/referral-terms': 420,
+  '/terms': 500,
+  '/privacy': 500,
+  '/referral-terms': 500,
   '/en': 420,
 };
 

@@ -1,3 +1,4 @@
+import { Inline, numeralsInMono } from '@/components/inline-text';
 import type { PageLink } from '@/components/page-link';
 import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
@@ -57,11 +58,12 @@ export function Path({
           <ul className="tail-steps">
             {content.stages.map((stage) => (
               <li key={stage.number}>
-                {/* The whole label in DM Mono, as the home and product pages'
-                    closing steps are: `.tail-steps b` is theirs too, and waits
-                    on bug 45's decision with them. One string, so the server
-                    does not split it into two runs of text. */}
-                <b>{`${content.stageLabel} ${stage.number}`}</b>
+                {/* «المرحلة» in the label face and the numeral in DM Mono, as
+                    the home and product pages' closing steps are:
+                    `.tail-steps b` is theirs too (ADR-0018). */}
+                <b>
+                  <Inline text={numeralsInMono(`${content.stageLabel} ${stage.number}`)} />
+                </b>
                 <span>
                   <b className="ph">{stage.title}</b>
                   {stage.text}

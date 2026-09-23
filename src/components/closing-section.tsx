@@ -1,4 +1,5 @@
 import { DemoRequestForm } from '@/components/demo-request-form';
+import { Inline, numeralsInMono } from '@/components/inline-text';
 import type { PageLink } from '@/components/page-link';
 import type { FormPageWording } from '@/forms/definition';
 import type { DemoRequestField } from '@/forms/demo-request';
@@ -38,14 +39,20 @@ export function ClosingSection({
 }) {
   return (
     <section id="tail" className="light pad">
-      <div className="wrap tail-grid">
+      {/* `#contact` is where the downloaded Pour Tracker sends someone who
+          asks for the cloud version (ticket 49): the steps and the form. */}
+      <div id="contact" className="wrap tail-grid">
         <div>
           <div className="eyebrow">{content.eyebrow}</div>
           <h2 style={{ fontSize: '29px', lineHeight: 1.4 }}>{content.heading}</h2>
           <ul className="tail-steps">
             {content.steps.map((step, index) => (
               <li key={index}>
-                <b>{step.label}</b>
+                {/* The Arabic in the label face and the numeral in DM Mono,
+                    as on the step cards (ADR-0018). */}
+                <b>
+                  <Inline text={numeralsInMono(step.label)} />
+                </b>
                 <span>{step.text}</span>
               </li>
             ))}

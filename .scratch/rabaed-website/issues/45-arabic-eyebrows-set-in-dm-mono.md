@@ -8,7 +8,7 @@ The spec forbids exactly this: "DM Mono for Latin numerals only — DM Mono has 
 
 **Blocked by:** nothing.
 
-**Status:** needs-info
+**Status:** resolved
 
 ## Where it is
 
@@ -36,10 +36,10 @@ The English site (tickets 40-42) reaches the same rule from the other side: in E
 
 ## Done when
 
-- [ ] A decision is recorded — in this ticket or an ADR, since it overrules the Reference site everywhere
-- [ ] No Arabic text on the site resolves to a font without Arabic glyphs, on any page, at any width
-- [ ] The English locale still gets DM Mono where DM Mono is right for it
-- [ ] The comparison tests are updated to record the eyebrow as a deliberate divergence, the way the footer's copyright and the hero's guarantee pill already are
+- [x] A decision is recorded — in this ticket or an ADR, since it overrules the Reference site everywhere
+- [x] No Arabic text on the site resolves to a font without Arabic glyphs, on any page, at any width
+- [x] The English locale still gets DM Mono where DM Mono is right for it
+- [x] The comparison tests are updated to record the eyebrow as a deliberate divergence, the way the footer's copyright and the hero's guarantee pill already are
 
 ## Comments
 
@@ -50,3 +50,12 @@ The English site (tickets 40-42) reaches the same rule from the other side: in E
 **Three more on the start page, fixed locally by ticket 13:** the step cards' labels «01 · إعداد», «02 · تشغيل», «03 · ضمان» (`.start .s .k`). Used on that page only, so the label now sets the Arabic face with only the numeral in `.mono`, as the guarantee pill does; it keeps the Reference site's .12em letter-spacing. It is in `src/styles/start.css`, marked DIVERGENCE. The page's four eyebrows — «ابدأ», «كيف نبدأ معك», «الأسئلة الشائعة», and «أداة مجانية» on the tool teaser — are still `.eyebrow`, and wait on this decision with the rest.
 
 **Four more on the partnership page, left for this decision by ticket 16:** the path's stage labels «المرحلة 01» to «المرحلة 04» are `.tail-steps b`, the rule the home and product pages' closing steps share, so they keep DM Mono with them. The page's other Arabic in DM Mono is fixed locally, as on the referral page: the figures «3 أنماط», «4 مراحل» and «بلا رسوم», the modes' labels «01 · التضمين في العرض» and the rest (`StepCards`), and «يوما عمل» in the guarantee pill. Its seven eyebrows are still `.eyebrow`.
+
+**Decided by the founder, 23 September 2026, and done: Thmanyah Sans, untracked.** None of the three options above: the founder chose a face instead, thmanyah's Thmanyah Sans, for every Arabic label, the eyebrow and every label in its voice. Recorded in ADR-0018, with the licence it comes under and the one condition on it: the repository goes private by 23 December 2026.
+
+- **Every Arabic label** is in Thmanyah Sans with no tracking: the eyebrow on every page, `.tail-steps b`, the phone menu's «الشراكات», the step cards' `.k`, the four units' and the journey's «المخرَج», the product page's review-cycle labels, and the tool page's requirement cards. Each rule has an Arabic-only override beside it, so English pages keep DM Mono and its tracking.
+- **One weight, Regular, the founder's choice.** Each of thmanyah's files is a whole 76 KB, since the licence forbids subsetting it. A bold for the step and stage labels would have cost a second 76 KB on the home, product and partnership pages, so those labels are Regular where the Reference site's are bold. Every Arabic page's weight budget rises by 80 KB.
+- **Numerals stay in DM Mono.** The closing section's and the partnership path's labels now wrap their numeral in `.mono`, as the step cards already did.
+- **Lined up as IBM Plex Sans Arabic is.** Thmanyah's own ascent and descent made each line that mixes it with DM Mono 1px to 4px taller than the Reference site's. `ascent-override` and `descent-override` give it IBM Plex's line box, and every comparison matches again.
+- **Tests.** `fonts.spec.ts` walks every Arabic page at 390px and 1440px and fails on Arabic set in a face without Arabic glyphs, or tracked as a label is, and checks that Thmanyah loads. `geometry.ts` reads the label face as the DM Mono it replaced, as it reads ADR-0011's colours. `english-pages.spec.ts` holds every English eyebrow to DM Mono.
+- **Left as the design has it:** the headings drawn in by .01em to .02em, and the few phrases let out by as much. The same walk found them. They are too slight to part a join, and they are not labels.

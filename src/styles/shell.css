@@ -173,6 +173,9 @@
 
 .mnav .msub { border-top: 1px solid var(--dark-line); padding: 13px 0 4px }
 .mnav .msub .msub-t { display: block; font-family: "DM Mono", monospace; font-size: 11px; letter-spacing: .14em; color: var(--acc-ink); margin-bottom: 2px }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: «الشراكات» is an Arabic
+   label, set in the label face, untracked (ADR-0018). */
+:where([dir="rtl"]) .mnav .msub .msub-t { font-family: var(--label-face); letter-spacing: 0 }
 .mnav .msub a { border-top: 0; padding: 9px 0; font-size: 15px; position: relative; padding-inline-start: 16px }
 .mnav .msub a:before { content: ""; position: absolute; inset-inline-start: 2px; top: 50%; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, .28); transform: translateY(-50%) }
 .mnav .msub a.on:before { background: var(--acc) }
@@ -211,11 +214,19 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 .tail-steps li { display: flex; gap: 14px; align-items: baseline; padding: 11px 0; border-bottom: 1px dashed var(--line) }
 .tail-steps li:last-child { border-bottom: 0 }
 .tail-steps b { font-family: "DM Mono", monospace; font-size: 12px; color: var(--acc-ink); white-space: nowrap; min-width: 96px; direction: rtl }
+/* DIVERGENCE FROM THE REFERENCE SITE, deliberate: «01 · إعداد» and «المرحلة 01»
+   are Arabic labels, set in the label face (ADR-0018). Their numerals stay in
+   DM Mono, in the markup, as on the step cards. Regular rather than the `b`'s
+   bold, as every label is (ADR-0018). As heavy as `.tail-steps b`, so the
+   partnership path's heading, `.tail-steps .ph`, still outranks it. */
+:where([dir="rtl"]) .tail-steps b { font-family: var(--label-face); font-weight: 400 }
 /* An English page's label is English, «Set up · 01», and reads left to right —
    and so does the stage's heading on the partnership page, a `b` inside the
    same list (ticket 42). */
 [dir="ltr"] .tail-steps b { direction: ltr }
-.tail-steps span { font-size: 14.5px; color: var(--muted); line-height: 1.75 }
+/* The step's text. The child combinator keeps it off the label's own `.mono`
+   numeral (ADR-0018); anything inside the text inherits it all the same. */
+.tail-steps li > span { font-size: 14.5px; color: var(--muted); line-height: 1.75 }
 .tail-more { display: inline-block; margin-top: 16px; font-size: 14px; color: var(--acc-ink); font-weight: 600; padding: 6px 0 }
 .tail-more:hover { text-decoration: underline }
 @media (max-width: 980px) { .tail-grid { grid-template-columns: 1fr; gap: 28px } }
@@ -248,5 +259,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
    script, stopping 78px short so the fixed header does not cover the form;
    this stops in the same place with no script at all. The Reference site's
    script stops short of every in-page anchor, not just this one; each later
-   anchor target wants the same margin when it is built. */
-#demo { scroll-margin-top: 78px }
+   anchor target wants the same margin when it is built. `#contact` is the
+   section around the form, where the downloaded Pour Tracker's own link to the
+   cloud version lands (ticket 49): its file cannot be changed to say `#demo`. */
+#demo, #contact { scroll-margin-top: 78px }
