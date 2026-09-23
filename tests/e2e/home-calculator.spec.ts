@@ -17,7 +17,6 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { readCalculator } from './delay-calculator';
-import { sidewaysOverflow } from './geometry';
 
 const calculator = (page: Page) => page.locator('#calc');
 const slider = (page: Page, name: string) => calculator(page).getByRole('slider', { name: new RegExp(name) });
@@ -219,30 +218,17 @@ test('with JavaScript off, the sliders show their starting positions filled in',
  * the orange fill ends. The thumb's inside, which covers the end of the fill,
  * is made see-through for the one screenshot, so that everything is read from
  * the same picture; its ring is kept. Positions are in pixels from the bar's
- * left end, and `width` is the bar's.
- *
- * At phone width the home page briefly grows a few pixels wider than the
- * window while its animations run. The page reads right to left, so the extra
- * width opens on the left, and a screenshot taken then is cut from a place that
- * many pixels to one side of the slider. So the screenshot waits for the page
- * to fit the window again, and the bar is still measured from its own ends
- * rather than the screenshot's, which are rounded out to whole pixels.
+ * left end, and `width` is the bar's — measured from the bar's own ends rather
+ * than the screenshot's, which are rounded out to whole pixels.
  */
 async function readSliderPixels(control: Locator) {
   const page = control.page();
   const seeThrough = await page.addStyleTag({
     content: `#calc .rng::-webkit-slider-thumb { background: transparent; box-shadow: none }`,
   });
-  let shot: Buffer | undefined;
-  await expect
-    .poll(async () => {
-      if ((await sidewaysOverflow(page)) > 0) return false;
-      shot = await control.screenshot({ animations: 'disabled' });
-      return (await sidewaysOverflow(page)) <= 0;
-    }, { message: 'the page fits the window while the slider is photographed' })
-    .toBe(true);
+  const shot = await control.screenshot({ animations: 'disabled' });
   await seeThrough.evaluate((style) => (style as HTMLStyleElement).remove());
-  const png = PNG.sync.read(shot!);
+  const png = PNG.sync.read(shot);
 
   const y = Math.floor(png.height / 2);
   const pixel = (x: number) => [...png.data.subarray((y * png.width + x) * 4, (y * png.width + x) * 4 + 3)];
