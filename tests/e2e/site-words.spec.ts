@@ -38,6 +38,7 @@ type SiteWords = {
   };
   footer: { tagline: Words; legalLinks: Link[]; rights: Words };
   notFound: { heading: Words; lead: Words; homeLabel: Words };
+  screenMocks: { swipeHint: Words };
 };
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
@@ -50,7 +51,7 @@ async function published(editor: APIRequestContext): Promise<SiteWords> {
 
 /** The entry's fields alone, ready to be sent back: no ids, no dates. */
 function fields(entry: SiteWords) {
-  const { languages, header, footer, notFound } = entry;
+  const { languages, header, footer, notFound, screenMocks } = entry;
   return {
     languages,
     header: {
@@ -60,6 +61,7 @@ function fields(entry: SiteWords) {
     },
     footer: { ...footer, legalLinks: footer.legalLinks.map(({ label, path }) => ({ label, path })) },
     notFound,
+    screenMocks,
   };
 }
 
@@ -122,6 +124,33 @@ test('the not-found page and both index leads are the CMS’s words', async ({ p
 
   expect(await visitorHtml(request, '/blog')).toContain(leads.blog.lead.ar);
   expect(await visitorHtml(request, '/en/blog')).toContain(leads.blog.lead.en);
+});
+
+test('the swipe hint over a Screen mock is the CMS’s, in both languages, and a reworded one is previewed', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  const entry = fields(await published(page.request));
+  // Written in both languages by ticket 77's migration, the English waiting
+  // for the day the entry is published in English.
+  expect(entry.screenMocks.swipeHint).toEqual({ ar: 'اسحب لرؤية الشاشة كاملة', en: 'Swipe to see the whole screen' });
+
+  const reworded = 'مرّر الشاشة جانباً';
+  try {
+    const swipeHint = { ...entry.screenMocks.swipeHint, ar: reworded };
+    const saved = await save(page.request, { ...entry, screenMocks: { swipeHint } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await page.setViewportSize({ width: 390, height: 812 });
+    for (const path of ['/', '/product']) {
+      await preview(page, path);
+      await expect(page.locator('.pan-hint').first(), path).toHaveText(reworded);
+      expect(await visitorHtml(request, path), path).not.toContain(reworded);
+    }
+  } finally {
+    await discardDraft(page.request);
+  }
 });
 
 test('a reworded menu label is previewed, renames the page in the search trail, and never reaches a visitor', async ({

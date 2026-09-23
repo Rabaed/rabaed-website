@@ -1,0 +1,58 @@
+/**
+ * A Screen mock on a phone says it can be swiped (ticket 77).
+ *
+ * At 700px and narrower every Screen mock is drawn 1040px wide in a box that
+ * pans sideways — the home page's four units in `home.css`, the product
+ * page's journey and roles in `product.css` — and those rules are left as
+ * they are. This adds what tells a visitor there is more: each edge with more
+ * of the screen behind it fades out, and a hint sits over the foot of the
+ * picture until the first swipe. `src/components/screen-mock-pan.tsx` keeps
+ * the box's `data-more-start`, `data-more-end` and `data-swiped` current.
+ *
+ * DIVERGENCE FROM THE REFERENCE SITE, deliberate: it pans the same box with
+ * neither. Above 700px nothing here applies.
+ */
+
+/* Registered, so the fade slides from one edge to the other as it moves
+   rather than jumping. */
+@property --pan-fade-start { syntax: '<length>'; inherits: false; initial-value: 0px }
+@property --pan-fade-end { syntax: '<length>'; inherits: false; initial-value: 0px }
+
+.pan-hint { display: none }
+
+@media (max-width: 700px) {
+  /* The fade at the edge panning starts from and the edge it goes towards.
+     At rest — and before the script runs — the box shows the screen from
+     where it begins, so only the far edge fades. */
+  [data-pan] {
+    --pan-fade-start: 0px;
+    --pan-fade-end: 36px;
+    --pan-fade-left: var(--pan-fade-start);
+    --pan-fade-right: var(--pan-fade-end);
+    mask-image: linear-gradient(to right, transparent, #000 var(--pan-fade-left), #000 calc(100% - var(--pan-fade-right)), transparent);
+    transition: --pan-fade-start .25s, --pan-fade-end .25s;
+  }
+  /* Right to left, panning starts at the right-hand edge. */
+  :where([dir="rtl"]) [data-pan] { --pan-fade-left: var(--pan-fade-end); --pan-fade-right: var(--pan-fade-start) }
+  [data-pan][data-more-start="true"] { --pan-fade-start: 36px }
+  [data-pan][data-more-end="false"] { --pan-fade-end: 0px }
+
+  /* The frames the hint is placed in: the four units' stage's own, and the
+     window a product page screen stands in. Neither draws anything. */
+  .jt-pan, .win { position: relative }
+
+  /* Over the foot of the picture, centred, and out of the way of the thumb:
+     a swipe that starts on it reaches the picture under it. */
+  .pan-hint {
+    display: flex; align-items: center; gap: 8px;
+    position: absolute; inset-inline: 0; bottom: 14px; margin: 0 auto;
+    width: max-content; max-width: calc(100% - 32px);
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(20, 22, 28, .84); color: #fff; font-size: 12.5px; line-height: 1.4;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+    pointer-events: none; transition: opacity .4s;
+  }
+  .pan-hint-i { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round }
+  /* Read once, it has done its work. */
+  [data-pan][data-swiped] + .pan-hint { opacity: 0 }
+}

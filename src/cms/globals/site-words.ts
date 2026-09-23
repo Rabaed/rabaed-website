@@ -163,5 +163,25 @@ export const SiteWords = pageGlobal({
         }),
       ],
     }),
+    sectionTab({
+      name: 'screenMocks',
+      label: { ar: 'صور الشاشات', en: 'Screen mocks' },
+      hideable: false,
+      description: {
+        ar: 'على الهاتف تُعرض كل صورة شاشة أعرض من الشاشة، ويسحبها الزائر جانباً ليراها كاملة.',
+        en: 'On a phone every Screen mock is wider than the screen, and the visitor swipes it sideways to see all of it.',
+      },
+      fields: [
+        // Ticket 77. On one line over the foot of the picture, on the narrowest
+        // phone: 40 characters is about half as long again as today's words,
+        // which are 24 in Arabic and 29 in English.
+        wordsField('swipeHint', { ar: 'تلميح السحب', en: 'Swipe hint' }, 40, {
+          description: {
+            ar: 'فوق أسفل الصورة على الهاتف وحده، ويختفي بعد أول سحبة.',
+            en: 'Over the foot of the picture on a phone only, and gone after the first swipe.',
+          },
+        }),
+      ],
+    }),
   ],
 });

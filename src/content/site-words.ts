@@ -135,6 +135,23 @@ export async function getNotFound(locale: Locale): Promise<NotFoundContent> {
 }
 
 /**
+ * The hint a phone shows over each Screen mock, in `locale` (ticket 77) — or
+ * `null` where the words every page shares are not published in that language
+ * yet, which is where an English page stands until the founder publishes its
+ * English. The screen still pans there; it only goes without saying so, as
+ * the page goes without a header, rather than saying so in Arabic.
+ */
+export async function getSwipeHint(locale: Locale): Promise<string | null> {
+  try {
+    const { screenMocks } = await pageEntry('site-words', locale);
+    return wordsIn(locale, screenMocks.swipeHint);
+  } catch (error) {
+    if (error instanceof ContentNotInLocale) return null;
+    throw error;
+  }
+}
+
+/**
  * The words the menu gives a page, for the trail search results show
  * (`structured-data.tsx`). A page the menu names is named the same way in the
  * trail, so renaming it in the menu renames it in both; a page the menu does
