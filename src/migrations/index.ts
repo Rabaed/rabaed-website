@@ -41,6 +41,9 @@ import * as migration_20260921_111500_propose_answer_first_copy from './20260921
 import * as migration_20260923_090000_propose_english_site_words from './20260923_090000_propose_english_site_words';
 import * as migration_20260923_100000_english_screen_mock_pictures from './20260923_100000_english_screen_mock_pictures';
 import * as migration_20260923_100100_propose_english_screen_mock_words from './20260923_100100_propose_english_screen_mock_words';
+import * as migration_20260923_120000_english_form_wording from './20260923_120000_english_form_wording';
+import * as migration_20260923_120001_propose_english_form_wording from './20260923_120001_propose_english_form_wording';
+import * as migration_20260923_120002_propose_english_pages from './20260923_120002_propose_english_pages';
 
 export const migrations = [
   {
@@ -231,7 +234,7 @@ export const migrations = [
   {
     up: migration_20260921_101500_import_launch_articles.up,
     down: migration_20260921_101500_import_launch_articles.down,
-    name: '20260921_101500_import_launch_articles'
+    name: '20260921_101500_import_launch_articles',
   },
   {
     up: migration_20260921_110900_answer_first_openers.up,
@@ -257,5 +260,20 @@ export const migrations = [
     up: migration_20260923_100100_propose_english_screen_mock_words.up,
     down: migration_20260923_100100_propose_english_screen_mock_words.down,
     name: '20260923_100100_propose_english_screen_mock_words',
+  },
+  {
+    up: migration_20260923_120000_english_form_wording.up,
+    down: migration_20260923_120000_english_form_wording.down,
+    name: '20260923_120000_english_form_wording',
+  },
+  {
+    up: migration_20260923_120001_propose_english_form_wording.up,
+    down: migration_20260923_120001_propose_english_form_wording.down,
+    name: '20260923_120001_propose_english_form_wording',
+  },
+  {
+    up: migration_20260923_120002_propose_english_pages.up,
+    down: migration_20260923_120002_propose_english_pages.down,
+    name: '20260923_120002_propose_english_pages',
   },
 ];

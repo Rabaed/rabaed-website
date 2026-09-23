@@ -14,9 +14,11 @@
  * each locale it exists in, and no other. The legal pages exist in Arabic
  * alone: the Arabic is binding, and they are never translated (spec: Out of
  * Scope). The product, start, tool, referral and partnership pages exist in
- * Arabic alone until ticket 42 writes their English, which adds their English
- * addresses here. Until then their English address is a notice, not a page of
- * the site's, and `localisation.spec.ts` holds it apart (ticket 40).
+ * Arabic alone until the founder publishes the English ticket 42 proposed,
+ * which the test server's database holds as drafts. Until then their English
+ * address is a notice, not a page of the site's, and `localisation.spec.ts`
+ * holds it apart (ticket 40); `english-pages.spec.ts` publishes one and holds
+ * it to everything a page of the site is held to.
  */
 export const ROUTES = [
   {

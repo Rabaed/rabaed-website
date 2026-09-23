@@ -12,10 +12,17 @@ export const COMPANY = {
   name: { ar: 'ربائد', en: 'Rabaed' },
   legalName: 'شركة ربائد البناء',
   /** The Saudi unified national number of the establishment — not a tax number. */
-  unifiedNumber: { label: 'الرقم الموحد', value: '7050078786' },
-  locality: 'الرياض',
+  unifiedNumber: { label: { ar: 'الرقم الموحد', en: 'Unified national number' }, value: '7050078786' },
+  locality: { ar: 'الرياض', en: 'Riyadh' },
   country: 'SA',
   /** The wordmark in its colours, on a transparent ground. */
   logo: '/brand/rabaed-wordmark-on-light.webp',
-  productDescription: 'نظام تشغيل مشاريع الإنشاء: يجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
+  /**
+   * The co-founder's line, and its English (ticket 42), which says the same
+   * in the words `CONTEXT.md` gives the three parties and the Record.
+   */
+  productDescription: {
+    ar: 'نظام تشغيل مشاريع الإنشاء: يجمع المالك والاستشاري والمقاول على سجل واحد موثّق ومؤرخ لكل طلب واعتماد.',
+    en: 'The operating system for construction projects: it brings the owner, the consultant and the contractor onto one documented, timestamped record of every request and approval.',
+  },
 } as const;

@@ -474,11 +474,113 @@ proposal is no longer what the entry opens on; you will find it under
 
 **Two things the English site will still lack, by design.** The sign-in link
 leads to the app in Arabic: its address is one for both languages, and nobody
-has said what the English one is. And five pages — the product, start, tool,
-referral and partnership pages — are not in English until ticket 42 writes
-them: their English address says so and offers the Arabic. The Terms, the Privacy Policy and the Referral Program's
-terms are never translated — the Arabic is binding — and their English address
-says that too.
+has said what the English one is. And the six marketing pages are not in
+English until you publish their English, which waits for you as the next
+section says: until then each English address says so and offers the Arabic.
+The Terms, the Privacy Policy and the Referral Program's terms are never
+translated — the Arabic is binding — and their English address says that too.
+
+### The English pages, waiting for a decision
+
+**Every word of the six marketing pages is written in English and sitting in
+the CMS as drafts, and nobody can read a word of it** (ticket 42). Each English
+address — `/en`, `/en/product`, `/en/start`, `/en/tool`, `/en/referral`,
+`/en/partnership` — goes on saying the page is not in English yet, and offers
+the Arabic, until you publish that page's English yourself.
+
+**Why it waits for you.** The words are yours, as the Arabic ones are, and the
+ticket asks that nothing reach a visitor before you have read it. A page is
+never shown half in English: it becomes an English page only when **everything
+it reads** is published in English, and until then it is the notice.
+
+**What is waiting, and where.** In each of these entries the draft it opens on
+has English beside every Arabic word. **الإنجليزية** is *not* ticked under
+**منشورة باللغات**: ticking it is how you approve a page's English, and until you
+do, publishing an Arabic change to the entry publishes none of its English.
+
+| Entry in the admin | Which English pages read it |
+| --- | --- |
+| **الصفحة الرئيسية** | The home page |
+| **صفحة المنتج** | The product page |
+| **صفحة ابدأ** | The start page |
+| **صفحة الأداة المجانية** | The tool page |
+| **صفحة برنامج الإحالة** | The referral page |
+| **صفحة برنامج الشراكات** | The partnership page |
+| **قسم «كيف نبدأ معك»** | The home and product pages, which both end on it |
+| **شاشات المنصة** | The home and product pages: each screen's description. Its English is the next section's proposal, and has **الإنجليزية** ticked already |
+| **شريط الثقة** | The home, product and start pages: its line, and each company's name |
+| **الظهور في البحث والمشاركة** | All six: each page's title and description in a search result |
+| **كلمات الموقع المشتركة** | All six: the header and the footer (the section above) |
+
+And beside them:
+
+- **FAQs** — an English question for every Arabic one, 36 in all, each a draft.
+  Filter the list by **اللغة: English** to see them. An English page shows only
+  the English questions that are published.
+- **Forms** — each form has an English entry, «نموذج … — بالإنجليزية», with a
+  draft of its labels, messages and confirmation email. The alert address is
+  one for both languages, and stays on the Arabic entry.
+
+**To take a page:**
+
+1. Open its entry. What you see is the proposal; what visitors see is still
+   what is published. Read the English and change anything you disagree with.
+2. Tick **الإنجليزية** under **منشورة باللغات**, and **Save Draft**. Do the same
+   on every shared entry the page reads (the table above).
+3. To see it as a page, open its English address in preview while signed in —
+   for example `/api/preview?path=/en/start`. The **Preview** button opens the
+   Arabic page, which this does not change.
+4. **Publish changes** on the page's entry, on every shared entry it reads, and
+   on its English questions. The page becomes English the moment the last of
+   them is published — the header and footer's included — and appears in the
+   sitemap and in the Arabic page's language switch at the same time.
+5. Publish each form's English entry too. Until you do, the English form shows
+   the same words the draft holds, so nothing is ever in Arabic — but they are
+   yours to change only once published.
+
+**The start page is the quickest.** It reads only its own entry, the Trust
+strip, the search settings and the header and footer, so it can be the first
+page in English while you read the rest.
+
+**Things to know before you start:**
+
+- **The home and product pages' drafts carry the waiting opening paragraphs**
+  of the answer-first copy pass (the section above), since a page's entry holds
+  one draft at a time and the English was added to the one waiting. Publishing
+  the English there publishes those Arabic paragraphs too. If you do not want
+  them yet, clear their Arabic and English boxes before publishing.
+- **A word you have changed in Arabic since it was first imported has no
+  English proposed**, because nobody here knows your new wording's English —
+  the search descriptions you rewrote, the client you added to the Trust strip.
+  The CMS names each empty English box when you press Publish: write it, or
+  remove **الإنجليزية** from **منشورة باللغات** to publish the Arabic alone.
+- **An English page's own titles, descriptions and structured data** come with
+  it: its search title and description from **الظهور في البحث والمشاركة**, and
+  the company's and the product's description in English for search engines.
+
+**Questions only you can answer.** The English says what the Arabic says, with
+a few places where saying it in English asked for a choice:
+
+- **Demos in English?** The Arabic says a demo is 30 minutes «بالعربية». The
+  English leaves the language out — on the home page's line under its buttons,
+  the demo form and its confirmation email — because whether the team gives
+  demos in English is yours to say. If it does, add «in English» there.
+- **«مسؤولية واضحة» is «Clear ownership.»** The natural English, «Clear
+  accountability.», is three letters longer than the home page's heading has
+  room for.
+- **The Trust strip's four Arabic names** are written as the companies' names
+  read in English — Nawah Real Estate Investment, Alsharq Engineering
+  Consultants, Shaheen Engineering Consultants, Amak Build. Put right any a
+  company writes otherwise.
+- **The tool page's «واجهة عربية كاملة»** tells an Arabic reader the Pour
+  Tracker is properly Arabic. To an English reader the English says what is
+  true for them: it is fully English and Arabic, each the right way round.
+- **The referral page promises a code «فوراً»**, straight away, while the form
+  says the team will review the signup and then issue it. The English says what
+  the Arabic says; both may want the same correction.
+- **The Referral Program terms and the Privacy Policy stay Arabic.** The
+  English signup form's consent links to them and says the Arabic is their
+  binding text.
 
 ### The English screen descriptions, waiting for a decision
 
@@ -489,8 +591,8 @@ picture — and an English page needs those words in English.
 
 **Why it waits for you.** The words are yours, as the header's were. Nothing a
 visitor sees changes when you publish: no English page shows a screen until
-ticket 42 writes the English home and product pages. Publishing now means they
-arrive with their descriptions ready.
+the English home and product pages are published (the section above). Publishing
+now means they arrive with their descriptions ready.
 
 **What is proposed.** Each description is the Arabic one's meaning — for
 example *What the owner sees in Rabaed: one project dashboard with its approval
@@ -668,6 +770,12 @@ the Privacy Policy, so adding one is a developer's change.
 - **While a form's alert address is empty, it sends no email at all** — no
   alert, and no confirmation to the applicant. Requests are still stored. Set
   the address once the team is ready to answer them.
+- **Each form also has an English entry**, «نموذج … — بالإنجليزية»: the same
+  words for the English pages, and the confirmation sent to whoever fills the
+  form in in English (ticket 42). The alert address is one for both languages,
+  on the Arabic entry. A request from an English page is stored and alerted in
+  Arabic like any other, with its language marked — **لغة النموذج** on the
+  record, and a line in the alert — so the reply goes back in English.
 - A request with the hidden trap field filled in, or a sixth request from the
   same network address within an hour, is turned away and not stored.
 

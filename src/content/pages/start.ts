@@ -31,7 +31,7 @@ export type StartPageContent = {
  * (ticket 32). Its search title and description are an Editor's, in the CMS
  * (ticket 26, `src/content/search-settings.ts`).
  */
-const NAME = 'ابدأ';
+const NAME: Readonly<Record<Locale, string>> = { ar: 'ابدأ', en: 'Get started' };
 
 /**
  * The start page's content in `locale`: its words from its entry in the CMS
@@ -44,9 +44,9 @@ const NAME = 'ابدأ';
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
   const [entry, demoForm, trustStrip, meta] = await Promise.all([
     pageEntry('start-page', locale),
-    formPageWording(DEMO_REQUEST),
+    formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
-    getSearchSettings(locale, 'start', { name: NAME }),
+    getSearchSettings(locale, 'start', { name: NAME[locale] }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 

@@ -132,7 +132,7 @@ export async function GET(): Promise<Response> {
   const lines = [
     `# ${COMPANY.name.ar} (${COMPANY.name.en})`,
     '',
-    `> ${COMPANY.productDescription} ${COMPANY.legalName} — ${COMPANY.locality}، السعودية.`,
+    `> ${COMPANY.productDescription.ar} ${COMPANY.legalName} — ${COMPANY.locality.ar}، السعودية.`,
     '',
     ...section('الصفحات', pages),
     ...section('المقالات', posts.map((post) => ({ label: post.title, path: blogPostPath(post.slug), description: post.summary }))),

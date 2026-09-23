@@ -94,7 +94,8 @@ test('the switcher offers exactly the languages the alternates name', async ({ p
 });
 
 test('where a page has no English, the switcher says so rather than pretending', async ({ page }) => {
-  // The product page is Arabic-only until ticket 42, and its alternates say so.
+  // The product page is Arabic-only until its English is published — which in
+  // this database it never is — and its alternates say so.
   await page.goto('/product');
 
   const switcher = page.locator('.nav .lang');
@@ -146,10 +147,11 @@ test('the language chosen is remembered, and never redirects anyone (ADR-0014)',
  * blank page or answering «not found» about a page that exists (spec: user
  * story 18).
  *
- * The five marketing pages are Arabic-only until ticket 42 writes their
- * English. The three legal documents are Arabic-only for good: the Arabic is
- * the binding text and is never translated (spec: Out of Scope), which an
- * English reader is told in as many words.
+ * The five marketing pages are Arabic-only until the founder publishes the
+ * English ticket 42 proposed as drafts, and a draft changes nothing here. The
+ * three legal documents are Arabic-only for good: the Arabic is the binding
+ * text and is never translated (spec: Out of Scope), which an English reader
+ * is told in as many words.
  */
 const NOT_YET_IN_ENGLISH = ['/product', '/start', '/tool', '/referral', '/partnership'];
 const LEGAL_DOCUMENTS = [

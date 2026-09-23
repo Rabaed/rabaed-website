@@ -39,7 +39,7 @@ const LISTS = {
  */
 export function PartnershipApplicationForm({ wording }: { wording: FormPageWording<PartnershipApplicationField> }) {
   const answers = useAnswers(PARTNERSHIP_APPLICATION, wording);
-  const { outcome, progress, sending, send } = useSubmission(PARTNERSHIP_APPLICATION, answers.refuse);
+  const { outcome, progress, sending, send } = useSubmission(PARTNERSHIP_APPLICATION, wording.locale, answers.refuse);
   const words = wording.fields;
 
   const company = answers.field('company');
@@ -104,6 +104,7 @@ export function PartnershipApplicationForm({ wording }: { wording: FormPageWordi
               aria-label={words.company.label}
             />
             <UploadField
+              locale={wording.locale}
               name="commercialRegistration"
               label={words.commercialRegistration.label}
               note={words.commercialRegistration.placeholder}

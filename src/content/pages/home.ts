@@ -46,7 +46,7 @@ export type HomePageContent = {
  * (ticket 32). Its search title and description are an Editor's, in the CMS
  * (ticket 26, `src/content/search-settings.ts`).
  */
-const NAME = 'الرئيسية';
+const NAME: Readonly<Record<Locale, string>> = { ar: 'الرئيسية', en: 'Home' };
 
 /** A unit numbered by its place: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -79,9 +79,9 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
     pageEntry('home-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
-    formPageWording(DEMO_REQUEST),
+    formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
-    getSearchSettings(locale, 'home', { name: NAME }),
+    getSearchSettings(locale, 'home', { name: NAME[locale] }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;

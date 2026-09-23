@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { BeforeAfterBehaviour } from '@/components/home/before-after-behaviour';
 import { SEAM_AT_REST, type Verdict } from '@/components/home/before-after-seam';
+import type { ReadingDirection } from '@/lib/reading-direction';
 import { Inline, type InlineText } from '@/components/inline-text';
 
 export type Face = {
@@ -36,9 +37,10 @@ export type ComparisonSteps = readonly [ComparisonStep, ComparisonStep, Comparis
 
 /**
  * «نفس الاعتماد… بطريقتين.» — four moments in one material approval, the usual
- * way and Rabaed's, with a seam the visitor drags across them. Every step to
- * the right of the seam shows Rabaed's way (`before-after-seam.ts`), and the
- * verdict under them says which way won. `BeforeAfterBehaviour` makes it move.
+ * way and Rabaed's, with a seam the visitor drags across them. Every step on
+ * the side of the seam a line begins on — the right in Arabic, the left in
+ * English — shows Rabaed's way (`before-after-seam.ts`), and the verdict under
+ * them says which way won. `BeforeAfterBehaviour` makes it move.
  *
  * A server component. Every face of every step is in the first response.
  *
@@ -47,12 +49,20 @@ export type ComparisonSteps = readonly [ComparisonStep, ComparisonStep, Comparis
  * script runs, so for that moment — and for good without JavaScript — both
  * faces of every step are drawn on top of each other and all three verdicts
  * overlap. Here the stylesheet draws the seam at rest from the start: the two
- * steps on its right turned over, the half-way verdict, both tags half-shown.
+ * steps a line begins with turned over, the half-way verdict, both tags
+ * half-shown.
  */
-export function BeforeAfter({ content }: { content: HomeBeforeAfterContent }) {
+export function BeforeAfter({
+  content,
+  direction,
+}: {
+  content: HomeBeforeAfterContent;
+  /** The page's reading direction, which side of the seam Rabaed's way is on (`before-after-seam.ts`). */
+  direction: ReadingDirection;
+}) {
   const { verdicts } = content;
   return (
-    <section id="ba" className="light pad">
+    <section id="ba" className="light pad" data-direction={direction}>
       <div className="wrap">
         <div className="eyebrow">{content.eyebrow}</div>
         <h2>{content.heading}</h2>

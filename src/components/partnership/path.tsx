@@ -1,4 +1,5 @@
 import type { PageLink } from '@/components/page-link';
+import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 /** One stage from a first meeting to a first project. */
 export type PathStage = {
@@ -28,7 +29,14 @@ export type PartnershipPathContent = {
  * heading of their own in each — `.ph`, and HANDOFF §7.4's wrapping exception
  * in `programmes.css`.
  */
-export function Path({ content }: { content: PartnershipPathContent }) {
+export function Path({
+  content,
+  direction,
+}: {
+  content: PartnershipPathContent;
+  /** The page's reading direction, which its arrow points (`ONWARD`). */
+  direction: ReadingDirection;
+}) {
   return (
     <section id="path" className="light pad" style={{ borderTop: '1px solid var(--line)' }}>
       <div className="wrap">
@@ -42,7 +50,7 @@ export function Path({ content }: { content: PartnershipPathContent }) {
             <div className="tz-foot">
               <a className="tz-more" href={content.link.href}>
                 {content.link.label}
-                <span className="ar">←</span>
+                <span className="ar">{ONWARD[direction]}</span>
               </a>
             </div>
           </div>

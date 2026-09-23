@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
+  HINT_SWEEP,
   SEAM_AT_REST,
   SEAM_KEY_STEP,
   clampSeam,
@@ -13,6 +14,7 @@ import {
   type Verdict,
 } from '@/components/home/before-after-seam';
 import { prefersReducedMotion } from '@/lib/motion';
+import { readingDirectionOf } from '@/lib/reading-direction';
 
 /**
  * Makes the before-and-after comparison move, attached to markup the server
@@ -23,7 +25,7 @@ import { prefersReducedMotion } from '@/lib/motion';
  * - **The arrow keys**, on the handle, move it 6% at a time.
  * - **A one-time hint** the first time the section comes into view: the seam
  *   jumps to the right, sweeps all the way left, and settles in the middle, to
- *   show what dragging does. Never with reduced motion (spec: Animation), and —
+ *   show what dragging does — the other way round on an English page. Never with reduced motion (spec: Animation), and —
  *   **DIVERGENCE FROM THE REFERENCE SITE, deliberate** — never once the visitor
  *   has moved the seam themselves, and cut short if they take hold of it while
  *   it runs. The Reference site lets a sweep already under way wrench the seam
@@ -44,6 +46,7 @@ export function BeforeAfterBehaviour() {
     const usualTag = comparison?.querySelector<HTMLElement>('.cmp-tag.tb');
     const rabaedTag = comparison?.querySelector<HTMLElement>('.cmp-tag.ta');
     if (!section || !comparison || !handle || !usualTag || !rabaedTag) return;
+    const direction = readingDirectionOf(section);
 
     const steps = [...comparison.querySelectorAll<HTMLElement>('.cmp-col')].map((column) => ({
       column,
@@ -76,7 +79,7 @@ export function BeforeAfterBehaviour() {
     const paint = () => {
       let stepsOver = 0;
       steps.forEach((step) => {
-        const turned = turnedOver(step.centre, seam);
+        const turned = turnedOver(step.centre, seam, direction);
         if (turned > 0.5) stepsOver += 1;
         const faces = facesAt(turned);
         Object.assign(step.rabaed.style, faces.rabaed);
@@ -161,10 +164,11 @@ export function BeforeAfterBehaviour() {
           onEnter: () => {
             if (touched) return;
             const sweep = { position: SEAM_AT_REST };
+            const { from, to } = HINT_SWEEP[direction];
             hint = gsap
               .timeline({ delay: 0.3 })
-              .set(sweep, { position: 100, onUpdate: () => placeSeam(100) })
-              .to(sweep, { position: 0, duration: 1.8, ease: 'power2.inOut', onUpdate: () => placeSeam(sweep.position) })
+              .set(sweep, { position: from, onUpdate: () => placeSeam(from) })
+              .to(sweep, { position: to, duration: 1.8, ease: 'power2.inOut', onUpdate: () => placeSeam(sweep.position) })
               .to(sweep, { position: SEAM_AT_REST, duration: 0.8, ease: 'power2.out', onUpdate: () => placeSeam(sweep.position) }, '+=.35');
           },
         });

@@ -26,7 +26,7 @@ export async function SiteDocument({ locale, children }: { locale: Locale; child
     <html lang={locale} dir={LOCALES[locale].dir}>
       <body>
         {children}
-        <StructuredData data={organisationData(contact)} />
+        <StructuredData data={organisationData(contact, locale)} />
         <PreviewBanner />
         <Measurement />
       </body>

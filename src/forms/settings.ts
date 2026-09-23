@@ -3,38 +3,52 @@
  * page while an editor is previewing, as last saved.
  *
  * A word the CMS does not have — a database the settings were never published
- * to — is the definition's own, so a form never shows an empty label.
+ * to — is the definition's own, so a form never shows an empty label. That
+ * holds for each language on its own: the English entry is one of its own
+ * (`formSettingsSlug`), and until its English is published an English page
+ * shows the English the form was written with (ticket 42) — never the Arabic.
  */
 import config from '@payload-config';
 import { draftMode } from 'next/headers';
 import { getPayload, type GlobalSlug } from 'payload';
 import { formSettingsSlug, optionFieldName } from '@/cms/globals/form-settings';
+import { LOCALE_CODES, type Locale } from '@/lib/locales';
 import { fieldNames, fieldOptions, type FieldWording, type FormDefinition, type FormPageWording, type FormWording } from './definition';
 
-export type FormSettings<Field extends string> = FormWording<Field> & {
-  /** Where alerts go, or `null` while none is set. */
+export type FormSettings<Field extends string> = {
+  /** Where alerts go, or `null` while none is set. One address, whichever language a form is filled in. */
   readonly alertAddress: string | null;
+  /** Every word, in each language. */
+  readonly wording: Readonly<Record<Locale, FormWording<Field>>>;
 };
 
 type Saved = { readonly [key: string]: unknown };
 
-/** The words the page shows with the form. */
-export async function formPageWording<Field extends string>(definition: FormDefinition<Field>): Promise<FormPageWording<Field>> {
+/** The words the page shows with the form, in the page's language. */
+export async function formPageWording<Field extends string>(
+  definition: FormDefinition<Field>,
+  locale: Locale,
+): Promise<FormPageWording<Field>> {
   const { isEnabled: previewing } = await draftMode();
-  const { heading, lead, submit, finePrint, fields } = wordingFrom(definition, await saved(definition, previewing));
-  return { heading, lead, submit, finePrint, fields };
+  const { heading, lead, submit, finePrint, fields } = wordingFrom(definition, locale, await saved(definition, locale, previewing));
+  return { locale, heading, lead, submit, finePrint, fields };
 }
 
 /** Everything a submission is answered with: always what is published, never a draft. */
 export async function publishedFormSettings<Field extends string>(definition: FormDefinition<Field>): Promise<FormSettings<Field>> {
-  const settings = await saved(definition, false);
-  const alertAddress = typeof settings.alertAddress === 'string' ? settings.alertAddress.trim() : '';
-  return { ...wordingFrom(definition, settings), alertAddress: alertAddress || null };
+  const stored = await Promise.all(LOCALE_CODES.map((locale) => saved(definition, locale, false)));
+  const byLocale = new Map(LOCALE_CODES.map((locale, index) => [locale, stored[index]]));
+  const arabic = byLocale.get('ar')!;
+  const alertAddress = typeof arabic.alertAddress === 'string' ? arabic.alertAddress.trim() : '';
+  const wording = Object.fromEntries(
+    LOCALE_CODES.map((locale) => [locale, wordingFrom(definition, locale, byLocale.get(locale)!)]),
+  ) as Record<Locale, FormWording<Field>>;
+  return { alertAddress: alertAddress || null, wording };
 }
 
-async function saved(definition: FormDefinition, draft: boolean): Promise<Saved> {
+async function saved(definition: FormDefinition, locale: Locale, draft: boolean): Promise<Saved> {
   const payload = await getPayload({ config });
-  const slug = formSettingsSlug(definition.id) as GlobalSlug;
+  const slug = formSettingsSlug(definition.id, locale) as GlobalSlug;
   return (await payload.findGlobal({ slug, draft, depth: 0 })) as unknown as Saved;
 }
 
@@ -55,8 +69,8 @@ function group(value: unknown): Saved {
   return value && typeof value === 'object' ? (value as Saved) : {};
 }
 
-function wordingFrom<Field extends string>(definition: FormDefinition<Field>, settings: Saved): FormWording<Field> {
-  const defaults = definition.wording;
+function wordingFrom<Field extends string>(definition: FormDefinition<Field>, locale: Locale, settings: Saved): FormWording<Field> {
+  const defaults = definition.wording[locale];
   const fields = Object.fromEntries(
     fieldNames(definition).map((name) => {
       const own = group(group(settings.fields)[name]);

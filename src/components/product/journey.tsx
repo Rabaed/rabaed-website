@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { JourneyBehaviour } from '@/components/product/journey-behaviour';
 import { ScreenMockPicture, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
+import type { ReadingDirection } from '@/lib/reading-direction';
 
 /** One piece of the row of pills at the foot of a panel. */
 export type FlowStep =
@@ -49,7 +50,14 @@ export type ProductJourneyContent = {
  * a stylesheet cannot tell whether a script runs, which is why these few rules
  * are here rather than in `product.css`.
  */
-export function Journey({ content }: { content: ProductJourneyContent }) {
+export function Journey({
+  content,
+  direction,
+}: {
+  content: ProductJourneyContent;
+  /** The page's reading direction, which the section's behaviour turns round by (`src/lib/reading-direction.ts`). */
+  direction: ReadingDirection;
+}) {
   return (
     // A plain wrapper, and it is load-bearing. Pinning moves the section into
     // a spacer element GSAP inserts around it, and React removes a page's
@@ -58,7 +66,7 @@ export function Journey({ content }: { content: ProductJourneyContent }) {
     // to remove it from a parent it no longer has, which throws. Removing the
     // wrapper takes the spacer and the section with it.
     <div>
-      <section id="journey" className="dark" data-direction="rtl">
+      <section id="journey" className="dark" data-direction={direction}>
         <div className="j-head">
           <div className="wrap">
             <div>

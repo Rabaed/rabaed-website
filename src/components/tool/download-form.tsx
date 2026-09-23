@@ -5,6 +5,7 @@ import { TRAP_FIELD, fieldNames, fieldOptions, isRequired, type FormPageWording 
 import { TOOL_DOWNLOAD, type ToolDownloadField } from '@/forms/tool-download';
 import { useAnswers } from '@/forms/use-answers';
 import { useSubmission } from '@/forms/use-submission';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /** The four details the button waits for; the country code has a default and the company is optional. */
 const REQUIRED = fieldNames(TOOL_DOWNLOAD).filter((name) => isRequired(TOOL_DOWNLOAD.fields[name]));
@@ -12,7 +13,6 @@ const REQUIRED = fieldNames(TOOL_DOWNLOAD).filter((name) => isRequired(TOOL_DOWN
 /** The country codes, in the Reference site's order. */
 const COUNTRY_CODES = fieldOptions(TOOL_DOWNLOAD.fields.countryCode);
 
-const LOCKED = 'أكمل البيانات لتفعيل التحميل';
 
 /**
  * The file itself, at the address `next.config.ts` sends as an attachment.
@@ -24,16 +24,47 @@ const DOWNLOAD_NAME = 'Rabaed-Pour-Tracker.html';
 const FILE = `/downloads/${DOWNLOAD_NAME}`;
 
 /**
- * What to do with the file once it has arrived, the Reference site's three
- * steps. They describe the file rather than the page, so they stay in code
- * with the file's name: an Editor changing them would be describing a browser
- * (`reference/site/tool.html`, `#tl-done`).
+ * What the form says of its own, in each language: the locked button, and the
+ * panel once the file is asked for with the Reference site's three steps for
+ * what to do with it. They describe the file rather than the page, so they
+ * stay in code with the file's name: an Editor changing them would be
+ * describing a browser (`reference/site/tool.html`, `#tl-done`).
  */
-const STEPS = [
-  { bold: 'احفظ الملف', text: 'في مكان ثابت — سطح المكتب أو مجلد المشروع. ليس في مجلد التنزيلات.' },
-  { bold: 'افتحه بنقرتين', text: 'في Chrome أو Edge.' },
-  { bold: 'اختر مجلداً للمشروع', text: 'عند أول تشغيل — وابدأ بتسجيل أول صبّة.' },
-] as const;
+const WORDS: Readonly<
+  Record<
+    Locale,
+    {
+      readonly locked: string;
+      readonly look: readonly [string, string];
+      readonly notStarted: string;
+      readonly steps: readonly { readonly bold: string; readonly text: string }[];
+      readonly retry: string;
+    }
+  >
+> = {
+  ar: {
+    locked: 'أكمل البيانات لتفعيل التحميل',
+    look: ['ابحث عن', 'في مجلد التنزيلات. ثلاث خطوات وتكون جاهزاً:'],
+    notStarted: 'إن لم يبدأ التحميل خلال ثوانٍ، اضغط الرابط أسفل الخطوات.',
+    steps: [
+      { bold: 'احفظ الملف', text: 'في مكان ثابت — سطح المكتب أو مجلد المشروع. ليس في مجلد التنزيلات.' },
+      { bold: 'افتحه بنقرتين', text: 'في Chrome أو Edge.' },
+      { bold: 'اختر مجلداً للمشروع', text: 'عند أول تشغيل — وابدأ بتسجيل أول صبّة.' },
+    ],
+    retry: 'لم يبدأ التحميل؟ اضغط هنا',
+  },
+  en: {
+    locked: 'Complete your details to download',
+    look: ['Look for', 'in your downloads folder. Three steps and you are ready:'],
+    notStarted: 'If the download does not start within a few seconds, press the link below the steps.',
+    steps: [
+      { bold: 'Save the file', text: 'somewhere permanent — your desktop or the project folder. Not your downloads folder.' },
+      { bold: 'Double-click to open it', text: 'in Chrome or Edge.' },
+      { bold: 'Choose a folder for the project', text: 'the first time it runs — and record your first pour.' },
+    ],
+    retry: 'Download did not start? Press here',
+  },
+};
 
 /**
  * Starts the download. A link clicked from the page rather than a redirect:
@@ -83,7 +114,7 @@ function deliver(): void {
 export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloadField> }) {
   const answers = useAnswers(TOOL_DOWNLOAD, wording, { countryCode: '+966' });
   const { acceptable, complete, field, touch } = answers;
-  const { outcome, sending, send } = useSubmission(TOOL_DOWNLOAD, answers.refuse);
+  const { outcome, sending, send } = useSubmission(TOOL_DOWNLOAD, wording.locale, answers.refuse);
   const validCount = REQUIRED.filter(acceptable).length;
   const delivered = outcome.outcome === 'received';
 
@@ -109,6 +140,10 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
   const email = field('email');
   const company = field('company');
   const words = wording.fields;
+  const own = WORDS[wording.locale];
+  // Typed left to right, as a number and an address are; in Arabic aligned to
+  // the right like the rest of the form — the Reference site's override.
+  const latinAlign = LOCALES[wording.locale].dir === 'rtl' ? 'right' : 'left';
 
   if (delivered) {
     return (
@@ -122,18 +157,18 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
             {outcome.message}
           </div>
           <p>
-            ابحث عن{' '}
+            {own.look[0]}{' '}
             <b className="mono" dir="ltr">
               {DOWNLOAD_NAME}
             </b>{' '}
-            في مجلد التنزيلات. ثلاث خطوات وتكون جاهزاً:
+            {own.look[1]}
           </p>
           {/* A browser tells a page nothing about a download, so the panel
               says what it knows — the details are kept — and points at the
               link for the case it cannot see. */}
-          <p>إن لم يبدأ التحميل خلال ثوانٍ، اضغط الرابط أسفل الخطوات.</p>
+          <p>{own.notStarted}</p>
           <ol className="tl-steps">
-            {STEPS.map((step, index) => (
+            {own.steps.map((step, index) => (
               <li key={step.bold}>
                 <i>{index + 1}</i>
                 <span>
@@ -152,7 +187,7 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
             download={DOWNLOAD_NAME}
             style={{ justifyContent: 'center', width: '100%' }}
           >
-            لم يبدأ التحميل؟ اضغط هنا
+            {own.retry}
           </a>
         </div>
       </div>
@@ -191,8 +226,8 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
           </div>
 
           {/* The phone number and the address are Latin, so they are typed
-              left to right, but aligned to the right like the rest of the
-              form — the Reference site's override, kept. */}
+              left to right — and, in Arabic, aligned to the right like the
+              rest of the form: the Reference site's override, kept. */}
           <div>
             <div className="tl-cc">
               <select {...countryCode.props} aria-label={words.countryCode.label}>
@@ -208,7 +243,7 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
                 inputMode="tel"
                 autoComplete="tel-national"
                 dir="ltr"
-                style={{ textAlign: 'right' }}
+                style={{ textAlign: latinAlign }}
                 placeholder={words.phone.placeholder}
                 aria-label={words.phone.label}
               />
@@ -222,7 +257,7 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
               inputMode="email"
               autoComplete="email"
               dir="ltr"
-              style={{ textAlign: 'right' }}
+              style={{ textAlign: latinAlign }}
               placeholder={words.email.placeholder}
               aria-label={words.email.label}
             />
@@ -242,7 +277,7 @@ export function DownloadForm({ wording }: { wording: FormPageWording<ToolDownloa
           )}
 
           <button className="btn p" type="submit" disabled={!complete || sending} style={{ justifyContent: 'center' }}>
-            {complete ? wording.submit : LOCKED}
+            {complete ? wording.submit : own.locked}
           </button>
           <small className="fine">{wording.finePrint}</small>
         </form>

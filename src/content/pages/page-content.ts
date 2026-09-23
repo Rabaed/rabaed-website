@@ -1,6 +1,7 @@
 import { FAQ_PAGES, type FaqPageKey } from '@/cms/faq-pages';
 import { pageQuestions } from '@/cms/faqs';
 import type { QuestionsContent } from '@/components/questions';
+import { siteWordsIn } from '@/content/site-words';
 import type { Locale } from '@/lib/locales';
 
 /**
@@ -93,4 +94,40 @@ export function inLocale<T>(page: string, content: Partial<Record<Locale, T>>, l
   const found = content[locale];
   if (found === undefined) throw new ContentNotInLocale(page, locale);
   return found;
+}
+
+/**
+ * A page's content, or `null` where the page is not published in the locale
+ * asked for — which an English route answers with a notice (ticket 42). Any
+ * other failure is not a missing translation, and is thrown on.
+ */
+export async function contentOrNull<T>(content: Promise<T>): Promise<T | null> {
+  try {
+    return await content;
+  } catch (error) {
+    if (error instanceof ContentNotInLocale) return null;
+    throw error;
+  }
+}
+
+/**
+ * A marketing page's English content, or `null` while the page is not
+ * published in English (ticket 42): everything its module reads — its own
+ * entry, and whatever it shares with other pages — and the header and footer
+ * every page is drawn in (ticket 40). A page is never published half in
+ * English, and one with no menu or footer is half.
+ */
+export async function inEnglish<T>(read: (locale: 'en') => Promise<T>): Promise<T | null> {
+  const [content, shell] = await Promise.all([contentOrNull(read('en')), siteWordsIn('en')]);
+  return shell ? content : null;
+}
+
+/**
+ * The languages a marketing page is published in: Arabic, which it always is,
+ * and English once `inEnglish` says so. What the Arabic page tells the
+ * switcher and its `hreflang` alternates, so neither offers an English page
+ * before it exists.
+ */
+export async function publishedLocales(read: (locale: 'en') => Promise<unknown>): Promise<Locale[]> {
+  return (await inEnglish(read)) === null ? ['ar'] : ['ar', 'en'];
 }

@@ -36,7 +36,7 @@ export type PartnershipPageContent = {
  * (ticket 32). Its search title and description are an Editor's, in the CMS
  * (ticket 26, `src/content/search-settings.ts`).
  */
-const NAME = 'برنامج الشراكات';
+const NAME: Readonly<Record<Locale, string>> = { ar: 'برنامج الشراكات', en: 'Partnership Program' };
 
 /** A card or stage numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -53,8 +53,8 @@ const numbered = (index: number) => String(index + 1).padStart(2, '0');
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
   const [entry, applicationForm, meta] = await Promise.all([
     pageEntry('partnership-page', locale),
-    formPageWording(PARTNERSHIP_APPLICATION),
-    getSearchSettings(locale, 'partnership', { name: NAME }),
+    formPageWording(PARTNERSHIP_APPLICATION, locale),
+    getSearchSettings(locale, 'partnership', { name: NAME[locale] }),
   ]);
   const { hero, idea, audience, modes, benefits, path, questions, apply } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);

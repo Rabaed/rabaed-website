@@ -1,4 +1,5 @@
-import type { SubmissionOutcome } from './definition';
+import type { Locale } from '@/lib/locales';
+import { LOCALE_PARAMETER, type SubmissionOutcome } from './definition';
 
 /**
  * Sends a form to the site (`src/app/(forms)/api/forms/`), reporting how much
@@ -10,13 +11,14 @@ import type { SubmissionOutcome } from './definition';
  */
 export function sendForm(
   formId: string,
+  locale: Locale,
   data: FormData,
   onProgress: (fraction: number) => void,
   failed: string,
 ): Promise<SubmissionOutcome> {
   return new Promise((resolve) => {
     const request = new XMLHttpRequest();
-    request.open('POST', `/api/forms/${formId}`);
+    request.open('POST', `/api/forms/${formId}?${LOCALE_PARAMETER}=${locale}`);
     request.responseType = 'json';
     request.upload.onprogress = (event) => {
       if (event.lengthComputable && event.total > 0) onProgress(event.loaded / event.total);

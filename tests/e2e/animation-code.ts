@@ -23,8 +23,22 @@ export const ANIMATIONS = [
   { name: "the home page's card decks", marker: '.pcard', usedOn: '/' },
   { name: "the home page's four units", marker: '.jt-hint', usedOn: '/' },
   { name: "the product page's journey", marker: '.j-head', usedOn: '/product' },
-  { name: "the product page's roles", marker: 'role on', usedOn: '/product' },
+  // Quoted, because the demo request form's English label, «Your role on the
+  // project», is on the home and start pages too (ticket 42).
+  { name: "the product page's roles", marker: '"role on"', usedOn: '/product' },
 ] as const;
+
+/**
+ * A route that carries another page's scripts, by the page it carries them for.
+ *
+ * `/en` is the home page in English (ticket 42). One route draws it, and —
+ * until its English is published — the English site's word that it is on its
+ * way; and a route carries the scripts of everything it can draw, whichever it
+ * draws. So `/en` is held to what the home page loads, not to what the
+ * placeholder would. It is the one cost of the placeholder, and it ends when
+ * the founder publishes the English home page, which needs every one of them.
+ */
+export const CARRIES_THE_SCRIPTS_OF: Readonly<Record<string, string>> = { '/en': '/' };
 
 /**
  * The animation library itself, and the pages that have something to animate

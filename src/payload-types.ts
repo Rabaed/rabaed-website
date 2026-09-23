@@ -103,9 +103,13 @@ export interface Config {
     'site-settings': SiteSetting;
     'ai-crawlers': AiCrawler;
     'demo-request-form': DemoRequestForm;
+    'demo-request-form-en': DemoRequestFormEn;
     'referral-signup-form': ReferralSignupForm;
+    'referral-signup-form-en': ReferralSignupFormEn;
     'tool-download-form': ToolDownloadForm;
+    'tool-download-form-en': ToolDownloadFormEn;
     'partnership-application-form': PartnershipApplicationForm;
+    'partnership-application-form-en': PartnershipApplicationFormEn;
     'referral-program': ReferralProgram;
     'start-page': StartPage;
     'tool-page': ToolPage;
@@ -124,9 +128,13 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'ai-crawlers': AiCrawlersSelect<false> | AiCrawlersSelect<true>;
     'demo-request-form': DemoRequestFormSelect<false> | DemoRequestFormSelect<true>;
+    'demo-request-form-en': DemoRequestFormEnSelect<false> | DemoRequestFormEnSelect<true>;
     'referral-signup-form': ReferralSignupFormSelect<false> | ReferralSignupFormSelect<true>;
+    'referral-signup-form-en': ReferralSignupFormEnSelect<false> | ReferralSignupFormEnSelect<true>;
     'tool-download-form': ToolDownloadFormSelect<false> | ToolDownloadFormSelect<true>;
+    'tool-download-form-en': ToolDownloadFormEnSelect<false> | ToolDownloadFormEnSelect<true>;
     'partnership-application-form': PartnershipApplicationFormSelect<false> | PartnershipApplicationFormSelect<true>;
+    'partnership-application-form-en': PartnershipApplicationFormEnSelect<false> | PartnershipApplicationFormEnSelect<true>;
     'referral-program': ReferralProgramSelect<false> | ReferralProgramSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
@@ -554,6 +562,10 @@ export interface FaqEntry {
 export interface FormSubmission {
   id: number;
   form: 'demo-request' | 'referral-signup' | 'tool-download' | 'partnership-application';
+  /**
+   * The language the form was filled in, to reply in.
+   */
+  locale: 'ar' | 'en';
   name?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -886,6 +898,7 @@ export interface FaqEntriesSelect<T extends boolean = true> {
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
   form?: T;
+  locale?: T;
   name?: T;
   email?: T;
   phone?: T;
@@ -1005,7 +1018,7 @@ export interface AiCrawler {
 export interface DemoRequestForm {
   id: number;
   /**
-   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   * Every request sent from this form, in Arabic or in English, is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
    */
   alertAddress?: string | null;
   heading: string;
@@ -1101,13 +1114,113 @@ export interface DemoRequestForm {
   createdAt?: string | null;
 }
 /**
+ * The form’s words on the English pages, and the confirmation sent to whoever fills it in in English. The alert address is one for both languages, and is on the Arabic form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demo-request-form-en".
+ */
+export interface DemoRequestFormEn {
+  id: number;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    name: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    role: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_owner: string;
+        option_consultant: string;
+        option_contractor: string;
+      };
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    company: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    activeProjects: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {name} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "referral-signup-form".
  */
 export interface ReferralSignupForm {
   id: number;
   /**
-   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   * Every request sent from this form, in Arabic or in English, is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
    */
   alertAddress?: string | null;
   heading: string;
@@ -1268,13 +1381,178 @@ export interface ReferralSignupForm {
   createdAt?: string | null;
 }
 /**
+ * The form’s words on the English pages, and the confirmation sent to whoever fills it in in English. The alert address is one for both languages, and is on the Arabic form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-signup-form-en".
+ */
+export interface ReferralSignupFormEn {
+  id: number;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    name: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    city: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    profession: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_engineer: string;
+        option_project_manager: string;
+        option_independent_consultant: string;
+        option_contractor: string;
+        option_real_estate_advisor: string;
+        option_content_creator: string;
+        option_other: string;
+      };
+    };
+    employer: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    ibanCertificate: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    accountHolder: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    commercialRegistration: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    taxRegistrationCertificate: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    acceptTerms: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      /**
+       * Shown under the box while it is not ticked.
+       */
+      message: string;
+    };
+    declareNoConflict: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      /**
+       * Shown under the box while it is not ticked.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {name} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tool-download-form".
  */
 export interface ToolDownloadForm {
   id: number;
   /**
-   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   * Every request sent from this form, in Arabic or in English, is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
    */
   alertAddress?: string | null;
   heading: string;
@@ -1377,13 +1655,120 @@ export interface ToolDownloadForm {
   createdAt?: string | null;
 }
 /**
+ * The form’s words on the English pages, and the confirmation sent to whoever fills it in in English. The alert address is one for both languages, and is on the Arabic form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tool-download-form-en".
+ */
+export interface ToolDownloadFormEn {
+  id: number;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    firstName: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    lastName: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    countryCode: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option__966: string;
+        option__971: string;
+        option__965: string;
+        option__974: string;
+        option__973: string;
+        option__968: string;
+        option__962: string;
+        option__20: string;
+        option__90: string;
+        option_other: string;
+      };
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    company: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {name} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "partnership-application-form".
  */
 export interface PartnershipApplicationForm {
   id: number;
   /**
-   * Every request sent from this form is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
+   * Every request sent from this form, in Arabic or in English, is alerted here. While it is empty no email is sent at all — no alert, and no confirmation to the applicant — and every request is still kept under Form submissions.
    */
   alertAddress?: string | null;
   heading: string;
@@ -1574,6 +1959,208 @@ export interface PartnershipApplicationForm {
   confirmationSubject: string;
   /**
    * Write {الاسم} where the applicant’s name goes.
+   */
+  confirmationBody: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The form’s words on the English pages, and the confirmation sent to whoever fills it in in English. The alert address is one for both languages, and is on the Arabic form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnership-application-form-en".
+ */
+export interface PartnershipApplicationFormEn {
+  id: number;
+  heading: string;
+  lead: string;
+  submit: string;
+  finePrint: string;
+  fields: {
+    company: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    commercialRegistration: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      message: string;
+      tooLarge: string;
+      wrongType: string;
+    };
+    city: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    name: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    jobTitle: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    phone: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    email: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+    activity: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_consulting_office: string;
+        option_project_management: string;
+        option_contracting: string;
+        option_real_estate_development: string;
+        option_other: string;
+      };
+    };
+    activeProjects: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_1_3: string;
+        option_4_10: string;
+        option_11_25: string;
+        option_over_25: string;
+      };
+    };
+    clientType: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_individual_developers: string;
+        option_development_companies: string;
+        option_government: string;
+        option_mixed: string;
+      };
+    };
+    projectArea: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        option_under_5000: string;
+        option_5000_20000: string;
+        option_20000_50000: string;
+        option_over_50000: string;
+      };
+    };
+    partnershipMode: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+      options: {
+        o_embedded_in_proposal: string;
+        o_office_licence: string;
+        o_approved_referral: string;
+        o_undecided: string;
+      };
+    };
+    goals: {
+      /**
+       * Read out by screen readers, and shown in Form submissions.
+       */
+      label: string;
+      placeholder: string;
+      /**
+       * Shown under the field while its answer is not acceptable.
+       */
+      message: string;
+    };
+  };
+  received: string;
+  /**
+   * For a request that looks automated, or too many from one address within an hour.
+   */
+  refused: string;
+  failed: string;
+  confirmationSubject: string;
+  /**
+   * Write {name} where the applicant’s name goes.
    */
   confirmationBody: string;
   _status?: ('draft' | 'published') | null;
@@ -4311,10 +4898,204 @@ export interface DemoRequestFormSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demo-request-form-en_select".
+ */
+export interface DemoRequestFormEnSelect<T extends boolean = true> {
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        name?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        role?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_owner?: T;
+                    option_consultant?: T;
+                    option_contractor?: T;
+                  };
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        activeProjects?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "referral-signup-form_select".
  */
 export interface ReferralSignupFormSelect<T extends boolean = true> {
   alertAddress?: T;
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        name?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        city?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        profession?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_engineer?: T;
+                    option_project_manager?: T;
+                    option_independent_consultant?: T;
+                    option_contractor?: T;
+                    option_real_estate_advisor?: T;
+                    option_content_creator?: T;
+                    option_other?: T;
+                  };
+            };
+        employer?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        ibanCertificate?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        accountHolder?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        commercialRegistration?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        taxRegistrationCertificate?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        acceptTerms?:
+          | T
+          | {
+              label?: T;
+              message?: T;
+            };
+        declareNoConflict?:
+          | T
+          | {
+              label?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-signup-form-en_select".
+ */
+export interface ReferralSignupFormEnSelect<T extends boolean = true> {
   heading?: T;
   lead?: T;
   submit?: T;
@@ -4514,10 +5295,246 @@ export interface ToolDownloadFormSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tool-download-form-en_select".
+ */
+export interface ToolDownloadFormEnSelect<T extends boolean = true> {
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        firstName?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        lastName?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        countryCode?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option__966?: T;
+                    option__971?: T;
+                    option__965?: T;
+                    option__974?: T;
+                    option__973?: T;
+                    option__968?: T;
+                    option__962?: T;
+                    option__20?: T;
+                    option__90?: T;
+                    option_other?: T;
+                  };
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "partnership-application-form_select".
  */
 export interface PartnershipApplicationFormSelect<T extends boolean = true> {
   alertAddress?: T;
+  heading?: T;
+  lead?: T;
+  submit?: T;
+  finePrint?: T;
+  fields?:
+    | T
+    | {
+        company?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        commercialRegistration?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              tooLarge?: T;
+              wrongType?: T;
+            };
+        city?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        name?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        jobTitle?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        phone?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        email?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+        activity?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_consulting_office?: T;
+                    option_project_management?: T;
+                    option_contracting?: T;
+                    option_real_estate_development?: T;
+                    option_other?: T;
+                  };
+            };
+        activeProjects?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_1_3?: T;
+                    option_4_10?: T;
+                    option_11_25?: T;
+                    option_over_25?: T;
+                  };
+            };
+        clientType?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_individual_developers?: T;
+                    option_development_companies?: T;
+                    option_government?: T;
+                    option_mixed?: T;
+                  };
+            };
+        projectArea?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    option_under_5000?: T;
+                    option_5000_20000?: T;
+                    option_20000_50000?: T;
+                    option_over_50000?: T;
+                  };
+            };
+        partnershipMode?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+              options?:
+                | T
+                | {
+                    o_embedded_in_proposal?: T;
+                    o_office_licence?: T;
+                    o_approved_referral?: T;
+                    o_undecided?: T;
+                  };
+            };
+        goals?:
+          | T
+          | {
+              label?: T;
+              placeholder?: T;
+              message?: T;
+            };
+      };
+  received?: T;
+  refused?: T;
+  failed?: T;
+  confirmationSubject?: T;
+  confirmationBody?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partnership-application-form-en_select".
+ */
+export interface PartnershipApplicationFormEnSelect<T extends boolean = true> {
   heading?: T;
   lead?: T;
   submit?: T;

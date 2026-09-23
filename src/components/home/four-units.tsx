@@ -2,6 +2,7 @@ import { FourUnitsBehaviour } from '@/components/home/four-units-behaviour';
 import { FIRST_CHOSEN, unitTabAppearance } from '@/components/home/four-units-state';
 import type { PageLink } from '@/components/page-link';
 import { ScreenMockImage, type ScreenMockPictureContent } from '@/components/screen-mock-picture';
+import { ONWARD, type ReadingDirection } from '@/lib/reading-direction';
 
 export type UnitTab = {
   /** The small line above the title: a unit's number, or the name of what the units produce. */
@@ -59,9 +60,16 @@ export type HomeFourUnitsContent = {
  * the handoff describe it widening to 1440px. No Reference page has that rule
  * any more, and the baselines were captured without it — ADR-0005.
  */
-export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
+export function FourUnits({
+  content,
+  direction,
+}: {
+  content: HomeFourUnitsContent;
+  /** The page's reading direction, which the section's behaviour turns round by (`src/lib/reading-direction.ts`). */
+  direction: ReadingDirection;
+}) {
   return (
-    <section id="jt" className="dark pad" data-direction="rtl">
+    <section id="jt" className="dark pad" data-direction={direction}>
       <div className="wrap">
         <div className="tz-head">
           <div className="eyebrow">{content.eyebrow}</div>
@@ -129,7 +137,7 @@ export function FourUnits({ content }: { content: HomeFourUnitsContent }) {
         <div className="tz-foot">
           <a className="tz-more" href={content.more.href}>
             <span>{content.more.label}</span>
-            <span className="ar">←</span>
+            <span className="ar">{ONWARD[direction]}</span>
           </a>
         </div>
       </div>

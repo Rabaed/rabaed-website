@@ -39,7 +39,7 @@ export type ReferralPageContent = {
  * and each may quote a Referral Program value by name — `{payout}` — which is
  * inserted here as it is in the page's own words (tickets 26 and 56).
  */
-const NAME = 'برنامج الإحالة';
+const NAME: Readonly<Record<Locale, string>> = { ar: 'برنامج الإحالة', en: 'Referral Program' };
 
 /** A step or kind numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -80,8 +80,8 @@ export async function getReferralPage(locale: Locale): Promise<ReferralPageConte
   const values = await referralProgramValues();
   const [entry, signupForm, meta] = await Promise.all([
     pageEntry('referral-page', locale),
-    formPageWording(REFERRAL_SIGNUP),
-    getSearchSettings(locale, 'referral', { name: NAME, values }),
+    formPageWording(REFERRAL_SIGNUP, locale),
+    getSearchSettings(locale, 'referral', { name: NAME[locale], values }),
   ]);
   const { hero, howItWorks, offer, audience, whatIsReferred, termsSummary, questions, signup } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => withValues(wordsIn(locale, stored), values);

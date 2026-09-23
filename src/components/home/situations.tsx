@@ -1,4 +1,5 @@
 import { CardDeck, type CardDeckWords } from '@/components/home/card-deck';
+import type { ReadingDirection } from '@/lib/reading-direction';
 
 export type FieldSituation = {
   /** What gets said on site. */
@@ -31,7 +32,14 @@ export type HomeSituationsContent = {
  * written against it and the class names and ids are load-bearing (spec:
  * Design system). Everywhere a name is ours to choose, it is "situations".
  */
-export function Situations({ content }: { content: HomeSituationsContent }) {
+export function Situations({
+  content,
+  direction,
+}: {
+  content: HomeSituationsContent;
+  /** The page's reading direction, which the section's behaviour turns round by (`src/lib/reading-direction.ts`). */
+  direction: ReadingDirection;
+}) {
   const { close } = content;
   const total = content.situations.length;
   const cards = content.situations.map((situation, index) => (
@@ -64,7 +72,7 @@ export function Situations({ content }: { content: HomeSituationsContent }) {
           </p>
         </div>
 
-        <CardDeck id="situations-deck" {...content.deck} direction="rtl" cards={cards} />
+        <CardDeck id="situations-deck" {...content.deck} direction={direction} cards={cards} />
       </div>
     </section>
   );

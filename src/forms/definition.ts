@@ -16,6 +16,8 @@
  * after that (`src/cms/globals/form-settings.ts`).
  */
 
+import { DEFAULT_LOCALE, LOCALE_CODES, type Locale } from '../lib/locales';
+
 /** Every form the site has a definition for. */
 export const FORM_IDS = ['demo-request', 'referral-signup', 'tool-download', 'partnership-application'] as const;
 
@@ -61,8 +63,10 @@ export type FieldWording = {
   readonly wrongType?: string;
 };
 
-/** The words the page shows with the form. */
+/** The words the page shows with the form, in one language. */
 export type FormPageWording<Field extends string = string> = {
+  /** The language they are in, which decides the words the form keeps in code — a file picker's, a consent's. */
+  readonly locale: Locale;
   readonly heading: string;
   readonly lead: string;
   readonly submit: string;
@@ -80,11 +84,12 @@ export type FormReplyWording = {
   readonly refused: string;
   readonly failed: string;
   readonly confirmationSubject: string;
-  /** `{الاسم}` is replaced with the applicant's name. */
+  /** The language's `NAME_PLACEHOLDER` is replaced with the applicant's name. */
   readonly confirmationBody: string;
 };
 
-export type FormWording<Field extends string = string> = FormPageWording<Field> & FormReplyWording;
+/** Every word of a form in one language: what the page shows, and what only the server says. */
+export type FormWording<Field extends string = string> = Omit<FormPageWording<Field>, 'locale'> & FormReplyWording;
 
 /**
  * Every answer as text: typed text as typed, a consent as `on` when ticked,
@@ -103,8 +108,12 @@ export type FormDefinition<Field extends string = string> = {
   readonly previewPath: string;
   readonly fields: Readonly<Record<Field, FieldDefinition>>;
   applicant(answers: Answers<Field>): Applicant;
-  /** What a database starts with (see above). */
-  readonly wording: FormWording<Field>;
+  /**
+   * What a database starts with (see above), in each language. The English is
+   * also what an English page shows for any word an Editor has not written in
+   * English in the CMS (ticket 42).
+   */
+  readonly wording: Readonly<Record<Locale, FormWording<Field>>>;
 };
 
 /** What is wrong with an attached document. A missing one is the field's own message. */
@@ -141,8 +150,24 @@ export const TRAP_FIELD = 'website';
  */
 export const TOKEN_FIELD = 'submissionToken';
 
-/** The placeholder in a confirmation email that stands for the applicant's name. */
-export const NAME_PLACEHOLDER = '{الاسم}';
+/**
+ * The placeholder in a confirmation email that stands for the applicant's
+ * name, in each language's email: an Editor writing the English one writes
+ * `{name}`, not a word of Arabic.
+ */
+export const NAME_PLACEHOLDER: Readonly<Record<Locale, string>> = { ar: '{الاسم}', en: '{name}' };
+
+/**
+ * The language a form was filled in, sent with it as `?locale=` so that even
+ * a request refused before its body is read is answered in that language, and
+ * the confirmation email is written in it (ticket 42).
+ */
+export const LOCALE_PARAMETER = 'locale';
+
+/** The language a request names, or Arabic — the site's — for one that names none the site has. */
+export function requestLocale(named: string | null): Locale {
+  return named !== null && (LOCALE_CODES as readonly string[]).includes(named) ? (named as Locale) : DEFAULT_LOCALE;
+}
 
 /** What a ticked consent sends. */
 export const CONSENT_GIVEN = 'on';
