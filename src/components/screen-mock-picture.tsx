@@ -1,4 +1,7 @@
 import Image from 'next/image';
+import type { ReactNode } from 'react';
+import { ScreenMockPan } from '@/components/screen-mock-pan';
+import { getSwipeHint } from '@/content/site-words';
 import type { Locale } from '@/lib/locales';
 import type { Media } from '@/payload-types';
 import { findScreenMock, screenMockImagePath, type ScreenMock } from '@/screen-mocks/registry';
@@ -105,13 +108,38 @@ export function ScreenMockPicture({ content, sizes }: { content: ScreenMockPictu
   return (
     <>
       <div className="win">
-        <div className="vs-shot-wrap">
+        <PanningScreen locale={content.locale} className="vs-shot-wrap">
           <ScreenMockImage className="vs-shot" content={content} sizes={sizes} eager />
-        </div>
+        </PanningScreen>
       </div>
       <p className="shot-cap" aria-hidden="true">
         {content.description}
       </p>
     </>
+  );
+}
+
+/**
+ * The box a Screen mock pans in on a phone, with the hint that says it can be
+ * swiped over its foot (ticket 77), in the page's language. The hint's words
+ * are the CMS's, with the other words every page shares.
+ *
+ * Its parent is the frame the hint is placed in, and the stylesheet positions
+ * the hint against it (`src/styles/screen-mocks.css`).
+ */
+export async function PanningScreen({
+  locale,
+  className,
+  children,
+}: {
+  locale: Locale;
+  /** The panning box's own class, which the page's stylesheet sizes it by. */
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <ScreenMockPan className={className} hint={await getSwipeHint(locale)}>
+      {children}
+    </ScreenMockPan>
   );
 }

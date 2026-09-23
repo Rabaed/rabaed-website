@@ -4,15 +4,15 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] At 700px wide and narrower, every Screen mock on the home and product pages shows a short hint under or over it: «اسحب لرؤية الشاشة كاملة» in Arabic, "Swipe to see the whole screen" in English
-- [ ] The edge where more of the screen is hidden fades out, and the fade moves to the other edge as the visitor swipes, and disappears from an edge once that edge is reached
-- [ ] The hint fades away once the visitor has swiped that Screen mock
-- [ ] The hint's words are in the CMS with the site's other site-wide words, in both languages
-- [ ] Wider than 700px nothing changes
-- [ ] The hint is not read out twice by a screen reader and does not replace the Screen mock's description (ADR-0002)
-- [ ] Tests cover: the hint and fade present at 390px, absent at 768px, and the hint gone after a sideways swipe
+- [x] At 700px wide and narrower, every Screen mock on the home and product pages shows a short hint under or over it: «اسحب لرؤية الشاشة كاملة» in Arabic, "Swipe to see the whole screen" in English
+- [x] The edge where more of the screen is hidden fades out, and the fade moves to the other edge as the visitor swipes, and disappears from an edge once that edge is reached
+- [x] The hint fades away once the visitor has swiped that Screen mock
+- [x] The hint's words are in the CMS with the site's other site-wide words, in both languages
+- [x] Wider than 700px nothing changes
+- [x] The hint is not read out twice by a screen reader and does not replace the Screen mock's description (ADR-0002)
+- [x] Tests cover: the hint and fade present at 390px, absent at 768px, and the hint gone after a sideways swipe
 
 ## Comments
 
