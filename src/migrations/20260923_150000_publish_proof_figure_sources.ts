@@ -11,17 +11,53 @@ export const PROOF_FIGURE_SOURCE =
 /** The four before-and-after figures it covers, by the figure each states. */
 export const SOURCED_FIGURES = ['3.6×', '7×', '31%', '22%'] as const;
 
+/**
+ * The first card's basis, corrected on the founder's approval of 23 September
+ * 2026 (ticket 47): the figures compare two of the customer's projects, not one
+ * project before and after, as it said. In Arabic, and in the English ticket
+ * 42 drafted from it.
+ */
+export const CORRECTED_BASIS = {
+  figure: '3.6×',
+  was: { ar: 'مقارنةً بالدورة الورقية على المشروع نفسه', en: 'Against the paper cycle on the same project' },
+  becomes: { ar: 'مقارنةً بمشروع آخر للعميل يُدار يدوياً', en: 'Against the client’s other project, run by hand' },
+} as const;
+
 /** A value as a SQL string: a quote inside one is written twice. */
 const text = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 const SOURCE = text(PROOF_FIGURE_SOURCE);
 const FIGURES = SOURCED_FIGURES.map(text).join(', ');
+const BASIS_FIGURE = text(CORRECTED_BASIS.figure);
 
 /** The versions written into: the newest, and the newest published. */
 const WRITTEN_VERSIONS = `
      SELECT "id" FROM "_home_page_v" WHERE "latest"
      UNION
      SELECT max("id") FROM "_home_page_v" WHERE "version__status" = 'published'`;
+
+/**
+ * Rewrites the first card's basis from one wording to the other, language by
+ * language, where it still reads `from`: in what is published and in the
+ * versions written into. `up` corrects it, and `down` puts it back.
+ */
+function correctBasis(from: 'was' | 'becomes', to: 'was' | 'becomes'): string {
+  return (['ar', 'en'] as const)
+    .map((language) => {
+      const column = `"basis_${language}"`;
+      const rewrite = `SET ${column} = ${text(CORRECTED_BASIS[to][language])}
+ WHERE "figure" = ${BASIS_FIGURE}
+   AND ${column} = ${text(CORRECTED_BASIS[from][language])}`;
+      return `
+UPDATE "home_page_blocks_comparison"
+   ${rewrite};
+
+UPDATE "_home_page_v_blocks_comparison"
+   ${rewrite}
+   AND "_parent_id" IN (${WRITTEN_VERSIONS});`;
+    })
+    .join('\n');
+}
 
 /**
  * Publishes the source of the home page's four proof figures (ticket 47), which
@@ -41,6 +77,12 @@ const WRITTEN_VERSIONS = `
  * so publishing it later does not take the cards off the site again. Older
  * versions are history, and are left as they were.
  *
+ * **With it, the first card's basis is corrected** — the one line on the
+ * four cards that said something other than what was measured, which the
+ * missing source had kept off the site until now. Only while it still reads
+ * as it was imported, in each language: words an Editor has written since are
+ * his.
+ *
  * Plain SQL, frozen here, as every data migration is (ticket 63).
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
@@ -56,14 +98,16 @@ UPDATE "_home_page_v_blocks_comparison"
  WHERE "figure" IN (${FIGURES})
    AND coalesce(btrim("source"), '') = ''
    AND "_parent_id" IN (${WRITTEN_VERSIONS});
+
+${correctBasis('was', 'becomes')}
 `),
   );
 }
 
 /**
  * Takes the source back off, where it is still this one, and the four cards off
- * the public site with it: from what is published and from the same two
- * versions, never from history.
+ * the public site with it, and the first card's basis back to what it said:
+ * from what is published and from the same two versions, never from history.
  */
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(
@@ -72,6 +116,8 @@ UPDATE "home_page_blocks_comparison" SET "source" = NULL WHERE "source" = ${SOUR
 UPDATE "_home_page_v_blocks_comparison" SET "source" = NULL
  WHERE "source" = ${SOURCE}
    AND "_parent_id" IN (${WRITTEN_VERSIONS});
+
+${correctBasis('becomes', 'was')}
 `),
   );
 }

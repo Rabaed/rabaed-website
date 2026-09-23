@@ -8,17 +8,23 @@
  * production's was, so the home page has drafts waiting on it — ticket 35's
  * openers inside ticket 42's English — and the source has to be in what is
  * published and in the draft both, or publishing the draft would take the
- * cards off again.
+ * cards off again — and so does the first card's corrected basis, or
+ * publishing the draft would put the old one back.
  *
  * It signs in as an editor of its own (`cms.ts`).
  */
 import { test, expect } from '@playwright/test';
 import { PROOF_FIGURES_EDITOR, logInByApi } from './cms';
-import { PROOF_FIGURE_SOURCE, SOURCED_FIGURES } from '../../src/migrations/20260923_150000_publish_proof_figure_sources';
+import {
+  CORRECTED_BASIS,
+  PROOF_FIGURE_SOURCE,
+  SOURCED_FIGURES,
+} from '../../src/migrations/20260923_150000_publish_proof_figure_sources';
 
-type Figure = { blockType: 'comparison' | 'commitment'; figure?: string; source?: string | null };
+type Words = { ar: string; en?: string | null };
+type Figure = { blockType: 'comparison' | 'commitment'; figure?: string; source?: string | null; basis: Words };
 
-test('the four proof figures carry their source, in what is published and in the draft waiting to be', async ({
+test('the four proof figures carry their source, and the first its corrected basis, in what is published and in the draft waiting to be', async ({
   request,
 }) => {
   await logInByApi(request, PROOF_FIGURES_EDITOR);
@@ -31,11 +37,20 @@ test('the four proof figures carry their source, in what is published and in the
     expect(response.ok(), what).toBe(true);
     const entry: { figures: { figures: Figure[] } } = await response.json();
 
-    const sources = new Map(
-      entry.figures.figures.filter((card) => card.blockType === 'comparison').map((card) => [card.figure, card.source]),
+    const cards = new Map(
+      entry.figures.figures.filter((card) => card.blockType === 'comparison').map((card) => [card.figure, card]),
     );
     for (const figure of SOURCED_FIGURES) {
-      expect(sources.get(figure), `the source of ${figure}, in ${what}`).toBe(PROOF_FIGURE_SOURCE);
+      expect(cards.get(figure)?.source, `the source of ${figure}, in ${what}`).toBe(PROOF_FIGURE_SOURCE);
     }
+
+    // The figures compare two of the customer's projects, and the first card
+    // said one project before and after. Its English, drafted by ticket 42,
+    // exists only in a draft — and the home page's other suites save drafts of
+    // their own beside this one, made from what is published, with no English
+    // at all. So whatever English the draft has must not be the old claim.
+    const basis = cards.get(CORRECTED_BASIS.figure)?.basis;
+    expect(basis?.ar, `the basis of ${CORRECTED_BASIS.figure}, in ${what}`).toBe(CORRECTED_BASIS.becomes.ar);
+    expect(basis?.en ?? null, `its English, in ${what}`).not.toBe(CORRECTED_BASIS.was.en);
   }
 });
