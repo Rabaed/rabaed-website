@@ -11,8 +11,8 @@ export type HomeHeroContent = {
   readonly lead: string;
   /** The filled button. */
   readonly primary: PageLink;
-  /** The outlined one beside it. */
-  readonly secondary: PageLink;
+  /** The outlined one beside it, down to the four units — `null` while they are switched off. */
+  readonly secondary: PageLink | null;
   /** The small line under the buttons. */
   readonly trust: string;
   /** The pill under that: the period in bold, then the promise. */
@@ -72,9 +72,11 @@ export function Hero({ content }: { content: HomeHeroContent }) {
               <a className="btn p" href={content.primary.href}>
                 {content.primary.label}
               </a>
-              <a className="btn g" href={content.secondary.href}>
-                {content.secondary.label}
-              </a>
+              {content.secondary && (
+                <a className="btn g" href={content.secondary.href}>
+                  {content.secondary.label}
+                </a>
+              )}
             </div>
             <div className="trust">{content.trust}</div>
             <div className="guar">

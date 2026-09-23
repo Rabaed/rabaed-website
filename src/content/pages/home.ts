@@ -85,6 +85,8 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;
+  // Read once: the section and the hero's button to it must never disagree.
+  const fourUnitsShow = fourUnits.shows !== false;
 
   const deck = ({ label, previousLabel, nextLabel, hint }: HomePage['situations']['deck']) => ({
     label: words(label),
@@ -117,12 +119,13 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
       eyebrow: words(hero.eyebrow),
       title: { lines: hero.titleLines.map((each) => words(each.line)), accent: words(hero.titleAccent) },
       lead: words(hero.lead),
-      // The first jumps to the demo request form at the foot of this page. The
-      // second points at `#journey`, which no section on this page carries, so
-      // it goes nowhere — as the Reference site's own anchors do on its
-      // sub-pages.
+      // The first jumps to the demo request form at the foot of this page, the
+      // second down to the four units. ENHANCEMENT OVER THE REFERENCE SITE
+      // (ticket 73): its second button points at `#journey`, which its home
+      // page does not have, so it goes nowhere. With the four units switched
+      // off there is nothing for it to lead to, and no second button.
       primary: { label: words(hero.primaryLabel), href: '#demo' },
-      secondary: { label: words(hero.secondaryLabel), href: '#journey' },
+      secondary: fourUnitsShow ? { label: words(hero.secondaryLabel), href: '#jt' } : null,
       trust: words(hero.trust),
       // Only the numerals are `.mono`: DM Mono has no Arabic glyphs, so setting
       // «يوماً» in it drops the word to a last-resort monospace face (spec:
@@ -162,7 +165,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
       deck: deck(situations.deck),
     },
     fourUnits: {
-      shows: fourUnits.shows !== false,
+      shows: fourUnitsShow,
       eyebrow: words(fourUnits.eyebrow),
       heading: words(fourUnits.heading),
       // Empty until an Editor writes the section's standalone answer, and

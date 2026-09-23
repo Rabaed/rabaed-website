@@ -35,6 +35,8 @@ type HomeEntry = {
   hero: {
     titleAccent: Words;
     titleLines: { line: Words }[];
+    primaryLabel: Words;
+    secondaryLabel: Words;
     statuses: { status: Words }[];
     parties: Record<'owner' | 'consultant' | 'contractor', Words>;
     pictures?: Record<string, number | null>;
@@ -337,6 +339,30 @@ test('the units section draws the answer under its heading once one is written, 
     await expect(page.locator('#jt .tz-head > *').nth(2)).toHaveText(answer);
 
     expect(await visitorHtml(request)).not.toContain(answer);
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
+test('with the units section switched off, the hero drops the button that leads to it, and keeps the demo button', async ({ page, request }) => {
+  await logInByApi(page.request, HOME_EDITOR);
+  const entry = await published(page.request);
+  const ctas = page.locator('#hero .ctas a');
+
+  try {
+    const saved = await save(page.request, { ...entry, fourUnits: { ...entry.fourUnits, shows: false } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await preview(page);
+    await expect(page.locator('#jt')).toHaveCount(0);
+    // Nothing on the page for «استكشف المنصة ↓» to lead to, so no such button
+    // (ticket 73).
+    await expect(ctas).toHaveText([entry.hero.primaryLabel.ar]);
+
+    // A visitor still has the section, and the button to it.
+    const html = await visitorHtml(request);
+    expect(html).toContain('id="jt"');
+    expect(html).toContain(entry.hero.secondaryLabel.ar);
   } finally {
     await discardDraft(page.request);
   }
