@@ -39,16 +39,26 @@ a change shows on it, and two separate things cause that:
 - **Publishing in the CMS.** Publishing marks every page — and `sitemap.xml`,
   `llms.txt` and `robots.txt` with them — as out of date, and each is rebuilt
   the next time somebody asks for it. This is how a change normally travels,
-  and it arrives in under a second.
-- **The maximum age: ten minutes.** Whatever becomes of that mark, no page is
+  and it arrives in under a second. **Ten seconds later it marks them all
+  again**, for the reason below.
+- **The maximum age: ten minutes.** Whatever becomes of those marks, no page is
   older than ten minutes before it is rebuilt anyway.
 
-The second exists because the first has one failure it cannot see. A mark can
-go astray — a rebuild that was already running can finish afterwards and put
-the old words back, and Next has no way to tell they are old (ticket 64) — and
-when that happens the page stays wrong **until somebody publishes again**,
-which could be days. The ten-minute age is the floor under that: it does not
-stop it happening, it stops it lasting.
+The second mark is there for one failure the first cannot see. A rebuild that
+was already running when you published can finish afterwards and put the old
+words back, and Next has no way to tell they are old: it goes by when a page
+was written, not by what is in it (ticket 64). Left alone, that page stays
+wrong **until somebody publishes again**. Ten seconds is longer than any
+rebuild took under the heaviest load the tests put on the site, so by the
+second mark such a rebuild has finished, and its page is marked in turn. You
+see no difference when you publish — the second mark happens after the CMS
+has answered you — and it costs each page one extra rebuild per publish, and
+the server a few seconds awake. ADR-0017 records the decision and the
+measurements behind the number.
+
+The ten-minute age is the floor under anything else that loses a mark — a
+failure we have not met yet. It does not stop one happening; it stops it
+lasting.
 
 Two things are worth knowing about the ten minutes:
 

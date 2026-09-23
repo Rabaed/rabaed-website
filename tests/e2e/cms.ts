@@ -154,6 +154,12 @@ export const ENGLISH_PAGES_EDITOR = {
   password: 'test-editor-password-42',
 } as const;
 
+/** The stale-render suite's own account (ticket 64), for the same reason as `BLOG_EDITOR`. */
+export const STALE_RENDER_EDITOR = {
+  email: 'stale-render-editor@rabaed.test',
+  password: 'test-editor-password-64',
+} as const;
+
 /** Every account the test server creates. */
 export const TEST_EDITORS: readonly Editor[] = [
   TEST_EDITOR,
@@ -177,6 +183,7 @@ export const TEST_EDITORS: readonly Editor[] = [
   LAUNCH_ARTICLES_EDITOR,
   ANSWER_FIRST_EDITOR,
   ENGLISH_PAGES_EDITOR,
+  STALE_RENDER_EDITOR,
 ];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
@@ -505,10 +512,12 @@ function waitBegins(what: string) {
  * `MISS` where it rendered the page for that request, `STALE` where it was
  * still rendering it, `HIT` where it answered from what it had built before.
  *
- * `HIT` for the whole budget is not a slow rebuild, and no budget covers it:
- * it is a render that began before the publish and finished after it, whose
+ * `HIT` for the whole budget is not a slow rebuild, and no budget covers it.
+ * It was a render that began before the publish and finished after it, whose
  * page Next keeps as fresh because of when it was written rather than what is
- * in it (ticket 64). Raising the number only makes such a run slower before it
+ * in it (ticket 64) — which publishing's second mark now catches (ADR-0017).
+ * So `HIT` throughout now says the second mark did not land, or that a render
+ * outlasted it; raising the number only makes such a run slower before it
  * fails.
  *
  * The test's own deadline is lengthened by the budget here, so that the bound
@@ -551,8 +560,8 @@ export async function reachesVisitors(request: APIRequestContext, path: string, 
  * What it cannot say is what Next said of the page, as `reachesVisitors` does:
  * the read is the caller's, and is not always a page this fetched — one walks
  * the browser, one reads a footer link. A run that needs that tell has it from
- * the page-text suites, whose waits carry it, and `HIT` throughout is ticket
- * 64 rather than a budget too small.
+ * the page-text suites, whose waits carry it, and `HIT` throughout is a missed
+ * second mark (ticket 64, ADR-0017) rather than a budget too small.
  *
  * Wait for the page the next assertion reads. Publishing marks every page, but
  * each is built again on its own next visit, so one page having the change

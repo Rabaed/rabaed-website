@@ -40,8 +40,16 @@ const ENTRIES = [
   'search-settings',
 ] as const;
 
-/** The six English pages. */
-const PAGES = ['/en', '/en/product', '/en/start', '/en/tool', '/en/referral', '/en/partnership'];
+/** The six English pages, and the entry each is its own. */
+const OWN_ENTRY: Readonly<Record<string, (typeof ENTRIES)[number]>> = {
+  '/en': 'home-page',
+  '/en/product': 'product-page',
+  '/en/start': 'start-page',
+  '/en/tool': 'tool-page',
+  '/en/referral': 'referral-page',
+  '/en/partnership': 'partnership-page',
+};
+const PAGES = Object.keys(OWN_ENTRY);
 
 /** Anything with an Arabic letter in it. */
 const ARABIC = /[\u0600-\u06FF]/;
@@ -163,13 +171,22 @@ test('previewed, each English page is the whole page, in English, left to right'
   await approveSiteWords(page.request, 'draft');
 
   for (const path of PAGES) {
-    await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
-    await expect(page.getByRole('status').first()).toContainText('معاينة');
+    // The page itself, not the notice that stands for it. `stale-render.spec.ts`
+    // runs beside this and publishes the tool page from its published words,
+    // which leaves this draft under a newer version: should that land between
+    // approving and previewing, the page's own proposal is approved again.
+    await expect(async () => {
+      await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+      await expect(page.getByRole('status').first()).toContainText('معاينة');
+      const notice = await page.locator('h1').textContent();
+      if (/not available in English|on its way/.test(notice ?? '')) {
+        await approve(page.request, OWN_ENTRY[path], 'draft');
+        throw new Error(`${path} shows its notice`);
+      }
+    }).toPass({ timeout: 60_000 });
 
     await expect(page.locator('html'), path).toHaveAttribute('lang', 'en');
     await expect(page.locator('html'), path).toHaveAttribute('dir', 'ltr');
-    // The page itself, not the notice that stands for it.
-    await expect(page.locator('h1'), path).not.toHaveText(/not available in English|on its way/);
     await expect(page.locator('main, section').first(), path).toBeVisible();
 
     // Not a word of Arabic in place of English, but the header's switcher,
