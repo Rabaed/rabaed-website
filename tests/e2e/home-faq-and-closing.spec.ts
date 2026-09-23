@@ -3,7 +3,8 @@
  * with the demo request form — and bug 44, the closing section's empty column.
  *
  * What a visitor meets: an answer that opens, a form whose every field is named,
- * and a button that takes them to that form without the header covering it.
+ * and a button that takes them to that form without the header covering it —
+ * as the downloaded Pour Tracker's own link does, to the section (ticket 49).
  * Sending the form is `form-submission.spec.ts`'s, which covers it here and in
  * its other two places.
  *
@@ -34,6 +35,16 @@ const FAKE_CONFIRMATION = 'وصلنا طلبك';
 
 const questions = (page: Page) => page.locator('#fq');
 const demoForm = (page: Page) => page.getByRole('form', { name: 'احجز عرضاً حياً على مشروعك' });
+
+/** That the element with this id, jumped to, sits just below the fixed header rather than under it. */
+async function expectJustBelowTheHeader(page: Page, id: string, what: string) {
+  const clearance = await page.evaluate((id) => {
+    const header = document.querySelector('.nav')!.getBoundingClientRect();
+    return document.getElementById(id)!.getBoundingClientRect().top - header.bottom;
+  }, id);
+  expect(clearance, `the header covers the top of ${what}`).toBeGreaterThanOrEqual(0);
+  expect(clearance, `${what} did not scroll to the top`).toBeLessThan(20);
+}
 
 test('both sections are in the first response, every answer included', async ({ request }) => {
   const html = await (await request.get('/')).text();
@@ -116,13 +127,18 @@ test('the call to action lands on the form, clear of the header', async ({ page 
   await page.locator('#hero').getByRole('link', { name: 'احجز عرضاً حياً' }).click();
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#demo');
 
-  const clearance = await page.evaluate(() => {
-    const header = document.querySelector('.nav')!.getBoundingClientRect();
-    const form = document.getElementById('demo')!.getBoundingClientRect();
-    return form.top - header.bottom;
-  });
-  expect(clearance, 'the header covers the top of the form').toBeGreaterThanOrEqual(0);
-  expect(clearance, 'the form did not scroll to the top').toBeLessThan(20);
+  await expectJustBelowTheHeader(page, 'demo', 'the form');
+});
+
+test('the Pour Tracker’s link to the cloud version lands on the closing section, clear of the header', async ({ page }) => {
+  // The downloaded tool links to `rabaedapp.com/#contact` (ticket 49), and its
+  // file cannot be changed to say `#demo`: it names the section instead. At a
+  // desktop width the form stands beside the steps, so it is in view too.
+  await page.setViewportSize({ width: 1280, height: 500 });
+  await page.goto('/#contact');
+
+  await expectJustBelowTheHeader(page, 'contact', 'the closing section');
+  await expect(demoForm(page)).toBeInViewport();
 });
 
 test('the closing section has something in both columns at desktop widths (bug 44)', async ({ page }) => {

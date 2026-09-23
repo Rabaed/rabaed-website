@@ -5,6 +5,11 @@
 # No normalisation, no diffing — it is never edited, only read and screenshotted.
 reference/** -text -diff
 
+# The Pour Tracker is the co-founder's release, byte for byte (ticket 49): a
+# changed copy calls itself unofficial. Its code is minified onto a few long
+# lines, so a diff of it says nothing either.
+public/downloads/Rabaed-Pour-Tracker.html -text -diff
+
 # Binary assets
 *.png binary
 *.jpg binary
