@@ -42,7 +42,7 @@ Checked on port 3170:
 - **Alone, with the fix:** passed; `/tool` had the new words 6.4s after the publish.
 - **Alone, without the second mark** (`markAgain()` commented out for the run): `never reached a visitor at /tool in 60063ms; Next said HIT`.
 - **Alone, with every route asked for while the lock was held**, so the pool starves inside the real test: the lock waits ended about ten seconds after they began, and the test failed with the ceiling's message.
-- **The full suite:** see the pull request.
+- **The full suite:** 1175 passed.
 
 ## What this does not fix
 
