@@ -35,6 +35,11 @@
  *   label that is only as wide as its words; their place and height are.
  * - **The closing section's** own differences are written in
  *   `closing-section.ts`, which the home page's comparison uses too.
+ * - **A Phone crop in place of the pan** (ticket 78, ADR-0022). At 700px and
+ *   narrower the Reference site draws each screen 1040px wide in a window
+ *   650px tall that pans; here the window holds the screen's Phone crop, whole
+ *   and in its own shape, so the window's height is not compared there. Its
+ *   place and width are; the crop is held to its shape by `phone-crops.spec.ts`.
  */
 import { test, expect, type Page } from '@playwright/test';
 import { CLOSING_SECTION } from './closing-section';
@@ -60,12 +65,17 @@ const HERO: Region = {
   parts: ['.eyebrow', 'h1', '.lead', '.ctas', '.ctas .btn.p', '.ctas .btn.g'],
 };
 
+/** At 700px and narrower a screen's window holds its Phone crop, not a 650px pan (ticket 78). */
+function cropLeftOut(viewport: Viewport): Measurement[] {
+  return viewport.width <= 700 ? ['height'] : [];
+}
+
 function journeyRegions(viewport: Viewport): Region[] {
   // Below 981px the panels stack, and each grows by its screen's caption.
   const growthLeftOut: Measurement[] = viewport.width <= 980 ? ['height'] : [];
   const columnLeftOut: Measurement[] = [...growthLeftOut, 'display'];
   const screenLeftOut: Measurement[] =
-    viewport.height === 900 ? ['top', 'display'] : ['top', 'left', 'width', 'height', 'display'];
+    viewport.height === 900 ? ['top', 'display', ...cropLeftOut(viewport)] : ['top', 'left', 'width', 'height', 'display'];
   // Below 981px the marks are not displayed, and a box that is not displayed
   // has no position to compare — only the fact that it is not displayed.
   const marksLeftOut: Measurement[] = viewport.width <= 980 ? ['top', 'left'] : [];
@@ -118,7 +128,7 @@ const CUSTOM: Region = {
   ],
 };
 
-function roleRegions(n: number): Region[] {
+function roleRegions(n: number, viewport: Viewport): Region[] {
   return [
     {
       name: `the roles section, party ${n} chosen`,
@@ -136,7 +146,10 @@ function roleRegions(n: number): Region[] {
       name: `party ${n}'s screen`,
       root: '#roles .role.on',
       omitFromRoot: ['height'],
-      parts: [{ selector: ':scope > div:first-child', omit: ['top'] }, { selector: '.win', omit: ['top'] }],
+      parts: [
+        { selector: ':scope > div:first-child', omit: ['top'] },
+        { selector: '.win', omit: ['top', ...cropLeftOut(viewport)] },
+      ],
     },
   ];
 }
@@ -234,7 +247,7 @@ test.describe('the product page matches the Reference site', () => {
 
         for (const n of [1, 2, 3]) {
           for (const page of [reference, rebuilt]) await page.locator(`#roles .tab:nth-child(${n})`).click();
-          await compare(roleRegions(n));
+          await compare(roleRegions(n, viewport));
         }
 
         const pins = viewport.width >= 981 && viewport.height >= 551;

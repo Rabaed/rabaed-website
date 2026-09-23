@@ -368,6 +368,161 @@ test('a replacement for the English pages leaves the Arabic pages showing theirs
   }
 });
 
+/**
+ * A replaced screen on a phone (tickets 77 and 78). A replacement has no Phone
+ * crop — an exported one would show the screen it replaced — so a phone is
+ * shown the whole picture, 1040px wide in a box that pans, with ticket 77's
+ * swipe hint over its foot and a fade at each edge with more behind it.
+ *
+ * Every Screen mock still showing its export is its crop on a phone, and
+ * `phone-crops.spec.ts` checks that. This is the one place a replaced screen
+ * can be made — in a draft, seen in the preview — so ticket 77's checks of the
+ * pan are here, where there is one to swipe.
+ */
+test.describe('a replaced screen, on a phone', () => {
+  test.use({ viewport: { width: 390, height: 812 } });
+
+  const HINT = 'اسحب لرؤية الشاشة كاملة';
+
+  /** Every place a Screen mock pans on a phone, and the frame the hint sits in. */
+  const PANS = [
+    { path: '/', where: 'the four units', frames: '#jt .jt-pan' },
+    { path: '/product', where: 'the journey', frames: '#journey .win' },
+    { path: '/product', where: 'the roles', frames: '#roles .role.on .win' },
+  ] as const;
+
+  /** The box inside a frame that pans. */
+  const pan = (frame: Locator) => frame.locator('[data-pan]');
+
+  /**
+   * How far in from each edge the picture fades, in pixels. The mask is a
+   * gradient from left to right, `transparent, black <left>, black
+   * calc(100% - <right>), transparent`, and a width of nothing is written as
+   * the edge itself. Read as the edges a visitor sees, not by the
+   * stylesheet's own names for them.
+   */
+  async function fades(frame: Locator): Promise<{ left: number; right: number }> {
+    const mask = await pan(frame).evaluate((element) => getComputedStyle(element).maskImage);
+    const stops = /rgb\(0, 0, 0\) ([\d.]+)px, rgb\(0, 0, 0\) (?:100%|calc\(100% - ([\d.]+)px\))/.exec(mask);
+    expect(stops, `a mask that is not a fade at both edges: ${mask}`).not.toBeNull();
+    return { left: Math.round(Number(stops![1])), right: Math.round(Number(stops![2] ?? 0)) };
+  }
+
+  /** At rest, the far edge — the left, right to left — fades and the near one does not. */
+  const AT_REST = { left: 36, right: 0 };
+
+  /** Swipes a pan as far as `share` of the way along, as a finger would take it. */
+  async function swipe(frame: Locator, share: number): Promise<void> {
+    await pan(frame).evaluate((element, share) => {
+      // Right to left, the rest of the screen is to the left: scrollLeft runs
+      // from 0 down to minus the hidden width.
+      const hidden = element.scrollWidth - element.clientWidth;
+      const towards = getComputedStyle(element).direction === 'rtl' ? -1 : 1;
+      element.scrollTo({ left: towards * hidden * share, behavior: 'instant' });
+    }, share);
+  }
+
+  /** Replaces every screen's picture for the Arabic pages in a draft, runs `check`, and discards the draft. */
+  async function withEveryScreenReplaced(page: Page, check: () => Promise<void>): Promise<void> {
+    await logInByApi(page.request, PRODUCT_EDITOR);
+    const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+    const picture = await uploadImage(page.request, 'شاشة بديلة', { width: 2880, height: 1800 });
+    const replaced = Object.fromEntries(
+      SCREEN_MOCKS.map(({ id }) => [screenMockFieldName(id), { ...mocks[screenMockFieldName(id)], picture }]),
+    );
+    try {
+      const saved = await save(page.request, 'screen-mocks', { ...mocks, ...replaced }, 'draft');
+      expect(saved.ok(), await saved.text()).toBe(true);
+      await check();
+    } finally {
+      await discardDraft(page.request, 'screen-mocks');
+    }
+  }
+
+  async function open(page: Page, path: string, frames: string): Promise<Locator> {
+    await preview(page, path);
+    const first = page.locator(frames).first();
+    await first.scrollIntoViewIfNeeded();
+    return first;
+  }
+
+  test('is the whole picture, to swipe, and says so; the fade follows the swipe and the hint goes once swiped', async ({
+    page,
+  }) => {
+    await withEveryScreenReplaced(page, async () => {
+      for (const { path, where, frames } of PANS) {
+        const frame = await open(page, path, frames);
+        const picture = frame.locator('img[data-screen-mock]').first();
+
+        // The replacement, whole, with no crop and nothing to tap.
+        await expect(picture, where).toHaveAttribute('src', /\/api\/media\/file\//);
+        await expect(picture, where).not.toHaveAttribute('data-phone-crop');
+        expect((await picture.boundingBox())?.width, where).toBe(1040);
+        await expect(frame.getByRole('button'), where).toHaveCount(0);
+
+        const hint = frame.locator('.pan-hint');
+        await expect(hint, where).toBeVisible();
+        await expect(hint, where).toHaveText(HINT);
+        await expect(hint, where).toHaveCSS('opacity', '1');
+        // Centred over the foot of the picture, whatever the page's own rules
+        // for the words around it.
+        const off = await frame.evaluate((box) => {
+          const outer = box.getBoundingClientRect();
+          const inner = box.querySelector('.pan-hint')!.getBoundingClientRect();
+          return {
+            centre: Math.abs((inner.left + inner.right) / 2 - (outer.left + outer.right) / 2),
+            foot: outer.bottom - inner.bottom,
+          };
+        });
+        expect(off.centre, where).toBeLessThan(2);
+        expect(off.foot, where).toBeGreaterThan(0);
+        expect(off.foot, where).toBeLessThan(40);
+
+        // At rest the screen shows from where it begins, so the far edge
+        // fades and the near one does not.
+        await expect.poll(() => fades(frame), { message: where }).toEqual(AT_REST);
+
+        await swipe(frame, 0.5);
+        // Part of the way along, there is more of the screen at both edges.
+        await expect.poll(() => fades(frame), { message: where }).toEqual({ left: 36, right: 36 });
+        await expect(hint, where).toHaveCSS('opacity', '0');
+
+        await swipe(frame, 1);
+        // At the far edge there is nothing more that way.
+        await expect.poll(() => fades(frame), { message: where }).toEqual({ left: 0, right: 36 });
+
+        await swipe(frame, 0);
+        // Back where it began, and the hint does not come back: it has been read.
+        await expect.poll(() => fades(frame), { message: where }).toEqual(AT_REST);
+        await expect(hint, where).toHaveCSS('opacity', '0');
+      }
+    });
+  });
+
+  test('only the swiped screen loses its hint, and each of the four units is swiped afresh', async ({ page }) => {
+    await withEveryScreenReplaced(page, async () => {
+      await open(page, '/product', '#journey .win');
+      const frames = page.locator('#journey .win');
+      expect(await frames.count()).toBeGreaterThan(1);
+      await swipe(frames.first(), 0.5);
+      await expect(frames.first().locator('.pan-hint')).toHaveCSS('opacity', '0');
+      await expect(frames.nth(1).locator('.pan-hint')).toHaveCSS('opacity', '1');
+
+      // The home page's units share the one box. A screen the visitor has not
+      // swiped yet is shown from where it begins, and says it can be.
+      const units = await open(page, '/', '#jt .jt-pan');
+      const hint = units.locator('.pan-hint');
+      await swipe(units, 0.5);
+      await expect(hint).toHaveCSS('opacity', '0');
+      await page.locator('#jt [role="tab"]').nth(2).click();
+      await expect(hint).toHaveCSS('opacity', '1');
+      await expect.poll(() => fades(units)).toEqual(AT_REST);
+      await swipe(units, 0.5);
+      await expect(hint).toHaveCSS('opacity', '0');
+    });
+  });
+});
+
 test('the CMS refuses what the product page, the closing section and the screens cannot carry', async ({ page }) => {
   await logInByApi(page.request, PRODUCT_EDITOR);
   const product = await published<ProductEntry>(page.request, 'product-page');

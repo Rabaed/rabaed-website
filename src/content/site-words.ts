@@ -203,6 +203,34 @@ export async function getSwipeHint(locale: Locale): Promise<string | null> {
   }
 }
 
+/** The words on a Phone crop, and on the whole screen tapping it opens (ticket 78). */
+export type WholeScreenWords = {
+  /** Over the foot of the crop: what tapping it does. */
+  readonly open: string;
+  readonly close: string;
+  readonly zoom: string;
+};
+
+/**
+ * The words on a Phone crop and on the whole screen it opens, in `locale` —
+ * or `null` where the words every page shares are not published in that
+ * language yet. A phone there is shown the whole screen to swipe, as before
+ * ticket 78, rather than a crop with nothing to say it opens.
+ */
+export async function getWholeScreenWords(locale: Locale): Promise<WholeScreenWords | null> {
+  try {
+    const { screenMocks } = await pageEntry('site-words', locale);
+    return {
+      open: wordsIn(locale, screenMocks.openWhole),
+      close: wordsIn(locale, screenMocks.closeWhole),
+      zoom: wordsIn(locale, screenMocks.zoomWhole),
+    };
+  } catch (error) {
+    if (error instanceof ContentNotInLocale) return null;
+    throw error;
+  }
+}
+
 /**
  * The words the menu gives a page, for the trail search results show
  * (`structured-data.tsx`). A page the menu names is named the same way in the

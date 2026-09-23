@@ -4590,6 +4590,27 @@ export interface SiteWord {
   };
   screenMocks: {
     /**
+     * Over the foot of the close-up crop on a phone. Tapping it opens the whole screen.
+     */
+    openWhole: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Closes the opened screen and returns the visitor to the page.
+     */
+    closeWhole: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Zooms the opened screen to its full size for the visitor to pan across, and back when pressed again.
+     */
+    zoomWhole: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
      * Over the foot of the picture on a phone only, and gone after the first swipe.
      */
     swipeHint: {
@@ -8488,6 +8509,24 @@ export interface SiteWordsSelect<T extends boolean = true> {
   screenMocks?:
     | T
     | {
+        openWhole?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        closeWhole?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        zoomWhole?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
         swipeHint?:
           | T
           | {

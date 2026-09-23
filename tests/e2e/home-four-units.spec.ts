@@ -207,24 +207,20 @@ test('the screen keeps its place while the picture is still on its way', async (
   expect(after.footer?.y).toBe(before.footer?.y);
 });
 
-test('on a phone the screen is shown full size, to be panned across', async ({ page }) => {
+test('on a phone the screen is its Phone crop, drawn whole across the column', async ({ page }) => {
+  // Squeezing 1440px of interface into 350 is unreadable. Tickets 08 and 12
+  // drew it 1040px wide to be panned across; ticket 78 shows the part that
+  // matters instead, whole, and a tap opens the rest (`phone-crops.spec.ts`).
+  // A replaced screen, which has no crop, still pans (`product-text.spec.ts`).
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto('/');
   await section(page).scrollIntoViewIfNeeded();
 
-  // 1040px: legible, where squeezing 1440px of interface into 350 would not be.
-  expect((await screen(page, 0).boundingBox())?.width).toBe(1040);
-
   const stage = section(page).locator('.jt-stage');
-  const panned = await stage.evaluate((element) => {
-    const before = element.scrollLeft;
-    // Right to left, so panning towards the rest of the screen is leftward.
-    element.scrollBy({ left: -300 });
-    return { canPan: element.scrollWidth > element.clientWidth, moved: element.scrollLeft !== before };
-  });
-  expect(panned).toEqual({ canPan: true, moved: true });
-
-  // The pan happens inside the stage; the page itself never scrolls sideways.
+  const [shot, column] = [await screen(page, 0).boundingBox(), await stage.boundingBox()];
+  expect(shot?.width).toBe(column?.width);
+  expect(shot!.width / shot!.height).toBeCloseTo(520 / 650, 2);
+  expect(await stage.evaluate((element) => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(0);
   expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
 });
 

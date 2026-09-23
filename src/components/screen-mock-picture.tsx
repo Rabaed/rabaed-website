@@ -1,10 +1,24 @@
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 import type { ReactNode } from 'react';
 import { ScreenMockPan } from '@/components/screen-mock-pan';
-import { getSwipeHint } from '@/content/site-words';
+import { ScreenMockWhole } from '@/components/screen-mock-whole';
+import { getSwipeHint, getWholeScreenWords } from '@/content/site-words';
 import type { Locale } from '@/lib/locales';
 import type { Media } from '@/payload-types';
-import { findScreenMock, screenMockImagePath, type ScreenMock } from '@/screen-mocks/registry';
+import {
+  findScreenMock,
+  PHONE_CROP,
+  phoneCropImagePath,
+  screenMockImagePath,
+  type ScreenMock,
+} from '@/screen-mocks/registry';
+
+/**
+ * How wide a Phone crop is drawn: across the page's column, 20px in from
+ * either edge (`responsive.css`), and only ever at 700px and narrower. Its
+ * copies are chosen for this, not for the whole screen's far wider box.
+ */
+const PHONE_CROP_SIZES = 'calc(100vw - 40px)';
 
 export type ScreenMockPictureContent = {
   /** Which Screen mock, by its id in `src/screen-mocks/registry.ts`. */
@@ -33,8 +47,17 @@ export type ScreenMockPictureContent = {
  * The export goes through `next/image`, which serves a size for the screen
  * asking. A replacement is already a set of sizes, made when it was uploaded
  * (`collections/media.ts`), so the browser is handed those to choose from.
+ *
+ * **On a phone the export is its Phone crop** (ticket 78, ADR-0022): at 700px
+ * and narrower the browser is offered the crop instead of the whole screen,
+ * and fetches only that; the picture is marked `data-phone-crop`, which the
+ * stylesheet draws it in the crop's shape by; and a button over it opens the
+ * whole screen (`screen-mock-whole.tsx`). A replacement has no crop — an
+ * exported one would show the screen it replaced — so a phone is shown it
+ * whole, to swipe (ticket 77), and so is a language whose words for the
+ * button are not published yet.
  */
-export function ScreenMockImage({
+export async function ScreenMockImage({
   content,
   sizes,
   eager = false,
@@ -51,6 +74,7 @@ export function ScreenMockImage({
   const loading = eager ? { loading: 'eager', fetchPriority: 'low' } as const : {};
 
   const replacement = content.replacement;
+  const whole = replacement?.url ? null : await getWholeScreenWords(content.locale);
   if (replacement?.url) {
     const copies = [replacement.sizes?.small, replacement.sizes?.medium, replacement.sizes?.large].flatMap((copy) =>
       copy?.url && copy.width ? [`${copy.url} ${copy.width}w`] : [],
@@ -71,17 +95,60 @@ export function ScreenMockImage({
     );
   }
 
+  const exported = screenMockImagePath(content.locale, entry.id);
+  if (!whole) {
+    return (
+      <Image
+        className={className}
+        data-screen-mock={entry.id}
+        src={exported}
+        alt={content.description}
+        width={entry.width}
+        height={entry.height}
+        sizes={sizes}
+        {...loading}
+      />
+    );
+  }
+
+  const { props: screen } = getImageProps({
+    src: exported,
+    alt: content.description,
+    width: entry.width,
+    height: entry.height,
+    sizes,
+    ...loading,
+  });
+  const { props: crop } = getImageProps({
+    src: phoneCropImagePath(content.locale, entry.id),
+    alt: content.description,
+    width: PHONE_CROP.width,
+    height: PHONE_CROP.height,
+    sizes: PHONE_CROP_SIZES,
+  });
+
   return (
-    <Image
-      className={className}
-      data-screen-mock={entry.id}
-      src={screenMockImagePath(content.locale, entry.id)}
-      alt={content.description}
-      width={entry.width}
-      height={entry.height}
-      sizes={sizes}
-      {...loading}
-    />
+    <>
+      <picture>
+        <source
+          media="(max-width: 700px)"
+          srcSet={crop.srcSet}
+          sizes={PHONE_CROP_SIZES}
+          width={PHONE_CROP.width}
+          height={PHONE_CROP.height}
+        />
+        {/* `next/image`'s own props, from `getImageProps`, so the whole screen
+            is sized and served as it was without a `<picture>` round it. */}
+        <img {...screen} className={className} data-screen-mock={entry.id} data-phone-crop="" />
+      </picture>
+      <ScreenMockWhole
+        src={exported}
+        width={entry.width}
+        height={entry.height}
+        description={content.description}
+        words={whole}
+      />
+    </>
   );
 }
 

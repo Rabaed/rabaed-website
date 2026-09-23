@@ -4,20 +4,20 @@
 
 **Blocked by:** 77 (the swipe hint, which phones fall back to when a Screen mock has no Phone crop).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **The founder approves the crops before they are built in, and sees the result before it merges.** First, show them each proposed crop next to its whole screen (a studio page on a preview deployment will do) and take their yes or their changes, crop by crop. Then the pull request is not merged until they have opened its preview on their own phone and said yes.
 
 - [x] Each of the eight Screen mocks has a Phone crop in Arabic, approved by the founder
 - [x] Each English Phone crop is its Arabic crop mirrored, the way the English Screen mocks mirror the Arabic ones (ticket 41)
 - [x] All eight crops share one shape, chosen for a phone screen and approved with the crops
-- [ ] At 700px wide and narrower, the home and product pages show the Phone crop in place of the whole screen; wider than 700px nothing changes, tablets included
+- [x] At 700px wide and narrower, the home and product pages show the Phone crop in place of the whole screen; wider than 700px nothing changes, tablets included
 - [x] The crops are made from the same studio source as the whole screens, by the export script, so re-running the export remakes both
-- [ ] Tapping a Phone crop opens the whole screen over the page, where it can be zoomed and panned, with a close control; Escape and the phone's back gesture close it too
-- [ ] A phone downloads the crop, not the whole screen, until the visitor taps
-- [ ] The crop carries the Screen mock's existing description and caption (ADR-0002); the tap target says it opens the whole screen
+- [x] Tapping a Phone crop opens the whole screen over the page, where it can be zoomed and panned, with a close control; Escape and the phone's back gesture close it too
+- [x] A phone downloads the crop, not the whole screen, until the visitor taps
+- [x] The crop carries the Screen mock's existing description and caption (ADR-0002); the tap target says it opens the whole screen
 - [x] A new ADR in `docs/adr/` records the decision (see below)
-- [ ] Tests cover: the crop at 390px and the whole screen at 768px, in both languages; opening and closing the whole screen; and an export check that every Screen mock has a crop in each language
+- [x] Tests cover: the crop at 390px and the whole screen at 768px, in both languages; opening and closing the whole screen; and an export check that every Screen mock has a crop in each language
 
 ## Comments
 
@@ -48,3 +48,11 @@
 ### 24 September 2026: the founder approved the crops
 
 The eight proposed crops were shown to the founder beside their whole screens, in both languages, on a review page. The shape was portrait, 520×650 of the 1440×900 screen. The founder approved all eight and the shape. For the stamped sheet they chose the crop that keeps the «أربع توقيعات على ورقة واحدة» card whole and loses the stamp. The positions are in `src/screen-mocks/registry.ts` and the decision is ADR-0022.
+
+### 24 September 2026: built
+
+At 700px and narrower, each Screen mock still showing its export is its Phone crop. The browser picks the crop from a `<picture>` source, so a phone fetches nothing else. A button over the crop opens the whole screen in a dialog that covers the page. There it can be zoomed to 1440px and panned, and closed by its button, by Escape or by the back gesture. The words «اضغط لرؤية الشاشة كاملة», «تكبير» and «إغلاق», with their English, are site-wide words in the CMS, next to ticket 77's hint.
+
+A replaced screen has no crop and pans as ticket 77 made it, so ticket 77's on-phone tests moved into `product-text.spec.ts`, which can replace a screen in a preview. The Reference comparisons record the crop as a deliberate difference at 700px and narrower.
+
+Per the ticket, the pull request waits for the founder to try the preview on their own phone before it merges.

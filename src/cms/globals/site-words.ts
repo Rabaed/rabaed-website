@@ -209,10 +209,32 @@ export const SiteWords = pageGlobal({
       label: { ar: 'صور الشاشات', en: 'Screen mocks' },
       hideable: false,
       description: {
-        ar: 'على الهاتف تُعرض كل صورة شاشة أعرض من الشاشة، ويسحبها الزائر جانباً ليراها كاملة.',
-        en: 'On a phone every Screen mock is wider than the screen, and the visitor swipes it sideways to see all of it.',
+        ar: 'على الهاتف تُعرض من كل شاشة لقطة مقرّبة، ويضغط عليها الزائر ليرى الشاشة كاملة. الشاشة التي استُبدلت صورتها تُعرض كاملة، ويسحبها الزائر جانباً.',
+        en: 'On a phone each Screen mock shows a close-up crop, which the visitor taps to see the whole screen. A screen whose picture has been replaced shows whole, and the visitor swipes it sideways.',
       },
       fields: [
+        // Ticket 78. Over the foot of the crop, on one line on the narrowest
+        // phone, as the swipe hint is: the same room, so the same limit.
+        wordsField('openWhole', { ar: 'زر الشاشة كاملة', en: 'Whole screen button' }, 40, {
+          description: {
+            ar: 'فوق أسفل اللقطة المقرّبة على الهاتف، ويفتح الشاشة كاملة عند الضغط.',
+            en: 'Over the foot of the close-up crop on a phone. Tapping it opens the whole screen.',
+          },
+        }),
+        // The two buttons at the top of the opened screen, side by side on the
+        // narrowest phone.
+        wordsField('closeWhole', { ar: 'زر الإغلاق', en: 'Close button' }, 16, {
+          description: {
+            ar: 'يغلق الشاشة المفتوحة ويعيد الزائر إلى الصفحة.',
+            en: 'Closes the opened screen and returns the visitor to the page.',
+          },
+        }),
+        wordsField('zoomWhole', { ar: 'زر التكبير', en: 'Zoom button' }, 16, {
+          description: {
+            ar: 'يكبّر الشاشة المفتوحة إلى حجمها الكامل ليسحبها الزائر، ويعيدها عند الضغط مرة أخرى.',
+            en: 'Zooms the opened screen to its full size for the visitor to pan across, and back when pressed again.',
+          },
+        }),
         // Ticket 77. On one line over the foot of the picture, on the narrowest
         // phone: 40 characters is about half as long again as today's words,
         // which are 24 in Arabic and 29 in English.

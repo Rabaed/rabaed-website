@@ -40,7 +40,7 @@ type SiteWords = {
   };
   footer: { tagline: Words; columns: Column[]; rights: Words };
   notFound: { heading: Words; lead: Words; homeLabel: Words };
-  screenMocks: { swipeHint: Words };
+  screenMocks: { swipeHint: Words; openWhole: Words; closeWhole: Words; zoomWhole: Words };
 };
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
@@ -160,6 +160,48 @@ test('the swipe hint over a Screen mock is the CMS’s, in both languages, and a
       await preview(page, path);
       await expect(page.locator('.pan-hint').first(), path).toHaveText(reworded);
       expect(await visitorHtml(request, path), path).not.toContain(reworded);
+    }
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
+test('the words on a Phone crop and its whole screen are the CMS’s, in both languages, and reworded ones are previewed', async ({
+  page,
+  request,
+}) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  const entry = fields(await published(page.request));
+  // Written in both languages by ticket 78's migration, the English waiting
+  // for the day the entry is published in English.
+  expect(entry.screenMocks).toMatchObject({
+    openWhole: { ar: 'اضغط لرؤية الشاشة كاملة', en: 'Tap to see the whole screen' },
+    closeWhole: { ar: 'إغلاق', en: 'Close' },
+    zoomWhole: { ar: 'تكبير', en: 'Zoom' },
+  });
+
+  const reworded = { openWhole: 'المس لعرض الشاشة', closeWhole: 'رجوع', zoomWhole: 'قرّب' };
+  try {
+    const screenMocks = Object.fromEntries(
+      Object.entries(entry.screenMocks).map(([name, words]) => [
+        name,
+        name in reworded ? { ...words, ar: reworded[name as keyof typeof reworded] } : words,
+      ]),
+    );
+    const saved = await save(page.request, { ...entry, screenMocks }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await page.setViewportSize({ width: 390, height: 812 });
+    for (const path of ['/', '/product']) {
+      await preview(page, path);
+      const opener = page.getByRole('button', { name: reworded.openWhole }).first();
+      await opener.scrollIntoViewIfNeeded();
+      await opener.click();
+      const whole = page.getByRole('dialog');
+      await expect(whole.getByRole('button', { name: reworded.zoomWhole }), path).toBeVisible();
+      await whole.getByRole('button', { name: reworded.closeWhole }).click();
+      await expect(whole, path).toBeHidden();
+      expect(await visitorHtml(request, path), path).not.toContain(reworded.openWhole);
     }
   } finally {
     await discardDraft(page.request);
