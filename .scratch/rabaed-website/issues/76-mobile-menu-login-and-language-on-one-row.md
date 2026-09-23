@@ -7,21 +7,21 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **The founder sees it before it merges.** The pull request is not merged until they have opened its preview deployment on their own phone, opened and closed the menu in both languages, and said yes.
 
-- [ ] In Arabic, the open panel shows the menu links, then one row with Login on the right and «English» on the left
-- [ ] In English, the same row is mirrored: Login on the left, «العربية» on the right
-- [ ] Login is a compact outlined button sized to its words, in the same style as the desktop header's Login, not a full-width pill
-- [ ] The language link has a small globe icon beside its words, keeps its accent dot when a language is remembered (ADR-0014), and loses the line above it that it inherits today
-- [ ] On a page with no translation, the note explaining that the link leads to the other language's home page sits under the row, across the panel's width
-- [ ] Both still fit on one row with the longest labels an Editor may write (Login's CMS limit) at 320px wide
-- [ ] While the panel is open, the page below it is dimmed and does not scroll; closing the panel restores the page exactly where it was
-- [ ] Tapping the dimmed page closes the panel. Escape, following a link and widening past 1100px still close it, as now
-- [ ] At 1100px and up nothing changes
-- [ ] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure the panel's Login point at it
-- [ ] Tests cover: the row's order in both languages, the note's place, the page not scrolling while the panel is open, and tapping the dimmed page closing the panel
+- [x] In Arabic, the open panel shows the menu links, then one row with Login on the right and «English» on the left
+- [x] In English, the same row is mirrored: Login on the left, «العربية» on the right
+- [x] Login is a compact outlined button sized to its words, in the same style as the desktop header's Login, not a full-width pill
+- [x] The language link has a small globe icon beside its words, keeps its accent dot when a language is remembered (ADR-0014), and loses the line above it that it inherits today
+- [x] On a page with no translation, the note explaining that the link leads to the other language's home page sits under the row, across the panel's width
+- [x] Both still fit on one row with the longest labels an Editor may write (Login's CMS limit) at 320px wide
+- [x] While the panel is open, the page below it is dimmed and does not scroll; closing the panel restores the page exactly where it was
+- [x] Tapping the dimmed page closes the panel. Escape, following a link and widening past 1100px still close it, as now
+- [x] At 1100px and up nothing changes
+- [x] A new ADR in `docs/adr/` records the decision (see below), and the Reference comparisons that measure the panel's Login point at it
+- [x] Tests cover: the row's order in both languages, the note's place, the page not scrolling while the panel is open, and tapping the dimmed page closing the panel
 
 ## Comments
 

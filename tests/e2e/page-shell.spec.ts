@@ -208,6 +208,107 @@ test.describe('the mobile panel', () => {
   });
 });
 
+/**
+ * Where ticket 76 departs from the Reference site's panel, by the founder's
+ * decision of 23 September 2026 (ADR-0020): Login and the language on one row,
+ * and the page behind the open panel dimmed, held still, and a tap away from
+ * closing it.
+ */
+test.describe('the mobile panel, as ticket 76 draws it', () => {
+  const PHONE = { width: 390, height: 812 };
+
+  test('puts Login on the right and English on the left of one row, under the links', async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto('/');
+    await page.locator('.navtog').click();
+
+    const panel = page.locator('.mnav');
+    const login = await panel.getByRole('link', { name: 'تسجيل الدخول' }).boundingBox();
+    const language = await panel.getByRole('link', { name: 'English' }).boundingBox();
+    const lastLink = await panel.locator('.msub a').last().boundingBox();
+    const inside = await panel.locator('.wrap').evaluate((wrap) => {
+      const box = wrap.getBoundingClientRect();
+      const style = getComputedStyle(wrap);
+      return box.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    });
+
+    // One row: the two share a middle line, and both are under the links.
+    expect(Math.abs(login!.y + login!.height / 2 - (language!.y + language!.height / 2))).toBeLessThan(2);
+    expect(login!.y).toBeGreaterThanOrEqual(lastLink!.y + lastLink!.height);
+    // Right to left, as Arabic reads: Login first, on the right.
+    expect(login!.x).toBeGreaterThan(language!.x + language!.width);
+    // A button sized to its words, not the full-width pill the Reference site draws.
+    expect(login!.width).toBeLessThan(inside / 2);
+
+    // The language link no longer reads as one more menu link.
+    await expect(panel.locator('.mlang')).toHaveCSS('border-top-width', '0px');
+    await expect(panel.locator('.mlang svg')).toBeVisible();
+  });
+
+  test('dims the page behind it and holds it still, and closing puts it back where it was', async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto('/');
+    await page.evaluate(() => window.scrollTo(0, 600));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600);
+
+    await page.locator('.navtog').click();
+    await expect(page.locator('.navtog')).toHaveAttribute('aria-expanded', 'true');
+
+    // What lies under a point below the panel is the dimming, not the page.
+    const below = { x: PHONE.width / 2, y: PHONE.height - 40 };
+    await expect
+      .poll(() =>
+        page.evaluate(({ x, y }) => {
+          const top = document.elementFromPoint(x, y);
+          return top ? { dim: top.classList.contains('mscrim'), opacity: getComputedStyle(top).opacity } : null;
+        }, below),
+      )
+      .toEqual({ dim: true, opacity: '1' });
+
+    // A wheel or a swipe over it scrolls nothing.
+    await page.mouse.move(below.x, below.y);
+    await page.mouse.wheel(0, 800);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => window.scrollY)).toBe(600);
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.navtog')).toHaveAttribute('aria-expanded', 'false');
+    expect(await page.evaluate(() => window.scrollY)).toBe(600);
+
+    // And once it is closed the page scrolls again.
+    await page.mouse.wheel(0, 400);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600);
+  });
+
+  test('closes when the dimmed page is tapped, and the tap reaches nothing under it', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: PHONE, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto('/');
+      await page.locator('.navtog').tap();
+      await expect(page.locator('.navtog')).toHaveAttribute('aria-expanded', 'true');
+      await expect(page.locator('.mscrim')).toHaveCSS('opacity', '1');
+
+      await page.touchscreen.tap(PHONE.width / 2, PHONE.height - 40);
+      await expect(page.locator('.navtog')).toHaveAttribute('aria-expanded', 'false');
+      await expect(page).toHaveURL(/\/$/);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('changes nothing at 1100px and up', async ({ page }) => {
+    await page.setViewportSize({ width: 1100, height: 900 });
+    await page.goto('/');
+    // Even with the panel's class left on — as it would be by a tablet turned
+    // sideways, a moment before the resize listener closes it — the row is
+    // what shows, and neither the dimming nor the hold reaches past 1099px.
+    await page.locator('.nav').evaluate((nav) => nav.classList.add('open'));
+    await expect(page.locator('.mscrim')).toBeHidden();
+    await expect(page.locator('html')).not.toHaveCSS('overflow', 'hidden');
+  });
+});
+
 test.describe('the header colour toggle', () => {
   test('is dark over a dark section and light over a light one', async ({ page }) => {
     // 700px tall: one of the spec's height breakpoints, and short enough that

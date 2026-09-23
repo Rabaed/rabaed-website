@@ -237,10 +237,33 @@ test('a menu of the longest labels the CMS allows still sits on one line', async
       const overflow = await row.evaluate((element) => element.scrollWidth - element.clientWidth);
       expect(overflow, `the header overflows at ${width}px`).toBeLessThanOrEqual(0);
     }
+
+    // And below it, the panel's one row still holds Login and the language
+    // side by side at the narrowest phone, with Login at its longest (ticket 76).
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.locator('.navtog').click();
+    await expect(page.locator('.navtog')).toHaveAttribute('aria-expanded', 'true');
+    expect(await sharesARow(page), 'Login and the language no longer fit on one row at 320px').toBe(true);
   } finally {
     await discardDraft(page.request);
   }
 });
+
+/**
+ * Whether the panel's Login and language link sit side by side: the same
+ * middle line, neither box overlapping the other, and nothing pushed past the
+ * panel's edge.
+ */
+async function sharesARow(page: Page): Promise<boolean> {
+  return page.locator('.mnav').evaluate((panel) => {
+    const login = panel.querySelector('.mlogin')!.getBoundingClientRect();
+    const language = panel.querySelector('.mlang')!.getBoundingClientRect();
+    const wrap = panel.querySelector('.wrap')!;
+    const middle = (box: DOMRect) => box.top + box.height / 2;
+    const apart = login.right <= language.left || language.right <= login.left;
+    return Math.abs(middle(login) - middle(language)) < 2 && apart && wrap.scrollWidth <= wrap.clientWidth;
+  });
+}
 
 test('a label longer than the header carries, an address that is not an address, an empty menu and an overfull footer are refused', async ({
   page,
@@ -426,6 +449,28 @@ test('previewed, English pages have the English header and footer, and switch to
       await expect(terms, path).toHaveAttribute('href', '/terms');
       await expect(terms, path).toHaveAttribute('hreflang', 'ar');
       await expect(footer.getByRole('link', { name: 'LinkedIn' }), path).toHaveCount(1);
+    }
+  } finally {
+    await discardDraft(page.request);
+  }
+});
+
+test('the English panel mirrors the Arabic one: Login on the left, Arabic on the right', async ({ page }) => {
+  await logInByApi(page.request, SITE_WORDS_EDITOR);
+  await restore(page.request, await englishProposal(page.request));
+
+  try {
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 812 });
+      await preview(page, '/en');
+      await page.locator('.navtog').click();
+      await expect(page.locator('.navtog')).toHaveAttribute('aria-expanded', 'true');
+
+      const panel = page.locator('.mnav');
+      const login = await panel.getByRole('link', { name: ENGLISH.signInLabel }).boundingBox();
+      const language = await panel.getByRole('link', { name: 'العربية' }).boundingBox();
+      expect(await sharesARow(page), `one row at ${width}px`).toBe(true);
+      expect(language!.x, `Login on the left at ${width}px`).toBeGreaterThan(login!.x + login!.width);
     }
   } finally {
     await discardDraft(page.request);
