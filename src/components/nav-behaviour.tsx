@@ -83,11 +83,19 @@ function useRememberedLanguage() {
   }, []);
 }
 
-/** Below 1100px the links are behind a button. Escape and following a link close it. */
+/**
+ * Below 1100px the links are behind a button. Escape, following a link and a
+ * tap on the dimmed page behind the panel close it (ticket 76).
+ *
+ * Holding the page still while it is open is the stylesheet's, not this: the
+ * `.open` class is the one fact both need, and `html:has(.nav.open)` reads it
+ * without a second class to keep in step (`src/styles/shell.css`).
+ */
 function useMobilePanel() {
   useEffect(() => {
     const nav = document.querySelector('.nav');
     const toggle = nav?.querySelector<HTMLButtonElement>('.navtog');
+    const scrim = nav?.querySelector('.mscrim');
     if (!nav || !toggle) return;
 
     const close = () => {
@@ -110,12 +118,14 @@ function useMobilePanel() {
     const links = [...nav.querySelectorAll('.mnav a')];
     toggle.addEventListener('click', onToggle);
     links.forEach((link) => link.addEventListener('click', close));
+    scrim?.addEventListener('click', close);
     document.addEventListener('keydown', onKeydown);
     window.addEventListener('resize', onResize);
 
     return () => {
       toggle.removeEventListener('click', onToggle);
       links.forEach((link) => link.removeEventListener('click', close));
+      scrim?.removeEventListener('click', close);
       document.removeEventListener('keydown', onKeydown);
       window.removeEventListener('resize', onResize);
     };

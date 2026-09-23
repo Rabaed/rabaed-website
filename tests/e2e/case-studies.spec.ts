@@ -174,6 +174,13 @@ test('publishing the first case study reveals the section and its link; unpublis
     'href',
     '/case-studies',
   );
+  // And in the Footer directory, after the blog, with nobody adding it
+  // (ticket 75). Unpublished below, it goes with the header's: `linksToSection`
+  // reads the whole page.
+  await expect(page.locator('footer nav').getByRole('link', { name: NAV_LABEL, exact: true })).toHaveAttribute(
+    'href',
+    '/case-studies',
+  );
   // At 1100px, the narrowest the desktop row shows at — 981px until ticket 40
   // moved the header's breakpoint to make room for the language switcher
   // (ADR-0015) — the extra link still fits between the brand and the buttons.

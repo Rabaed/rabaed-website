@@ -9,22 +9,29 @@ import type { Locale } from '@/lib/locales';
  * never seen.
  */
 const NAMES = {
-  ar: { brand: 'ربائد', linkedin: 'لينكدإن', x: 'إكس', facebook: 'فيسبوك', instagram: 'إنستجرام', whatsapp: 'واتساب' },
-  en: { brand: 'Rabaed', linkedin: 'LinkedIn', x: 'X', facebook: 'Facebook', instagram: 'Instagram', whatsapp: 'WhatsApp' },
+  ar: { brand: 'ربائد', linkedin: 'لينكدإن', x: 'إكس', facebook: 'فيسبوك', instagram: 'إنستجرام', whatsapp: 'واتساب', directory: 'روابط الموقع' },
+  en: { brand: 'Rabaed', linkedin: 'LinkedIn', x: 'X', facebook: 'Facebook', instagram: 'Instagram', whatsapp: 'WhatsApp', directory: 'Site links' },
 } as const satisfies Record<Locale, unknown>;
 
 /**
  * The site footer. Byte-identical across all nine Reference pages, which is
  * why it is one component here.
  *
- * Its lines and the labels on its links are read from the CMS (ticket 59);
+ * DIVERGENCE FROM THE REFERENCE SITE, deliberate, and the founder's
+ * (ADR-0020): between the social icons and the rights line sits the Footer
+ * directory, four columns of links through which every page can be reached.
+ * The Reference site's footer has a row of two legal links there instead,
+ * which became the directory's Legal column. Everything above and below it is
+ * the Reference site's footer as it was.
+ *
+ * Its lines, its columns and the labels on its links are read from the CMS (ticket 59);
  * the WhatsApp number and the social accounts are site settings (ticket 19).
  * An account nobody has supplied yet keeps the Reference site's `#`, rather
  * than losing its icon: the accounts are awaiting the founders, and ticket 39
  * will not let the site go public with them empty.
  */
 export async function SiteFooter({ locale }: { locale: Locale }) {
-  const [contact, { tagline, legalLinks, rights }] = await Promise.all([getContactPoints(), getFooter(locale)]);
+  const [contact, { tagline, directory, rights }] = await Promise.all([getContactPoints(), getFooter(locale)]);
   const names = NAMES[locale];
 
   return (
@@ -65,14 +72,23 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
           </a>
         </div>
       </div>
+      <nav className="wrap foot-dir" aria-label={names.directory}>
+        {directory.map((column, place) => (
+          <div key={place} className="foot-col">
+            <h2>{column.heading}</h2>
+            <ul>
+              {column.links.map((link, index) => (
+                <li key={index}>
+                  <a href={link.href} hrefLang={link.hrefLang}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
       <div className="wrap foot-bar">
-        <div className="foot-legal">
-          {legalLinks.map((link) => (
-            <a key={link.path} href={link.href}>
-              {link.label}
-            </a>
-          ))}
-        </div>
         {/* DIVERGENCE FROM THE REFERENCE SITE, deliberate.
             The Reference site puts the whole line inside `.mono`, so the
             Arabic in it is set in DM Mono — a face with no Arabic glyphs at

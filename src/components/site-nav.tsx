@@ -122,12 +122,22 @@ export async function SiteNav({
               </a>
             ))}
           </div>
-          <a className="mlogin" href={signIn.href} target="_blank" rel="noopener">
-            {signIn.label}
-          </a>
-          <LanguageSwitcher locale={locale} path={ownPath} locales={locales} variant="panel" />
+          {/* Login and the language on one row, on opposite sides, and the
+              switcher's note — where a page has no translation — on a line
+              of its own under them (ticket 76, ADR-0020). */}
+          <div className="mrow">
+            <a className="mlogin" href={signIn.href} target="_blank" rel="noopener">
+              {signIn.label}
+            </a>
+            <LanguageSwitcher locale={locale} path={ownPath} locales={locales} variant="panel" />
+          </div>
         </div>
       </div>
+
+      {/* The page behind the open panel, dimmed; a tap on it closes the panel
+          (ticket 76). Decorative to a screen reader, which has Escape and the
+          menu button for that. */}
+      <div className="mscrim" aria-hidden="true" />
 
       <NavBehaviour />
     </nav>
