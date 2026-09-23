@@ -13,7 +13,7 @@ Found by the architecture review of 24 September 2026 (L6).
 - [x] Nothing is listed in English before it is published in English — the same rule the sitemap follows (`src/app/sitemap.ts`), so the file never points an assistant at a notice or a placeholder
 - [x] The legal documents stay Arabic only: their Arabic is binding (spec: Out of Scope)
 - [x] The English entries are under English headings, after the Arabic, with the company described in English above them
-- [x] A test publishes an English page and an English article and finds each in the file, and the article leaves again when it is deleted
+- [x] A test publishes an English page and an English article and finds each in the file; an article leaving when deleted is held by the Arabic article's test, through the same code
 - [ ] An English page leaves again when it is unpublished — not driven by a test (below)
 
 ## Comments
@@ -24,9 +24,9 @@ Found by the architecture review of 24 September 2026 (L6).
 > - **One step stricter than the sitemap:** an index whose lead is not published in the language is left out, since the file quotes the lead. `getIndexLead` throws for such a language, which would otherwise fail the whole file. The route's comment says so.
 > - **Tests**, both red against the code before the fix:
 >   - `english-pages.spec.ts` publishes the English start page and holds `llms.txt` to it: under `## Pages in English`, after the Arabic, described word for word as the page's own meta description, with no Arabic in the line. The English company line is present. `/en/product` (unpublished) and every English legal address are absent.
->   - `ai-crawlers.spec.ts` publishes an English article and finds it at `/en/blog/<slug>` under `## Articles in English`, with the English blog index. It is gone again after the article is deleted.
+>   - `blog.spec.ts`, where an English article is already published, finds it in `llms.txt` at `/en/blog/<slug>` under `## Articles in English`, after the Arabic, with the English blog index. A first version published one more English article in `ai-crawlers.spec.ts`. Twice in a row locally, the extra publish and delete in the last stage starved `stale-render.spec.ts` (ticket 70's connection pattern), and once on CI they left `launch-articles.spec.ts` reading an `llms.txt` rebuilt from before its own publish (ADR-0017's race). Runs of each half against the other's files traced both to that test, not to the route, so the check moved.
+>   - Leaving the file when deleted is held by the Arabic article test in `ai-crawlers.spec.ts`, through the same code.
 >   - The fixed-list test sets the English entries aside, as it does the case studies.
->   - Both suites pass, 16 tests.
 > - **Not driven by a test:**
 >   - An English page leaving when it is unpublished. `english-pages.spec.ts` keeps the start page published for the rest of its stage, and the suites beside it share its server; ticket 89 would make this testable.
 >   - The English home page's entry. The test database has the English home page as a draft, and publishing it would change `/en` for the suites beside it.

@@ -400,6 +400,18 @@ test('an article exists per language, and a missing translation offers the one t
   // And now that it has an article, the English index is a page of the site.
   expect((await visit(request, '/sitemap.xml')).html).toContain(`<loc>${baseURL}/en/blog</loc>`);
 
+  // And in llms.txt, at its English address under the English heading, with
+  // the English index beside it (ticket 82). Asked here, where an English
+  // article is published anyway, rather than by publishing one more in the
+  // suites that run last, which a publish slows for everyone beside it.
+  await reaching('the English article in llms.txt', async () => (await visit(request, '/llms.txt')).html).toContain(
+    `- [${english.title}](${englishAddress}): ${english.summary}`,
+  );
+  const llms = (await visit(request, '/llms.txt')).html;
+  expect(llms.indexOf(`](${englishAddress})`)).toBeGreaterThan(llms.indexOf('## Articles in English'));
+  expect(llms.indexOf('## Articles in English')).toBeGreaterThan(llms.indexOf('## المقالات'));
+  expect(llms).toMatch(new RegExp(`^- \\[The Rabaed blog\\]\\(${baseURL}/en/blog\\): `, 'm'));
+
   // Now that both exist, each names the other as its alternate.
   await page.goto(`/blog/${arabic.slug}`);
   await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute('href', new RegExp(`/en/blog/${arabic.slug}$`));
