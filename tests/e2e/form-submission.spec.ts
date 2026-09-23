@@ -280,9 +280,22 @@ test.describe('mail and wording from the admin', () => {
     return settings;
   }
 
+  /**
+   * Publishes the settings as the form editor. A sign-in to that editor
+   * elsewhere in the run can erase this one's session (`cms.ts`), and the
+   * publish is then refused as if nobody were signed in: so it is signed in
+   * afresh and asked again, as `readerGet` does.
+   */
   async function publishSettings(request: APIRequestContext, settings: Settings): Promise<void> {
-    const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
-    expect(response.ok(), await response.text()).toBe(true);
+    for (let attempt = 1; ; attempt++) {
+      const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
+      const lostSession = response.status() === 401 || response.status() === 403;
+      if (!lostSession || attempt === 3) {
+        expect(response.ok(), await response.text()).toBe(true);
+        return;
+      }
+      await logInByApi(request, FORM_EDITOR);
+    }
   }
 
   test('while no alert address is set, a request is still stored, and no mail at all is sent', async ({

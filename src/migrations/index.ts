@@ -50,6 +50,7 @@ import * as migration_20260923_180726_footer_directory from './20260923_180726_f
 import * as migration_20260923_193054_screen_mock_swipe_hint from './20260923_193054_screen_mock_swipe_hint';
 import * as migration_20260923_193055_publish_screen_mock_swipe_hint from './20260923_193055_publish_screen_mock_swipe_hint';
 import * as migration_20260923_222518_form_confirmation_withheld from './20260923_222518_form_confirmation_withheld';
+import * as migration_20260923_223657_form_confirmation_sending from './20260923_223657_form_confirmation_sending';
 
 export const migrations = [
   {
@@ -311,5 +312,10 @@ export const migrations = [
     up: migration_20260923_222518_form_confirmation_withheld.up,
     down: migration_20260923_222518_form_confirmation_withheld.down,
     name: '20260923_222518_form_confirmation_withheld',
+  },
+  {
+    up: migration_20260923_223657_form_confirmation_sending.up,
+    down: migration_20260923_223657_form_confirmation_sending.down,
+    name: '20260923_223657_form_confirmation_sending',
   },
 ];

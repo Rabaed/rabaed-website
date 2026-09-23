@@ -594,7 +594,7 @@ export interface FormSubmission {
       }[]
     | null;
   alert?: ('sent' | 'skipped' | 'failed') | null;
-  confirmation?: ('sent' | 'skipped' | 'failed' | 'withheld') | null;
+  confirmation?: ('sent' | 'skipped' | 'failed' | 'withheld' | 'sending') | null;
   token?: string | null;
   sourceHash?: string | null;
   updatedAt: string;

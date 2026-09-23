@@ -300,9 +300,9 @@ async function oneAtATime<T>(
 
 /**
  * Whether submission `id` may confirm to `email` under `CONFIRMATION_LIMIT`,
- * and if so, its claim to: its record is marked sent before the mail goes, so
- * the next request counts it, and the outcome replaces the mark afterwards. A
- * confirmation that failed was tried and is counted as sent.
+ * and if so, its claim to: its record is marked sending before the mail goes,
+ * so the next request counts it, and what became of the mail replaces the mark
+ * afterwards. A confirmation that failed was tried, and is counted too.
  *
  * Counted in SQL rather than through Payload so that the address is compared
  * without case, one site-wide lock at a time. Withheld when it cannot be
@@ -320,11 +320,11 @@ async function mayConfirm(id: number, email: string): Promise<boolean> {
           )::int AS to_address,
           count(*) FILTER (WHERE "created_at" > now() - make_interval(hours => ${fromTheSite.withinHours}))::int AS from_site
         FROM "form_submissions"
-        WHERE "confirmation" IN ('sent', 'failed')
+        WHERE "confirmation" IN ('sending', 'sent', 'failed')
       `);
       const [counted] = rows;
       if (counted.to_address >= toOneAddress.count || counted.from_site >= fromTheSite.count) return false;
-      await payload.update({ collection: 'form-submissions', id, data: { confirmation: 'sent' }, req });
+      await payload.update({ collection: 'form-submissions', id, data: { confirmation: 'sending' }, req });
       return true;
     });
   } catch (error) {

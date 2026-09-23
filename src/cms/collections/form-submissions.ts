@@ -43,10 +43,11 @@ const MAIL_OUTCOMES = [
 ];
 
 /**
- * What became of the applicant's confirmation: a mail's outcomes, and one of
- * its own — withheld because the address or the site had been sent as many
- * as `CONFIRMATION_LIMIT` allows (ticket 81, ADR-0022), so the team replies by
- * hand.
+ * What became of the applicant's confirmation: a mail's outcomes, and two of
+ * its own (ticket 81, ADR-0022) — withheld because the address or the site had
+ * been sent as many as `CONFIRMATION_LIMIT` allows, so the team replies by
+ * hand; and sending, from the moment it is counted against that limit to the
+ * moment its outcome is known, so the record never says sent before it is.
  */
 const CONFIRMATION_OUTCOMES = [
   ...MAIL_OUTCOMES,
@@ -57,6 +58,7 @@ const CONFIRMATION_OUTCOMES = [
       en: 'Not sent — this address or the site reached its confirmation limit; reply by hand',
     },
   },
+  { value: 'sending', label: { ar: 'قيد الإرسال', en: 'Being sent' } },
 ];
 
 /**
