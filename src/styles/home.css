@@ -447,8 +447,22 @@
 /* Kept together here, media queries included, like the four units and the
    Record. The Reference site wrote the section's white ground and its rules
    above and below as an inline style; they are the section's, so they are
-   here. */
-#ba { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
+   here.
+
+   ENHANCEMENT OVER THE REFERENCE SITE (ticket 74): `overflow-x: clip`. The
+   knob is 52px round and centred on the seam, so at either end of its travel
+   half of it hangs past the comparison — and below 700px the comparison is
+   only 20px from the edge of the screen, so 6px of the knob (8px while it is
+   held, drawn larger) hangs past the screen too. On the Reference site that
+   makes the page wider than a phone's screen, and a sideways swipe moves it:
+   for half a second as the hint pauses at the far end, and for as long as a
+   visitor leaves the seam there. Clipping at the section's edge cuts the same
+   6px the screen's edge already cut, so nothing looks different; it only stops
+   the page growing. `clip` rather than `hidden`, as on `#pain` and `#proof`:
+   it does not make the section a scroll container, so `overflow-y` stays
+   visible. tests/e2e/home-before-after.spec.ts holds the page to the screen's
+   width through the hint and with the seam at either end. */
+#ba { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow-x: clip }
 
 /* DIVERGENCE FROM THE REFERENCE SITE, deliberate: `touch-action: pan-y` where
    the Reference site has `none`. With `none`, a thumb that lands anywhere on
