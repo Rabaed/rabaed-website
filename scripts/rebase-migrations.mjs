@@ -21,21 +21,22 @@
  * them.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
 import {
   DEVELOPMENT_DATABASE,
+  MIGRATIONS_DIRECTORY,
   PAYLOAD_BIN,
   WITHOUT_DATABASE,
+  connectionString,
+  migrationFolder as folder,
   repoRoot,
   runNode,
   startDatabase,
   withThrowawayDatabase,
 } from './local-database.mjs';
-import { changedStatements, planRebase, tidyMigration } from './migration-rebase.ts';
-
-const MIGRATIONS = path.join(repoRoot, 'src', 'migrations');
+import { changedStatements, nameAfterMoment, planRebase, tidyMigration } from './migration-rebase.ts';
 
 const git = (...args) => execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8' }).trim();
 const succeeds = (...args) => spawnSync('git', args, { cwd: repoRoot }).status === 0;
@@ -45,19 +46,13 @@ function fail(message) {
   process.exit(1);
 }
 
-/** The files directly in `src/migrations/`: the migrations, their snapshots and the index. */
-const folder = () =>
-  readdirSync(MIGRATIONS, { withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name);
-
-const file = (name, extension) => path.join(MIGRATIONS, `${name}${extension}`);
+const file = (name, extension) => path.join(MIGRATIONS_DIRECTORY, `${name}${extension}`);
 
 // ---------------------------------------------------------------------------
 // Which main, and has it been merged?
 
-const at = process.argv.indexOf('--base');
-const base = at === -1 ? 'origin/main' : process.argv[at + 1];
+const baseFlag = process.argv.indexOf('--base');
+const base = baseFlag === -1 ? 'origin/main' : process.argv[baseFlag + 1];
 if (!base) fail('--base names the branch this one has merged, such as origin/main.');
 if (!succeeds('rev-parse', '--verify', '--quiet', `${base}^{commit}`)) {
   fail(`There is no ${base} here to compare with. Fetch it first: git fetch origin`);
@@ -94,7 +89,7 @@ const saved = plan.regenerate.flatMap((name) =>
 for (const [location] of saved) rmSync(location);
 
 const before = new Set(folder());
-const suffix = plan.schema?.replace(/^\d{8}_\d{6}_/, '') ?? 'unmigrated_changes';
+const suffix = plan.schema === null ? 'unmigrated_changes' : nameAfterMoment(plan.schema);
 try {
   await runNode([PAYLOAD_BIN, 'migrate:create', suffix, '--skip-empty'], WITHOUT_DATABASE);
 } catch (error) {
@@ -104,7 +99,7 @@ try {
 const created = folder().filter((name) => !before.has(name) && name !== 'index.ts');
 
 if (created.length > 0 && plan.schema === null) {
-  for (const name of created) rmSync(path.join(MIGRATIONS, name));
+  for (const name of created) rmSync(path.join(MIGRATIONS_DIRECTORY, name));
   fail(
     `The configuration asks for changes ${base}'s migrations do not make, and this branch has no schema migration ` +
       'of its own to write them into. Write one: npm run cms:migration -- <name>',
@@ -127,7 +122,7 @@ for (const { from, to } of plan.renames) {
 // The index Payload keeps beside the migrations lists them; this project
 // does not commit it (.gitignore), but a stale one would mislead whoever reads it.
 const { writeMigrationIndex } = await import('payload');
-writeMigrationIndex({ migrationsDir: MIGRATIONS });
+writeMigrationIndex({ migrationsDir: MIGRATIONS_DIRECTORY });
 
 // ---------------------------------------------------------------------------
 // Say what happened, and what a database that ran the old names needs.
@@ -152,8 +147,19 @@ if (plan.regenerate.length === 0) {
 
 const changes = generated === null ? { dropped: [], added: [] } : changedStatements({ previous, generated });
 const unchanged = changes.dropped.length === 0 && changes.added.length === 0;
+// Whether a database that ran the old migrations has what the files now make,
+// so that renaming its rows tells Payload the truth. Not when main's
+// migrations took over the branch's: that database made the objects under the
+// branch's names, and main's own migration would stop on them.
+const safe = unchanged && (generated !== null || plan.regenerate.length === 0);
 if (generated !== null && unchanged) {
   console.log('Its SQL is the same, statement for statement, as what it replaces.');
+} else if (generated === null && plan.regenerate.length > 0) {
+  console.log(
+    `A database that ran ${plan.regenerate.join(' and ')} already has what ${base}'s migrations make, and ` +
+      `${base}'s will stop on it — "already exists". Build such a database again from the migrations; ` +
+      'for your own, delete .data/postgres.',
+  );
 } else if (!unchanged) {
   console.log('\nIts SQL differs from what it replaces. Read it before committing it.');
   for (const statement of changes.dropped) console.log(`  no longer: ${statement}`);
@@ -187,7 +193,7 @@ if (rows.length > 0) {
       'branch — records them by those names. Before it is migrated again, run on it:\n',
   );
   for (const { sql } of rows) console.log(`  ${sql}`);
-  if (!unchanged) console.log('\nOnly once it has what the new SQL makes: the SQL above differs from what it ran.');
+  if (!safe) console.log('\nOnly once it has what the files now make, which it may not: see above.');
 
   const mentioned = spawnSync(
     'git',
@@ -196,13 +202,13 @@ if (rows.length > 0) {
   ).stdout.trim();
   if (mentioned) console.log(`\nThese still name the old ones:\n${mentioned.replace(/^/gm, '  ')}`);
 
-  await renameInDevelopmentDatabase(rows, unchanged);
+  await renameInDevelopmentDatabase(rows, safe);
 }
 
 /**
  * This checkout's own `.data/` database is the one database that ran the old
  * names which this can reach, and `npm run dev` would stop on it — it migrates
- * before it starts — so its rows are renamed here, when the SQL is unchanged.
+ * before it starts — so its rows are renamed here, when that is safe.
  */
 async function renameInDevelopmentDatabase(statements, safe) {
   if (!existsSync(path.join(DEVELOPMENT_DATABASE.directory, 'PG_VERSION'))) return;
@@ -214,7 +220,7 @@ async function renameInDevelopmentDatabase(statements, safe) {
     return;
   }
 
-  const url = `postgres://postgres:postgres@127.0.0.1:${DEVELOPMENT_DATABASE.port}/rabaed`;
+  const url = connectionString(DEVELOPMENT_DATABASE.port);
   let started = null;
   const client = async () => {
     const connection = new pg.Client({ connectionString: url, connectionTimeoutMillis: 2000 });

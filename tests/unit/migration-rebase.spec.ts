@@ -8,7 +8,7 @@
  * could observe any of it.
  */
 import { test, expect } from '@playwright/test';
-import { changedStatements, planRebase, tidyMigration } from '../../scripts/migration-rebase.ts';
+import { changedStatements, nameAfterMoment, planRebase, tidyMigration } from '../../scripts/migration-rebase.ts';
 
 /** `main`'s migrations: a schema migration with its snapshot, and a data migration after it. */
 const MAIN = [
@@ -171,4 +171,8 @@ test.describe('what the regenerated migration changes', () => {
       `UPDATE "site_words" SET "screen_mocks_swipe_hint_ar" = 'اسحب'`,
     ]);
   });
+});
+
+test('the name a migration is written under, without the moment in front', () => {
+  expect(nameAfterMoment('20260923_193055_publish_screen_mock_swipe_hint')).toBe('publish_screen_mock_swipe_hint');
 });

@@ -725,10 +725,10 @@ reads. With a separate preview database, run `npm run cms:migrate` against it,
 the same way as step 6 — from a file, not from the command line — when a pull
 request that adds a migration needs a preview.
 
-**A migration rebuilt after a merge usually keeps its name.** When it has to
-move after migrations merged since (`npm run cms:rebase-migrations` says so,
-see `docs/agents/parallel-sessions.md`), a preview database migrated before the
-rebuild knows it by its old name: run the `UPDATE payload_migrations …`
+**A migration rebuilt after a merge keeps its name unless it has to move**
+after migrations merged since, which `npm run cms:rebase-migrations` says when
+it happens (`docs/agents/parallel-sessions.md`). A preview database migrated
+before the move knows it by its old name: run the `UPDATE payload_migrations …`
 statements the command printed on it, then migrate it again.
 
 **Until that is done, the pull request's Vercel check goes red, and the red is

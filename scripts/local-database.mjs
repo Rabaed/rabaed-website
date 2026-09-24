@@ -9,7 +9,7 @@
  */
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -26,6 +26,9 @@ export const PAYLOAD_BIN = path.join(repoRoot, 'node_modules', 'payload', 'bin.j
 export const NEXT_BIN = require.resolve('next/dist/bin/next');
 
 const DATABASE = 'rabaed';
+
+/** How to reach the Postgres `startDatabase` starts on `port`. */
+export const connectionString = (port) => `postgres://postgres:postgres@127.0.0.1:${port}/${DATABASE}`;
 
 /**
  * This checkout's development database: kept in `.data/postgres` so content
@@ -65,7 +68,7 @@ export async function startDatabase({ directory, port }) {
   if (fresh) await server.createDatabase(DATABASE);
 
   return {
-    url: `postgres://postgres:postgres@127.0.0.1:${port}/${DATABASE}`,
+    url: connectionString(port),
     stop: () => server.stop(),
   };
 }
@@ -111,6 +114,18 @@ ${name}`).digest().readUInt16BE(0) % 2000);
   await rm(directory, { recursive: true, force: true }).catch(() => {});
   return failure;
 }
+
+/** Where Payload keeps the migrations (`migrationDir` in `src/payload.config.ts`). */
+export const MIGRATIONS_DIRECTORY = path.join(repoRoot, 'src', 'migrations');
+
+/**
+ * The files directly in `src/migrations/`: the migrations, their snapshots and
+ * the index Payload writes beside them — not the folders of frozen words.
+ */
+export const migrationFolder = () =>
+  readdirSync(MIGRATIONS_DIRECTORY, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name);
 
 /**
  * The environment for the Payload commands that never connect: `migrate:create`

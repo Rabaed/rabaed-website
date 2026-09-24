@@ -13,24 +13,26 @@
  * - **The generated code.** `src/payload-types.ts` or the admin's import map
  *   is not what the configuration generates.
  *
- * Needs no database. It leaves the working tree as it found it: what it
- * generates to compare with is taken away again, and the difference printed.
+ * Needs no database. It leaves the working tree as it found it, whether or
+ * not Payload succeeds: what it generates to compare with is taken away
+ * again, and the difference printed.
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { PAYLOAD_BIN, WITHOUT_DATABASE, repoRoot, runNode } from './local-database.mjs';
+import {
+  MIGRATIONS_DIRECTORY,
+  PAYLOAD_BIN,
+  WITHOUT_DATABASE,
+  migrationFolder as folder,
+  repoRoot,
+  runNode,
+} from './local-database.mjs';
 import { changedStatements } from './migration-rebase.ts';
 
-const MIGRATIONS = path.join(repoRoot, 'src', 'migrations');
-const INDEX = path.join(MIGRATIONS, 'index.ts');
+const INDEX = path.join(MIGRATIONS_DIRECTORY, 'index.ts');
 const problems = [];
-
-const folder = () =>
-  readdirSync(MIGRATIONS, { withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name);
 
 // ---------------------------------------------------------------------------
 // Would a migration written now be empty?
@@ -42,23 +44,24 @@ const newest = folder()
 const before = new Set(folder());
 const index = existsSync(INDEX) ? readFileSync(INDEX, 'utf8') : null;
 
-await runNode([PAYLOAD_BIN, 'migrate:create', 'unmigrated_changes', '--skip-empty'], WITHOUT_DATABASE);
+try {
+  await runNode([PAYLOAD_BIN, 'migrate:create', 'unmigrated_changes', '--skip-empty'], WITHOUT_DATABASE);
 
-const created = folder().filter((name) => !before.has(name) && name !== 'index.ts');
-if (created.length > 0) {
-  const written = created.find((name) => name.endsWith('.ts'));
-  const statements = changedStatements({ previous: [], generated: readFileSync(path.join(MIGRATIONS, written), 'utf8') }).added;
-  for (const name of created) rmSync(path.join(MIGRATIONS, name));
-  if (index === null) rmSync(INDEX, { force: true });
-  else writeFileSync(INDEX, index);
-
-  problems.push(
-    `The configuration differs from the newest snapshot, src/migrations/${newest}. ` +
-      'A migration written now would run:\n\n' +
-      statements.map((statement) => `  ${statement};`).join('\n') +
-      '\n\nWrite that migration — npm run cms:migration -- <name> — or, when this branch has merged main since it ' +
-      'wrote its own, rebuild them: npm run cms:rebase-migrations (docs/agents/parallel-sessions.md).',
-  );
+  const written = folder().find((name) => !before.has(name) && name.endsWith('.ts') && name !== 'index.ts');
+  if (written) {
+    const source = readFileSync(path.join(MIGRATIONS_DIRECTORY, written), 'utf8');
+    const statements = changedStatements({ previous: [], generated: source }).added;
+    problems.push(
+      `The configuration differs from the newest snapshot, src/migrations/${newest}. ` +
+        'A migration written now would run:\n\n' +
+        statements.map((statement) => `  ${statement};`).join('\n') +
+        '\n\nWrite that migration — npm run cms:migration -- <name> — or, when this branch has merged main since ' +
+        'it wrote its own, rebuild them: npm run cms:rebase-migrations (docs/agents/parallel-sessions.md).',
+    );
+  }
+} finally {
+  for (const name of folder()) if (!before.has(name)) rmSync(path.join(MIGRATIONS_DIRECTORY, name));
+  if (index !== null) writeFileSync(INDEX, index);
 }
 
 // ---------------------------------------------------------------------------
@@ -72,11 +75,15 @@ const GENERATED = [
 for (const { file, command } of GENERATED) {
   const location = path.join(repoRoot, file);
   const committed = readFileSync(location, 'utf8');
-  await runNode([PAYLOAD_BIN, command], WITHOUT_DATABASE);
-  const generated = readFileSync(location, 'utf8');
+  let generated;
+  try {
+    await runNode([PAYLOAD_BIN, command], WITHOUT_DATABASE);
+    generated = readFileSync(location, 'utf8');
+  } finally {
+    writeFileSync(location, committed);
+  }
   if (generated.replace(/\r/g, '').trim() === committed.replace(/\r/g, '').trim()) continue;
 
-  writeFileSync(location, committed);
   const scratch = mkdtempSync(path.join(tmpdir(), 'rabaed-check-migrations-'));
   writeFileSync(path.join(scratch, 'committed'), committed);
   writeFileSync(path.join(scratch, 'generated'), generated);

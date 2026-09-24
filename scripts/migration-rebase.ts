@@ -90,6 +90,9 @@ function parse(name: string): { at: Date; rest: string } {
   return { at: new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`), rest: rest! };
 }
 
+/** What `payload migrate:create` is given to name a migration: its name without the moment in front. */
+export const nameAfterMoment = (name: string) => parse(name).rest;
+
 /** A moment as Payload writes it at the front of a migration's name: in UTC, to the second. */
 function stamp(at: Date): string {
   const [date, time] = at.toISOString().split('T');
@@ -108,6 +111,8 @@ function stamp(at: Date): string {
  * run before main's on a database built from scratch they could meet tables
  * that are not there yet, and the newest snapshot by name — what Payload diffs
  * the next migration against — would be main's, without this branch's tables.
+ * All of them, not just the ones that sort too early: moved to now, those
+ * would come after the rest and run out of the order they were written in.
  */
 export function planRebase({ folder, base, now }: { folder: string[]; base: string[]; now: Date }): RebasePlan {
   const mainNames = migrationNames(base);
@@ -127,7 +132,7 @@ export function planRebase({ folder, base, now }: { folder: string[]; base: stri
   const start = Math.max(Math.floor(now.getTime() / 1000) * 1000, after);
   const renames = kept.map((from, index) => ({
     from,
-    to: `${stamp(new Date(start + index * 1000))}_${parse(from).rest}`,
+    to: `${stamp(new Date(start + index * 1000))}_${nameAfterMoment(from)}`,
   }));
   const schema = regenerate[0] === undefined ? null : renames.find((rename) => rename.from === regenerate[0])!.to;
   return { regenerate, schema, renames };
