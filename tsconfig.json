@@ -43,6 +43,7 @@
   "exclude": [
     "node_modules",
     "reference",
-    "scripts"
+    "scripts",
+    "src/migrations/index.ts"
   ]
 }

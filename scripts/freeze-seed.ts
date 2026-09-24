@@ -26,8 +26,7 @@
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { getPayload } from 'payload';
-import { migrations } from '../src/migrations/index';
+import { getPayload, readMigrationFiles } from 'payload';
 import config from '../src/payload.config';
 
 /**
@@ -145,6 +144,9 @@ const CLOCK_COLUMNS = new Set(['created_at', 'updated_at', 'version_created_at',
 type Rows = Record<string, string | null>[];
 
 const payload = await getPayload({ config });
+// Read from the folder, in order, as `payload migrate` reads them.
+const migrations = await readMigrationFiles({ payload });
+
 // Past Payload's public types on purpose, and only here: `pool` is the
 // connection this script reads the rows back through, and `migrate` takes a
 // list of migrations to run, which is what lets it stop after each import.

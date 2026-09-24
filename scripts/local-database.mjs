@@ -28,6 +28,17 @@ export const NEXT_BIN = require.resolve('next/dist/bin/next');
 const DATABASE = 'rabaed';
 
 /**
+ * This checkout's development database: kept in `.data/postgres` so content
+ * survives between runs, on a port derived from where the checkout lives, so
+ * the worktrees of parallel sessions each get their own
+ * (docs/agents/parallel-sessions.md).
+ */
+export const DEVELOPMENT_DATABASE = {
+  directory: path.join(repoRoot, '.data', 'postgres'),
+  port: 55000 + (createHash('sha256').update(repoRoot).digest().readUInt16BE(0) % 1000),
+};
+
+/**
  * Starts Postgres with its data in `directory`, creating the cluster the first
  * time, and resolves with the connection string once it accepts connections.
  */
@@ -100,6 +111,19 @@ ${name}`).digest().readUInt16BE(0) % 2000);
   await rm(directory, { recursive: true, force: true }).catch(() => {});
   return failure;
 }
+
+/**
+ * The environment for the Payload commands that never connect: `migrate:create`
+ * and `generate:types` read the configuration alone. The configuration will
+ * not load without a connection string, so it is given one that nothing
+ * listens at — a command that ever did connect would fail, rather than reach
+ * whatever database `.env.local` names.
+ */
+export const WITHOUT_DATABASE = {
+  ...process.env,
+  DATABASE_URL: 'postgres://no-database@127.0.0.1:1/none',
+  PAYLOAD_SECRET: 'local-development-only',
+};
 
 /** Runs a Node script to completion, and throws if it fails. */
 export function runNode(args, env) {
