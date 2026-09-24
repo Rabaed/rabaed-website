@@ -12,7 +12,7 @@ Found by the architecture review of 24 September 2026 (L3). **Due before launch*
 - [x] Idle connections are let go (`idleTimeoutMillis`) so an instance that has gone quiet does not keep holding them — ten seconds
 - [x] `docs/deployment.md` says which Supabase address `DATABASE_URL` must be — the **transaction pooler** (port 6543), not the direct connection (5432) — and why
 - [x] **The founder** checks the production and preview `DATABASE_URL` in Vercel against that, and changes them if they point at 5432. An agent never reads or writes those values — the founder confirmed both end in `6543/postgres`, 24 September 2026
-- [ ] The full suite passes with the new pool settings (the test server's 10-connection behaviour, ticket 70, is unchanged or deliberately changed) — unchanged by design: the ceiling applies on Vercel only. The run is pending
+- [x] The full suite passes with the new pool settings (the test server's 10-connection behaviour, ticket 70, is unchanged or deliberately changed) — unchanged by design: the ceiling applies on Vercel only. CI's full suite passed on all four shards at `75c8d1b`; the local run on port 3183 had reached 1039 of 1286 with no failure when the founder asked for the merge
 
 Added while building:
 
