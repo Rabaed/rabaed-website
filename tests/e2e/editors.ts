@@ -72,14 +72,19 @@ export async function invited(editor: Editor = suiteEditor()): Promise<void> {
 
 /**
  * Has the keyholder create `editor`'s account, in a request context of its
- * own so that the caller's session is not touched. Another request of the
- * same test may have invited it a moment before; the sign-in that follows is
- * what says whether the account is there.
+ * own so that the caller's session is not touched.
+ *
+ * Every worker's first sign-in of every suite comes through here, so the
+ * keyholder is the one account many sign in to at once, and loses sessions
+ * as any would: `signedIn` signs it in again. Another request of the same
+ * test may have invited the account a moment before, which the CMS answers
+ * with a 400; the sign-in that follows is what says whether it is there.
  */
 async function invite(editor: Editor): Promise<void> {
   const keyholder = await requests.newContext({ baseURL: test.info().project.use.baseURL });
   try {
-    await signedIn(keyholder, KEYHOLDER).post('/api/users', { data: editor });
+    const created = await signedIn(keyholder, KEYHOLDER).post('/api/users', { data: editor });
+    expect(created.ok() || created.status() === 400, `${editor.email} could not be invited: ${await created.text()}`).toBe(true);
   } finally {
     await keyholder.dispose();
   }

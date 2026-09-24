@@ -68,8 +68,9 @@ export function fields<T>(value: T): Fields<T> {
 /**
  * One global, as the running suite's editor edits it.
  *
- * It remembers what was published the first time it is read or changed, so
- * that `restore` can put back exactly that: a published change — through the
+ * It remembers what was published the first time the test reads or changes
+ * it, and keeps that however often it is read again, so that `restore` can
+ * put back exactly that: a published change — through the
  * adapter or through the admin's own form — is undone by publishing what was
  * there before, which visitors see as they saw the change; a draft, by making
  * the latest published version the draft again, which visitors never see
@@ -79,7 +80,6 @@ export class CmsEntry<S extends Slug> {
   readonly slug: S;
   readonly #editor: SignedIn;
   #before: Entry<S> | undefined;
-  #saved = false;
   #drafted = false;
 
   constructor(slug: S, editor: SignedIn) {
@@ -94,7 +94,7 @@ export class CmsEntry<S extends Slug> {
   /** The entry as published: what a visitor is shown. */
   async published(): Promise<Entry<S>> {
     const entry = await this.#read();
-    if (!this.#saved) this.#before = entry;
+    this.#before ??= entry;
     return entry;
   }
 
@@ -123,11 +123,8 @@ export class CmsEntry<S extends Slug> {
       data: { ...entry, _status: status },
       ...options,
     });
-    if (response.ok()) {
-      this.#saved = true;
-      // A publish leaves no draft behind it.
-      this.#drafted = status === 'draft';
-    }
+    // A publish leaves no draft behind it.
+    if (response.ok()) this.#drafted = status === 'draft';
     return response;
   }
 
@@ -144,9 +141,8 @@ export class CmsEntry<S extends Slug> {
   /** Makes a kept version the draft, as restoring it from the admin's Versions does. */
   async restoreVersion(version: { id: string }): Promise<void> {
     await this.#remember();
-    const restored = await this.#editor.post(`${this.#address}/versions/${version.id}?draft=true`);
-    expect(restored.ok(), `${this.slug}'s version ${version.id}: ${await restored.text()}`).toBe(true);
-    this.#saved = this.#drafted = true;
+    await this.#makeDraft(version.id);
+    this.#drafted = true;
   }
 
   /**
@@ -168,11 +164,17 @@ export class CmsEntry<S extends Slug> {
         `${this.#address}/versions?where[version._status][equals]=published&sort=-updatedAt&limit=1&depth=0`,
       );
       expect(response.ok(), `${this.slug}'s published version: ${await response.text()}`).toBe(true);
-      const [latest] = (await response.json()).docs;
-      const restored = await this.#editor.post(`${this.#address}/versions/${latest.id}?draft=true`);
-      expect(restored.ok(), `${this.slug}'s draft discarded: ${await restored.text()}`).toBe(true);
+      const [latest] = (await response.json()).docs as { id: string }[];
+      expect(latest, `${this.slug} has no published version to make the draft again`).toBeDefined();
+      await this.#makeDraft(latest.id);
     }
-    this.#saved = this.#drafted = false;
+    this.#drafted = false;
+  }
+
+  /** Makes a kept version the latest, as a draft. */
+  async #makeDraft(id: string): Promise<void> {
+    const made = await this.#editor.post(`${this.#address}/versions/${id}?draft=true`);
+    expect(made.ok(), `${this.slug}'s version ${id} as the draft: ${await made.text()}`).toBe(true);
   }
 
   async #read(): Promise<Entry<S>> {
@@ -320,7 +322,8 @@ export class Cms {
  * Playwright's `test`, with `cms`: the page's requests signed in as the
  * running suite's editor — the browser shares them, so the admin and the
  * preview open signed in — and every entry the test changed put back when it
- * ends, whether it passed or not.
+ * ends, whether it passed or not. A test that only needs to be signed in, to
+ * upload a picture say, asks for `cms` for that alone.
  */
 export const test = base.extend<{ cms: Cms }>({
   cms: async ({ page }, use) => {

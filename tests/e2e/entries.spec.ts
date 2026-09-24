@@ -38,7 +38,7 @@ test.beforeAll(async ({ request }) => {
  * marked to fail passes however it fails, so the test after it checks this
  * rather than pass on a change that was never made.
  */
-const reached = { draft: false, publish: false };
+const reached = { draft: false, publish: false, elsewhere: false };
 
 test('signs in as an account of the suite’s own, invited on its first sign-in', async ({ page, cms }) => {
   expect(await cms.entry(SLUG).published()).toEqual(before);
@@ -74,6 +74,24 @@ test('fails after publishing a change', async ({ cms }) => {
 
 test('the change a failed test published is published back when it ends', async ({ cms }) => {
   expect(reached.publish, 'the test before never published its change').toBe(true);
+  expect(await cms.entry(SLUG).published()).toEqual(before);
+});
+
+test('fails after a change published without the adapter, and read back through it', async ({ page, cms }) => {
+  test.fail();
+  const entry = cms.entry(SLUG);
+  // As the admin's own form publishes, which the adapter never sees.
+  const published = await page.request.post(`/api/globals/${SLUG}`, {
+    data: { ...changed(await entry.published()), _status: 'published' },
+  });
+  expect(published.ok(), await published.text()).toBe(true);
+  expect((await entry.published()).closing.heading.ar).toBe(heading(before));
+  reached.elsewhere = true;
+  expect(true, 'failing on purpose, with the change published elsewhere').toBe(false);
+});
+
+test('a change published without the adapter is published back too', async ({ cms }) => {
+  expect(reached.elsewhere, 'the test before never published its change').toBe(true);
   expect(await cms.entry(SLUG).published()).toEqual(before);
 });
 

@@ -16,7 +16,7 @@
  * The tests sign in as an editor of their own and run one at a time, and what
  * they change is put back when each ends (`entries.ts`).
  */
-import type { APIRequestContext, Locator, Page } from '@playwright/test';
+import type { APIRequestContext, APIResponse, Locator, Page } from '@playwright/test';
 import { ADMIN_PATH, reachesVisitors, uploadImage } from './cms';
 import { test, expect, type Cms, type CmsEntry, type Entry } from './entries';
 import { drawnFrom, expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
@@ -331,7 +331,7 @@ test.describe('a replaced screen, on a phone', () => {
     }, share);
   }
 
-  /** Replaces every screen's picture for the Arabic pages in a draft, runs `check`, and discards the draft. */
+  /** Replaces every screen's picture for the Arabic pages in a draft and runs `check`; the draft is discarded when the test ends. */
   async function withEveryScreenReplaced(page: Page, cms: Cms, check: () => Promise<void>): Promise<void> {
     const screenMocks = cms.entry('screen-mocks');
     const mocks = await screenMocks.published();
@@ -525,52 +525,51 @@ test('the CMS refuses what the product page, the closing section and the screens
   const smallCrop = await uploadImage(page.request, 'صورة مقرّبة صغيرة', { width: exportedCrop.width / 2, height: exportedCrop.height / 2 });
   const largerCrop = await uploadImage(page.request, 'صورة مقرّبة أكبر', { width: exportedCrop.width * 2, height: exportedCrop.height * 2 });
 
-  // What is refused, where it is saved, what is sent, and the field it breaks.
-  const refused: [string, Global, object, string | RegExp][] = [
-    ['two parties', 'product-page', { ...product, roles: { ...roles, roles: roles.roles.slice(0, 2) } }, 'roles.roles'],
-    ['four parties', 'product-page', { ...product, roles: { ...roles, roles: [...roles.roles, roles.roles[0]] } }, 'roles.roles'],
+  /** Sends `data` to be published as `global`'s entry, typed as that entry. */
+  const sending =
+    <S extends Global>(global: S, data: Entry<S>) =>
+    () =>
+      cms.entry(global).attempt(data, 'published');
+
+  // What is refused, the entry it is sent as, and the field it breaks.
+  const refused: [string, () => Promise<APIResponse>, string | RegExp][] = [
+    ['two parties', sending('product-page', { ...product, roles: { ...roles, roles: roles.roles.slice(0, 2) } }), 'roles.roles'],
+    ['four parties', sending('product-page', { ...product, roles: { ...roles, roles: [...roles.roles, roles.roles[0]] } }), 'roles.roles'],
     [
       'four review cycles',
-      'product-page',
-      { ...product, innerCycle: { ...innerCycle, cycles: [...innerCycle.cycles, innerCycle.cycles[0]] } },
+      sending('product-page', { ...product, innerCycle: { ...innerCycle, cycles: [...innerCycle.cycles, innerCycle.cycles[0]] } }),
       'innerCycle.cycles',
     ],
-    ['no panels', 'product-page', { ...product, journey: { ...journey, panels: [] } }, 'journey.panels'],
+    ['no panels', sending('product-page', { ...product, journey: { ...journey, panels: [] } }), 'journey.panels'],
     [
       'a panel title longer than a panel holds',
-      'product-page',
-      { ...product, journey: { ...journey, panels: [{ ...panel, title: arabic(wordsOfLength(41)) }, ...otherPanels] } },
+      sending('product-page', { ...product, journey: { ...journey, panels: [{ ...panel, title: arabic(wordsOfLength(41)) }, ...otherPanels] } }),
       'journey.panels.0.title.ar',
     ],
     [
       'five parties under a panel',
-      'product-page',
-      { ...product, journey: { ...journey, panels: [{ ...panel, flow: Array(5).fill(party) }, ...otherPanels] } },
+      sending('product-page', { ...product, journey: { ...journey, panels: [{ ...panel, flow: Array(5).fill(party) }, ...otherPanels] } }),
       'journey.panels.0.flow',
     ],
     [
       "a journey heading longer than its line",
-      'product-page',
-      { ...product, journey: { ...journey, heading: arabic(wordsOfLength(41)) } },
+      sending('product-page', { ...product, journey: { ...journey, heading: arabic(wordsOfLength(41)) } }),
       'journey.heading.ar',
     ],
     [
       'a card title that would run under the badge',
-      'product-page',
-      { ...product, customStrip: { ...customStrip, features: [{ ...card, title: arabic(wordsOfLength(33)) }, ...otherCards] } },
+      sending('product-page', { ...product, customStrip: { ...customStrip, features: [{ ...card, title: arabic(wordsOfLength(33)) }, ...otherCards] } }),
       'customStrip.features.0.title.ar',
     ],
-    ['English with no English words', 'product-page', { ...product, languages: ['ar', 'en'] }, /\.en$/],
+    ['English with no English words', sending('product-page', { ...product, languages: ['ar', 'en'] }), /\.en$/],
     [
       'six closing steps',
-      'closing-section',
-      { ...closing, closing: { ...closing.closing, steps: Array(6).fill(step) } },
+      sending('closing-section', { ...closing, closing: { ...closing.closing, steps: Array(6).fill(step) } }),
       'closing.steps',
     ],
     [
       'a closing step label too long for its line',
-      'closing-section',
-      { ...closing, closing: { ...closing.closing, steps: [{ ...step, label: arabic(wordsOfLength(11)) }, ...otherSteps] } },
+      sending('closing-section', { ...closing, closing: { ...closing.closing, steps: [{ ...step, label: arabic(wordsOfLength(11)) }, ...otherSteps] } }),
       'closing.steps.0.label.ar',
     ],
     // The answer-first rule (ticket 35): the paragraph under these two
@@ -578,64 +577,54 @@ test('the CMS refuses what the product page, the closing section and the screens
     // standalone answer of 30 to 60 words rather than only to a length.
     [
       'an opening answer of 29 words under the parties',
-      'product-page',
-      { ...product, roles: { ...roles, lead: arabic(wordsCounting(29)) } },
+      sending('product-page', { ...product, roles: { ...roles, lead: arabic(wordsCounting(29)) } }),
       'roles.lead.ar',
     ],
     [
       'an opening answer of 61 words inside each party',
-      'product-page',
-      { ...product, innerCycle: { ...innerCycle, lead: arabic(wordsCounting(61)) } },
+      sending('product-page', { ...product, innerCycle: { ...innerCycle, lead: arabic(wordsCounting(61)) } }),
       'innerCycle.lead.ar',
     ],
     [
       'a replacement of another shape',
-      'screen-mocks',
-      { ...mocks, correspondence: { ...mocks.correspondence, picture: otherShape } },
+      sending('screen-mocks', { ...mocks, correspondence: { ...mocks.correspondence, picture: otherShape } }),
       'correspondence.picture',
     ],
     [
       'a replacement smaller than its place',
-      'screen-mocks',
-      { ...mocks, correspondence: { ...mocks.correspondence, picture: tooSmall } },
+      sending('screen-mocks', { ...mocks, correspondence: { ...mocks.correspondence, picture: tooSmall } }),
       'correspondence.picture',
     ],
     [
       'an English pages replacement of another shape',
-      'screen-mocks',
-      { ...mocks, correspondence: { ...mocks.correspondence, englishPicture: otherShape } },
+      sending('screen-mocks', { ...mocks, correspondence: { ...mocks.correspondence, englishPicture: otherShape } }),
       'correspondence.englishPicture',
     ],
     // A Phone crop keeps the export's crop shape, at the size the export
     // makes it or larger (ticket 79).
     [
       "a Phone crop of the whole screen's shape",
-      'screen-mocks',
-      { ...mocks, correspondence: { ...mocks.correspondence, phoneCrop: larger } },
+      sending('screen-mocks', { ...mocks, correspondence: { ...mocks.correspondence, phoneCrop: larger } }),
       'correspondence.phoneCrop',
     ],
     [
       'a Phone crop smaller than the export makes one',
-      'screen-mocks',
-      { ...mocks, correspondence: { ...mocks.correspondence, phoneCrop: smallCrop } },
+      sending('screen-mocks', { ...mocks, correspondence: { ...mocks.correspondence, phoneCrop: smallCrop } }),
       'correspondence.phoneCrop',
     ],
     [
       'an English pages Phone crop of another shape',
-      'screen-mocks',
-      { ...mocks, correspondence: { ...mocks.correspondence, englishPhoneCrop: otherShape } },
+      sending('screen-mocks', { ...mocks, correspondence: { ...mocks.correspondence, englishPhoneCrop: otherShape } }),
       'correspondence.englishPhoneCrop',
     ],
     [
       'a screen with no description',
-      'screen-mocks',
-      { ...mocks, kanban: { ...mocks.kanban, description: arabic('') } },
+      sending('screen-mocks', { ...mocks, kanban: { ...mocks.kanban, description: arabic('') } }),
       'kanban.description.ar',
     ],
   ];
-  for (const [what, global, data, field] of refused) {
-    // Sent as it stands: what the CMS is to refuse need not be an entry it would take.
-    const response = await cms.entry(global).attempt(data as never, 'published');
+  for (const [what, send, field] of refused) {
+    const response = await send();
     expect(response.status(), `${what} (${field}): ${await response.text()}`).toBe(400);
   }
 
