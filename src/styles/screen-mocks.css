@@ -59,13 +59,13 @@
 
 /* ---- a Phone crop, and the whole screen it opens (ticket 78) ---- */
 
-/* At 700px and narrower a Screen mock still showing its export is its Phone
-   crop (ADR-0022): the browser takes the crop from the picture's `<source>`,
-   and these rules draw it whole, in its own 520 by 650 shape, with nothing to
-   pan and so no fade and no swipe hint. A button over it says it opens the
-   whole screen (`src/components/screen-mock-whole.tsx`). A replaced screen
-   has no crop, and keeps ticket 77's pan above. Wider than 700px none of this
-   applies, and the page is as it was. */
+/* At 700px and narrower a Screen mock is its Phone crop (ADR-0022) — the
+   export's, or one an Editor uploaded (ticket 79): the browser takes the crop
+   from the picture's `<source>`, and these rules draw it whole, in its own 520
+   by 650 shape, with nothing to pan and so no fade and no swipe hint. A button
+   over it says it opens the whole screen (`src/components/screen-mock-whole.tsx`).
+   A replaced screen with no uploaded crop has none, and keeps ticket 77's pan
+   above. Wider than 700px none of this applies, and the page is as it was. */
 
 /* The `<picture>` the crop is offered in takes no part in the layout: the
    pages' rules size the picture inside it, as they did before there was one. */

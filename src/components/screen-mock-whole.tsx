@@ -51,8 +51,9 @@ function leave(): void {
  *
  * **The whole screen is not fetched until it is opened.** A phone shown the
  * crops has no use for the whole screens until a visitor asks for one, and
- * each is two to four times the crop's weight. It is the exported file as it
- * is, at twice the stage, which zoomed in is what a dense screen needs.
+ * each is two to four times the crop's weight. It is the whole screen's file
+ * as it is — the export, at twice the stage, or an Editor's replacement as
+ * they uploaded it (ticket 79) — which zoomed in is what a dense screen needs.
  *
  * Above 700px the stylesheet hides the button, and the page shows the whole
  * screen as it always has (`src/styles/screen-mocks.css`).
@@ -64,7 +65,7 @@ export function ScreenMockWhole({
   description,
   words,
 }: {
-  /** The whole screen's exported file. */
+  /** The whole screen's file: the export, or the replacement an Editor uploaded. */
   src: string;
   /** The screen's stage, which the opened picture is drawn at when zoomed in. */
   width: number;
@@ -137,8 +138,8 @@ export function ScreenMockWhole({
         </div>
         <div className="shot-whole-view" data-zoomed={zoomed}>
           {opened ? (
-            // The exported file as it is: `next/image` would size it for a
-            // phone's width, and zoomed in it is drawn at the stage's.
+            // The file as it is: `next/image` would size it for a phone's
+            // width, and zoomed in it is drawn at the stage's.
             <img src={src} alt={description} width={width} height={height} onClick={() => setZoomed(!zoomed)} />
           ) : null}
         </div>
