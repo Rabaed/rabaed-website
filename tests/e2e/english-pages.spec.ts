@@ -24,7 +24,8 @@
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { reachesVisitors, reaching, uploadImage } from './cms';
-import { signIn } from './editors';
+import { signIn, signedIn } from './editors';
+import { CmsEntry } from './entries';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
@@ -355,10 +356,18 @@ test.describe('the comparison', () => {
  * and the demo request form's English — as the founder publishes them.
  */
 test.describe('published in English', () => {
+  /** The editor's request, kept for putting the header and footer back (`afterAll`). */
+  let editor: APIRequestContext | undefined;
+  /** The header and footer, remembered as they were published before these tests. */
+  let siteWords: CmsEntry<'site-words'> | undefined;
+
   test.beforeAll(async ({ playwright }, testInfo) => {
     const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+    editor = request;
     await signIn(request);
     for (const slug of ['start-page', 'trust-strip', 'search-settings'] as const) await approve(request, slug, 'published');
+    siteWords = new CmsEntry('site-words', signedIn(request));
+    await siteWords.published();
     await approveSiteWords(request, 'published');
 
     const questions = await request.get('/api/faq-entries?where[locale][equals]=en&where[page][equals]=start&draft=true&depth=0&limit=100');
@@ -376,7 +385,38 @@ test.describe('published in English', () => {
       data: { ...(await form.json()), _status: 'published' },
     });
     expect(publishedForm.ok(), await publishedForm.text()).toBe(true);
-    await request.dispose();
+  });
+
+  /**
+   * The header and footer put back as they were, in Arabic alone: the site
+   * words suite runs on this server too, after this one or before its next
+   * run, and holds them to what the founder left (`site-words.spec.ts`). The
+   * rest of what is published here stays published, which no suite beside it
+   * minds.
+   *
+   * Every English page is built again on its next visit, and one still drawn
+   * with the English header and footer would be read by the next suite as if
+   * they were published, so each is waited for.
+   */
+  test.afterAll(async ({ playwright }, testInfo) => {
+    let english: string | null | undefined;
+    try {
+      english = (await siteWords?.published())?.footer.tagline.en;
+      await siteWords?.restore();
+    } finally {
+      await editor?.dispose();
+    }
+    if (!english) return;
+
+    const visitor = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+    try {
+      for (const path of [...PAGES, '/en/blog']) {
+        const html = async () => (await visitor.get(path)).text();
+        await reaching(`the English header and footer taken off ${path}`, html).not.toContain(english);
+      }
+    } finally {
+      await visitor.dispose();
+    }
   });
 
   test('the English start page is a page of the site, with its own title, alternates and trail', async ({ request, baseURL }) => {
