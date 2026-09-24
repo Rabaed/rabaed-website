@@ -214,22 +214,27 @@ export function richText(text: string, locale: 'ar' | 'en') {
   };
 }
 
+/**
+ * A plain PNG of `size`, as a file to upload — under a name of its own:
+ * suites running side by side upload at the same moment, and two files
+ * arriving under one name race for it.
+ */
+export async function pictureFile(
+  size: { width: number; height: number } = { width: 1600, height: 900 },
+  background = '#1B1E27',
+): Promise<{ name: string; mimeType: string; buffer: Buffer }> {
+  const buffer = await sharp({ create: { ...size, channels: 3, background } }).png().toBuffer();
+  return { name: `image-${Date.now()}-${Math.random().toString(36).slice(2)}.png`, mimeType: 'image/png', buffer };
+}
+
 /** Uploads a plain image, 1600×900 unless told otherwise, to the CMS's media as the signed-in editor, and returns its id. */
 export async function uploadImage(
   editor: APIRequestContext,
   alt: string,
   size: { width: number; height: number } = { width: 1600, height: 900 },
 ): Promise<number> {
-  const image = await sharp({ create: { ...size, channels: 3, background: '#1B1E27' } })
-    .png()
-    .toBuffer();
   const response = await editor.post('/api/media', {
-    multipart: {
-      // A name of its own: suites running side by side upload at the same
-      // moment, and two files arriving under one name race for it.
-      file: { name: `image-${Date.now()}-${Math.random().toString(36).slice(2)}.png`, mimeType: 'image/png', buffer: image },
-      _payload: JSON.stringify({ alt }),
-    },
+    multipart: { file: await pictureFile(size), _payload: JSON.stringify({ alt }) },
   });
   expect(response.ok(), await response.text()).toBe(true);
   return (await response.json()).doc.id as number;

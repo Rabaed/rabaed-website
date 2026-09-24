@@ -10,9 +10,18 @@
  * their own, so that `cms.spec.ts`, running beside them, never loses a session
  * to them (`cms.ts`).
  */
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import sharp from 'sharp';
-import { ADMIN_PATH, BLOG_EDITOR, logInByApi, reachesVisitors, reaching, richText, uploadImage, uploadSharingImage } from './cms';
+import { test, expect, type APIRequestContext } from '@playwright/test';
+import {
+  ADMIN_PATH,
+  BLOG_EDITOR,
+  logInByApi,
+  pictureFile,
+  reachesVisitors,
+  reaching,
+  richText,
+  uploadImage,
+  uploadSharingImage,
+} from './cms';
 import { nodesOf, structuredData, trail } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
@@ -64,13 +73,18 @@ async function coverImage(editor: APIRequestContext): Promise<number> {
   return cover;
 }
 
-/** Sends an article to the CMS as the editor would save it, and returns the response. */
-async function savePost(editor: APIRequestContext, fields: Article, status: 'published' | 'draft') {
+/**
+ * Sends an article to the CMS as the editor would save it, and returns the
+ * response. `also` is any field the article type leaves out, such as a
+ * sharing image.
+ */
+async function savePost(editor: APIRequestContext, fields: Article, status: 'published' | 'draft', also: object = {}) {
   const response = await editor.post(`/api/posts${status === 'draft' ? '?draft=true' : ''}`, {
     data: {
       ...fields,
       body: richText(fields.body, fields.locale),
       coverImage: await coverImage(editor),
+      ...also,
       _status: status,
     },
   });
@@ -78,8 +92,13 @@ async function savePost(editor: APIRequestContext, fields: Article, status: 'pub
   return response;
 }
 
-async function createPost(editor: APIRequestContext, fields: Article, status: 'published' | 'draft' = 'published') {
-  const response = await savePost(editor, fields, status);
+async function createPost(
+  editor: APIRequestContext,
+  fields: Article,
+  status: 'published' | 'draft' = 'published',
+  also: object = {},
+) {
+  const response = await savePost(editor, fields, status, also);
   expect(response.ok(), await response.text()).toBe(true);
   return (await response.json()).doc as { id: number };
 }
@@ -505,19 +524,30 @@ test('an article cannot be published without an opening answer of 30 to 60 words
  * the images were the one thing in the CMS that marked nothing, so a page
  * showed the old picture until its ten-minute age ran out (ADR-0016).
  *
- * An article is where these ask it: the page is this test's alone, so what
- * rebuilds it is this test's change and nothing another suite publishes.
+ * An article is where these ask it, because nothing else reads it: changing
+ * its images disturbs no other suite. What they cannot promise, run beside
+ * suites that publish, is that the test's change is the only thing to rebuild
+ * it — a publish anywhere marks every page. So, as with
+ * `stale-render.spec.ts`, the proof that these fail without the fix is a run
+ * of them alone: the two descriptions then never arrive, `HIT` for the whole
+ * wait (ticket 84 records it).
  */
 test.describe('an image changed in the CMS reaches the pages that show it', () => {
   /**
-   * Publishing marks the site again ten seconds after it answers (ADR-0017,
-   * `SECOND_MARK_AFTER_MS` in `src/cms/revalidation.ts`, restated for the
-   * reason `routes.ts` gives). Waited out, and then until Next answers the
-   * article from what it has built, so that the image change is the only
-   * thing left that could build it again.
+   * How long after a publish the site is marked a second time (ADR-0017):
+   * `SECOND_MARK_AFTER_MS` in `src/cms/revalidation.ts`, restated rather than
+   * imported for the reason `routes.ts` gives.
    */
-  async function settled(page: Page, request: APIRequestContext, path: string): Promise<void> {
-    await page.waitForTimeout(10_000 + 2_000);
+  const SECOND_MARK_AFTER_MS = 10_000;
+
+  /**
+   * Waits out publishing's second mark, with two seconds over for the mark
+   * itself to land, and then until Next answers the article from what it has
+   * built — so that, run alone, the image change is the only thing left that
+   * could build it again.
+   */
+  async function settled(request: APIRequestContext, path: string): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, SECOND_MARK_AFTER_MS + 2_000));
     await expect
       .poll(async () => (await request.get(path)).headers()['x-nextjs-cache'], {
         message: `${path} never settled into the cache after publishing`,
@@ -531,7 +561,7 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
     await createPost(page.request, fields);
     const path = `/blog/${fields.slug}`;
     await reachesVisitors(request, path, 'alt="صورة غلاف للاختبار"', 'the article');
-    await settled(page, request, path);
+    await settled(request, path);
 
     const described = await page.request.patch(`/api/media/${await coverImage(page.request)}`, {
       data: { alt: 'غلاف الاختبار بوصف جديد' },
@@ -552,7 +582,8 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
    * assumed (ticket 84): the page is marked, and Next builds it again before
    * answering rather than sending the page as it was, so that visitor already
    * has the new file. The same was seen on the home page, which is built
-   * ahead of time rather than on demand as an article is.
+   * ahead of time rather than on demand as an article is. This is the test
+   * server's cache; Vercel's keeps its own, and was not watched.
    */
   test('a cover image given a new file', async ({ page, request }) => {
     await logInByApi(page.request, BLOG_EDITOR);
@@ -562,15 +593,12 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
     const id = await coverImage(page.request);
     const { url: before } = (await (await page.request.get(`/api/media/${id}?depth=0`)).json()) as { url: string };
     await reachesVisitors(request, path, before, 'the article');
-    await settled(page, request, path);
+    await settled(request, path);
 
     const replaced = await page.request.patch(`/api/media/${id}`, {
       multipart: {
-        file: {
-          name: `replacement-${Date.now()}-${Math.random().toString(36).slice(2)}.png`,
-          mimeType: 'image/png',
-          buffer: await sharp({ create: { width: 1600, height: 900, channels: 3, background: '#2A2F3A' } }).png().toBuffer(),
-        },
+        // Another colour, so it is another picture and not the same one again.
+        file: await pictureFile({ width: 1600, height: 900 }, '#2A2F3A'),
         _payload: JSON.stringify({ alt: 'صورة غلاف للاختبار' }),
       },
     });
@@ -591,23 +619,13 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
     await logInByApi(page.request, BLOG_EDITOR);
     const card = await uploadSharingImage(page.request, 'بطاقة مقالة الاختبار');
     expect(card.id, card.url).toBeGreaterThan(0);
-    const fields = article();
 
     try {
-      const response = await page.request.post('/api/posts', {
-        data: {
-          ...fields,
-          body: richText(fields.body, fields.locale),
-          coverImage: await coverImage(page.request),
-          sharingImage: card.id,
-          _status: 'published',
-        },
-      });
-      expect(response.ok(), await response.text()).toBe(true);
-      createdPosts.push((await response.json()).doc.id);
+      const fields = article();
+      await createPost(page.request, fields, 'published', { sharingImage: card.id });
       const path = `/blog/${fields.slug}`;
       await reachesVisitors(request, path, 'content="بطاقة مقالة الاختبار"', 'the article’s card');
-      await settled(page, request, path);
+      await settled(request, path);
 
       const described = await page.request.patch(`/api/sharing-images/${card.id}`, {
         data: { alt: 'بطاقة المقالة بوصف جديد' },
@@ -616,6 +634,8 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
 
       await reachesVisitors(request, path, 'content="بطاقة المقالة بوصف جديد"', 'the card’s new description');
     } finally {
+      // The article goes before the picture it names, which `afterEach` would
+      // otherwise leave it pointing at after this has deleted it.
       for (const post of createdPosts.splice(0)) await page.request.delete(`/api/posts/${post}`);
       await page.request.delete(`/api/sharing-images/${card.id}`);
     }

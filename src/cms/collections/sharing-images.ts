@@ -64,8 +64,6 @@ export const SharingImages: CollectionConfig = {
     },
   ],
   hooks: {
-    // Every page that shows an image is marked stale when it changes (ticket 84).
-    ...refreshSiteWhenImageChanges,
     /**
      * **Before anything is written or unwritten**, as `media.ts` refuses an
      * SVG it cannot clean. `beforeValidate` was tried and is wrong here:
@@ -109,5 +107,8 @@ export const SharingImages: CollectionConfig = {
         }
       },
     ],
+    /** Whatever page shows the image is built again with it (ticket 84). */
+    afterChange: [refreshSiteWhenImageChanges],
+    afterDelete: [refreshSiteWhenImageChanges],
   },
 };

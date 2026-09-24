@@ -51,8 +51,6 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'small',
   },
   hooks: {
-    // Every page that shows an image is marked stale when it changes (ticket 84).
-    ...refreshSiteWhenImageChanges,
     /**
      * Before the file is written anywhere: an uploaded SVG is replaced by what
      * survives the sanitiser, and one with nothing left — or one carrying a
@@ -89,6 +87,9 @@ export const Media: CollectionConfig = {
         file.size = file.data.byteLength;
       },
     ],
+    /** Whatever page shows the image is built again with it (ticket 84). */
+    afterChange: [refreshSiteWhenImageChanges],
+    afterDelete: [refreshSiteWhenImageChanges],
   },
   fields: [
     {

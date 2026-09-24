@@ -9,7 +9,7 @@
  *
  * **Why this is asked of the running application rather than of the build.**
  * The whole point of setting the age on two layouts instead of twenty pages is
- * that a route takes the lowest age in its chain; a spec that read the five
+ * that a route takes the lowest age in its chain; a spec that read the
  * `export const revalidate` lines would assume that inheritance rather than
  * show it. The build's manifest does record what Next resolved, but it records
  * it only for routes prerendered at build time — the blog posts and the case
@@ -21,7 +21,7 @@
  *
  * It is also the seam the spec asks for — the running application, the highest
  * point (spec: Testing Decisions). `tests/unit/cached-page-age.spec.ts` holds
- * the five literals to `MAX_PAGE_AGE_SECONDS`, which is the repository's own
+ * the literals to `MAX_PAGE_AGE_SECONDS`, which is the repository's own
  * consistency and the one thing no running application can observe.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
