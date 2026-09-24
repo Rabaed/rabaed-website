@@ -4060,7 +4060,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4068,7 +4068,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4085,7 +4085,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4093,7 +4093,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4110,7 +4110,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4118,7 +4118,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4135,7 +4135,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4143,7 +4143,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4160,7 +4160,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4168,7 +4168,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4185,7 +4185,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4193,7 +4193,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4210,7 +4210,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4218,7 +4218,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
@@ -4235,7 +4235,7 @@ export interface ScreenMock {
      */
     picture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     phoneCrop?: (number | null) | Media;
     /**
@@ -4243,7 +4243,7 @@ export interface ScreenMock {
      */
     englishPicture?: (number | null) | Media;
     /**
-     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across.
+     * On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, 1040×1300 or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.
      */
     englishPhoneCrop?: (number | null) | Media;
     /**
