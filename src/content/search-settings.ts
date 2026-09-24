@@ -17,11 +17,13 @@ import type { HomePage } from '@/payload-types';
  * breadcrumb trail, rather than saying anything to a search engine, and it
  * stays in the page's own module.
  */
-export type SearchSettings = HomePage['search'];
+
+/** The tab as the CMS holds it: the same on each of the six pages. */
+export type SearchTab = HomePage['search'];
 
 export function pageMeta(
   locale: Locale,
-  search: SearchSettings,
+  search: SearchTab,
   options: { readonly name: string; readonly values?: ReferralProgramValues },
 ): PageMeta {
   // The referral page's title and description quote the Referral Program's

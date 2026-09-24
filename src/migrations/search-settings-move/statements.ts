@@ -27,6 +27,16 @@
  * entry's languages were: a page's own languages now decide whether its
  * English is shown.
  *
+ * **No page becomes English by the move.** A page used to be shown in English
+ * only once the old entry was published in English too. A page published in
+ * English on its own entry, while the old entry's English waited as a draft,
+ * was a notice — and would now be an English page with no search title. So a
+ * published page, or a published version of one, left without its search
+ * title's or description's English has English taken off its languages, as
+ * visitors already saw it. Publishing it in English again asks for those
+ * words. A draft keeps its languages: the CMS names what it wants when it is
+ * published.
+ *
  * Frozen like every data migration (`docs/deployment.md`): the pages and the
  * columns are written out as they are today, never read from the
  * configuration, which will go on changing after this has run.
@@ -91,6 +101,14 @@ export const MOVE = [
   FROM "search_settings_moving" m
  WHERE m."page" = '${tab}'
    AND m."state" = CASE WHEN v."version__status" = 'published' THEN 'published' ELSE 'saved' END;`,
+    `DELETE FROM "${table}_languages" l
+ USING "${table}" p
+ WHERE l."parent_id" = p."id" AND l."value" = 'en' AND p."_status" = 'published'
+   AND (coalesce(p."search_title_en", '') = '' OR coalesce(p."search_description_en", '') = '');`,
+    `DELETE FROM "_${table}_v_version_languages" l
+ USING "_${table}_v" v
+ WHERE l."parent_id" = v."id" AND l."value" = 'en' AND v."version__status" = 'published'
+   AND (coalesce(v."version_search_title_en", '') = '' OR coalesce(v."version_search_description_en", '') = '');`,
   ]),
   'DROP TABLE "search_settings_moving";',
 ].join('\n\n');
