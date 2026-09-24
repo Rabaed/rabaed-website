@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { StartPage } from '@/components/pages/start-page';
 import { getStartPage } from '@/content/pages/start';
-import { publishedLocales } from '@/content/pages/page-content';
+import { publishedLocales } from '@/content/pages/languages';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [{ meta }, locales] = await Promise.all([getStartPage('ar'), publishedLocales(getStartPage)]);
+  const [{ meta }, locales] = await Promise.all([getStartPage('ar'), publishedLocales('start')]);
   return pageMetadata({ locale: 'ar', locales, path: '/start', ...meta });
 }
 
@@ -15,6 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * alternates — once its English is published (ticket 42).
  */
 export default async function ArabicStartPage() {
-  const [content, locales] = await Promise.all([getStartPage('ar'), publishedLocales(getStartPage)]);
+  const [content, locales] = await Promise.all([getStartPage('ar'), publishedLocales('start')]);
   return <StartPage locale="ar" locales={locales} content={content} />;
 }

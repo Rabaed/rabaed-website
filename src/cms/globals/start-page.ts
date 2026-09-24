@@ -1,5 +1,6 @@
 import { listField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
+import { searchTab } from '../search-fields';
 
 /**
  * The start page's words, section by section, in the page's order (ticket 53):
@@ -114,5 +115,6 @@ export const StartPage = pageGlobal({
         }),
       ],
     }),
+    searchTab(),
   ],
 });

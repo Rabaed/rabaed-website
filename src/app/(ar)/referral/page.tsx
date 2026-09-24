@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { ReferralPage } from '@/components/pages/referral-page';
 import { getReferralPage } from '@/content/pages/referral';
-import { publishedLocales } from '@/content/pages/page-content';
+import { publishedLocales } from '@/content/pages/languages';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [{ meta }, locales] = await Promise.all([getReferralPage('ar'), publishedLocales(getReferralPage)]);
+  const [{ meta }, locales] = await Promise.all([getReferralPage('ar'), publishedLocales('referral')]);
   return pageMetadata({ locale: 'ar', locales, path: '/referral', ...meta });
 }
 
@@ -15,6 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * alternates — once its English is published (ticket 42).
  */
 export default async function ArabicReferralPage() {
-  const [content, locales] = await Promise.all([getReferralPage('ar'), publishedLocales(getReferralPage)]);
+  const [content, locales] = await Promise.all([getReferralPage('ar'), publishedLocales('referral')]);
   return <ReferralPage locale="ar" locales={locales} content={content} />;
 }

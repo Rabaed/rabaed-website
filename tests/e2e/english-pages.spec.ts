@@ -10,7 +10,7 @@
  * on, and ticks English among the languages it is published in — and to hold
  * a published English page to what a page of the site is held to it publishes
  * one: the start page, and what it reads beside its own entry — the Trust
- * strip, the search settings, its questions, its form's English, and the
+ * strip, its questions, its form's English, and the
  * header and footer's (ticket 40). The page-text suites edit these entries
  * on the first server, where a draft of this suite's would be found under
  * theirs; this server's database is not theirs. The Arabic of every entry
@@ -22,44 +22,44 @@
  * proposed. What is asserted is what any English would have to do: be
  * English, fill the page, and never leave Arabic in its place.
  */
+import { isDeepStrictEqual } from 'node:util';
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { reachesVisitors, reaching, uploadImage } from './cms';
-import { signIn, signedIn } from './editors';
-import { CmsEntry } from './entries';
+import { signIn } from './editors';
+import { fields, type Entry } from './entries';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
+import { entriesRead, MARKETING_PAGES, PAGE_ENTRIES, type MarketingPage } from '../../src/content/pages/page-entries';
 import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
 
 test.describe.configure({ mode: 'default' });
 
 /**
+ * The entries a page reads beside the header and footer, whose English is
+ * approved on its own (`approveSiteWords`): as the site decides the page's
+ * languages by them (`src/content/pages/page-entries.ts`, ticket 91).
+ */
+const entriesOf = (...pages: MarketingPage[]) => [
+  ...new Set(pages.flatMap((page) => entriesRead(page)).filter((slug) => slug !== 'site-words')),
+];
+
+/**
  * Every entry an English page reads beside the header and footer: this
  * ticket's proposals, and the Screen mocks, whose English is ticket 41's.
  */
-const ENTRIES = [
-  'home-page',
-  'product-page',
-  'start-page',
-  'tool-page',
-  'referral-page',
-  'partnership-page',
-  'closing-section',
-  'screen-mocks',
-  'trust-strip',
-  'search-settings',
-] as const;
+const ENTRIES = entriesOf(...MARKETING_PAGES);
 
-/** The six English pages, and the entry each is its own. */
-const OWN_ENTRY: Readonly<Record<string, (typeof ENTRIES)[number]>> = {
-  '/en': 'home-page',
-  '/en/product': 'product-page',
-  '/en/start': 'start-page',
-  '/en/tool': 'tool-page',
-  '/en/referral': 'referral-page',
-  '/en/partnership': 'partnership-page',
+/** Each English page's address. */
+const PATH: Readonly<Record<MarketingPage, string>> = {
+  home: '/en',
+  product: '/en/product',
+  start: '/en/start',
+  tool: '/en/tool',
+  referral: '/en/referral',
+  partnership: '/en/partnership',
 };
-const PAGES = Object.keys(OWN_ENTRY);
+const PAGES = MARKETING_PAGES.map((page) => PATH[page]);
 
 /** Anything with an Arabic letter in it. */
 const ARABIC = /[\u0600-\u06FF]/;
@@ -142,6 +142,70 @@ function readText(page: Page): Promise<string> {
   });
 }
 
+/**
+ * The header and footer as visitors were shown them before this suite: the
+ * newest published version, which is what the site reads (`src/cms/pages.ts`).
+ */
+let siteWordsBefore: Version | undefined;
+
+test.beforeAll(async ({ playwright }, testInfo) => {
+  const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+  try {
+    await signIn(request);
+    [siteWordsBefore] = await versions(request, 'site-words', 'published');
+  } finally {
+    await request.dispose();
+  }
+});
+
+/**
+ * The header and footer put back as they were, in Arabic alone: the site
+ * words suite runs on this server too, after this one or before its next
+ * run, and holds them to what the founder left (`site-words.spec.ts`). The
+ * rest of what is published here stays published, which no suite beside it
+ * minds.
+ *
+ * Put back from the published version remembered, not from the entry as the
+ * API reads it: approving the English as a draft restores the proposal, and
+ * restoring a version makes it the entry, draft or not — so after the
+ * previews above the API reads the English proposal, and the published
+ * Arabic is only in the versions.
+ *
+ * Every English page is built again on its next visit, and one still drawn
+ * with the English header and footer would be read by the next suite as if
+ * they were published, so each is waited for.
+ */
+test.afterAll(async ({ playwright }, testInfo) => {
+  const before = siteWordsBefore;
+  if (!before) return;
+  const editor = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+  let english: string | null | undefined;
+  try {
+    await signIn(editor);
+    const [latest] = await versions(editor, 'site-words', 'published');
+    const entry = await editor.get('/api/globals/site-words?depth=0');
+    expect(entry.ok(), await entry.text()).toBe(true);
+    const unchanged = latest.id === before.id && isDeepStrictEqual(fields(await entry.json()), fields(before.version));
+    if (unchanged) return;
+    if (latest.version.languages?.includes('en')) english = (latest.version as unknown as Entry<'site-words'>).footer.tagline.en;
+    const restored = await editor.post('/api/globals/site-words', { data: { ...fields(before.version), _status: 'published' } });
+    expect(restored.ok(), await restored.text()).toBe(true);
+  } finally {
+    await editor.dispose();
+  }
+  if (!english) return;
+
+  const visitor = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+  try {
+    for (const path of [...PAGES, '/en/blog']) {
+      const html = async () => (await visitor.get(path)).text();
+      await reaching(`the English header and footer taken off ${path}`, html).not.toContain(english);
+    }
+  } finally {
+    await visitor.dispose();
+  }
+});
+
 test.afterEach(async ({ page }) => {
   await page.request.get('/api/preview/exit');
 });
@@ -177,13 +241,24 @@ test('every entry the English pages read waits as a draft, with every word of it
 
 test('previewed, each English page is the whole page, in English, left to right', async ({ page }) => {
   await signIn(page.request);
-  for (const slug of ENTRIES) await approve(page.request, slug, 'draft');
   await approveSiteWords(page.request, 'draft');
 
+  // Each page's entries approved only when that page is next, the pages that
+  // read the fewest first: a page reading an entry its list leaves out finds
+  // that entry still in Arabic alone, and fails rather than drawing.
+  const approved = new Set<string>();
+  const inOrder = [...MARKETING_PAGES].sort((one, other) => entriesRead(one).length - entriesRead(other).length);
   let eyebrows = 0;
-  for (const path of PAGES) {
-    // The page itself, not the notice that stands for it.
-    await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+  for (const each of inOrder) {
+    for (const slug of entriesOf(each).filter((slug) => !approved.has(slug))) {
+      await approve(page.request, slug, 'draft');
+      approved.add(slug);
+    }
+    const path = PATH[each];
+    // The page itself, not the notice that stands for it, nor an error for a
+    // part of it still in Arabic alone.
+    const response = await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+    expect(response?.status(), path).toBe(200);
     await expect(page.getByRole('status').first()).toContainText('معاينة');
     await expect(page.locator('h1'), path).not.toHaveText(/not available in English|on its way/);
 
@@ -218,9 +293,7 @@ test('previewed on a phone, the English Screen mocks are English Phone crops; at
   page,
 }) => {
   await signIn(page.request);
-  for (const slug of ['home-page', 'product-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
-    await approve(page.request, slug, 'draft');
-  }
+  for (const slug of entriesOf('home', 'product')) await approve(page.request, slug, 'draft');
   await approveSiteWords(page.request, 'draft');
 
   /** The file the Screen mock on show was drawn from, as `next/image` names it. */
@@ -268,9 +341,7 @@ test('previewed on a phone, an uploaded English Phone crop shows, and a replaced
   // Found before approving, which saves a copy of it the next approval would
   // find instead.
   const { id: proposed } = await proposal(page.request, 'screen-mocks');
-  for (const slug of ['product-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
-    await approve(page.request, slug, 'draft');
-  }
+  for (const slug of entriesOf('product')) await approve(page.request, slug, 'draft');
   await approveSiteWords(page.request, 'draft');
 
   const crop = await uploadImage(page.request, 'Phone crop', phoneCropExportSize(SCREEN_MOCKS[0]));
@@ -325,9 +396,7 @@ test.describe('the comparison', () => {
 
   test('previewed, the home page’s comparison turns over from the left, where an English line begins', async ({ page }) => {
     await signIn(page.request);
-    for (const slug of ['home-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
-      await approve(page.request, slug, 'draft');
-    }
+    for (const slug of entriesOf('home')) await approve(page.request, slug, 'draft');
     await approveSiteWords(page.request, 'draft');
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`/api/preview?path=${encodeURIComponent('/en')}`, { waitUntil: 'networkidle' });
@@ -352,22 +421,14 @@ test.describe('the comparison', () => {
 
 /**
  * The start page published in English, and what it reads with it — the Trust
- * strip, the search settings, the header and footer, its English questions
+ * strip, the header and footer, its English questions
  * and the demo request form's English — as the founder publishes them.
  */
 test.describe('published in English', () => {
-  /** The editor's request, kept for putting the header and footer back (`afterAll`). */
-  let editor: APIRequestContext | undefined;
-  /** The header and footer, remembered as they were published before these tests. */
-  let siteWords: CmsEntry<'site-words'> | undefined;
-
   test.beforeAll(async ({ playwright }, testInfo) => {
     const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
-    editor = request;
     await signIn(request);
-    for (const slug of ['start-page', 'trust-strip', 'search-settings'] as const) await approve(request, slug, 'published');
-    siteWords = new CmsEntry('site-words', signedIn(request));
-    await siteWords.published();
+    for (const slug of entriesOf('start')) await approve(request, slug, 'published');
     await approveSiteWords(request, 'published');
 
     const questions = await request.get('/api/faq-entries?where[locale][equals]=en&where[page][equals]=start&draft=true&depth=0&limit=100');
@@ -385,43 +446,12 @@ test.describe('published in English', () => {
       data: { ...(await form.json()), _status: 'published' },
     });
     expect(publishedForm.ok(), await publishedForm.text()).toBe(true);
-  });
-
-  /**
-   * The header and footer put back as they were, in Arabic alone: the site
-   * words suite runs on this server too, after this one or before its next
-   * run, and holds them to what the founder left (`site-words.spec.ts`). The
-   * rest of what is published here stays published, which no suite beside it
-   * minds.
-   *
-   * Every English page is built again on its next visit, and one still drawn
-   * with the English header and footer would be read by the next suite as if
-   * they were published, so each is waited for.
-   */
-  test.afterAll(async ({ playwright }, testInfo) => {
-    let english: string | null | undefined;
-    try {
-      english = (await siteWords?.published())?.footer.tagline.en;
-      await siteWords?.restore();
-    } finally {
-      await editor?.dispose();
-    }
-    if (!english) return;
-
-    const visitor = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
-    try {
-      for (const path of [...PAGES, '/en/blog']) {
-        const html = async () => (await visitor.get(path)).text();
-        await reaching(`the English header and footer taken off ${path}`, html).not.toContain(english);
-      }
-    } finally {
-      await visitor.dispose();
-    }
+    await request.dispose();
   });
 
   test('the English start page is a page of the site, with its own title, alternates and trail', async ({ request, baseURL }) => {
     await signIn(request);
-    const title = (await proposal(request, 'search-settings')).version.start as { title: { en: string } };
+    const title = (await proposal(request, PAGE_ENTRIES.start.own)).version.search as { title: { en: string } };
     const html = await reachesVisitors(request, '/en/start', title.title.en, 'the English start page');
 
     expect(html).not.toContain('This page is not available in English yet.');

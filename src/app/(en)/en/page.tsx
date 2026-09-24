@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import { HomePage } from '@/components/pages/home-page';
 import { PageShell } from '@/components/page-shell';
 import { getHomePage } from '@/content/pages/home';
-import { inEnglish } from '@/content/pages/page-content';
+import { inEnglish } from '@/content/pages/languages';
 import { LOCALE_CODES } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await inEnglish(getHomePage);
+  const content = await inEnglish('home', getHomePage);
   if (content) return pageMetadata({ locale: 'en', path: '/', ...content.meta });
   return pageMetadata({
     locale: 'en',
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * and needs every one of them (`tests/e2e/animation-code.ts`).
  */
 export default async function EnglishHomePage() {
-  const content = await inEnglish(getHomePage);
+  const content = await inEnglish('home', getHomePage);
   if (content) return <HomePage locale="en" locales={LOCALE_CODES} content={content} />;
 
   return (

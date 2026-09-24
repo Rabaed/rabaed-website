@@ -3,12 +3,12 @@ import { ArabicOnlyNotice, arabicOnlyMetadata } from '@/components/arabic-only-n
 import { StartPage } from '@/components/pages/start-page';
 import { NOT_YET_IN_ENGLISH } from '@/content/arabic-only-pages';
 import { getStartPage } from '@/content/pages/start';
-import { inEnglish } from '@/content/pages/page-content';
+import { inEnglish } from '@/content/pages/languages';
 import { LOCALE_CODES } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await inEnglish(getStartPage);
+  const content = await inEnglish('start', getStartPage);
   if (!content) return arabicOnlyMetadata(NOT_YET_IN_ENGLISH.start);
   return pageMetadata({ locale: 'en', path: '/start', ...content.meta });
 }
@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * (`src/content/arabic-only-pages.ts`) — never the Arabic words in its place.
  */
 export default async function EnglishStartPage() {
-  const content = await inEnglish(getStartPage);
+  const content = await inEnglish('start', getStartPage);
   if (!content) return <ArabicOnlyNotice page={NOT_YET_IN_ENGLISH.start} />;
   return <StartPage locale="en" locales={LOCALE_CODES} content={content} />;
 }

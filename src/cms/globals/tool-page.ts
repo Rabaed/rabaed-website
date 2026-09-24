@@ -1,6 +1,7 @@
 import type { Field } from 'payload';
 import { latinField, listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
+import { searchTab } from '../search-fields';
 
 /**
  * The tool page's words, section by section, in the page's order (ticket 54),
@@ -379,5 +380,6 @@ export const ToolPage = pageGlobal({
         wordsField('signOff', { ar: 'السطر الذي يختم الصفحة', en: 'Line that closes the page' }, 120),
       ],
     }),
+    searchTab(),
   ],
 });
