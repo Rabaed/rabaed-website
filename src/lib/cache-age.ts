@@ -40,7 +40,7 @@
  * `export const revalidate` by static analysis, and only a literal: the
  * documented rule is that `revalidate = 600` is valid and `revalidate = 60 *
  * 10` is not (`node_modules/next/dist/docs/01-app/02-guides/caching-without-cache-components.md`).
- * So each of the five routes writes the number out, and
+ * So each of the six routes writes the number out, and
  * `tests/unit/cached-page-age.spec.ts` holds every one of them to this
  * constant — and holds the build to it too, so the inheritance the two layouts
  * rely on is shown rather than assumed.

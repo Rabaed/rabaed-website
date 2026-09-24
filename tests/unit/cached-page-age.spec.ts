@@ -9,8 +9,8 @@
  * floor under all of them.
  *
  * Next reads `export const revalidate` by static analysis and accepts only a
- * literal, so the number cannot be imported into the five routes that set it.
- * What this spec holds is that the five literals still agree with
+ * literal, so the number cannot be imported into the six routes that set it.
+ * What this spec holds is that the six literals still agree with
  * `MAX_PAGE_AGE_SECONDS`, and that the route groups deliberately left without
  * an age are still without one on purpose rather than by having been
  * forgotten.
@@ -19,7 +19,7 @@
  * own consistency — one file held to another, the third seam the spec permits
  * (spec: Testing Decisions). That the age *reaches* a visitor is a different
  * question and a different seam: `tests/e2e/cached-page-age.spec.ts` asks the
- * running application, which is where the inheritance these five lines rely on
+ * running application, which is where the inheritance these lines rely on
  * can actually be observed.
  */
 import { test, expect } from '@playwright/test';
@@ -36,7 +36,10 @@ const repoRoot = path.resolve(import.meta.dirname, '..', '..');
  * in its chain, so those two cover every page without twenty edits to keep in
  * step. The three discovery files are routes of their own with no layout above
  * them — the same reason `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`,
- * and the same three.
+ * and the same three. So is the not-found page, which sits in neither
+ * language's layout (`PAGE_LAYOUTS` there names it) and shows words from the
+ * CMS (ticket 59); Next builds it as a page of its own, `/_not-found`, from
+ * this file (ticket 84).
  */
 const MUST_CARRY_THE_AGE = [
   'src/app/(ar)/layout.tsx',
@@ -44,6 +47,7 @@ const MUST_CARRY_THE_AGE = [
   'src/app/llms.txt/route.ts',
   'src/app/robots.ts',
   'src/app/sitemap.ts',
+  'src/app/not-found.tsx',
 ];
 
 /**

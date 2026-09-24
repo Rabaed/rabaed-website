@@ -2,6 +2,7 @@ import { APIError, type CollectionConfig } from 'payload';
 import sharp from 'sharp';
 import { signedIn } from '../access';
 import { localSharingImageDirectory } from '../environment';
+import { refreshSiteWhenImageChanges } from '../revalidation';
 
 /**
  * The picture a page shows when its link is shared — on WhatsApp, on LinkedIn,
@@ -63,6 +64,8 @@ export const SharingImages: CollectionConfig = {
     },
   ],
   hooks: {
+    // Every page that shows an image is marked stale when it changes (ticket 84).
+    ...refreshSiteWhenImageChanges,
     /**
      * **Before anything is written or unwritten**, as `media.ts` refuses an
      * SVG it cannot clean. `beforeValidate` was tried and is wrong here:

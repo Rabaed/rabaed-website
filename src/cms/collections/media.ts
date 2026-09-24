@@ -2,6 +2,7 @@ import { APIError, type CollectionConfig, type ImageUploadFormatOptions } from '
 import { signedIn } from '../access';
 import { localMediaDirectory } from '../environment';
 import { inAdminLanguage } from '../page-fields';
+import { refreshSiteWhenImageChanges } from '../revalidation';
 
 /**
  * WebP rather than AVIF. Every browser the site supports shows it, and it
@@ -50,6 +51,8 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'small',
   },
   hooks: {
+    // Every page that shows an image is marked stale when it changes (ticket 84).
+    ...refreshSiteWhenImageChanges,
     /**
      * Before the file is written anywhere: an uploaded SVG is replaced by what
      * survives the sanitiser, and one with nothing left — or one carrying a

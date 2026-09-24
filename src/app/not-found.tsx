@@ -27,6 +27,21 @@ import '@/styles/globals.css';
  * here matched no route, so it names no language to answer in, and the site's
  * own language answers.
  */
+/**
+ * Rebuilt at most ten minutes after it was last built, whether or not a
+ * publish reached it (ticket 84, ADR-0016). Publishing marks it with the rest
+ * (`PAGE_LAYOUTS` in `src/cms/revalidation.ts`), but it sits beneath neither
+ * language's layout, so their age never reached it: it was the one cached page
+ * a lost mark left wrong until the next publish.
+ *
+ * Next builds this file as the page of a route of its own, `/_not-found`, and
+ * reads the age from it as from any page. Written out rather than imported
+ * because Next reads only a literal — see `src/lib/cache-age.ts`, which holds
+ * the number, and `tests/unit/cached-page-age.spec.ts`, which holds this line
+ * to it.
+ */
+export const revalidate = 600;
+
 export default async function NotFound() {
   const { heading, lead, homeLabel } = await getNotFound(DEFAULT_LOCALE);
 
