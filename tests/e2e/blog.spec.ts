@@ -11,7 +11,17 @@
  * to them (`cms.ts`).
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ADMIN_PATH, BLOG_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
+import {
+  ADMIN_PATH,
+  BLOG_EDITOR,
+  logInByApi,
+  pictureFile,
+  reachesVisitors,
+  reaching,
+  richText,
+  uploadImage,
+  uploadSharingImage,
+} from './cms';
 import { sidewaysOverflow } from './geometry';
 import { nodesOf, structuredData, trail } from './structured-data';
 
@@ -64,13 +74,18 @@ async function coverImage(editor: APIRequestContext): Promise<number> {
   return cover;
 }
 
-/** Sends an article to the CMS as the editor would save it, and returns the response. */
-async function savePost(editor: APIRequestContext, fields: Article, status: 'published' | 'draft') {
+/**
+ * Sends an article to the CMS as the editor would save it, and returns the
+ * response. `also` is any field the article type leaves out, such as a
+ * sharing image.
+ */
+async function savePost(editor: APIRequestContext, fields: Article, status: 'published' | 'draft', also: object = {}) {
   const response = await editor.post(`/api/posts${status === 'draft' ? '?draft=true' : ''}`, {
     data: {
       ...fields,
       body: richText(fields.body, fields.locale),
       coverImage: await coverImage(editor),
+      ...also,
       _status: status,
     },
   });
@@ -78,8 +93,13 @@ async function savePost(editor: APIRequestContext, fields: Article, status: 'pub
   return response;
 }
 
-async function createPost(editor: APIRequestContext, fields: Article, status: 'published' | 'draft' = 'published') {
-  const response = await savePost(editor, fields, status);
+async function createPost(
+  editor: APIRequestContext,
+  fields: Article,
+  status: 'published' | 'draft' = 'published',
+  also: object = {},
+) {
+  const response = await savePost(editor, fields, status, also);
   expect(response.ok(), await response.text()).toBe(true);
   return (await response.json()).doc as { id: number };
 }
@@ -497,4 +517,128 @@ test('an article cannot be published without an opening answer of 30 to 60 words
   // A draft may be unfinished: Ahmed saves as he writes.
   const unfinished = await savePost(page.request, article({ answer: 'مسودة لم تكتمل.' }), 'draft');
   expect(unfinished.ok()).toBe(true);
+});
+
+/**
+ * An image is a record of its own, and changing it changes every page that
+ * shows it without that page being published again (ticket 84). Until then
+ * the images were the one thing in the CMS that marked nothing, so a page
+ * showed the old picture until its ten-minute age ran out (ADR-0016).
+ *
+ * An article is where these ask it, because nothing else reads it: changing
+ * its images disturbs no other suite. What they cannot promise, run beside
+ * suites that publish, is that the test's change is the only thing to rebuild
+ * it — a publish anywhere marks every page. So, as with
+ * `stale-render.spec.ts`, the proof that these fail without the fix is a run
+ * of them alone: the two descriptions then never arrive, `HIT` for the whole
+ * wait (ticket 84 records it).
+ */
+test.describe('an image changed in the CMS reaches the pages that show it', () => {
+  /**
+   * How long after a publish the site is marked a second time (ADR-0017):
+   * `SECOND_MARK_AFTER_MS` in `src/cms/revalidation.ts`, restated rather than
+   * imported for the reason `routes.ts` gives.
+   */
+  const SECOND_MARK_AFTER_MS = 10_000;
+
+  /**
+   * Waits out publishing's second mark, with two seconds over for the mark
+   * itself to land, and then until Next answers the article from what it has
+   * built — so that, run alone, the image change is the only thing left that
+   * could build it again.
+   */
+  async function settled(request: APIRequestContext, path: string): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, SECOND_MARK_AFTER_MS + 2_000));
+    await expect
+      .poll(async () => (await request.get(path)).headers()['x-nextjs-cache'], {
+        message: `${path} never settled into the cache after publishing`,
+      })
+      .toBe('HIT');
+  }
+
+  test('a cover image given a new description', async ({ page, request }) => {
+    await logInByApi(page.request, BLOG_EDITOR);
+    const fields = article();
+    await createPost(page.request, fields);
+    const path = `/blog/${fields.slug}`;
+    await reachesVisitors(request, path, 'alt="صورة غلاف للاختبار"', 'the article');
+    await settled(request, path);
+
+    const described = await page.request.patch(`/api/media/${await coverImage(page.request)}`, {
+      data: { alt: 'غلاف الاختبار بوصف جديد' },
+    });
+    expect(described.ok(), await described.text()).toBe(true);
+
+    await reachesVisitors(request, path, 'alt="غلاف الاختبار بوصف جديد"', 'the cover’s new description');
+  });
+
+  /**
+   * Replacing the file deletes the one it replaces at once — from Payload's own
+   * disk before the new one is stored, as here, or from the storage a
+   * deployment uses once it is (`@payloadcms/storage-s3`). Until this ticket
+   * the page went on naming the old file for up to ten minutes: a missing
+   * picture, or in the Trust strip a company's name where its mark was.
+   *
+   * What the first visitor after the change is sent was asked rather than
+   * assumed (ticket 84): the page is marked, and Next builds it again before
+   * answering rather than sending the page as it was, so that visitor already
+   * has the new file. The same was seen on the home page, which is built
+   * ahead of time rather than on demand as an article is. This is the test
+   * server's cache; Vercel's keeps its own, and was not watched.
+   */
+  test('a cover image given a new file', async ({ page, request }) => {
+    await logInByApi(page.request, BLOG_EDITOR);
+    const fields = article();
+    await createPost(page.request, fields);
+    const path = `/blog/${fields.slug}`;
+    const id = await coverImage(page.request);
+    const { url: before } = (await (await page.request.get(`/api/media/${id}?depth=0`)).json()) as { url: string };
+    await reachesVisitors(request, path, before, 'the article');
+    await settled(request, path);
+
+    const replaced = await page.request.patch(`/api/media/${id}`, {
+      multipart: {
+        // Another colour, so it is another picture and not the same one again.
+        file: await pictureFile({ width: 1600, height: 900 }, '#2A2F3A'),
+        _payload: JSON.stringify({ alt: 'صورة غلاف للاختبار' }),
+      },
+    });
+    expect(replaced.ok(), await replaced.text()).toBe(true);
+    const { url: after } = (await replaced.json()).doc as { url: string };
+    expect(after, 'the replacement kept the old file’s address').not.toBe(before);
+
+    // Payload answers 500 for a file gone from its own disk, as here, and the
+    // storage on a deployment answers 404 (`@payloadcms/storage-s3`,
+    // `getFile.js`). Either is a picture that does not arrive.
+    expect((await request.get(before)).ok(), 'the replaced file still answers').toBe(false);
+    const first = await (await request.get(path)).text();
+    expect(first, 'the first visitor after the change was sent the page naming a file that is gone').not.toContain(before);
+    expect(first).toContain(after);
+  });
+
+  test('a sharing image given a new description', async ({ page, request }) => {
+    await logInByApi(page.request, BLOG_EDITOR);
+    const card = await uploadSharingImage(page.request, 'بطاقة مقالة الاختبار');
+    expect(card.id, card.url).toBeGreaterThan(0);
+
+    try {
+      const fields = article();
+      await createPost(page.request, fields, 'published', { sharingImage: card.id });
+      const path = `/blog/${fields.slug}`;
+      await reachesVisitors(request, path, 'content="بطاقة مقالة الاختبار"', 'the article’s card');
+      await settled(request, path);
+
+      const described = await page.request.patch(`/api/sharing-images/${card.id}`, {
+        data: { alt: 'بطاقة المقالة بوصف جديد' },
+      });
+      expect(described.ok(), await described.text()).toBe(true);
+
+      await reachesVisitors(request, path, 'content="بطاقة المقالة بوصف جديد"', 'the card’s new description');
+    } finally {
+      // The article goes before the picture it names, which `afterEach` would
+      // otherwise leave it pointing at after this has deleted it.
+      for (const post of createdPosts.splice(0)) await page.request.delete(`/api/posts/${post}`);
+      await page.request.delete(`/api/sharing-images/${card.id}`);
+    }
+  });
 });

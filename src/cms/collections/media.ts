@@ -2,6 +2,7 @@ import { APIError, type CollectionConfig, type ImageUploadFormatOptions } from '
 import { signedIn } from '../access';
 import { localMediaDirectory } from '../environment';
 import { inAdminLanguage } from '../page-fields';
+import { refreshSiteWhenImageChanges } from '../revalidation';
 
 /**
  * WebP rather than AVIF. Every browser the site supports shows it, and it
@@ -86,6 +87,9 @@ export const Media: CollectionConfig = {
         file.size = file.data.byteLength;
       },
     ],
+    /** Whatever page shows the image is built again with it (ticket 84). */
+    afterChange: [refreshSiteWhenImageChanges],
+    afterDelete: [refreshSiteWhenImageChanges],
   },
   fields: [
     {

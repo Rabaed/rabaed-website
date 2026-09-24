@@ -40,7 +40,9 @@ a change shows on it, and two separate things cause that:
   `llms.txt` and `robots.txt` with them — as out of date, and each is rebuilt
   the next time somebody asks for it. This is how a change normally travels,
   and it arrives in under a second. **Ten seconds later it marks them all
-  again**, for the reason below.
+  again**, for the reason below. Saving, replacing or deleting an image does
+  the same, though an image is never published: whatever page shows it
+  changes with it (ticket 84).
 - **The maximum age: ten minutes.** Whatever becomes of those marks, no page is
   older than ten minutes before it is rebuilt anyway.
 

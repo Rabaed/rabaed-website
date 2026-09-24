@@ -108,3 +108,24 @@ export const refreshSiteWhenSaved: GlobalAfterChangeHook = ({ doc, req }) => {
   refreshSite(req);
   return doc;
 };
+
+/**
+ * For the two image collections, `media` and `sharing-images` (ticket 84), as
+ * both their `afterChange` and their `afterDelete`. An image keeps no drafts
+ * and is shown by whatever page names it — a Trust strip mark, an article's
+ * cover, a page's link card — so saving one, replacing its file or deleting it
+ * changes those pages at once, and the page never knows: nothing it is built
+ * from was published. Without this, a page went on showing the old picture, or
+ * its old description, until its ten-minute age ran out (ADR-0016).
+ *
+ * Replacing the file deletes the old one as the new one is stored, so a page
+ * left as it was built names a file that no longer answers: a missing
+ * picture, or in the Trust strip a company's name where its mark was. Marked,
+ * the page is built again before its next visitor is answered — seen on the
+ * test server (`tests/e2e/blog.spec.ts` asks it); Vercel's cache was not
+ * watched doing the same.
+ */
+export const refreshSiteWhenImageChanges = <Doc>({ doc, req }: { doc: Doc; req: PayloadRequest }): Doc => {
+  refreshSite(req);
+  return doc;
+};
