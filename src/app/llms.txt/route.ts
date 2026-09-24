@@ -6,7 +6,8 @@ import { BLOG_COPY } from '@/content/blog';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { COMPANY } from '@/content/company';
 import { getIndexLead } from '@/content/index-leads';
-import type { PageMeta } from '@/content/pages/page-content';
+import { getHomePage } from '@/content/pages/home';
+import { contentOrNull, inEnglish, type PageMeta } from '@/content/pages/page-content';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { getProductPage } from '@/content/pages/product';
 import { getReferralPage } from '@/content/pages/referral';
@@ -15,8 +16,8 @@ import { getToolPage } from '@/content/pages/tool';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
-import { localePath } from '@/lib/locales';
-import type { CaseStudy } from '@/payload-types';
+import { localePath, type Locale } from '@/lib/locales';
+import type { CaseStudy, Post } from '@/payload-types';
 
 /**
  * `llms.txt`: what Rabaed is and where its pages are, in one short Markdown
@@ -32,12 +33,22 @@ import type { CaseStudy } from '@/payload-types';
  * goes quietly stale. Ticket 26 moves the pages' descriptions into the CMS,
  * and this file follows them there without being touched.
  *
- * Arabic alone, as the site is until ticket 42 writes the English pages.
+ * **Arabic first, then English** (ticket 82). The English half lists what is
+ * published in English by the sitemap's rule (`src/app/sitemap.ts`): a
+ * marketing page once it is published in English, the English blog and case
+ * studies indexes once each has something to list, and nothing before — so
+ * the file never points an assistant at a notice or a placeholder. One step
+ * stricter than the sitemap: an index whose lead is not published in the
+ * language is left out, since this file quotes the lead and the sitemap does
+ * not. The legal documents are Arabic alone, their Arabic being binding
+ * (spec: Out of Scope).
  *
- * The home page is the site, and the heading and summary at the top of the
- * file describe it; it is not listed again among the pages. Nor is the Screen
- * mock studio, the CMS admin or anything else that is not a page of the site —
- * the list is written out, as the sitemap's is, so nothing can wander in.
+ * The Arabic home page is the site, and the heading and summary at the top of
+ * the file describe it; it is not listed again among the pages. The English
+ * home page is listed, first among the English pages, since the heading is not
+ * its. Nor is the Screen mock studio, the CMS admin or anything else that is
+ * not a page of the site — the list is written out, as the sitemap's is, so
+ * nothing can wander in.
  */
 
 /** Built ahead of time and rebuilt when content is published (`src/cms/revalidation.ts`). */
@@ -55,10 +66,30 @@ export const dynamic = 'force-static';
  */
 export const revalidate = 600;
 
-const LOCALE = 'ar';
-
 /** One line of the file: a link, and what the page it points at says about itself. */
 type Entry = { readonly label: string; readonly path: string; readonly description: string };
+
+/** The headings each language's entries stand under. The legal documents are Arabic alone. */
+const HEADINGS = {
+  ar: { pages: 'الصفحات', posts: 'المقالات', caseStudies: 'قصص العملاء', legal: 'نظامي' },
+  en: { pages: 'Pages in English', posts: 'Articles in English', caseStudies: 'Case studies in English' },
+} as const satisfies Record<Locale, unknown>;
+
+/**
+ * The marketing pages, each with what reads it in a language — a copy of the
+ * sitemap's list, as `MARKETING_PAGES` in `src/app/sitemap.ts`, until ticket
+ * 92 gives the site one registry of its pages for both to read. The home page
+ * leads the English pages and is left out of the Arabic, whose home page the
+ * file's heading describes.
+ */
+const MARKETING_PAGES: readonly { readonly path: string; readonly read: (locale: Locale) => Promise<{ readonly meta: PageMeta }> }[] = [
+  { path: '/', read: getHomePage },
+  { path: '/product', read: getProductPage },
+  { path: '/start', read: getStartPage },
+  { path: '/tool', read: getToolPage },
+  { path: '/referral', read: getReferralPage },
+  { path: '/partnership', read: getPartnershipPage },
+];
 
 /**
  * A description as one line. A summary written in the CMS may hold line
@@ -67,47 +98,76 @@ type Entry = { readonly label: string; readonly path: string; readonly descripti
  */
 const oneLine = (text: string) => text.replace(/\s+/g, ' ').trim();
 
-/** One entry as the file writes it: a Markdown link at the address the page answers on. */
-function bullet(entry: Entry): string {
-  return `- [${oneLine(entry.label)}](${absoluteUrl(localePath(LOCALE, entry.path))}): ${oneLine(entry.description)}`;
+/** One entry as the file writes it: a Markdown link at the address the page answers on in `locale`. */
+function bullet(locale: Locale, entry: Entry): string {
+  return `- [${oneLine(entry.label)}](${absoluteUrl(localePath(locale, entry.path))}): ${oneLine(entry.description)}`;
 }
 
 /** A heading and its entries, or nothing at all when there are none to list. */
-function section(heading: string, entries: readonly Entry[]): string[] {
+function section(locale: Locale, heading: string, entries: readonly Entry[]): string[] {
   if (entries.length === 0) return [];
-  return [`## ${heading}`, '', ...entries.map(bullet), ''];
+  return [`## ${heading}`, '', ...entries.map((entry) => bullet(locale, entry)), ''];
 }
 
 /**
- * The site's own pages, each described as its `<meta name="description">`
- * describes it: one module per page hands over both (`src/content/pages/`).
- * The case studies are passed in for the sitemap's rule — the section has no
- * page of its own until a story is published (ticket 24).
+ * The site's own pages in `locale`, each described as its `<meta
+ * name="description">` describes it: one module per page hands over both
+ * (`src/content/pages/`).
+ *
+ * Arabic, every page is; English, a page is once `inEnglish` says it is
+ * published in English. An index is listed where it has something to list —
+ * the Arabic blog index always, as it always has been — which is the
+ * sitemap's rule, and the case studies section has no page at all until a
+ * story is published (ticket 24).
  */
-async function pageEntries(caseStudies: readonly CaseStudy[]): Promise<Entry[]> {
-  const [product, start, tool, referral, partnership, blogLead, caseStudiesLead] = await Promise.all([
-    getProductPage(LOCALE),
-    getStartPage(LOCALE),
-    getToolPage(LOCALE),
-    getReferralPage(LOCALE),
-    getPartnershipPage(LOCALE),
-    // The line under each index's heading, which is also its search
-    // description — in the CMS since ticket 59.
-    getIndexLead(LOCALE, 'blog'),
-    getIndexLead(LOCALE, 'caseStudies'),
+async function pageEntries(
+  locale: Locale,
+  posts: readonly Post[],
+  caseStudies: readonly CaseStudy[],
+): Promise<Entry[]> {
+  const read = (page: (typeof MARKETING_PAGES)[number]) => (locale === 'en' ? inEnglish(page.read) : page.read(locale));
+  const marketing = MARKETING_PAGES.filter((page) => locale === 'en' || page.path !== '/');
+  // The line under an index's heading, which is also its search description —
+  // in the CMS since ticket 59 — or `null` where its entry is not published in
+  // this language, when the index is left out rather than the file failing.
+  // Read only for an index with something to list.
+  const leadOf = (index: 'blog' | 'caseStudies') => contentOrNull(getIndexLead(locale, index));
+  const [contents, blogLead, caseStudiesLead] = await Promise.all([
+    Promise.all(marketing.map(read)),
+    locale === 'ar' || posts.length > 0 ? leadOf('blog') : null,
+    caseStudies.length > 0 ? leadOf('caseStudies') : null,
   ]);
-  const page = ({ name, description }: PageMeta, path: string): Entry => ({ label: name, description, path });
+
+  const pages = marketing.flatMap((page, index): Entry[] => {
+    const content = contents[index];
+    if (!content) return [];
+    // The English home page by the company's name: its short name is «Home»,
+    // which tells an assistant nothing.
+    const label = page.path === '/' ? COMPANY.name[locale] : content.meta.name;
+    return [{ label, path: page.path, description: content.meta.description }];
+  });
 
   return [
-    page(product.meta, '/product'),
-    page(start.meta, '/start'),
-    page(tool.meta, '/tool'),
-    page(referral.meta, '/referral'),
-    page(partnership.meta, '/partnership'),
-    { label: BLOG_COPY[LOCALE].title, path: blogIndexPath(), description: blogLead },
-    ...(caseStudies.length > 0
-      ? [{ label: CASE_STUDIES_COPY[LOCALE].title, path: CASE_STUDIES_PATH, description: caseStudiesLead }]
-      : []),
+    ...pages,
+    ...(blogLead === null ? [] : [{ label: BLOG_COPY[locale].title, path: blogIndexPath(), description: blogLead }]),
+    ...(caseStudiesLead === null
+      ? []
+      : [{ label: CASE_STUDIES_COPY[locale].title, path: CASE_STUDIES_PATH, description: caseStudiesLead }]),
+  ];
+}
+
+/** A language's pages, articles and case studies, each under its heading. */
+async function sections(locale: Locale): Promise<string[]> {
+  const [posts, caseStudies] = await Promise.all([allPublishedPosts(locale), allPublishedCaseStudies(locale)]);
+  const headings = HEADINGS[locale];
+  return [
+    ...section(locale, headings.pages, await pageEntries(locale, posts, caseStudies)),
+    ...section(locale, headings.posts, posts.map((post) => ({ label: post.title, path: blogPostPath(post.slug), description: post.summary }))),
+    ...section(
+      locale,
+      headings.caseStudies,
+      caseStudies.map((study) => ({ label: study.title, path: caseStudyPath(study.slug), description: study.summary })),
+    ),
   ];
 }
 
@@ -122,25 +182,21 @@ async function legalEntries(): Promise<Entry[]> {
 }
 
 export async function GET(): Promise<Response> {
-  const [posts, caseStudies, legal] = await Promise.all([
-    allPublishedPosts(LOCALE),
-    allPublishedCaseStudies(LOCALE),
-    legalEntries(),
-  ]);
-  const pages = await pageEntries(caseStudies);
+  const [arabic, english, legal] = await Promise.all([sections('ar'), sections('en'), legalEntries()]);
 
   const lines = [
     `# ${COMPANY.name.ar} (${COMPANY.name.en})`,
     '',
     `> ${COMPANY.productDescription.ar} ${COMPANY.legalName} — ${COMPANY.locality.ar}، السعودية.`,
+    // The company in English too, once there is English to point at, for an
+    // assistant answering in English.
+    ...(english.length > 0
+      ? ['>', `> ${COMPANY.productDescription.en} ${COMPANY.name.en} — ${COMPANY.locality.en}, Saudi Arabia.`]
+      : []),
     '',
-    ...section('الصفحات', pages),
-    ...section('المقالات', posts.map((post) => ({ label: post.title, path: blogPostPath(post.slug), description: post.summary }))),
-    ...section(
-      'قصص العملاء',
-      caseStudies.map((study) => ({ label: study.title, path: caseStudyPath(study.slug), description: study.summary })),
-    ),
-    ...section('نظامي', legal),
+    ...arabic,
+    ...section('ar', HEADINGS.ar.legal, legal),
+    ...english,
   ];
 
   return new Response(`${lines.join('\n').trimEnd()}\n`, {

@@ -165,8 +165,11 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   const listed = [...llms.matchAll(/^- \[[^\]]+\]\(([^)]+)\):/gm)].map(([, url]) => url);
 
   // The Arabic site's pages, each once. The home page is the file's own
-  // heading rather than an entry; `/en` waits for English (ticket 42); and the
-  // Screen mock studio is never listed (ticket 05).
+  // heading rather than an entry, and the Screen mock studio is never listed
+  // (ticket 05). An English page joins once it is published in English (ticket
+  // 82) — in this database none is, but `english-pages.spec.ts` publishes one
+  // beside this suite and holds the file to it, so the English are left out of
+  // the comparison below as the case studies are.
   const expected = [
     '/product',
     '/start',
@@ -182,7 +185,9 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   // comparison rather than asserted against: an article, a case study, and the
   // case studies index that appears with the first of them (ticket 24). What
   // stays is the fixed set, which nothing published can add to or take from.
-  const pages = listed.filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'));
+  const pages = listed
+    .filter((url) => !url.startsWith(absolute(baseURL!, '/en/')) && url !== absolute(baseURL!, '/en'))
+    .filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'));
   expect([...pages].sort()).toEqual(expected.map((path) => absolute(baseURL!, path)).sort());
   expect(listed.filter((url) => url.includes('/studio'))).toEqual([]);
 });
