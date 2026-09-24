@@ -603,7 +603,7 @@ test.describe('a Phone crop an Editor uploads', () => {
 
       // Wider than a phone, an uploaded crop is never shown: each is its whole screen.
       await page.setViewportSize({ width: 768, height: 1024 });
-      await page.reload();
+      await preview(page, '/product');
       for (const [mock, whole] of [
         ['correspondence', ['/screen-mocks/ar/correspondence.webp']],
         ['kanban', pictureFiles],
