@@ -23,6 +23,8 @@
     "cms:migrate-fresh": "node scripts/migrate-fresh.mjs",
     "cms:freeze-seed": "node scripts/freeze-seed.mjs",
     "cms:migration": "node scripts/with-database.mjs payload migrate:create",
+    "cms:rebase-migrations": "node scripts/rebase-migrations.mjs",
+    "cms:check-migrations": "node scripts/check-migrations.mjs",
     "cms:generate": "node scripts/with-database.mjs \"payload generate:importmap && payload generate:types\"",
     "cms:create-editor": "payload run scripts/create-editor.ts"
   },

@@ -9,6 +9,11 @@ secrets/
 # The local development database and uploaded images (scripts/with-database.mjs)
 .data/
 
+# Payload writes this list of the migrations whenever it writes a migration.
+# It reads the folder itself, so the list is never committed: typed by hand at
+# every merge, it was the file most often in conflict (ticket 88).
+src/migrations/index.ts
+
 # Dependencies
 node_modules/
 .pnp/

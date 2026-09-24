@@ -9,7 +9,7 @@
  */
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -26,6 +26,20 @@ export const PAYLOAD_BIN = path.join(repoRoot, 'node_modules', 'payload', 'bin.j
 export const NEXT_BIN = require.resolve('next/dist/bin/next');
 
 const DATABASE = 'rabaed';
+
+/** How to reach the Postgres `startDatabase` starts on `port`. */
+export const connectionString = (port) => `postgres://postgres:postgres@127.0.0.1:${port}/${DATABASE}`;
+
+/**
+ * This checkout's development database: kept in `.data/postgres` so content
+ * survives between runs, on a port derived from where the checkout lives, so
+ * the worktrees of parallel sessions each get their own
+ * (docs/agents/parallel-sessions.md).
+ */
+export const DEVELOPMENT_DATABASE = {
+  directory: path.join(repoRoot, '.data', 'postgres'),
+  port: 55000 + (createHash('sha256').update(repoRoot).digest().readUInt16BE(0) % 1000),
+};
 
 /**
  * Starts Postgres with its data in `directory`, creating the cluster the first
@@ -54,7 +68,7 @@ export async function startDatabase({ directory, port }) {
   if (fresh) await server.createDatabase(DATABASE);
 
   return {
-    url: `postgres://postgres:postgres@127.0.0.1:${port}/${DATABASE}`,
+    url: connectionString(port),
     stop: () => server.stop(),
   };
 }
@@ -100,6 +114,31 @@ ${name}`).digest().readUInt16BE(0) % 2000);
   await rm(directory, { recursive: true, force: true }).catch(() => {});
   return failure;
 }
+
+/** Where Payload keeps the migrations (`migrationDir` in `src/payload.config.ts`). */
+export const MIGRATIONS_DIRECTORY = path.join(repoRoot, 'src', 'migrations');
+
+/**
+ * The files directly in `src/migrations/`: the migrations, their snapshots and
+ * the index Payload writes beside them — not the folders of frozen words.
+ */
+export const migrationFolder = () =>
+  readdirSync(MIGRATIONS_DIRECTORY, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name);
+
+/**
+ * The environment for the Payload commands that never connect: `migrate:create`
+ * and `generate:types` read the configuration alone. The configuration will
+ * not load without a connection string, so it is given one that nothing
+ * listens at — a command that ever did connect would fail, rather than reach
+ * whatever database `.env.local` names.
+ */
+export const WITHOUT_DATABASE = {
+  ...process.env,
+  DATABASE_URL: 'postgres://no-database@127.0.0.1:1/none',
+  PAYLOAD_SECRET: 'local-development-only',
+};
 
 /** Runs a Node script to completion, and throws if it fails. */
 export function runNode(args, env) {

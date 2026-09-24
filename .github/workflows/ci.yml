@@ -64,6 +64,13 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Fails when the CMS configuration asks for something no migration
+      # creates, or `payload-types.ts` or the admin's import map is not what
+      # the configuration generates (ticket 88). Here rather than beside the
+      # tests because it needs no database and no build.
+      - name: Migrations and generated code match the CMS configuration
+        run: npm run cms:check-migrations
+
   e2e:
     name: e2e (${{ matrix.shard }})
     runs-on: ubuntu-latest
