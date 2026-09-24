@@ -256,10 +256,7 @@ test('publishing the first case study reveals the section and its link; unpublis
 });
 
 /** The site words an Editor edits, as the CMS gives them back: only what these tests change is named. */
-type SiteWords = Record<string, unknown> & {
-  header: Record<string, unknown> & { links: { path: string }[] };
-  footer: Record<string, unknown> & { tagline: { ar: string } };
-};
+type SiteWords = Record<string, unknown> & { footer: Record<string, unknown> & { tagline: { ar: string } } };
 
 /** What the CMS adds to an entry and its list rows, which is not sent back — as `stale-render.spec.ts` has it. */
 const NOT_SENT = new Set(['id', 'globalType', 'createdAt', 'updatedAt', '_status']);
@@ -276,51 +273,63 @@ function sendable<T>(value: T): T {
   return value;
 }
 
-// The header's case studies link is an Editor's to write, and the CMS lets a
-// path end with a slash or start with its language (ticket 87). However it is
-// written, it is the same link, and waits for the first story all the same.
-test('the case studies link waits for the first story however an Editor writes its path', async ({ page, request }) => {
+/** Every link in `value` whose path is the case studies', given `path` instead: the header's and the Footer directory's. */
+function caseStudiesAt<T>(value: T, path: string): T {
+  if (Array.isArray(value)) return value.map((each) => caseStudiesAt(each, path)) as T;
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value).map(([key, each]) =>
+      key === 'path' && each === '/case-studies' ? [key, path] : [key, caseStudiesAt(each, path)],
+    );
+    return Object.fromEntries(entries) as T;
+  }
+  return value;
+}
+
+/** Ways an Editor might write the case studies' path, each of which the CMS accepts. */
+const SPELLINGS = ['/en/case-studies', '/en//case-studies', ' /case-studies', '/case-studies/'];
+
+// The case studies link is an Editor's to write, in the header and the Footer
+// directory, and the CMS takes a path as typed (ticket 87). However it is
+// written, it is the same link: it waits for the first case study, and then
+// leads to the section.
+test('the case studies link waits for the first case study however an Editor writes its path', async ({ page, request }) => {
   await logInByApi(page.request, CASE_STUDIES_EDITOR);
   const read = await page.request.get('/api/globals/site-words?depth=0');
   expect(read.ok()).toBe(true);
   const original = sendable((await read.json()) as SiteWords);
-  const at = original.header.links.findIndex(({ path }) => path === '/case-studies');
-  expect(at, 'the header has no case studies link to rewrite').toBeGreaterThanOrEqual(0);
+  expect(JSON.stringify(original), 'no case studies link to rewrite').toContain('"path":"/case-studies"');
 
   /**
-   * Publishes the header's case studies link at `path`, and waits for the home
-   * page to be built with it. The link itself is hidden either way, so what is
-   * waited for is a mark published with it: a footer tagline of its own,
-   * short enough for the tagline's limit.
+   * Publishes every case studies link at `path`, and returns the home page
+   * once it has been built with it. The link is hidden while nothing is
+   * published, so what is waited for is a mark published with it: a footer
+   * tagline of its own, short enough for the tagline's limit.
    */
   let marks = 0;
-  const publishLinkAt = async (path: string) => {
-    const mark = `وسم الاختبار ${runId} رقم ${(marks += 1)}`;
-    const links = original.header.links.map((link, index) => (index === at ? { ...link, path } : link));
+  const publishLinksAt = async (path: string) => {
+    marks += 1;
+    const mark = `وسم الاختبار ${runId} رقم ${marks}`;
+    const rewritten = caseStudiesAt(original, path);
     const saved = await page.request.post('/api/globals/site-words', {
-      data: {
-        ...original,
-        header: { ...original.header, links },
-        footer: { ...original.footer, tagline: { ...original.footer.tagline, ar: mark } },
-        _status: 'published',
-      },
+      data: { ...rewritten, footer: { ...rewritten.footer, tagline: { ...rewritten.footer.tagline, ar: mark } }, _status: 'published' },
     });
     expect(saved.ok(), await saved.text()).toBe(true);
-    return reachesVisitors(request, '/', mark, `the case studies link published as ${path}`);
+    return reachesVisitors(request, '/', mark, `the case studies links published as «${path}»`);
   };
 
   try {
-    // No story yet: whichever way the path is written, nothing leads to the section.
-    for (const path of ['/case-studies/', '/en/case-studies', '/en/case-studies/']) {
-      expect(linksToSection(await publishLinkAt(path)), `the link shows as ${path} with no story published`).toBe(false);
+    // Nothing published: whichever way it is written, nothing leads to the section.
+    for (const path of SPELLINGS) {
+      expect(linksToSection(await publishLinksAt(path)), `a link shows as «${path}» with nothing published`).toBe(false);
     }
 
-    // The first story, and the link is there — leading to the section, not
-    // to an address with its language written in.
+    // The first case study, and the links are there, however they are
+    // written — leading to the section, not to an address with a language,
+    // a doubled slash or a space written into it.
     await create(page.request, caseStudy());
-    await reaching('the case studies link, written /en/case-studies/', async () => linksToSection((await visit(request, '/')).html)).toBe(
-      true,
-    );
+    for (const path of SPELLINGS) {
+      expect(linksToSection(await publishLinksAt(path)), `no link to the section as «${path}»`).toBe(true);
+    }
   } finally {
     const restored = await page.request.post('/api/globals/site-words', { data: { ...original, _status: 'published' } });
     expect(restored.ok(), await restored.text()).toBe(true);

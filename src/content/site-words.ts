@@ -64,23 +64,30 @@ export type NotFoundContent = {
 
 /**
  * The page a path an Editor typed leads to, however it was written (ticket
- * 87). The CMS takes a path as typed, so `/case-studies/` and
- * `/en/case-studies` are both the case studies: a slash at the end names the
- * same page, and a language written in front is the one a link is given
- * anyway, since each link is drawn in the language being read.
+ * 87). The CMS checks a path with the spaces around it left off, but keeps
+ * it as typed, and takes any run of slashes: so ` /case-studies/`,
+ * `/en/case-studies` and `/en//case-studies` are all the case studies. A
+ * slash at the end or doubled names the same page, and a language written in
+ * front is the one a link is given anyway, since the menu's paths are shared
+ * by both languages and each link is drawn in the language being read.
  *
  * Read here rather than rewritten as the Editor saves: what they typed stays
  * what they see, and the paths already saved need nothing done to them.
  */
 function pageOf(path: string): string {
-  const trimmed = path.replace(/(.)\/+$/, '$1');
-  for (const locale of LOCALE_CODES) {
-    const prefix = LOCALES[locale].pathPrefix;
-    if (!prefix) continue;
-    if (trimmed === prefix) return '/';
-    if (trimmed.startsWith(`${prefix}/`)) return trimmed.slice(prefix.length);
+  let page = path.trim().replace(/\/{2,}/g, '/').replace(/(.)\/$/, '$1');
+  for (let found = true; found; ) {
+    found = false;
+    for (const locale of LOCALE_CODES) {
+      const prefix = LOCALES[locale].pathPrefix;
+      if (!prefix) continue;
+      if (page === prefix) page = '/';
+      else if (page.startsWith(`${prefix}/`)) page = page.slice(prefix.length);
+      else continue;
+      found = true;
+    }
   }
-  return trimmed;
+  return page;
 }
 
 /**
@@ -89,7 +96,7 @@ function pageOf(path: string): string {
  * does not contain — is left as it was written.
  */
 function href(locale: Locale, destination: string): string {
-  return destination.startsWith('/') ? localePath(locale, pageOf(destination)) : destination;
+  return destination.trim().startsWith('/') ? localePath(locale, pageOf(destination)) : destination.trim();
 }
 
 /**
@@ -158,10 +165,11 @@ const ARABIC_ONLY_PATHS = new Set(Object.values(ARABIC_ONLY_PAGES).map((page) =>
  * link's English label says the page is in Arabic.
  */
 function directoryLink(locale: Locale, path: string, label: string): DirectoryLink {
-  if (locale !== DEFAULT_LOCALE && ARABIC_ONLY_PATHS.has(pageOf(path))) {
-    return { path, href: localePath(DEFAULT_LOCALE, pageOf(path)), label, hrefLang: DEFAULT_LOCALE };
+  const page = pageOf(path);
+  if (locale !== DEFAULT_LOCALE && ARABIC_ONLY_PATHS.has(page)) {
+    return { path: page, href: localePath(DEFAULT_LOCALE, page), label, hrefLang: DEFAULT_LOCALE };
   }
-  return { path, href: href(locale, path), label };
+  return { path: page, href: href(locale, path), label };
 }
 
 /**
