@@ -2,34 +2,29 @@ import type { MetadataRoute } from 'next';
 import { allPublishedPosts } from '@/cms/blog';
 import { pageEntry } from '@/cms/pages';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
-import { getHomePage } from '@/content/pages/home';
-import { inEnglish } from '@/content/pages/page-content';
-import { getPartnershipPage } from '@/content/pages/partnership';
-import { getProductPage } from '@/content/pages/product';
-import { getReferralPage } from '@/content/pages/referral';
-import { getStartPage } from '@/content/pages/start';
-import { getToolPage } from '@/content/pages/tool';
+import { isPublishedIn } from '@/content/pages/languages';
+import { PAGE_ENTRIES, type MarketingPage } from '@/content/pages/page-entries';
 import { blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
 import { DEFAULT_LOCALE, localePath } from '@/lib/locales';
 
-/** The Arabic site's pages, as they stand. */
-const PAGES = ['/', '/product', '/start', '/tool', '/referral', '/partnership', '/blog', '/terms', '/privacy', '/referral-terms'];
+/** The Arabic site's pages other than the marketing pages, as they stand. */
+const PAGES = ['/blog', '/terms', '/privacy', '/referral-terms'];
 
 /**
- * The marketing pages, each with what reads it in a language (ticket 42). An
+ * The marketing pages, each by the name its entry goes by (ticket 42). An
  * English one is listed once it is published in English, and not before:
  * until then its address is a notice (`src/content/arabic-only-pages.ts`),
  * or, for the home page, the English site's word that it is on its way.
  */
-const MARKETING_PAGES: readonly { readonly path: string; readonly read: (locale: 'en') => Promise<unknown> }[] = [
-  { path: '/', read: getHomePage },
-  { path: '/product', read: getProductPage },
-  { path: '/start', read: getStartPage },
-  { path: '/tool', read: getToolPage },
-  { path: '/referral', read: getReferralPage },
-  { path: '/partnership', read: getPartnershipPage },
+const MARKETING_PAGES: readonly { readonly page: MarketingPage; readonly path: string }[] = [
+  { page: 'home', path: '/' },
+  { page: 'product', path: '/product' },
+  { page: 'start', path: '/start' },
+  { page: 'tool', path: '/tool' },
+  { page: 'referral', path: '/referral' },
+  { page: 'partnership', path: '/partnership' },
 ];
 
 /**
@@ -55,29 +50,41 @@ export const revalidate = 600;
  * admin, the English placeholder (ticket 31), or the notice at the English
  * address of a page not yet in English (ticket 42).
  *
- * A page carries the day its search settings were last published (ticket 26).
- * A sitemap has nowhere to put a title or a description — an entry is an
- * address and a date — so the date is what a change to how a page is
- * described can show here, and it is the one thing a crawler reads it for.
+ * A marketing page carries the day its entry was last published, in either
+ * language — its words, and since ticket 91 its search title and description
+ * (ticket 26). A sitemap has nowhere to put a title or a description — an
+ * entry is an address and a date — so the date is what a change to a page or
+ * to how it is described can show here, and it is the one thing a crawler
+ * reads it for. The other pages carry no date: the day an entry that
+ * describes none of them was published would say nothing about them.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, caseStudies, search, english] = await Promise.all([
+  const [posts, caseStudies, marketing] = await Promise.all([
     allPublishedPosts(),
     allPublishedCaseStudies(),
-    pageEntry('search-settings', DEFAULT_LOCALE),
-    Promise.all(MARKETING_PAGES.map(async (page) => ((await inEnglish(page.read)) === null ? [] : [page.path]))),
+    Promise.all(
+      MARKETING_PAGES.map(async ({ page, path }) => {
+        const [entry, inEnglish] = await Promise.all([
+          pageEntry(PAGE_ENTRIES[page].own, DEFAULT_LOCALE),
+          isPublishedIn(page, 'en'),
+        ]);
+        return { path, inEnglish, lastModified: entry.updatedAt ?? undefined };
+      }),
+    ),
   ]);
-  const described = search.updatedAt ?? undefined;
 
   return [
-    ...PAGES.map((path) => ({ url: absoluteUrl(path), lastModified: described })),
-    ...english.flat().map((path) => ({ url: absoluteUrl(localePath('en', path)), lastModified: described })),
+    ...marketing.map(({ path, lastModified }) => ({ url: absoluteUrl(path), lastModified })),
+    ...PAGES.map((path) => ({ url: absoluteUrl(path) })),
+    ...marketing
+      .filter((page) => page.inEnglish)
+      .map(({ path, lastModified }) => ({ url: absoluteUrl(localePath('en', path)), lastModified })),
     // The case studies index is one of the Arabic site's pages once the section
     // shows there. The English blog and case studies indexes are the English
     // site's pages once each has something published in English to list — until
     // then one is empty and the other is not there (ticket 43).
     ...(caseStudies.some((caseStudy) => caseStudy.locale === 'ar')
-      ? [{ url: absoluteUrl(CASE_STUDIES_PATH), lastModified: described }]
+      ? [{ url: absoluteUrl(CASE_STUDIES_PATH) }]
       : []),
     ...(posts.some((post) => post.locale === 'en') ? [{ url: absoluteUrl(localePath('en', '/blog')) }] : []),
     ...(caseStudies.some((caseStudy) => caseStudy.locale === 'en')

@@ -1,6 +1,6 @@
 import { FAQ_PAGES } from '@/cms/faq-pages';
 import { pageEntry, wordsIn } from '@/cms/pages';
-import { getSearchSettings } from '@/content/search-settings';
+import { pageMeta } from '@/content/search-settings';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { QuestionsContent } from '@/components/questions';
@@ -29,7 +29,8 @@ export type StartPageContent = {
 /**
  * The page's short name, as its breadcrumb structured data reads it
  * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26, `src/content/search-settings.ts`).
+ * (ticket 26), on its own entry
+ * (ticket 91, `src/content/search-settings.ts`).
  */
 const NAME: Readonly<Record<Locale, string>> = { ar: 'ابدأ', en: 'Get started' };
 
@@ -42,16 +43,15 @@ const NAME: Readonly<Record<Locale, string>> = { ar: 'ابدأ', en: 'Get starte
  * a button says, never where it goes.
  */
 export async function getStartPage(locale: Locale): Promise<StartPageContent> {
-  const [entry, demoForm, trustStrip, meta] = await Promise.all([
+  const [entry, demoForm, trustStrip] = await Promise.all([
     pageEntry('start-page', locale),
     formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
-    getSearchSettings(locale, 'start', { name: NAME[locale] }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
-    meta,
+    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
     hero: {
       eyebrow: words(entry.hero.eyebrow),
       title: words(entry.hero.title),
