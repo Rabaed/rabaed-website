@@ -423,8 +423,7 @@ test('an article exists per language, and a missing translation offers the one t
 
   // And in llms.txt, at its English address under the English heading, with
   // the English index beside it (ticket 82). Asked here, where an English
-  // article is published anyway, rather than by publishing one more in the
-  // suites that run last, which a publish slows for everyone beside it.
+  // article is published anyway, rather than by publishing one more.
   await reaching('the English article in llms.txt', async () => (await visit(request, '/llms.txt')).html).toContain(
     `- [${english.title}](${englishAddress}): ${english.summary}`,
   );

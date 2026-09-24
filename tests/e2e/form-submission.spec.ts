@@ -23,13 +23,13 @@
  * Messages are restated here rather than imported from the form definitions,
  * for the reason `routes.ts` gives.
  */
-import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi, reaching } from './cms';
 import { POUR_TRACKER, checksumOf } from './pour-tracker';
+import { postDemoRequest, publishDemoSettings, readDemoSettings } from './demo-request-api';
 import { TRAP_FIELD } from '../../src/forms/definition';
 import {
   APPLICANT,
@@ -87,29 +87,6 @@ async function settledSubmission(request: APIRequestContext, email: string): Pro
   return (await submissionsFrom(request, email))[0];
 }
 
-/**
- * A valid demo request sent straight to the server, as a script would send it
- * rather than a person at the form: its answer, and nothing waited for.
- */
-async function postDemoRequest(
-  request: APIRequestContext,
-  baseURL: string,
-  applicant: { email: string; ip: string; name?: string; locale?: 'en' },
-): Promise<{ outcome: string }> {
-  const response = await request.post(`/api/forms/demo-request${applicant.locale ? `?locale=${applicant.locale}` : ''}`, {
-    headers: { origin: baseURL, 'x-forwarded-for': applicant.ip },
-    multipart: {
-      name: applicant.name ?? APPLICANT.name,
-      email: applicant.email,
-      role: 'owner',
-      phone: APPLICANT.phone,
-      submissionToken: randomUUID(),
-      [TRAP_FIELD]: '',
-    },
-  });
-  expect(response.ok(), await response.text()).toBe(true);
-  return response.json();
-}
 
 for (const placement of DEMO_PLACEMENTS) {
   test.describe(`the demo request form on ${placement.path}`, () => {
@@ -265,45 +242,12 @@ test.describe('the demo request form, on the server', () => {
 test.describe('mail and wording from the admin', () => {
   test.describe.configure({ mode: 'default' });
 
-  const SETTINGS = '/api/globals/demo-request-form';
-
-  type Settings = Record<string, unknown> & {
-    alertAddress?: string | null;
-    confirmationSubject: string;
-    fields: { company: { placeholder: string } };
-  };
-
-  async function readSettings(request: APIRequestContext): Promise<Settings> {
-    const response = await request.get(`${SETTINGS}?depth=0`);
-    expect(response.ok()).toBe(true);
-    const { id, globalType, createdAt, updatedAt, ...settings } = await response.json();
-    return settings;
-  }
-
-  /**
-   * Publishes the settings as the form editor. A sign-in to that editor
-   * elsewhere in the run can erase this one's session (`cms.ts`), and the
-   * publish is then refused as if nobody were signed in: so it is signed in
-   * afresh and asked again, as `readerGet` does.
-   */
-  async function publishSettings(request: APIRequestContext, settings: Settings): Promise<void> {
-    for (let attempt = 1; ; attempt++) {
-      const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
-      const lostSession = response.status() === 401 || response.status() === 403;
-      if (!lostSession || attempt === 3) {
-        expect(response.ok(), await response.text()).toBe(true);
-        return;
-      }
-      await logInByApi(request, FORM_EDITOR);
-    }
-  }
-
   test('while no alert address is set, a request is still stored, and no mail at all is sent', async ({
     page,
     request,
   }) => {
     await logInByApi(request, FORM_EDITOR);
-    expect((await readSettings(request)).alertAddress ?? '').toBe('');
+    expect((await readDemoSettings(request)).alertAddress ?? '').toBe('');
 
     const applicant = uniqueApplicant('demo-unaddressed');
     await sendDemoRequest(page, '/product', applicant);
@@ -318,11 +262,11 @@ test.describe('mail and wording from the admin', () => {
     request,
   }) => {
     await logInByApi(request, FORM_EDITOR);
-    const original = await readSettings(request);
+    const original = await readDemoSettings(request);
     const team = uniqueApplicant('team').email;
 
     try {
-      await publishSettings(request, { ...original, alertAddress: team });
+      await publishDemoSettings(request, { ...original, alertAddress: team });
       const applicant = uniqueApplicant('demo-addressed');
       await sendDemoRequest(page, '/', applicant);
 
@@ -346,7 +290,7 @@ test.describe('mail and wording from the admin', () => {
 
       expect(stored).toMatchObject({ alert: 'sent', confirmation: 'sent' });
     } finally {
-      await publishSettings(request, original);
+      await publishDemoSettings(request, original);
     }
   });
 
@@ -358,14 +302,14 @@ test.describe('mail and wording from the admin', () => {
     baseURL,
   }) => {
     await logInByApi(request, FORM_EDITOR);
-    const original = await readSettings(request);
+    const original = await readDemoSettings(request);
     const team = uniqueApplicant('team').email;
     const { email } = uniqueApplicant('demo-capped');
     const shouted = email.toUpperCase();
     const spellings = [email, shouted, email, shouted, email];
 
     try {
-      await publishSettings(request, { ...original, alertAddress: team });
+      await publishDemoSettings(request, { ...original, alertAddress: team });
       const outcomes = await Promise.all(
         spellings.map((address) => postDemoRequest(request, baseURL!, { email: address, ip: uniqueApplicant('demo-capped').ip })),
       );
@@ -381,7 +325,7 @@ test.describe('mail and wording from the admin', () => {
       const alerts = (await mailTo(team)).filter((mail) => mail.replyTo?.toLowerCase() === email);
       expect(alerts).toHaveLength(5);
     } finally {
-      await publishSettings(request, original);
+      await publishDemoSettings(request, original);
     }
   });
 
@@ -394,11 +338,11 @@ test.describe('mail and wording from the admin', () => {
   }) => {
     const ADVERT = 'اربح ٥٠٠٠ ريال الآن: www.win-now.example';
     await logInByApi(request, FORM_EDITOR);
-    const original = await readSettings(request);
+    const original = await readDemoSettings(request);
     const team = uniqueApplicant('team').email;
 
     try {
-      await publishSettings(request, { ...original, alertAddress: team });
+      await publishDemoSettings(request, { ...original, alertAddress: team });
       const advert = uniqueApplicant('demo-advert');
       const english = uniqueApplicant('demo-advert-en');
       const titled = uniqueApplicant('demo-titled');
@@ -423,7 +367,7 @@ test.describe('mail and wording from the admin', () => {
       await expect.poll(async () => (await mailTo(team)).filter((mail) => mail.replyTo === advert.email)).toHaveLength(1);
       expect((await mailTo(team)).find((mail) => mail.replyTo === advert.email)!.text).toContain(ADVERT);
     } finally {
-      await publishSettings(request, original);
+      await publishDemoSettings(request, original);
     }
   });
 
@@ -434,10 +378,10 @@ test.describe('mail and wording from the admin', () => {
     const PLACEHOLDER = 'اسم جهة العمل — للاختبار';
     const SUBJECT = 'ربائد — تأكيد للاختبار';
     await logInByApi(request, FORM_EDITOR);
-    const original = await readSettings(request);
+    const original = await readDemoSettings(request);
 
     try {
-      await publishSettings(request, {
+      await publishDemoSettings(request, {
         ...original,
         alertAddress: uniqueApplicant('team').email,
         confirmationSubject: SUBJECT,
@@ -455,7 +399,7 @@ test.describe('mail and wording from the admin', () => {
       await expect.poll(() => mailTo(applicant.email)).toHaveLength(1);
       expect((await mailTo(applicant.email))[0].subject).toBe(SUBJECT);
     } finally {
-      await publishSettings(request, original);
+      await publishDemoSettings(request, original);
     }
   });
 

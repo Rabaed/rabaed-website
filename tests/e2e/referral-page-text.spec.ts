@@ -11,8 +11,8 @@
  * changes published are a space at the end of the signup's paragraph, which no
  * screenshot shows and no suite reads, and English listed with words of its
  * own, which the Arabic page does not show. Changing the Referral Program values
- * themselves is `referral-program-values.spec.ts`'s, which runs after
- * everything else.
+ * themselves is `referral-program-values.spec.ts`'s, which runs against a
+ * server of its own (`playwright.config.ts`).
  *
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */

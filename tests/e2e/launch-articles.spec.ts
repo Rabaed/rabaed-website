@@ -18,9 +18,10 @@
  * that reads its expectation out of the data under test agrees with it by
  * construction, and would keep agreeing if an article went missing.
  *
- * **Runs last** (playwright.config.ts). The last test publishes an article,
- * which puts it on the blog index, in the sitemap and in `llms.txt` — all of
- * which other suites read — and unpublishes it again afterwards.
+ * **Runs against the second test server** (`playwright.config.ts`, ticket 89).
+ * The last test publishes an article, which puts it on the blog index, in the
+ * sitemap and in `llms.txt` — all of which other suites read — and
+ * unpublishes it again afterwards.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { LAUNCH_ARTICLES_EDITOR, logInByApi } from './cms';
@@ -289,7 +290,7 @@ test('an article is published only once a real person’s name is on it — and 
     });
   } finally {
     // Back to the draft it arrived as, so nothing this ran leaves the article
-    // published for the suites beside it. Unpublished first, while the name
+    // published for the suites after it on this server. Unpublished first, while the name
     // and the cover are still there: the same rules that refused to publish
     // it would refuse a save that both clears them and stays published.
     await page.request.patch(`/api/posts/${article.id}`, { data: { _status: 'draft' } });
