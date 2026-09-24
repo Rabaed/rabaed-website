@@ -11,6 +11,7 @@
  * `home-matches-reference.spec.ts` is where it is asked.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { sidewaysOverflow } from './geometry';
 
 const SHORT_DESKTOP = { width: 1280, height: 700 };
 
@@ -438,10 +439,7 @@ test.describe('the Trust strip', () => {
 
     await expect(page.locator('.logos-row:not(.copy) .slot b').first()).toBeVisible();
 
-    const overflow = await page.evaluate(() => {
-      const doc = document.documentElement;
-      return doc.scrollWidth - doc.clientWidth;
-    });
+    const overflow = await sidewaysOverflow(page);
     expect(overflow).toBeLessThanOrEqual(0);
   });
 });
@@ -464,10 +462,7 @@ test.describe('with reduced motion', () => {
     // Standing still, the rail lets its content out rather than clipping it —
     // which is the arrangement in which an over-wide name could push the page
     // sideways, so the check belongs here too.
-    const overflow = await page.evaluate(() => {
-      const doc = document.documentElement;
-      return doc.scrollWidth - doc.clientWidth;
-    });
+    const overflow = await sidewaysOverflow(page);
     expect(overflow).toBeLessThanOrEqual(0);
 
     // The strip stands still, so all eight marks have to be where they can be
@@ -497,10 +492,7 @@ test.describe('with reduced motion', () => {
     await expect(names).toHaveCount(8);
     await expect(names.first()).toBeVisible();
 
-    const overflow = await page.evaluate(() => {
-      const doc = document.documentElement;
-      return doc.scrollWidth - doc.clientWidth;
-    });
+    const overflow = await sidewaysOverflow(page);
     expect(overflow).toBeLessThanOrEqual(0);
   });
 });

@@ -23,6 +23,7 @@
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { ENGLISH_PAGES_EDITOR, logInByApi, reachesVisitors, reaching } from './cms';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
+import { sidewaysOverflow } from './geometry';
 
 test.describe.configure({ mode: 'default' });
 
@@ -204,7 +205,7 @@ test('previewed, each English page is the whole page, in English, left to right'
     }
 
     // Nothing wider than the window.
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const overflow = await sidewaysOverflow(page);
     expect(overflow, `${path} overflows`).toBeLessThanOrEqual(0);
 
     // Its labels keep DM Mono, the right face for Latin: Thmanyah Sans is the

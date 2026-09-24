@@ -19,7 +19,7 @@
  * of whatever a test was doing. It has its own tests, with motion on.
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
-import { sidewaysOverflow } from './geometry';
+import { sidewaysOverflow, widestSidewaysOverflow } from './geometry';
 
 const DECKS = [
   {
@@ -250,20 +250,7 @@ for (const deck of DECKS) {
 
         // ...and in every frame of a throw, which carries the card 130% of its
         // own width off the side before the pile closes up.
-        const worst = page.evaluate(
-          () =>
-            new Promise<number>((resolve) => {
-              let most = -Infinity;
-              const started = performance.now();
-              const tick = () => {
-                const doc = document.documentElement;
-                most = Math.max(most, doc.scrollWidth - doc.clientWidth);
-                if (performance.now() - started < 900) requestAnimationFrame(tick);
-                else resolve(most);
-              };
-              requestAnimationFrame(tick);
-            }),
-        );
+        const worst = widestSidewaysOverflow(page, 900);
         await next.click();
         expect(await worst, 'while being thrown').toBeLessThanOrEqual(0);
       });

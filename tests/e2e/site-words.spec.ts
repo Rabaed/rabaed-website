@@ -16,6 +16,7 @@
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { SITE_WORDS_EDITOR, logInByApi } from './cms';
+import { sidewaysOverflow, sidewaysOverflowOf } from './geometry';
 import { ROUTES } from './routes';
 
 test.describe.configure({ mode: 'default' });
@@ -305,7 +306,7 @@ test('a menu of the longest labels the CMS allows still sits on one line', async
     // And nothing in the header is pushed outside it, at this width or wider.
     for (const width of [1100, 1280, 1600]) {
       await page.setViewportSize({ width, height: 900 });
-      const overflow = await row.evaluate((element) => element.scrollWidth - element.clientWidth);
+      const overflow = await sidewaysOverflowOf(row);
       expect(overflow, `the header overflows at ${width}px`).toBeLessThanOrEqual(0);
     }
 
@@ -564,7 +565,7 @@ test('the English header sits on one line wherever it is a row', async ({ page }
     const row = page.locator('.nav > .wrap');
     for (const width of [1100, 1280, 1600]) {
       await page.setViewportSize({ width, height: 900 });
-      const overflow = await row.evaluate((element) => element.scrollWidth - element.clientWidth);
+      const overflow = await sidewaysOverflowOf(row);
       expect(overflow, `the English header overflows at ${width}px`).toBeLessThanOrEqual(0);
     }
   } finally {
@@ -728,7 +729,7 @@ test('on a phone the Footer directory sits two by two, and on a desktop four acr
         return { top: Math.round(box.top), left: Math.round(box.left), right: Math.round(box.right) };
       }),
     );
-  const sideways = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  const sideways = () => sidewaysOverflow(page);
 
   await page.goto('/');
   for (const width of [360, 390, 768, 980]) {
