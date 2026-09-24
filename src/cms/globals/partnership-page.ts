@@ -1,6 +1,7 @@
 import type { Field } from 'payload';
 import { listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
+import { searchTab } from '../search-fields';
 
 /**
  * The partnership page's words, section by section, in the page's order
@@ -254,5 +255,6 @@ export const PartnershipPage = pageGlobal({
         },
       ],
     }),
+    searchTab(),
   ],
 });

@@ -3,12 +3,12 @@ import { ArabicOnlyNotice, arabicOnlyMetadata } from '@/components/arabic-only-n
 import { ReferralPage } from '@/components/pages/referral-page';
 import { NOT_YET_IN_ENGLISH } from '@/content/arabic-only-pages';
 import { getReferralPage } from '@/content/pages/referral';
-import { inEnglish } from '@/content/pages/page-content';
+import { inEnglish } from '@/content/pages/languages';
 import { LOCALE_CODES } from '@/lib/locales';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await inEnglish(getReferralPage);
+  const content = await inEnglish('referral', getReferralPage);
   if (!content) return arabicOnlyMetadata(NOT_YET_IN_ENGLISH.referral);
   return pageMetadata({ locale: 'en', path: '/referral', ...content.meta });
 }
@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * (`src/content/arabic-only-pages.ts`) — never the Arabic words in its place.
  */
 export default async function EnglishReferralPage() {
-  const content = await inEnglish(getReferralPage);
+  const content = await inEnglish('referral', getReferralPage);
   if (!content) return <ArabicOnlyNotice page={NOT_YET_IN_ENGLISH.referral} />;
   return <ReferralPage locale="en" locales={LOCALE_CODES} content={content} />;
 }

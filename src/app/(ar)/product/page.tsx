@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { ProductPage } from '@/components/pages/product-page';
 import { getProductPage } from '@/content/pages/product';
-import { publishedLocales } from '@/content/pages/page-content';
+import { publishedLocales } from '@/content/pages/languages';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [{ meta }, locales] = await Promise.all([getProductPage('ar'), publishedLocales(getProductPage)]);
+  const [{ meta }, locales] = await Promise.all([getProductPage('ar'), publishedLocales('product')]);
   return pageMetadata({ locale: 'ar', locales, path: '/product', ...meta });
 }
 
@@ -15,6 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * alternates — once its English is published (ticket 42).
  */
 export default async function ArabicProductPage() {
-  const [content, locales] = await Promise.all([getProductPage('ar'), publishedLocales(getProductPage)]);
+  const [content, locales] = await Promise.all([getProductPage('ar'), publishedLocales('product')]);
   return <ProductPage locale="ar" locales={locales} content={content} />;
 }

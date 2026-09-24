@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { ToolPage } from '@/components/pages/tool-page';
 import { getToolPage } from '@/content/pages/tool';
-import { publishedLocales } from '@/content/pages/page-content';
+import { publishedLocales } from '@/content/pages/languages';
 import { pageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [{ meta }, locales] = await Promise.all([getToolPage('ar'), publishedLocales(getToolPage)]);
+  const [{ meta }, locales] = await Promise.all([getToolPage('ar'), publishedLocales('tool')]);
   return pageMetadata({ locale: 'ar', locales, path: '/tool', ...meta });
 }
 
@@ -15,6 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * alternates — once its English is published (ticket 42).
  */
 export default async function ArabicToolPage() {
-  const [content, locales] = await Promise.all([getToolPage('ar'), publishedLocales(getToolPage)]);
+  const [content, locales] = await Promise.all([getToolPage('ar'), publishedLocales('tool')]);
   return <ToolPage locale="ar" locales={locales} content={content} />;
 }

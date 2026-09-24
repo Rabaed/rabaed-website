@@ -1,5 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
-import { getSearchSettings } from '@/content/search-settings';
+import { pageMeta } from '@/content/search-settings';
 import { numeralsInMono } from '@/components/inline-text';
 import type { PageHeroContent } from '@/components/page-hero';
 import type { PartnershipApplyContent } from '@/components/partnership/apply';
@@ -34,7 +34,8 @@ export type PartnershipPageContent = {
 /**
  * The page's short name, as its breadcrumb structured data reads it
  * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26, `src/content/search-settings.ts`).
+ * (ticket 26), on its own entry
+ * (ticket 91, `src/content/search-settings.ts`).
  */
 const NAME: Readonly<Record<Locale, string>> = { ar: 'برنامج الشراكات', en: 'Partnership Program' };
 
@@ -51,16 +52,15 @@ const numbered = (index: number) => String(index + 1).padStart(2, '0');
  * says, never where it goes.
  */
 export async function getPartnershipPage(locale: Locale): Promise<PartnershipPageContent> {
-  const [entry, applicationForm, meta] = await Promise.all([
+  const [entry, applicationForm] = await Promise.all([
     pageEntry('partnership-page', locale),
     formPageWording(PARTNERSHIP_APPLICATION, locale),
-    getSearchSettings(locale, 'partnership', { name: NAME[locale] }),
   ]);
   const { hero, idea, audience, modes, benefits, path, questions, apply } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<PartnershipPageContent, 'applicationForm'>> = {
-    meta,
+    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

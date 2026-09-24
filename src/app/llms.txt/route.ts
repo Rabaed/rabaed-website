@@ -7,7 +7,9 @@ import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { COMPANY } from '@/content/company';
 import { getIndexLead } from '@/content/index-leads';
 import { getHomePage } from '@/content/pages/home';
-import { contentOrNull, inEnglish, type PageMeta } from '@/content/pages/page-content';
+import { inEnglish } from '@/content/pages/languages';
+import type { MarketingPage } from '@/content/pages/page-entries';
+import { contentOrNull, type PageMeta } from '@/content/pages/page-content';
 import { getPartnershipPage } from '@/content/pages/partnership';
 import { getProductPage } from '@/content/pages/product';
 import { getReferralPage } from '@/content/pages/referral';
@@ -82,13 +84,17 @@ const HEADINGS = {
  * leads the English pages and is left out of the Arabic, whose home page the
  * file's heading describes.
  */
-const MARKETING_PAGES: readonly { readonly path: string; readonly read: (locale: Locale) => Promise<{ readonly meta: PageMeta }> }[] = [
-  { path: '/', read: getHomePage },
-  { path: '/product', read: getProductPage },
-  { path: '/start', read: getStartPage },
-  { path: '/tool', read: getToolPage },
-  { path: '/referral', read: getReferralPage },
-  { path: '/partnership', read: getPartnershipPage },
+const MARKETING_PAGES: readonly {
+  readonly page: MarketingPage;
+  readonly path: string;
+  readonly read: (locale: Locale) => Promise<{ readonly meta: PageMeta }>;
+}[] = [
+  { page: 'home', path: '/', read: getHomePage },
+  { page: 'product', path: '/product', read: getProductPage },
+  { page: 'start', path: '/start', read: getStartPage },
+  { page: 'tool', path: '/tool', read: getToolPage },
+  { page: 'referral', path: '/referral', read: getReferralPage },
+  { page: 'partnership', path: '/partnership', read: getPartnershipPage },
 ];
 
 /**
@@ -114,8 +120,8 @@ function section(locale: Locale, heading: string, entries: readonly Entry[]): st
  * name="description">` describes it: one module per page hands over both
  * (`src/content/pages/`).
  *
- * Arabic, every page is; English, a page is once `inEnglish` says it is
- * published in English. An index is listed where it has something to list —
+ * Arabic, every page is; English, a page is once it is published in English
+ * (`src/content/pages/languages.ts`), and only then is its English read. An index is listed where it has something to list —
  * the Arabic blog index always, as it always has been — which is the
  * sitemap's rule, and the case studies section has no page at all until a
  * story is published (ticket 24).
@@ -125,7 +131,7 @@ async function pageEntries(
   posts: readonly Post[],
   caseStudies: readonly CaseStudy[],
 ): Promise<Entry[]> {
-  const read = (page: (typeof MARKETING_PAGES)[number]) => (locale === 'en' ? inEnglish(page.read) : page.read(locale));
+  const read = (page: (typeof MARKETING_PAGES)[number]) => (locale === 'en' ? inEnglish(page.page, page.read) : page.read(locale));
   const marketing = MARKETING_PAGES.filter((page) => locale === 'en' || page.path !== '/');
   // The line under an index's heading, which is also its search description —
   // in the CMS since ticket 59 — or `null` where its entry is not published in
