@@ -8,14 +8,17 @@
  * block itself is `indexing.spec.ts`.
  *
  * The switch test changes what `robots.txt` says for everyone, and `llms.txt`
- * follows what every other suite publishes, so this suite runs after the rest
- * (`playwright.config.ts`) and puts the switch back whether it passes or not.
- * Its tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ * follows what every other suite publishes, so this suite runs against the
+ * second test server (`playwright.config.ts`, ticket 89) and puts the switch
+ * back whether it passes or not. Its tests sign in as an editor of their own
+ * (`cms.ts`) and run one at a time, as every suite on that server does.
  *
- * It runs beside the other two suites in that stage, which is why the two
- * `llms.txt` tests say in their comments what they tolerate: a case study
- * published into the file, and the moment after a Referral Program value is
- * published when the page carries it and the file does not yet.
+ * The suites that publish run there too, before or after this one in no fixed
+ * order, which is why the two `llms.txt` tests say in their comments what
+ * they tolerate: an English page one of them left published, a case study or
+ * article one of them published and took down again, which the file names
+ * until its next rebuild, and the moment after a Referral Program value is put
+ * back when the page carries it and the file does not yet.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { CRAWLERS_EDITOR, logInByApi, richText, uploadImage } from './cms';
@@ -168,7 +171,7 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   // heading rather than an entry, and the Screen mock studio is never listed
   // (ticket 05). An English page joins once it is published in English (ticket
   // 82) — in this database none is, but `english-pages.spec.ts` publishes one
-  // beside this suite and holds the file to it, so the English are left out of
+  // on this server and leaves it published, so the English are left out of
   // the comparison below as the case studies are.
   const expected = [
     '/product',
@@ -181,9 +184,10 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
     '/privacy',
     '/referral-terms',
   ];
-  // What `case-studies.spec.ts` publishes beside this suite is left out of the
+  // What `case-studies.spec.ts` publishes on this server is left out of the
   // comparison rather than asserted against: an article, a case study, and the
-  // case studies index that appears with the first of them (ticket 24). What
+  // case studies index that appears with the first of them (ticket 24), each
+  // named by the file until its next rebuild after they are deleted. What
   // stays is the fixed set, which nothing published can add to or take from.
   const pages = listed
     .filter((url) => !url.startsWith(absolute(baseURL!, '/en/')) && url !== absolute(baseURL!, '/en'))
@@ -198,9 +202,10 @@ test('every page llms.txt lists answers, and is described in the words that page
   baseURL,
 }) => {
   // Polled as one whole, and re-read each time. `referral-program-values.spec.ts`
-  // runs beside this one and publishes an amount the referral page's
-  // description quotes; for the moment between the page being rebuilt with it
-  // and the file being rebuilt with it, the two disagree honestly. Everything
+  // runs on this server and publishes an amount the referral page's
+  // description quotes, then puts it back; for the moment between the page
+  // being rebuilt with it and the file being rebuilt with it, the two disagree
+  // honestly. Everything
   // else here is fixed, so the poll settles rather than hides a mismatch — and
   // a mismatch that outlasts it is reported with both sides.
   let entries: { url: string; description: string }[] = [];

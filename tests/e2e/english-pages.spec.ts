@@ -4,15 +4,17 @@
  * any other, in English, left to right, with their own titles, structured data
  * and forms.
  *
- * **Runs last** (`playwright.config.ts`). To preview the proposals it does
+ * **Runs against the second test server** (`playwright.config.ts`, ticket
+ * 89), one suite at a time. To preview the proposals it does
  * what the founder does to approve one — makes it the draft its entry opens
  * on, and ticks English among the languages it is published in — and to hold
  * a published English page to what a page of the site is held to it publishes
  * one: the start page, and what it reads beside its own entry — the Trust
  * strip, the search settings, its questions, its form's English, and the
- * header and footer's (ticket 40). The page-text suites edit these
- * entries all the while, and would find a draft of this suite's under theirs;
- * nothing that runs last reads them. The Arabic of every entry published here
+ * header and footer's (ticket 40). The page-text suites edit these entries
+ * on the first server, where a draft of this suite's would be found under
+ * theirs; this server's database is not theirs. The Arabic of every entry
+ * published here
  * is the Arabic already published: the proposals carry it unchanged.
  *
  * What English would say is not asserted word for word here — it is the
@@ -178,19 +180,10 @@ test('previewed, each English page is the whole page, in English, left to right'
 
   let eyebrows = 0;
   for (const path of PAGES) {
-    // The page itself, not the notice that stands for it. `stale-render.spec.ts`
-    // runs beside this and publishes the tool page from its published words,
-    // which leaves this draft under a newer version: should that land between
-    // approving and previewing, the page's own proposal is approved again.
-    await expect(async () => {
-      await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
-      await expect(page.getByRole('status').first()).toContainText('معاينة');
-      const notice = await page.locator('h1').textContent();
-      if (/not available in English|on its way/.test(notice ?? '')) {
-        await approve(page.request, OWN_ENTRY[path], 'draft');
-        throw new Error(`${path} shows its notice`);
-      }
-    }).toPass({ timeout: 60_000 });
+    // The page itself, not the notice that stands for it.
+    await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
+    await expect(page.getByRole('status').first()).toContainText('معاينة');
+    await expect(page.locator('h1'), path).not.toHaveText(/not available in English|on its way/);
 
     await expect(page.locator('html'), path).toHaveAttribute('lang', 'en');
     await expect(page.locator('html'), path).toHaveAttribute('dir', 'ltr');

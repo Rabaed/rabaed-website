@@ -6,8 +6,9 @@
  * say the same. The terms are never rewritten for him (ADR-0008).
  *
  * Publishing a value changes what the referral page's and the FAQs' suites
- * read, so this suite runs after everything else (`playwright.config.ts`), and
- * puts the values and the terms back as they were whether it passes or not.
+ * read, so this suite runs against the second test server, apart from them
+ * (`playwright.config.ts`, ticket 89), and puts the values and the terms back
+ * as they were whether it passes or not, for the suites after it there.
  *
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */

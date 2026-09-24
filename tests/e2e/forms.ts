@@ -7,12 +7,14 @@
  * instead of a private bucket (`scripts/test-server.mjs`): every message and
  * every document is written there as a file, and nothing leaves the machine.
  * Both folders sit beside the server's database, named after the port, so
- * suites running side by side on different `TEST_PORT`s read only their own.
+ * suites running side by side on different `TEST_PORT`s read only their own —
+ * and a suite reads the folders of the server its project runs against, of
+ * the two a run starts (`playwright.config.ts`).
  */
 import { readdir, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { expect, type APIRequestContext, type APIResponse, type Locator } from '@playwright/test';
+import { expect, test, type APIRequestContext, type APIResponse, type Locator } from '@playwright/test';
 // With its extension: the test server imports this file under Node's own
 // TypeScript loading, which resolves no other way (`scripts/test-server.mjs`).
 import { FORM_READER } from './cms.ts';
@@ -22,17 +24,21 @@ export function testServerScratch(port: number): string {
   return path.join(os.tmpdir(), `rabaed-test-server-${port}`);
 }
 
-export function outboxDirectory(port: number = testPort()): string {
+export function outboxDirectory(port: number = thisTestsServerPort()): string {
   return path.join(testServerScratch(port), 'outbox');
 }
 
-export function documentsDirectory(port: number = testPort()): string {
+export function documentsDirectory(port: number = thisTestsServerPort()): string {
   return path.join(testServerScratch(port), 'documents');
 }
 
-/** The port this run's test server listens on (`playwright.config.ts`). */
-function testPort(): number {
-  return Number(process.env.TEST_PORT || 3100);
+/**
+ * The port of the server the running test's project runs against, of the two
+ * a run starts (`playwright.config.ts`). Only a running test has one: outside
+ * one, say which port.
+ */
+function thisTestsServerPort(): number {
+  return Number(new URL(test.info().project.use.baseURL!).port);
 }
 
 /** One message, as the outbox keeps it. */

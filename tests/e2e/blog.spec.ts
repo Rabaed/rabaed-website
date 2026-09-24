@@ -423,8 +423,7 @@ test('an article exists per language, and a missing translation offers the one t
 
   // And in llms.txt, at its English address under the English heading, with
   // the English index beside it (ticket 82). Asked here, where an English
-  // article is published anyway, rather than by publishing one more in the
-  // suites that run last, which a publish slows for everyone beside it.
+  // article is published anyway, rather than by publishing one more.
   await reaching('the English article in llms.txt', async () => (await visit(request, '/llms.txt')).html).toContain(
     `- [${english.title}](${englishAddress}): ${english.summary}`,
   );
@@ -528,10 +527,9 @@ test('an article cannot be published without an opening answer of 30 to 60 words
  * An article is where these ask it, because nothing else reads it: changing
  * its images disturbs no other suite. What they cannot promise, run beside
  * suites that publish, is that the test's change is the only thing to rebuild
- * it — a publish anywhere marks every page. So, as with
- * `stale-render.spec.ts`, the proof that these fail without the fix is a run
- * of them alone: the two descriptions then never arrive, `HIT` for the whole
- * wait (ticket 84 records it).
+ * it — a publish anywhere marks every page. So the proof that these fail
+ * without the fix is a run of them alone: the two descriptions then never
+ * arrive, `HIT` for the whole wait (ticket 84 records it).
  */
 test.describe('an image changed in the CMS reaches the pages that show it', () => {
   /**
