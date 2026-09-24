@@ -70,11 +70,10 @@ export function fields<T>(value: T): Fields<T> {
  *
  * It remembers what was published the first time the test reads or changes
  * it, and keeps that however often it is read again, so that `restore` can
- * put back exactly that: a published change — through the
- * adapter or through the admin's own form — is undone by publishing what was
- * there before, which visitors see as they saw the change; a draft, by making
- * the latest published version the draft again, which visitors never see
- * either way.
+ * put back exactly that: a published change — through the adapter or through
+ * the admin's own form — is undone by publishing what was there before, which
+ * visitors see as they saw the change; a draft, by saving what was there
+ * before as the draft, which visitors never see either way.
  */
 export class CmsEntry<S extends Slug> {
   readonly slug: S;
@@ -141,40 +140,38 @@ export class CmsEntry<S extends Slug> {
   /** Makes a kept version the draft, as restoring it from the admin's Versions does. */
   async restoreVersion(version: { id: string }): Promise<void> {
     await this.#remember();
-    await this.#makeDraft(version.id);
+    const made = await this.#editor.post(`${this.#address}/versions/${version.id}?draft=true`);
+    expect(made.ok(), `${this.slug}'s version ${version.id} as the draft: ${await made.text()}`).toBe(true);
     this.#drafted = true;
   }
 
   /**
    * Puts back what this test changed: the entry as it was published before,
-   * if what is published now is anything else, and otherwise the latest
-   * published version as the draft, if the test saved one — so that a test's
-   * draft is not left waiting to be published by the next. Done for every
-   * entry when the test ends; a test that has to see the entry put back calls
-   * it itself.
+   * if what is published now is anything else; otherwise, if the test saved a
+   * draft, the same entry saved as the draft over it — so that a test's draft
+   * is not left waiting to be published by the next. Done for every entry
+   * when the test ends; a test that has to see the entry put back calls it
+   * itself.
+   *
+   * The draft is written from what the test read rather than by restoring
+   * the newest published version from the entry's history. That history is
+   * not always what is published: on CI the English pages' suite published
+   * the closing section's English before this suite's test ran, and the
+   * version found by date was an older one, without it. The English
+   * partnership form's oldest published version is an empty one.
    */
   async restore(): Promise<void> {
     const before = this.#before;
     if (before === undefined) return;
-    if (!isDeepStrictEqual(await this.#read(), before)) {
-      const response = await this.#editor.post(this.#address, { data: { ...before, _status: 'published' } });
-      expect(response.ok(), `${this.slug} put back: ${await response.text()}`).toBe(true);
-    } else if (this.#drafted) {
-      const response = await this.#editor.get(
-        `${this.#address}/versions?where[version._status][equals]=published&sort=-updatedAt&limit=1&depth=0`,
-      );
-      expect(response.ok(), `${this.slug}'s published version: ${await response.text()}`).toBe(true);
-      const [latest] = (await response.json()).docs as { id: string }[];
-      expect(latest, `${this.slug} has no published version to make the draft again`).toBeDefined();
-      await this.#makeDraft(latest.id);
+    const published = !isDeepStrictEqual(await this.#read(), before);
+    if (published || this.#drafted) {
+      const status = published ? 'published' : 'draft';
+      const response = await this.#editor.post(`${this.#address}${published ? '' : '?draft=true'}`, {
+        data: { ...before, _status: status },
+      });
+      expect(response.ok(), `${this.slug} put back as ${status}: ${await response.text()}`).toBe(true);
     }
     this.#drafted = false;
-  }
-
-  /** Makes a kept version the latest, as a draft. */
-  async #makeDraft(id: string): Promise<void> {
-    const made = await this.#editor.post(`${this.#address}/versions/${id}?draft=true`);
-    expect(made.ok(), `${this.slug}'s version ${id} as the draft: ${await made.text()}`).toBe(true);
   }
 
   async #read(): Promise<Entry<S>> {
