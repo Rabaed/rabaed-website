@@ -11,7 +11,7 @@
  * follows what every other suite publishes, so this suite runs against the
  * second test server (`playwright.config.ts`, ticket 89) and puts the switch
  * back whether it passes or not. Its tests sign in as an editor of their own
- * (`cms.ts`) and run one at a time, as every suite on that server does.
+ * (`editors.ts`) and run one at a time, as every suite on that server does.
  *
  * The suites that publish run there too, before or after this one in no fixed
  * order, which is why the two `llms.txt` tests say in their comments what
@@ -21,7 +21,8 @@
  * back when the page carries it and the file does not yet.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { CRAWLERS_EDITOR, logInByApi, richText, uploadImage } from './cms';
+import { richText, uploadImage } from './cms';
+import { signIn } from './editors';
 import { ROUTES } from './routes';
 
 test.describe.configure({ mode: 'default' });
@@ -131,7 +132,7 @@ test('one switch in the CMS refuses the training crawlers, and leaves the citati
   page,
   request,
 }) => {
-  await logInByApi(page.request, CRAWLERS_EDITOR);
+  await signIn(page.request);
 
   try {
     await setSwitch(page.request, false);
@@ -240,7 +241,7 @@ test('an article published in the CMS joins llms.txt, and leaves it again when i
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, CRAWLERS_EDITOR);
+  await signIn(page.request);
   const cover = await uploadImage(page.request, 'صورة غلاف لاختبار زواحف الذكاء الاصطناعي');
   const slug = `crawlers-${Date.now().toString(36)}`;
   const title = `مقالة اختبار زواحف الذكاء الاصطناعي ${slug}`;

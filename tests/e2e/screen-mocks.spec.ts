@@ -78,7 +78,7 @@ const ARABIC_LETTER = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE
  *
  * Read from the pages, as a visitor with no session receives them, rather than
  * from the CMS: these checks run side by side, and side by side sign-ins to one
- * account erase each other's sessions (`cms.ts`). Every mock's picture names
+ * account erase each other's sessions (`editors.ts`). Every mock's picture names
  * its mock (`src/components/screen-mock-picture.tsx`).
  */
 async function replacedInTheAdmin(request: APIRequestContext, locale: MockLocale, mockId: string): Promise<boolean> {

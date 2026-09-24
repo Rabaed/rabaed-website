@@ -10,10 +10,11 @@
  * (`playwright.config.ts`, ticket 89), and puts the values and the terms back
  * as they were whether it passes or not, for the suites after it there.
  *
- * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ * The tests sign in as an editor of their own (`editors.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, REFERRAL_VALUES_EDITOR, legalDocument, logInByApi } from './cms';
+import { ADMIN_PATH, legalDocument } from './cms';
+import { signIn } from './editors';
 
 test.describe.configure({ mode: 'default' });
 
@@ -45,7 +46,7 @@ async function visibleText(page: Page, path: string): Promise<string> {
 const warning = (page: Page) => page.getByRole('alert').filter({ hasText: 'do not state the Referral Program values' });
 
 test.beforeEach(async ({ page }) => {
-  await logInByApi(page.request, REFERRAL_VALUES_EDITOR);
+  await signIn(page.request);
 });
 
 test.afterEach(async ({ page }) => {

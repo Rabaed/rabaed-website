@@ -24,7 +24,7 @@
  * unpublishes it again afterwards.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { LAUNCH_ARTICLES_EDITOR, logInByApi } from './cms';
+import { signIn } from './editors';
 import { nodesOf, structuredData } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
@@ -120,7 +120,7 @@ function openingParagraph(page: Page): Promise<string | undefined> {
 }
 
 test('the six launch articles are in the CMS as drafts, and no visitor can reach one', async ({ page, request }) => {
-  await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
+  await signIn(page.request);
 
   for (const { slug } of EXPECTED_ARTICLES) {
     const article = await draftArticle(page.request, slug);
@@ -160,7 +160,7 @@ test('each article waits in English too: a draft at its slug, with an English co
   page,
   request,
 }) => {
-  await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
+  await signIn(page.request);
 
   for (const { slug, cover: coverFile, phrases } of EXPECTED_ENGLISH) {
     const article = await draftArticle(page.request, slug, 'en');
@@ -207,7 +207,7 @@ test('each article waits in English too: a draft at its slug, with an English co
 test('each article answers its own kind of question, opening with a standalone answer of 30 to 60 words', async ({
   page,
 }) => {
-  await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
+  await signIn(page.request);
 
   for (const { kind, slug, phrases } of EXPECTED_ARTICLES) {
     const article = await draftArticle(page.request, slug);
@@ -240,7 +240,7 @@ test('an article is published only once a real person’s name is on it — and 
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, LAUNCH_ARTICLES_EDITOR);
+  await signIn(page.request);
   const { slug } = EXPECTED_ARTICLES[1];
   const article = await draftArticle(page.request, slug);
   const address = `${baseURL}/blog/${slug}`;

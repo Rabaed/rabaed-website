@@ -11,74 +11,28 @@
  * the end of the hero's paragraph, which no screenshot shows and no suite
  * reads; the refused changes are never saved at all.
  *
- * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ * The tests sign in as an editor of their own and run one at a time, and what
+ * they change is put back when each ends (`entries.ts`).
  */
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { PAGES_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, outsideTheHeader } from './cms';
+import type { APIRequestContext } from '@playwright/test';
+import { reachesVisitors, outsideTheHeader } from './cms';
+import { test, expect, type Entry } from './entries';
 
 test.describe.configure({ mode: 'default' });
 
-const GLOBAL = '/api/globals/start-page';
-
 /** A word as the CMS holds it: its Arabic and its English. */
-type Words = { ar: string; en?: string | null };
-type Step = { label: Words; title: Words; text: Words; markedOut: boolean };
-type StartPage = {
-  languages: string[];
-  hero: { eyebrow: Words; title: Words; lead: Words; primaryLabel: Words; secondaryLabel: Words };
-  trustStrip: { shows: boolean };
-  steps: { shows: boolean; eyebrow: Words; heading: Words; steps: Step[] };
-  questions: { eyebrow: Words; heading: Words };
-  freeTool: { shows: boolean; eyebrow: Words; heading: Words; text: Words; linkLabel: Words };
-};
+type Words = Entry<'start-page'>['hero']['title'];
+type Step = Entry<'start-page'>['steps']['steps'][number];
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
-
-/** The start page's entry as published. */
-async function published(editor: APIRequestContext): Promise<StartPage> {
-  const response = await editor.get(`${GLOBAL}?depth=0`);
-  expect(response.ok(), await response.text()).toBe(true);
-  return response.json();
-}
-
-/** The entry's fields alone, ready to be sent back: no ids, no dates. */
-function fields(page: StartPage) {
-  const { languages, hero, trustStrip, steps, questions, freeTool } = page;
-  const rows = steps.steps.map(({ label, title, text, markedOut }) => ({ label, title, text, markedOut }));
-  return { languages, hero, trustStrip, steps: { ...steps, steps: rows }, questions, freeTool };
-}
-
-/** Saves the entry as the admin's Save Draft or Publish changes would. */
-function save(editor: APIRequestContext, data: object, status: 'draft' | 'published') {
-  return editor.post(`${GLOBAL}${status === 'draft' ? '?draft=true' : ''}`, { data: { ...data, _status: status } });
-}
-
-/** Puts the entry's latest version back to what is published, so a test's draft is not left waiting. */
-async function discardDraft(editor: APIRequestContext): Promise<void> {
-  const response = await editor.get(`${GLOBAL}/versions?where[version._status][equals]=published&sort=-updatedAt&limit=1&depth=0`);
-  expect(response.ok()).toBe(true);
-  const [latest] = (await response.json()).docs;
-  const restored = await editor.post(`${GLOBAL}/versions/${latest.id}?draft=true`);
-  expect(restored.ok(), await restored.text()).toBe(true);
-}
 
 async function visitorHtml(request: APIRequestContext): Promise<string> {
   return (await request.get('/start')).text();
 }
 
-/** Opens the site in preview at the start page, as the admin's Preview button does. */
-async function preview(page: Page): Promise<void> {
-  await page.goto(`/api/preview?path=${encodeURIComponent('/start')}`);
-  await expect(page.getByRole('status')).toContainText('معاينة');
-}
-
-test.afterEach(async ({ page }) => {
-  await page.request.get('/api/preview/exit');
-});
-
-test('the start page shows the words the CMS has published, in Arabic only', async ({ page, request }) => {
-  await logInByApi(page.request, PAGES_EDITOR);
-  const entry = await published(page.request);
+test('the start page shows the words the CMS has published, in Arabic only', async ({ page, request, cms }) => {
+  const start = cms.entry('start-page');
+  const entry = await start.published();
   const html = await visitorHtml(request);
 
   expect(entry.languages).toEqual(['ar']);
@@ -91,9 +45,10 @@ test('the start page shows the words the CMS has published, in Arabic only', asy
 test('a reworded heading, a fourth step and a hidden section are previewed, and never reach a visitor', async ({
   page,
   request,
+  cms,
 }) => {
-  await logInByApi(page.request, PAGES_EDITOR);
-  const entry = await published(page.request);
+  const start = cms.entry('start-page');
+  const entry = await start.published();
   const title = `${entry.hero.title.ar} — مسودة`;
   const fourth: Step = {
     label: arabic('متابعة'),
@@ -101,71 +56,61 @@ test('a reworded heading, a fourth step and a hidden section are previewed, and 
     text: arabic('نجلس مع الأطراف الثلاثة بعد شهر من التشغيل.'),
     markedOut: false,
   };
-  const draft = fields(entry);
 
-  try {
-    const saved = await save(
-      page.request,
-      {
-        ...draft,
-        hero: { ...draft.hero, title: { ...draft.hero.title, ar: title } },
-        steps: { ...draft.steps, steps: [...draft.steps.steps, fourth] },
-        freeTool: { ...draft.freeTool, shows: false },
-      },
-      'draft',
-    );
-    expect(saved.ok(), await saved.text()).toBe(true);
+  await start.draft({
+    ...entry,
+    hero: { ...entry.hero, title: { ...entry.hero.title, ar: title } },
+    steps: { ...entry.steps, steps: [...entry.steps.steps, fourth] },
+    freeTool: { ...entry.freeTool, shows: false },
+  });
 
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await preview(page);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
-    const cards = page.locator('#start .s');
-    await expect(cards.locator('h3')).toHaveText([...entry.steps.steps.map((step) => step.title.ar), fourth.title.ar]);
-    await expect(cards.last().locator('.k')).toHaveText(`04 · ${fourth.label.ar}`);
-    await expect(page.locator('.free')).toHaveCount(0);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await cms.preview('/start');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
+  const cards = page.locator('#start .s');
+  await expect(cards.locator('h3')).toHaveText([...entry.steps.steps.map((step) => step.title.ar), fourth.title.ar]);
+  await expect(cards.last().locator('.k')).toHaveText(`04 · ${fourth.label.ar}`);
+  await expect(page.locator('.free')).toHaveCount(0);
 
-    // Four steps sit in two rows of two at desktop widths, not three and one alone.
-    const boxes = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
-    expect(boxes[0].y).toBe(boxes[1].y);
-    expect(boxes[2].y).toBe(boxes[3].y);
-    expect(boxes[2].y).toBeGreaterThan(boxes[0].y);
-    expect(boxes[0].width).toBeCloseTo(boxes[2].width, 0);
+  // Four steps sit in two rows of two at desktop widths, not three and one alone.
+  const boxes = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
+  expect(boxes[0].y).toBe(boxes[1].y);
+  expect(boxes[2].y).toBe(boxes[3].y);
+  expect(boxes[2].y).toBeGreaterThan(boxes[0].y);
+  expect(boxes[0].width).toBeCloseTo(boxes[2].width, 0);
 
-    // On a phone they stand one under another, as three do today.
-    await page.setViewportSize({ width: 390, height: 844 });
-    const narrow = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
-    expect(new Set(narrow.map((box) => Math.round(box.x))).size).toBe(1);
-    for (let index = 1; index < narrow.length; index += 1) expect(narrow[index].y).toBeGreaterThan(narrow[index - 1].y);
+  // On a phone they stand one under another, as three do today.
+  await page.setViewportSize({ width: 390, height: 844 });
+  const narrow = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
+  expect(new Set(narrow.map((box) => Math.round(box.x))).size).toBe(1);
+  for (let index = 1; index < narrow.length; index += 1) expect(narrow[index].y).toBeGreaterThan(narrow[index - 1].y);
 
-    const html = await visitorHtml(request);
-    expect(html).not.toContain(title);
-    expect(html).not.toContain(fourth.title.ar);
-    expect(html).toContain(entry.freeTool.heading.ar);
-  } finally {
-    await discardDraft(page.request);
-  }
+  const html = await visitorHtml(request);
+  expect(html).not.toContain(title);
+  expect(html).not.toContain(fourth.title.ar);
+  expect(html).toContain(entry.freeTool.heading.ar);
 });
 
-test('a section links land on has no switch to hide it; a section that can hide has one', async ({ page }) => {
-  await logInAs(page, PAGES_EDITOR);
-  await openPageEntry(page, 'start-page');
+test('a section links land on has no switch to hide it; a section that can hide has one', async ({ page, cms }) => {
+  const admin = await cms.openInAdmin('start-page');
 
-  await openSection(page, 'Steps');
+  await admin.openSection('Steps');
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
 
-  await openSection(page, 'Questions');
+  await admin.openSection('Questions');
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
 });
 
 test('words too long for their place, a list too long or empty, and an English page with no English are refused', async ({
   page,
+  cms,
 }) => {
-  await logInByApi(page.request, PAGES_EDITOR);
-  const entry = fields(await published(page.request));
+  const start = cms.entry('start-page');
+  const entry = await start.published();
   const step: Step = { label: arabic('خطوة'), title: arabic('خطوة إضافية'), text: arabic('نص خطوة إضافية.'), markedOut: false };
 
-  const refused = {
+  const refused: Record<string, Entry<'start-page'>> = {
     'a heading longer than its place': { ...entry, hero: { ...entry.hero, title: arabic('ع'.repeat(71)) } },
     'seven steps': { ...entry, steps: { ...entry.steps, steps: Array.from({ length: 7 }, () => step) } },
     'no steps': { ...entry, steps: { ...entry.steps, steps: [] } },
@@ -175,12 +120,12 @@ test('words too long for their place, a list too long or empty, and an English p
     'an Arabic heading of spaces': { ...entry, hero: { ...entry.hero, title: arabic('   ') } },
   };
   for (const [what, data] of Object.entries(refused)) {
-    const response = await save(page.request, data, 'published');
+    const response = await start.attempt(data, 'published');
     expect(response.status(), what).toBe(400);
   }
 
   // Nothing refused was kept.
-  expect(fields(await published(page.request))).toEqual(entry);
+  expect(await start.published()).toEqual(entry);
 });
 
 /** Every word of an entry given English of its own. */
@@ -196,58 +141,49 @@ function withEnglish<T>(value: T): T {
 test('a page with every word written in English is published in English, and its Arabic page is unchanged', async ({
   page,
   request,
+  cms,
 }) => {
-  await logInByApi(page.request, PAGES_EDITOR);
-  const entry = await published(page.request);
+  const start = cms.entry('start-page');
+  const entry = await start.published();
 
-  try {
-    // A visitor's Arabic page is meant to come back exactly as it was, which
-    // leaves nothing in it to wait for — and a publish is in nobody's page the
-    // moment it is saved (`cms.ts`). So the English is published together with a
-    // space at the end of the hero's paragraph, which is in the HTML and drawn
-    // nowhere, and the page waited for is the one that space arrives in: built
-    // from this publish, not from before it.
-    const english = withEnglish(fields(entry));
-    const lead = `${entry.hero.lead.ar} `;
-    const response = await save(
-      page.request,
-      { ...english, hero: { ...english.hero, lead: { ...english.hero.lead, ar: lead } }, languages: ['ar', 'en'] },
-      'published',
-    );
-    expect(response.ok(), await response.text()).toBe(true);
-    const now = await published(page.request);
-    expect(now.languages).toEqual(['ar', 'en']);
-    expect(now.hero.title).toEqual({ ar: entry.hero.title.ar, en: 'English' });
+  // A visitor's Arabic page is meant to come back exactly as it was, which
+  // leaves nothing in it to wait for — and a publish is in nobody's page the
+  // moment it is saved (`cms.ts`). So the English is published together with a
+  // space at the end of the hero's paragraph, which is in the HTML and drawn
+  // nowhere, and the page waited for is the one that space arrives in: built
+  // from this publish, not from before it.
+  const english = withEnglish(entry);
+  const lead = `${entry.hero.lead.ar} `;
+  await start.publish({
+    ...english,
+    hero: { ...english.hero, lead: { ...english.hero.lead, ar: lead } },
+    languages: ['ar', 'en'],
+  });
+  const now = await start.published();
+  expect(now.languages).toEqual(['ar', 'en']);
+  expect(now.hero.title).toEqual({ ar: entry.hero.title.ar, en: 'English' });
 
-    const html = await reachesVisitors(request, '/start', `${lead}</p>`, 'the start page published in English');
-    expect(html).toContain(entry.hero.title.ar);
-    expect(outsideTheHeader(html)).not.toContain('>English<');
-  } finally {
-    const restored = await save(page.request, fields(entry), 'published');
-    expect(restored.ok(), await restored.text()).toBe(true);
-  }
+  const html = await reachesVisitors(request, '/start', `${lead}</p>`, 'the start page published in English');
+  expect(html).toContain(entry.hero.title.ar);
+  expect(outsideTheHeader(html)).not.toContain('>English<');
 });
 
-test('a change published in the admin reaches visitors', async ({ page, request }) => {
-  await logInAs(page, PAGES_EDITOR);
-  const entry = await published(page.request);
+test('a change published in the admin reaches visitors', async ({ page, request, cms }) => {
+  const start = cms.entry('start-page');
+  const entry = await start.published();
   // A space at the end of the paragraph: in the HTML, but drawn nowhere.
   const lead = `${entry.hero.lead.ar} `;
 
-  try {
-    await openPageEntry(page, 'start-page');
-    // The admin reopens the tab an editor last had open, so the hero's is chosen.
-    await openSection(page, 'Hero');
-    // The Arabic box is the first one after the paragraph's heading.
-    const heading = page.getByRole('heading', { name: 'Paragraph under the heading', exact: true });
-    await heading.locator('xpath=following::textarea[1]').fill(lead);
-    await page.getByRole('button', { name: 'Publish changes' }).click();
-    await expect(page.getByText(/successfully/).first()).toBeVisible();
+  // Published in the admin, and put back when the test ends like any change.
+  const admin = await cms.openInAdmin('start-page');
+  // The admin reopens the tab an editor last had open, so the hero's is chosen.
+  await admin.openSection('Hero');
+  // The Arabic box is the first one after the paragraph's heading.
+  const heading = page.getByRole('heading', { name: 'Paragraph under the heading', exact: true });
+  await heading.locator('xpath=following::textarea[1]').fill(lead);
+  await page.getByRole('button', { name: 'Publish changes' }).click();
+  await expect(page.getByText(/successfully/).first()).toBeVisible();
 
-    await reachesVisitors(request, '/start', `${lead}</p>`, "the start page's reworded paragraph");
-    expect((await published(page.request)).hero.lead.ar).toBe(lead);
-  } finally {
-    const restored = await save(page.request, fields(entry), 'published');
-    expect(restored.ok(), await restored.text()).toBe(true);
-  }
+  await reachesVisitors(request, '/start', `${lead}</p>`, "the start page's reworded paragraph");
+  expect((await start.published()).hero.lead.ar).toBe(lead);
 });

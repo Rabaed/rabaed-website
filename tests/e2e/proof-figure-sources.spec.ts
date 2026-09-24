@@ -11,10 +11,10 @@
  * cards off again — and so does the first card's corrected basis, or
  * publishing the draft would put the old one back.
  *
- * It signs in as an editor of its own (`cms.ts`).
+ * It signs in as an editor of its own (`editors.ts`).
  */
 import { test, expect } from '@playwright/test';
-import { PROOF_FIGURES_EDITOR, logInByApi } from './cms';
+import { signIn } from './editors';
 import {
   CORRECTED_BASIS,
   PROOF_FIGURE_SOURCE,
@@ -27,7 +27,7 @@ type Figure = { blockType: 'comparison' | 'commitment'; figure?: string; source?
 test('the four proof figures carry their source, and the first its corrected basis, in what is published and in the draft waiting to be', async ({
   request,
 }) => {
-  await logInByApi(request, PROOF_FIGURES_EDITOR);
+  await signIn(request);
 
   for (const [what, query] of [
     ['what is published', ''],

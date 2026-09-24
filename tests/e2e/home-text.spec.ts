@@ -13,47 +13,23 @@
  * is a space at the end of the calculator's paragraph, which no screenshot
  * shows and no suite reads; refused changes are never saved at all.
  *
- * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ * The tests sign in as an editor of their own and run one at a time, and what
+ * they change is put back when each ends (`entries.ts`).
  */
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { HOME_EDITOR, expectSectionOpen, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage, outsideTheHeader } from './cms';
+import { test, expect, type Entry } from './entries';
+import { reachesVisitors, uploadImage, outsideTheHeader } from './cms';
+import type { APIRequestContext } from '@playwright/test';
 
 test.describe.configure({ mode: 'default' });
 
-const GLOBAL = '/api/globals/home-page';
-
+type Home = Entry<'home-page'>;
 /** A word as the CMS holds it: its Arabic and its English. */
-type Words = { ar: string; en?: string | null };
-type Situation = { quote: Words; cost: Words };
-type Tab = { final: boolean; title: Words; screen: string };
-type Step = { action: Words; by: Words; time: string };
-type TransactionType = { label: Words; title: Words; steps: Step[] };
-type Face = { channel: Words; words: Words };
-type Figure = { blockType: 'comparison' | 'commitment'; topic: Words; claim: Words; basis: Words } & Record<string, unknown>;
-type HomeEntry = {
-  languages: string[];
-  hero: {
-    titleAccent: Words;
-    titleLines: { line: Words }[];
-    primaryLabel: Words;
-    secondaryLabel: Words;
-    statuses: { status: Words }[];
-    parties: Record<'owner' | 'consultant' | 'contractor', Words>;
-    pictures?: Record<string, number | null>;
-  } & Record<string, unknown>;
-  situations: { shows: boolean; heading: Words; situations: Situation[] } & Record<string, unknown>;
-  fourUnits: { shows: boolean; heading: Words; lead: Words; tabs: Tab[] } & Record<string, unknown>;
-  record: { shows: boolean; lead: Words; types: TransactionType[] } & Record<string, unknown>;
-  beforeAfter: {
-    shows: boolean;
-    heading: Words;
-    lead: Words;
-    steps: { name: Words; usual: Face; rabaed: Face }[];
-  } & Record<string, unknown>;
-  calculator: { shows: boolean; heading: Words; lead: Words; sliderLabels: Record<string, Words> } & Record<string, unknown>;
-  figures: { shows: boolean; heading: Words; figures: Figure[] } & Record<string, unknown>;
-  questions: { shows: boolean; heading: Words } & Record<string, unknown>;
-};
+type Words = Home['hero']['titleAccent'];
+type Situation = Home['situations']['situations'][number];
+type Tab = Home['fourUnits']['tabs'][number];
+type TransactionType = Home['record']['types'][number];
+type Face = Home['beforeAfter']['steps'][number]['usual'];
+type Figure = Home['figures']['figures'][number];
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
 
@@ -69,48 +45,8 @@ function wordsCounting(count: number): string {
   return Array.from({ length: count }, (_, index) => (index % 2 === 0 ? 'ربائد' : 'سجل')).join(' ');
 }
 
-const LEFT_OUT = new Set(['id', 'createdAt', 'updatedAt', 'globalType', '_status']);
-
-/** The entry's fields alone, ready to be sent back: no ids, no dates. */
-function fields<T>(value: T): T {
-  if (Array.isArray(value)) return value.map(fields) as T;
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).filter(([key]) => !LEFT_OUT.has(key)).map(([key, each]) => [key, fields(each)]),
-    ) as T;
-  }
-  return value;
-}
-
-/** The home page's entry as published. */
-async function published(editor: APIRequestContext): Promise<HomeEntry> {
-  const response = await editor.get(`${GLOBAL}?depth=0`);
-  expect(response.ok(), await response.text()).toBe(true);
-  return fields(await response.json());
-}
-
-/** Saves the entry as the admin's Save Draft or Publish changes would. */
-function save(editor: APIRequestContext, data: object, status: 'draft' | 'published') {
-  return editor.post(`${GLOBAL}${status === 'draft' ? '?draft=true' : ''}`, { data: { ...data, _status: status } });
-}
-
-/** Puts the entry's latest version back to what is published, so a test's draft is not left waiting. */
-async function discardDraft(editor: APIRequestContext): Promise<void> {
-  const response = await editor.get(`${GLOBAL}/versions?where[version._status][equals]=published&sort=-updatedAt&limit=1&depth=0`);
-  expect(response.ok()).toBe(true);
-  const [latest] = (await response.json()).docs;
-  const restored = await editor.post(`${GLOBAL}/versions/${latest.id}?draft=true`);
-  expect(restored.ok(), await restored.text()).toBe(true);
-}
-
 async function visitorHtml(request: APIRequestContext): Promise<string> {
   return (await request.get('/')).text();
-}
-
-/** Opens the site in preview at the home page, as the admin's Preview button does. */
-async function preview(page: Page): Promise<void> {
-  await page.goto(`/api/preview?path=${encodeURIComponent('/')}`);
-  await expect(page.getByRole('status')).toContainText('معاينة');
 }
 
 /**
@@ -198,13 +134,9 @@ function cardsNotHoldingTheirWords(cards: Element[]): string[] {
   });
 }
 
-test.afterEach(async ({ page }) => {
-  await page.request.get('/api/preview/exit');
-});
-
-test('the home page shows the words the CMS has published, every section of it, in Arabic only', async ({ page, request }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+test('the home page shows the words the CMS has published, every section of it, in Arabic only', async ({ page, request, cms }) => {
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   const html = await visitorHtml(request);
 
   expect(entry.languages).toEqual(['ar']);
@@ -237,9 +169,9 @@ test('the home page shows the words the CMS has published, every section of it, 
   expect(html).not.toContain('*SUB-031*');
 });
 
-test('a reworded heading, grown lists and hidden sections are previewed, and never reach a visitor', async ({ page, request }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+test('a reworded heading, grown lists and hidden sections are previewed, and never reach a visitor', async ({ page, request, cms }) => {
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   const accent = `${entry.hero.titleAccent.ar} مسودة`;
   const situation: Situation = { quote: arabic('الاستشاري يطلب النسخة الموقعة… والمقاول أرسلها بالواتساب.'), cost: arabic('نسخة بلا مرجع.') };
   const tab: Tab = { final: false, title: arabic('لوحة المالك'), screen: 'overview' };
@@ -259,188 +191,160 @@ test('a reworded heading, grown lists and hidden sections are previewed, and nev
   // A unit before the Record, which stays last.
   const tabs = [...entry.fourUnits.tabs.slice(0, -1), tab, ...entry.fourUnits.tabs.slice(-1)];
 
-  try {
-    const saved = await save(
-      page.request,
-      {
-        ...entry,
-        hero: { ...entry.hero, titleAccent: arabic(accent) },
-        situations: { ...entry.situations, situations: [...entry.situations.situations, situation] },
-        fourUnits: { ...entry.fourUnits, tabs },
-        record: { ...entry.record, types: [...entry.record.types, type] },
-        figures: { ...entry.figures, figures: [...entry.figures.figures, commitment] },
-        beforeAfter: { ...entry.beforeAfter, shows: false },
-        calculator: { ...entry.calculator, shows: false },
-      },
-      'draft',
-    );
-    expect(saved.ok(), await saved.text()).toBe(true);
+  await home.draft({
+    ...entry,
+    hero: { ...entry.hero, titleAccent: arabic(accent) },
+    situations: { ...entry.situations, situations: [...entry.situations.situations, situation] },
+    fourUnits: { ...entry.fourUnits, tabs },
+    record: { ...entry.record, types: [...entry.record.types, type] },
+    figures: { ...entry.figures, figures: [...entry.figures.figures, commitment] },
+    beforeAfter: { ...entry.beforeAfter, shows: false },
+    calculator: { ...entry.calculator, shows: false },
+  });
 
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await preview(page);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(accent);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await cms.preview('/');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(accent);
 
-    const situations = page.locator('#situations-deck .pcard');
-    await expect(situations).toHaveCount(7);
-    await expect(situations.first().locator('.n')).toHaveText('01 / 07');
-    await expect(situations.last().locator('q')).toHaveText(situation.quote.ar);
+  const situations = page.locator('#situations-deck .pcard');
+  await expect(situations).toHaveCount(7);
+  await expect(situations.first().locator('.n')).toHaveText('01 / 07');
+  await expect(situations.last().locator('q')).toHaveText(situation.quote.ar);
 
-    // Units numbered by their place among the units; the Record by its name.
-    await expect(page.locator('#jt [role="tab"] .n')).toHaveText(['01', '02', '03', '04', '05', 'المخرَج']);
-    await expect(page.locator('#jt [role="tab"] h3').nth(4)).toHaveText(tab.title.ar);
-    await expect(page.locator('#jt [role="tabpanel"]')).toHaveCount(6);
+  // Units numbered by their place among the units; the Record by its name.
+  await expect(page.locator('#jt [role="tab"] .n')).toHaveText(['01', '02', '03', '04', '05', 'المخرَج']);
+  await expect(page.locator('#jt [role="tab"] h3').nth(4)).toHaveText(tab.title.ar);
+  await expect(page.locator('#jt [role="tabpanel"]')).toHaveCount(6);
 
-    await expect(page.locator('#record .rec-types span')).toHaveText(
-      [...entry.record.types, type].map((each) => each.label.ar),
-    );
-    await expect(page.locator('#record .rec-entry')).toHaveCount(6);
+  await expect(page.locator('#record .rec-types span')).toHaveText(
+    [...entry.record.types, type].map((each) => each.label.ar),
+  );
+  await expect(page.locator('#record .rec-entry')).toHaveCount(6);
 
-    await expect(page.locator('#figures-deck .pcard')).toHaveCount(7);
-    await expect(page.locator('#figures-deck .pcard').last().locator('.chead')).toHaveText(commitment.claim.ar);
+  await expect(page.locator('#figures-deck .pcard')).toHaveCount(7);
+  await expect(page.locator('#figures-deck .pcard').last().locator('.chead')).toHaveText(commitment.claim.ar);
 
-    await expect(page.locator('#ba')).toHaveCount(0);
-    await expect(page.locator('#calc')).toHaveCount(0);
+  await expect(page.locator('#ba')).toHaveCount(0);
+  await expect(page.locator('#calc')).toHaveCount(0);
 
-    const html = await visitorHtml(request);
-    for (const draft of [accent, situation.quote.ar, tab.title.ar, type.label.ar, commitment.claim.ar]) {
-      expect(html).not.toContain(draft);
-    }
-    expect(html).toContain('id="ba"');
-    expect(html).toContain('id="calc"');
-  } finally {
-    await discardDraft(page.request);
+  const html = await visitorHtml(request);
+  for (const draft of [accent, situation.quote.ar, tab.title.ar, type.label.ar, commitment.claim.ar]) {
+    expect(html).not.toContain(draft);
   }
+  expect(html).toContain('id="ba"');
+  expect(html).toContain('id="calc"');
 });
 
 test('the units section draws the answer under its heading once one is written, and nothing while it is empty', async ({
   page,
   request,
+  cms,
 }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   // A standalone answer of 30 to 60 words, which is what this field takes
   // (ticket 35). The Reference site gives this section no paragraph, so the
   // field is empty until an Editor writes one.
   const answer =
     'ربائد أربع وحدات على سجل واحد: المراسلات الرسمية، والاعتمادات والطلبات، والتقرير اليومي للموقع، والمستندات والإصدارات. هذه مسودة مكتوبة في الاختبار وحده لترى الصفحة كيف تحمل الفقرة تحت العنوان، ومخرج الوحدات واحد: السجل الموثّق.';
   expect(answer.trim().split(/\s+/).length).toBeGreaterThanOrEqual(30);
-  expect(entry.fourUnits.lead.ar ?? '', 'the units section publishes no paragraph today').toBe('');
+  expect(entry.fourUnits.lead?.ar ?? '', 'the units section publishes no paragraph today').toBe('');
   // And a visitor is served the section with nothing under its heading.
   await page.goto('/');
   await expect(page.locator('#jt .tz-head p')).toHaveCount(0);
 
-  try {
-    const saved = await save(page.request, { ...entry, fourUnits: { ...entry.fourUnits, lead: arabic(answer) } }, 'draft');
-    expect(saved.ok(), await saved.text()).toBe(true);
+  await home.draft({ ...entry, fourUnits: { ...entry.fourUnits, lead: arabic(answer) } });
 
-    await preview(page);
-    await expect(page.locator('#jt .tz-head .lead')).toHaveText(answer);
-    // Under the heading, which is what makes it the section's opening answer.
-    await expect(page.locator('#jt .tz-head > *').nth(2)).toHaveText(answer);
+  await cms.preview('/');
+  await expect(page.locator('#jt .tz-head .lead')).toHaveText(answer);
+  // Under the heading, which is what makes it the section's opening answer.
+  await expect(page.locator('#jt .tz-head > *').nth(2)).toHaveText(answer);
 
-    expect(await visitorHtml(request)).not.toContain(answer);
-  } finally {
-    await discardDraft(page.request);
-  }
+  expect(await visitorHtml(request)).not.toContain(answer);
 });
 
-test('with the units section switched off, the hero drops the button that leads to it, and keeps the demo button', async ({ page, request }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+test('with the units section switched off, the hero drops the button that leads to it, and keeps the demo button', async ({ page, request, cms }) => {
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   const ctas = page.locator('#hero .ctas a');
 
-  try {
-    const saved = await save(page.request, { ...entry, fourUnits: { ...entry.fourUnits, shows: false } }, 'draft');
-    expect(saved.ok(), await saved.text()).toBe(true);
+  await home.draft({ ...entry, fourUnits: { ...entry.fourUnits, shows: false } });
 
-    await preview(page);
-    await expect(page.locator('#jt')).toHaveCount(0);
-    // Nothing on the page for «استكشف المنصة ↓» to lead to, so no such button
-    // (ticket 73).
-    await expect(ctas).toHaveText([entry.hero.primaryLabel.ar]);
+  await cms.preview('/');
+  await expect(page.locator('#jt')).toHaveCount(0);
+  // Nothing on the page for «استكشف المنصة ↓» to lead to, so no such button
+  // (ticket 73).
+  await expect(ctas).toHaveText([entry.hero.primaryLabel.ar]);
 
-    // A visitor still has the section, and the button to it.
-    const html = await visitorHtml(request);
-    expect(html).toContain('id="jt"');
-    expect(html).toContain(entry.hero.secondaryLabel.ar);
-  } finally {
-    await discardDraft(page.request);
-  }
+  // A visitor still has the section, and the button to it.
+  const html = await visitorHtml(request);
+  expect(html).toContain('id="jt"');
+  expect(html).toContain(entry.hero.secondaryLabel.ar);
 });
 
 test('a replaced building, and words marked in bold and broken onto a new line, are previewed as the page draws them', async ({
   page,
   request,
+  cms,
 }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   // Twice the drawing's own 369×303.
   const building = await uploadImage(page.request, 'مبنى المالك', { width: 738, height: 606 });
   const [first, ...others] = entry.beforeAfter.steps;
   const words = 'يُرفع الطلب *برقم مرجعي*\nويصل إلى الاستشاري فوراً.';
 
-  try {
-    const saved = await save(
-      page.request,
-      {
-        ...entry,
-        hero: { ...entry.hero, pictures: { ...entry.hero.pictures, owner: building } },
-        beforeAfter: {
-          ...entry.beforeAfter,
-          steps: [{ ...first, rabaed: { ...first.rabaed, words: arabic(words) } }, ...others],
-        },
-      },
-      'draft',
-    );
-    expect(saved.ok(), await saved.text()).toBe(true);
+  await home.draft({
+    ...entry,
+    hero: { ...entry.hero, pictures: { ...entry.hero.pictures, owner: building } },
+    beforeAfter: {
+      ...entry.beforeAfter,
+      steps: [{ ...first, rabaed: { ...first.rabaed, words: arabic(words) } }, ...others],
+    },
+  });
 
-    await preview(page);
-    const owner = page.locator('#hero-art img.bld').first();
-    await expect(owner).toHaveAttribute('src', /\/api\/media\/file\//);
-    // In the drawing's own box.
-    await expect(owner).toHaveAttribute('width', '369');
-    await expect
-      .poll(() => owner.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0), {
-        message: 'the replacement never loaded',
-      })
-      .toBe(true);
+  await cms.preview('/');
+  const owner = page.locator('#hero-art img.bld').first();
+  await expect(owner).toHaveAttribute('src', /\/api\/media\/file\//);
+  // In the drawing's own box.
+  await expect(owner).toHaveAttribute('width', '369');
+  await expect
+    .poll(() => owner.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0), {
+      message: 'the replacement never loaded',
+    })
+    .toBe(true);
 
-    const face = page.locator('#ba .cmp-col').first().locator('.face.fa p');
-    await expect(face.locator('b')).toHaveText('برقم مرجعي');
-    await expect(face.locator('br')).toHaveCount(1);
-    await expect(face).not.toContainText('*');
+  const face = page.locator('#ba .cmp-col').first().locator('.face.fa p');
+  await expect(face.locator('b')).toHaveText('برقم مرجعي');
+  await expect(face.locator('br')).toHaveCount(1);
+  await expect(face).not.toContainText('*');
 
-    const html = await visitorHtml(request);
-    expect(html).toContain('src="/hero/b-owner.webp"');
-    expect(html).not.toContain('برقم مرجعي</b>');
-  } finally {
-    await discardDraft(page.request);
-  }
+  const html = await visitorHtml(request);
+  expect(html).toContain('src="/hero/b-owner.webp"');
+  expect(html).not.toContain('برقم مرجعي</b>');
 });
 
-test('the hero has no switch to hide it; every other section of the home page has one', async ({ page }) => {
-  await logInAs(page, HOME_EDITOR);
-  await openPageEntry(page, 'home-page');
+test('the hero has no switch to hide it; every other section of the home page has one', async ({ page, cms }) => {
+  const admin = await cms.openInAdmin('home-page');
 
   for (const section of ['Trust strip', 'Situations', 'Units', 'Record', 'Before and after', 'Delay calculator', 'Figures', 'Questions']) {
-    await openSection(page, section);
+    await admin.openSection(section);
     await expect(page.getByLabel('Shows on the page'), section).toBeVisible();
   }
-  await openSection(page, 'Hero');
+  await admin.openSection('Hero');
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
 });
 
 /**
- * What `openPageEntry` is for (ticket 61). The admin reopens the tab an editor
- * last had open, and asks the server which one that was; the answer undoes a
- * tab clicked while it is still in flight, and the test above then reads
+ * What `cms.openInAdmin` waits for (`entries.ts`, ticket 61). The admin
+ * reopens the tab an editor last had open, and asks the server which one that
+ * was; the answer undoes a tab clicked while it is still in flight, and the test above then reads
  * another section's panel — on CI, twice, as a switch that was never found.
  * That window is milliseconds on a machine nobody is squeezing, so the
  * request is held up here and the window is the whole of the hold.
  */
-test('an entry is not handed over until the admin has reopened its remembered tab, and a section opened then stays open', async ({ page }) => {
-  await logInAs(page, HOME_EDITOR);
+test('an entry is not handed over until the admin has reopened its remembered tab, and a section opened then stays open', async ({ page, cms }) => {
   // Two seconds because the window has only to be wider than a test can walk
   // into by accident: on a runner it is the odd stall, hundreds of
   // milliseconds at most, and every one of those is inside this. The flag is
@@ -454,13 +358,13 @@ test('an entry is not handed over until the admin has reopened its remembered ta
     await route.fallback();
   });
 
-  await openPageEntry(page, 'home-page');
+  const admin = await cms.openInAdmin('home-page');
   expect(released, 'the entry was handed back while the admin was still waiting to hear which tab to reopen').toBe(true);
 
   // Situations, because the section the admin is told to reopen is the second
   // one — the Trust strip — and a tab put back where the test asked for it
   // would prove nothing.
-  await openSection(page, 'Situations');
+  await admin.openSection('Situations');
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
 
   // Waiting for nothing to happen is the point of this one: the restore is
@@ -469,13 +373,13 @@ test('an entry is not handed over until the admin has reopened its remembered ta
   // than the admin needs to act on an answer it already has, and erring the
   // other way would only let this test pass where it should fail.
   await page.waitForTimeout(1_000);
-  await expectSectionOpen(page, 'Situations');
+  await admin.expectSectionOpen('Situations');
   await expect(page.getByLabel('Shows on the page')).toBeVisible();
 });
 
-test('the CMS refuses what the home page cannot carry', async ({ page }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+test('the CMS refuses what the home page cannot carry', async ({ page, cms }) => {
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   const { hero, situations, fourUnits, record, beforeAfter, figures } = entry;
   const [situation, ...otherSituations] = situations.situations;
   const [type, ...otherTypes] = record.types;
@@ -489,7 +393,7 @@ test('the CMS refuses what the home page cannot carry', async ({ page }) => {
   });
 
   // What is refused, what is sent, and the field it breaks.
-  const refused: [string, object, string | RegExp][] = [
+  const refused: [string, Home, string | RegExp][] = [
     ['three statuses', { ...entry, hero: { ...hero, statuses: hero.statuses.slice(0, 3) } }, 'hero.statuses'],
     ['five statuses', { ...entry, hero: { ...hero, statuses: [...hero.statuses, hero.statuses[0]] } }, 'hero.statuses'],
     [
@@ -517,7 +421,7 @@ test('the CMS refuses what the home page cannot carry', async ({ page }) => {
     ['a figure too wide to sit beside its bars', withFigure({ figure: '100.5%' }), 'figures.figures.0.figure'],
     [
       'a bar taller than the card draws',
-      withFigure({ after: { ...(figure.after as object), height: 71 } }),
+      withFigure({ after: { ...(figure.blockType === 'comparison' ? figure.after : {}), height: 71 } }),
       'figures.figures.0.after.height',
     ],
     [
@@ -549,24 +453,24 @@ test('the CMS refuses what the home page cannot carry', async ({ page }) => {
     ['English with no English words', { ...entry, languages: ['ar', 'en'] }, /\.en$/],
   ];
   for (const [what, data, field] of refused) {
-    const response = await save(page.request, data, 'published');
+    const response = await home.attempt(data, 'published');
     expect(response.status(), `${what} (${field}): ${await response.text()}`).toBe(400);
   }
 
   // Nothing refused was kept.
-  expect(await published(page.request)).toEqual(entry);
+  expect(await home.published()).toEqual(entry);
 
   // And the entry, as published, is accepted: so each refusal above was for the
   // one thing it changed (`product-text.spec.ts` says why it is said this way).
-  const response = await save(page.request, entry, 'published');
-  expect(response.ok(), await response.text()).toBe(true);
+  await home.publish(entry);
 });
 
 test('a situation card, a figure card and a before-and-after card each hold their words at their longest, at every width', async ({
   page,
+  cms,
 }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   const longest = (length: number) => arabic(wordsOfLength(length));
   const face = (): Face => ({ channel: longest(10), words: longest(66) });
 
@@ -592,34 +496,29 @@ test('a situation card, a figure card and a before-and-after card each hold thei
     },
   };
 
-  try {
-    const saved = await save(page.request, draft, 'draft');
-    expect(saved.ok(), await saved.text()).toBe(true);
+  await home.draft(draft);
 
-    for (const viewport of [
-      { width: 1440, height: 900 },
-      { width: 1280, height: 700 },
-      { width: 981, height: 551 },
-      { width: 980, height: 900 },
-      { width: 768, height: 1024 },
-      { width: 390, height: 844 },
-      { width: 360, height: 740 },
-    ]) {
-      await page.setViewportSize(viewport);
-      await preview(page);
-      await page.evaluate(() => document.fonts.ready);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 1280, height: 700 },
+    { width: 981, height: 551 },
+    { width: 980, height: 900 },
+    { width: 768, height: 1024 },
+    { width: 390, height: 844 },
+    { width: 360, height: 740 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await cms.preview('/');
+    await page.evaluate(() => document.fonts.ready);
 
-      // A before-and-after card is held to its words from 700px up. On a phone
-      // its column is a fixed minimum height two columns wide, and the
-      // founders' own longest words fill it only because of where their lines
-      // happen to break: a limit short enough to hold any words there would
-      // refuse theirs (ticket 58).
-      const cards = viewport.width >= 700 ? '#situations-deck .pcard, #figures-deck .pcard, #ba .face' : '#situations-deck .pcard, #figures-deck .pcard';
-      const overflowing = await page.locator(cards).evaluateAll(cardsNotHoldingTheirWords);
-      expect(overflowing, `at ${viewport.width}x${viewport.height}`).toEqual([]);
-    }
-  } finally {
-    await discardDraft(page.request);
+    // A before-and-after card is held to its words from 700px up. On a phone
+    // its column is a fixed minimum height two columns wide, and the
+    // founders' own longest words fill it only because of where their lines
+    // happen to break: a limit short enough to hold any words there would
+    // refuse theirs (ticket 58).
+    const cards = viewport.width >= 700 ? '#situations-deck .pcard, #figures-deck .pcard, #ba .face' : '#situations-deck .pcard, #figures-deck .pcard';
+    const overflowing = await page.locator(cards).evaluateAll(cardsNotHoldingTheirWords);
+    expect(overflowing, `at ${viewport.width}x${viewport.height}`).toEqual([]);
   }
 });
 
@@ -647,52 +546,36 @@ function withEnglish<T>(value: T): T {
   return value;
 }
 
-test('the home page is published in English once every word it has is written in English', async ({ page, request }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+test('the home page is published in English once every word it has is written in English', async ({ page, request, cms }) => {
+  const home = cms.entry('home-page');
+  const entry = await home.published();
 
-  try {
-    // A visitor's Arabic page is meant to come back exactly as it was, which
-    // leaves nothing in it to wait for — and a publish is in nobody's page the
-    // moment it is saved (`cms.ts`). So the English is published together with a
-    // space at the end of the calculator's paragraph, which is in the HTML and drawn
-    // nowhere, and the page waited for is the one that space arrives in: built
-    // from this publish, not from before it.
-    const english = withEnglish(entry);
-    const lead = `${entry.calculator.lead.ar} `;
-    const response = await save(
-      page.request,
-      { ...english, calculator: { ...english.calculator, lead: { ...english.calculator.lead, ar: lead } }, languages: ['ar', 'en'] },
-      'published',
-    );
-    expect(response.ok(), await response.text()).toBe(true);
-    expect((await published(page.request)).languages).toEqual(['ar', 'en']);
+  // A visitor's Arabic page is meant to come back exactly as it was, which
+  // leaves nothing in it to wait for — and a publish is in nobody's page the
+  // moment it is saved (`cms.ts`). So the English is published together with a
+  // space at the end of the calculator's paragraph, which is in the HTML and drawn
+  // nowhere, and the page waited for is the one that space arrives in: built
+  // from this publish, not from before it.
+  const english = withEnglish(entry);
+  const lead = `${entry.calculator.lead.ar} `;
+  await home.publish({
+    ...english,
+    calculator: { ...english.calculator, lead: { ...english.calculator.lead, ar: lead } },
+    languages: ['ar', 'en'],
+  });
+  expect((await home.published()).languages).toEqual(['ar', 'en']);
 
-    const html = await reachesVisitors(request, '/', `${lead}</p>`, 'the home page published in English');
-    expect(html).toContain(entry.hero.titleAccent.ar);
-    expect(outsideTheHeader(html)).not.toContain('>English<');
-  } finally {
-    const restored = await save(page.request, entry, 'published');
-    expect(restored.ok(), await restored.text()).toBe(true);
-  }
+  const html = await reachesVisitors(request, '/', `${lead}</p>`, 'the home page published in English');
+  expect(html).toContain(entry.hero.titleAccent.ar);
+  expect(outsideTheHeader(html)).not.toContain('>English<');
 });
 
-test('a change to the home page published reaches visitors', async ({ page, request }) => {
-  await logInByApi(page.request, HOME_EDITOR);
-  const entry = await published(page.request);
+test('a change to the home page published reaches visitors', async ({ page, request, cms }) => {
+  const home = cms.entry('home-page');
+  const entry = await home.published();
   // A space at the end of the paragraph: in the HTML, but drawn nowhere.
   const lead = `${entry.calculator.lead.ar} `;
 
-  try {
-    const response = await save(
-      page.request,
-      { ...entry, calculator: { ...entry.calculator, lead: { ...entry.calculator.lead, ar: lead } } },
-      'published',
-    );
-    expect(response.ok(), await response.text()).toBe(true);
-    await reachesVisitors(request, '/', `${lead}</p>`, "the calculator's reworded paragraph");
-  } finally {
-    const restored = await save(page.request, entry, 'published');
-    expect(restored.ok(), await restored.text()).toBe(true);
-  }
+  await home.publish({ ...entry, calculator: { ...entry.calculator, lead: { ...entry.calculator.lead, ar: lead } } });
+  await reachesVisitors(request, '/', `${lead}</p>`, "the calculator's reworded paragraph");
 });

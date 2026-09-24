@@ -32,7 +32,7 @@ const PUBLISHING_PORT = PORT + 1000;
  * The suites that publish what every other suite would notice, or hold what
  * every other suite would wait for (`publishing`, below).
  */
-const PUBLISHING = /(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit)\.spec\.ts$/;
+const PUBLISHING = /(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 const publishingURL = `http://127.0.0.1:${PUBLISHING_PORT}`;
 
@@ -133,10 +133,11 @@ export default defineConfig({
     // in `llms.txt` (ticket 38); the stale-render suite publishes the site
     // settings every footer shows, and holds `/tool` at the database while it
     // does (ticket 64); the English pages suite publishes English pages the
-    // others hold to being notices (ticket 42); and the confirmation limit
-    // suite spends the whole site's hour of confirmations (ticket 89). None of
-    // that reaches the first server's database, so the suites there never see
-    // it, and never wait for it.
+    // others hold to being notices (ticket 42); the confirmation limit suite
+    // spends the whole site's hour of confirmations (ticket 89); and the entry
+    // adapter's suite publishes the closing section, to see it put back
+    // (ticket 90). None of that reaches the first server's database, so the
+    // suites there never see it, and never wait for it.
     //
     // **One at a time.** They would notice each other too, as they would any
     // other suite: one worker for the project means no two of them ever
@@ -154,7 +155,7 @@ export default defineConfig({
   webServer: [
     {
       ...TEST_SERVER,
-      // Starts a throwaway database, migrates it and creates the test editor,
+      // Starts a throwaway database, migrates it and creates the keyholder,
       // then builds the application and starts it (ticket 19).
       command: 'node scripts/test-server.mjs',
       // Read by the build to work out the origin canonical URLs point at when
@@ -165,7 +166,7 @@ export default defineConfig({
     },
     {
       ...TEST_SERVER,
-      // A database of its own, migrated, with the same editors, serving a
+      // A database of its own, migrated, with the same keyholder, serving a
       // copy of the build above with its own address in place of the first
       // server's (`--publishing` in the script).
       command: 'node scripts/test-server.mjs --publishing',

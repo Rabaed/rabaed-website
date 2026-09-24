@@ -23,7 +23,8 @@
  * English, fill the page, and never leave Arabic in its place.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ENGLISH_PAGES_EDITOR, logInByApi, reachesVisitors, reaching, uploadImage } from './cms';
+import { reachesVisitors, reaching, uploadImage } from './cms';
+import { signIn } from './editors';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
@@ -145,7 +146,7 @@ test.afterEach(async ({ page }) => {
 });
 
 test('every entry the English pages read waits as a draft, with every word of it in English', async ({ request }) => {
-  await logInByApi(request, ENGLISH_PAGES_EDITOR);
+  await signIn(request);
 
   for (const slug of ENTRIES.filter((each) => each !== 'screen-mocks')) {
     const proposed = await proposal(request, slug);
@@ -174,7 +175,7 @@ test('every entry the English pages read waits as a draft, with every word of it
 });
 
 test('previewed, each English page is the whole page, in English, left to right', async ({ page }) => {
-  await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+  await signIn(page.request);
   for (const slug of ENTRIES) await approve(page.request, slug, 'draft');
   await approveSiteWords(page.request, 'draft');
 
@@ -215,7 +216,7 @@ test('previewed, each English page is the whole page, in English, left to right'
 test('previewed on a phone, the English Screen mocks are English Phone crops; at 768px, whole English screens', async ({
   page,
 }) => {
-  await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+  await signIn(page.request);
   for (const slug of ['home-page', 'product-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
     await approve(page.request, slug, 'draft');
   }
@@ -262,7 +263,7 @@ test('previewed on a phone, an uploaded English Phone crop shows, and a replaced
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 812 });
-  await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+  await signIn(page.request);
   // Found before approving, which saves a copy of it the next approval would
   // find instead.
   const { id: proposed } = await proposal(page.request, 'screen-mocks');
@@ -322,7 +323,7 @@ test.describe('the comparison', () => {
   test.use({ contextOptions: { reducedMotion: 'reduce' } });
 
   test('previewed, the home page’s comparison turns over from the left, where an English line begins', async ({ page }) => {
-    await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+    await signIn(page.request);
     for (const slug of ['home-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
       await approve(page.request, slug, 'draft');
     }
@@ -356,7 +357,7 @@ test.describe('the comparison', () => {
 test.describe('published in English', () => {
   test.beforeAll(async ({ playwright }, testInfo) => {
     const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
-    await logInByApi(request, ENGLISH_PAGES_EDITOR);
+    await signIn(request);
     for (const slug of ['start-page', 'trust-strip', 'search-settings'] as const) await approve(request, slug, 'published');
     await approveSiteWords(request, 'published');
 
@@ -379,7 +380,7 @@ test.describe('published in English', () => {
   });
 
   test('the English start page is a page of the site, with its own title, alternates and trail', async ({ request, baseURL }) => {
-    await logInByApi(request, ENGLISH_PAGES_EDITOR);
+    await signIn(request);
     const title = (await proposal(request, 'search-settings')).version.start as { title: { en: string } };
     const html = await reachesVisitors(request, '/en/start', title.title.en, 'the English start page');
 
@@ -448,7 +449,7 @@ test.describe('published in English', () => {
   });
 
   test('a request sent from the English page is answered, confirmed and recorded in English', async ({ page, request }) => {
-    await logInByApi(request, ENGLISH_PAGES_EDITOR);
+    await signIn(request);
     // The alert address is the Arabic entry's, one for both languages. While
     // it is empty no mail is sent at all, so this sets one and puts it back.
     const settings = await request.get('/api/globals/demo-request-form?depth=0');
@@ -497,7 +498,7 @@ test.describe('published in English', () => {
       // Named as the Arabic form names each answer, for the team who reads it.
       expect(stored.answers.find((answer) => answer.field === 'role')).toMatchObject({ label: 'دورك في المشروع', option: 'استشاري' });
     } finally {
-      await logInByApi(request, ENGLISH_PAGES_EDITOR);
+      await signIn(request);
       const restored = await request.post('/api/globals/demo-request-form', { data: { ...original, _status: 'published' } });
       expect(restored.ok(), await restored.text()).toBe(true);
     }
