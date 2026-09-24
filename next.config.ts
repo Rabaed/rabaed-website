@@ -26,6 +26,13 @@ const nextConfig: NextConfig = {
   // server only.
   allowedDevOrigins: ['127.0.0.1'],
 
+  // Where the build is served from. Only the test suite's second server sets
+  // it: it serves a copy of the first server's build, because a server keeps
+  // the pages it rebuilds on disk inside this folder, and two servers sharing
+  // one would each serve pages built from the other's database (ticket 89).
+  // A build and a deployment never set it.
+  distDir: process.env.TEST_BUILD_DIR || '.next',
+
   // The Screen mock studio reads its markup off disk rather than importing it,
   // so that 260 KB of hand-built HTML never lands in a bundle (ADR-0002).
   // Nothing statically references those files, so tracing cannot find them.

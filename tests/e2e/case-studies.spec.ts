@@ -5,11 +5,11 @@
  * reveals it; unpublishing the last hides it again.
  *
  * Case studies are created through the CMS's own API as an editor of this
- * suite's own (`cms.ts`), and deleted after each test. The suite runs after
- * every other one has finished (`playwright.config.ts`): a published case
+ * suite's own (`cms.ts`), and deleted after each test. The suite runs against
+ * the second test server (`playwright.config.ts`, ticket 89): a published case
  * study changes the header of every page, which the suites holding the header
- * to the Reference site would otherwise see. The tests run one at a time, for
- * the same reason within the suite.
+ * to the Reference site, on the first, would otherwise see. The tests run one
+ * at a time, as every suite on that server does.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';

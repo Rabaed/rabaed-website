@@ -16,22 +16,22 @@
  * words are published while it waits, and the lock let go. Nothing in the site
  * knows it is being tested.
  *
- * Runs last (`playwright.config.ts`): it publishes the tool page, and while it
- * holds the site settings every page being built waits a moment. The suites
- * beside it there publish too, and a publish of theirs landing in this test's
- * wait would rebuild `/tool` for it — so in the full suite this is a guard,
- * and the proof that it fails without the second mark is a run of it alone.
+ * Runs against the second test server (`playwright.config.ts`, ticket 89): it
+ * publishes the tool page, and while it holds the site settings every page
+ * being built there waits a moment. No other suite runs on that server while
+ * it does, so no publish of theirs can land in this test's wait and rebuild
+ * `/tool` for it.
  *
  * **The hold is bounded, and has to be** (ticket 70). Each build waiting on the
- * lock holds one of the server's ten database connections while it waits, and
- * the suites beside this one ask for pages all the while. Once ten builds are
- * waiting, the publish below has no connection to publish with: it waits for
- * the lock, and the lock waits for it. Nothing ended that but this test's two
- * minutes, and every page asked for in them waited too — on 23 September 2026,
- * beside another checkout's suite on the same machine, that took five tests of
- * the suites beside it down with this one. So the lock lets go at
- * `HELD_AT_MOST` whatever the test is doing, and the test then fails in words
- * that say so.
+ * lock holds one of the server's ten database connections while it waits.
+ * Once ten builds are waiting, the publish below has no connection to publish
+ * with: it waits for the lock, and the lock waits for it. Nothing ended that
+ * but this test's two minutes, and every page asked for in them waited too —
+ * on 23 September 2026, when this ran on the server every suite shared, that
+ * took five tests of the suites beside it down with this one. It has a server
+ * to itself now, but a page a suite before it marked for rebuilding can still
+ * be built while it holds. So the lock lets go at `HELD_AT_MOST` whatever the
+ * test is doing, and the test then fails in words that say so.
  */
 import { test, expect, type APIRequestContext, type APIResponse } from '@playwright/test';
 import pg from 'pg';
@@ -152,8 +152,8 @@ test('a change published while a page is being built still reaches that page', a
         { message: 'a build of /tool waiting on the site settings', timeout: 3_000 },
       )
       .toBeGreaterThan(0);
-    // The suites beside this one build pages too, and any of them may be what
-    // the watcher saw: a moment for /tool's own build to have read its words.
+    // A page a suite before this one marked for rebuilding may be what the
+    // watcher saw: a moment for /tool's own build to have read its words.
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // The words change while that build is under way. The build is held a

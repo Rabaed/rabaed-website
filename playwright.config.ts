@@ -13,21 +13,51 @@ import { defineConfig, devices } from '@playwright/test';
  * and stops, because `reuseExistingServer` is off on purpose (below). See
  * `docs/agents/parallel-sessions.md`.
  *
+ * The suites that publish what others read run against a **second server**
+ * with a database of its own, on `TEST_PORT + 1000` (ticket 89), below.
+ *
  * Chromium is pinned to the same Playwright version the visual baselines were
  * captured with (see `tests/baselines/README.md`); bumping it changes text
  * rasterisation and invalidates the comparison.
  */
 const PORT = testPort(process.env.TEST_PORT);
-/** The suites that publish, or read, what every other suite would notice — run once those are done (below). */
-const RUNS_LAST = /(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages)\.spec\.ts$/;
+/**
+ * The second server's port. A thousand up keeps it clear of the other lanes'
+ * `TEST_PORT`s, which are 31NN, and puts its database, at `+ 2000` as every
+ * test server's is, on `TEST_PORT + 3000`: clear of the lanes' own databases
+ * and of the development ones from 55000 (`scripts/local-database.mjs`).
+ */
+const PUBLISHING_PORT = PORT + 1000;
+/**
+ * The suites that publish what every other suite would notice, or hold what
+ * every other suite would wait for (`publishing`, below).
+ */
+const PUBLISHING = /(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
+const publishingURL = `http://127.0.0.1:${PUBLISHING_PORT}`;
 
-/** Reads `TEST_PORT`, and refuses a value that is not a usable port. */
+/** What the two test servers (`webServer`, below) have in common. */
+const TEST_SERVER = {
+  // Never reuse: a server already listening is either a dev server or a
+  // stale build, and both would make the run a lie.
+  reuseExistingServer: false,
+  // The database, its migrations and the build, one after another.
+  timeout: 300_000,
+  stdout: 'pipe',
+  stderr: 'pipe',
+} as const;
+
+/**
+ * Reads `TEST_PORT`, and refuses a value that is not a usable port. Four
+ * digits whose second server's port has four too: the second server serves
+ * the first one's build with its address rewritten, which only works where
+ * the two are the same length (`scripts/test-server.mjs`).
+ */
 function testPort(value: string | undefined): number {
   if (value === undefined || value.trim() === '') return 3100;
   const port = Number(value);
-  if (!Number.isInteger(port) || port < 1024 || port > 65535) {
-    throw new Error(`TEST_PORT must be a whole number from 1024 to 65535, not "${value}".`);
+  if (!Number.isInteger(port) || port < 1024 || port > 8999) {
+    throw new Error(`TEST_PORT must be a whole number from 1024 to 8999, not "${value}".`);
   }
   return port;
 }
@@ -91,57 +121,56 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: RUNS_LAST,
-      teardown: 'runs-last',
+      testIgnore: PUBLISHING,
     },
-    // After everything else has finished, never beside it. Publishing a case
-    // study puts a link in the header of every page (ticket 24), and the
-    // suites that hold the header to the Reference site would see it;
-    // publishing a Referral Program value changes the amounts the referral
-    // page's and the FAQs' suites read (ticket 56); and the AI crawler rules
-    // suite reads `llms.txt`, which describes every page of the site at once,
-    // and publishes a `robots.txt` rule (ticket 33); and publishing a launch
-    // article puts it on the blog index, in the sitemap and in `llms.txt`
-    // (ticket 38); and the stale-render suite publishes the site settings every
-    // footer shows, and holds `/tool` at the database for a moment while it
-    // does (ticket 64). None reads what another writes — what the others
-    // publish, the crawler suite tolerates and says so — so the five run side
-    // by side.
+    // The suites that publish what every other suite would notice, against a
+    // server and database of their own (ticket 89). Publishing a case study
+    // puts a link in the header of every page (ticket 24); publishing a
+    // Referral Program value changes the amounts the referral page and the
+    // FAQs show (ticket 56); the AI crawler suite publishes a `robots.txt` rule
+    // and reads `llms.txt`, which describes every page at once (ticket 33);
+    // publishing a launch article puts it on the blog index, in the sitemap and
+    // in `llms.txt` (ticket 38); the stale-render suite publishes the site
+    // settings every footer shows, and holds `/tool` at the database while it
+    // does (ticket 64); the English pages suite publishes English pages the
+    // others hold to being notices (ticket 42); and the confirmation limit
+    // suite spends the whole site's hour of confirmations (ticket 89). None of
+    // that reaches the first server's database, so the suites there never see
+    // it, and never wait for it.
     //
-    // A teardown project runs once the project it belongs to is done, whether
-    // or not its tests passed. It is not divided between CI machines: each
-    // runs all of it, against its own server. Running one file of the main
-    // project runs this after it too; `--no-deps` leaves it out.
-    //
-    // A teardown and nothing else. These cannot be a project that *depends* on
-    // `chromium` instead, though the ordering would read the same: Playwright
-    // applies neither `--grep` nor `--shard` to a dependency, so the shard
-    // carrying such a project runs the whole main project unfiltered — which
-    // on CI meant one shard running all 889 tests, `@pixel` ones included,
-    // and failing on the committed pixels that only their own machine can
-    // match (ticket 05). Nor can one teardown chain to another: each waits for
-    // the other, and neither ever runs.
+    // **One at a time.** They would notice each other too, as they would any
+    // other suite: one worker for the project means no two of them ever
+    // publish at once, or hold a lock while another publishes. The first
+    // server's suites run beside them all the while, on every other worker.
     {
-      name: 'runs-last',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: RUNS_LAST,
+      name: 'publishing',
+      use: { ...devices['Desktop Chrome'], baseURL: publishingURL },
+      testMatch: PUBLISHING,
+      workers: 1,
     },
   ],
-  webServer: {
-    // Starts a throwaway database, migrates it and creates the test editor,
-    // then builds the application and starts it (ticket 19).
-    command: 'node scripts/test-server.mjs',
-    // Read by the build to work out the origin canonical URLs point at when
-    // nothing else says (src/lib/environment.ts), and by the test server to
-    // choose its port and its database's.
-    env: { PORT: String(PORT) },
-    url: baseURL,
-    // Never reuse: a server already listening is either a dev server or a
-    // stale build, and both would make the run a lie.
-    reuseExistingServer: false,
-    // The database, its migrations and the build, one after another.
-    timeout: 300_000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  // Started in this order, each once the one before it answers — which the
+  // second relies on, since it serves the first one's build.
+  webServer: [
+    {
+      ...TEST_SERVER,
+      // Starts a throwaway database, migrates it and creates the test editor,
+      // then builds the application and starts it (ticket 19).
+      command: 'node scripts/test-server.mjs',
+      // Read by the build to work out the origin canonical URLs point at when
+      // nothing else says (src/lib/environment.ts), and by the test server to
+      // choose its port and its database's.
+      env: { PORT: String(PORT) },
+      url: baseURL,
+    },
+    {
+      ...TEST_SERVER,
+      // A database of its own, migrated, with the same editors, serving a
+      // copy of the build above with its own address in place of the first
+      // server's (`--publishing` in the script).
+      command: 'node scripts/test-server.mjs --publishing',
+      env: { PORT: String(PUBLISHING_PORT), FIRST_SERVER_PORT: String(PORT) },
+      url: publishingURL,
+    },
+  ],
 });
