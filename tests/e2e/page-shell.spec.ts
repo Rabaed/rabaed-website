@@ -9,6 +9,7 @@
  * ticket's requirement *is* the exact value.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { sidewaysOverflow } from './geometry';
 
 /** Every destination the header offers, desktop and mobile alike. */
 const NAV_LINKS = [
@@ -341,13 +342,7 @@ test.describe('layout integrity', () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/');
 
-      // Measured against clientWidth: the Reference site clips overflow
-      // deliberately, which makes scrollWidth useless here (spec).
-      const overflow = await page.evaluate(() => {
-        const doc = document.documentElement;
-        return doc.scrollWidth - doc.clientWidth;
-      });
-      expect(overflow).toBeLessThanOrEqual(0);
+      expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
     });
   }
 });

@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 /**
  * Measuring pages — shared by the specs that compare a section with the same
@@ -186,6 +186,47 @@ export async function sidewaysOverflow(page: Page) {
   return page.evaluate(() => {
     const doc = document.documentElement;
     return doc.scrollWidth - doc.clientWidth;
+  });
+}
+
+/**
+ * How far one box could scroll sideways inside itself: the hidden width of a
+ * pan, or how far a row has run out of room. Zero or less means none.
+ */
+export async function sidewaysOverflowOf(box: Locator) {
+  return box.evaluate((element) => element.scrollWidth - element.clientWidth);
+}
+
+/**
+ * What is pushing the page sideways, for a failure message: each outermost
+ * element that reaches past the edge the page can scroll towards — the left
+ * in Arabic, the right in English — with nothing around it clipping it. Empty
+ * when nothing does, or when an animation that did has already taken it back.
+ */
+export async function whatOverflows(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const doc = document.documentElement;
+    const width = doc.clientWidth;
+    const rtl = getComputedStyle(doc).direction === 'rtl';
+    const past = (element: Element) => {
+      const box = element.getBoundingClientRect();
+      return box.width > 0 && (rtl ? box.left < -0.5 : box.right > width + 0.5);
+    };
+    const clipped = (element: Element) => {
+      for (let around = element.parentElement; around && around !== document.body; around = around.parentElement) {
+        if (getComputedStyle(around).overflowX !== 'visible') return true;
+      }
+      return false;
+    };
+    const named = (element: Element) => {
+      const section = element.closest('section[id]');
+      const classes = [...element.classList].slice(0, 2).map((name) => `.${name}`).join('');
+      const box = element.getBoundingClientRect();
+      return `${section ? `#${section.id} ` : ''}${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${classes} (${Math.round(box.left)}px to ${Math.round(box.right)}px of ${width}px)`;
+    };
+    return [...document.body.querySelectorAll('*')]
+      .filter((element) => past(element) && !clipped(element) && !(element.parentElement && element.parentElement !== document.body && past(element.parentElement)))
+      .map(named);
   });
 }
 

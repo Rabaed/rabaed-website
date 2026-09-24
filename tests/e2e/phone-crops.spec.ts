@@ -17,6 +17,7 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import { drawnFrom } from './screen-mock-phone';
 import { PHONE_CROP } from '../../src/screen-mocks/registry';
+import { sidewaysOverflow, sidewaysOverflowOf } from './geometry';
 
 const PHONE = { width: 390, height: 812 };
 const TABLET = { width: 768, height: 1024 };
@@ -51,7 +52,7 @@ for (const { page: path, where, frame } of PLACES) {
     expect(box.width).toBeLessThanOrEqual(PHONE.width - 32);
     expect(box.width / box.height).toBeCloseTo(PHONE_CROP.width / PHONE_CROP.height, 2);
     const pan = picture.locator('xpath=ancestor::*[@data-pan][1]');
-    expect(await pan.evaluate((element) => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(0);
+    expect(await sidewaysOverflowOf(pan)).toBeLessThanOrEqual(0);
     await expect(pan).toHaveCSS('mask-image', 'none');
     await expect(page.locator('.pan-hint').filter({ visible: true })).toHaveCount(0);
 
@@ -155,7 +156,7 @@ test.describe('the whole screen, opened from its crop', () => {
       return { canPan: element.scrollWidth > element.clientWidth, moved: element.scrollLeft !== before };
     });
     expect(panned).toEqual({ canPan: true, moved: true });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
 
     // And back.
     await zoom.click();

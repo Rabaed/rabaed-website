@@ -22,6 +22,7 @@ import {
   uploadImage,
   uploadSharingImage,
 } from './cms';
+import { sidewaysOverflow } from './geometry';
 import { nodesOf, structuredData, trail } from './structured-data';
 
 test.describe.configure({ mode: 'default' });
@@ -182,7 +183,7 @@ test('a published article is on the blog index and at its own address, whole in 
   await page.goto(`/blog/${fields.slug}`);
   await page.evaluate(() => document.fonts.ready);
   expect(problems).toEqual([]);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+  expect(await sidewaysOverflow(page)).toBe(0);
 });
 
 test('a draft is nowhere a visitor can reach it; the editor previews it, then publishes it from the admin', async ({
