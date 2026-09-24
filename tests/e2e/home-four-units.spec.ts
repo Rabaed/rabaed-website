@@ -10,7 +10,7 @@
  * `home-four-units-match-reference.spec.ts`.
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
-import { sidewaysOverflow } from './geometry';
+import { sidewaysOverflow, sidewaysOverflowOf } from './geometry';
 
 /** The tabs in order, and what each one's screen is described as. */
 const UNITS = [
@@ -220,7 +220,7 @@ test('on a phone the screen is its Phone crop, drawn whole across the column', a
   const [shot, column] = [await screen(page, 0).boundingBox(), await stage.boundingBox()];
   expect(shot?.width).toBe(column?.width);
   expect(shot!.width / shot!.height).toBeCloseTo(520 / 650, 2);
-  expect(await stage.evaluate((element) => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(0);
+  expect(await sidewaysOverflowOf(stage)).toBeLessThanOrEqual(0);
   expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
 });
 

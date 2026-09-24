@@ -13,6 +13,7 @@
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
+import { sidewaysOverflow } from './geometry';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
 
@@ -194,7 +195,7 @@ test('publishing the first case study reveals the section and its link; unpublis
   const apart = (a: typeof brand, b: typeof brand) => a.x + a.width <= b.x || b.x + b.width <= a.x;
   expect(apart(brand, links), 'the links run into the brand').toBe(true);
   expect(apart(links, buttons), 'the links run into the buttons').toBe(true);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+  expect(await sidewaysOverflow(page)).toBe(0);
   await page.setViewportSize({ width: 360, height: 900 });
   await page.locator('.navtog').click();
   const panel = page.locator('.mnav');
@@ -345,7 +346,7 @@ test('a case study page tells the whole story, whole in the first response', asy
     page.off('response', onResponse);
     expect(problems, path).toEqual([]);
     expect(
-      await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+      await sidewaysOverflow(page),
       path,
     ).toBe(0);
   }
