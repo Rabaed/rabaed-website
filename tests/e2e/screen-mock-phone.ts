@@ -63,6 +63,16 @@ export async function expectPhoneCrop(
   expect(whole, `${mock}: the whole screen its crop opens`).toContain(await drawnFrom(opened.getByRole('img')));
   await page.keyboard.press('Escape');
   await expect(opened).toBeHidden();
+  // Closing takes the screen's step off the browser's history with
+  // `history.back()`, which lands a moment after the dialog has gone
+  // (`src/components/screen-mock-whole.tsx`). A test that goes to another page
+  // in that moment has its navigation cut short by it (`net::ERR_ABORTED`), so
+  // the step is waited out. Its key is restated, for `routes.ts`'s reason.
+  await expect
+    .poll(() => page.evaluate(() => (window.history.state as Record<string, unknown> | null)?.screenMockWhole ?? null), {
+      message: `${mock}: the closed screen's step is still on the browser's history`,
+    })
+    .toBeNull();
 }
 
 /**
