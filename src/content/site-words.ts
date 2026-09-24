@@ -3,7 +3,7 @@ import { pageEntry, wordsIn } from '@/cms/pages';
 import { ARABIC_ONLY_PAGES } from '@/content/arabic-only-pages';
 import { ContentNotInLocale } from '@/content/pages/page-content';
 import { CASE_STUDIES_PATH } from '@/lib/case-study-paths';
-import { DEFAULT_LOCALE, localePath, type Locale } from '@/lib/locales';
+import { DEFAULT_LOCALE, LOCALE_CODES, LOCALES, localePath, type Locale } from '@/lib/locales';
 
 /**
  * The words every page shares, in `locale`: the header's menu, the footer's
@@ -63,12 +63,40 @@ export type NotFoundContent = {
 };
 
 /**
+ * The page a path an Editor typed leads to, however it was written (ticket
+ * 87). The CMS checks a path with the spaces around it left off, but keeps
+ * it as typed, and takes any run of slashes: so ` /case-studies/`,
+ * `/en/case-studies` and `/en//case-studies` are all the case studies. A
+ * slash at the end or doubled names the same page, and a language written in
+ * front is the one a link is given anyway, since the menu's paths are shared
+ * by both languages and each link is drawn in the language being read.
+ *
+ * Read here rather than rewritten as the Editor saves: what they typed stays
+ * what they see, and the paths already saved need nothing done to them.
+ */
+function pageOf(path: string): string {
+  let page = path.trim().replace(/\/{2,}/g, '/').replace(/(.)\/$/, '$1');
+  for (let found = true; found; ) {
+    found = false;
+    for (const locale of LOCALE_CODES) {
+      const prefix = LOCALES[locale].pathPrefix;
+      if (!prefix) continue;
+      if (page === prefix) page = '/';
+      else if (page.startsWith(`${prefix}/`)) page = page.slice(prefix.length);
+      else continue;
+      found = true;
+    }
+  }
+  return page;
+}
+
+/**
  * Where a link leads. A path on the site is prefixed for the language being
  * read; an address of its own — the product app, which this site links to and
  * does not contain — is left as it was written.
  */
 function href(locale: Locale, destination: string): string {
-  return destination.startsWith('/') ? localePath(locale, destination) : destination;
+  return destination.trim().startsWith('/') ? localePath(locale, pageOf(destination)) : destination.trim();
 }
 
 /**
@@ -79,7 +107,7 @@ function href(locale: Locale, destination: string): string {
 const shownWith =
   (caseStudies: boolean) =>
   (link: { readonly path: string }): boolean =>
-    caseStudies || link.path !== CASE_STUDIES_PATH;
+    caseStudies || pageOf(link.path) !== CASE_STUDIES_PATH;
 
 /**
  * Whether the header and footer can be drawn in `locale`: whether the words
@@ -114,10 +142,10 @@ export async function getHeader(locale: Locale): Promise<HeaderContent> {
   return {
     links: header.links
       .filter(shownWith(caseStudies))
-      .map((link) => ({ path: link.path, href: href(locale, link.path), label: words(link.label) })),
+      .map((link) => ({ path: pageOf(link.path), href: href(locale, link.path), label: words(link.label) })),
     partnershipsLabel: words(header.partnershipsLabel),
     partnerships: header.partnerships.map((link) => ({
-      path: link.path,
+      path: pageOf(link.path),
       href: href(locale, link.path),
       label: words(link.label),
       summary: words(link.summary),
@@ -137,11 +165,11 @@ const ARABIC_ONLY_PATHS = new Set(Object.values(ARABIC_ONLY_PAGES).map((page) =>
  * link's English label says the page is in Arabic.
  */
 function directoryLink(locale: Locale, path: string, label: string): DirectoryLink {
-  // `/terms/` is `/terms`: the CMS lets an Editor end a path with a slash.
-  if (locale !== DEFAULT_LOCALE && ARABIC_ONLY_PATHS.has(path.replace(/(.)\/+$/, '$1'))) {
-    return { path, href: localePath(DEFAULT_LOCALE, path), label, hrefLang: DEFAULT_LOCALE };
+  const page = pageOf(path);
+  if (locale !== DEFAULT_LOCALE && ARABIC_ONLY_PATHS.has(page)) {
+    return { path: page, href: localePath(DEFAULT_LOCALE, page), label, hrefLang: DEFAULT_LOCALE };
   }
-  return { path, href: href(locale, path), label };
+  return { path: page, href: href(locale, path), label };
 }
 
 /**
