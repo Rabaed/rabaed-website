@@ -12,7 +12,7 @@
  * at a time, as every suite on that server does.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reaching, richText, uploadImage } from './cms';
+import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reachesVisitors, reaching, richText, uploadImage } from './cms';
 import { sidewaysOverflow } from './geometry';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
@@ -253,6 +253,78 @@ test('publishing the first case study reveals the section and its link; unpublis
   await reaching('the section gone from the sitemap', async () => (await visit(request, '/sitemap.xml')).html).not.toContain(
     '/case-studies',
   );
+});
+
+/** The site words an Editor edits, as the CMS gives them back: only what these tests change is named. */
+type SiteWords = Record<string, unknown> & {
+  header: Record<string, unknown> & { links: { path: string }[] };
+  footer: Record<string, unknown> & { tagline: { ar: string } };
+};
+
+/** What the CMS adds to an entry and its list rows, which is not sent back — as `stale-render.spec.ts` has it. */
+const NOT_SENT = new Set(['id', 'globalType', 'createdAt', 'updatedAt', '_status']);
+
+function sendable<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(sendable) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([key]) => !NOT_SENT.has(key))
+        .map(([key, each]) => [key, sendable(each)]),
+    ) as T;
+  }
+  return value;
+}
+
+// The header's case studies link is an Editor's to write, and the CMS lets a
+// path end with a slash or start with its language (ticket 87). However it is
+// written, it is the same link, and waits for the first story all the same.
+test('the case studies link waits for the first story however an Editor writes its path', async ({ page, request }) => {
+  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  const read = await page.request.get('/api/globals/site-words?depth=0');
+  expect(read.ok()).toBe(true);
+  const original = sendable((await read.json()) as SiteWords);
+  const at = original.header.links.findIndex(({ path }) => path === '/case-studies');
+  expect(at, 'the header has no case studies link to rewrite').toBeGreaterThanOrEqual(0);
+
+  /**
+   * Publishes the header's case studies link at `path`, and waits for the home
+   * page to be built with it. The link itself is hidden either way, so what is
+   * waited for is a mark published with it: a footer tagline of its own,
+   * short enough for the tagline's limit.
+   */
+  let marks = 0;
+  const publishLinkAt = async (path: string) => {
+    const mark = `وسم الاختبار ${runId} رقم ${(marks += 1)}`;
+    const links = original.header.links.map((link, index) => (index === at ? { ...link, path } : link));
+    const saved = await page.request.post('/api/globals/site-words', {
+      data: {
+        ...original,
+        header: { ...original.header, links },
+        footer: { ...original.footer, tagline: { ...original.footer.tagline, ar: mark } },
+        _status: 'published',
+      },
+    });
+    expect(saved.ok(), await saved.text()).toBe(true);
+    return reachesVisitors(request, '/', mark, `the case studies link published as ${path}`);
+  };
+
+  try {
+    // No story yet: whichever way the path is written, nothing leads to the section.
+    for (const path of ['/case-studies/', '/en/case-studies', '/en/case-studies/']) {
+      expect(linksToSection(await publishLinkAt(path)), `the link shows as ${path} with no story published`).toBe(false);
+    }
+
+    // The first story, and the link is there — leading to the section, not
+    // to an address with its language written in.
+    await create(page.request, caseStudy());
+    await reaching('the case studies link, written /en/case-studies/', async () => linksToSection((await visit(request, '/')).html)).toBe(
+      true,
+    );
+  } finally {
+    const restored = await page.request.post('/api/globals/site-words', { data: { ...original, _status: 'published' } });
+    expect(restored.ok(), await restored.text()).toBe(true);
+  }
 });
 
 test('a case study page tells the whole story, whole in the first response', async ({ page, request, browser, baseURL }) => {
