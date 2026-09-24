@@ -1,6 +1,7 @@
 import type { Field } from 'payload';
 import { listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
+import { searchTab } from '../search-fields';
 
 /**
  * The referral page's words, section by section, in the page's order (ticket
@@ -289,5 +290,6 @@ export const ReferralPage = pageGlobal({
         },
       ],
     }),
+    searchTab({ values: true }),
   ],
 });

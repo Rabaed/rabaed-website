@@ -388,6 +388,11 @@ are still in code. The migrations import each entry's words once, as they were.
   moved, added or removed.
 - A section with **Shows on the page** can be hidden, keeping its words. A
   section that links on the site land on has no such switch, and always shows.
+- Each page's last tab, **الظهور في البحث والمشاركة**, is how the page appears
+  in a search result and when its link is shared: its title, the line under
+  it — which is also what `/llms.txt` quotes — and, if you want one, a
+  sharing image of its own (1200×630, PNG). It is published with the rest of
+  the page, in the page's languages (ticket 91).
 - Every word has an **Arabic** and an **English** field. The Arabic is always
   needed to publish. The English is needed only once **English** is added under
   **Published in**; until then the page is in Arabic alone, and nothing is ever
@@ -555,19 +560,22 @@ has English beside every Arabic word. **الإنجليزية** is *not* ticked u
 **منشورة باللغات**: ticking it is how you approve a page's English, and until you
 do, publishing an Arabic change to the entry publishes none of its English.
 
-| Entry in the admin | Which English pages read it |
-| --- | --- |
-| **الصفحة الرئيسية** | The home page |
-| **صفحة المنتج** | The product page |
-| **صفحة ابدأ** | The start page |
-| **صفحة الأداة المجانية** | The tool page |
-| **صفحة برنامج الإحالة** | The referral page |
-| **صفحة برنامج الشراكات** | The partnership page |
-| **قسم «كيف نبدأ معك»** | The home and product pages, which both end on it |
-| **شاشات المنصة** | The home and product pages: each screen's description. Its English is the next section's proposal, and has **الإنجليزية** ticked already |
-| **شريط الثقة** | The home, product and start pages: its line, and each company's name |
-| **الظهور في البحث والمشاركة** | All six: each page's title and description in a search result |
-| **كلمات الموقع المشتركة** | All six: the header and the footer (the section above) |
+| Entry in the admin | English pages that read it | What they read there |
+| --- | --- | --- |
+| **الصفحة الرئيسية** | Home | Its words, and in its last tab, **الظهور في البحث والمشاركة**, its title and description in a search result |
+| **صفحة المنتج** | Product | The same, for the product page |
+| **صفحة ابدأ** | Start | The same, for the start page |
+| **صفحة الأداة المجانية** | Tool | The same, for the tool page |
+| **صفحة برنامج الإحالة** | Referral | The same, for the referral page |
+| **صفحة برنامج الشراكات** | Partnership | The same, for the partnership page |
+| **قسم «كيف نبدأ معك»** | Home, Product | The closing section both pages end on |
+| **شاشات المنصة** | Home, Product | Each screen's description. Its English is the next section's proposal, and has **الإنجليزية** ticked already |
+| **شريط الثقة** | Home, Product, Start | Its line, and each company's name |
+| **كلمات الموقع المشتركة** | Home, Product, Start, Tool, Referral, Partnership | The header and the footer (the section above) |
+
+The site decides whether a page is in English by exactly these entries, listed
+once in `src/content/pages/page-entries.ts` (ticket 91); a test fails if this
+table and that list disagree.
 
 And beside them:
 
@@ -595,9 +603,10 @@ And beside them:
    the same words the draft holds, so nothing is ever in Arabic — but they are
    yours to change only once published.
 
-**The start page is the quickest.** It reads only its own entry, the Trust
-strip, the search settings and the header and footer, so it can be the first
-page in English while you read the rest.
+**The pages the table names least are the quickest.** The tool, referral and
+partnership pages share nothing but the header and footer, so each can be the
+first page in English — with its questions and its form — while you read the
+rest.
 
 **Things to know before you start:**
 
@@ -612,7 +621,8 @@ page in English while you read the rest.
   The CMS names each empty English box when you press Publish: write it, or
   remove **الإنجليزية** from **منشورة باللغات** to publish the Arabic alone.
 - **An English page's own titles, descriptions and structured data** come with
-  it: its search title and description from **الظهور في البحث والمشاركة**, and
+  it: its search title and description from the **الظهور في البحث والمشاركة**
+  tab of its own entry, published in English with the rest of the page, and
   the company's and the product's description in English for search engines.
 
 **Questions only you can answer.** The English says what the Arabic says, with

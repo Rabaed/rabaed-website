@@ -1,6 +1,6 @@
 import { withLatinNames } from '@/cms/latin-names';
 import { pageEntry, wordsIn } from '@/cms/pages';
-import { getSearchSettings } from '@/content/search-settings';
+import { pageMeta } from '@/content/search-settings';
 import type { FormPageWording } from '@/forms/definition';
 import { formPageWording } from '@/forms/settings';
 import { TOOL_DOWNLOAD, type ToolDownloadField } from '@/forms/tool-download';
@@ -37,7 +37,8 @@ export type ToolPageContent = {
 /**
  * The page's short name, as its breadcrumb structured data reads it
  * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26, `src/content/search-settings.ts`).
+ * (ticket 26), on its own entry
+ * (ticket 91, `src/content/search-settings.ts`).
  */
 const NAME: Readonly<Record<Locale, string>> = { ar: 'متتبّع الصبّات', en: 'Pour Tracker' };
 
@@ -63,16 +64,15 @@ function boldThen(bold: string, rest: InlineText): InlinePart[] {
  * says, never where it goes.
  */
 export async function getToolPage(locale: Locale): Promise<ToolPageContent> {
-  const [entry, meta, downloadForm] = await Promise.all([
+  const [entry, downloadForm] = await Promise.all([
     pageEntry('tool-page', locale),
-    getSearchSettings(locale, 'tool', { name: NAME[locale] }),
     formPageWording(TOOL_DOWNLOAD, locale),
   ]);
   const { hero, why, features, how, privacy, requirements, download, questions, upsell } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<ToolPageContent> = {
-    meta,
+    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
     downloadForm,
     hero: {
       eyebrow: words(hero.eyebrow),

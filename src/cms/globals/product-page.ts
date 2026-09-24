@@ -1,6 +1,7 @@
 import type { Field } from 'payload';
 import { listField, openingAnswerField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
+import { searchTab } from '../search-fields';
 import { screenField } from './screen-mocks';
 
 const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 30);
@@ -288,5 +289,6 @@ export const ProductPage = pageGlobal({
         ),
       ],
     }),
+    searchTab(),
   ],
 });

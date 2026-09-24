@@ -1,5 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
-import { getSearchSettings } from '@/content/search-settings';
+import { pageMeta } from '@/content/search-settings';
 import { referralProgramValues } from '@/cms/referral-program';
 import { withValues, type ReferralProgramValues } from '@/cms/referral-program-values';
 import { numeralsInMono, type InlinePart, type InlineText } from '@/components/inline-text';
@@ -78,16 +78,15 @@ export async function getReferralPage(locale: Locale): Promise<ReferralPageConte
   // The amounts are read first: the page's search title and description name
   // them, and the words on the page do too.
   const values = await referralProgramValues();
-  const [entry, signupForm, meta] = await Promise.all([
+  const [entry, signupForm] = await Promise.all([
     pageEntry('referral-page', locale),
     formPageWording(REFERRAL_SIGNUP, locale),
-    getSearchSettings(locale, 'referral', { name: NAME[locale], values }),
   ]);
   const { hero, howItWorks, offer, audience, whatIsReferred, termsSummary, questions, signup } = entry;
   const words = (stored: Parameters<typeof wordsIn>[1]) => withValues(wordsIn(locale, stored), values);
 
   const page: BeforeQuestions<Omit<ReferralPageContent, 'signupForm'>> = {
-    meta,
+    meta: pageMeta(locale, entry.search, { name: NAME[locale], values }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

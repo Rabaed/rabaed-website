@@ -1,40 +1,39 @@
 import { fetchedSharingImage } from '@/cms/fetched-media';
-import { pageEntry, wordsIn } from '@/cms/pages';
+import { wordsIn } from '@/cms/pages';
 import type { PageMeta } from '@/content/pages/page-content';
 import { withValues, type ReferralProgramValues } from '@/cms/referral-program-values';
 import type { Locale } from '@/lib/locales';
-import type { SEARCH_PAGES } from '@/cms/globals/search-settings';
+import type { HomePage } from '@/payload-types';
 
 /**
  * How a page appears in a search result and when its link is shared
  * (ticket 26): the title, the line under it, and the picture the card draws.
  *
- * One entry holds all six marketing pages — `src/cms/globals/search-settings.ts`
- * says why it is not on each page's own entry — so a page asks for its own
- * section by name, and the per-request cache answers all six from one read.
+ * The **Search and sharing** tab of the page's own entry (ticket 91,
+ * `src/cms/search-fields.ts`), which each page's module has already read, so
+ * this reads nothing: it words what the module hands it in `locale`.
  *
  * The page's short name is not here: it names the page inside the site, in a
  * breadcrumb trail, rather than saying anything to a search engine, and it
  * stays in the page's own module.
  */
-export type SearchPage = (typeof SEARCH_PAGES)[number];
+export type SearchSettings = HomePage['search'];
 
-export async function getSearchSettings(
+export function pageMeta(
   locale: Locale,
-  page: SearchPage,
+  search: SearchSettings,
   options: { readonly name: string; readonly values?: ReferralProgramValues },
-): Promise<PageMeta> {
-  const entry = await pageEntry('search-settings', locale);
-  const section = entry[page];
-  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
-
+): PageMeta {
   // The referral page's title and description quote the Referral Program's
   // own amounts, which an Editor writes as `{payout}` (ticket 56).
-  const filled = (written: string) => (options.values ? withValues(written, options.values) : written);
+  const words = (stored: Parameters<typeof wordsIn>[1]) => {
+    const written = wordsIn(locale, stored);
+    return options.values ? withValues(written, options.values) : written;
+  };
   return {
     name: options.name,
-    title: filled(words(section.title)),
-    description: filled(words(section.description)),
-    sharingImage: fetchedSharingImage(section.sharingImage),
+    title: words(search.title),
+    description: words(search.description),
+    sharingImage: fetchedSharingImage(search.sharingImage),
   };
 }

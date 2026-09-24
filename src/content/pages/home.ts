@@ -2,7 +2,7 @@ import { withEmphasis } from '@/cms/emphasis';
 import { FAQ_PAGES } from '@/cms/faq-pages';
 import { fetchedMedia } from '@/cms/fetched-media';
 import { pageEntry, wordsIn } from '@/cms/pages';
-import { getSearchSettings } from '@/content/search-settings';
+import { pageMeta } from '@/content/search-settings';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { ComparisonStep, Face, HomeBeforeAfterContent } from '@/components/home/before-after';
 import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
@@ -44,7 +44,8 @@ export type HomePageContent = {
 /**
  * The page's short name, as its breadcrumb structured data reads it
  * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26, `src/content/search-settings.ts`).
+ * (ticket 26), on its own entry
+ * (ticket 91, `src/content/search-settings.ts`).
  */
 const NAME: Readonly<Record<Locale, string>> = { ar: 'الرئيسية', en: 'Home' };
 
@@ -75,13 +76,12 @@ const EMPTY_STEP: TransactionStep = { action: '', by: '', time: '' };
  * a button says, never where it goes.
  */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const [entry, screenOf, closing, demoForm, trustStrip, meta] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
     pageEntry('home-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
-    getSearchSettings(locale, 'home', { name: NAME[locale] }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;
@@ -114,7 +114,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
   );
 
   const page = await withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, {
-    meta,
+    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: { lines: hero.titleLines.map((each) => words(each.line)), accent: words(hero.titleAccent) },

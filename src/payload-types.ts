@@ -122,7 +122,6 @@ export interface Config {
     'site-words': SiteWord;
     'index-leads': IndexLead;
     'trust-strip': TrustStrip;
-    'search-settings': SearchSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -147,7 +146,6 @@ export interface Config {
     'site-words': SiteWordsSelect<false> | SiteWordsSelect<true>;
     'index-leads': IndexLeadsSelect<false> | IndexLeadsSelect<true>;
     'trust-strip': TrustStripSelect<false> | TrustStripSelect<true>;
-    'search-settings': SearchSettingsSelect<false> | SearchSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2300,6 +2298,26 @@ export interface StartPage {
       en?: string | null;
     };
   };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2703,6 +2721,26 @@ export interface ToolPage {
       en?: string | null;
     };
   };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -3020,6 +3058,26 @@ export interface ReferralPage {
       };
     };
   };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -3331,6 +3389,26 @@ export interface ProductPage {
         en?: string | null;
       };
     };
+  };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
   };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -3992,6 +4070,26 @@ export interface HomePage {
       en?: string | null;
     };
   };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -4534,6 +4632,26 @@ export interface PartnershipPage {
       };
     };
   };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -4763,140 +4881,6 @@ export interface TrustStrip {
       link?: string | null;
       id?: string | null;
     }[];
-  };
-  _status?: ('draft' | 'published') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search-settings".
- */
-export interface SearchSetting {
-  id: number;
-  /**
-   * Arabic always. Add English once every word of the page is written in English.
-   */
-  languages: ('ar' | 'en')[];
-  home: {
-    /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
-     */
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
-     */
-    description: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
-     */
-    sharingImage?: (number | null) | SharingImage;
-  };
-  product: {
-    /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
-     */
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
-     */
-    description: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
-     */
-    sharingImage?: (number | null) | SharingImage;
-  };
-  start: {
-    /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
-     */
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
-     */
-    description: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
-     */
-    sharingImage?: (number | null) | SharingImage;
-  };
-  tool: {
-    /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
-     */
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
-     */
-    description: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
-     */
-    sharingImage?: (number | null) | SharingImage;
-  };
-  referral: {
-    /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
-     */
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
-     */
-    description: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
-     */
-    sharingImage?: (number | null) | SharingImage;
-  };
-  partnership: {
-    /**
-     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
-     */
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
-     */
-    description: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
-     */
-    sharingImage?: (number | null) | SharingImage;
   };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -5940,6 +5924,23 @@ export interface StartPageSelect<T extends boolean = true> {
               en?: T;
             };
       };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -6463,6 +6464,23 @@ export interface ToolPageSelect<T extends boolean = true> {
               en?: T;
             };
       };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -6836,6 +6854,23 @@ export interface ReferralPageSelect<T extends boolean = true> {
                   };
             };
       };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -7179,6 +7214,23 @@ export interface ProductPageSelect<T extends boolean = true> {
                     en?: T;
                   };
             };
+      };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
       };
   _status?: T;
   updatedAt?: T;
@@ -7929,6 +7981,23 @@ export interface HomePageSelect<T extends boolean = true> {
               en?: T;
             };
       };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -8461,6 +8530,23 @@ export interface PartnershipPageSelect<T extends boolean = true> {
                   };
             };
       };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
+      };
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -8686,119 +8772,6 @@ export interface TrustStripSelect<T extends boolean = true> {
               link?: T;
               id?: T;
             };
-      };
-  _status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search-settings_select".
- */
-export interface SearchSettingsSelect<T extends boolean = true> {
-  languages?: T;
-  home?:
-    | T
-    | {
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        description?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sharingImage?: T;
-      };
-  product?:
-    | T
-    | {
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        description?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sharingImage?: T;
-      };
-  start?:
-    | T
-    | {
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        description?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sharingImage?: T;
-      };
-  tool?:
-    | T
-    | {
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        description?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sharingImage?: T;
-      };
-  referral?:
-    | T
-    | {
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        description?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sharingImage?: T;
-      };
-  partnership?:
-    | T
-    | {
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        description?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sharingImage?: T;
       };
   _status?: T;
   updatedAt?: T;

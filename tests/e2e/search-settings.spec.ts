@@ -4,150 +4,141 @@
  * gives a page a picture of its own for when the link is unfurled, and the CMS
  * refuses a picture the places that unfurl links would crop differently.
  *
+ * Each page's are the **Search and sharing** tab of its own entry (ticket 91),
+ * so a page's are published with it, in its languages.
+ *
  * The six pages' titles are read by `search-foundations.spec.ts`, which holds
  * every page to a unique title and description, and by `ai-crawlers.spec.ts`,
  * which holds `/llms.txt` to saying what the page says. So nothing here is
- * published: each change is saved as a draft and read in the editor's
- * preview, which visitors never see.
+ * published, and nothing here is saved to a page's entry at all: each page's
+ * own suite saves its drafts there, beside this one, and would find this
+ * suite's among them. Rewording a title and giving a page a picture of its
+ * own are the product page's suite's to try (`product-text.spec.ts`); a
+ * refused change is never saved, and is tried here.
  */
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 import sharp from 'sharp';
 import { SEARCH_EDITOR, logInByApi, uploadSharingImage } from './cms';
 
 test.describe.configure({ mode: 'default' });
 
-const GLOBAL = '/api/globals/search-settings';
-
 type Words = { ar: string; en?: string | null };
-type Section = { title: Words; description: Words; sharingImage?: number | null };
-type SearchSettings = {
-  languages: string[];
-  home: Section;
-  product: Section;
-  start: Section;
-  tool: Section;
-  referral: Section;
-  partnership: Section;
-};
+type Search = { title: Words; description: Words; sharingImage?: number | null };
+type Entry = { languages: string[]; search: Search } & Record<string, unknown>;
+
+/** Each page's address, and its own entry. */
+const PAGES = [
+  ['/', 'home-page'],
+  ['/product', 'product-page'],
+  ['/start', 'start-page'],
+  ['/tool', 'tool-page'],
+  ['/referral', 'referral-page'],
+  ['/partnership', 'partnership-page'],
+] as const;
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
 
-async function published(editor: APIRequestContext): Promise<SearchSettings> {
-  const response = await editor.get(`${GLOBAL}?depth=0`);
+const LEFT_OUT = new Set(['id', 'createdAt', 'updatedAt', 'globalType', '_status']);
+
+/** An entry's fields alone, ready to be sent back: no ids, no dates. */
+function fields<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(fields) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).filter(([key]) => !LEFT_OUT.has(key)).map(([key, each]) => [key, fields(each)]),
+    ) as T;
+  }
+  return value;
+}
+
+/** A page's entry as published, or as its newest draft. */
+async function entry(editor: APIRequestContext, slug: string, draft = false): Promise<Entry> {
+  const response = await editor.get(`/api/globals/${slug}?depth=0${draft ? '&draft=true' : ''}`);
   expect(response.ok(), await response.text()).toBe(true);
-  return response.json();
+  return fields(await response.json());
 }
 
-function fields(entry: SearchSettings) {
-  const { languages, home, product, start, tool, referral, partnership } = entry;
-  return { languages, home, product, start, tool, referral, partnership };
+function publish(editor: APIRequestContext, slug: string, data: object) {
+  return editor.post(`/api/globals/${slug}`, { data: { ...data, _status: 'published' } });
 }
 
-function save(editor: APIRequestContext, data: object, status: 'draft' | 'published') {
-  return editor.post(`${GLOBAL}${status === 'draft' ? '?draft=true' : ''}`, { data: { ...data, _status: status } });
-}
-
-async function discardDraft(editor: APIRequestContext): Promise<void> {
-  const response = await editor.get(`${GLOBAL}/versions?where[version._status][equals]=published&sort=-updatedAt&limit=1&depth=0`);
-  expect(response.ok()).toBe(true);
-  const [latest] = (await response.json()).docs;
-  const restored = await editor.post(`${GLOBAL}/versions/${latest.id}?draft=true`);
-  expect(restored.ok(), await restored.text()).toBe(true);
-}
-
-/** Opens the site in preview at `path`, as the admin's Preview button does. */
-async function preview(page: Page, path: string): Promise<void> {
-  await page.goto(`/api/preview?path=${encodeURIComponent(path)}`);
-  await expect(page.getByRole('status')).toContainText('معاينة');
-}
-
-const tagged = (page: Page, selector: string) => page.locator(selector);
-
-test.afterEach(async ({ page }) => {
-  await page.request.get('/api/preview/exit');
-});
-
-test('every page is described in search by what the CMS has published', async ({ page, request }) => {
+test('every page is described in search by what its own entry has published', async ({ page, request }) => {
   await logInByApi(page.request, SEARCH_EDITOR);
-  const entry = await published(page.request);
 
-  expect(entry.languages).toEqual(['ar']);
-  const pages = [
-    ['/', entry.home],
-    ['/product', entry.product],
-    ['/start', entry.start],
-    ['/tool', entry.tool],
-    ['/partnership', entry.partnership],
-  ] as const;
-
-  for (const [path, section] of pages) {
+  for (const [path, slug] of PAGES) {
+    const { search } = await entry(page.request, slug);
     const html = await (await request.get(path)).text();
-    expect(html, `${path} title`).toContain(section.title.ar);
-    expect(html, `${path} description`).toContain(section.description.ar);
+    expect(html, `${path} title`).toContain(search.title.ar);
+    expect(html, `${path} description`).toContain(search.description.ar);
   }
 });
 
 test('the referral page names the programme’s amounts rather than stating them', async ({ page, request }) => {
   await logInByApi(page.request, SEARCH_EDITOR);
-  const entry = await published(page.request);
+  const { search } = await entry(page.request, 'referral-page');
   const html = await (await request.get('/referral')).text();
 
   // What the CMS holds has the names in it …
-  expect(entry.referral.title.ar).toContain('{payout}');
+  expect(search.title.ar).toContain('{payout}');
   // … and what a visitor is shown has the amount, with no name left over.
-  const title = await (await request.get('/referral')).text();
-  expect(title).not.toContain('{payout}');
-  expect(title).not.toContain('{clientDiscount}');
-  const stated = entry.referral.title.ar.replace('{payout}', '');
+  expect(html).not.toContain('{payout}');
+  expect(html).not.toContain('{clientDiscount}');
+  const stated = search.title.ar.replace('{payout}', '');
   for (const word of stated.split('·')[1]?.trim().split(' ').slice(0, 2) ?? []) {
     expect(html, word).toContain(word);
   }
 });
 
-test('a reworded search title is previewed, and reaches no visitor until it is published', async ({ page, request }) => {
+test('a search title longer than a result shows, and an empty one, are refused', async ({ page }) => {
   await logInByApi(page.request, SEARCH_EDITOR);
-  const entry = fields(await published(page.request));
-  const rewritten = 'ربائد · سجل المشروع الواحد';
+  const home = await entry(page.request, 'home-page');
+  const withSearch = (search: Partial<Search>) => ({ ...home, search: { ...home.search, ...search } });
 
-  try {
-    const saved = await save(page.request, { ...entry, product: { ...entry.product, title: arabic(rewritten) } }, 'draft');
-    expect(saved.ok(), await saved.text()).toBe(true);
-
-    await preview(page, '/product');
-    await expect(page).toHaveTitle(rewritten);
-    await expect(tagged(page, 'meta[property="og:title"]')).toHaveAttribute('content', rewritten);
-    await expect(tagged(page, 'meta[name="twitter:title"]')).toHaveAttribute('content', rewritten);
-
-    expect(await (await request.get('/product')).text()).not.toContain(rewritten);
-  } finally {
-    await discardDraft(page.request);
+  const refused = {
+    'a title longer than its place': withSearch({ title: arabic('ع'.repeat(71)) }),
+    'a description longer than its place': withSearch({ description: arabic('ع'.repeat(181)) }),
+    'an empty title': withSearch({ title: arabic('') }),
+    'a title of spaces': withSearch({ title: arabic('   ') }),
+    'an empty description': withSearch({ description: arabic('') }),
+  };
+  for (const [what, data] of Object.entries(refused)) {
+    const response = await publish(page.request, 'home-page', data);
+    expect(response.status(), what).toBe(400);
+    // For the search title or description itself, not for some other word on the page.
+    expect(await response.text(), what).toMatch(/search\.(title|description)\.ar/);
   }
+
+  // On the referral page, where an amount may be named, a name the site does
+  // not hold is refused rather than shown to a visitor in braces.
+  const referral = await entry(page.request, 'referral-page');
+  const wrongName = await publish(page.request, 'referral-page', {
+    ...referral,
+    search: { ...referral.search, title: arabic('ربائد · {bonus}') },
+  });
+  expect(wrongName.status(), 'a value the site does not hold').toBe(400);
+
+  expect((await entry(page.request, 'home-page')).search).toEqual(home.search);
+  expect((await entry(page.request, 'referral-page')).search).toEqual(referral.search);
 });
 
-test('a page given a picture of its own shares that one; every other page keeps the site’s', async ({ page }) => {
+/**
+ * A page is published in English with its search title's English, or not at
+ * all (ticket 91): its title is the English page's name in a search result.
+ * Tried on the start page's English proposal (ticket 42), whose every word has
+ * its English, with only the search title's taken out.
+ */
+test('a page published in English without its search title in English is refused, naming it', async ({ page }) => {
   await logInByApi(page.request, SEARCH_EDITOR);
-  const entry = fields(await published(page.request));
-  const image = await uploadSharingImage(page.request, 'صورة مشاركة لصفحة المنتج');
+  const proposal = await entry(page.request, 'start-page', true);
+  const response = await publish(page.request, 'start-page', {
+    ...proposal,
+    languages: ['ar', 'en'],
+    search: { ...proposal.search, title: { ...proposal.search.title, en: '' } },
+  });
 
-  try {
-    expect(image.id, image.url).toBeGreaterThan(0);
-    const saved = await save(page.request, { ...entry, product: { ...entry.product, sharingImage: image.id } }, 'draft');
-    expect(saved.ok(), await saved.text()).toBe(true);
-
-    await preview(page, '/product');
-    const shown = await tagged(page, 'meta[property="og:image"]').getAttribute('content');
-    expect(shown).toContain(image.url);
-    await expect(tagged(page, 'meta[name="twitter:image"]')).toHaveAttribute('content', shown!);
-    // The words a card reads out are the picture's own.
-    await expect(tagged(page, 'meta[property="og:image:alt"]')).toHaveAttribute('content', 'صورة مشاركة لصفحة المنتج');
-
-    // The start page, which has none, still shares the site's own.
-    await preview(page, '/start');
-    await expect(tagged(page, 'meta[property="og:image"]')).toHaveAttribute('content', /og-rabaed\.png$/);
-  } finally {
-    await discardDraft(page.request);
-    await page.request.delete(`/api/sharing-images/${image.id}`);
-  }
+  expect(response.status()).toBe(400);
+  expect(await response.text()).toContain('search.title.en');
+  expect((await entry(page.request, 'start-page')).languages).toEqual(['ar']);
 });
 
 test('a picture of the wrong size or the wrong kind is refused, with the reason', async ({ page }) => {
@@ -197,43 +188,13 @@ test('a picture refused in place of another leaves the first one where it was', 
   }
 });
 
-test('a search title longer than a result shows, and an empty one, are refused', async ({ page }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
-  const entry = fields(await published(page.request));
-  const withHome = (section: Partial<Section>) => ({ ...entry, home: { ...entry.home, ...section } });
-
-  const refused = {
-    'a title longer than its place': withHome({ title: arabic('ع'.repeat(71)) }),
-    'a description longer than its place': withHome({ description: arabic('ع'.repeat(181)) }),
-    'an empty title': withHome({ title: arabic('') }),
-    'a title of spaces': withHome({ title: arabic('   ') }),
-    'an empty description': withHome({ description: arabic('') }),
-    'published in English with no English words': { ...entry, languages: ['ar', 'en'] },
-  };
-  for (const [what, data] of Object.entries(refused)) {
-    const response = await save(page.request, data, 'published');
-    expect(response.status(), what).toBe(400);
-  }
-
-  // On the referral page, where an amount may be named, a name the site does
-  // not hold is refused rather than shown to a visitor in braces.
-  const wrongName = await save(
-    page.request,
-    { ...entry, referral: { ...entry.referral, title: arabic('ربائد · {bonus}') } },
-    'published',
-  );
-  expect(wrongName.status(), 'a value the site does not hold').toBe(400);
-
-  expect(fields(await published(page.request))).toEqual(entry);
-});
-
 test('what /llms.txt tells an assistant is what the page says, both from the CMS', async ({ page, request }) => {
   await logInByApi(page.request, SEARCH_EDITOR);
-  const entry = await published(page.request);
+  const { search } = await entry(page.request, 'tool-page');
   const llms = await (await request.get('/llms.txt')).text();
 
   // The tool page's line, which an assistant quotes, is the Editor's.
-  expect(llms).toContain(entry.tool.description.ar);
-  const page_ = await (await request.get('/tool')).text();
-  expect(page_).toContain(entry.tool.description.ar);
+  expect(llms).toContain(search.description.ar);
+  const html = await (await request.get('/tool')).text();
+  expect(html).toContain(search.description.ar);
 });

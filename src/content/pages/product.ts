@@ -1,5 +1,5 @@
 import { pageEntry, wordsIn } from '@/cms/pages';
-import { getSearchSettings } from '@/content/search-settings';
+import { pageMeta } from '@/content/search-settings';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import type { PageHeroContent } from '@/components/page-hero';
@@ -36,7 +36,8 @@ export type ProductPageContent = {
 /**
  * The page's short name, as its breadcrumb structured data reads it
  * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26, `src/content/search-settings.ts`).
+ * (ticket 26), on its own entry
+ * (ticket 91, `src/content/search-settings.ts`).
  */
 const NAME: Readonly<Record<Locale, string>> = { ar: 'المنتج', en: 'Product' };
 
@@ -65,13 +66,12 @@ function flowSteps(locale: Locale, flow: Flow): FlowStep[] {
  * a button says, never where it goes.
  */
 export async function getProductPage(locale: Locale): Promise<ProductPageContent> {
-  const [entry, screenOf, closing, demoForm, trustStrip, meta] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
     pageEntry('product-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
-    getSearchSettings(locale, 'product', { name: NAME[locale] }),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, journey, customStrip, roles, innerCycle } = entry;
@@ -82,7 +82,7 @@ export async function getProductPage(locale: Locale): Promise<ProductPageContent
   });
 
   return {
-    meta,
+    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

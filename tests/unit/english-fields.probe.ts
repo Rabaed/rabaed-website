@@ -18,7 +18,6 @@ import { HomePage } from '../../src/cms/globals/home-page';
 import { PartnershipPage } from '../../src/cms/globals/partnership-page';
 import { ProductPage } from '../../src/cms/globals/product-page';
 import { ReferralPage } from '../../src/cms/globals/referral-page';
-import { SearchSettings } from '../../src/cms/globals/search-settings';
 import { StartPage } from '../../src/cms/globals/start-page';
 import { ToolPage } from '../../src/cms/globals/tool-page';
 import { TrustStripLogos } from '../../src/cms/globals/trust-strip';
@@ -34,8 +33,28 @@ const ENTRIES: Readonly<Record<string, GlobalConfig>> = {
   'partnership-page': PartnershipPage,
   'closing-section': ClosingSection,
   'trust-strip': TrustStripLogos,
-  'search-settings': SearchSettings,
 };
+
+/**
+ * Where a word proposed for the entry that held every page's search settings
+ * is held now: on the page's own entry, in its search tab (ticket 91). The
+ * proposal's path begins with the page, `product.title`.
+ */
+const SEARCH_TAB_OF: Readonly<Record<string, string>> = {
+  home: 'home-page',
+  product: 'product-page',
+  start: 'start-page',
+  tool: 'tool-page',
+  referral: 'referral-page',
+  partnership: 'partnership-page',
+};
+
+/** The entry that holds a proposed word, and where in it. */
+function heldAt(pair: (typeof ENGLISH_PAIRS)[number]): { entry: GlobalConfig; path: readonly (string | number)[] } {
+  if (pair.entry !== 'search-settings') return { entry: ENTRIES[pair.entry], path: pair.path };
+  const [page, ...rest] = pair.path;
+  return { entry: ENTRIES[SEARCH_TAB_OF[page as string]], path: ['search', ...rest] };
+}
 
 /**
  * Enough of a request for Payload's own validators: they read the default
@@ -57,13 +76,13 @@ function at(value: unknown, path: readonly (string | number)[]): unknown {
 async function refusedEnglish(): Promise<string[]> {
   const refused: string[] = [];
   for (const pair of ENGLISH_PAIRS) {
-    const entry = ENTRIES[pair.entry];
+    const { entry, path } = heldAt(pair);
     const twins = ENGLISH_ENTRIES.find((each) => each.slug === pair.entry)!.twins;
     const blockTypeAt = (path: readonly (string | number)[]) =>
       twins
         .map(([arabic]) => at(arabic, [...path, 'blockType']))
         .find((type): type is string => typeof type === 'string');
-    const field = englishFieldAt(entry, pair.path, blockTypeAt);
+    const field = englishFieldAt(entry, path, blockTypeAt);
     const validate = (field as { validate?: (value: unknown, options: unknown) => Promise<string | true> }).validate;
     const answer = validate
       ? await validate(pair.en, {

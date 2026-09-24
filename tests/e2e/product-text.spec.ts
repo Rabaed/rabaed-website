@@ -16,7 +16,17 @@
  * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage } from './cms';
+import {
+  ADMIN_PATH,
+  PRODUCT_EDITOR,
+  logInAs,
+  logInByApi,
+  openPageEntry,
+  openSection,
+  reachesVisitors,
+  uploadImage,
+  uploadSharingImage,
+} from './cms';
 import { drawnFrom, expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
 import { ENGLISH_SCREEN_MOCK_DESCRIPTIONS } from '../../src/migrations/english-screen-mock-words/words';
@@ -39,6 +49,8 @@ type ProductEntry = {
   customStrip: { shows: boolean; eyebrow: Words; heading: Words; badge: Words; features: Feature[]; askLabel: Words };
   roles: { shows: boolean; heading: Words; lead: Words; roles: { party: Words; promise: Words; screen: string }[] };
   innerCycle: { shows: boolean; lead: Words; cycles: { party: Words }[] };
+  /** How the page appears in a search result and when its link is shared (ticket 26, on this entry since ticket 91). */
+  search: { title: Words; description: Words; sharingImage?: number | null };
 };
 type ClosingEntry = {
   languages: string[];
@@ -191,6 +203,58 @@ test('the closing section is reworded once for both pages that end on it, previe
     for (const path of ['/product', '/']) expect(await visitorHtml(request, path)).not.toContain(heading);
   } finally {
     await discardDraft(page.request, 'closing-section');
+  }
+});
+
+/**
+ * The page's search title and sharing picture, on its own entry (tickets 26
+ * and 91). Tried here rather than in `search-settings.spec.ts`, because a
+ * draft of this entry is this suite's to save: two suites saving drafts of one
+ * entry side by side would each preview the other's.
+ */
+test('a reworded search title is previewed, and reaches no visitor until it is published', async ({ page, request }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  const rewritten = 'ربائد · سجل المشروع الواحد';
+
+  try {
+    const saved = await save(page.request, 'product-page', { ...entry, search: { ...entry.search, title: arabic(rewritten) } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await preview(page, '/product');
+    await expect(page).toHaveTitle(rewritten);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', rewritten);
+    await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', rewritten);
+
+    expect(await visitorHtml(request, '/product')).not.toContain(rewritten);
+  } finally {
+    await discardDraft(page.request, 'product-page');
+  }
+});
+
+test('a page given a picture of its own shares that one; every other page keeps the site’s', async ({ page }) => {
+  await logInByApi(page.request, PRODUCT_EDITOR);
+  const entry = await published<ProductEntry>(page.request, 'product-page');
+  const image = await uploadSharingImage(page.request, 'صورة مشاركة لصفحة المنتج');
+
+  try {
+    expect(image.id, image.url).toBeGreaterThan(0);
+    const saved = await save(page.request, 'product-page', { ...entry, search: { ...entry.search, sharingImage: image.id } }, 'draft');
+    expect(saved.ok(), await saved.text()).toBe(true);
+
+    await preview(page, '/product');
+    const shown = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(shown).toContain(image.url);
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', shown!);
+    // The words a card reads out are the picture's own.
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute('content', 'صورة مشاركة لصفحة المنتج');
+
+    // The start page, which has none, still shares the site's own.
+    await preview(page, '/start');
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /og-rabaed.png$/);
+  } finally {
+    await discardDraft(page.request, 'product-page');
+    await page.request.delete(`/api/sharing-images/${image.id}`);
   }
 });
 
