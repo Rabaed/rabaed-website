@@ -141,8 +141,7 @@ export default defineConfig({
     // **One at a time.** They would notice each other too, as they would any
     // other suite: one worker for the project means no two of them ever
     // publish at once, or hold a lock while another publishes. The first
-    // server's suites run beside them all the while, and on CI's one worker
-    // nothing runs beside anything anyway (`.github/workflows/ci.yml`).
+    // server's suites run beside them all the while, on every other worker.
     {
       name: 'publishing',
       use: { ...devices['Desktop Chrome'], baseURL: publishingURL },
