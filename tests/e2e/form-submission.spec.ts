@@ -28,8 +28,8 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi, reaching } from './cms';
-import { POUR_TRACKER, checksumOf } from './pour-tracker';
 import { postDemoRequest, publishDemoSettings, readDemoSettings } from './demo-request-api';
+import { POUR_TRACKER, checksumOf } from './pour-tracker';
 import { TRAP_FIELD } from '../../src/forms/definition';
 import {
   APPLICANT,
@@ -86,7 +86,6 @@ async function settledSubmission(request: APIRequestContext, email: string): Pro
     .toEqual([expect.stringMatching(/^(sent|skipped|failed|withheld)$/)]);
   return (await submissionsFrom(request, email))[0];
 }
-
 
 for (const placement of DEMO_PLACEMENTS) {
   test.describe(`the demo request form on ${placement.path}`, () => {

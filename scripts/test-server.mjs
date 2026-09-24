@@ -69,7 +69,7 @@ try {
   }
   if (publishing) {
     await copyBuild(path.join(repoRoot, '.next'), path.join(repoRoot, buildDir));
-    await moveOrigin(path.join(repoRoot, buildDir, 'server'), Number(process.env.FIRST_SERVER_PORT), port);
+    await moveOrigin(path.join(repoRoot, buildDir), Number(process.env.FIRST_SERVER_PORT), port);
   }
   else await runNode([NEXT_BIN, 'build'], env);
 } catch (error) {
@@ -124,18 +124,20 @@ async function copyBuild(from, to) {
  * (`siteOrigin` in `src/lib/environment.ts`). Left alone, a page would change
  * address on its first rebuild.
  *
- * The two ports have the same number of digits (`playwright.config.ts` holds
- * `TEST_PORT` to that), so every address keeps its length: the `.rsc` files
- * count the length of the text they carry. Read and written as bytes, which a
- * change of ASCII leaves the rest of intact.
+ * Every file of the build is read, not only the kinds that carry an address
+ * today — `.html`, `.rsc` and `.body` — so an address a later version of Next
+ * writes somewhere new is moved too. The two ports have the same number of
+ * digits (`playwright.config.ts` holds `TEST_PORT` to that), so every address
+ * keeps its length: the `.rsc` files count the length of the text they carry.
+ * Read and written as bytes, which a change of ASCII leaves the rest of intact.
  */
-async function moveOrigin(serverDir, from, to) {
-  const [before, after] = [`127.0.0.1:${from}`, `127.0.0.1:${to}`];
-  if (!Number.isInteger(from) || before.length !== after.length) {
-    throw new Error(`Cannot move the build from port ${from} to ${to}: the two must have the same number of digits.`);
+async function moveOrigin(buildDir, fromPort, toPort) {
+  const [before, after] = [`127.0.0.1:${fromPort}`, `127.0.0.1:${toPort}`];
+  if (!Number.isInteger(fromPort) || before.length !== after.length) {
+    throw new Error(`Cannot move the build from port ${fromPort} to ${toPort}: the two must have the same number of digits.`);
   }
-  for (const entry of await readdir(serverDir, { recursive: true, withFileTypes: true })) {
-    if (!entry.isFile() || !/\.(html|rsc|body)$/.test(entry.name)) continue;
+  for (const entry of await readdir(buildDir, { recursive: true, withFileTypes: true })) {
+    if (!entry.isFile()) continue;
     const file = path.join(entry.parentPath, entry.name);
     const text = (await readFile(file)).toString('latin1');
     if (text.includes(before)) await writeFile(file, Buffer.from(text.replaceAll(before, after), 'latin1'));

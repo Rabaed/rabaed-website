@@ -24,16 +24,20 @@ export function testServerScratch(port: number): string {
   return path.join(os.tmpdir(), `rabaed-test-server-${port}`);
 }
 
-export function outboxDirectory(port: number = testPort()): string {
+export function outboxDirectory(port: number = thisTestsServerPort()): string {
   return path.join(testServerScratch(port), 'outbox');
 }
 
-export function documentsDirectory(port: number = testPort()): string {
+export function documentsDirectory(port: number = thisTestsServerPort()): string {
   return path.join(testServerScratch(port), 'documents');
 }
 
-/** The port the running test's server listens on: its project's (`playwright.config.ts`). */
-function testPort(): number {
+/**
+ * The port of the server the running test's project runs against, of the two
+ * a run starts (`playwright.config.ts`). Only a running test has one: outside
+ * one, say which port.
+ */
+function thisTestsServerPort(): number {
   return Number(new URL(test.info().project.use.baseURL!).port);
 }
 

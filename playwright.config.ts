@@ -36,6 +36,17 @@ const PUBLISHING = /(case-studies|referral-program-values|ai-crawlers|launch-art
 const baseURL = `http://127.0.0.1:${PORT}`;
 const publishingURL = `http://127.0.0.1:${PUBLISHING_PORT}`;
 
+/** What the two test servers (`webServer`, below) have in common. */
+const TEST_SERVER = {
+  // Never reuse: a server already listening is either a dev server or a
+  // stale build, and both would make the run a lie.
+  reuseExistingServer: false,
+  // The database, its migrations and the build, one after another.
+  timeout: 300_000,
+  stdout: 'pipe',
+  stderr: 'pipe',
+} as const;
+
 /**
  * Reads `TEST_PORT`, and refuses a value that is not a usable port. Four
  * digits whose second server's port has four too: the second server serves
@@ -143,6 +154,7 @@ export default defineConfig({
   // second relies on, since it serves the first one's build.
   webServer: [
     {
+      ...TEST_SERVER,
       // Starts a throwaway database, migrates it and creates the test editor,
       // then builds the application and starts it (ticket 19).
       command: 'node scripts/test-server.mjs',
@@ -151,25 +163,15 @@ export default defineConfig({
       // choose its port and its database's.
       env: { PORT: String(PORT) },
       url: baseURL,
-      // Never reuse: a server already listening is either a dev server or a
-      // stale build, and both would make the run a lie.
-      reuseExistingServer: false,
-      // The database, its migrations and the build, one after another.
-      timeout: 300_000,
-      stdout: 'pipe',
-      stderr: 'pipe',
     },
     {
+      ...TEST_SERVER,
       // A database of its own, migrated, with the same editors, serving a
       // copy of the build above with its own address in place of the first
       // server's (`--publishing` in the script).
       command: 'node scripts/test-server.mjs --publishing',
       env: { PORT: String(PUBLISHING_PORT), FIRST_SERVER_PORT: String(PORT) },
       url: publishingURL,
-      reuseExistingServer: false,
-      timeout: 300_000,
-      stdout: 'pipe',
-      stderr: 'pipe',
     },
   ],
 });

@@ -43,6 +43,7 @@ test('the site sends thirty confirmations an hour at most; a request past them i
   // too, so the requests fill what is left and go one past it — each from an
   // address and a network address of its own, as a script would send them.
   const room = FROM_THE_SITE_AN_HOUR - (await confirmationsThisHour(request));
+  expect(room, 'the suites before this one on the server have spent the hour already').toBeGreaterThan(0);
   const applicants = Array.from({ length: room + 1 }, () => uniqueApplicant('site-limit'));
   const stored = async (): Promise<StoredSubmission[]> =>
     (await Promise.all(applicants.map(({ email }) => submissionsFrom(request, email)))).flat();
