@@ -9,31 +9,20 @@
  * published from them is a page of the site, is `tests/e2e/english-pages.spec.ts`.
  */
 import { test, expect } from '@playwright/test';
-import { spawnSync } from 'node:child_process';
-import path from 'node:path';
 import { FAQ_REWRITES, COMPARISON_QUESTIONS } from '../../src/migrations/answer-first-proposal/words';
 import { ENGLISH_PAIRS, ENGLISH_WORDS } from '../../src/migrations/english-pages/entries';
 import { ENGLISH_QUESTIONS } from '../../src/migrations/english-pages/faqs';
 import { MARKS } from '../../src/migrations/english-pages/seed';
 import { IMPORTED_FAQ_ENTRIES } from '../../src/migrations/faq-import/entries';
+import { runProbe } from './payload-probe';
 
-const repoRoot = path.resolve(import.meta.dirname, '..', '..');
-
-/** What `english-fields.probe.ts` found the CMS would refuse, asked in a Payload process of its own. */
+/**
+ * What `english-fields.probe.ts` found the CMS would refuse. It opens no
+ * database: the fields are checked as the configuration declares them, and
+ * none of them reads one.
+ */
 function refusedEnglish(): string[] {
-  const { status, stdout, stderr } = spawnSync(
-    process.execPath,
-    [path.join('node_modules', 'payload', 'bin.js'), 'run', path.join('tests', 'unit', 'english-fields.probe.ts')],
-    {
-      encoding: 'utf8',
-      cwd: repoRoot,
-      // It opens no database: the fields are checked as the configuration
-      // declares them, and none of them reads one.
-      env: { ...process.env, DATABASE_URL: 'postgres://unused:unused@127.0.0.1:1/unused', PAYLOAD_SECRET: 'unused-in-this-test' },
-    },
-  );
-  if (status !== 0) throw new Error(`the probe failed:\n${stdout}\n${stderr}`);
-  return JSON.parse(stdout.trim().split(/\r?\n/).at(-1)!) as string[];
+  return JSON.parse(runProbe('english-fields.probe.ts')) as string[];
 }
 
 test.describe('the English pages’ words', () => {

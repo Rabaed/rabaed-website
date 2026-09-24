@@ -26,40 +26,19 @@
  * a command line.
  */
 import { test, expect } from '@playwright/test';
-import { spawnSync } from 'node:child_process';
-import path from 'node:path';
-
-const repoRoot = path.resolve(import.meta.dirname, '..', '..');
-const PROBE = path.join('tests', 'unit', 'cms-boot.probe.ts');
-const PAYLOAD_BIN = path.join('node_modules', 'payload', 'bin.js');
+import { runProbe } from './payload-probe';
 
 /**
  * Imports `module` — a specifier relative to the probe — in a new Node
  * process, and answers whether jsdom was loaded along with it.
  *
- * The database and secret are named but never reached: the Postgres adapter
- * opens no connection until something asks it for data, and nothing here
- * does. `VERCEL_ENV` is cleared so the config does not also demand the five
+ * `VERCEL_ENV` is cleared so the config does not also demand the five
  * storage variables a deployment needs (`src/cms/environment.ts`).
  */
 function loadsJsdom(module: string): boolean {
-  const { status, stdout, stderr } = spawnSync(process.execPath, [PAYLOAD_BIN, 'run', PROBE], {
-    encoding: 'utf8',
-    cwd: repoRoot,
-    env: {
-      ...process.env,
-      MODULE_UNDER_TEST: module,
-      DATABASE_URL: 'postgres://unused:unused@127.0.0.1:1/unused',
-      PAYLOAD_SECRET: 'unused-in-this-test',
-      VERCEL_ENV: '',
-    },
-  });
-
-  if (status !== 0) throw new Error(`loading ${module} failed:\n${stdout}\n${stderr}`);
-
-  const answer = stdout.trim().split(/\r?\n/).at(-1);
+  const answer = runProbe('cms-boot.probe.ts', { MODULE_UNDER_TEST: module, VERCEL_ENV: '' });
   if (answer !== 'jsdom' && answer !== 'no-jsdom') {
-    throw new Error(`loading ${module} said "${answer}", which is neither answer:\n${stdout}`);
+    throw new Error(`loading ${module} said "${answer}", which is neither answer.`);
   }
   return answer === 'jsdom';
 }
