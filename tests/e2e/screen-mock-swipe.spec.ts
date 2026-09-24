@@ -5,9 +5,9 @@
  * in a box that pans sideways (tickets 08 and 12), with a hint,
  * «اسحب لرؤية الشاشة كاملة», and a fade at whichever edge has more of the
  * screen behind it. Since ticket 78 every Screen mock still showing its export
- * is its Phone crop instead, so the pan is what a replaced screen shows: its
- * hint, its fade and a swipe across it are checked where a screen can be
- * replaced, in `product-text.spec.ts`.
+ * is its Phone crop instead, so the pan is what a replaced screen with no
+ * uploaded crop shows (ticket 79): its hint, its fade and a swipe across it
+ * are checked where a screen can be replaced, in `product-text.spec.ts`.
  *
  * What is checked here holds on every page a visitor is sent: the hint is in
  * the first response, is never read out, and nothing of it shows above 700px.

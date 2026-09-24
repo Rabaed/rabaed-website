@@ -1,6 +1,6 @@
 import type { Field } from 'payload';
-import { SCREEN_MOCKS } from '../../screen-mocks/registry';
-import { pictureField, sectionTab, wordsField } from '../page-fields';
+import { phoneCropExportSize, SCREEN_MOCKS, type ScreenMock } from '../../screen-mocks/registry';
+import { pictureField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { screenMockFieldName } from '../screen-mock-fields';
 
@@ -46,6 +46,26 @@ function englishTitle(mockId: string): string {
 }
 
 /**
+ * A Phone crop an Editor uploads beside a replacement picture, for the same
+ * language's pages (ticket 79): the crop's shape, at the size the export makes
+ * one or larger, so it is as sharp as the crop it stands in for. Its help says
+ * what a Phone crop is, for an Editor who has never heard the name.
+ */
+function phoneCropField(mock: ScreenMock, name: string, label: Words): Field {
+  const size = phoneCropExportSize(mock);
+  return pictureField({
+    name,
+    label,
+    size,
+    required: false,
+    description: {
+      ar: `على الهاتف تصغر الشاشة كاملة فلا تُقرأ، فتظهر مكانها صورة مقرّبة لجزء منها، ومن يضغط عليها يرى الشاشة كاملة. إن استبدلت صورة الشاشة فارفع هنا صورة مقرّبة من الصورة الجديدة، بمقاس ${size.width}×${size.height} أو أكبر بالنسبة نفسها. بلا صورة مقرّبة تظهر الصورة البديلة كاملة على الهاتف، ويسحبها الزائر بإصبعه ليرى بقيتها. وإن غيّرت صورة الشاشة أو حذفتها فغيّر صورتها المقرّبة أو احذفها معها.`,
+      en: `On a phone the whole screen is too small to read, so a close-up of part of it shows in its place, and tapping it shows the whole screen. If you replace the screen's picture, upload a close-up of the new one here, ${size.width}×${size.height} or larger in the same proportions. Without one, phones show the replacement picture whole, for visitors to swipe across. If you change or remove the screen's picture, change or remove its close-up with it.`,
+    },
+  });
+}
+
+/**
  * The Screen mocks as the site shows them (ticket 57): for each, a picture that
  * replaces its exported image, and what it shows in words — the picture's
  * description for screen readers and the caption under it, both at once
@@ -62,6 +82,13 @@ function englishTitle(mockId: string): string {
  * What a mock depicts is still a developer's to change, through the studio and
  * `npm run mocks:export`; a replacement keeps the studio's 1440×900 shape
  * (spec: Screen mocks).
+ *
+ * **A Phone crop beside each replacement (ticket 79).** On a phone a Screen
+ * mock is its Phone crop (ADR-0022), which the export cuts from the screen it
+ * exports. A replaced screen needs a crop of its own, and the Editor who
+ * replaces it can upload one beside it, per language as the picture is. With
+ * none, a phone shows the replacement whole, to swipe, and never the exported
+ * crop of the screen it replaced (`screen-mock-picture.tsx`).
  */
 export const ScreenMocks = pageGlobal({
   slug: 'screen-mocks',
@@ -87,6 +114,10 @@ export const ScreenMocks = pageGlobal({
             en: `${mock.width}×${mock.height}, or larger in the same proportions. Remove it to bring back the exported image.`,
           },
         }),
+        phoneCropField(mock, 'phoneCrop', {
+          ar: 'الصورة المقرّبة للهاتف، للصفحات العربية',
+          en: 'Phone crop, Arabic pages',
+        }),
         pictureField({
           name: 'englishPicture',
           label: { ar: 'صورة بديلة للصفحات الإنجليزية', en: 'Replacement picture, English pages' },
@@ -96,6 +127,10 @@ export const ScreenMocks = pageGlobal({
             ar: `بواجهة إنجليزية، بمقاس ${mock.width}×${mock.height} أو أكبر بالنسبة نفسها. احذفها لتعود الصورة المصدَّرة بالإنجليزية.`,
             en: `With an English interface, ${mock.width}×${mock.height} or larger in the same proportions. Remove it to bring back the English exported image.`,
           },
+        }),
+        phoneCropField(mock, 'englishPhoneCrop', {
+          ar: 'الصورة المقرّبة للهاتف، للصفحات الإنجليزية',
+          en: 'Phone crop, English pages',
         }),
         wordsField('description', { ar: 'ما تُظهره الشاشة', en: 'What the screen shows' }, 150, {
           multiline: true,
