@@ -190,10 +190,12 @@ if (renamedRows.length > 0) {
 if (rows.length > 0) {
   console.log(
     '\nA database that already ran them under the old names — the preview database, if it was migrated for this ' +
-      'branch — records them by those names. Before it is migrated again, run on it:\n',
+      'branch — records them by those names. ' +
+      (safe
+        ? 'Before it is migrated again, run on it:\n'
+        : 'It has to be brought level first (above); only then do these make its records match the files:\n'),
   );
   for (const { sql } of rows) console.log(`  ${sql}`);
-  if (!safe) console.log('\nOnly once it has what the files now make, which it may not: see above.');
 
   const mentioned = spawnSync(
     'git',
