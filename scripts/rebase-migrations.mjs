@@ -230,7 +230,11 @@ async function renameInDevelopmentDatabase(statements, safe) {
     });
     let renamed = 0;
     for (const { sql } of statements) renamed += (await connection.query(sql)).rowCount ?? 0;
-    console.log(`\nYour own .data/ database: ${renamed} of those rows ${renamed === 1 ? 'was' : 'were'} there, and now match.`);
+    console.log(
+      renamed === 0
+        ? '\nYour own .data/ database had not run them under the old names, so it needs nothing.'
+        : `\nYour own .data/ database had: ${renamed} of its rows now name them as the files do.`,
+    );
   } catch (error) {
     console.log(`\nYour own .data/ database could not be reached (${error.message}). Run the statements above on it.`);
   } finally {

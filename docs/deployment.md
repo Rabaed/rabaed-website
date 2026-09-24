@@ -725,9 +725,11 @@ reads. With a separate preview database, run `npm run cms:migrate` against it,
 the same way as step 6 — from a file, not from the command line — when a pull
 request that adds a migration needs a preview.
 
-**A migration regenerated after a merge takes a new name** (see the parallel
-sessions note below), so a preview database that was migrated before the
-rebase has the old one and needs migrating again.
+**A migration rebuilt after a merge usually keeps its name.** When it has to
+move after migrations merged since (`npm run cms:rebase-migrations` says so,
+see `docs/agents/parallel-sessions.md`), a preview database migrated before the
+rebuild knows it by its old name: run the `UPDATE payload_migrations …`
+statements the command printed on it, then migrate it again.
 
 **Until that is done, the pull request's Vercel check goes red, and the red is
 expected.** The build fails on the first page that reads a table the preview
@@ -742,7 +744,10 @@ For developers: after changing the CMS configuration, `npm run cms:migration --
 <name>` writes the migration, and `npm run cms:generate` refreshes the admin's
 import map and `src/payload-types.ts`. Payload writes the migration's type
 imports as value imports, which this project's compiler settings refuse; mark
-them `type` by hand.
+them `type` by hand. After merging `main` into a branch that has one, rebuild
+it with `npm run cms:rebase-migrations` instead. CI's
+`npm run cms:check-migrations` fails a pull request whose configuration asks
+for something no migration makes, or whose generated code is out of date.
 
 #### What a data migration may and may not do
 
