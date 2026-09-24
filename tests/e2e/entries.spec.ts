@@ -13,8 +13,10 @@
  */
 import { test, expect, fields, type Entry } from './entries';
 import { signIn, signedIn, suiteEditor } from './editors';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const SLUG = 'closing-section';
 

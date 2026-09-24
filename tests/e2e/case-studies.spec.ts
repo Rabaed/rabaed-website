@@ -17,8 +17,10 @@ import { signIn } from './editors';
 import { sidewaysOverflow } from './geometry';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 /** The header's link to the section, restated rather than imported (see `routes.ts`). */
 const NAV_LABEL = 'قصص العملاء';

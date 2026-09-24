@@ -32,8 +32,10 @@ import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
 import { entriesRead, MARKETING_PAGES, PAGE_ENTRIES, type MarketingPage } from '../../src/content/pages/page-entries';
 import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 /**
  * The entries a page reads beside the header and footer, whose English is

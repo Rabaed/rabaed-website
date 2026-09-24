@@ -29,8 +29,10 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { test, expect, type CmsEntry, type Entry, type Version } from './entries';
 import { sidewaysOverflow, sidewaysOverflowOf } from './geometry';
 import { ROUTES } from './routes';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 type SiteWords = Entry<'site-words'>;
 /** A word as the CMS holds it: its Arabic and its English. */

@@ -30,9 +30,10 @@ const PORT = testPort(process.env.TEST_PORT);
 const PUBLISHING_PORT = PORT + 1000;
 /**
  * The suites that publish what every other suite would notice, or hold what
- * every other suite would wait for (`publishing`, below).
+ * every other suite would wait for (`publishing`, below). Whole file names,
+ * so that `tests/unit/page-entries.spec.ts` is not taken for `entries.spec.ts`.
  */
-const PUBLISHING = /(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries|site-words)\.spec\.ts$/;
+const PUBLISHING = /(?:^|[\\/])(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries|site-words)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 const publishingURL = `http://127.0.0.1:${PUBLISHING_PORT}`;
 
@@ -144,9 +145,13 @@ export default defineConfig({
     // and never wait for it.
     //
     // **One at a time.** They would notice each other too, as they would any
-    // other suite: one worker for the project means no two of them ever
-    // publish at once, or hold a lock while another publishes. The first
-    // server's suites run beside them all the while, on every other worker.
+    // other suite: no two of them may publish at once, or hold a lock while
+    // another publishes. One worker for the project was meant to keep them
+    // apart, but Playwright starts several of them at once all the same, so
+    // each suite also holds the server to itself from its first test to its
+    // last (`tests/e2e/one-suite-at-a-time.ts`). A suite added to
+    // `PUBLISHING` calls `oneSuiteAtATime(test)` too. The first server's
+    // suites run beside them all the while, on every other worker.
     {
       name: 'publishing',
       use: { ...devices['Desktop Chrome'], baseURL: publishingURL },

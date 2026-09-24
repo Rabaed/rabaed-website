@@ -26,8 +26,10 @@
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { signIn } from './editors';
 import { nodesOf, structuredData } from './structured-data';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 /**
  * The six addresses, and words that only an article answering that kind of

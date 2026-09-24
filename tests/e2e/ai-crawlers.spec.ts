@@ -24,8 +24,10 @@ import { test, expect, type APIRequestContext } from '@playwright/test';
 import { richText, uploadImage } from './cms';
 import { signIn } from './editors';
 import { ROUTES } from './routes';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const SWITCH = '/api/globals/ai-crawlers';
 

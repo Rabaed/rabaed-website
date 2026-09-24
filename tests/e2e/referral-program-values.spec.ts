@@ -15,8 +15,10 @@
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { ADMIN_PATH, legalDocument } from './cms';
 import { signIn } from './editors';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const GLOBAL = '/api/globals/referral-program';
 
