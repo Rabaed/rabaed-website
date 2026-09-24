@@ -4,14 +4,14 @@
 
 **Blocked by:** 78 (Phone crops exist and are shown on phones).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Each Screen mock in the CMS has a Phone crop upload for Arabic pages and one for English pages, beside that language's replacement picture
-- [ ] The CMS refuses a Phone crop that is not the shape ticket 78 chose, at the size the export makes or larger, as it already refuses a replacement picture of the wrong proportions
-- [ ] On a phone, a language shows: the uploaded Phone crop if there is one; otherwise the exported crop if the screen's picture has not been replaced; otherwise the replaced whole picture with ticket 77's swipe hint
-- [ ] Tapping an uploaded Phone crop opens that language's current whole screen (the replacement if there is one)
-- [ ] The field's help text in the CMS says in plain words what a Phone crop is, and that without one phones show the whole picture to swipe
-- [ ] Tests cover all three cases of the rule above, in both languages
+- [x] Each Screen mock in the CMS has a Phone crop upload for Arabic pages and one for English pages, beside that language's replacement picture
+- [x] The CMS refuses a Phone crop that is not the shape ticket 78 chose, at the size the export makes or larger, as it already refuses a replacement picture of the wrong proportions
+- [x] On a phone, a language shows: the uploaded Phone crop if there is one; otherwise the exported crop if the screen's picture has not been replaced; otherwise the replaced whole picture with ticket 77's swipe hint
+- [x] Tapping an uploaded Phone crop opens that language's current whole screen (the replacement if there is one)
+- [x] The field's help text in the CMS says in plain words what a Phone crop is, and that without one phones show the whole picture to swipe
+- [x] Tests cover all three cases of the rule above, in both languages
 
 ## Comments
 
@@ -25,3 +25,11 @@
 **Current behaviour (confirmed 23 September 2026):** ticket 57 lets an Editor replace each Screen mock's picture and its description, once for all pages. Ticket 41 made the replacement per language. A replacement must be 1440×900 or larger in exactly those proportions. There is nowhere to put a phone version.
 
 **Desired behaviour (decided by the founder, 23 September 2026):** a Phone crop upload beside each replacement picture. When a picture is replaced without a crop, phones fall back to the whole picture with the swipe hint (ticket 77), so a phone visitor never sees a crop that no longer matches the screen. Changing what a Screen mock depicts is still a developer's job through the studio, as ticket 57 says.
+
+### 24 September 2026: built
+
+Each Screen mock's tab in «شاشات المنصة» now has «الصورة المقرّبة للهاتف» under each language's replacement picture: Arabic picture, Arabic crop, English picture, English crop. A crop must be 1040×1300, the size the export makes, or larger in the same proportions. Anything else is refused with the message a wrong-shaped replacement already gets. The help text says what a Phone crop is, how big it must be, and that without one phones show the replacement whole, for visitors to swipe across.
+
+On a phone each language shows its own uploaded crop if there is one. Otherwise it shows the exported crop while its picture is not replaced. Otherwise it shows the replacement whole with ticket 77's swipe hint. Tapping an uploaded crop opens that language's current whole screen: the replacement, or the export when there is none. Wider than 700px an uploaded crop is never shown. As with an exported crop, a language whose words for the button are not published yet shows the whole screen to swipe.
+
+The Arabic cases are tested in `product-text.spec.ts` and the English in `english-pages.spec.ts`. Each makes a draft in which the journey's first four screens are one case each, and checks it in the preview on a phone. ADR-0022's consequences now describe the rule.

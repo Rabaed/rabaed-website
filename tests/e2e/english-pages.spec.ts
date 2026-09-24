@@ -21,9 +21,11 @@
  * English, fill the page, and never leave Arabic in its place.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ENGLISH_PAGES_EDITOR, logInByApi, reachesVisitors, reaching } from './cms';
+import { ENGLISH_PAGES_EDITOR, logInByApi, reachesVisitors, reaching, uploadImage } from './cms';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
+import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
+import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
 
 test.describe.configure({ mode: 'default' });
 
@@ -253,6 +255,70 @@ test('previewed on a phone, the English Screen mocks are English Phone crops; at
     await page.reload();
     const tablet = await drawnFrom(section);
     expect(tablet.file, path).toBe(`/screen-mocks/en/${tablet.mock}.webp`);
+  }
+});
+
+/**
+ * An English Phone crop an Editor uploads (ticket 79), as `product-text.spec.ts`
+ * checks the Arabic: on a phone, the English pages show the English crop if
+ * there is one; otherwise the exported English crop, while the English picture
+ * is not replaced; otherwise the English replacement whole, to swipe. The
+ * Arabic pages' uploads are never shown on the English ones.
+ */
+test('previewed on a phone, an uploaded English Phone crop shows, and a replaced English screen without one is whole', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 812 });
+  await logInByApi(page.request, ENGLISH_PAGES_EDITOR);
+  // Found before approving, which saves a copy of it the next approval would
+  // find instead.
+  const { id: proposed } = await proposal(page.request, 'screen-mocks');
+  for (const slug of ['product-page', 'closing-section', 'screen-mocks', 'trust-strip', 'search-settings']) {
+    await approve(page.request, slug, 'draft');
+  }
+  await approveSiteWords(page.request, 'draft');
+
+  const crop = await uploadImage(page.request, 'Phone crop', phoneCropExportSize(SCREEN_MOCKS[0]));
+  const picture = await uploadImage(page.request, 'English replacement screen', { width: 2880, height: 1800 });
+  const [cropFiles, pictureFiles] = [await mediaFiles(page.request, crop), await mediaFiles(page.request, picture)];
+  const mocks = await (await page.request.get('/api/globals/screen-mocks?draft=true&depth=0')).json();
+  const changed = (field: string, change: object) => ({ [field]: { ...mocks[field], ...change } });
+
+  try {
+    // The journey's first four panels, one case each.
+    const saved = await page.request.post('/api/globals/screen-mocks?draft=true', {
+      data: {
+        ...mocks,
+        ...changed('correspondence', { englishPhoneCrop: crop }),
+        ...changed('kanban', { englishPicture: picture, englishPhoneCrop: crop }),
+        ...changed('dailyReport', { englishPicture: picture }),
+        // The Arabic pages' crop and replacement, which the English pages never show.
+        ...changed('documents', { picture, phoneCrop: crop }),
+        _status: 'draft',
+      },
+    });
+    expect(saved.ok(), await saved.text()).toBe(true);
+    await page.goto(`/api/preview?path=${encodeURIComponent('/en/product')}`);
+    const frame = (mock: string) => frameShowing(page, '#journey .ui', mock);
+    const OPEN = 'Tap to see the whole screen';
+
+    await expectPhoneCrop(page, frame('correspondence'), {
+      crop: cropFiles,
+      whole: ['/screen-mocks/en/correspondence.webp'],
+      open: OPEN,
+    });
+    await expectPhoneCrop(page, frame('kanban'), { crop: cropFiles, whole: pictureFiles, open: OPEN });
+    await expectWholeToSwipe(frame('daily-report'), { whole: pictureFiles, hint: 'Swipe to see the whole screen' });
+    await expectPhoneCrop(page, frame('documents'), {
+      crop: ['/screen-mocks/en/phone/documents.webp'],
+      whole: ['/screen-mocks/en/documents.webp'],
+      open: OPEN,
+    });
+  } finally {
+    // The proposal made the newest draft again, so the next approval finds it
+    // and not this test's crops.
+    const restored = await page.request.post(`/api/globals/screen-mocks/versions/${proposed}?draft=true`);
+    expect(restored.ok(), await restored.text()).toBe(true);
   }
 });
 

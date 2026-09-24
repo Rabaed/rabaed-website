@@ -9,11 +9,13 @@
  * Escape or by going back.
  *
  * Everything here is a Screen mock still showing its export. One an Editor
- * has replaced has no crop, and pans as ticket 77 made it; that is checked
- * where the replacing is done, in `product-text.spec.ts`. The English pages
- * are checked in `english-pages.spec.ts`, which can preview them.
+ * has replaced shows the crop they uploaded beside it, or with none pans as
+ * ticket 77 made it (ticket 79); that is checked where the replacing is done,
+ * in `product-text.spec.ts`. The English pages are checked in
+ * `english-pages.spec.ts`, which can preview them.
  */
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { drawnFrom } from './screen-mock-phone';
 import { PHONE_CROP } from '../../src/screen-mocks/registry';
 import { sidewaysOverflow, sidewaysOverflowOf } from './geometry';
 
@@ -33,14 +35,6 @@ async function frameOn(page: Page, path: string, frame: string): Promise<Locator
   const first = page.locator(frame).first();
   await first.scrollIntoViewIfNeeded();
   return first;
-}
-
-/** The file a picture was actually drawn from, as `next/image` names it: `/screen-mocks/ar/phone/kanban.webp`. */
-async function drawnFrom(picture: Locator): Promise<string> {
-  await expect.poll(() => picture.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
-  const source = await picture.evaluate((image: HTMLImageElement) => image.currentSrc);
-  const url = new URL(source);
-  return url.pathname === '/_next/image' ? url.searchParams.get('url')! : url.pathname;
 }
 
 for (const { page: path, where, frame } of PLACES) {

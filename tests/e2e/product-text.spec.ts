@@ -17,9 +17,10 @@
  */
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
 import { ADMIN_PATH, PRODUCT_EDITOR, logInAs, logInByApi, openPageEntry, openSection, reachesVisitors, uploadImage } from './cms';
+import { drawnFrom, expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
 import { ENGLISH_SCREEN_MOCK_DESCRIPTIONS } from '../../src/migrations/english-screen-mock-words/words';
-import { SCREEN_MOCKS } from '../../src/screen-mocks/registry';
+import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
 
 test.describe.configure({ mode: 'default' });
 
@@ -43,7 +44,13 @@ type ClosingEntry = {
   languages: string[];
   closing: { eyebrow: Words; heading: Words; steps: { label: Words; text: Words }[]; moreLabel: Words };
 };
-type MockFields = { picture: number | null; englishPicture?: number | null; description: Words };
+type MockFields = {
+  picture: number | null;
+  phoneCrop?: number | null;
+  englishPicture?: number | null;
+  englishPhoneCrop?: number | null;
+  description: Words;
+};
 type MocksEntry = { languages: string[] } & { [mock: string]: MockFields };
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
@@ -369,10 +376,11 @@ test('a replacement for the English pages leaves the Arabic pages showing theirs
 });
 
 /**
- * A replaced screen on a phone (tickets 77 and 78). A replacement has no Phone
- * crop — an exported one would show the screen it replaced — so a phone is
- * shown the whole picture, 1040px wide in a box that pans, with ticket 77's
- * swipe hint over its foot and a fade at each edge with more behind it.
+ * A replaced screen on a phone (tickets 77 and 78). A replacement with no
+ * Phone crop uploaded beside it (ticket 79) has none — an exported one would
+ * show the screen it replaced — so a phone is shown the whole picture, 1040px
+ * wide in a box that pans, with ticket 77's swipe hint over its foot and a
+ * fade at each edge with more behind it.
  *
  * Every Screen mock still showing its export is its crop on a phone, and
  * `phone-crops.spec.ts` checks that. This is the one place a replaced screen
@@ -523,6 +531,93 @@ test.describe('a replaced screen, on a phone', () => {
   });
 });
 
+/**
+ * A Phone crop an Editor uploads beside a screen's picture (ticket 79). On a
+ * phone each language shows its uploaded crop if there is one; otherwise the
+ * exported crop, while the screen is not replaced; otherwise the replaced
+ * picture whole, to swipe — never an exported crop of a screen that has
+ * changed. An uploaded crop opens the language's current whole screen: the
+ * replacement if there is one. The English pages are checked the same way in
+ * `english-pages.spec.ts`, which can preview them.
+ */
+test.describe('a Phone crop an Editor uploads', () => {
+  test.use({ viewport: { width: 390, height: 812 } });
+
+  const OPEN = 'اضغط لرؤية الشاشة كاملة';
+  const HINT = 'اسحب لرؤية الشاشة كاملة';
+
+  test('is what a phone shows; without one, the exported crop, or a replaced screen whole', async ({ page }) => {
+    await logInByApi(page.request, PRODUCT_EDITOR);
+    const mocks = await published<MocksEntry>(page.request, 'screen-mocks');
+    // The size the export makes a crop at.
+    const crop = await uploadImage(page.request, 'صورة مقرّبة للهاتف', phoneCropExportSize(SCREEN_MOCKS[0]));
+    const picture = await uploadImage(page.request, 'شاشة بديلة', { width: 2880, height: 1800 });
+    const [cropFiles, pictureFiles] = [await mediaFiles(page.request, crop), await mediaFiles(page.request, picture)];
+    const changed = (mock: string, change: Partial<MockFields>) => ({
+      [screenMockFieldName(mock)]: { ...mocks[screenMockFieldName(mock)], ...change },
+    });
+
+    try {
+      // The journey's first four panels, one case each.
+      const saved = await save(
+        page.request,
+        'screen-mocks',
+        {
+          ...mocks,
+          ...changed('correspondence', { phoneCrop: crop }),
+          ...changed('kanban', { picture, phoneCrop: crop }),
+          ...changed('daily-report', { picture }),
+          // The English pages' crop, which the Arabic pages never show.
+          ...changed('documents', { englishPhoneCrop: crop }),
+        },
+        'draft',
+      );
+      expect(saved.ok(), await saved.text()).toBe(true);
+      await preview(page, '/product');
+      const frame = (mock: string) => frameShowing(page, '#journey .ui', mock);
+
+      // An uploaded crop over the export opens the export whole.
+      await expectPhoneCrop(page, frame('correspondence'), {
+        crop: cropFiles,
+        whole: ['/screen-mocks/ar/correspondence.webp'],
+        open: OPEN,
+      });
+      // Beside a replacement, it opens the replacement.
+      await expectPhoneCrop(page, frame('kanban'), { crop: cropFiles, whole: pictureFiles, open: OPEN });
+      // A replacement with no crop is shown whole, to swipe.
+      await expectWholeToSwipe(frame('daily-report'), { whole: pictureFiles, hint: HINT });
+      // Neither replaced nor cropped in Arabic: the export's own crop.
+      await expectPhoneCrop(page, frame('documents'), {
+        crop: ['/screen-mocks/ar/phone/documents.webp'],
+        whole: ['/screen-mocks/ar/documents.webp'],
+        open: OPEN,
+      });
+
+      // The home page's units show an uploaded crop the same way.
+      await preview(page, '/');
+      await expectPhoneCrop(page, frameShowing(page, '#jt .jt-shot.on', 'correspondence'), {
+        crop: cropFiles,
+        whole: ['/screen-mocks/ar/correspondence.webp'],
+        open: OPEN,
+      });
+
+      // Wider than a phone, an uploaded crop is never shown: each is its whole screen.
+      await page.setViewportSize({ width: 768, height: 1024 });
+      await preview(page, '/product');
+      for (const [mock, whole] of [
+        ['correspondence', ['/screen-mocks/ar/correspondence.webp']],
+        ['kanban', pictureFiles],
+      ] as const) {
+        const shown = frame(mock).locator('img[data-screen-mock]');
+        await shown.scrollIntoViewIfNeeded();
+        expect(whole, mock).toContain(await drawnFrom(shown));
+      }
+    } finally {
+      await discardDraft(page.request, 'screen-mocks');
+    }
+  });
+});
+
 test('the CMS refuses what the product page, the closing section and the screens cannot carry', async ({ page }) => {
   await logInByApi(page.request, PRODUCT_EDITOR);
   const product = await published<ProductEntry>(page.request, 'product-page');
@@ -535,6 +630,11 @@ test('the CMS refuses what the product page, the closing section and the screens
   const party: FlowItem = { party: arabic('المالك'), after: 'towards' };
   const otherShape = await uploadImage(page.request, 'صورة بمقاس آخر', { width: 1600, height: 900 });
   const tooSmall = await uploadImage(page.request, 'صورة أصغر من مكانها', { width: 720, height: 450 });
+  const larger = await uploadImage(page.request, 'صورة بضعف المقاس', { width: 2880, height: 1800 });
+  // The crop's shape, at half and at twice the size the export makes it.
+  const exportedCrop = phoneCropExportSize(SCREEN_MOCKS[0]);
+  const smallCrop = await uploadImage(page.request, 'صورة مقرّبة صغيرة', { width: exportedCrop.width / 2, height: exportedCrop.height / 2 });
+  const largerCrop = await uploadImage(page.request, 'صورة مقرّبة أكبر', { width: exportedCrop.width * 2, height: exportedCrop.height * 2 });
 
   // What is refused, where it is saved, what is sent, and the field it breaks.
   const refused: [string, Global, object, string | RegExp][] = [
@@ -617,6 +717,26 @@ test('the CMS refuses what the product page, the closing section and the screens
       { ...mocks, correspondence: { ...mocks.correspondence, englishPicture: otherShape } },
       'correspondence.englishPicture',
     ],
+    // A Phone crop keeps the export's crop shape, at the size the export
+    // makes it or larger (ticket 79).
+    [
+      "a Phone crop of the whole screen's shape",
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, phoneCrop: larger } },
+      'correspondence.phoneCrop',
+    ],
+    [
+      'a Phone crop smaller than the export makes one',
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, phoneCrop: smallCrop } },
+      'correspondence.phoneCrop',
+    ],
+    [
+      'an English pages Phone crop of another shape',
+      'screen-mocks',
+      { ...mocks, correspondence: { ...mocks.correspondence, englishPhoneCrop: otherShape } },
+      'correspondence.englishPhoneCrop',
+    ],
     [
       'a screen with no description',
       'screen-mocks',
@@ -629,16 +749,16 @@ test('the CMS refuses what the product page, the closing section and the screens
     expect(response.status(), `${what} (${field}): ${await response.text()}`).toBe(400);
   }
 
-  // A picture of the mock's shape, larger, is not what gets refused. Published
-  // beside a fault of its own, so that nothing is saved either way; the refusal
-  // names the one screen at fault, by its tab, and not the one beside it.
-  const larger = await uploadImage(page.request, 'صورة بضعف المقاس', { width: 2880, height: 1800 });
+  // A picture of the mock's shape, larger, and a crop larger than the export
+  // makes, are not what gets refused. Published beside a fault of their own, so that
+  // nothing is saved either way; the refusal names the one screen at fault, by
+  // its tab, and not the one beside it.
   const beside = await save(
     page.request,
     'screen-mocks',
     {
       ...mocks,
-      correspondence: { ...mocks.correspondence, picture: larger },
+      correspondence: { ...mocks.correspondence, picture: larger, phoneCrop: largerCrop, englishPhoneCrop: largerCrop },
       kanban: { ...mocks.kanban, description: arabic('') },
     },
     'published',
@@ -682,6 +802,26 @@ test('the journey and the closing section have no switch to hide them; the custo
   await page.goto(`${ADMIN_PATH}/globals/closing-section`);
   await expect(page.getByText(/Always shows/)).toBeVisible();
   await expect(page.getByLabel('Shows on the page')).toHaveCount(0);
+});
+
+test("each screen has a Phone crop upload beside each language's picture, which says what a Phone crop is", async ({ page }) => {
+  await logInAs(page, PRODUCT_EDITOR);
+  await openPageEntry(page, 'screen-mocks');
+  await openSection(page, 'Correspondence');
+
+  const uploads = page.locator('.field-type.upload');
+  await expect(uploads.locator('.field-label')).toHaveText([
+    'Replacement picture, Arabic pages',
+    'Phone crop, Arabic pages',
+    'Replacement picture, English pages',
+    'Phone crop, English pages',
+  ]);
+  for (const crop of [uploads.nth(1), uploads.nth(3)]) {
+    const help = crop.locator('.field-description');
+    await expect(help).toContainText('too small to read');
+    await expect(help).toContainText('1040×1300');
+    await expect(help).toContainText('Without one, phones show the replacement picture whole, for visitors to swipe across.');
+  }
 });
 
 test('on the smallest windows that pin the journey, every panel holds its words at their longest', async ({ page }) => {
