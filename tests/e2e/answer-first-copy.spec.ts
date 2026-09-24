@@ -19,7 +19,7 @@
  * rather than as the latest one, which is true whatever those suites have left
  * behind.
  *
- * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ * The tests sign in as an editor of their own (`editors.ts`) and run one at a time.
  *
  * Expectations are restated here rather than imported from
  * `src/migrations/answer-first-proposal/`, for the reason `routes.ts` gives: a
@@ -27,11 +27,11 @@
  * construction, and would go on agreeing if a proposal went missing.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ANSWER_FIRST_EDITOR, logInByApi } from './cms';
+import { signIn } from './editors';
 
 // One at a time, and signed in as an editor of this suite's own: Payload
 // records a login by writing back the editor's whole list of sessions, so two
-// tests signing in to one account at once can erase each other's (`cms.ts`).
+// tests signing in to one account at once can erase each other's (`editors.ts`).
 test.describe.configure({ mode: 'default' });
 
 /**
@@ -101,7 +101,7 @@ async function questions(editor: APIRequestContext, draft: boolean): Promise<Que
 
 test.describe('the four section openers', () => {
   test('each is waiting in the CMS as a standalone answer of 30 to 60 words', async ({ page }) => {
-    await logInByApi(page.request, ANSWER_FIRST_EDITOR);
+    await signIn(page.request);
 
     for (const opener of OPENERS) {
       const drafts = await versionsOf(page.request, opener.entry, 'draft');
@@ -129,7 +129,7 @@ test.describe('the four section openers', () => {
   });
 
   test('what the two sections that had one still say is what the CMS publishes', async ({ page, request }) => {
-    await logInByApi(page.request, ANSWER_FIRST_EDITOR);
+    await signIn(page.request);
     const home = await visit(request, '/');
     const product = await visit(request, '/product');
 
@@ -147,7 +147,7 @@ test.describe('the four section openers', () => {
 
 test.describe('the 31 answers', () => {
   test('each has a rewrite waiting, and none of the rewrites opens on a bare «لا» or «نعم»', async ({ page }) => {
-    await logInByApi(page.request, ANSWER_FIRST_EDITOR);
+    await signIn(page.request);
     const published = (await questions(page.request, false)).filter((entry) => entry._status === 'published');
     const waiting = new Map((await questions(page.request, true)).map((entry) => [entry.id, entry.answer]));
     expect(published, 'the 31 questions ticket 22 imported').toHaveLength(31);
@@ -167,7 +167,7 @@ test.describe('the 31 answers', () => {
   });
 
   test('every page still shows the answer it publishes, not the one waiting', async ({ page, request }) => {
-    await logInByApi(page.request, ANSWER_FIRST_EDITOR);
+    await signIn(page.request);
     const published = (await questions(page.request, false)).filter((entry) => entry._status === 'published');
     const where = { home: '/', start: '/start', tool: '/tool', referral: '/referral', partnership: '/partnership' };
     const pages = Object.fromEntries(
@@ -187,7 +187,7 @@ test.describe('the 31 answers', () => {
 
 test.describe('the comparison questions', () => {
   test('each is waiting, unpublished, against WhatsApp, email and the spreadsheet', async ({ page }) => {
-    await logInByApi(page.request, ANSWER_FIRST_EDITOR);
+    await signIn(page.request);
     const drafts = (await questions(page.request, false)).filter((entry) => entry._status !== 'published');
 
     const waiting = COMPARISONS.map((comparison) => {

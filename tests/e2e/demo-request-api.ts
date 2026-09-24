@@ -6,17 +6,15 @@
  */
 import { randomUUID } from 'node:crypto';
 import { expect, type APIRequestContext } from '@playwright/test';
-import { FORM_EDITOR, logInByApi } from './cms';
+import { signedIn } from './editors';
+import { fields, type Entry } from './entries';
 import { APPLICANT } from './forms';
 import { TRAP_FIELD } from '../../src/forms/definition';
 
 const SETTINGS = '/api/globals/demo-request-form';
 
-export type DemoSettings = Record<string, unknown> & {
-  alertAddress?: string | null;
-  confirmationSubject: string;
-  fields: { company: { placeholder: string } };
-};
+/** The demo request form's settings, typed from `src/payload-types.ts` (`entries.ts`). */
+export type DemoSettings = Entry<'demo-request-form'>;
 
 /**
  * A valid demo request sent straight to the server, as a script would send it
@@ -46,24 +44,15 @@ export async function postDemoRequest(
 export async function readDemoSettings(request: APIRequestContext): Promise<DemoSettings> {
   const response = await request.get(`${SETTINGS}?depth=0`);
   expect(response.ok()).toBe(true);
-  const { id, globalType, createdAt, updatedAt, ...settings } = await response.json();
-  return settings;
+  return fields(await response.json());
 }
 
 /**
- * Publishes the settings as the form editor. A sign-in to that editor
- * elsewhere in the run can erase this one's session (`cms.ts`), and the
- * publish is then refused as if nobody were signed in: so it is signed in
- * afresh and asked again, as `readerGet` does.
+ * Publishes the settings as the running suite's editor — signed in afresh and
+ * asked again if the publish is refused as if nobody were signed in
+ * (`editors.ts`).
  */
 export async function publishDemoSettings(request: APIRequestContext, settings: DemoSettings): Promise<void> {
-  for (let attempt = 1; ; attempt++) {
-    const response = await request.post(SETTINGS, { data: { ...settings, _status: 'published' } });
-    const lostSession = response.status() === 401 || response.status() === 403;
-    if (!lostSession || attempt === 3) {
-      expect(response.ok(), await response.text()).toBe(true);
-      return;
-    }
-    await logInByApi(request, FORM_EDITOR);
-  }
+  const response = await signedIn(request).post(SETTINGS, { data: { ...settings, _status: 'published' } });
+  expect(response.ok(), await response.text()).toBe(true);
 }

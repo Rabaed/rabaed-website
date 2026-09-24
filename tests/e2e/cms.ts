@@ -1,7 +1,8 @@
 /**
- * What the CMS suites share: where the admin lives, and the editor account the
- * test server creates in its throwaway database before the build
- * (`scripts/test-server.mjs`).
+ * What the CMS suites share: where the admin lives, how to sign in through it,
+ * pictures to upload, and how long a publish is given to reach a visitor. Who
+ * signs in is `editors.ts`'s; an entry read, saved and put back is
+ * `entries.ts`'s.
  *
  * `ADMIN_PATH` is restated rather than imported from the application, for the
  * reason `routes.ts` gives: a test that reads its expectation out of the code
@@ -9,189 +10,9 @@
  */
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import sharp from 'sharp';
+import { invited, suiteEditor } from './editors';
 
 export const ADMIN_PATH = '/maktab';
-
-type Editor = { readonly email: string; readonly password: string };
-
-/** Exists only in the database the test server creates and deletes. */
-export const TEST_EDITOR = {
-  email: 'editor@rabaed.test',
-  password: 'test-editor-password-19',
-} as const;
-
-/**
- * The blog suite's own account. Payload records a login by reading the
- * editor's list of sessions, adding one and writing the list back, so two
- * suites signing in to one account in the same instant can erase each other's
- * session — `cms.spec.ts` explains how that surfaced. Suites that run side by
- * side, as those two do, therefore sign in as different editors.
- */
-export const BLOG_EDITOR = {
-  email: 'blog-editor@rabaed.test',
-  password: 'test-editor-password-23',
-} as const;
-
-/** The FAQ suite's own account, for the same reason. */
-export const FAQ_EDITOR = {
-  email: 'faq-editor@rabaed.test',
-  password: 'test-editor-password-22',
-} as const;
-
-/** The case studies suite's own account, for the same reason as `BLOG_EDITOR`. */
-export const CASE_STUDIES_EDITOR = {
-  email: 'case-studies-editor@rabaed.test',
-  password: 'test-editor-password-24',
-} as const;
-
-/**
- * The form suite's two accounts (ticket 27): one that its side-by-side tests
- * share to read what they stored (`forms.ts` explains how they share it), and
- * one for its tests that change the forms' settings, one at a time.
- */
-export const FORM_READER = {
-  email: 'form-reader@rabaed.test',
-  password: 'test-editor-password-27r',
-} as const;
-
-export const FORM_EDITOR = {
-  email: 'form-editor@rabaed.test',
-  password: 'test-editor-password-27e',
-} as const;
-
-/**
- * The partnership application's settings account (ticket 29). Its test
- * changes that form's alert address while the tests above change the demo
- * request form's, so the two run side by side — and they need accounts of
- * their own, or one login would erase the other's session.
- */
-export const PARTNERSHIP_FORM_EDITOR = {
-  email: 'partnership-form-editor@rabaed.test',
-  password: 'test-editor-password-29',
-} as const;
-
-/** The page-text suite's own account (ticket 53), for the same reason as `BLOG_EDITOR`. */
-export const PAGES_EDITOR = {
-  email: 'pages-editor@rabaed.test',
-  password: 'test-editor-password-53',
-} as const;
-
-/** The tool page's text suite's own account (ticket 54), for the same reason as `BLOG_EDITOR`. */
-export const TOOL_PAGE_EDITOR = {
-  email: 'tool-page-editor@rabaed.test',
-  password: 'test-editor-password-54',
-} as const;
-
-/** The product page suite's own account (ticket 57), for the same reason as `BLOG_EDITOR`. */
-export const PRODUCT_EDITOR = {
-  email: 'product-editor@rabaed.test',
-  password: 'test-editor-password-57',
-} as const;
-
-/** The partnership page's text suite's own account (ticket 55), for the same reason as `BLOG_EDITOR`. */
-export const PARTNERSHIP_PAGE_EDITOR = {
-  email: 'partnership-page-editor@rabaed.test',
-  password: 'test-editor-password-55',
-} as const;
-
-/** The referral page's text suite's own account (ticket 56), for the same reason as `BLOG_EDITOR`. */
-export const REFERRAL_PAGE_EDITOR = {
-  email: 'referral-page-editor@rabaed.test',
-  password: 'test-editor-password-56p',
-} as const;
-
-/** The Referral Program values suite's own account (ticket 56), for the same reason as `BLOG_EDITOR`. */
-export const REFERRAL_VALUES_EDITOR = {
-  email: 'referral-values-editor@rabaed.test',
-  password: 'test-editor-password-56v',
-} as const;
-
-/** The home page's text suite's own account (ticket 58), for the same reason as `BLOG_EDITOR`. */
-export const HOME_EDITOR = {
-  email: 'home-editor@rabaed.test',
-  password: 'test-editor-password-58',
-} as const;
-
-/** The site-wide words suite's own account (ticket 59), for the same reason as `BLOG_EDITOR`. */
-export const SITE_WORDS_EDITOR = {
-  email: 'site-words-editor@rabaed.test',
-  password: 'test-editor-password-59',
-} as const;
-
-/** The Trust strip suite's own account (ticket 20), for the same reason as `BLOG_EDITOR`. */
-export const TRUST_STRIP_EDITOR = {
-  email: 'trust-strip-editor@rabaed.test',
-  password: 'test-editor-password-20',
-} as const;
-
-/** The AI crawler rules' suite's own account (ticket 33), for the same reason as `BLOG_EDITOR`. */
-export const CRAWLERS_EDITOR = {
-  email: 'crawlers-editor@rabaed.test',
-  password: 'test-editor-password-33',
-} as const;
-
-/** The search settings suite's own account (ticket 26), for the same reason as `BLOG_EDITOR`. */
-export const SEARCH_EDITOR = {
-  email: 'search-editor@rabaed.test',
-  password: 'test-editor-password-26',
-} as const;
-
-/** The launch articles' suite's own account (ticket 38), for the same reason as `BLOG_EDITOR`. */
-export const LAUNCH_ARTICLES_EDITOR = {
-  email: 'launch-articles-editor@rabaed.test',
-  password: 'test-editor-password-38',
-} as const;
-
-/** The answer-first copy pass's own account (ticket 35), for the same reason as `BLOG_EDITOR`. */
-export const ANSWER_FIRST_EDITOR = {
-  email: 'answer-first-editor@rabaed.test',
-  password: 'test-editor-password-35',
-} as const;
-
-/** The English pages' own account (ticket 42), for the same reason as `BLOG_EDITOR`. */
-export const ENGLISH_PAGES_EDITOR = {
-  email: 'english-pages-editor@rabaed.test',
-  password: 'test-editor-password-42',
-} as const;
-
-/** The stale-render suite's own account (ticket 64), for the same reason as `BLOG_EDITOR`. */
-export const STALE_RENDER_EDITOR = {
-  email: 'stale-render-editor@rabaed.test',
-  password: 'test-editor-password-64',
-} as const;
-
-/** The proof figures' sources suite's own account (ticket 47), for the same reason as `BLOG_EDITOR`. */
-export const PROOF_FIGURES_EDITOR = {
-  email: 'proof-figures-editor@rabaed.test',
-  password: 'test-editor-password-47',
-} as const;
-
-/** Every account the test server creates. */
-export const TEST_EDITORS: readonly Editor[] = [
-  TEST_EDITOR,
-  BLOG_EDITOR,
-  FAQ_EDITOR,
-  CASE_STUDIES_EDITOR,
-  FORM_READER,
-  FORM_EDITOR,
-  PARTNERSHIP_FORM_EDITOR,
-  PAGES_EDITOR,
-  TOOL_PAGE_EDITOR,
-  PRODUCT_EDITOR,
-  PARTNERSHIP_PAGE_EDITOR,
-  REFERRAL_PAGE_EDITOR,
-  REFERRAL_VALUES_EDITOR,
-  HOME_EDITOR,
-  SITE_WORDS_EDITOR,
-  TRUST_STRIP_EDITOR,
-  CRAWLERS_EDITOR,
-  SEARCH_EDITOR,
-  LAUNCH_ARTICLES_EDITOR,
-  ANSWER_FIRST_EDITOR,
-  ENGLISH_PAGES_EDITOR,
-  STALE_RENDER_EDITOR,
-  PROOF_FIGURES_EDITOR,
-];
 
 /** One paragraph, in the shape the CMS's rich text editor saves. */
 export function richText(text: string, locale: 'ar' | 'en') {
@@ -285,110 +106,18 @@ export async function transparentMark(size: { width: number; height: number }): 
     .toBuffer();
 }
 
-/** Signs in through the admin's own login form, as `editor`. */
-export async function logInAs(page: Page, editor: Editor): Promise<void> {
+/**
+ * Signs in through the admin's own login form, as the running suite's editor —
+ * whose account is invited first if this is its first sign-in.
+ */
+export async function logIn(page: Page): Promise<void> {
+  const editor = suiteEditor();
+  await invited(editor);
   await page.goto(`${ADMIN_PATH}/login`);
   await page.getByLabel('Email').fill(editor.email);
   await page.getByLabel('Password').fill(editor.password);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page).not.toHaveURL(/\/login/);
-}
-
-/** Signs in through the admin's own login form, as Ahmed would. */
-export async function logIn(page: Page): Promise<void> {
-  await logInAs(page, TEST_EDITOR);
-}
-
-/**
- * Where the admin keeps which tab an editor last had open, inside that
- * entry's preference: the path of a page entry's tabs field, which is the
- * second field of every page global (`src/cms/page-globals.ts`) and has no
- * name of its own, so Payload calls it by its place.
- *
- * Restated here rather than worked out, for `routes.ts`'s reason. If Payload
- * ever names it something else, `openPageEntry` says so — the tab it asks the
- * admin to reopen is then never reopened, and the wait below fails.
- */
-const TABS_FIELD_PATH = '_index-1';
-
-/** How Payload marks the button of the tab it has open. */
-const OPEN_TAB = /tabs-field__tab-button--active/;
-
-/** A page entry's section tabs, in the order its sections are in. */
-const SECTION_TABS = '.tabs-field__tabs .tabs-field__tab-button';
-
-/**
- * Opens a page entry in the admin, with its section tabs ready to be clicked.
- *
- * Going there is not enough. The admin remembers which tab an editor had open
- * and restores it from a preference it fetches when the form mounts
- * (`@payloadcms/ui/fields/Tabs`, under the key `global-<slug>`): the answer,
- * whenever it lands, sets the open tab to the remembered one. A tab clicked
- * while that is still in flight is therefore set and then unset — the button
- * keeps the focus the click gave it, and the panel beside the tabs goes back
- * to another section's fields. That is what failed twice on CI as an
- * assertion that never found a switch (ticket 61), and holding that one
- * request up reproduces it every time, as `home-text.spec.ts` does.
- *
- * Waiting for the answer to arrive is not enough either: the admin acts on it
- * a render later, so a click in between is still lost. What is waited for
- * here is the restore itself, which this makes visible by telling the admin
- * first — through the same preference — that the second section is the one
- * this editor last had open. The entry then opens on its first section and
- * moves to its second, and that move is the restore, done. Nothing can undo a
- * click afterwards: the restore happens once, and from then on the admin
- * answers its own question out of what the clicks themselves have written.
- *
- * For entries of two sections or more, which is every page global but the
- * closing section's one.
- */
-export async function openPageEntry(page: Page, globalSlug: string): Promise<void> {
-  const remembered = await page.request.post(`/api/payload-preferences/global-${globalSlug}`, {
-    data: { value: { fields: { [TABS_FIELD_PATH]: { tabIndex: 1 } } } },
-  });
-  expect(remembered.ok(), await remembered.text()).toBe(true);
-
-  await page.goto(`${ADMIN_PATH}/globals/${globalSlug}`);
-  const second = page.locator(SECTION_TABS).nth(1);
-  await expect(second, `the admin never reopened the second section of ${globalSlug}, so the restore that undoes a click has still to come`).toHaveClass(
-    OPEN_TAB,
-  );
-}
-
-/**
- * Opens one section of a page entry, and leaves that section's own fields in
- * the panel beside the tabs.
- *
- * Clicking the tab is what an editor does; waiting for the panel to be this
- * section's is what tells the test it may read it. Without that, a test reads
- * whichever panel is there — the section it asked for, or the one the admin
- * put back (`openPageEntry`), or one it opened earlier — and an assertion
- * about a section can pass on another section's fields.
- *
- * The panel itself is unnamed in the markup — every section's is
- * `tabs-field__tab` — so what is waited for is the tab whose panel it is:
- * Payload marks the open tab's button, and draws the panel of that one tab
- * and no other.
- */
-export async function openSection(page: Page, name: string): Promise<void> {
-  await page.getByRole('button', { name, exact: true }).click();
-  await expectSectionOpen(page, name);
-}
-
-/** That `name` is the section the admin has open, without asking it to open one. */
-export async function expectSectionOpen(page: Page, name: string): Promise<void> {
-  const tab = page.getByRole('button', { name, exact: true });
-  await expect(tab, `the ${name} section is not the one the admin has open`).toHaveClass(OPEN_TAB);
-}
-
-/**
- * Signs in through the API rather than the form. For putting things back
- * after a test, which must work whether or not the test got as far as signing
- * in — the form redirects away when there is already a session.
- */
-export async function logInByApi(request: APIRequestContext, editor: Editor = TEST_EDITOR): Promise<void> {
-  const response = await request.post('/api/users/login', { data: editor });
-  expect(response.ok()).toBe(true);
 }
 
 /** A legal document, as the API gives it to a signed-in editor: what is published. */

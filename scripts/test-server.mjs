@@ -1,7 +1,8 @@
 /**
  * The server the end-to-end suite runs against (playwright.config.ts): a
- * throwaway database, migrated and given the suites' editor accounts, then the
- * application built and started against it.
+ * throwaway database, migrated and given the account that invites the suites'
+ * editors (`tests/e2e/editors.ts`), then the application built and started
+ * against it.
  *
  * Throwaway on purpose. The spec asks for CMS content in tests to be real
  * content in a real database, not fixtures injected at render time; starting
@@ -26,7 +27,7 @@ import { randomBytes } from 'node:crypto';
 import { cp, lstat, readdir, readFile, readlink, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NEXT_BIN, PAYLOAD_BIN, repoRoot, runNode, startDatabase } from './local-database.mjs';
-import { TEST_EDITORS } from '../tests/e2e/cms.ts';
+import { KEYHOLDER } from '../tests/e2e/editors.ts';
 import { documentsDirectory, outboxDirectory, testServerScratch } from '../tests/e2e/forms.ts';
 
 const port = Number(process.env.PORT ?? 3100);
@@ -60,13 +61,12 @@ const env = {
 
 try {
   await runNode([PAYLOAD_BIN, 'migrate'], env);
-  for (const editor of TEST_EDITORS) {
-    await runNode([PAYLOAD_BIN, 'run', 'scripts/create-editor.ts'], {
-      ...env,
-      EDITOR_EMAIL: editor.email,
-      EDITOR_PASSWORD: editor.password,
-    });
-  }
+  // One account, which invites each suite's own on its first sign-in (`tests/e2e/editors.ts`).
+  await runNode([PAYLOAD_BIN, 'run', 'scripts/create-editor.ts'], {
+    ...env,
+    EDITOR_EMAIL: KEYHOLDER.email,
+    EDITOR_PASSWORD: KEYHOLDER.password,
+  });
   if (publishing) {
     await copyBuild(path.join(repoRoot, '.next'), path.join(repoRoot, buildDir));
     await moveOrigin(path.join(repoRoot, buildDir), Number(process.env.FIRST_SERVER_PORT), port);

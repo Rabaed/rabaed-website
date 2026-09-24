@@ -27,7 +27,8 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { ADMIN_PATH, FORM_EDITOR, PARTNERSHIP_FORM_EDITOR, logInAs, logInByApi, reaching } from './cms';
+import { logIn, ADMIN_PATH, reaching } from './cms';
+import { signIn } from './editors';
 import { postDemoRequest, publishDemoSettings, readDemoSettings } from './demo-request-api';
 import { POUR_TRACKER, checksumOf } from './pour-tracker';
 import { TRAP_FIELD } from '../../src/forms/definition';
@@ -245,7 +246,7 @@ test.describe('mail and wording from the admin', () => {
     page,
     request,
   }) => {
-    await logInByApi(request, FORM_EDITOR);
+    await signIn(request);
     expect((await readDemoSettings(request)).alertAddress ?? '').toBe('');
 
     const applicant = uniqueApplicant('demo-unaddressed');
@@ -260,7 +261,7 @@ test.describe('mail and wording from the admin', () => {
     page,
     request,
   }) => {
-    await logInByApi(request, FORM_EDITOR);
+    await signIn(request);
     const original = await readDemoSettings(request);
     const team = uniqueApplicant('team').email;
 
@@ -300,7 +301,7 @@ test.describe('mail and wording from the admin', () => {
     request,
     baseURL,
   }) => {
-    await logInByApi(request, FORM_EDITOR);
+    await signIn(request);
     const original = await readDemoSettings(request);
     const team = uniqueApplicant('team').email;
     const { email } = uniqueApplicant('demo-capped');
@@ -336,7 +337,7 @@ test.describe('mail and wording from the admin', () => {
     baseURL,
   }) => {
     const ADVERT = 'اربح ٥٠٠٠ ريال الآن: www.win-now.example';
-    await logInByApi(request, FORM_EDITOR);
+    await signIn(request);
     const original = await readDemoSettings(request);
     const team = uniqueApplicant('team').email;
 
@@ -376,7 +377,7 @@ test.describe('mail and wording from the admin', () => {
   }) => {
     const PLACEHOLDER = 'اسم جهة العمل — للاختبار';
     const SUBJECT = 'ربائد — تأكيد للاختبار';
-    await logInByApi(request, FORM_EDITOR);
+    await signIn(request);
     const original = await readDemoSettings(request);
 
     try {
@@ -406,7 +407,7 @@ test.describe('mail and wording from the admin', () => {
     const applicant = uniqueApplicant('demo-admin');
     await sendDemoRequest(page, '/start', applicant);
 
-    await logInAs(page, FORM_EDITOR);
+    await logIn(page);
     await page.goto(`${ADMIN_PATH}/collections/form-submissions`);
     await expect(page.getByRole('link', { name: APPLICANT.name }).first()).toBeVisible();
     await expect(page.getByText(applicant.email)).toBeVisible();
@@ -424,7 +425,7 @@ test.describe('mail and wording from the admin', () => {
     await sendReferral(page, applicant);
     const [stored] = await submissionsFrom(request, applicant.email);
 
-    await logInAs(page, FORM_EDITOR);
+    await logIn(page);
     await page.goto(`${ADMIN_PATH}/collections/form-submissions/${stored.id}`);
     const open = page.getByRole('link', { name: 'Open document' });
     await expect(open).toHaveCount(2);
@@ -934,8 +935,8 @@ test.describe('the partnership application', () => {
 /**
  * The partnership application's own alert address, which only this test
  * changes and which it puts back, for the reason the demo request form's
- * settings tests give. It signs in as an editor of its own (`cms.ts`), since
- * it runs beside those and they would erase each other's session.
+ * settings tests give. It runs beside those on another worker, and so signs
+ * in as another account (`editors.ts`): they would erase each other's session.
  */
 test.describe('the partnership application, alerted and confirmed', () => {
   const SETTINGS = '/api/globals/partnership-application-form';
@@ -944,7 +945,7 @@ test.describe('the partnership application, alerted and confirmed', () => {
     page,
     request,
   }) => {
-    await logInByApi(request, PARTNERSHIP_FORM_EDITOR);
+    await signIn(request);
     const read = await request.get(`${SETTINGS}?depth=0`);
     expect(read.ok()).toBe(true);
     const { id, globalType, createdAt, updatedAt, ...original } = await read.json();
@@ -1089,7 +1090,7 @@ test.describe('the Pour Tracker download', () => {
   });
 
   test('the team is alerted and the engineer is sent the file’s three steps', async ({ page, request }) => {
-    await logInByApi(request, FORM_EDITOR);
+    await signIn(request);
     const settings = '/api/globals/tool-download-form';
     const published = async () => (await readerGet(request, `${settings}?depth=0`)).json();
     const original = await published();

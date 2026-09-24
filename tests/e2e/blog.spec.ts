@@ -8,20 +8,11 @@
  * reads the order the index shows, which an article another test had
  * published a moment earlier would disturb. They sign in as an editor of
  * their own, so that `cms.spec.ts`, running beside them, never loses a session
- * to them (`cms.ts`).
+ * to them (`editors.ts`).
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import {
-  ADMIN_PATH,
-  BLOG_EDITOR,
-  logInByApi,
-  pictureFile,
-  reachesVisitors,
-  reaching,
-  richText,
-  uploadImage,
-  uploadSharingImage,
-} from './cms';
+import { ADMIN_PATH, pictureFile, reachesVisitors, reaching, richText, uploadImage, uploadSharingImage } from './cms';
+import { signIn } from './editors';
 import { sidewaysOverflow } from './geometry';
 import { nodesOf, structuredData, trail } from './structured-data';
 
@@ -111,7 +102,7 @@ async function visit(request: APIRequestContext, path: string) {
 }
 
 test.afterEach(async ({ page }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   for (const id of createdPosts) await page.request.delete(`/api/posts/${id}`);
   if (cover !== null) await page.request.delete(`/api/media/${cover}`);
   createdPosts = [];
@@ -124,7 +115,7 @@ test('a published article is on the blog index and at its own address, whole in 
   browser,
   baseURL,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const fields = article();
   await createPost(page.request, fields);
 
@@ -190,7 +181,7 @@ test('a draft is nowhere a visitor can reach it; the editor previews it, then pu
   page,
   request,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const fields = article();
   const { id } = await createPost(page.request, fields, 'draft');
 
@@ -219,7 +210,7 @@ test('a draft saved over a published article reaches the editor’s preview, nev
   page,
   request,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const fields = article();
   const { id } = await createPost(page.request, fields);
 
@@ -248,7 +239,7 @@ test('a published article describes itself in article data, opening with its ans
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const fields = article();
   await createPost(page.request, fields);
   const address = `${baseURL}/blog/${fields.slug}`;
@@ -291,7 +282,7 @@ test('a published article describes itself in article data, opening with its ans
 });
 
 test('the index lists articles newest first, a page at a time', async ({ page, request, baseURL }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const articles = Array.from({ length: POSTS_PER_PAGE + 1 }, (_, day) =>
     article({ publishedAt: `2026-01-${String(day + 1).padStart(2, '0')}T12:00:00.000Z` }),
   );
@@ -337,7 +328,7 @@ test('an article is in the sitemap while it is published, and leaves it when unp
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const fields = article();
   const { id } = await createPost(page.request, fields);
   const address = `<loc>${baseURL}/blog/${fields.slug}</loc>`;
@@ -361,7 +352,7 @@ test('an article exists per language, and a missing translation offers the one t
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const arabic = article();
   await createPost(page.request, arabic);
 
@@ -451,7 +442,7 @@ test('an article exists per language, and a missing translation offers the one t
 });
 
 test('the admin shows at a glance which articles are missing a translation', async ({ page, request }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const arabic = article();
   const { id } = await createPost(page.request, arabic);
 
@@ -492,7 +483,7 @@ test('the admin shows at a glance which articles are missing a translation', asy
 test('an article cannot be published without an opening answer of 30 to 60 words, or on an address already taken', async ({
   page,
 }) => {
-  await logInByApi(page.request, BLOG_EDITOR);
+  await signIn(page.request);
   const tooShort = await savePost(page.request, article({ answer: 'جواب قصير جداً.' }), 'published');
   expect(tooShort.status()).toBe(400);
   const tooLong = await savePost(page.request, article({ answer: `${ANSWER} ${ANSWER}` }), 'published');
@@ -555,7 +546,7 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
   }
 
   test('a cover image given a new description', async ({ page, request }) => {
-    await logInByApi(page.request, BLOG_EDITOR);
+    await signIn(page.request);
     const fields = article();
     await createPost(page.request, fields);
     const path = `/blog/${fields.slug}`;
@@ -585,7 +576,7 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
    * server's cache; Vercel's keeps its own, and was not watched.
    */
   test('a cover image given a new file', async ({ page, request }) => {
-    await logInByApi(page.request, BLOG_EDITOR);
+    await signIn(page.request);
     const fields = article();
     await createPost(page.request, fields);
     const path = `/blog/${fields.slug}`;
@@ -615,7 +606,7 @@ test.describe('an image changed in the CMS reaches the pages that show it', () =
   });
 
   test('a sharing image given a new description', async ({ page, request }) => {
-    await logInByApi(page.request, BLOG_EDITOR);
+    await signIn(page.request);
     const card = await uploadSharingImage(page.request, 'بطاقة مقالة الاختبار');
     expect(card.id, card.url).toBeGreaterThan(0);
 

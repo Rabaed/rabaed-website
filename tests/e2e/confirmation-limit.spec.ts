@@ -14,7 +14,7 @@
  * for the reason `routes.ts` gives.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { FORM_EDITOR, logInByApi } from './cms';
+import { signIn } from './editors';
 import { postDemoRequest, publishDemoSettings, readDemoSettings } from './demo-request-api';
 import { mailTo, readerDelete, readerGet, submissionsFrom, uniqueApplicant, type StoredSubmission } from './forms';
 
@@ -35,7 +35,7 @@ test('the site sends thirty confirmations an hour at most; a request past them i
   request,
   baseURL,
 }) => {
-  await logInByApi(request, FORM_EDITOR);
+  await signIn(request);
   const original = await readDemoSettings(request);
   const team = uniqueApplicant('team').email;
 

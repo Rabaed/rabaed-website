@@ -16,10 +16,11 @@
  * The reorder is sent to the endpoint the admin's list calls when a row is
  * dropped, rather than dragged with the mouse.
  *
- * The tests sign in as an editor of their own (`cms.ts`) and run one at a time.
+ * The tests sign in as an editor of their own (`editors.ts`) and run one at a time.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_PATH, FAQ_EDITOR, logInAs, logInByApi, reaching } from './cms';
+import { logIn, ADMIN_PATH, reaching } from './cms';
+import { signIn } from './editors';
 
 test.describe.configure({ mode: 'default' });
 
@@ -87,7 +88,7 @@ async function preview(page: Page, path: string): Promise<void> {
 }
 
 test.afterEach(async ({ page }) => {
-  await logInByApi(page.request, FAQ_EDITOR);
+  await signIn(page.request);
   for (const id of created) await page.request.delete(`/api/faq-entries/${id}`);
   created = [];
   // Leave the browser out of preview for whatever runs next in it.
@@ -95,7 +96,7 @@ test.afterEach(async ({ page }) => {
 });
 
 test('the 31 questions are in the CMS, grouped by the page they are on', async ({ page }) => {
-  await logInByApi(page.request, FAQ_EDITOR);
+  await signIn(page.request);
   let total = 0;
   for (const [key, faqPage] of Object.entries(FAQ_PAGES) as [FaqPage, (typeof FAQ_PAGES)[FaqPage]][]) {
     const published = (await entries(page.request, key)).filter((entry) => entry._status === 'published');
@@ -110,7 +111,7 @@ test('every page shows its questions from the CMS, in the CMS’s order, as nati
   request,
   browser,
 }) => {
-  await logInByApi(page.request, FAQ_EDITOR);
+  await signIn(page.request);
   const context = await browser.newContext({ javaScriptEnabled: false });
   const visitor = await context.newPage();
 
@@ -133,7 +134,7 @@ test('a question added in the admin is saved as a draft: the editor previews it,
   // named in braces, inserted rather than typed.
   const answer = 'نعم. يُحفظ في ملف `concrete_db.json` ويُحتسب {payout} ريال عن كل مشروع.';
 
-  await logInAs(page, FAQ_EDITOR);
+  await logIn(page);
   await page.goto(`${ADMIN_PATH}/collections/faq-entries/create`);
   await page.locator('#field-page').click();
   await page.locator('.rs__option', { hasText: FAQ_PAGES.partnership.admin }).click();
@@ -161,7 +162,7 @@ test('a question is reordered, hidden and removed from the admin, and the previe
   page,
   request,
 }) => {
-  await logInAs(page, FAQ_EDITOR);
+  await logIn(page);
   const first = await draftEntry(page.request, 'tool', `سؤال للإخفاء ${runId}`, 'جواب سؤال الإخفاء.');
   const second = await draftEntry(page.request, 'tool', `سؤال لإعادة الترتيب ${runId}`, 'جواب سؤال الترتيب.');
   const [top] = (await entries(page.request, 'tool')).filter((entry) => entry._status === 'published');
@@ -208,7 +209,7 @@ test('a question is reordered, hidden and removed from the admin, and the previe
 
 test('an answer edited and published in the admin reaches visitors', async ({ page, request }) => {
   const EDIT = ' — تعديل منشور للاختبار';
-  await logInAs(page, FAQ_EDITOR);
+  await logIn(page);
   const entry = (await entries(page.request, 'referral')).find((each) => each.question === 'هل هناك حد أقصى للمبالغ؟')!;
   expect(entry).toBeDefined();
 
@@ -230,7 +231,7 @@ test('an answer edited and published in the admin reaches visitors', async ({ pa
 });
 
 test('a question too long for its card, or an answer the page could not draw, is refused', async ({ page }) => {
-  await logInByApi(page.request, FAQ_EDITOR);
+  await signIn(page.request);
   const question = `سؤال مرفوض ${runId}`;
   const refused = [
     { question: 'س'.repeat(161), answer: 'جواب.' },

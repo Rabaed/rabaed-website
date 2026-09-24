@@ -33,11 +33,10 @@
  * be built while it holds. So the lock lets go at `HELD_AT_MOST` whatever the
  * test is doing, and the test then fails in words that say so.
  */
-import { test, expect, type APIRequestContext, type APIResponse } from '@playwright/test';
+import type { APIResponse } from '@playwright/test';
 import pg from 'pg';
-import { STALE_RENDER_EDITOR, logInByApi, reachesVisitors } from './cms';
-
-const GLOBAL = '/api/globals/tool-page';
+import { reachesVisitors } from './cms';
+import { test, expect } from './entries';
 
 /**
  * The longest the site settings are held, whatever happens. A hold is about
@@ -45,9 +44,6 @@ const GLOBAL = '/api/globals/tool-page';
  * seconds — and every page being built waits for as long as it lasts.
  */
 const HELD_AT_MOST = 10_000;
-
-type Words = { ar: string; en: string | null };
-type ToolPage = { upsell: { lead: Words } } & Record<string, unknown>;
 
 /**
  * The test server's database: `TEST_PORT + 2000`, as `scripts/test-server.mjs`
@@ -80,33 +76,15 @@ function holdAtMost(database: pg.Client) {
   return hold;
 }
 
-/** What the CMS adds to an entry and its list rows, which is not sent back — as `tool-page-text.spec.ts` has it. */
-const NOT_SENT = new Set(['id', 'globalType', 'createdAt', 'updatedAt', '_status']);
-
-function fields<T>(value: T): T {
-  if (Array.isArray(value)) return value.map(fields) as T;
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value)
-        .filter(([key]) => !NOT_SENT.has(key))
-        .map(([key, each]) => [key, fields(each)]),
-    ) as T;
-  }
-  return value;
-}
-
 /**
  * Given its own deadline: one that outlives the ceiling, so a publish the lock
  * held up is answered once the ceiling lets go, but never the test's two minutes.
  */
-async function publish(editor: APIRequestContext, entry: ToolPage): Promise<void> {
-  const response = await editor.post(GLOBAL, { data: { ...entry, _status: 'published' }, timeout: HELD_AT_MOST + 10_000 });
-  expect(response.ok(), await response.text()).toBe(true);
-}
+const PUBLISH_HELD_UP = { timeout: HELD_AT_MOST + 10_000 };
 
-test('a change published while a page is being built still reaches that page', async ({ page, request, baseURL }) => {
-  await logInByApi(page.request, STALE_RENDER_EDITOR);
-  const entry = fields((await (await page.request.get(`${GLOBAL}?depth=0`)).json()) as ToolPage);
+test('a change published while a page is being built still reaches that page', async ({ request, baseURL, cms }) => {
+  const tool = cms.entry('tool-page');
+  const entry = await tool.published();
   // A space at the end of the paragraph: in the HTML, but drawn nowhere.
   const lead = `${entry.upsell.lead.ar} `;
   const reworded = { ...entry, upsell: { ...entry.upsell, lead: { ...entry.upsell.lead, ar: lead } } };
@@ -132,7 +110,7 @@ test('a change published while a page is being built still reaches that page', a
     await Promise.all([database.connect(), watcher.connect()]);
 
     // Every page marked, so that the next visit to /tool builds it again.
-    await publish(page.request, entry);
+    await tool.publish(entry, PUBLISH_HELD_UP);
 
     // The site settings held: a build of /tool reads the tool page's words, then waits.
     await database.query('BEGIN');
@@ -162,7 +140,7 @@ test('a change published while a page is being built still reaches that page', a
     // be written before the mark rather than after it. Then it lets go, and
     // caches /tool as it read it: with the words from before, stamped after
     // the publish.
-    await publish(page.request, reworded);
+    await tool.publish(reworded, PUBLISH_HELD_UP);
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await hold.letGo();
     expect(
@@ -182,13 +160,13 @@ test('a change published while a page is being built still reaches that page', a
     // `HIT` for the whole wait, if it fails, is the page that build cached.
     await reachesVisitors(request, '/tool', `${lead}</p>`, 'the words published while /tool was being built');
   } finally {
-    // The words go back whatever happened above, before anything that could throw.
+    // The lock let go whatever happened above, before anything that could
+    // throw; the words go back when the test ends (`entries.ts`).
     try {
       await hold?.letGo();
       await building?.catch(() => undefined);
     } finally {
       await Promise.allSettled([database.end(), watcher.end()]);
-      await publish(page.request, entry);
     }
   }
 });

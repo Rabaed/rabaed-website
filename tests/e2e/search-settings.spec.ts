@@ -16,15 +16,14 @@
  * own are the product page's suite's to try (`product-text.spec.ts`); a
  * refused change is never saved, and is tried here.
  */
-import { test, expect, type APIRequestContext } from '@playwright/test';
 import sharp from 'sharp';
-import { SEARCH_EDITOR, logInByApi, uploadSharingImage } from './cms';
+import { uploadSharingImage } from './cms';
+import { test, expect, fields, type Entry } from './entries';
 
 test.describe.configure({ mode: 'default' });
 
-type Words = { ar: string; en?: string | null };
-type Search = { title: Words; description: Words; sharingImage?: number | null };
-type Entry = { languages: string[]; search: Search } & Record<string, unknown>;
+type Search = Entry<'home-page'>['search'];
+type Words = Search['title'];
 
 /** Each page's address, and its own entry. */
 const PAGES = [
@@ -38,46 +37,20 @@ const PAGES = [
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
 
-const LEFT_OUT = new Set(['id', 'createdAt', 'updatedAt', 'globalType', '_status']);
-
-/** An entry's fields alone, ready to be sent back: no ids, no dates. */
-function fields<T>(value: T): T {
-  if (Array.isArray(value)) return value.map(fields) as T;
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).filter(([key]) => !LEFT_OUT.has(key)).map(([key, each]) => [key, fields(each)]),
-    ) as T;
-  }
-  return value;
-}
-
-/** A page's entry as published, or as its newest draft. */
-async function entry(editor: APIRequestContext, slug: string, draft = false): Promise<Entry> {
-  const response = await editor.get(`/api/globals/${slug}?depth=0${draft ? '&draft=true' : ''}`);
-  expect(response.ok(), await response.text()).toBe(true);
-  return fields(await response.json());
-}
-
-function publish(editor: APIRequestContext, slug: string, data: object) {
-  return editor.post(`/api/globals/${slug}`, { data: { ...data, _status: 'published' } });
-}
-
-test('every page is described in search by what its own entry has published', async ({ page, request }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
+test('every page is described in search by what its own entry has published', async ({ request, cms }) => {
 
   // The referral page's words name an amount the page inserts, which the next
   // test holds it to.
   for (const [path, slug] of PAGES.filter(([path]) => path !== '/referral')) {
-    const { search } = await entry(page.request, slug);
+    const { search } = await cms.entry(slug).published();
     const html = await (await request.get(path)).text();
     expect(html, `${path} title`).toContain(search.title.ar);
     expect(html, `${path} description`).toContain(search.description.ar);
   }
 });
 
-test('the referral page names the programme’s amounts rather than stating them', async ({ page, request }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
-  const { search } = await entry(page.request, 'referral-page');
+test('the referral page names the programme’s amounts rather than stating them', async ({ request, cms }) => {
+  const { search } = await cms.entry('referral-page').published();
   const html = await (await request.get('/referral')).text();
 
   // What the CMS holds has the names in it …
@@ -91,12 +64,13 @@ test('the referral page names the programme’s amounts rather than stating them
   }
 });
 
-test('a search title longer than a result shows, and an empty one, are refused', async ({ page }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
-  const home = await entry(page.request, 'home-page');
+test('a search title longer than a result shows, and an empty one, are refused', async ({ page, cms }) => {
+  const homePage = cms.entry('home-page');
+  const referralPage = cms.entry('referral-page');
+  const home = await homePage.published();
   const withSearch = (search: Partial<Search>) => ({ ...home, search: { ...home.search, ...search } });
 
-  const refused = {
+  const refused: Record<string, Entry<'home-page'>> = {
     'a title longer than its place': withSearch({ title: arabic('ع'.repeat(71)) }),
     'a description longer than its place': withSearch({ description: arabic('ع'.repeat(181)) }),
     'an empty title': withSearch({ title: arabic('') }),
@@ -104,7 +78,7 @@ test('a search title longer than a result shows, and an empty one, are refused',
     'an empty description': withSearch({ description: arabic('') }),
   };
   for (const [what, data] of Object.entries(refused)) {
-    const response = await publish(page.request, 'home-page', data);
+    const response = await homePage.attempt(data, 'published');
     expect(response.status(), what).toBe(400);
     // For the search title or description itself, not for some other word on the page.
     expect(await response.text(), what).toMatch(/search\.(title|description)\.ar/);
@@ -112,15 +86,15 @@ test('a search title longer than a result shows, and an empty one, are refused',
 
   // On the referral page, where an amount may be named, a name the site does
   // not hold is refused rather than shown to a visitor in braces.
-  const referral = await entry(page.request, 'referral-page');
-  const wrongName = await publish(page.request, 'referral-page', {
-    ...referral,
-    search: { ...referral.search, title: arabic('ربائد · {bonus}') },
-  });
+  const referral = await referralPage.published();
+  const wrongName = await referralPage.attempt(
+    { ...referral, search: { ...referral.search, title: arabic('ربائد · {bonus}') } },
+    'published',
+  );
   expect(wrongName.status(), 'a value the site does not hold').toBe(400);
 
-  expect((await entry(page.request, 'home-page')).search).toEqual(home.search);
-  expect((await entry(page.request, 'referral-page')).search).toEqual(referral.search);
+  expect((await homePage.published()).search).toEqual(home.search);
+  expect((await referralPage.published()).search).toEqual(referral.search);
 });
 
 /**
@@ -129,21 +103,21 @@ test('a search title longer than a result shows, and an empty one, are refused',
  * Tried on the start page's English proposal (ticket 42), whose every word has
  * its English, with only the search title's taken out.
  */
-test('a page published in English without its search title in English is refused, naming it', async ({ page }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
-  const proposal = await entry(page.request, 'start-page', true);
-  const response = await publish(page.request, 'start-page', {
-    ...proposal,
-    languages: ['ar', 'en'],
-    search: { ...proposal.search, title: { ...proposal.search.title, en: '' } },
-  });
+test('a page published in English without its search title in English is refused, naming it', async ({ page, cms }) => {
+  // The entry's newest version, which the admin opens: the proposal.
+  const newest = await page.request.get('/api/globals/start-page?depth=0&draft=true');
+  expect(newest.ok(), await newest.text()).toBe(true);
+  const proposal: Entry<'start-page'> = fields(await newest.json());
+  const response = await cms.entry('start-page').attempt(
+    { ...proposal, languages: ['ar', 'en'], search: { ...proposal.search, title: { ...proposal.search.title, en: '' } } },
+    'published',
+  );
 
   expect(response.status()).toBe(400);
   expect(await response.text()).toContain('search.title.en');
 });
 
-test('a picture of the wrong size or the wrong kind is refused, with the reason', async ({ page }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
+test('a picture of the wrong size or the wrong kind is refused, with the reason', async ({ page, cms }) => {
 
   // Every place that unfurls a link crops to 1200×630; another shape is
   // cropped differently by each of them.
@@ -158,8 +132,7 @@ test('a picture of the wrong size or the wrong kind is refused, with the reason'
   expect(small.id, 'a 600×315 picture was accepted').toBe(0);
 });
 
-test('a picture refused in place of another leaves the first one where it was', async ({ page }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
+test('a picture refused in place of another leaves the first one where it was', async ({ page, cms }) => {
   const image = await uploadSharingImage(page.request, 'صورة مشاركة تبقى');
 
   try {
@@ -189,9 +162,8 @@ test('a picture refused in place of another leaves the first one where it was', 
   }
 });
 
-test('what /llms.txt tells an assistant is what the page says, both from the CMS', async ({ page, request }) => {
-  await logInByApi(page.request, SEARCH_EDITOR);
-  const { search } = await entry(page.request, 'tool-page');
+test('what /llms.txt tells an assistant is what the page says, both from the CMS', async ({ request, cms }) => {
+  const { search } = await cms.entry('tool-page').published();
   const llms = await (await request.get('/llms.txt')).text();
 
   // The tool page's line, which an assistant quotes, is the Editor's.

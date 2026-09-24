@@ -19,7 +19,6 @@ import { test, expect } from '@playwright/test';
 import sharp from 'sharp';
 import {
   ADMIN_PATH,
-  TEST_EDITOR,
   discardLegalDraft,
   footerLink,
   lastUpdatedLine,
@@ -27,11 +26,11 @@ import {
   legalDocument,
   legalVersions,
   logIn,
-  logInByApi,
   metaDescription,
   reaching,
   todayInRiyadh,
 } from './cms';
+import { signIn, suiteEditor } from './editors';
 import { LEGAL_PAGES } from './legal-documents';
 import { nodesOf, structuredData } from './structured-data';
 
@@ -52,7 +51,7 @@ const REAL_WHATSAPP = `https://wa.me/${REAL_NUMBER}`;
 
 test.describe('site settings', () => {
   test.afterEach(async ({ page }) => {
-    await logInByApi(page.request);
+    await signIn(page.request);
     const restored = await page.request.post('/api/globals/site-settings', {
       data: {
         whatsappNumber: REAL_NUMBER,
@@ -143,7 +142,7 @@ test.describe('site settings', () => {
     // A draft saved before that visit must not be what they are rebuilt from.
     // The test above cannot see that mistake: nothing rebuilds a page after a
     // draft alone is saved, so it would pass even if pages read drafts.
-    await logInByApi(page.request);
+    await signIn(page.request);
     const published = await page.request.post('/api/globals/site-settings', {
       data: { whatsappNumber: '966500000191', _status: 'published' },
     });
@@ -167,7 +166,7 @@ test.describe('site settings', () => {
     await expect(page.getByRole('status')).toHaveCount(0);
 
     // An editor cannot be sent off the site through it, however the address is dressed up.
-    await logInByApi(page.request);
+    await signIn(page.request);
     for (const trick of ['//example.com', '/%5Cexample.com', '/%09/example.com', 'https://example.com']) {
       const offSite = await page.request.get(`/api/preview?path=${trick}`, { maxRedirects: 0 });
       expect(offSite.status(), trick).toBeGreaterThanOrEqual(300);
@@ -189,7 +188,7 @@ test.describe('legal documents', () => {
   }) => {
     // The words of that version are held to the Word documents and the
     // Reference pages by `legal-pages.spec.ts`.
-    await logInByApi(page.request);
+    await signIn(page.request);
     for (const legal of LEGAL_PAGES) {
       const document = await legalDocument(page.request, legal.slug);
       const versions = await legalVersions(page.request, document.id);
@@ -280,7 +279,7 @@ test.describe('legal documents', () => {
       // Kept as a version, with who published it and when.
       const published = await latestPublishedVersion(page.request, privacy.id);
       expect(published.version.description).toBe(DESCRIPTION);
-      expect(published.version.editedBy).toContain(TEST_EDITOR.email);
+      expect(published.version.editedBy).toContain(suiteEditor().email);
       expect(Date.now() - Date.parse(published.updatedAt)).toBeLessThan(5 * 60_000);
     } finally {
       // The draft first: publishing the old description on top of it would
@@ -297,7 +296,7 @@ test.describe('legal documents', () => {
     page,
     request,
   }) => {
-    await logInByApi(page.request);
+    await signIn(page.request);
     const privacy = await legalDocument(page.request, 'privacy');
 
     const unpublished = await page.request.patch(`/api/legal-documents/${privacy.id}`, { data: { _status: 'draft' } });
@@ -331,7 +330,7 @@ test.describe('legal documents', () => {
       const edit = (await legalVersions(page.request, referralTerms.id)).at(-1)!;
       expect(edit.version._status).toBe('draft');
       expect(edit.version.clauses[0].heading).toBe(`${heading}${EDITED}`);
-      expect(edit.version.editedBy).toContain(TEST_EDITOR.email);
+      expect(edit.version.editedBy).toContain(suiteEditor().email);
 
       // The imported version, opened in the admin.
       await page.goto(`${ADMIN_PATH}/collections/legal-documents/${referralTerms.id}/versions/${imported.id}`);
@@ -343,7 +342,7 @@ test.describe('legal documents', () => {
       const restoration = (await legalVersions(page.request, referralTerms.id)).at(-1)!;
       expect(restoration.id).not.toBe(edit.id);
       expect(restoration.version.clauses[0].heading).toBe(heading);
-      expect(restoration.version.editedBy).toContain(TEST_EDITOR.email);
+      expect(restoration.version.editedBy).toContain(suiteEditor().email);
 
       // And every earlier version is still there.
       const ids = (await legalVersions(page.request, referralTerms.id)).map((version) => version.id);
@@ -395,7 +394,7 @@ test.describe('accounts', () => {
   });
 
   test('an editor can invite another editor from inside the admin', async ({ page, browser }) => {
-    await logInByApi(page.request);
+    await signIn(page.request);
     const invited = { email: `invited-${Date.now()}@rabaed.test`, password: 'invited-editor-password' };
     const created = await page.request.post('/api/users', { data: invited });
     expect(created.ok()).toBe(true);
@@ -412,7 +411,7 @@ test.describe('accounts', () => {
 
 test.describe('images', () => {
   test('an uploaded photograph is stored as WebP, with narrower copies made from it', async ({ page }) => {
-    await logInByApi(page.request);
+    await signIn(page.request);
     const photograph = await sharp({
       create: { width: 2000, height: 1000, channels: 3, background: '#F95738' },
     })
@@ -446,7 +445,7 @@ test.describe('images', () => {
   });
 
   test('an image without a description for screen readers is refused', async ({ page }) => {
-    await logInByApi(page.request);
+    await signIn(page.request);
     const image = await sharp({ create: { width: 10, height: 10, channels: 3, background: '#222222' } }).png().toBuffer();
     const response = await page.request.post('/api/media', {
       multipart: { file: { name: 'no-alt.png', mimeType: 'image/png', buffer: image } },

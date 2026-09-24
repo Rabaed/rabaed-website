@@ -5,14 +5,15 @@
  * reveals it; unpublishing the last hides it again.
  *
  * Case studies are created through the CMS's own API as an editor of this
- * suite's own (`cms.ts`), and deleted after each test. The suite runs against
+ * suite's own (`editors.ts`), and deleted after each test. The suite runs against
  * the second test server (`playwright.config.ts`, ticket 89): a published case
  * study changes the header of every page, which the suites holding the header
  * to the Reference site, on the first, would otherwise see. The tests run one
  * at a time, as every suite on that server does.
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ADMIN_PATH, CASE_STUDIES_EDITOR, logInByApi, reachesVisitors, reaching, richText, uploadImage } from './cms';
+import { ADMIN_PATH, reachesVisitors, reaching, richText, uploadImage } from './cms';
+import { signIn } from './editors';
 import { sidewaysOverflow } from './geometry';
 import { ROUTES } from './routes';
 import { nodesOf, structuredData, trail } from './structured-data';
@@ -119,7 +120,7 @@ async function visit(request: APIRequestContext, path: string) {
 const linksToSection = (html: string) => html.includes('href="/case-studies"');
 
 test.afterEach(async ({ page }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   for (const id of created) await page.request.delete(`/api/case-studies/${id}`);
   for (const id of media) await page.request.delete(`/api/media/${id}`);
   created = [];
@@ -130,7 +131,7 @@ test('while no case study is published, nothing on the site leads to one — not
   page,
   request,
 }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   const draft = caseStudy();
   await create(page.request, draft, 'draft');
 
@@ -155,7 +156,7 @@ test('publishing the first case study reveals the section and its link; unpublis
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   // No figures and no quote: neither is needed to publish.
   const fields = caseStudy();
   const { id } = await create(page.request, fields);
@@ -293,7 +294,7 @@ const SPELLINGS = ['/en/case-studies', '/en//case-studies', ' /case-studies', '/
 // written, it is the same link: it waits for the first case study, and then
 // leads to the section.
 test('the case studies link waits for the first case study however an Editor writes its path', async ({ page, request }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   const read = await page.request.get('/api/globals/site-words?depth=0');
   expect(read.ok()).toBe(true);
   const original = sendable((await read.json()) as SiteWords);
@@ -337,7 +338,7 @@ test('the case studies link waits for the first case study however an Editor wri
 });
 
 test('a case study page tells the whole story, whole in the first response', async ({ page, request, browser, baseURL }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   const fields = caseStudy({
     figures: [
       { value: '3 أيام', label: 'لاعتماد المخططات بدل أسبوعين', basis: 'متوسط اعتمادات المشروع في الربع الأول' },
@@ -436,7 +437,7 @@ test('a case study page tells the whole story, whole in the first response', asy
 test('a case study cannot be published missing any part of the story, or with a number or quote nobody stands behind', async ({
   page,
 }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   const refused = async (fields: CaseStudy) => (await save(page.request, fields, 'published')).status();
 
   expect(await refused(caseStudy({ answer: 'جواب قصير جداً.' }))).toBe(400);
@@ -465,7 +466,7 @@ test('an English case study has its own section, breadcrumb trail and sitemap en
   request,
   baseURL,
 }) => {
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   const english = caseStudy({
     locale: 'en',
     title: `Test case study ${runId}`,
@@ -504,7 +505,7 @@ test('an English case study has its own section, breadcrumb trail and sitemap en
 test('the admin shows which case studies are missing a translation', async ({ page }) => {
   // Drafts: the admin lists an entry whether or not it is published, and a
   // draft changes nothing on the site for this to clean up after.
-  await logInByApi(page.request, CASE_STUDIES_EDITOR);
+  await signIn(page.request);
   const arabic = caseStudy({ withoutCover: true });
   await create(page.request, arabic, 'draft');
 
