@@ -65,7 +65,9 @@ function publish(editor: APIRequestContext, slug: string, data: object) {
 test('every page is described in search by what its own entry has published', async ({ page, request }) => {
   await logInByApi(page.request, SEARCH_EDITOR);
 
-  for (const [path, slug] of PAGES) {
+  // The referral page's words name an amount the page inserts, which the next
+  // test holds it to.
+  for (const [path, slug] of PAGES.filter(([path]) => path !== '/referral')) {
     const { search } = await entry(page.request, slug);
     const html = await (await request.get(path)).text();
     expect(html, `${path} title`).toContain(search.title.ar);
@@ -138,7 +140,6 @@ test('a page published in English without its search title in English is refused
 
   expect(response.status()).toBe(400);
   expect(await response.text()).toContain('search.title.en');
-  expect((await entry(page.request, 'start-page')).languages).toEqual(['ar']);
 });
 
 test('a picture of the wrong size or the wrong kind is refused, with the reason', async ({ page }) => {

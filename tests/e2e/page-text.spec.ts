@@ -30,6 +30,8 @@ type StartPage = {
   steps: { shows: boolean; eyebrow: Words; heading: Words; steps: Step[] };
   questions: { eyebrow: Words; heading: Words };
   freeTool: { shows: boolean; eyebrow: Words; heading: Words; text: Words; linkLabel: Words };
+  /** How the page appears in a search result (ticket 26), on this entry since ticket 91. */
+  search: { title: Words; description: Words; sharingImage: number | null };
 };
 
 const arabic = (words: string): Words => ({ ar: words, en: null });
@@ -43,9 +45,9 @@ async function published(editor: APIRequestContext): Promise<StartPage> {
 
 /** The entry's fields alone, ready to be sent back: no ids, no dates. */
 function fields(page: StartPage) {
-  const { languages, hero, trustStrip, steps, questions, freeTool } = page;
+  const { languages, hero, trustStrip, steps, questions, freeTool, search } = page;
   const rows = steps.steps.map(({ label, title, text, markedOut }) => ({ label, title, text, markedOut }));
-  return { languages, hero, trustStrip, steps: { ...steps, steps: rows }, questions, freeTool };
+  return { languages, hero, trustStrip, steps: { ...steps, steps: rows }, questions, freeTool, search };
 }
 
 /** Saves the entry as the admin's Save Draft or Publish changes would. */
