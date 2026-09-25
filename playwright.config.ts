@@ -26,6 +26,8 @@ const PORT = testPort(process.env.TEST_PORT);
  * `TEST_PORT`s, which are 31NN, and puts its database, at `+ 2000` as every
  * test server's is, on `TEST_PORT + 3000`: clear of the lanes' own databases
  * and of the development ones from 55000 (`scripts/local-database.mjs`).
+ * `TEST_PORT + 4000` is taken too, by the server
+ * `tests/e2e/studio-in-production.spec.ts` starts as production (ticket 98).
  */
 const PUBLISHING_PORT = PORT + 1000;
 /**

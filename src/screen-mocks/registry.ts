@@ -104,7 +104,9 @@ export function findScreenMock(id: string): ScreenMock | undefined {
 
 /**
  * The studio route for one mock. Private: it is blocked from indexing whatever
- * the environment, and ticket 33 keeps it out of the sitemap by this prefix.
+ * the environment, ticket 33 keeps it out of the sitemap by this prefix, and
+ * `src/proxy.ts` answers not found for it on the production deployment
+ * (ticket 98), with this prefix written out in its matcher.
  */
 export const STUDIO_PREFIX = '/studio';
 
