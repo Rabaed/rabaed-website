@@ -66,6 +66,11 @@ _Avoid_: success story, testimonial (a quote is one part of a case study, not th
 
 **Pour Tracker** (متتبّع الصبّات):
 The free downloadable tool — a single self-contained HTML file for tracking concrete pours and break tests — offered as a lead magnet. Distinct from `tool.html`, the marketing page that describes and delivers it.
+_Avoid_: Pour tool.
+
+**Release** (of the Pour Tracker):
+One build of the Pour Tracker as its builder delivers it: the HTML file, and a checksum file that names its release number (such as `2026-08-25.7`). Shipped exactly as delivered, never edited. Ahmed builds each release and publishes it from the CMS; the copy kept with the site's code is the fallback, served while the CMS holds none.
+_Avoid_: version (the CMS's own word for a saved edit in any document's history), update.
 
 **Form definition**:
 A form described once in code: its fields, what counts as an acceptable answer to each, and the words it starts with. The browser and the server both check answers against it. Which fields exist is fixed there; what they say is an Editor's.
