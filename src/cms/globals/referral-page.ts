@@ -2,6 +2,7 @@ import type { Field } from 'payload';
 import { listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
+import { MARKETING_PAGES } from '../../lib/page-registry';
 
 /**
  * The referral page's words, section by section, in the page's order (ticket
@@ -55,9 +56,9 @@ const NUMBERED: Words = {
 };
 
 export const ReferralPage = pageGlobal({
-  slug: 'referral-page',
-  label: { ar: 'صفحة برنامج الإحالة', en: 'Referral Program page' },
-  path: '/referral',
+  slug: MARKETING_PAGES.referral.entry.slug,
+  label: MARKETING_PAGES.referral.entry.label,
+  path: MARKETING_PAGES.referral.path,
   sections: [
     sectionTab({
       name: 'hero',

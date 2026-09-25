@@ -15,6 +15,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { REFERRAL_SIGNUP, type ReferralSignupField } from '@/forms/referral-signup';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
+import { MARKETING_PAGES } from '@/lib/page-registry';
 import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ReferralPageContent = {
@@ -32,14 +33,6 @@ export type ReferralPageContent = {
   /** The words of the signup form: its settings in the CMS. */
   readonly signupForm: FormPageWording<ReferralSignupField>;
 };
-
-/**
- * The page's short name, as its breadcrumb structured data reads it
- * (ticket 32). Its search title and description are an Editor's, in the CMS,
- * and each may quote a Referral Program value by name — `{payout}` — which is
- * inserted here as it is in the page's own words (tickets 26 and 56).
- */
-const NAME: Readonly<Record<Locale, string>> = { ar: 'برنامج الإحالة', en: 'Referral Program' };
 
 /** A step or kind numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -86,7 +79,10 @@ export async function getReferralPage(locale: Locale): Promise<ReferralPageConte
   const words = (stored: Parameters<typeof wordsIn>[1]) => withValues(wordsIn(locale, stored), values);
 
   const page: BeforeQuestions<Omit<ReferralPageContent, 'signupForm'>> = {
-    meta: pageMeta(locale, entry.search, { name: NAME[locale], values }),
+    // Its search title and description may quote a Referral Program value by
+    // name, `{payout}`, inserted as it is in the page's own words (tickets 26
+    // and 56).
+    meta: pageMeta(locale, entry.search, { name: MARKETING_PAGES.referral.name[locale], values }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

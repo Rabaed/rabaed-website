@@ -11,6 +11,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
+import { MARKETING_PAGES } from '@/lib/page-registry';
 import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type StartPageContent = {
@@ -25,14 +26,6 @@ export type StartPageContent = {
   /** The words of the demo request form beside the questions: its settings in the CMS. */
   readonly demoForm: FormPageWording<DemoRequestField>;
 };
-
-/**
- * The page's short name, as its breadcrumb structured data reads it
- * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26), on its own entry
- * (ticket 91, `src/content/search-settings.ts`).
- */
-const NAME: Readonly<Record<Locale, string>> = { ar: 'ابدأ', en: 'Get started' };
 
 /**
  * The start page's content in `locale`: its words from its entry in the CMS
@@ -51,7 +44,7 @@ export async function getStartPage(locale: Locale): Promise<StartPageContent> {
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<StartPageContent, 'demoForm'>> = {
-    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
+    meta: pageMeta(locale, entry.search, { name: MARKETING_PAGES.start.name[locale] }),
     hero: {
       eyebrow: words(entry.hero.eyebrow),
       title: words(entry.hero.title),

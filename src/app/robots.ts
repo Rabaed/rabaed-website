@@ -55,7 +55,7 @@ const TRAINING_CRAWLERS = ['GPTBot', 'ClaudeBot', 'Meta-ExternalAgent', 'CCBot']
  *
  * Its own, because a discovery file is a route beside the layouts rather than
  * beneath one, so no layout's age reaches it — the same reason
- * `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`. Written out rather
+ * `DISCOVERY_FILES` exists in `src/lib/page-registry.ts`. Written out rather
  * than imported because Next reads only a literal; `src/lib/cache-age.ts`
  * holds the number and the reason it is that number.
  */

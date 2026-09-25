@@ -3,29 +3,18 @@ import { allPublishedPosts } from '@/cms/blog';
 import { pageEntry } from '@/cms/pages';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
 import { isPublishedIn } from '@/content/pages/languages';
-import { PAGE_ENTRIES, type MarketingPage } from '@/content/pages/page-entries';
 import { blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
 import { DEFAULT_LOCALE, localePath } from '@/lib/locales';
-
-/** The Arabic site's pages other than the marketing pages, as they stand. */
-const PAGES = ['/blog', '/terms', '/privacy', '/referral-terms'];
+import { MARKETING_PAGES, MARKETING_PAGE_KEYS, SITE_PAGES } from '@/lib/page-registry';
 
 /**
- * The marketing pages, each by the name its entry goes by (ticket 42). An
- * English one is listed once it is published in English, and not before:
- * until then its address is a notice (`src/content/arabic-only-pages.ts`),
- * or, for the home page, the English site's word that it is on its way.
+ * The Arabic site's pages other than the marketing pages: the blog's index
+ * and the legal documents. The case studies' index is listed below, once it
+ * has something to list.
  */
-const MARKETING_PAGES: readonly { readonly page: MarketingPage; readonly path: string }[] = [
-  { page: 'home', path: '/' },
-  { page: 'product', path: '/product' },
-  { page: 'start', path: '/start' },
-  { page: 'tool', path: '/tool' },
-  { page: 'referral', path: '/referral' },
-  { page: 'partnership', path: '/partnership' },
-];
+const PAGES = [SITE_PAGES.blog, SITE_PAGES.terms, SITE_PAGES.privacy, SITE_PAGES['referral-terms']].map((page) => page.path);
 
 /**
  * The floor under `sitemap.xml`: whatever becomes of a publish's mark, it is
@@ -33,7 +22,7 @@ const MARKETING_PAGES: readonly { readonly page: MarketingPage; readonly path: s
  *
  * Its own, because a discovery file is a route beside the layouts rather than
  * beneath one, so no layout's age reaches it — the same reason
- * `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`. Written out rather
+ * `DISCOVERY_FILES` exists in `src/lib/page-registry.ts`. Written out rather
  * than imported because Next reads only a literal; `src/lib/cache-age.ts`
  * holds the number and the reason it is that number.
  */
@@ -45,8 +34,9 @@ export const revalidate = 600;
  * listed, and an entry leaves when it is unpublished: publishing and
  * unpublishing mark this stale along with the pages (`src/cms/revalidation.ts`).
  *
- * Pages are listed by name, not found by walking the routes, so nothing that
- * is not a page of the site can reach it: not the Screen mock studio, the CMS
+ * Pages are listed by name — the page registry's, `src/lib/page-registry.ts` —
+ * not found by walking the routes, so nothing that is not a page of the site
+ * can reach it: not the Screen mock studio, the CMS
  * admin, the English placeholder (ticket 31), or the notice at the English
  * address of a page not yet in English (ticket 42).
  *
@@ -63,9 +53,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     allPublishedPosts(),
     allPublishedCaseStudies(),
     Promise.all(
-      MARKETING_PAGES.map(async ({ page, path }) => {
+      MARKETING_PAGE_KEYS.map(async (page) => {
+        const { path, entry: own } = MARKETING_PAGES[page];
         const [entry, inEnglish] = await Promise.all([
-          pageEntry(PAGE_ENTRIES[page].own, DEFAULT_LOCALE),
+          pageEntry(own.slug, DEFAULT_LOCALE),
           isPublishedIn(page, 'en'),
         ]);
         return { path, inEnglish, lastModified: entry.updatedAt ?? undefined };

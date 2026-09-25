@@ -27,6 +27,10 @@ The two events that make up the Record. A Request is raised by one party; an App
 This project: the public pages at `rabaedapp.com`. Distinct from the **product app** (`app.rabaedapp.com`), which is a separate system this site links to and does not contain.
 _Avoid_: "the website" unqualified, when the app is also in scope.
 
+**Page registry**:
+The one list of the Marketing site's pages, written out by hand in `src/lib/page-registry.ts`: each page's address, its short name, its entry in the CMS and the entries it shares, and where its questions are; and, beside them, the files crawlers read and the routes that are not pages. Every other list of pages — the sitemap, `llms.txt`, the pages questions are filed under — is read from it, and a test fails when a route is in neither it nor its list of exclusions (ticket 92).
+_Avoid_: sitemap (the file search engines read, built from this), route list (`tests/e2e/routes.ts`, which the tests restate on purpose).
+
 **Reference site**:
 The nine hand-built HTML pages in `reference/site/`, written by the co-founder. The source of design, animation and content for the rebuild — never the source of technical guidance.
 _Avoid_: prototype, old site, v1.

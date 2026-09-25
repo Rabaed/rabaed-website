@@ -13,6 +13,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { PARTNERSHIP_APPLICATION, type PartnershipApplicationField } from '@/forms/partnership-application';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
+import { MARKETING_PAGES } from '@/lib/page-registry';
 import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type PartnershipPageContent = {
@@ -30,14 +31,6 @@ export type PartnershipPageContent = {
   /** The words of the application form: its settings in the CMS. */
   readonly applicationForm: FormPageWording<PartnershipApplicationField>;
 };
-
-/**
- * The page's short name, as its breadcrumb structured data reads it
- * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26), on its own entry
- * (ticket 91, `src/content/search-settings.ts`).
- */
-const NAME: Readonly<Record<Locale, string>> = { ar: 'برنامج الشراكات', en: 'Partnership Program' };
 
 /** A card or stage numbered by its place, so reordering renumbers it: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -60,7 +53,7 @@ export async function getPartnershipPage(locale: Locale): Promise<PartnershipPag
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<Omit<PartnershipPageContent, 'applicationForm'>> = {
-    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
+    meta: pageMeta(locale, entry.search, { name: MARKETING_PAGES.partnership.name[locale] }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: words(hero.title),

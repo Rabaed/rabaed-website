@@ -15,6 +15,7 @@ import type { ToolRequirementsContent } from '@/components/tool/requirements';
 import type { ToolUpsellContent } from '@/components/tool/upsell';
 import type { ToolWhyContent } from '@/components/tool/why';
 import { localePath, type Locale } from '@/lib/locales';
+import { MARKETING_PAGES } from '@/lib/page-registry';
 import { withQuestions, type BeforeQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
 export type ToolPageContent = {
@@ -33,14 +34,6 @@ export type ToolPageContent = {
   readonly questions: Section<QuestionsContent>;
   readonly upsell: Section<ToolUpsellContent>;
 };
-
-/**
- * The page's short name, as its breadcrumb structured data reads it
- * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26), on its own entry
- * (ticket 91, `src/content/search-settings.ts`).
- */
-const NAME: Readonly<Record<Locale, string>> = { ar: 'متتبّع الصبّات', en: 'Pour Tracker' };
 
 /** A test's states, in the order the legend lists them. */
 const LEGEND = ['idle', 'warn', 'bad', 'info', 'ok'] as const;
@@ -72,7 +65,7 @@ export async function getToolPage(locale: Locale): Promise<ToolPageContent> {
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
 
   const page: BeforeQuestions<ToolPageContent> = {
-    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
+    meta: pageMeta(locale, entry.search, { name: MARKETING_PAGES.tool.name[locale] }),
     downloadForm,
     hero: {
       eyebrow: words(hero.eyebrow),

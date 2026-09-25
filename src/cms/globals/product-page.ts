@@ -2,6 +2,7 @@ import type { Field } from 'payload';
 import { listField, openingAnswerField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
+import { MARKETING_PAGES } from '../../lib/page-registry';
 import { screenField } from './screen-mocks';
 
 const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 30);
@@ -26,9 +27,9 @@ const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق ال
  * changes what a button says, never where it goes.
  */
 export const ProductPage = pageGlobal({
-  slug: 'product-page',
-  label: { ar: 'صفحة المنتج', en: 'Product page' },
-  path: '/product',
+  slug: MARKETING_PAGES.product.entry.slug,
+  label: MARKETING_PAGES.product.entry.label,
+  path: MARKETING_PAGES.product.path,
   sections: [
     sectionTab({
       name: 'hero',

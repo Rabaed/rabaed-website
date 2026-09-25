@@ -3,9 +3,12 @@
  *
  * The documents' words live in the CMS; what lives here is what an Editor
  * cannot change: which documents exist, where each is on the site, and how its
- * clauses are linked to. Imported by the CMS configuration as well as the site,
- * so it imports nothing.
+ * clauses are linked to. Where each is on the site is the page registry's
+ * (ticket 92, `src/lib/page-registry.ts`). Imported by the CMS configuration
+ * as well as the site, so it imports relatively, and nothing that reads the CMS.
  */
+import { SITE_PAGES } from '../lib/page-registry';
+
 export const LEGAL_SLUGS = ['terms', 'privacy', 'referral-terms'] as const;
 
 export type LegalSlug = (typeof LEGAL_SLUGS)[number];
@@ -19,10 +22,10 @@ export type LegalPage = {
 };
 
 export const LEGAL_PAGES: Readonly<Record<LegalSlug, LegalPage>> = {
-  terms: { path: '/terms', clauseIdPrefix: 's', label: { ar: 'شروط الخدمة', en: 'Terms of Service' } },
-  privacy: { path: '/privacy', clauseIdPrefix: 's', label: { ar: 'سياسة الخصوصية', en: 'Privacy Policy' } },
+  terms: { path: SITE_PAGES.terms.path, clauseIdPrefix: 's', label: { ar: 'شروط الخدمة', en: 'Terms of Service' } },
+  privacy: { path: SITE_PAGES.privacy.path, clauseIdPrefix: 's', label: { ar: 'سياسة الخصوصية', en: 'Privacy Policy' } },
   'referral-terms': {
-    path: '/referral-terms',
+    path: SITE_PAGES['referral-terms'].path,
     clauseIdPrefix: 'r',
     label: { ar: 'شروط برنامج الإحالة', en: 'Referral Program Terms' },
   },

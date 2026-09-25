@@ -2,6 +2,7 @@ import type { Field } from 'payload';
 import { latinField, listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
+import { MARKETING_PAGES } from '../../lib/page-registry';
 
 /**
  * The tool page's words, section by section, in the page's order (ticket 54),
@@ -45,9 +46,9 @@ const TEST_STATES: { value: 'idle' | 'warn' | 'bad' | 'info' | 'ok'; label: Word
 ];
 
 export const ToolPage = pageGlobal({
-  slug: 'tool-page',
-  label: { ar: 'صفحة الأداة المجانية', en: 'Tool page' },
-  path: '/tool',
+  slug: MARKETING_PAGES.tool.entry.slug,
+  label: MARKETING_PAGES.tool.entry.label,
+  path: MARKETING_PAGES.tool.path,
   sections: [
     sectionTab({
       name: 'hero',

@@ -1,6 +1,7 @@
 import { listField, sectionTab, wordsField } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
+import { MARKETING_PAGES } from '../../lib/page-registry';
 
 /**
  * The start page's words, section by section, in the page's order (ticket 53):
@@ -12,9 +13,9 @@ import { searchTab } from '../search-fields';
  * Editor changes what a button says, never where it goes.
  */
 export const StartPage = pageGlobal({
-  slug: 'start-page',
-  label: { ar: 'صفحة ابدأ', en: 'Start page' },
-  path: '/start',
+  slug: MARKETING_PAGES.start.entry.slug,
+  label: MARKETING_PAGES.start.entry.label,
+  path: MARKETING_PAGES.start.path,
   sections: [
     sectionTab({
       name: 'hero',
