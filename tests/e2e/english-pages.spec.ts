@@ -30,6 +30,7 @@ import { fields, type Entry } from './entries';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
+import { localePath } from '../../src/lib/locales';
 import { entriesRead, MARKETING_PAGES, MARKETING_PAGE_KEYS, type MarketingPage } from '../../src/lib/page-registry';
 import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
 import { oneSuiteAtATime } from './one-suite-at-a-time';
@@ -54,7 +55,7 @@ const ENTRIES = entriesOf(...MARKETING_PAGE_KEYS);
 
 /** Each English page's address. */
 const PATH = Object.fromEntries(
-  MARKETING_PAGE_KEYS.map((page) => [page, MARKETING_PAGES[page].path === '/' ? '/en' : `/en${MARKETING_PAGES[page].path}`]),
+  MARKETING_PAGE_KEYS.map((page) => [page, localePath('en', MARKETING_PAGES[page].path)]),
 ) as Readonly<Record<MarketingPage, string>>;
 const PAGES = MARKETING_PAGE_KEYS.map((page) => PATH[page]);
 

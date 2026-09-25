@@ -14,7 +14,9 @@ import { MARKETING_PAGES, MARKETING_PAGE_KEYS, SITE_PAGES } from '@/lib/page-reg
  * and the legal documents. The case studies' index is listed below, once it
  * has something to list.
  */
-const PAGES = [SITE_PAGES.blog, SITE_PAGES.terms, SITE_PAGES.privacy, SITE_PAGES['referral-terms']].map((page) => page.path);
+const PAGES = Object.entries(SITE_PAGES)
+  .filter(([key]) => key !== 'case-studies')
+  .map(([, page]) => page.path);
 
 /**
  * The floor under `sitemap.xml`: whatever becomes of a publish's mark, it is

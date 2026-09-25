@@ -46,5 +46,7 @@ Found by the architecture review of 24 September 2026 (A2).
 
 **The tests.** `tests/unit/page-registry.spec.ts` walks `src/app` (with `tests/unit/app-routes.ts`, which works out each route file's address as Next does) and fails on a route neither listed nor excluded, on a listed page with no route, on an exclusion naming no route, and when `tests/e2e/routes.ts` and the registry disagree. Checked failing by taking the studio's exclusion away.
 
-**Adding a page** is `docs/deployment.md`, «Adding a page»: twelve files by hand, besides the page's own section components, where the architecture review counted 18 to 20.
+**Adding a page** is `docs/deployment.md`, «Adding a page»: seventeen files by hand — twelve for the page and five end-to-end tests that restate the site's pages on purpose, for the reason `routes.ts` gives — besides the page's own section components, where the architecture review counted 18 to 20. The gain is less in the count than in what can drift: every file outside those tests now reads the registry, or fails to compile or to pass until it does.
+
+**The code review found**, and this fixes: the maximum-age test had stopped checking the layouts of the uncached routes (it now checks each route, and separately any layout above nothing but uncached routes — shown failing on an age added to `(payload)/layout.tsx`); the route walk now knows Next's other metadata files and parallel-route slots; the sitemap takes every page but the case studies' index from the registry rather than naming four; and the guide no longer claims an index or a legal document is one line. The legal documents keep their own keys in `legal-pages.ts`, which carries what only they have — how their clauses are linked to — and reads their addresses from the registry.
 

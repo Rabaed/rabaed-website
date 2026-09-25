@@ -39,7 +39,7 @@ type MarketingPageSpec = {
    */
   readonly shared: readonly GlobalSlug[];
   /** The id of its Questions section — which links land on — or `null` where it has none (ticket 22). */
-  readonly questions: string | null;
+  readonly questionsSection: string | null;
 };
 
 /**
@@ -54,14 +54,14 @@ export const MARKETING_PAGES = {
     entry: { slug: 'home-page', label: { ar: 'الصفحة الرئيسية', en: 'Home page' } },
     shared: ['closing-section', 'screen-mocks', 'trust-strip', 'site-words'],
     // The Reference site's own id.
-    questions: 'fq',
+    questionsSection: 'fq',
   },
   product: {
     path: '/product',
     name: { ar: 'المنتج', en: 'Product' },
     entry: { slug: 'product-page', label: { ar: 'صفحة المنتج', en: 'Product page' } },
     shared: ['closing-section', 'screen-mocks', 'trust-strip', 'site-words'],
-    questions: null,
+    questionsSection: null,
   },
   start: {
     path: '/start',
@@ -69,28 +69,28 @@ export const MARKETING_PAGES = {
     entry: { slug: 'start-page', label: { ar: 'صفحة ابدأ', en: 'Start page' } },
     shared: ['trust-strip', 'site-words'],
     // Where the home page's «كل الأسئلة» lands.
-    questions: 'faq',
+    questionsSection: 'faq',
   },
   tool: {
     path: '/tool',
     name: { ar: 'متتبّع الصبّات', en: 'Pour Tracker' },
     entry: { slug: 'tool-page', label: { ar: 'صفحة الأداة المجانية', en: 'Tool page' } },
     shared: ['site-words'],
-    questions: 'faq',
+    questionsSection: 'faq',
   },
   referral: {
     path: '/referral',
     name: { ar: 'برنامج الإحالة', en: 'Referral Program' },
     entry: { slug: 'referral-page', label: { ar: 'صفحة برنامج الإحالة', en: 'Referral Program page' } },
     shared: ['site-words'],
-    questions: 'faq',
+    questionsSection: 'faq',
   },
   partnership: {
     path: '/partnership',
     name: { ar: 'برنامج الشراكات', en: 'Partnership Program' },
     entry: { slug: 'partnership-page', label: { ar: 'صفحة برنامج الشراكات', en: 'Partnership Program page' } },
     shared: ['site-words'],
-    questions: 'faq',
+    questionsSection: 'faq',
   },
 } as const satisfies Record<string, MarketingPageSpec>;
 
@@ -112,26 +112,27 @@ export function entriesRead(page: MarketingPage): readonly (MarketingPageEntry |
 
 /** A marketing page with a Questions section: the pages an Editor files a question under. */
 export type QuestionsPage = {
-  [Key in MarketingPage]: (typeof MARKETING_PAGES)[Key]['questions'] extends string ? Key : never;
+  [Key in MarketingPage]: (typeof MARKETING_PAGES)[Key]['questionsSection'] extends string ? Key : never;
 }[MarketingPage];
 
 export const QUESTIONS_PAGE_KEYS = MARKETING_PAGE_KEYS.filter(
-  (key): key is QuestionsPage => MARKETING_PAGES[key].questions !== null,
+  (key): key is QuestionsPage => MARKETING_PAGES[key].questionsSection !== null,
 );
 
 /**
- * The site's other pages: the blog's and the case studies' indexes, with
- * every article and story `beneath` them, and the legal documents. Their
+ * The site's other pages: the blog's and the case studies' indexes, each
+ * `withArticles` — every article or story at an address beneath it — and the
+ * legal documents. Their
  * words are collections and documents rather than an entry each.
  */
 export const SITE_PAGES = {
-  blog: { path: '/blog', beneath: true },
+  blog: { path: '/blog', withArticles: true },
   // A page only once a story is published in its language (ticket 24).
-  'case-studies': { path: '/case-studies', beneath: true },
-  terms: { path: '/terms', beneath: false },
-  privacy: { path: '/privacy', beneath: false },
-  'referral-terms': { path: '/referral-terms', beneath: false },
-} as const satisfies Record<string, { readonly path: string; readonly beneath: boolean }>;
+  'case-studies': { path: '/case-studies', withArticles: true },
+  terms: { path: '/terms', withArticles: false },
+  privacy: { path: '/privacy', withArticles: false },
+  'referral-terms': { path: '/referral-terms', withArticles: false },
+} as const satisfies Record<string, { readonly path: string; readonly withArticles: boolean }>;
 
 /**
  * The files a crawler reads about the site rather than a page of it, each a

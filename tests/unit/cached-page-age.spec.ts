@@ -27,7 +27,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { MAX_PAGE_AGE_SECONDS } from '../../src/lib/cache-age';
 import { DISCOVERY_FILES, NOT_FOUND_ADDRESS, NOT_PAGES } from '../../src/lib/page-registry';
-import { appRoutes, repoRoot } from './app-routes';
+import { appRoutes, repoRoot, under } from './app-routes';
 
 /**
  * The layouts that must each carry the age. The two sit above all twenty
@@ -80,7 +80,7 @@ for (const file of LAYOUTS) {
 
 for (const address of ROUTES_OF_THEIR_OWN) {
   test(`${address} sets the age`, async () => {
-    const route = (await appRoutes()).find((each) => each.address === address);
+    const route = (await appRoutes()).find((each) => !each.layout && each.address === address);
     expect(route, `no route answers ${address}`).toBeTruthy();
     await expectTheAge(route!.file);
   });
@@ -90,10 +90,32 @@ for (const { address, reason } of UNCACHED) {
   test(`${address} does not`, async () => {
     const withAnAge: string[] = [];
     for (const route of await appRoutes()) {
-      if (route.address !== address && !route.address.startsWith(`${address}/`)) continue;
+      if (route.layout || !under(route.address, address)) continue;
       if (AGE_EXPORT.test(await readFile(path.join(repoRoot, route.file), 'utf8'))) withAnAge.push(route.file);
     }
 
     expect(withAnAge, `${address} is ${reason}: not cached, so an age there is either meaningless or a rebuild of something no publish changes.`).toEqual([]);
   });
 }
+
+/**
+ * A layout above nothing but routes that are not cached — the CMS admin's and
+ * the Screen mock studio's — has no age either: it would reach no page, and
+ * says one is meant. Known by the routes in its folder, since a route group's
+ * own layout, `(payload)/layout.tsx`, answers no address of its own.
+ */
+test('a layout above only routes that are not cached does not', async () => {
+  const all = await appRoutes();
+  const routes = all.filter((route) => !route.layout);
+  const uncached = (address: string) => UNCACHED.some((each) => under(address, each.address));
+  const withAnAge: string[] = [];
+
+  for (const layout of all.filter((route) => route.layout)) {
+    const folder = layout.file.slice(0, layout.file.lastIndexOf('/') + 1);
+    const beneath = routes.filter((route) => route.file.startsWith(folder));
+    if (beneath.length === 0 || !beneath.every((route) => uncached(route.address))) continue;
+    if (AGE_EXPORT.test(await readFile(path.join(repoRoot, layout.file), 'utf8'))) withAnAge.push(layout.file);
+  }
+
+  expect(withAnAge).toEqual([]);
+});

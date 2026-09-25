@@ -4,8 +4,11 @@
  * site really has (tickets 66 and 92).
  *
  * The address is worked out the way Next works it out: a route group, `(ar)`,
- * adds nothing; a dynamic segment stays as it is written, `[slug]`; and a
- * metadata file is served at its own name, `sitemap.ts` at `/sitemap.xml`.
+ * and a parallel route's slot, `@modal`, add nothing; a dynamic segment stays
+ * as it is written, `[slug]`; a metadata file is served at its own name,
+ * `sitemap.ts` at `/sitemap.xml`; and the root not-found page is built as a
+ * page of its own, `/_not-found`. A layout, or a not-found page further down,
+ * answers the address of the folder it is in.
  */
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -13,17 +16,27 @@ import path from 'node:path';
 export const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const appDirectory = path.join(repoRoot, 'src', 'app');
 
-/** A page, a route handler, a metadata file or the not-found page: a file Next answers an address with. */
-const ROUTE_FILE = /^(page|route)\.tsx?$|^(sitemap|robots|not-found)\.tsx?$/;
+/** The metadata files, and the name each is served at. */
+const METADATA: Readonly<Record<string, string>> = {
+  sitemap: 'sitemap.xml',
+  robots: 'robots.txt',
+  manifest: 'manifest.webmanifest',
+  icon: 'icon',
+  'apple-icon': 'apple-icon',
+  'opengraph-image': 'opengraph-image',
+  'twitter-image': 'twitter-image',
+};
 
-/** The metadata files, and the address each is served at. */
-const METADATA: Readonly<Record<string, string>> = { sitemap: 'sitemap.xml', robots: 'robots.txt' };
+/** A file Next answers an address with, or a layout above such files. */
+const ROUTE_FILE = new RegExp(`^(page|route|layout|not-found|${Object.keys(METADATA).join('|')})\\.tsx?$`);
 
 export type AppRoute = {
   /** The file, from the repository's root, with forward slashes. */
   readonly file: string;
-  /** The address it answers: `/en/blog/[slug]`, `/sitemap.xml`. The not-found page is `/_not-found`, as Next builds it. */
+  /** The address it answers: `/en/blog/[slug]`, `/sitemap.xml`. */
   readonly address: string;
+  /** A layout, which is not a route of its own but sets things for those beneath it: their maximum age among them. */
+  readonly layout: boolean;
 };
 
 export async function appRoutes(): Promise<AppRoute[]> {
@@ -35,11 +48,14 @@ export async function appRoutes(): Promise<AppRoute[]> {
       const segments = path
         .relative(appDirectory, entry.parentPath)
         .split(path.sep)
-        .filter((segment) => segment !== '' && !/^\(.*\)$/.test(segment));
+        .filter((segment) => segment !== '' && !/^\(.*\)$/.test(segment) && !segment.startsWith('@'));
       const name = entry.name.replace(/\.tsx?$/, '');
-      if (name === 'not-found') segments.push('_not-found');
+      if (name === 'not-found' && segments.length === 0) segments.push('_not-found');
       else if (METADATA[name]) segments.push(METADATA[name]);
-      return { file, address: `/${segments.join('/')}` };
+      return { file, address: `/${segments.join('/')}`, layout: name === 'layout' };
     })
     .sort((one, other) => one.file.localeCompare(other.file));
 }
+
+/** An address, and every address beneath it. */
+export const under = (address: string, prefix: string) => address === prefix || address.startsWith(`${prefix}/`);

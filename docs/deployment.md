@@ -847,13 +847,21 @@ A marketing page with an entry of its own takes these files, written by hand:
    to the registry.
 10. This guide's table of what each English page reads (**The English pages,
     waiting for a decision**), which a test holds to the registry.
+11. The end-to-end tests that restate the site's pages on purpose, and fail
+    until they are told — for the reason `tests/e2e/routes.ts` gives, a test
+    that read its expectation from the registry would agree with any mistake
+    in it: `performance.spec.ts` (the page's weight budget),
+    `search-foundations.spec.ts` and `ai-crawlers.spec.ts` (the sitemap's and
+    `llms.txt`'s lists), `structured-data.spec.ts` (its breadcrumb trail) and
+    `cached-page-age.spec.ts` (its maximum age).
 
-Twelve files by hand — the two routes as two, and the import as its words and
-its migration — besides the page's own section components, where the
-architecture review of 24 September 2026 counted 18 to 20. `npm run
+Seventeen files by hand — the two routes as two, the import as its words and
+its migration, and the five tests — besides the page's own section
+components, where the architecture review of 24 September 2026 counted 18 to
+20. The difference is in what can go wrong: every file outside the tests now
+either reads the registry or fails to compile or to pass until it does. `npm run
 cms:migration` then writes the schema migration and its snapshot, `npm run
-cms:freeze-seed` the import's SQL, and `npm run cms:generate` the types. A page of another kind — an index, a legal
-document — is one line in `SITE_PAGES` and its route.
+cms:freeze-seed` the import's SQL, and `npm run cms:generate` the types.
 
 ### Forms
 

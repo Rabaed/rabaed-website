@@ -78,7 +78,7 @@ const HEADINGS = {
  * reads it. The home page leads the English pages and is left out of the
  * Arabic, whose home page the file's heading describes.
  */
-const MARKETING = MARKETING_PAGE_KEYS.map((page) => ({ page, path: MARKETING_PAGES[page].path, read: PAGE_LOADERS[page] }));
+const PAGES_AND_READERS = MARKETING_PAGE_KEYS.map((page) => ({ page, path: MARKETING_PAGES[page].path, read: PAGE_LOADERS[page] }));
 
 /**
  * A description as one line. A summary written in the CMS may hold line
@@ -114,8 +114,8 @@ async function pageEntries(
   posts: readonly Post[],
   caseStudies: readonly CaseStudy[],
 ): Promise<Entry[]> {
-  const read = (page: (typeof MARKETING)[number]) => (locale === 'en' ? inEnglish(page.page, page.read) : page.read(locale));
-  const marketing = MARKETING.filter((page) => locale === 'en' || page.path !== '/');
+  const read = (page: (typeof PAGES_AND_READERS)[number]) => (locale === 'en' ? inEnglish(page.page, page.read) : page.read(locale));
+  const marketing = PAGES_AND_READERS.filter((page) => locale === 'en' || page.path !== '/');
   // The line under an index's heading, which is also its search description —
   // in the CMS since ticket 59 — or `null` where its entry is not published in
   // this language, when the index is left out rather than the file failing.

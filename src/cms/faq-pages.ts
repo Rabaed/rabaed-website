@@ -31,6 +31,6 @@ export type FaqPage = {
 export const FAQ_PAGES = Object.fromEntries(
   QUESTIONS_PAGE_KEYS.map((key) => {
     const page = MARKETING_PAGES[key];
-    return [key, { path: page.path, sectionId: page.questions, label: page.entry.label }];
+    return [key, { path: page.path, sectionId: page.questionsSection, label: page.entry.label }];
   }),
 ) as Readonly<Record<FaqPageKey, FaqPage>>;
