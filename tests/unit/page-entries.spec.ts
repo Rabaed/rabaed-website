@@ -1,6 +1,6 @@
 /**
  * Which entries decide each page's English is written once, in
- * `src/content/pages/page-entries.ts` (ticket 91), and the table in
+ * `src/lib/page-registry.ts`, the page registry (tickets 91 and 92), and the table in
  * `docs/deployment.md` that tells the founder what to publish for a page to be
  * in English is held to it here: a page given a new shared entry, and the
  * table not told, would leave him publishing everything it names and the page
@@ -14,16 +14,14 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { MARKETING_PAGES, entriesRead, type MarketingPage } from '../../src/content/pages/page-entries';
+import { MARKETING_PAGES, MARKETING_PAGE_KEYS, entriesRead, type MarketingPage } from '../../src/lib/page-registry';
 
-/** Each entry by the name the admin gives it, which is the name the table uses. */
+/**
+ * Each entry by the name the admin gives it, which is the name the table uses:
+ * the pages' own as the registry names them, and the entries they share.
+ */
 const ENTRY_NAMED: Readonly<Record<string, string>> = {
-  'الصفحة الرئيسية': 'home-page',
-  'صفحة المنتج': 'product-page',
-  'صفحة ابدأ': 'start-page',
-  'صفحة الأداة المجانية': 'tool-page',
-  'صفحة برنامج الإحالة': 'referral-page',
-  'صفحة برنامج الشراكات': 'partnership-page',
+  ...Object.fromEntries(MARKETING_PAGE_KEYS.map((page) => [MARKETING_PAGES[page].entry.label.ar, MARKETING_PAGES[page].entry.slug])),
   'قسم «كيف نبدأ معك»': 'closing-section',
   'شاشات المنصة': 'screen-mocks',
   'شريط الثقة': 'trust-strip',
@@ -64,5 +62,5 @@ test('the guide names, for each page, the entries that decide whether it is in E
 
   const table = (page: MarketingPage) =>
     rows.filter((row) => row.pages.some((named) => PAGE_NAMED[named] === page)).map((row) => ENTRY_NAMED[row.entry]);
-  for (const page of MARKETING_PAGES) expect(table(page).sort(), page).toEqual([...entriesRead(page)].sort());
+  for (const page of MARKETING_PAGE_KEYS) expect(table(page).sort(), page).toEqual([...entriesRead(page)].sort());
 });

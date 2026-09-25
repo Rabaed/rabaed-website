@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import type { GlobalAfterChangeHook, PayloadRequest } from 'payload';
+import { DISCOVERY_FILES, NOT_FOUND_ADDRESS } from '../lib/page-registry';
 
 /**
  * Set on `context` by anything that writes CMS content outside a request to
@@ -10,21 +11,14 @@ import type { GlobalAfterChangeHook, PayloadRequest } from 'payload';
 export const SKIP_REVALIDATION = 'skipRevalidation';
 
 /**
- * The files a crawler reads about the site rather than a page of it, each a
- * route of its own beside the layouts, so none is covered by marking the pages
- * stale: the sitemap (ticket 31), `llms.txt` — built from the pages' own
- * descriptions and every published article — and `robots.txt`, which reads the
- * training-crawler switch (ticket 33).
- */
-const DISCOVERY_FILES = ['/sitemap.xml', '/llms.txt', '/robots.txt'];
-
-/**
  * Every page of the site by the layout it sits beneath: each language's route
  * group, and the not-found page, which sits in neither and shows words from
- * the CMS (ticket 59). The second mark reaches the pages through these rather
+ * the CMS (ticket 59). The discovery files — the sitemap, `llms.txt` and
+ * `robots.txt` — are routes of their own beside the layouts, so marking the
+ * pages covers none of them: the page registry lists them (ticket 92). The second mark reaches the pages through these rather
  * than through the root layout the first mark uses (below).
  */
-const PAGE_LAYOUTS = ['/(ar)', '/(en)', '/_not-found'];
+const PAGE_LAYOUTS = ['/(ar)', '/(en)', NOT_FOUND_ADDRESS];
 
 /**
  * How long after a publish the site is marked a second time (ticket 64,

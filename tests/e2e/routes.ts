@@ -1,7 +1,9 @@
 /**
  * Every route the site serves, with a phrase from each that must survive the
  * trip to the browser. Later tickets add pages here; the suites that iterate
- * over this list then cover them without being edited.
+ * over this list then cover them without being edited. Which pages there are
+ * is the page registry's (`src/lib/page-registry.ts`), and
+ * `tests/unit/page-registry.spec.ts` holds this list to it.
  *
  * The phrases are real page copy, not test fixtures, because the thing being
  * proved is that *this* content reaches a client with no JavaScript.

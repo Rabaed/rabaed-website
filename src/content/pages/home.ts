@@ -21,6 +21,7 @@ import type { FormPageWording } from '@/forms/definition';
 import { DEMO_REQUEST, type DemoRequestField } from '@/forms/demo-request';
 import { formPageWording } from '@/forms/settings';
 import { localePath, type Locale } from '@/lib/locales';
+import { MARKETING_PAGES } from '@/lib/page-registry';
 import type { HomePage } from '@/payload-types';
 import { withQuestions, type LinkedSection, type PageMeta, type Section } from './page-content';
 
@@ -40,14 +41,6 @@ export type HomePageContent = {
   /** The words of the closing section's demo request form: its settings in the CMS. */
   readonly demoForm: FormPageWording<DemoRequestField>;
 };
-
-/**
- * The page's short name, as its breadcrumb structured data reads it
- * (ticket 32). Its search title and description are an Editor's, in the CMS
- * (ticket 26), on its own entry
- * (ticket 91, `src/content/search-settings.ts`).
- */
-const NAME: Readonly<Record<Locale, string>> = { ar: 'الرئيسية', en: 'Home' };
 
 /** A unit numbered by its place: «01». */
 const numbered = (index: number) => String(index + 1).padStart(2, '0');
@@ -114,7 +107,7 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
   );
 
   const page = await withQuestions<Omit<HomePageContent, 'demoForm'>>('home', locale, {
-    meta: pageMeta(locale, entry.search, { name: NAME[locale] }),
+    meta: pageMeta(locale, entry.search, { name: MARKETING_PAGES.home.name[locale] }),
     hero: {
       eyebrow: words(hero.eyebrow),
       title: { lines: hero.titleLines.map((each) => words(each.line)), accent: words(hero.titleAccent) },

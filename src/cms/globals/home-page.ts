@@ -3,6 +3,7 @@ import { HERO_DOCUMENT, HERO_STATIONS } from '../../components/home/hero-station
 import { latinField, listField, openingAnswerField, pictureField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
+import { MARKETING_PAGES } from '../../lib/page-registry';
 import { screenField } from './screen-mocks';
 
 const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40);
@@ -180,9 +181,9 @@ const COMMITMENT: Block = {
  * where it goes.
  */
 export const HomePage = pageGlobal({
-  slug: 'home-page',
-  label: { ar: 'الصفحة الرئيسية', en: 'Home page' },
-  path: '/',
+  slug: MARKETING_PAGES.home.entry.slug,
+  label: MARKETING_PAGES.home.entry.label,
+  path: MARKETING_PAGES.home.path,
   sections: [
     sectionTab({
       name: 'hero',

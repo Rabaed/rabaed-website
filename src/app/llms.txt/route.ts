@@ -6,19 +6,14 @@ import { BLOG_COPY } from '@/content/blog';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { COMPANY } from '@/content/company';
 import { getIndexLead } from '@/content/index-leads';
-import { getHomePage } from '@/content/pages/home';
 import { inEnglish } from '@/content/pages/languages';
-import type { MarketingPage } from '@/content/pages/page-entries';
 import { contentOrNull, type PageMeta } from '@/content/pages/page-content';
-import { getPartnershipPage } from '@/content/pages/partnership';
-import { getProductPage } from '@/content/pages/product';
-import { getReferralPage } from '@/content/pages/referral';
-import { getStartPage } from '@/content/pages/start';
-import { getToolPage } from '@/content/pages/tool';
+import { PAGE_LOADERS } from '@/content/pages/loaders';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
 import { localePath, type Locale } from '@/lib/locales';
+import { MARKETING_PAGES, MARKETING_PAGE_KEYS } from '@/lib/page-registry';
 import type { CaseStudy, Post } from '@/payload-types';
 
 /**
@@ -62,7 +57,7 @@ export const dynamic = 'force-static';
  *
  * Its own, because a discovery file is a route beside the layouts rather than
  * beneath one, so no layout's age reaches it — the same reason
- * `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`. Written out rather
+ * `DISCOVERY_FILES` exists in `src/lib/page-registry.ts`. Written out rather
  * than imported because Next reads only a literal; `src/lib/cache-age.ts`
  * holds the number and the reason it is that number.
  */
@@ -78,24 +73,12 @@ const HEADINGS = {
 } as const satisfies Record<Locale, unknown>;
 
 /**
- * The marketing pages, each with what reads it in a language — a copy of the
- * sitemap's list, as `MARKETING_PAGES` in `src/app/sitemap.ts`, until ticket
- * 92 gives the site one registry of its pages for both to read. The home page
- * leads the English pages and is left out of the Arabic, whose home page the
- * file's heading describes.
+ * The marketing pages, as the page registry lists them — the sitemap's list
+ * too (ticket 92, `src/lib/page-registry.ts`) — each with the module that
+ * reads it. The home page leads the English pages and is left out of the
+ * Arabic, whose home page the file's heading describes.
  */
-const MARKETING_PAGES: readonly {
-  readonly page: MarketingPage;
-  readonly path: string;
-  readonly read: (locale: Locale) => Promise<{ readonly meta: PageMeta }>;
-}[] = [
-  { page: 'home', path: '/', read: getHomePage },
-  { page: 'product', path: '/product', read: getProductPage },
-  { page: 'start', path: '/start', read: getStartPage },
-  { page: 'tool', path: '/tool', read: getToolPage },
-  { page: 'referral', path: '/referral', read: getReferralPage },
-  { page: 'partnership', path: '/partnership', read: getPartnershipPage },
-];
+const PAGES_AND_READERS = MARKETING_PAGE_KEYS.map((page) => ({ page, path: MARKETING_PAGES[page].path, read: PAGE_LOADERS[page] }));
 
 /**
  * A description as one line. A summary written in the CMS may hold line
@@ -131,8 +114,8 @@ async function pageEntries(
   posts: readonly Post[],
   caseStudies: readonly CaseStudy[],
 ): Promise<Entry[]> {
-  const read = (page: (typeof MARKETING_PAGES)[number]) => (locale === 'en' ? inEnglish(page.page, page.read) : page.read(locale));
-  const marketing = MARKETING_PAGES.filter((page) => locale === 'en' || page.path !== '/');
+  const read = (page: (typeof PAGES_AND_READERS)[number]) => (locale === 'en' ? inEnglish(page.page, page.read) : page.read(locale));
+  const marketing = PAGES_AND_READERS.filter((page) => locale === 'en' || page.path !== '/');
   // The line under an index's heading, which is also its search description —
   // in the CMS since ticket 59 — or `null` where its entry is not published in
   // this language, when the index is left out rather than the file failing.

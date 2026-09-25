@@ -10,26 +10,15 @@ import { getPayload, type DataFromGlobalSlug, type GlobalSlug } from 'payload';
 import { cache } from 'react';
 import { ContentNotInLocale } from '@/content/pages/page-content';
 import type { Locale } from '@/lib/locales';
+import type { MarketingPageEntry, SharedEntry } from '@/lib/page-registry';
 
 /**
- * The pages whose words are in the CMS, and the entries pages share: the
- * sections and pictures of tickets 53–58, and the words every page shares
- * (ticket 59).
+ * The marketing pages' entries and the entries they share, as the page
+ * registry lists them (ticket 92, `src/lib/page-registry.ts`): the sections
+ * and pictures of tickets 53–58 and the words every page shares (ticket 59).
+ * And the indexes' lines, which the blog and the case studies read.
  */
-export type PageSlug = Extract<
-  GlobalSlug,
-  | 'start-page'
-  | 'tool-page'
-  | 'referral-page'
-  | 'product-page'
-  | 'home-page'
-  | 'closing-section'
-  | 'screen-mocks'
-  | 'partnership-page'
-  | 'site-words'
-  | 'index-leads'
-  | 'trust-strip'
->;
+export type PageSlug = Extract<GlobalSlug, MarketingPageEntry | SharedEntry | 'index-leads'>;
 
 /**
  * One level deep, so that a picture comes with the image it names rather than

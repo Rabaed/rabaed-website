@@ -22,6 +22,7 @@ import { StartPage } from '../../src/cms/globals/start-page';
 import { ToolPage } from '../../src/cms/globals/tool-page';
 import { TrustStripLogos } from '../../src/cms/globals/trust-strip';
 import { ENGLISH_ENTRIES, ENGLISH_PAIRS } from '../../src/migrations/english-pages/entries';
+import { MARKETING_PAGES, type MarketingPage } from '../../src/lib/page-registry';
 import { englishFieldAt } from './cms-fields';
 
 const ENTRIES: Readonly<Record<string, GlobalConfig>> = {
@@ -35,25 +36,17 @@ const ENTRIES: Readonly<Record<string, GlobalConfig>> = {
   'trust-strip': TrustStripLogos,
 };
 
-/**
- * Where a word proposed for the entry that held every page's search settings
- * is held now: on the page's own entry, in its search tab (ticket 91). The
- * proposal's path begins with the page, `product.title`.
- */
-const SEARCH_TAB_OF: Readonly<Record<string, string>> = {
-  home: 'home-page',
-  product: 'product-page',
-  start: 'start-page',
-  tool: 'tool-page',
-  referral: 'referral-page',
-  partnership: 'partnership-page',
-};
 
-/** The entry that holds a proposed word, and where in it. */
+/**
+ * The entry that holds a proposed word, and where in it. A word proposed for
+ * the entry that held every page's search settings is held now on the page's
+ * own entry, in its search tab (ticket 91): the proposal's path begins with
+ * the page, `product.title`.
+ */
 function heldAt(pair: (typeof ENGLISH_PAIRS)[number]): { entry: GlobalConfig; path: readonly (string | number)[] } {
   if (pair.entry !== 'search-settings') return { entry: ENTRIES[pair.entry], path: pair.path };
   const [page, ...rest] = pair.path;
-  return { entry: ENTRIES[SEARCH_TAB_OF[page as string]], path: ['search', ...rest] };
+  return { entry: ENTRIES[MARKETING_PAGES[page as MarketingPage].entry.slug], path: ['search', ...rest] };
 }
 
 /**

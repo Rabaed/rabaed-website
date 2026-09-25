@@ -2,6 +2,7 @@ import type { Field } from 'payload';
 import { listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
+import { MARKETING_PAGES } from '../../lib/page-registry';
 
 /**
  * The partnership page's words, section by section, in the page's order
@@ -30,9 +31,9 @@ const NUMBERED: Words = {
 };
 
 export const PartnershipPage = pageGlobal({
-  slug: 'partnership-page',
-  label: { ar: 'صفحة برنامج الشراكات', en: 'Partnership page' },
-  path: '/partnership',
+  slug: MARKETING_PAGES.partnership.entry.slug,
+  label: MARKETING_PAGES.partnership.entry.label,
+  path: MARKETING_PAGES.partnership.path,
   sections: [
     sectionTab({
       name: 'hero',

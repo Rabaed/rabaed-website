@@ -30,7 +30,8 @@ import { fields, type Entry } from './entries';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
-import { entriesRead, MARKETING_PAGES, PAGE_ENTRIES, type MarketingPage } from '../../src/content/pages/page-entries';
+import { localePath } from '../../src/lib/locales';
+import { entriesRead, MARKETING_PAGES, MARKETING_PAGE_KEYS, type MarketingPage } from '../../src/lib/page-registry';
 import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
 import { oneSuiteAtATime } from './one-suite-at-a-time';
 
@@ -40,7 +41,7 @@ oneSuiteAtATime(test);
 /**
  * The entries a page reads beside the header and footer, whose English is
  * approved on its own (`approveSiteWords`): as the site decides the page's
- * languages by them (`src/content/pages/page-entries.ts`, ticket 91).
+ * languages by them (the page registry, `src/lib/page-registry.ts`; tickets 91 and 92).
  */
 const entriesOf = (...pages: MarketingPage[]) => [
   ...new Set(pages.flatMap((page) => entriesRead(page)).filter((slug) => slug !== 'site-words')),
@@ -50,18 +51,13 @@ const entriesOf = (...pages: MarketingPage[]) => [
  * Every entry an English page reads beside the header and footer: this
  * ticket's proposals, and the Screen mocks, whose English is ticket 41's.
  */
-const ENTRIES = entriesOf(...MARKETING_PAGES);
+const ENTRIES = entriesOf(...MARKETING_PAGE_KEYS);
 
 /** Each English page's address. */
-const PATH: Readonly<Record<MarketingPage, string>> = {
-  home: '/en',
-  product: '/en/product',
-  start: '/en/start',
-  tool: '/en/tool',
-  referral: '/en/referral',
-  partnership: '/en/partnership',
-};
-const PAGES = MARKETING_PAGES.map((page) => PATH[page]);
+const PATH = Object.fromEntries(
+  MARKETING_PAGE_KEYS.map((page) => [page, localePath('en', MARKETING_PAGES[page].path)]),
+) as Readonly<Record<MarketingPage, string>>;
+const PAGES = MARKETING_PAGE_KEYS.map((page) => PATH[page]);
 
 /** Anything with an Arabic letter in it. */
 const ARABIC = /[\u0600-\u06FF]/;
@@ -249,7 +245,7 @@ test('previewed, each English page is the whole page, in English, left to right'
   // read the fewest first: a page reading an entry its list leaves out finds
   // that entry still in Arabic alone, and fails rather than drawing.
   const approved = new Set<string>();
-  const inOrder = [...MARKETING_PAGES].sort((one, other) => entriesRead(one).length - entriesRead(other).length);
+  const inOrder = [...MARKETING_PAGE_KEYS].sort((one, other) => entriesRead(one).length - entriesRead(other).length);
   let eyebrows = 0;
   for (const each of inOrder) {
     for (const slug of entriesOf(each).filter((slug) => !approved.has(slug))) {
@@ -453,7 +449,7 @@ test.describe('published in English', () => {
 
   test('the English start page is a page of the site, with its own title, alternates and trail', async ({ request, baseURL }) => {
     await signIn(request);
-    const title = (await proposal(request, PAGE_ENTRIES.start.own)).version.search as { title: { en: string } };
+    const title = (await proposal(request, MARKETING_PAGES.start.entry.slug)).version.search as { title: { en: string } };
     const html = await reachesVisitors(request, '/en/start', title.title.en, 'the English start page');
 
     expect(html).not.toContain('This page is not available in English yet.');

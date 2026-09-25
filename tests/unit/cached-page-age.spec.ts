@@ -23,84 +23,99 @@
  * can actually be observed.
  */
 import { test, expect } from '@playwright/test';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { MAX_PAGE_AGE_SECONDS } from '../../src/lib/cache-age';
-
-const repoRoot = path.resolve(import.meta.dirname, '..', '..');
+import { DISCOVERY_FILES, NOT_FOUND_ADDRESS, NOT_PAGES } from '../../src/lib/page-registry';
+import { appRoutes, repoRoot, under } from './app-routes';
 
 /**
- * The files that must each carry the age.
- *
- * The two layouts sit above all twenty pages and a route takes the lowest age
- * in its chain, so those two cover every page without twenty edits to keep in
- * step. The three discovery files are routes of their own with no layout above
- * them — the same reason `DISCOVERY_FILES` exists in `src/cms/revalidation.ts`,
- * and the same three. So is the not-found page, which sits in neither
- * language's layout (`PAGE_LAYOUTS` there names it) and shows words from the
- * CMS (ticket 59); Next builds it as a page of its own, `/_not-found`, from
- * this file (ticket 84).
+ * The layouts that must each carry the age. The two sit above all twenty
+ * pages and a route takes the lowest age in its chain, so those two cover
+ * every page without twenty edits to keep in step.
  */
-const MUST_CARRY_THE_AGE = [
-  'src/app/(ar)/layout.tsx',
-  'src/app/(en)/en/layout.tsx',
-  'src/app/llms.txt/route.ts',
-  'src/app/robots.ts',
-  'src/app/sitemap.ts',
-  'src/app/not-found.tsx',
-];
+const LAYOUTS = ['src/app/(ar)/layout.tsx', 'src/app/(en)/en/layout.tsx'];
 
 /**
- * The route groups that must not have one, and why each is not a page a
- * visitor reads.
- *
- * `(payload)` is the CMS admin and `(forms)` is two API routes: neither is
- * cached, so an age would mean nothing. `(studio)` is the Screen mock studio,
+ * The routes that must each carry the age of their own, by address: the
+ * discovery files, routes with no layout above them, and the not-found page,
+ * which sits in neither language's layout and shows words from the CMS
+ * (ticket 59); Next builds it as a page of its own, `/_not-found` (ticket 84).
+ * The page registry lists all four (ticket 92, `src/lib/page-registry.ts`).
+ */
+const ROUTES_OF_THEIR_OWN = [...DISCOVERY_FILES, NOT_FOUND_ADDRESS];
+
+/**
+ * The routes that must not have one: what the page registry names as not a
+ * page and not cached — the CMS admin, its API and the forms' routes, which
+ * are not cached, so an age would mean nothing; and the Screen mock studio,
  * which is built from HTML on disk (ADR-0002) and changes only when a deploy
  * changes it — nothing a publish can make stale, so nothing for a floor to
  * catch.
  */
-const MUST_NOT_CARRY_THE_AGE = ['src/app/(payload)', 'src/app/(forms)', 'src/app/(studio)'];
+const UNCACHED = NOT_PAGES.filter((route) => !route.cached);
 
 /** `export const revalidate = 600`, which is the only form Next reads (see `src/lib/cache-age.ts`). */
 const AGE_EXPORT = /^export const revalidate = (\d+);$/m;
 
-for (const file of MUST_CARRY_THE_AGE) {
-  test(`${file} sets the age`, async () => {
-    const source = await readFile(path.join(repoRoot, file), 'utf8');
-    const match = source.match(AGE_EXPORT);
+async function expectTheAge(file: string): Promise<void> {
+  const source = await readFile(path.join(repoRoot, file), 'utf8');
+  const match = source.match(AGE_EXPORT);
 
-    expect(
-      match,
-      `${file} does not export a maximum age. Every route a visitor can reach needs one, or a lost mark leaves it wrong until the next publish (ticket 66).`,
-    ).not.toBeNull();
-    expect(
-      Number(match?.[1]),
-      `${file} sets an age that is not MAX_PAGE_AGE_SECONDS. Next reads only a literal, so the number is written out in each file and held to the constant here.`,
-    ).toBe(MAX_PAGE_AGE_SECONDS);
+  expect(
+    match,
+    `${file} does not export a maximum age. Every route a visitor can reach needs one, or a lost mark leaves it wrong until the next publish (ticket 66).`,
+  ).not.toBeNull();
+  expect(
+    Number(match?.[1]),
+    `${file} sets an age that is not MAX_PAGE_AGE_SECONDS. Next reads only a literal, so the number is written out in each file and held to the constant here.`,
+  ).toBe(MAX_PAGE_AGE_SECONDS);
+}
+
+for (const file of LAYOUTS) {
+  test(`${file} sets the age`, async () => {
+    await expectTheAge(file);
   });
 }
 
-for (const group of MUST_NOT_CARRY_THE_AGE) {
-  test(`${group} does not`, async () => {
-    const withAnAge: string[] = [];
+for (const address of ROUTES_OF_THEIR_OWN) {
+  test(`${address} sets the age`, async () => {
+    const route = (await appRoutes()).find((each) => !each.layout && each.address === address);
+    expect(route, `no route answers ${address}`).toBeTruthy();
+    await expectTheAge(route!.file);
+  });
+}
 
-    for (const file of await routeFilesUnder(path.join(repoRoot, group))) {
-      if (AGE_EXPORT.test(await readFile(file, 'utf8'))) withAnAge.push(path.relative(repoRoot, file));
+for (const { address, reason } of UNCACHED) {
+  test(`${address} does not`, async () => {
+    const withAnAge: string[] = [];
+    for (const route of await appRoutes()) {
+      if (route.layout || !under(route.address, address)) continue;
+      if (AGE_EXPORT.test(await readFile(path.join(repoRoot, route.file), 'utf8'))) withAnAge.push(route.file);
     }
 
-    expect(
-      withAnAge,
-      `${group} is not a page a visitor reads, so an age there is either meaningless or a rebuild of something no publish changes.`,
-    ).toEqual([]);
+    expect(withAnAge, `${address} is ${reason}: not cached, so an age there is either meaningless or a rebuild of something no publish changes.`).toEqual([]);
   });
 }
 
-/** Every route file — a page, a layout or a route handler — beneath a directory. */
-async function routeFilesUnder(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
+/**
+ * A layout above nothing but routes that are not cached — the CMS admin's and
+ * the Screen mock studio's — has no age either: it would reach no page, and
+ * says one is meant. Known by the routes in its folder, since a route group's
+ * own layout, `(payload)/layout.tsx`, answers no address of its own.
+ */
+test('a layout above only routes that are not cached does not', async () => {
+  const all = await appRoutes();
+  const routes = all.filter((route) => !route.layout);
+  const uncached = (address: string) => UNCACHED.some((each) => under(address, each.address));
+  const withAnAge: string[] = [];
 
-  return entries
-    .filter((entry) => entry.isFile() && /^(page|layout|route)\.tsx?$/.test(entry.name))
-    .map((entry) => path.join(entry.parentPath, entry.name));
-}
+  for (const layout of all.filter((route) => route.layout)) {
+    const folder = layout.file.slice(0, layout.file.lastIndexOf('/') + 1);
+    const beneath = routes.filter((route) => route.file.startsWith(folder));
+    if (beneath.length === 0 || !beneath.every((route) => uncached(route.address))) continue;
+    if (AGE_EXPORT.test(await readFile(path.join(repoRoot, layout.file), 'utf8'))) withAnAge.push(layout.file);
+  }
+
+  expect(withAnAge).toEqual([]);
+});

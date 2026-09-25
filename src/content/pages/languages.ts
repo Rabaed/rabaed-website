@@ -1,10 +1,11 @@
 import { entryLanguages } from '@/cms/pages';
 import { LOCALE_CODES, type Locale } from '@/lib/locales';
-import { entriesRead, type MarketingPage } from './page-entries';
+import { entriesRead, type MarketingPage } from '@/lib/page-registry';
 
 /**
  * Which languages a marketing page is published in, asked of the entries that
- * decide it (`page-entries.ts`) rather than by building the page (ticket 91).
+ * decide it (the page registry, `src/lib/page-registry.ts`) rather than by
+ * building the page (ticket 91).
  *
  * A page is published in a language once every entry it reads is. Arabic
  * always: the CMS publishes no entry without it. English once the founder

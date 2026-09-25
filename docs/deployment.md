@@ -574,8 +574,8 @@ do, publishing an Arabic change to the entry publishes none of its English.
 | **كلمات الموقع المشتركة** | Home, Product, Start, Tool, Referral, Partnership | The header and the footer (the section above) |
 
 The site decides whether a page is in English by exactly these entries, listed
-once in `src/content/pages/page-entries.ts` (ticket 91); a test fails if this
-table and that list disagree.
+once in the page registry, `src/lib/page-registry.ts` (tickets 91 and 92); a
+test fails if this table and that list disagree.
 
 And beside them:
 
@@ -818,6 +818,50 @@ and missed would propose an entry with a field wiped.
 keeps it: ticket 68 brought over the last eight. A new one written through
 Payload fails the suite the day it merges, and so does a frozen seed that no
 longer writes the words beside it.
+
+#### Adding a page
+
+For developers. **Every page of the site is listed once, by hand, in the page
+registry, `src/lib/page-registry.ts`** (ticket 92): its address, its short
+name, its entry in the CMS and that entry's name in the admin, the entries it
+shares, and where its questions are. The sitemap, `llms.txt`, the pages
+questions are filed under, the English notices, which files a publish
+rebuilds, and the admin's name for the page all read it. Nothing is found by
+walking the routes, so nothing that is not a page can reach the sitemap; and
+`tests/unit/page-registry.spec.ts` fails when a route is neither listed nor
+named there as not a page, with its reason.
+
+A marketing page with an entry of its own takes these files, written by hand:
+
+1. `src/lib/page-registry.ts` — the page, in `MARKETING_PAGES`.
+2. `src/cms/globals/<page>-page.ts` — its entry: its sections, then `searchTab()`.
+3. `src/payload.config.ts` — the entry, among the globals.
+4. `src/content/pages/<page>.ts` — the module that reads the entry into the page.
+5. `src/content/pages/loaders.ts` — that module, by the page's key.
+6. `src/components/pages/<page>-page.tsx` — the page, and the sections it draws.
+7. `src/app/(ar)/<page>/page.tsx` and `src/app/(en)/en/<page>/page.tsx` — its
+   two addresses.
+8. `src/migrations/<page>-page-import/` — the words it starts with, frozen as
+   the section above says.
+9. `tests/e2e/routes.ts` — its address, and a phrase from it, which a test holds
+   to the registry.
+10. This guide's table of what each English page reads (**The English pages,
+    waiting for a decision**), which a test holds to the registry.
+11. The end-to-end tests that restate the site's pages on purpose, and fail
+    until they are told — for the reason `tests/e2e/routes.ts` gives, a test
+    that read its expectation from the registry would agree with any mistake
+    in it: `performance.spec.ts` (the page's weight budget),
+    `search-foundations.spec.ts` and `ai-crawlers.spec.ts` (the sitemap's and
+    `llms.txt`'s lists), `structured-data.spec.ts` (its breadcrumb trail) and
+    `cached-page-age.spec.ts` (its maximum age).
+
+Seventeen files by hand — the two routes as two, the import as its words and
+its migration, and the five tests — besides the page's own section
+components, where the architecture review of 24 September 2026 counted 18 to
+20. The difference is in what can go wrong: every file outside the tests now
+either reads the registry or fails to compile or to pass until it does. `npm run
+cms:migration` then writes the schema migration and its snapshot, `npm run
+cms:freeze-seed` the import's SQL, and `npm run cms:generate` the types.
 
 ### Forms
 
