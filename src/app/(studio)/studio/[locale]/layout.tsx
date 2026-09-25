@@ -6,7 +6,9 @@ import '@/styles/studio.css';
 
 /**
  * The Screen mock studio: a private route whose only purpose is to be
- * photographed by `npm run mocks:export` (ADR-0002).
+ * photographed by `npm run mocks:export` (ADR-0002). Private meaning never
+ * indexed, and not there at all on the production deployment, where
+ * `src/proxy.ts` answers not found before this is reached (ticket 98).
  *
  * Its own root layout, outside both locales, because it is not a page of the
  * site — it has no header, no footer, and no content of its own.

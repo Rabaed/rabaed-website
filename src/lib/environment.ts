@@ -58,6 +58,22 @@ export function isPubliclyDeployed(): boolean {
 }
 
 /**
+ * Whether the Screen mock studio answers here (ADR-0002, ticket 98): on every
+ * deployment but production, and locally.
+ *
+ * It exists to be photographed by `npm run mocks:export` and compared by the
+ * suite, which both run locally, and to be looked at by the founder on a
+ * preview, which Vercel's sign-in already guards (ticket 78). On the live site
+ * it would only be one more address for a scanner to find.
+ *
+ * Read when the page is asked for, in `src/proxy.ts`, rather than when the
+ * site is built, so that one build answers as the deployment it is serving.
+ */
+export function servesScreenMockStudio(): boolean {
+  return process.env.VERCEL_ENV !== 'production';
+}
+
+/**
  * Whether this build reports what visitors do to Vercel's Web Analytics and
  * Speed Insights (ticket 34).
  *
