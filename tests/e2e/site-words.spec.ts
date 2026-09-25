@@ -12,6 +12,16 @@
  * the end of the footer's tagline, which no screenshot shows and no suite
  * reads; the refused changes are never saved at all.
  *
+ * Visitors never see a draft, but every preview does: the admin's preview
+ * draws every entry's latest draft, so another suite previewing a page while
+ * a draft here is waiting is shown this suite's words in place of the ones it
+ * expects. The product page suite's swipe hint was, once. So the suite **runs
+ * against the second test server** (`playwright.config.ts`, ticket 89), one
+ * suite at a time, where nothing previews beside it. `english-pages.spec.ts`
+ * publishes these words in English there, and puts them back before it is
+ * done, so that this suite finds them in Arabic alone, as the founder left
+ * them.
+ *
  * The tests sign in as an editor of their own and run one at a time, and what
  * they change is put back when each ends (`entries.ts`).
  */
@@ -19,8 +29,10 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { test, expect, type CmsEntry, type Entry, type Version } from './entries';
 import { sidewaysOverflow, sidewaysOverflowOf } from './geometry';
 import { ROUTES } from './routes';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 type SiteWords = Entry<'site-words'>;
 /** A word as the CMS holds it: its Arabic and its English. */
@@ -491,7 +503,8 @@ test('a change published reaches visitors', async ({ page, request, cms }) => {
  * What the migration wrote is restated here rather than imported, for the
  * reason `routes.ts` gives. The case studies link is left out: no story is
  * published while this suite runs, and the link waits for the first
- * (`case-studies.spec.ts` publishes one and finds it).
+ * (`case-studies.spec.ts`, on the same server, publishes one and finds it,
+ * and deletes it when each test ends).
  */
 const DIRECTORY = [
   {

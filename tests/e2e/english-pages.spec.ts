@@ -22,16 +22,20 @@
  * proposed. What is asserted is what any English would have to do: be
  * English, fill the page, and never leave Arabic in its place.
  */
+import { isDeepStrictEqual } from 'node:util';
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { reachesVisitors, reaching, uploadImage } from './cms';
 import { signIn } from './editors';
+import { fields, type Entry } from './entries';
 import { mailTo, submissionsFrom, uniqueApplicant } from './forms';
 import { sidewaysOverflow } from './geometry';
 import { expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFiles } from './screen-mock-phone';
 import { entriesRead, MARKETING_PAGES, PAGE_ENTRIES, type MarketingPage } from '../../src/content/pages/page-entries';
 import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 /**
  * The entries a page reads beside the header and footer, whose English is
@@ -139,6 +143,70 @@ function readText(page: Page): Promise<string> {
     return body.innerText;
   });
 }
+
+/**
+ * The header and footer as visitors were shown them before this suite: the
+ * newest published version, which is what the site reads (`src/cms/pages.ts`).
+ */
+let siteWordsBefore: Version | undefined;
+
+test.beforeAll(async ({ playwright }, testInfo) => {
+  const request = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+  try {
+    await signIn(request);
+    [siteWordsBefore] = await versions(request, 'site-words', 'published');
+  } finally {
+    await request.dispose();
+  }
+});
+
+/**
+ * The header and footer put back as they were, in Arabic alone: the site
+ * words suite runs on this server too, after this one or before its next
+ * run, and holds them to what the founder left (`site-words.spec.ts`). The
+ * rest of what is published here stays published, which no suite beside it
+ * minds.
+ *
+ * Put back from the published version remembered, not from the entry as the
+ * API reads it: approving the English as a draft restores the proposal, and
+ * restoring a version makes it the entry, draft or not — so after the
+ * previews above the API reads the English proposal, and the published
+ * Arabic is only in the versions.
+ *
+ * Every English page is built again on its next visit, and one still drawn
+ * with the English header and footer would be read by the next suite as if
+ * they were published, so each is waited for.
+ */
+test.afterAll(async ({ playwright }, testInfo) => {
+  const before = siteWordsBefore;
+  if (!before) return;
+  const editor = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+  let english: string | null | undefined;
+  try {
+    await signIn(editor);
+    const [latest] = await versions(editor, 'site-words', 'published');
+    const entry = await editor.get('/api/globals/site-words?depth=0');
+    expect(entry.ok(), await entry.text()).toBe(true);
+    const unchanged = latest.id === before.id && isDeepStrictEqual(fields(await entry.json()), fields(before.version));
+    if (unchanged) return;
+    if (latest.version.languages?.includes('en')) english = (latest.version as unknown as Entry<'site-words'>).footer.tagline.en;
+    const restored = await editor.post('/api/globals/site-words', { data: { ...fields(before.version), _status: 'published' } });
+    expect(restored.ok(), await restored.text()).toBe(true);
+  } finally {
+    await editor.dispose();
+  }
+  if (!english) return;
+
+  const visitor = await playwright.request.newContext({ baseURL: testInfo.project.use.baseURL });
+  try {
+    for (const path of [...PAGES, '/en/blog']) {
+      const html = async () => (await visitor.get(path)).text();
+      await reaching(`the English header and footer taken off ${path}`, html).not.toContain(english);
+    }
+  } finally {
+    await visitor.dispose();
+  }
+});
 
 test.afterEach(async ({ page }) => {
   await page.request.get('/api/preview/exit');

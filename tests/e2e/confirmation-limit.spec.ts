@@ -17,6 +17,9 @@ import { test, expect, type APIRequestContext } from '@playwright/test';
 import { signIn } from './editors';
 import { postDemoRequest, publishDemoSettings, readDemoSettings } from './demo-request-api';
 import { mailTo, readerDelete, readerGet, submissionsFrom, uniqueApplicant, type StoredSubmission } from './forms';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
+
+oneSuiteAtATime(test);
 
 const FROM_THE_SITE_AN_HOUR = 30;
 

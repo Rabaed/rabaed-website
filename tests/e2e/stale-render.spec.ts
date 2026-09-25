@@ -37,6 +37,9 @@ import type { APIResponse } from '@playwright/test';
 import pg from 'pg';
 import { reachesVisitors } from './cms';
 import { test, expect } from './entries';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
+
+oneSuiteAtATime(test);
 
 /**
  * The longest the site settings are held, whatever happens. A hold is about
