@@ -63,7 +63,8 @@ export function isPubliclyDeployed(): boolean {
  *
  * It exists to be photographed by `npm run mocks:export` and compared by the
  * suite, which both run locally, and to be looked at by the founder on a
- * preview, which Vercel's sign-in already guards (ticket 78). On the live site
+ * preview, as ticket 78's Phone crops were; a preview is behind Vercel's
+ * sign-in, so nobody else sees it there. On the live site
  * it would only be one more address for a scanner to find.
  *
  * Read when the page is asked for, in `src/proxy.ts`, rather than when the
