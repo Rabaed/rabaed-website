@@ -26,7 +26,8 @@
     "cms:rebase-migrations": "node scripts/rebase-migrations.mjs",
     "cms:check-migrations": "node scripts/check-migrations.mjs",
     "cms:generate": "node scripts/with-database.mjs \"payload generate:importmap && payload generate:types\"",
-    "cms:create-editor": "payload run scripts/create-editor.ts"
+    "cms:create-editor": "payload run scripts/create-editor.ts",
+    "check:redirects": "node scripts/check-portal-redirects.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

@@ -40,6 +40,27 @@ const nextConfig: NextConfig = {
     '/studio/**': ['./src/screen-mocks/**/*.html'],
   },
 
+  async rewrites() {
+    return {
+      // `/api/*` cannot wait for `fallback`. Payload's own catch-all route
+      // (`src/app/(payload)/api/[...slug]/route.ts`) matches every address
+      // under it, so nothing there is ever a filesystem miss and the fallback
+      // below would never see it — `/api/1.1/wf/redeem-invite` would answer
+      // Payload's 404 instead of reaching the portal. Bubble's API prefix is
+      // `/api/1.1/`, which Payload does not use, so it is safe to claim here,
+      // before the filesystem is consulted.
+      beforeFiles: [{ source: '/api/1.1/:path*', destination: '/portal-redirect/api/1.1/:path*' }],
+
+      afterFiles: [],
+
+      // Runs only once Next has checked every page, route and public file, so
+      // anything this site serves is served, and everything else — today's
+      // Bubble pages, tomorrow's, `/version-test/*`, `/fileupload/*` — goes to
+      // the portal. Neither side ever has to list the other's addresses.
+      fallback: [{ source: '/:path*', destination: '/portal-redirect/:path*' }],
+    };
+  },
+
   async headers() {
     // The Screen mock studio is private for good, not just before launch: it
     // shows the same screens as the pages that are meant to rank
