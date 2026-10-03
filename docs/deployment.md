@@ -191,7 +191,10 @@ or production deployments stop.
    registrations, which nobody may reach by address (ADR-0004). It uses the
    same S3 connection and key as `media`. Its name is `S3_DOCUMENTS_BUCKET`
    (`documents`). Without it, the site still builds, but a form that carries
-   documents cannot be sent, and says so.
+   documents cannot be sent, and says so. The Pour Tracker releases Ahmed
+   uploads are kept there too, under `pour-tracker/` (ticket 100): without the
+   bucket an upload is refused, and visitors keep receiving the copy in the
+   code.
 5. **Vercel.** In the project's **Settings → Environment Variables**, add the
    seven values above plus `PAYLOAD_SECRET`, a long random value (for example the
    output of `openssl rand -hex 32`). Recommended: a **second** Supabase project
