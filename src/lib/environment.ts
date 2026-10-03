@@ -32,6 +32,16 @@ export function siteOrigin(): string {
 }
 
 /**
+ * Where the product app answers (ADR-0026): asked whether it has a page, and
+ * where a visitor is sent when it has. Only the test suite sets
+ * `PRODUCT_APP_ORIGIN`, to its stand-in (`scripts/fake-product-app.mjs`); a
+ * deployment never does.
+ */
+export function productAppOrigin(): string {
+  return process.env.PRODUCT_APP_ORIGIN || 'https://app.rabaedapp.com';
+}
+
+/**
  * A page's absolute address, from the path it has in its locale
  * (`localePath`). The home page is the bare origin, as its canonical URL is —
  * one rule, because the sitemap, the structured data and `llms.txt` all write

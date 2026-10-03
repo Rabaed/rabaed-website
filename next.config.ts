@@ -41,41 +41,22 @@ const nextConfig: NextConfig = {
   },
 
   /**
-   * The portal's old addresses on this domain, forwarded to `app.rabaedapp.com`
-   * (ADR-0025). Named, not "everything left over": a rule that forwarded
-   * whatever this site does not serve would take the site's own not-found page
-   * with it, and `/ar`, `/admin` and every mistyped address would leave for the
-   * portal instead of being refused here (`tests/e2e/localisation.spec.ts`,
-   * `tests/e2e/cms.spec.ts`).
+   * The product app's API, which its pages called at this domain before it
+   * moved (ADR-0026). Everything else the product app used to answer here is
+   * the proxy's to forward (`src/proxy.ts`), because only the proxy can ask
+   * the product app first and still leave this site's not-found page to
+   * answer what neither has. This is the one address it cannot leave to the
+   * proxy: a call to an API is not a link anyone follows, so there is nothing
+   * to ask — it is the product app's, and it goes there.
    *
-   * `beforeFiles`, so these addresses belong to the portal whatever this site
-   * later adds. Two of them have to be: Payload's catch-all
+   * `beforeFiles`, because Payload's catch-all
    * (`src/app/(payload)/api/[...slug]/route.ts`) answers everything under
-   * `/api/`, and `/maktab` is the CMS, so neither would ever reach a later
-   * phase.
+   * `/api/`, so nothing there ever reaches a later phase. `/api/1.1/` is the
+   * product app's prefix, and Payload does not use it.
    */
   async rewrites() {
-    const portal = [
-      // Bubble names a version in the address, and every page below has a copy
-      // under each — so these two cover the test and live copies of all of them.
-      '/version-test/:path*',
-      '/version-live/:path*',
-
-      '/api/1.1/:path*', // Bubble's API, which Payload's own `/api` does not use
-      '/fileupload/:path*', // a stored private file, addressed in emails
-      '/signin/:path*',
-      '/signup/:path*',
-      '/registration/:path*', // an invite email's link, with its token in the query
-      '/verify/:path*', // the QR code printed on a letter
-      '/submittal/:path*', // submittal emails and the links inside Excel exports
-      '/project/:path*',
-      '/projects_list/:path*',
-    ];
-
     return {
-      // `:path*` matches no segments as well as some, so `/signin` and
-      // `/signin/anything` both forward.
-      beforeFiles: portal.map((source) => ({ source, destination: `/portal-redirect${source}` })),
+      beforeFiles: [{ source: '/api/1.1/:path*', destination: '/portal-redirect/api/1.1/:path*' }],
       afterFiles: [],
       fallback: [],
     };

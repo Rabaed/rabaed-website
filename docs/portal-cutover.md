@@ -1,6 +1,6 @@
 # Moving the portal to app.rabaedapp.com
 
-`rabaedapp.com` is the Bubble portal today. After this it is this site, and the portal is `app.rabaedapp.com`. Old portal links keep working: see [ADR-0025](adr/0025-the-portals-old-addresses-on-this-domain-are-named-and-forwarded.md) for why the forwarding is shaped the way it is.
+`rabaedapp.com` is the product app today. After this it is this site, and the product app is `app.rabaedapp.com`. Links the product app gave out keep working: see [ADR-0026](adr/0026-the-product-app-is-asked-whether-it-has-the-page.md) for why the forwarding is shaped the way it is.
 
 DNS is at GoDaddy, default TTL 600 seconds, so any step below can be undone in about ten minutes.
 
@@ -9,8 +9,9 @@ DNS is at GoDaddy, default TTL 600 seconds, so any step below can be undone in a
 ## Days before
 
 1. **Add `app.rabaedapp.com` at GoDaddy**, pointing at Bubble per Bubble's own instructions, and let Bubble finish issuing its certificate. Doing this early is the whole point of the step: if it is left until switch night, there is a window where the portal's new address serves a certificate warning.
-2. **Check the callbacks.** Anything that registered `rabaedapp.com` as an allowed address fails closed, and a redirect does not rescue it. Social or SSO sign-in redirect URIs, payment gateway callbacks, and any webhook sender that cannot be edited later.
-3. **Deploy this branch to a preview** and run the checker against the preview URL:
+2. **Rename `/admin` in Bubble** so that `app.rabaedapp.com/admin` answers 404. Today it sends visitors to `/projects_list`, so the site would forward every scanner that tries `/admin` straight to the product app. Check with `curl -sI https://app.rabaedapp.com/admin`.
+3. **Check the callbacks.** Anything that registered `rabaedapp.com` as an allowed address fails closed, and a redirect does not rescue it. Social or SSO sign-in redirect URIs, payment gateway callbacks, and any webhook sender that cannot be edited later.
+4. **Deploy this branch to a preview** and run the checker against the preview URL:
 
    ```bash
    npm run check:redirects -- https://<preview>.vercel.app
@@ -43,11 +44,13 @@ Put the apex `A` record back to its old value at GoDaddy and change Bubble's cus
 
 ## A week later
 
-Change `STATUS` in `src/app/(portal)/portal-redirect/[[...path]]/route.ts` from `307` to `308` and deploy. That tells search engines the move is permanent. It is cached by browsers for good, which is why it waits until the cutover has been watched for a week.
+Change `FORWARD_STATUS` in `src/lib/product-app.ts` from `307` to `308` and deploy. It is the one status both the proxy and the API's route handler send with. That tells search engines the move is permanent. It is cached by browsers for good, which is why it waits until the cutover has been watched for a week.
 
 ## From now on
 
-Two rules, both enforced by nothing but this document and the checker:
+Nothing to keep in step. For any address this site has no page for, the proxy asks the product app whether it has one, and forwards only if it does ([ADR-0026](adr/0026-the-product-app-is-asked-whether-it-has-the-page.md)). A page added to either side works without touching the other.
 
-1. **A page added to the Bubble portal has to be named in `next.config.ts` too.** The forwarding is a named list, not a catch-all — see [ADR-0025](adr/0025-the-portals-old-addresses-on-this-domain-are-named-and-forwarded.md) for why the catch-all was given up. A portal page nobody adds to the list lands on this site's not-found page instead.
-2. **No page here may take a portal address.** Not `/signin`, `/registration`, `/verify`, `/submittal`, `/project` or `/projects_list`, and nothing starting `/version-`, `/api/1.1/` or `/fileupload/`. Those are claimed before this site's own files, so such a page would never be reached — and the addresses are in letters that have already been printed.
+Two things to know:
+
+1. **No page here may take an address the product app gave out.** Not `/signin`, `/registration`, `/verify`, `/submittal`, `/project` or `/projects_list`, nor anything starting `/version-`, `/api/1.1/` or `/fileupload/`. A page of this site's at one of them answers it, and the letters that point there have already been printed.
+2. **The product app must answer 404 for a page it does not have.** That is the whole of what the proxy relies on. If Bubble is ever set to answer missing pages with a 200, every mistyped address will start leaving for the product app. The checker's `/nothing-here` case is what catches it.

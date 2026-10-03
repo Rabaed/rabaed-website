@@ -8,11 +8,11 @@
 // emails, Excel exports, the QR codes on printed letters, stored private
 // files — which must leave for app.rabaedapp.com with their path and query
 // intact. The `site` cases are addresses this site owns, which must not
-// leave. The `refused` cases are addresses this site deliberately answers 404
-// for, and they are the ones that caught the first attempt at this: a rule
-// that forwarded everything left over passed every `portal` case while taking
-// the site's own not-found page with it, and sending `/ar` and `/admin` to
-// the portal (ADR-0025).
+// leave. The `refused` cases are addresses neither has, which must reach this
+// site's own not-found page. They are the ones that catch the product app
+// starting to answer a missing page with anything but 404 — the one thing the
+// proxy relies on, since it asks the product app before forwarding (ADR-0026).
+// `/admin` among them passes only once it is renamed in the product app.
 //
 // Nothing is followed. The script reads the answer the deployment gives and
 // stops there, so running it against production sends no traffic to Bubble.

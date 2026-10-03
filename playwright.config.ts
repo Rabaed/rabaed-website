@@ -31,6 +31,15 @@ const PORT = testPort(process.env.TEST_PORT);
  */
 const PUBLISHING_PORT = PORT + 1000;
 /**
+ * The stand-in for the product app, which the proxy asks whether it has a page
+ * before forwarding an address there (`scripts/fake-product-app.mjs`,
+ * ADR-0026). `TEST_PORT + 5000`, the next lane clear of the ones above. Both
+ * servers ask it, and `tests/e2e/product-app-forwarding.spec.ts` expects to be
+ * sent to it.
+ */
+const PRODUCT_APP_PORT = PORT + 5000;
+const productAppOrigin = `http://127.0.0.1:${PRODUCT_APP_PORT}`;
+/**
  * The suites that publish what every other suite would notice, or hold what
  * every other suite would wait for (`publishing`, below). Whole file names,
  * so that `tests/unit/page-entries.spec.ts` is not taken for `entries.spec.ts`.
@@ -162,8 +171,19 @@ export default defineConfig({
     },
   ],
   // Started in this order, each once the one before it answers — which the
-  // second relies on, since it serves the first one's build.
+  // publishing server relies on, since it serves the build of the one before.
   webServer: [
+    {
+      // Answers at once, so it is up before either server could ask it.
+      // Ready on `signin` because Playwright reads a 404 as not ready, and 404
+      // is what it answers at its root.
+      command: 'node scripts/fake-product-app.mjs',
+      env: { PORT: String(PRODUCT_APP_PORT) },
+      url: `${productAppOrigin}/signin`,
+      reuseExistingServer: false,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
     {
       ...TEST_SERVER,
       // Starts a throwaway database, migrates it and creates the keyholder,
@@ -172,7 +192,7 @@ export default defineConfig({
       // Read by the build to work out the origin canonical URLs point at when
       // nothing else says (src/lib/environment.ts), and by the test server to
       // choose its port and its database's.
-      env: { PORT: String(PORT) },
+      env: { PORT: String(PORT), PRODUCT_APP_ORIGIN: productAppOrigin },
       url: baseURL,
     },
     {
@@ -181,7 +201,7 @@ export default defineConfig({
       // copy of the build above with its own address in place of the first
       // server's (`--publishing` in the script).
       command: 'node scripts/test-server.mjs --publishing',
-      env: { PORT: String(PUBLISHING_PORT), FIRST_SERVER_PORT: String(PORT) },
+      env: { PORT: String(PUBLISHING_PORT), FIRST_SERVER_PORT: String(PORT), PRODUCT_APP_ORIGIN: productAppOrigin },
       url: publishingURL,
     },
   ],
