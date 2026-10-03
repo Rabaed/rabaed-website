@@ -168,6 +168,11 @@ export const NOT_PAGES: readonly { readonly address: string; readonly cached: bo
     reason: 'the Screen mock studio, which each Screen mock is drawn in and exported from (ADR-0002)',
   },
   {
+    address: '/downloads',
+    cached: false,
+    reason: 'the Pour Tracker, a file a visitor saves rather than a page of the site (ADR-0024)',
+  },
+  {
     address: '/portal-redirect',
     cached: false,
     reason: 'where the product app’s API, called at this domain before it moved, is forwarded from (ADR-0026)',
