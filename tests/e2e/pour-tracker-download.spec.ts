@@ -111,11 +111,12 @@ async function logAPour(tool: Page) {
   await tool.getByRole('button', { name: 'ابدأ التتبّع' }).click();
   await expectBrandSpelledRight(tool, 'the register');
 
-  await tool.getByRole('button', { name: '＋ تسجيل صبّة' }).first().click();
+  // «تسجيل صبّة» both opens the form and saves it; 2026-08-25.7 wrote it «＋ تسجيل صبّة».
+  await tool.getByRole('button', { name: 'تسجيل صبّة', exact: true }).first().click();
   await tool.locator('#f-date').fill('2026-09-01');
   await tool.locator('#f-vol').fill('12');
   await tool.getByPlaceholder('مثال: قاعدة F14').fill('قاعدة F14');
-  await tool.getByRole('button', { name: '＋ تسجيل صبّة' }).last().click();
+  await tool.getByRole('button', { name: 'تسجيل صبّة', exact: true }).last().click();
   await expect(tool.getByRole('row').filter({ hasText: 'PR-001' })).toBeVisible();
   await expectBrandSpelledRight(tool, 'the pour, logged');
 }
