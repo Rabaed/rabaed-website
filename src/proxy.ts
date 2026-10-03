@@ -52,7 +52,11 @@ export async function proxy(request: NextRequest) {
   // must not break because the product app was slow once.
   if ((await productAppHas(page)) === 'lacks') return NextResponse.next();
 
-  return forwardToProductApp(asItCame, search);
+  return forwardToProductApp(
+    asItCame,
+    search,
+    request.cookies.getAll().map((cookie) => cookie.name),
+  );
 }
 
 /** A path percent-decoded, or as it is where it is not validly encoded. */

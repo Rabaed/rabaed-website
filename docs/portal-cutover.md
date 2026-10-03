@@ -76,6 +76,12 @@ Look through Vercel's and Bubble's logs for redirect loops and runs of 404s. In 
 
 Change `FORWARD_STATUS` in `src/lib/product-app.ts` from `307` to `308` and deploy. It is the one status both the proxy and the API's route handler send with. That tells search engines the move is permanent. It is cached by browsers for good, which is why it waits until the cutover has been watched for a week.
 
+Remove the old-cookie clean-up the same day; by then none of the product app's old login cookies can exist. They expire 72 hours after they were last renewed, which stopped on 3 October:
+
+- **Code**: the old-cookie expiry in `forwardToProductApp` (`src/lib/product-app.ts`), and its three tests at the end of `tests/e2e/product-app-forwarding.spec.ts`.
+- **CMS**: the sign-in address back to `https://app.rabaedapp.com/signin?lang=ar_ar`. Until then it goes through `https://rabaedapp.com/signin`, so that signing in from the site passes through the forward that expires the old cookies.
+- **Bubble**: the hidden `fetch` to `https://rabaedapp.com/signin` on the sign-in page, which does the same for people who go straight to `app.rabaedapp.com`.
+
 ## From now on
 
 Nothing to keep in step. For any address this site has no page for, the proxy asks the product app whether it has one, and forwards only if it does ([ADR-0026](adr/0026-the-product-app-is-asked-whether-it-has-the-page.md)). A page added to either side works without touching the other.
