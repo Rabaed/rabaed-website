@@ -43,7 +43,6 @@ export const SITE_SEGMENTS: ReadonlySet<string> = new Set([
   'apple-icon.png',
   // `public/`.
   'brand',
-  'downloads',
   'hero',
   'logos',
   'og-rabaed.png',

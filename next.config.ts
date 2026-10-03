@@ -38,6 +38,8 @@ const nextConfig: NextConfig = {
   // Nothing statically references those files, so tracing cannot find them.
   outputFileTracingIncludes: {
     '/studio/**': ['./src/screen-mocks/**/*.html'],
+    // The Pour Tracker's code copy, read off disk by its download route.
+    '/downloads/**': ['./src/pour-tracker/fallback/index.html'],
   },
 
   /**
@@ -71,17 +73,9 @@ const nextConfig: NextConfig = {
       headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
     };
 
-    // The Pour Tracker file (ticket 18) is saved, not opened as a page on the
-    // site, and takes its name from the URL. It is never indexed either, so a
-    // search result cannot hand it out past the form ticket 30 puts in front
-    // of it — though anyone given the link can still fetch it.
-    const downloads = {
-      source: '/downloads/:file*',
-      headers: [
-        { key: 'Content-Disposition', value: 'attachment' },
-        { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
-      ],
-    };
+    // The Pour Tracker download sets its own headers — saved, never indexed —
+    // in its route (`src/app/(pour-tracker)/downloads/…/route.ts`): a second
+    // `Content-Disposition` from here would arrive beside its own.
 
     // The CMS admin and its API (ticket 19) are for editors, never for search.
     const cms = ['/maktab/:path*', '/api/:path*'].map((source) => ({
@@ -89,11 +83,10 @@ const nextConfig: NextConfig = {
       headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
     }));
 
-    if (isIndexable()) return [studio, downloads, ...cms];
+    if (isIndexable()) return [studio, ...cms];
 
     return [
       studio,
-      downloads,
       ...cms,
       {
         source: '/:path*',
