@@ -25,7 +25,11 @@ async function toProductApp(request: NextRequest, context: { params: Promise<{ p
   // the whole value of the redirect for an invite link: the token is in it.
   const { search } = request.nextUrl;
 
-  return forwardToProductApp(`/${pathname}`, search);
+  return forwardToProductApp(
+    `/${pathname}`,
+    search,
+    request.cookies.getAll().map((cookie) => cookie.name),
+  );
 }
 
 // Every method, because the product app's own API answers POST and the browser

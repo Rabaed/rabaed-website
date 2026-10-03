@@ -36,14 +36,53 @@ export function productAppUrl(pathname: string, search: string): string {
   return `${productAppOrigin()}${pathname}${search}`;
 }
 
-/** Sends a visitor to the same address on the product app. */
-export function forwardToProductApp(pathname: string, search: string): Response {
-  return new Response(null, {
-    status: FORWARD_STATUS,
+/**
+ * The product app's login cookies from before it moved, and how to be rid of
+ * them. **Temporary: remove on 10 October 2026** — by then none can exist
+ * (`docs/portal-cutover.md`, "A week later").
+ *
+ * While the product app answered at `rabaedapp.com`, it set its cookies for
+ * the whole domain, so the browser still sends them to `app.rabaedapp.com`.
+ * There, cookies of the same names now belong to new sessions, and with two
+ * under one name the product app refuses the login. They are `HttpOnly`, so
+ * no script can remove them, and the product app cannot send the header that
+ * would; a response from `rabaedapp.com` can. They expire on their own 72
+ * hours after they were last renewed, which can no longer happen — so the last
+ * of them are gone by about 6 October 2026.
+ *
+ * Every cookie of the product app's starts with its app name. Each is expired
+ * on `Domain=rabaedapp.com` alone: the new sessions are on
+ * `Domain=app.rabaedapp.com`, a different cookie the browser keeps, and a
+ * cookie of anyone else's is never touched.
+ */
+const OLD_APP_COOKIE = /^rabaed-sa_/;
+
+function expiringOldAppCookies(cookieNames: readonly string[]): string[] {
+  return [...new Set(cookieNames)]
+    .filter((name) => OLD_APP_COOKIE.test(name))
+    .map(
+      (name) =>
+        `${name}=; Domain=rabaedapp.com; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax`,
+    );
+}
+
+/**
+ * Sends a visitor to the same address on the product app — expiring, on the
+ * way, any of its login cookies from before it moved that the request carries
+ * (above). The forward is the one response from `rabaedapp.com` that every
+ * visitor bound for the product app passes through, and the browser applies
+ * the expiry before it follows the redirect, so the product app never sees
+ * the old copies.
+ */
+export function forwardToProductApp(pathname: string, search: string, cookieNames: readonly string[] = []): Response {
+  const headers = new Headers({
+    Location: productAppUrl(pathname, search),
     // Not cached: the answer it rests on can change, and a wrong forward
     // should stop the moment it is fixed.
-    headers: { Location: productAppUrl(pathname, search), 'Cache-Control': 'no-store' },
+    'Cache-Control': 'no-store',
   });
+  for (const expiry of expiringOldAppCookies(cookieNames)) headers.append('Set-Cookie', expiry);
+  return new Response(null, { status: FORWARD_STATUS, headers });
 }
 
 /**

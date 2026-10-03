@@ -114,3 +114,43 @@ test('an address with a letter percent-encoded is asked about as the page it spe
     location: `${productApp(baseURL)}/%73ignin?lang=ar_ar`,
   });
 });
+
+/**
+ * The product app's login cookies from before it moved (`src/lib/product-app.ts`). While it
+ * answered at `rabaedapp.com` it set them for the whole domain, so the browser
+ * still sends them to `app.rabaedapp.com`, where cookies of the same names now
+ * belong to new sessions and the two collide. The forward is the one response
+ * from `rabaedapp.com` these visitors are certain to pass through, so it
+ * expires them on the way.
+ */
+const STALE = 'rabaed-sa_live_u2main=old; rabaed-sa_live_u2main.sig=oldsig; other=keep';
+const expired = (name: string) =>
+  `${name}=; Domain=rabaedapp.com; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax`;
+
+/** Every `Set-Cookie` an address answers with, without following it anywhere. */
+async function setCookies(request: APIRequestContext, address: string, cookie?: string) {
+  const response = await request.fetch(address, { maxRedirects: 0, headers: cookie ? { Cookie: cookie } : {} });
+  return {
+    status: response.status(),
+    setCookies: response
+      .headersArray()
+      .filter((header) => header.name.toLowerCase() === 'set-cookie')
+      .map((header) => header.value),
+  };
+}
+
+test('a forward expires the product app’s old cookies, each on the whole domain, and no others', async ({ request }) => {
+  expect(await setCookies(request, '/signin?lang=ar_ar', STALE)).toEqual({
+    status: 307,
+    setCookies: [expired('rabaed-sa_live_u2main'), expired('rabaed-sa_live_u2main.sig')],
+  });
+});
+
+test('a forward with none of the old cookies sets no cookie at all', async ({ request }) => {
+  expect(await setCookies(request, '/signin?lang=ar_ar', 'other=keep')).toEqual({ status: 307, setCookies: [] });
+});
+
+test('this site’s own pages are left exactly as they were, old cookies or not', async ({ request }) => {
+  // Only the forward expires them: a page view never waits on the proxy.
+  expect(await setCookies(request, '/', STALE)).toEqual({ status: 200, setCookies: [] });
+});
