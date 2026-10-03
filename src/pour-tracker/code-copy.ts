@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { namedInChecksumFile } from './release';
 
 /**
  * The copy of the Pour Tracker kept with the site's code: the fallback the
@@ -14,9 +15,7 @@ export const CODE_COPY_DIRECTORY = path.join(process.cwd(), 'src', 'pour-tracker
 
 /** The code copy's release number and checksum, as its checksum file names them. */
 export async function codeCopyRelease(): Promise<{ releaseNumber: string; sha256: string }> {
-  const written = await readFile(path.join(CODE_COPY_DIRECTORY, 'index.html.sha256'), 'utf8');
-  const sha256 = /^([0-9a-f]{64})/im.exec(written)?.[1]?.toLowerCase();
-  const releaseNumber = /^build\s+(\S+)\s*$/im.exec(written)?.[1];
+  const { sha256, releaseNumber } = namedInChecksumFile(await readFile(path.join(CODE_COPY_DIRECTORY, 'index.html.sha256'), 'utf8'));
   if (!sha256 || !releaseNumber) throw new Error('The code copy’s checksum file names no checksum or no release number.');
   return { releaseNumber, sha256 };
 }

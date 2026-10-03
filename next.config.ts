@@ -39,9 +39,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/studio/**': ['./src/screen-mocks/**/*.html'],
     // The Pour Tracker's code copy: its file, read off disk by its download
-    // route, and its checksum file, which names its release number for the
-    // upload's clash check and for the admin's Pour Tracker screen.
-    '/downloads/**': ['./src/pour-tracker/fallback/index.html', './src/pour-tracker/fallback/index.html.sha256'],
+    // route; and its checksum file, which names its release number for the
+    // upload's clash check (`/api`) and the admin's Pour Tracker screen.
+    '/downloads/**': ['./src/pour-tracker/fallback/index.html'],
     '/api/**': ['./src/pour-tracker/fallback/index.html.sha256'],
     '/maktab/**': ['./src/pour-tracker/fallback/index.html.sha256'],
   },

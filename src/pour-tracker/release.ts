@@ -11,6 +11,9 @@ import { createHash } from 'node:crypto';
  * never read as text: a file re-saved with its line endings changed is a
  * different file, and is refused.
  *
+ * Also here, the order of release numbers (`isOlderRelease`): going back to
+ * an older release is allowed, but said (ticket 101).
+ *
  * Pure, so the narrow seam the spec permits for pure calculation tests it
  * directly (`tests/unit/pour-tracker-release.spec.ts`).
  */
@@ -53,10 +56,22 @@ const SHA256_LINE = /^([0-9a-f]{64})(?=\s|$)/im;
 /** The line that names the release: `build 2026-08-25.7`. */
 const BUILD_LINE = /^build\s+(\S+)\s*$/im;
 
+/**
+ * What a checksum file names: the SHA-256 of its file, in lower case, and the
+ * release number on its `build` line — either `null` where it names none. The
+ * one reading of a checksum file, for an upload and for the code copy alike.
+ */
+export function namedInChecksumFile(written: string): { sha256: string | null; releaseNumber: string | null } {
+  return {
+    sha256: SHA256_LINE.exec(written)?.[1]?.toLowerCase() ?? null,
+    releaseNumber: BUILD_LINE.exec(written)?.[1] ?? null,
+  };
+}
+
 /** Whether `html` is the file `checksum` was made from, and which release it is. */
 export function checkedRelease(html: Uint8Array, checksum: Uint8Array): CheckedRelease {
-  const written = new TextDecoder().decode(checksum);
-  const expected = SHA256_LINE.exec(written)?.[1]?.toLowerCase();
+  const named = namedInChecksumFile(new TextDecoder().decode(checksum));
+  const expected = named.sha256;
   if (!expected) return { ok: false, problem: NOT_A_CHECKSUM };
 
   const sha256 = createHash('sha256').update(html).digest('hex');
@@ -64,7 +79,7 @@ export function checkedRelease(html: Uint8Array, checksum: Uint8Array): CheckedR
 
   // A release number names one file for good (ticket 101), so a release that
   // names none could never be told apart from the next.
-  const releaseNumber = BUILD_LINE.exec(written)?.[1];
+  const { releaseNumber } = named;
   if (!releaseNumber) return { ok: false, problem: NAMES_NO_RELEASE };
 
   return { ok: true, sha256, releaseNumber };

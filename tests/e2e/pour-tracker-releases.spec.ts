@@ -2,7 +2,9 @@
  * Ahmed publishes a Pour Tracker **Release** (CONTEXT.md) from the CMS
  * (ticket 100, ADR-0024): its HTML file and its checksum file, refused unless
  * the two match, kept waiting until Publish, and then the very file visitors
- * download — byte for byte, at the same address, under the same name.
+ * download — byte for byte, at the same address, under the same name. And
+ * safely over time (ticket 101): a release number names one file for good,
+ * the screen says what visitors get, and he can go back without a developer.
  *
  * Runs on the publishing server (`playwright.config.ts`), and holds it from
  * its first test to its last (`one-suite-at-a-time.ts`): a release published
@@ -303,22 +305,61 @@ test('removing the published release in the admin sends visitors the code copy a
   );
 });
 
-test('an earlier release restored from the history and published is the very next download (ticket 101)', async ({ request }) => {
+test('an earlier release restored from the history is live at once, and the screen says so (ticket 101)', async ({
+  page,
+  request,
+}) => {
   const editor = signedIn(request);
   const earlier = await testRelease();
   const later = await release(CODE_COPY);
   await save(editor, await (await upload(editor, earlier.html, earlier.checksum)).json(), 'published');
   await save(editor, await (await upload(editor, later.html, later.checksum)).json(), 'published');
 
-  // The admin's Versions → Restore: the kept version becomes the draft, and is published.
+  // What the admin's Versions → Restore sends for a global: `?draft=false`
+  // (`@payloadcms/next`'s Restore view offers restoring as a draft to
+  // collections only). The version is live as soon as it is restored.
   const versions = await editor.get(`${ENTRY}/versions?where[version.releaseNumber][equals]=2099-01-01.1&sort=-updatedAt&limit=1&depth=0`);
   const [kept] = ((await versions.json()) as { docs: { id: string }[] }).docs;
-  const restored = await editor.post(`${ENTRY}/versions/${kept!.id}?draft=true`);
+  const restored = await editor.post(`${ENTRY}/versions/${kept!.id}?draft=false`);
   expect(restored.ok(), await restored.text()).toBe(true);
-  const draft = (await (await editor.get(`${ENTRY}?draft=true&depth=0`)).json()) as Named;
-  await save(editor, { sha256: draft.sha256, releaseNumber: draft.releaseNumber, size: draft.size, fileName: draft.fileName }, 'published');
 
   expect((await download(request)).bytes.equals(earlier.html)).toBe(true);
+  await logIn(page);
+  await expect(await releasesShown(page)).toContainText('Visitors download release 2099-01-01.1');
+});
+
+test('no save names a release under another release’s number, or a checksum nobody uploaded — drafts included (ticket 101)', async ({
+  request,
+}) => {
+  const editor = signedIn(request);
+  const { html, checksum } = await testRelease();
+  const kept: Named = await (await upload(editor, html, checksum)).json();
+
+  // The API skips the admin's read-only fields: the check is the server's.
+  const misnumbered = await editor.post(ENTRY, { data: { ...kept, releaseNumber: '2099-12-31.9', _status: 'published' } });
+  expect(misnumbered.status()).toBe(400);
+  // Every draft is checked too: Restore would put it back live unchecked.
+  const unknown = await editor.post(`${ENTRY}?draft=true`, {
+    data: { ...kept, sha256: '0'.repeat(64), _status: 'draft' },
+  });
+  expect(unknown.status()).toBe(400);
+});
+
+test('two uploads claiming one new release number at once: one is kept, the other told it clashes (ticket 101)', async ({
+  request,
+}) => {
+  const editor = signedIn(request);
+  const { html } = await testRelease();
+  const number = `2099-02-${String(Date.now() % 28 + 1).padStart(2, '0')}.${Date.now() % 1000}`;
+  const one = anotherFileCalled(html, number);
+  const other = { html: Buffer.concat([one.html, Buffer.from(' ')]), checksum: Buffer.alloc(0) };
+  other.checksum = Buffer.from(`${checksumOf(other.html)}  index.html\nbuild ${number}\n`);
+
+  const statuses = (await Promise.all([upload(editor, one.html, one.checksum), upload(editor, other.html, other.checksum)])).map(
+    (response) => response.status(),
+  );
+
+  expect(statuses.sort()).toEqual([200, 409]);
 });
 
 test('uploading an older release in the admin says so before it is published (ticket 101)', async ({ page, request }) => {
@@ -333,8 +374,9 @@ test('uploading an older release in the admin says so before it is published (ti
   await page.getByRole('button', { name: 'Check and upload' }).click();
 
   // Payload keeps a status region of its own on the page; the upload's is the one that names the release.
-  const said = page.getByRole('status').filter({ hasText: `Release ${POUR_TRACKER.build} checked and kept` });
-  await expect(said).toContainText('older than the release visitors download now');
+  await expect(page.getByRole('status').filter({ hasText: `Release ${POUR_TRACKER.build} checked and kept` })).toBeVisible();
+  // Said apart from the rest, as a warning, before it is published.
+  await expect(page.getByRole('note')).toHaveText(`⚠ Release ${POUR_TRACKER.build} is older than the release visitors download now.`);
 });
 
 test('with no release published, the download is the copy kept with the code', async ({ request }) => {

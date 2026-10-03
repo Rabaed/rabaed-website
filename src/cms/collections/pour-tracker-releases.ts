@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
 import { signedIn } from '../access';
+import { RELEASE_FIELD_LABELS } from '../pour-tracker-words';
 
 /**
  * Every Pour Tracker **Release** (CONTEXT.md) the CMS has kept, by its release
@@ -28,16 +29,9 @@ export const PourTrackerReleases: CollectionConfig = {
   },
   admin: { hidden: true, useAsTitle: 'releaseNumber' },
   fields: [
-    {
-      name: 'releaseNumber',
-      type: 'text',
-      label: { ar: 'رقم الإصدار', en: 'Release number' },
-      required: true,
-      unique: true,
-      index: true,
-    },
-    { name: 'sha256', type: 'text', label: { ar: 'رمز التحقق (SHA-256)', en: 'Checksum (SHA-256)' }, required: true },
-    { name: 'size', type: 'number', label: { ar: 'الحجم (بايت)', en: 'Size (bytes)' }, required: true },
-    { name: 'fileName', type: 'text', label: { ar: 'اسم الملف المرفوع', en: 'File uploaded' } },
+    { name: 'releaseNumber', type: 'text', label: RELEASE_FIELD_LABELS.releaseNumber, required: true, unique: true, index: true },
+    { name: 'sha256', type: 'text', label: RELEASE_FIELD_LABELS.sha256, required: true },
+    { name: 'size', type: 'number', label: RELEASE_FIELD_LABELS.size, required: true },
+    { name: 'fileName', type: 'text', label: RELEASE_FIELD_LABELS.fileName },
   ],
 };
