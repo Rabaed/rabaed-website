@@ -44,7 +44,7 @@ const productAppOrigin = `http://127.0.0.1:${PRODUCT_APP_PORT}`;
  * every other suite would wait for (`publishing`, below). Whole file names,
  * so that `tests/unit/page-entries.spec.ts` is not taken for `entries.spec.ts`.
  */
-const PUBLISHING = /(?:^|[\\/])(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries|site-words)\.spec\.ts$/;
+const PUBLISHING = /(?:^|[\\/])(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries|site-words|pour-tracker-releases)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 const publishingURL = `http://127.0.0.1:${PUBLISHING_PORT}`;
 

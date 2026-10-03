@@ -113,6 +113,7 @@ export interface Config {
     'referral-program': ReferralProgram;
     'start-page': StartPage;
     'tool-page': ToolPage;
+    'pour-tracker': PourTracker;
     'referral-page': ReferralPage;
     'product-page': ProductPage;
     'home-page': HomePage;
@@ -137,6 +138,7 @@ export interface Config {
     'referral-program': ReferralProgramSelect<false> | ReferralProgramSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
+    'pour-tracker': PourTrackerSelect<false> | PourTrackerSelect<true>;
     'referral-page': ReferralPageSelect<false> | ReferralPageSelect<true>;
     'product-page': ProductPageSelect<false> | ProductPageSelect<true>;
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
@@ -2741,6 +2743,20 @@ export interface ToolPage {
      */
     sharingImage?: (number | null) | SharingImage;
   };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pour-tracker".
+ */
+export interface PourTracker {
+  id: number;
+  sha256?: string | null;
+  releaseNumber?: string | null;
+  size?: number | null;
+  fileName?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -6481,6 +6497,20 @@ export interface ToolPageSelect<T extends boolean = true> {
             };
         sharingImage?: T;
       };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pour-tracker_select".
+ */
+export interface PourTrackerSelect<T extends boolean = true> {
+  sha256?: T;
+  releaseNumber?: T;
+  size?: T;
+  fileName?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

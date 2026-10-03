@@ -31,6 +31,7 @@ import { HomePage } from './cms/globals/home-page';
 import { IndexLeads } from './cms/globals/index-leads';
 import { PartnershipPage } from './cms/globals/partnership-page';
 import { ProductPage } from './cms/globals/product-page';
+import { PourTracker } from './cms/globals/pour-tracker';
 import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
 import { ScreenMocks } from './cms/globals/screen-mocks';
@@ -102,6 +103,8 @@ export default buildConfig({
     ReferralProgram,
     StartPage,
     ToolPage,
+    // The release the tool page's download sends (ticket 100, ADR-0024).
+    PourTracker,
     ReferralPage,
     ProductPage,
     HomePage,
