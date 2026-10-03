@@ -7,8 +7,15 @@ reference/** -text -diff
 
 # The Pour Tracker is the co-founder's release, byte for byte (ticket 49): a
 # changed copy calls itself unofficial. Its code is minified onto a few long
-# lines, so a diff of it says nothing either.
-public/downloads/Rabaed-Pour-Tracker.html -text -diff
+# lines, so a diff of it says nothing either. The copy kept with the code is
+# the fallback (ADR-0024), held to its checksum file, so neither may be
+# rewritten on the way into the repository.
+src/pour-tracker/fallback/index.html -text -diff
+src/pour-tracker/fallback/index.html.sha256 -text
+
+# The test release is held to its own checksum, and has CRLF line endings on
+# purpose, to catch a check that reads it as text (ticket 100).
+tests/pour-tracker-test-release/** -text
 
 # Binary assets
 *.png binary
