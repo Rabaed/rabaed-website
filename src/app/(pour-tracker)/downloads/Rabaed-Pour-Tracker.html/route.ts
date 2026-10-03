@@ -5,6 +5,7 @@ import config from '@payload-config';
 import { getPayload } from 'payload';
 import { releaseKey } from '@/cms/globals/pour-tracker';
 import { documentStore } from '@/forms/documents';
+import { CODE_COPY_DIRECTORY } from '@/pour-tracker/code-copy';
 
 /**
  * The Pour Tracker a visitor downloads (tickets 18 and 49), at the address the
@@ -21,7 +22,7 @@ import { documentStore } from '@/forms/documents';
  * bundle beside this route. It is sent as the bytes it is: a release is
  * shipped exactly as delivered (ticket 49), so nothing here reads it as text.
  */
-const CODE_COPY = path.join(process.cwd(), 'src', 'pour-tracker', 'fallback', 'index.html');
+const CODE_COPY = path.join(CODE_COPY_DIRECTORY, 'index.html');
 
 /** The name it is saved under — the Reference site's, and the one the form and its email give. */
 const DOWNLOAD_NAME = 'Rabaed-Pour-Tracker.html';

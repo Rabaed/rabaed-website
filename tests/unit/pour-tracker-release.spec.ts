@@ -15,7 +15,7 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { checkedRelease } from '../../src/pour-tracker/release';
+import { checkedRelease, isOlderRelease } from '../../src/pour-tracker/release';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const TEST_RELEASE = path.join(repoRoot, 'tests', 'pour-tracker-test-release');
@@ -99,4 +99,28 @@ test('the copy kept with the site’s code matches the checksum file it was deli
     sha256: '925a4ed9d38bc22f8f8c6fc44f606f3c8adbfb3f1011753c645bd4e9c4616eaf',
     releaseNumber: '2026-09-23.3',
   });
+});
+
+test('a checksum file that names no release number is refused, saying so in both languages (ticket 101)', async () => {
+  const { html } = await pair(TEST_RELEASE);
+  // The right checksum, and no `build` line to say which release it is.
+  const unnamed = new TextEncoder().encode('55236cb8e8f98d2ffe9946a9a4d4cfcdb9c5b5d99550ed3d7dd40f53d200caf8  index.html\n');
+
+  const result = checkedRelease(html, unnamed);
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.en).toMatch(/names no release number/);
+  expect(result.problem.ar).toMatch(/رقم الإصدار/);
+});
+
+test('release numbers are ordered by their date, then by the build of that day, as numbers', () => {
+  // Worked out by hand: a later date is newer whatever its build number, and
+  // on one day build 10 follows build 3 — which comparing as text gets wrong.
+  expect(isOlderRelease('2026-08-25.7', '2026-09-23.3')).toBe(true);
+  expect(isOlderRelease('2026-09-23.3', '2099-01-01.1')).toBe(true);
+  expect(isOlderRelease('2026-09-23.3', '2026-09-23.10')).toBe(true);
+  expect(isOlderRelease('2026-09-23.10', '2026-09-23.3')).toBe(false);
+  expect(isOlderRelease('2099-01-01.1', '2026-09-23.3')).toBe(false);
+  expect(isOlderRelease('2026-09-23.3', '2026-09-23.3')).toBe(false);
 });

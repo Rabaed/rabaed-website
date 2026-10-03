@@ -20,6 +20,7 @@ import { FormSubmissions } from './cms/collections/form-submissions';
 import { LegalDocuments } from './cms/collections/legal-documents';
 import { Media } from './cms/collections/media';
 import { Posts } from './cms/collections/posts';
+import { PourTrackerReleases } from './cms/collections/pour-tracker-releases';
 import { SharingImages } from './cms/collections/sharing-images';
 import { Users } from './cms/collections/users';
 import { databasePool, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
@@ -89,7 +90,7 @@ export default buildConfig({
 
   // No `localization`: page text holds its Arabic and English side by side in
   // fields of its own (`cms/page-fields.ts` says why).
-  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
+  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions, PourTrackerReleases],
   // One settings global per form that submits (ticket 27), the Referral
   // Program values (ticket 56), and one entry per marketing page whose words
   // are in the CMS (ticket 53), with the closing section and the Screen mocks

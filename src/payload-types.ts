@@ -75,6 +75,7 @@ export interface Config {
     'legal-documents': LegalDocument;
     'faq-entries': FaqEntry;
     'form-submissions': FormSubmission;
+    'pour-tracker-releases': PourTrackerRelease;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
     'faq-entries': FaqEntriesSelect<false> | FaqEntriesSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
+    'pour-tracker-releases': PourTrackerReleasesSelect<false> | PourTrackerReleasesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -602,6 +604,19 @@ export interface FormSubmission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pour-tracker-releases".
+ */
+export interface PourTrackerRelease {
+  id: number;
+  releaseNumber: string;
+  sha256: string;
+  size: number;
+  fileName?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -655,6 +670,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'form-submissions';
         value: number | FormSubmission;
+      } | null)
+    | ({
+        relationTo: 'pour-tracker-releases';
+        value: number | PourTrackerRelease;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -927,6 +946,18 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
   confirmation?: T;
   token?: T;
   sourceHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pour-tracker-releases_select".
+ */
+export interface PourTrackerReleasesSelect<T extends boolean = true> {
+  releaseNumber?: T;
+  sha256?: T;
+  size?: T;
+  fileName?: T;
   updatedAt?: T;
   createdAt?: T;
 }

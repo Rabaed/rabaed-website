@@ -727,6 +727,51 @@ crawling. Nobody maintains it: it is written from the pages' own search
 descriptions and from every article, case study and legal document published in
 the CMS, and rebuilds whenever any of those is published.
 
+### The Pour Tracker
+
+Ahmed publishes each Pour Tracker **Release** himself (tickets 100 and 101,
+ADR-0024). In `/maktab` → **Pour Tracker** he picks the release's HTML file and
+its `.sha256` file, presses **Check and upload**, then **Publish changes**. The
+next download is that file, byte for byte. The screen shows what visitors
+download now and when it went out, what is waiting for Publish, and the copy
+kept with the code. **Remove release** and the CMS's own **Versions → Restore**
+take visitors back to the code copy, or to an earlier release.
+
+The CMS holds every release to its number. A pair whose file does not match
+its checksum is refused. So is a checksum file that names no release number,
+and a release number that already names a different file, the code copy's
+included. An older release than the live one is allowed, and labelled as
+older before it is published. Every release kept is recorded in the hidden
+`pour-tracker-releases` collection; its file is in the private documents
+bucket, under `pour-tracker/`.
+
+#### Refreshing the copy kept with the code
+
+The copy in `src/pour-tracker/fallback/` is what visitors download whenever
+no release is published. It is also **the only release that goes through
+ticket 49's walk-through**: `tests/e2e/pour-tracker-download.spec.ts` opens it
+offline in both languages, logs a pour, and checks it sends nothing anywhere.
+A release Ahmed publishes goes live on its checksum alone. So from time to
+time, a developer brings the code copy up to a recent release:
+
+1. Copy the release's `index.html` and `index.html.sha256` over the two files
+   in `src/pour-tracker/fallback/`, **as files**, never opened and saved in an
+   editor. `.gitattributes` keeps Git from rewriting them; check afterwards
+   that `sha256sum src/pour-tracker/fallback/index.html` still prints the
+   checksum its `.sha256` names.
+2. In `tests/e2e/pour-tracker.ts`, set `build` and `sha256` to the release's
+   number and checksum. In `tests/unit/pour-tracker-release.spec.ts`, the
+   code copy's test names them too.
+3. Run `tests/e2e/pour-tracker-download.spec.ts`. If it stops, look before
+   changing anything: a release can rename a button the walk-through presses,
+   as `2026-09-23.3` renamed «＋ تسجيل صبّة» to «تسجيل صبّة». A renamed
+   button is the test's to follow. A tool that no longer does what the test
+   checks is the release's problem, and goes back to Ahmed.
+
+It is **never urgent**, and a release is never held back for it: visitors
+download what Ahmed published. The code copy only has to be good enough to
+fall back on, and it gives the walk-through something to walk.
+
 ### When a change adds to the CMS
 
 A change that adds a field or a content type carries a **migration** in
