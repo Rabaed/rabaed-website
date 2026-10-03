@@ -7,8 +7,8 @@
  * address, whether it has the page one of those names — so this answers only
  * "which page", never "is it there".
  *
- * Pure: the proxy imports it on every request, and the narrow seam the spec
- * permits for pure calculation tests it directly
+ * Pure: the proxy asks it on every request it runs for, and the narrow seam
+ * the spec permits for pure calculation tests it directly
  * (`tests/unit/product-app-address.spec.ts`).
  */
 import { LOCALES } from './locales';

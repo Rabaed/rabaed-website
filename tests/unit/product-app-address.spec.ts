@@ -132,6 +132,15 @@ test('the proxy runs for every address the product app might have, and for none 
   );
   const runsFor = (address: string) => patterns.some((pattern) => pattern.test(address));
 
+  // Both directions, as sets. A segment left out of the matcher that is not
+  // this site's own is the dangerous one: an address under it never reaches
+  // the proxy, and is never forwarded.
+  const leftOut = literal!.match(/\(\?!\(\?:([^)]*)\)\(\?:\/\|\$\)\)/)?.[1];
+  expect(leftOut, 'src/proxy.ts leaves segments out of its matcher').toBeDefined();
+  expect(new Set(leftOut!.split('|').map((segment) => segment.replace(/\\\\/g, '')))).toEqual(
+    new Set([...SITE_SEGMENTS].filter((segment) => segment !== '')),
+  );
+
   const own = [...SITE_SEGMENTS].filter((segment) => segment !== '' && segment !== 'studio');
   const covered = ['/', ...own.flatMap((segment) => [`/${segment}`, `/${segment}/anything`])].filter(runsFor);
   expect(covered, 'leave this site’s own segment out of the matcher in src/proxy.ts').toEqual([]);

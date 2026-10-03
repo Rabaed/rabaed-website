@@ -1,6 +1,6 @@
 # Moving the portal to app.rabaedapp.com
 
-`rabaedapp.com` is the Bubble portal today. After this it is this site, and the portal is `app.rabaedapp.com`. Old portal links keep working: see [ADR-0026](adr/0026-the-product-app-is-asked-whether-it-has-the-page.md) for why the forwarding is shaped the way it is.
+`rabaedapp.com` is the product app today. After this it is this site, and the product app is `app.rabaedapp.com`. Links the product app gave out keep working: see [ADR-0026](adr/0026-the-product-app-is-asked-whether-it-has-the-page.md) for why the forwarding is shaped the way it is.
 
 DNS is at GoDaddy, default TTL 600 seconds, so any step below can be undone in about ten minutes.
 
@@ -44,7 +44,7 @@ Put the apex `A` record back to its old value at GoDaddy and change Bubble's cus
 
 ## A week later
 
-Change `STATUS` in `src/app/(portal)/portal-redirect/[[...path]]/route.ts` from `307` to `308` and deploy. That tells search engines the move is permanent. It is cached by browsers for good, which is why it waits until the cutover has been watched for a week.
+Change `FORWARD_STATUS` in `src/lib/product-app.ts` from `307` to `308` and deploy. It is the one status both the proxy and the API's route handler send with. That tells search engines the move is permanent. It is cached by browsers for good, which is why it waits until the cutover has been watched for a week.
 
 ## From now on
 

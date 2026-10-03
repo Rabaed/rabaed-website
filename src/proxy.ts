@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { servesScreenMockStudio } from './lib/environment';
-import { productAppHas, productAppUrl } from './lib/product-app';
+import { forwardToProductApp, productAppHas } from './lib/product-app';
 import { productAppPage } from './lib/product-app-address';
 import { STUDIO_PREFIX } from './screen-mocks/registry';
 
 /**
- * Runs before any built page is served, for two reasons that each need a fact
+ * Runs before the pages its matcher covers are served — the studio, and every
+ * address that is not this site's own — for two reasons that each need a fact
  * about the request rather than about the build.
  *
  * **Closing the Screen mock studio on the production deployment** (ticket 98,
@@ -47,16 +48,11 @@ export async function proxy(request: NextRequest) {
   const page = productAppPage(pathname);
   if (page === null) return NextResponse.next();
 
-  // `null` — no answer in time — forwards too: a printed link must not break
-  // because the product app was slow once.
-  if ((await productAppHas(page)) === false) return NextResponse.next();
+  // Only a plain "lacks" stays here. `unknown` forwards too: a printed link
+  // must not break because the product app was slow once.
+  if ((await productAppHas(page)) === 'lacks') return NextResponse.next();
 
-  // 307 keeps the method and the body, so a form posted to an old address
-  // still arrives as a post. Not cached: the answer it rests on can change.
-  return NextResponse.redirect(productAppUrl(asItCame, search), {
-    status: 307,
-    headers: { 'Cache-Control': 'no-store' },
-  });
+  return forwardToProductApp(asItCame, search);
 }
 
 /** A path percent-decoded, or as it is where it is not validly encoded. */

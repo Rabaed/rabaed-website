@@ -74,12 +74,26 @@ test('when the product app is too slow to answer, the visitor is sent there anyw
   });
 });
 
-test('a question the product app failed to answer is asked again next time', async ({ request, baseURL }) => {
-  // The stand-in fails the first question about a `flaky-` page and answers
-  // 404 after. A fresh name each run, since the answer is remembered by page.
-  const address = `/flaky-${Date.now()}`;
-  expect(await answer(request, address)).toEqual({ status: 307, location: `${productApp(baseURL)}${address}` });
-  expect(await answer(request, address)).toEqual({ status: 404, location: null });
+test('a question the product app failed or refused to answer is asked again next time', async ({ request, baseURL }) => {
+  // The stand-in turns away the first question about a `flaky-` page with a
+  // 503, and a `limited-` page with a 429, and answers 404 after. A fresh name
+  // each run, since the answer is remembered by page.
+  for (const kind of ['flaky', 'limited']) {
+    const address = `/${kind}-${Date.now()}`;
+    expect(await answer(request, address), address).toEqual({ status: 307, location: `${productApp(baseURL)}${address}` });
+    expect(await answer(request, address), address).toEqual({ status: 404, location: null });
+  }
+});
+
+test('a page only the test copy has is asked about in the test copy', async ({ request, baseURL }) => {
+  // The stand-in's two copies differ by this one page, as a page added to the
+  // test copy is there before it is live. Asked about in the live copy, the
+  // link would be refused.
+  expect(await answer(request, '/version-test/only-in-test?id=7')).toEqual({
+    status: 307,
+    location: `${productApp(baseURL)}/version-test/only-in-test?id=7`,
+  });
+  expect(await answer(request, '/only-in-test')).toEqual({ status: 404, location: null });
 });
 
 test('an old address posted to is sent on as a post', async ({ request, baseURL }) => {

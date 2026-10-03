@@ -170,7 +170,7 @@ export const NOT_PAGES: readonly { readonly address: string; readonly cached: bo
   {
     address: '/portal-redirect',
     cached: false,
-    reason: 'where the portal’s old addresses on this domain are forwarded from, never a page anyone is given (ADR-0025)',
+    reason: 'where the product app’s API, called at this domain before it moved, is forwarded from (ADR-0026)',
   },
   {
     address: '/en/[page]',
