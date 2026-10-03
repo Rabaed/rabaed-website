@@ -3,14 +3,16 @@
 //   node scripts/check-portal-redirects.mjs https://<preview>.vercel.app
 //   node scripts/check-portal-redirects.mjs https://rabaedapp.com   (after the cutover)
 //
-// Two kinds of case, and the second kind is the one that catches real
-// mistakes. The `portal` cases are addresses the Bubble portal has already
-// sent out — invite emails, submittal emails, Excel exports, the QR codes on
-// printed letters, stored private files — which must leave for
-// app.rabaedapp.com with their path and query intact. The `site` cases are
-// addresses this site owns, which must NOT leave: a rule that forwards
-// everything passes every `portal` case and takes the marketing site down
-// with it.
+// Three kinds of case, and only the first is obvious. The `portal` cases are
+// addresses the Bubble portal has already sent out — invite emails, submittal
+// emails, Excel exports, the QR codes on printed letters, stored private
+// files — which must leave for app.rabaedapp.com with their path and query
+// intact. The `site` cases are addresses this site owns, which must not
+// leave. The `refused` cases are addresses this site deliberately answers 404
+// for, and they are the ones that caught the first attempt at this: a rule
+// that forwarded everything left over passed every `portal` case while taking
+// the site's own not-found page with it, and sending `/ar` and `/admin` to
+// the portal (ADR-0025).
 //
 // Nothing is followed. The script reads the answer the deployment gives and
 // stops there, so running it against production sends no traffic to Bubble.
@@ -44,6 +46,12 @@ const cases = [
   ['GET', '/maktab', 'stays'],
   ['GET', '/api/users', 'stays'],
 
+  // --- addresses this site refuses on purpose: 404 here, never forwarded ---
+  ['GET', '/nothing-here', 'refused'], // the site's own not-found page, in Arabic
+  ['GET', '/ar', 'refused'], // Arabic has exactly one address, and it is not this one
+  ['GET', '/admin', 'refused'], // the first address a scanner tries; the CMS is at /maktab
+  ['GET', '/en/nothing-here', 'refused'],
+
   // --- the portal's addresses: must be forwarded, path and query intact ---
   ['GET', '/signin?lang=ar_ar', 'portal'], // the header's sign-in button
   ['GET', '/registration?token=abc123XYZ', 'portal'], // invite email
@@ -55,7 +63,7 @@ const cases = [
   ['GET', '/version-live/verify/AbC123tokenAbC123tokenAbC123to054', 'portal'],
   ['GET', '/fileupload/f1729516897294x808916950788260100/Inspection%20Request%201.pdf', 'portal'],
   ['GET', '/project/test3?nav=2', 'portal'],
-  ['GET', '/a-bubble-page-that-does-not-exist-yet', 'portal'], // a new Bubble page needs no edit here
+  ['GET', '/version-live/project/test3', 'portal'], // a version prefix forwards whatever follows it
   ['POST', '/api/1.1/wf/redeem-invite', 'portal'], // Payload owns /api/*, so this one needs its own rule
   ['GET', '/api/1.1/obj/project', 'portal'],
 ];
@@ -85,6 +93,9 @@ for (const [method, path, expected] of cases) {
     const want = PORTAL + path;
     ok = (res.status === 307 || res.status === 308) && location === want;
     detail = `${res.status} -> ${location || '(no Location)'}${ok ? '' : `   expected 307/308 -> ${want}`}`;
+  } else if (expected === 'refused') {
+    ok = res.status === 404;
+    detail = `${res.status}${location ? ` -> ${location}` : ''}${ok ? '' : '   expected 404 from this site'}`;
   } else if (expected === 'stays') {
     // Any answer at all, as long as it did not go to the portal.
     ok = !location.startsWith(PORTAL);

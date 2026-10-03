@@ -1,6 +1,6 @@
 # Moving the portal to app.rabaedapp.com
 
-`rabaedapp.com` is the Bubble portal today. After this it is this site, and the portal is `app.rabaedapp.com`. Old portal links keep working: see [ADR-0025](adr/0025-the-site-forwards-every-address-it-does-not-serve-to-the-portal.md) for why the forwarding is shaped the way it is.
+`rabaedapp.com` is the Bubble portal today. After this it is this site, and the portal is `app.rabaedapp.com`. Old portal links keep working: see [ADR-0025](adr/0025-the-portals-old-addresses-on-this-domain-are-named-and-forwarded.md) for why the forwarding is shaped the way it is.
 
 DNS is at GoDaddy, default TTL 600 seconds, so any step below can be undone in about ten minutes.
 
@@ -16,7 +16,7 @@ DNS is at GoDaddy, default TTL 600 seconds, so any step below can be undone in a
    npm run check:redirects -- https://<preview>.vercel.app
    ```
 
-   The last line must read `all 27 passed`. A preview is not indexable and `rabaedapp.com` still points at Bubble, so nothing is live yet.
+   The last line must read `all 31 passed`. A preview is not indexable and `rabaedapp.com` still points at Bubble, so nothing is live yet.
 
 ## Switch night
 
@@ -35,7 +35,7 @@ In this order:
    npm run check:redirects -- https://rabaedapp.com
    ```
 
-   `all 27 passed`, and `curl -sI https://rabaedapp.com | grep -i x-robots` returns nothing.
+   `all 31 passed`, and `curl -sI https://rabaedapp.com | grep -i x-robots` returns nothing.
 
 ### If it goes wrong
 
@@ -49,5 +49,5 @@ Change `STATUS` in `src/app/(portal)/portal-redirect/[[...path]]/route.ts` from 
 
 Two rules, both enforced by nothing but this document and the checker:
 
-1. **No page may take a portal address.** Not `/signin`, `/registration`, `/verify`, `/submittal`, `/project` or `/projects_list`, and nothing starting `/version-`, `/api/` or `/fileupload/`. Those addresses are in letters that have already been printed.
-2. **No catch-all page at the top level.** It would match everything and the forwarding would never run. Under a prefix is fine, which is where `/blog/[slug]`, `/case-studies/[slug]` and `/en/[page]` already are.
+1. **A page added to the Bubble portal has to be named in `next.config.ts` too.** The forwarding is a named list, not a catch-all — see [ADR-0025](adr/0025-the-portals-old-addresses-on-this-domain-are-named-and-forwarded.md) for why the catch-all was given up. A portal page nobody adds to the list lands on this site's not-found page instead.
+2. **No page here may take a portal address.** Not `/signin`, `/registration`, `/verify`, `/submittal`, `/project` or `/projects_list`, and nothing starting `/version-`, `/api/1.1/` or `/fileupload/`. Those are claimed before this site's own files, so such a page would never be reached — and the addresses are in letters that have already been printed.

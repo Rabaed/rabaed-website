@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 /**
- * Every address this site does not serve itself belongs to the portal.
+ * The portal's old addresses on this domain, sent to where the portal lives now.
  *
  * Until the move, `rabaedapp.com` *was* the Bubble portal, and its addresses
  * are in invite emails, submittal emails, Excel exports and the QR codes
@@ -10,10 +10,10 @@ import type { NextRequest } from 'next/server';
  * on a 404, and the person holding the letter has no way to know where the
  * page went.
  *
- * Reached only through the `fallback` rewrite in `next.config.ts`, which runs
- * after Next has checked every page, route and public file. So the rule is
- * not a list of the portal's addresses — it is "whatever is left", and
- * neither side has to be told when the other adds a page.
+ * Reached only through the rewrites in `next.config.ts`, which name the
+ * portal's addresses rather than claiming everything this site does not
+ * serve. Anything not named there is this site's to answer, including its
+ * not-found page — see ADR-0025 for why the broader rule was given up.
  */
 const PORTAL = 'https://app.rabaedapp.com';
 

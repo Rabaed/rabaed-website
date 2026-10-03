@@ -40,24 +40,44 @@ const nextConfig: NextConfig = {
     '/studio/**': ['./src/screen-mocks/**/*.html'],
   },
 
+  /**
+   * The portal's old addresses on this domain, forwarded to `app.rabaedapp.com`
+   * (ADR-0025). Named, not "everything left over": a rule that forwarded
+   * whatever this site does not serve would take the site's own not-found page
+   * with it, and `/ar`, `/admin` and every mistyped address would leave for the
+   * portal instead of being refused here (`tests/e2e/localisation.spec.ts`,
+   * `tests/e2e/cms.spec.ts`).
+   *
+   * `beforeFiles`, so these addresses belong to the portal whatever this site
+   * later adds. Two of them have to be: Payload's catch-all
+   * (`src/app/(payload)/api/[...slug]/route.ts`) answers everything under
+   * `/api/`, and `/maktab` is the CMS, so neither would ever reach a later
+   * phase.
+   */
   async rewrites() {
+    const portal = [
+      // Bubble names a version in the address, and every page below has a copy
+      // under each — so these two cover the test and live copies of all of them.
+      '/version-test/:path*',
+      '/version-live/:path*',
+
+      '/api/1.1/:path*', // Bubble's API, which Payload's own `/api` does not use
+      '/fileupload/:path*', // a stored private file, addressed in emails
+      '/signin/:path*',
+      '/signup/:path*',
+      '/registration/:path*', // an invite email's link, with its token in the query
+      '/verify/:path*', // the QR code printed on a letter
+      '/submittal/:path*', // submittal emails and the links inside Excel exports
+      '/project/:path*',
+      '/projects_list/:path*',
+    ];
+
     return {
-      // `/api/*` cannot wait for `fallback`. Payload's own catch-all route
-      // (`src/app/(payload)/api/[...slug]/route.ts`) matches every address
-      // under it, so nothing there is ever a filesystem miss and the fallback
-      // below would never see it — `/api/1.1/wf/redeem-invite` would answer
-      // Payload's 404 instead of reaching the portal. Bubble's API prefix is
-      // `/api/1.1/`, which Payload does not use, so it is safe to claim here,
-      // before the filesystem is consulted.
-      beforeFiles: [{ source: '/api/1.1/:path*', destination: '/portal-redirect/api/1.1/:path*' }],
-
+      // `:path*` matches no segments as well as some, so `/signin` and
+      // `/signin/anything` both forward.
+      beforeFiles: portal.map((source) => ({ source, destination: `/portal-redirect${source}` })),
       afterFiles: [],
-
-      // Runs only once Next has checked every page, route and public file, so
-      // anything this site serves is served, and everything else — today's
-      // Bubble pages, tomorrow's, `/version-test/*`, `/fileupload/*` — goes to
-      // the portal. Neither side ever has to list the other's addresses.
-      fallback: [{ source: '/:path*', destination: '/portal-redirect/:path*' }],
+      fallback: [],
     };
   },
 

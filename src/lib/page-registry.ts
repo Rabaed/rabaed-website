@@ -168,6 +168,11 @@ export const NOT_PAGES: readonly { readonly address: string; readonly cached: bo
     reason: 'the Screen mock studio, which each Screen mock is drawn in and exported from (ADR-0002)',
   },
   {
+    address: '/portal-redirect',
+    cached: false,
+    reason: 'where the portal’s old addresses on this domain are forwarded from, never a page anyone is given (ADR-0025)',
+  },
+  {
     address: '/en/[page]',
     cached: true,
     reason:
