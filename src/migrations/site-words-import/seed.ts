@@ -17,7 +17,7 @@ VALUES ('1', 'مقالات عن إدارة مشاريع الإنشاء في ال
 SELECT setval(pg_get_serial_sequence('"_index_leads_v"', 'id'), (SELECT max("id") FROM "_index_leads_v"));
 
 INSERT INTO "_site_words_v" ("id", "version_header_partnerships_label_ar", "version_header_partnerships_label_en", "version_header_sign_in_label_ar", "version_header_sign_in_label_en", "version_header_sign_in_url", "version_header_demo_label_ar", "version_header_demo_label_en", "version_footer_tagline_ar", "version_footer_tagline_en", "version_footer_rights_ar", "version_footer_rights_en", "version_not_found_heading_ar", "version_not_found_heading_en", "version_not_found_lead_ar", "version_not_found_lead_en", "version_not_found_home_label_ar", "version_not_found_home_label_en", "version__status", "version_updated_at", "version_created_at", "created_at", "updated_at", "latest")
-VALUES ('1', 'الشراكات', NULL, 'تسجيل الدخول', NULL, 'https://rabaedapp.com/signin?lang=ar_ar', 'احجز عرضاً حياً', NULL, 'نظام تشغيل مشاريع الإنشاء · الرياض · rabaedapp.com', NULL, 'ربائد · جميع الحقوق محفوظة', NULL, 'الصفحة غير موجودة', NULL, 'الرابط الذي طلبته غير متاح.', NULL, 'العودة إلى الصفحة الرئيسية', NULL, 'published', now(), now(), now(), now(), 'true');
+VALUES ('1', 'الشراكات', NULL, 'تسجيل الدخول', NULL, 'https://app.rabaedapp.com/signin?lang=ar_ar', 'احجز عرضاً حياً', NULL, 'نظام تشغيل مشاريع الإنشاء · الرياض · rabaedapp.com', NULL, 'ربائد · جميع الحقوق محفوظة', NULL, 'الصفحة غير موجودة', NULL, 'الرابط الذي طلبته غير متاح.', NULL, 'العودة إلى الصفحة الرئيسية', NULL, 'published', now(), now(), now(), now(), 'true');
 
 SELECT setval(pg_get_serial_sequence('"_site_words_v"', 'id'), (SELECT max("id") FROM "_site_words_v"));
 
@@ -27,7 +27,7 @@ VALUES ('1', 'مقالات عن إدارة مشاريع الإنشاء في ال
 SELECT setval(pg_get_serial_sequence('"index_leads"', 'id'), (SELECT max("id") FROM "index_leads"));
 
 INSERT INTO "site_words" ("id", "header_partnerships_label_ar", "header_partnerships_label_en", "header_sign_in_label_ar", "header_sign_in_label_en", "header_sign_in_url", "header_demo_label_ar", "header_demo_label_en", "footer_tagline_ar", "footer_tagline_en", "footer_rights_ar", "footer_rights_en", "not_found_heading_ar", "not_found_heading_en", "not_found_lead_ar", "not_found_lead_en", "not_found_home_label_ar", "not_found_home_label_en", "_status", "updated_at", "created_at")
-VALUES ('1', 'الشراكات', NULL, 'تسجيل الدخول', NULL, 'https://rabaedapp.com/signin?lang=ar_ar', 'احجز عرضاً حياً', NULL, 'نظام تشغيل مشاريع الإنشاء · الرياض · rabaedapp.com', NULL, 'ربائد · جميع الحقوق محفوظة', NULL, 'الصفحة غير موجودة', NULL, 'الرابط الذي طلبته غير متاح.', NULL, 'العودة إلى الصفحة الرئيسية', NULL, 'published', now(), now());
+VALUES ('1', 'الشراكات', NULL, 'تسجيل الدخول', NULL, 'https://app.rabaedapp.com/signin?lang=ar_ar', 'احجز عرضاً حياً', NULL, 'نظام تشغيل مشاريع الإنشاء · الرياض · rabaedapp.com', NULL, 'ربائد · جميع الحقوق محفوظة', NULL, 'الصفحة غير موجودة', NULL, 'الرابط الذي طلبته غير متاح.', NULL, 'العودة إلى الصفحة الرئيسية', NULL, 'published', now(), now());
 
 SELECT setval(pg_get_serial_sequence('"site_words"', 'id'), (SELECT max("id") FROM "site_words"));
 

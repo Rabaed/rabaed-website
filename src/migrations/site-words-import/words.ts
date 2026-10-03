@@ -35,7 +35,7 @@ export const SITE_WORDS = {
       },
     ],
     signInLabel: arabic('تسجيل الدخول'),
-    signInUrl: 'https://rabaedapp.com/signin?lang=ar_ar',
+    signInUrl: 'https://app.rabaedapp.com/signin?lang=ar_ar',
     demoLabel: arabic('احجز عرضاً حياً'),
   },
   footer: {
