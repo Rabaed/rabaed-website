@@ -1,5 +1,7 @@
 # The portal's old addresses on this domain are named, and forwarded
 
+**Superseded by [ADR-0026](0026-the-product-app-is-asked-whether-it-has-the-page.md)**: the product app is asked whether it has the page, and no list is kept.
+
 Until the move, `rabaedapp.com` **was** the Bubble portal. Its addresses went out and cannot be recalled: invite emails carrying a registration token, submittal emails, the links inside Excel exports, the QR codes printed on letters, the stored addresses of private files. On the day the apex serves this site instead, every one of them lands here.
 
 On 3 October 2026 the founder chose to move the portal to `app.rabaedapp.com` and give the apex to this site. So this site answers for the portal's past as well as its own present.

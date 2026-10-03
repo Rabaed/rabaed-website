@@ -27,6 +27,10 @@ The two events that make up the Record. A Request is raised by one party; an App
 This project: the public pages at `rabaedapp.com`. Distinct from the **product app** (`app.rabaedapp.com`), which is a separate system this site links to and does not contain.
 _Avoid_: "the website" unqualified, when the app is also in scope.
 
+**Product app**:
+The Rabaed product itself, built on Bubble, at `app.rabaedapp.com`. It answered at `rabaedapp.com` until the Marketing site took that address, so links it gave out before then — invites, submittals, exports, printed letters — still arrive at the Marketing site and are sent on to it.
+_Avoid_: portal, "the Bubble app", "the tool".
+
 **Page registry**:
 The one list of the Marketing site's pages, written out by hand in `src/lib/page-registry.ts`: each page's address, its short name, its entry in the CMS and the entries it shares, and where its questions are; and, beside them, the files crawlers read and the routes that are not pages. The sitemap, `llms.txt`, the pages questions are filed under and the English notices read it rather than keeping lists of their own, and a test fails when a route is in neither it nor its list of exclusions (ticket 92).
 _Avoid_: sitemap (the file search engines read, built from this), route list (`tests/e2e/routes.ts`, which the tests restate on purpose).
