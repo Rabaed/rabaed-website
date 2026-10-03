@@ -1,5 +1,6 @@
 import { addDataAndFileToRequest, type Endpoint, type GlobalConfig, type TextFieldSingleValidation } from 'payload';
 import { signedIn } from '../access';
+import { inAdminLanguage, type Words } from '../page-fields';
 import { documentStore } from '../../forms/documents';
 import { checkedRelease } from '../../pour-tracker/release';
 
@@ -16,7 +17,11 @@ import { checkedRelease } from '../../pour-tracker/release';
  * which release was live: restoring an old version names its file again.
  */
 
-type Words = { readonly ar: string; readonly en: string };
+/**
+ * What a kept release is named by: the upload's answer, and the entry's four
+ * fields once it is saved. Its file is the one stored under `sha256`.
+ */
+export type KeptRelease = { sha256: string; releaseNumber: string | null; size: number; fileName: string };
 
 /** Where a release's file is kept in the documents store: under its own checksum. */
 export function releaseKey(sha256: string): string {
@@ -31,6 +36,11 @@ const NOT_SIGNED_IN: Words = {
 const TWO_FILES: Words = {
   ar: 'الإصدار ملفان معاً: ملف HTML وملف التحقق ‎.sha256 المسلَّم معه. ارفعهما كليهما.',
   en: 'A release is two files together: the HTML file and the .sha256 checksum file delivered with it. Upload both.',
+};
+
+const TOO_LARGE: Words = {
+  ar: 'أحد الملفين أكبر من 10 ميغابايت، أكبر بكثير من أي إصدار. تأكد أنك اخترت ملفَي الإصدار.',
+  en: 'One of the files is larger than 10 MB, far larger than any release. Check that you picked the release’s two files.',
 };
 
 const NOWHERE_TO_KEEP: Words = {
@@ -51,17 +61,18 @@ const NOT_UPLOADED: Words = {
  */
 const namesAKeptRelease: TextFieldSingleValidation = async (value, { req }) => {
   if (!value) return true;
-  const words = req.i18n?.language === 'ar' ? 'ar' : 'en';
   const store = documentStore();
-  if (!store) return NOWHERE_TO_KEEP[words];
-  if (!/^[0-9a-f]{64}$/.test(value) || !(await store.get(releaseKey(value)))) return NOT_UPLOADED[words];
+  if (!store) return inAdminLanguage(req, NOWHERE_TO_KEEP);
+  if (!/^[0-9a-f]{64}$/.test(value) || !(await store.get(releaseKey(value)))) return inAdminLanguage(req, NOT_UPLOADED);
   return true;
 };
 
+type Uploaded = { data: Buffer; name: string; truncated?: boolean };
+
 /** One uploaded file of a field's, however many were sent under its name. */
-function onlyFile(files: unknown): { data: Buffer; name: string } | null {
+function onlyFile(files: unknown): Uploaded | null {
   const file = Array.isArray(files) ? files[0] : files;
-  return file && typeof file === 'object' && 'data' in file ? (file as { data: Buffer; name: string }) : null;
+  return file && typeof file === 'object' && 'data' in file ? (file as Uploaded) : null;
 }
 
 /**
@@ -80,6 +91,9 @@ const uploadRelease: Endpoint = {
     const html = onlyFile(req.files?.html);
     const checksum = onlyFile(req.files?.checksum);
     if (!html || !checksum) return Response.json({ problem: TWO_FILES }, { status: 400 });
+    // Past the upload limit, the parser cuts a file short rather than refusing
+    // it, and a cut file would be refused as not matching its checksum.
+    if (html.truncated || checksum.truncated) return Response.json({ problem: TOO_LARGE }, { status: 413 });
 
     const bytes = new Uint8Array(html.data);
     const checked = checkedRelease(bytes, new Uint8Array(checksum.data));
@@ -89,12 +103,13 @@ const uploadRelease: Endpoint = {
     if (!store) return Response.json({ problem: NOWHERE_TO_KEEP }, { status: 503 });
     await store.put(releaseKey(checked.sha256), bytes, 'text/html');
 
-    return Response.json({
+    const kept: KeptRelease = {
       sha256: checked.sha256,
       releaseNumber: checked.releaseNumber,
       size: bytes.byteLength,
       fileName: html.name,
-    });
+    };
+    return Response.json(kept);
   },
 };
 

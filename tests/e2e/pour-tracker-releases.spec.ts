@@ -4,34 +4,43 @@
  * the two match, kept waiting until Publish, and then the very file visitors
  * download — byte for byte, at the same address, under the same name.
  *
- * Runs on the publishing server (`playwright.config.ts`): a release published
+ * Runs on the publishing server (`playwright.config.ts`), and holds it from
+ * its first test to its last (`one-suite-at-a-time.ts`): a release published
  * here is what every suite downloads until it is taken down again, so it is
  * kept away from `tests/e2e/pour-tracker-download.spec.ts`, which holds the
- * download to the copy in the code. The tests share one entry, so they run
- * one after another, and the entry is left as it was found.
+ * download to the copy in the code. Each test sets the entry up as it needs
+ * it, and the suite leaves it with nothing published.
  *
  * The release used is the test release (`tests/pour-tracker-test-release/`),
  * never a real one, so these tests outlive any release Ahmed ships.
  */
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { ADMIN_PATH, logIn } from './cms';
 import { signedIn, type SignedIn } from './editors';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 import { POUR_TRACKER, checksumOf } from './pour-tracker';
 
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const TEST_RELEASE = path.join(repoRoot, 'tests', 'pour-tracker-test-release');
 
-/** The test release: 2099-01-01.1, its file and its checksum file as delivered. */
-async function testRelease() {
+const CODE_COPY = path.join(repoRoot, 'src', 'pour-tracker', 'fallback');
+
+/** A release as delivered: its file, and its checksum file. The test release by default, 2099-01-01.1. */
+async function release(directory = TEST_RELEASE) {
   return {
-    html: await readFile(path.join(TEST_RELEASE, 'index.html')),
-    checksum: await readFile(path.join(TEST_RELEASE, 'index.html.sha256')),
+    html: await readFile(path.join(directory, 'index.html')),
+    checksum: await readFile(path.join(directory, 'index.html.sha256')),
   };
 }
+const testRelease = () => release();
+
+/** The SHA-256 a checksum file names, read off its first line as its builder wrote it. */
+const namedIn = (checksum: Buffer) => /^[0-9a-f]{64}/m.exec(checksum.toString('utf8'))![0];
 
 /** Where an Editor uploads a release: the Pour Tracker entry's own endpoint. */
 const UPLOAD = '/api/globals/pour-tracker/release';
@@ -90,12 +99,9 @@ test('a pair whose file does not match its checksum is refused, saying so, and n
   const changed = Buffer.from(html);
   changed[changed.length - 3] ^= 1;
 
-  const response = await editor.post(UPLOAD, {
-    multipart: {
-      html: { name: 'index.html', mimeType: 'text/html', buffer: changed },
-      checksum: { name: 'index.html.sha256', mimeType: 'text/plain', buffer: checksum },
-    },
-  });
+  await save(editor, NOTHING, 'published');
+
+  const response = await upload(editor, changed, checksum);
 
   expect(response.status()).toBe(400);
   const { problem } = await response.json();
@@ -115,10 +121,24 @@ test('an uploaded release waits for Publish: a draft naming it changes nothing v
   const editor = signedIn(request);
   const { html, checksum } = await testRelease();
   const named: Named = await (await upload(editor, html, checksum)).json();
+  await save(editor, NOTHING, 'published');
 
   await save(editor, named, 'draft');
 
   expect(checksumOf((await download(request)).bytes)).toBe(POUR_TRACKER.sha256);
+});
+
+test('a release waiting as a draft leaves the published one where it is', async ({ request }) => {
+  // The test release published, then the code copy's own release uploaded and
+  // saved as a draft over it: visitors keep the test release.
+  const editor = signedIn(request);
+  const published = await testRelease();
+  const waiting = await release(CODE_COPY);
+  await save(editor, await (await upload(editor, published.html, published.checksum)).json(), 'published');
+
+  await save(editor, await (await upload(editor, waiting.html, waiting.checksum)).json(), 'draft');
+
+  expect((await download(request)).bytes.equals(published.html)).toBe(true);
 });
 
 test('after Publish, the very next download is the release, byte for byte, and otherwise unchanged', async ({ request }) => {
@@ -129,9 +149,9 @@ test('after Publish, the very next download is the release, byte for byte, and o
   await save(editor, named, 'published');
   const { bytes, headers } = await download(request);
 
-  // Byte for byte: its checksum is the one its checksum file names.
-  expect(checksumOf(bytes)).toBe(checksumOf(html));
+  // Byte for byte: the file uploaded, and the checksum its checksum file names.
   expect(bytes.equals(html)).toBe(true);
+  expect(checksumOf(bytes)).toBe(namedIn(checksum));
   expect(headers['content-type']).toContain('text/html');
   expect(headers['content-disposition']).toBe(`attachment; filename="${POUR_TRACKER.name}"`);
   expect(headers['x-robots-tag']).toContain('noindex');
@@ -139,6 +159,7 @@ test('after Publish, the very next download is the release, byte for byte, and o
 });
 
 test('Ahmed’s way: in the admin, both files picked, checked, and published reach the download', async ({ page, request }) => {
+  await save(signedIn(request), NOTHING, 'published');
   await logIn(page);
   await page.goto(`${ADMIN_PATH}/globals/pour-tracker`);
 
@@ -152,6 +173,26 @@ test('Ahmed’s way: in the admin, both files picked, checked, and published rea
 
   const { html } = await testRelease();
   expect((await download(request)).bytes.equals(html)).toBe(true);
+});
+
+test('in the admin in Arabic, a pair that does not match is refused in Arabic', async ({ page, baseURL }, testInfo) => {
+  const { html } = await testRelease();
+  const changed = Buffer.from(html);
+  changed[changed.length - 3] ^= 1;
+  const changedFile = testInfo.outputPath('index.html');
+  await writeFile(changedFile, changed);
+
+  await logIn(page);
+  // The admin's language, as the language switch in an Editor's account sets it.
+  await page.context().addCookies([{ name: 'payload-lng', value: 'ar', url: baseURL! }]);
+  await page.goto(`${ADMIN_PATH}/globals/pour-tracker`);
+
+  await page.getByLabel(/ملف الإصدار/).setInputFiles(changedFile);
+  await page.getByLabel(/ملف التحقق/).setInputFiles(path.join(TEST_RELEASE, 'index.html.sha256'));
+  await page.getByRole('button', { name: 'تحقّق وارفع' }).click();
+
+  // Payload keeps an alert region of its own on the page; the refusal is the one that says it.
+  await expect(page.getByRole('alert').filter({ hasText: 'لا يطابق ملف التحقق' })).toBeVisible();
 });
 
 test('with no release published, the download is the copy kept with the code', async ({ request }) => {

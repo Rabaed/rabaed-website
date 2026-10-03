@@ -42,7 +42,7 @@ export const dynamic = 'force-dynamic';
  * under, or a CMS that could not be asked. Each but the first is logged, since
  * each means visitors are not getting what Ahmed published.
  */
-async function publishedRelease(): Promise<Uint8Array | null> {
+async function publishedRelease(): Promise<Uint8Array<ArrayBuffer> | null> {
   let payload;
   try {
     payload = await getPayload({ config });
@@ -58,7 +58,7 @@ async function publishedRelease(): Promise<Uint8Array | null> {
       payload.logger.error(`The published Pour Tracker release ${entry.releaseNumber} no longer matches its checksum; sending the code copy.`);
       return null;
     }
-    return bytes;
+    return new Uint8Array(bytes);
   } catch (error) {
     const why = 'The published Pour Tracker release could not be read; sending the code copy.';
     if (payload) payload.logger.error({ err: error }, why);
@@ -69,7 +69,7 @@ async function publishedRelease(): Promise<Uint8Array | null> {
 
 export async function GET() {
   const bytes = (await publishedRelease()) ?? new Uint8Array(await readFile(CODE_COPY));
-  return new Response(new Uint8Array(bytes), {
+  return new Response(bytes, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Content-Length': String(bytes.byteLength),

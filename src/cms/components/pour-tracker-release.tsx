@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useField, useTranslation } from '@payloadcms/ui';
 import type { UIFieldClientComponent } from 'payload';
+import type { KeptRelease } from '../globals/pour-tracker';
+import type { Words } from '../page-fields';
 
 /**
  * Where Ahmed uploads a Pour Tracker release (ticket 100, ADR-0024): its HTML
@@ -14,9 +16,6 @@ import type { UIFieldClientComponent } from 'payload';
  * pair that is refused says why, in the admin's language, and changes nothing.
  */
 
-type Words = { readonly ar: string; readonly en: string };
-type Kept = { sha256: string; releaseNumber: string | null; size: number; fileName: string };
-
 const WORDS = {
   html: { ar: 'ملف الإصدار (HTML)', en: 'Release HTML file' },
   checksum: { ar: 'ملف التحقق (‎.sha256)', en: 'Checksum file (.sha256)' },
@@ -26,7 +25,7 @@ const WORDS = {
   failed: { ar: 'تعذّر الرفع. حاول مرة أخرى.', en: 'The upload failed. Try again.' },
 } satisfies Record<string, Words>;
 
-function keptMessage(kept: Kept, language: 'ar' | 'en'): string {
+function keptMessage(kept: KeptRelease, language: keyof Words): string {
   const number = kept.releaseNumber ?? '';
   return language === 'ar'
     ? `تم التحقق من الإصدار ${number} وحفظه. اضغط «نشر التغييرات» ليصل إلى الزوار.`
@@ -35,7 +34,7 @@ function keptMessage(kept: Kept, language: 'ar' | 'en'): string {
 
 export const PourTrackerRelease: UIFieldClientComponent = () => {
   const { i18n } = useTranslation();
-  const language = i18n.language === 'ar' ? 'ar' : 'en';
+  const language: keyof Words = i18n.language === 'en' ? 'en' : 'ar';
   const sha256 = useField<string>({ path: 'sha256' });
   const releaseNumber = useField<string>({ path: 'releaseNumber' });
   const size = useField<number>({ path: 'size' });
@@ -60,7 +59,7 @@ export const PourTrackerRelease: UIFieldClientComponent = () => {
         const problem: Words | undefined = answer?.problem;
         return setResult({ ok: false, text: problem?.[language] ?? WORDS.failed[language] });
       }
-      const kept = answer as Kept;
+      const kept = answer as KeptRelease;
       sha256.setValue(kept.sha256);
       releaseNumber.setValue(kept.releaseNumber ?? '');
       size.setValue(kept.size);
