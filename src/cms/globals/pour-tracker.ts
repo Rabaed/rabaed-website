@@ -2,7 +2,8 @@ import { addDataAndFileToRequest, type Endpoint, type GlobalConfig, type TextFie
 import { signedIn } from '../access';
 import { inAdminLanguage, type Words } from '../page-fields';
 import { documentStore } from '../../forms/documents';
-import { checkedRelease } from '../../pour-tracker/release';
+import { codeCopyRelease } from '../../pour-tracker/code-copy';
+import { checkedRelease, isOlderRelease } from '../../pour-tracker/release';
 
 /**
  * The Pour Tracker **Release** (CONTEXT.md) visitors download: Ahmed uploads
@@ -21,7 +22,14 @@ import { checkedRelease } from '../../pour-tracker/release';
  * What a kept release is named by: the upload's answer, and the entry's four
  * fields once it is saved. Its file is the one stored under `sha256`.
  */
-export type KeptRelease = { sha256: string; releaseNumber: string | null; size: number; fileName: string };
+export type KeptRelease = { sha256: string; releaseNumber: string; size: number; fileName: string };
+
+/**
+ * The upload's answer: the release kept, and whether it is older than what
+ * visitors download now — allowed, since going back is Ahmed's call, but said
+ * before he publishes it (ticket 101).
+ */
+export type UploadAnswer = KeptRelease & { olderThanLive: boolean };
 
 /** Where a release's file is kept in the documents store: under its own checksum. */
 export function releaseKey(sha256: string): string {
@@ -42,6 +50,14 @@ const TOO_LARGE: Words = {
   ar: 'أحد الملفين أكبر من 10 ميغابايت، أكبر بكثير من أي إصدار. تأكد أنك اخترت ملفَي الإصدار.',
   en: 'One of the files is larger than 10 MB, far larger than any release. Check that you picked the release’s two files.',
 };
+
+/** A release number already naming another file: said with the number, so Ahmed knows which. */
+function clash(releaseNumber: string): Words {
+  return {
+    ar: `رقم الإصدار ${releaseNumber} يدل على ملف آخر من قبل. رقم الإصدار يدل على ملف واحد إلى الأبد: إن كان هذا إصداراً جديداً فله رقم جديد.`,
+    en: `Release ${releaseNumber} already names a different file. A release number names one file for good: if this is a new build, it needs a new number.`,
+  };
+}
 
 const NOWHERE_TO_KEEP: Words = {
   ar: 'لا يوجد على هذا الخادم مكان آمن لحفظ الإصدار، فلم يُحفظ. أبلغ المطوّر.',
@@ -99,17 +115,36 @@ const uploadRelease: Endpoint = {
     const checked = checkedRelease(bytes, new Uint8Array(checksum.data));
     if (!checked.ok) return Response.json({ problem: checked.problem }, { status: 400 });
 
+    // A release number names one file for good (ticket 101): the code copy's
+    // number as much as any upload's. Checked before anything is kept.
+    const { releaseNumber, sha256 } = checked;
+    const codeCopy = await codeCopyRelease();
+    const known = await req.payload.find({
+      collection: 'pour-tracker-releases',
+      where: { releaseNumber: { equals: releaseNumber } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const named = releaseNumber === codeCopy.releaseNumber ? codeCopy.sha256 : known.docs[0]?.sha256;
+    if (named && named !== sha256) return Response.json({ problem: clash(releaseNumber) }, { status: 409 });
+
     const store = documentStore();
     if (!store) return Response.json({ problem: NOWHERE_TO_KEEP }, { status: 503 });
-    await store.put(releaseKey(checked.sha256), bytes, 'text/html');
+    await store.put(releaseKey(sha256), bytes, 'text/html');
 
-    const kept: KeptRelease = {
-      sha256: checked.sha256,
-      releaseNumber: checked.releaseNumber,
-      size: bytes.byteLength,
-      fileName: html.name,
+    const kept: KeptRelease = { sha256, releaseNumber, size: bytes.byteLength, fileName: html.name };
+    if (!known.docs[0]) {
+      await req.payload.create({ collection: 'pour-tracker-releases', data: kept, overrideAccess: true, req });
+    }
+
+    // What visitors download now: the published release, or else the code copy.
+    const live = await req.payload.findGlobal({ slug: 'pour-tracker', draft: false, depth: 0, overrideAccess: true });
+    const answer: UploadAnswer = {
+      ...kept,
+      olderThanLive: isOlderRelease(releaseNumber, live.releaseNumber || codeCopy.releaseNumber),
     };
-    return Response.json(kept);
+    return Response.json(answer);
   },
 };
 
@@ -127,6 +162,12 @@ export const PourTracker: GlobalConfig = {
   },
   endpoints: [uploadRelease],
   fields: [
+    {
+      // What visitors download now, what waits for Publish, and the code copy (ticket 101).
+      name: 'releases',
+      type: 'ui',
+      admin: { components: { Field: '/cms/components/pour-tracker-releases-panel#PourTrackerReleasesPanel' } },
+    },
     {
       // The two file pickers and the button that checks and keeps a release.
       name: 'release',

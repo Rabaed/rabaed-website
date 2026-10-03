@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useField, useTranslation } from '@payloadcms/ui';
 import type { UIFieldClientComponent } from 'payload';
-import type { KeptRelease } from '../globals/pour-tracker';
+import type { UploadAnswer } from '../globals/pour-tracker';
 import type { Words } from '../page-fields';
 
 /**
@@ -23,13 +23,20 @@ const WORDS = {
   checking: { ar: 'جارٍ التحقق…', en: 'Checking…' },
   pickBoth: { ar: 'اختر الملفين كليهما.', en: 'Pick both files.' },
   failed: { ar: 'تعذّر الرفع. حاول مرة أخرى.', en: 'The upload failed. Try again.' },
+  remove: { ar: 'إزالة الإصدار', en: 'Remove release' },
+  removed: {
+    ar: 'أُزيل الإصدار من هذا المدخل. اضغط «نشر التغييرات» ليحمّل الزوار النسخة المحفوظة مع الموقع.',
+    en: 'Release removed from this entry. Press Publish changes to send visitors the copy kept with the code.',
+  },
 } satisfies Record<string, Words>;
 
-function keptMessage(kept: KeptRelease, language: keyof Words): string {
-  const number = kept.releaseNumber ?? '';
-  return language === 'ar'
-    ? `تم التحقق من الإصدار ${number} وحفظه. اضغط «نشر التغييرات» ليصل إلى الزوار.`
-    : `Release ${number} checked and kept. Press Publish changes to send it to visitors.`;
+function keptMessage(kept: UploadAnswer, language: keyof Words): string {
+  // Going back to an older release is allowed — it is Ahmed's call — but said
+  // before he publishes it (ticket 101).
+  const older = kept.olderThanLive;
+  return language === 'en'
+    ? `Release ${kept.releaseNumber} checked and kept.${older ? ' It is older than the release visitors download now.' : ''} Press Publish changes to send it to visitors.`
+    : `تم التحقق من الإصدار ${kept.releaseNumber} وحفظه.${older ? ' وهو أقدم من الإصدار الذي يحمّله الزوار الآن.' : ''} اضغط «نشر التغييرات» ليصل إلى الزوار.`;
 }
 
 export const PourTrackerRelease: UIFieldClientComponent = () => {
@@ -59,7 +66,7 @@ export const PourTrackerRelease: UIFieldClientComponent = () => {
         const problem: Words | undefined = answer?.problem;
         return setResult({ ok: false, text: problem?.[language] ?? WORDS.failed[language] });
       }
-      const kept = answer as KeptRelease;
+      const kept = answer as UploadAnswer;
       sha256.setValue(kept.sha256);
       releaseNumber.setValue(kept.releaseNumber ?? '');
       size.setValue(kept.size);
@@ -70,6 +77,15 @@ export const PourTrackerRelease: UIFieldClientComponent = () => {
     } finally {
       setBusy(false);
     }
+  }
+
+  /** Clears the entry: once published, visitors download the copy kept with the code. */
+  function remove() {
+    sha256.setValue(null);
+    releaseNumber.setValue(null);
+    size.setValue(null);
+    fileName.setValue(null);
+    setResult({ ok: true, text: WORDS.removed[language] });
   }
 
   return (
@@ -85,7 +101,12 @@ export const PourTrackerRelease: UIFieldClientComponent = () => {
       <div>
         <button type="button" className="btn btn--style-secondary btn--size-small" disabled={busy} onClick={upload}>
           {busy ? WORDS.checking[language] : WORDS.upload[language]}
-        </button>
+        </button>{' '}
+        {sha256.value && (
+          <button type="button" className="btn btn--style-secondary btn--size-small" disabled={busy} onClick={remove}>
+            {WORDS.remove[language]}
+          </button>
+        )}
       </div>
       {result && (
         <p role={result.ok ? 'status' : 'alert'} style={{ color: result.ok ? 'var(--theme-success-500)' : 'var(--theme-error-500)' }}>

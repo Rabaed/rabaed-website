@@ -16,7 +16,7 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { test, expect, type APIRequestContext } from '@playwright/test';
+import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { ADMIN_PATH, logIn } from './cms';
 import { signedIn, type SignedIn } from './editors';
 import { oneSuiteAtATime } from './one-suite-at-a-time';
@@ -48,6 +48,7 @@ const ENTRY = '/api/globals/pour-tracker';
 
 /** What the entry names once a release is uploaded: the upload's own answer. */
 type Named = { sha256: string | null; releaseNumber: string | null; size: number | null; fileName: string | null };
+
 const NOTHING: Named = { sha256: null, releaseNumber: null, size: null, fileName: null };
 
 async function upload(editor: SignedIn, html: Buffer, checksum: Buffer) {
@@ -91,6 +92,66 @@ test('a release whose file matches its checksum file is kept, under its release 
     releaseNumber: '2099-01-01.1',
     size: html.byteLength,
   });
+});
+
+/** A file one byte away from `html`, with a checksum file of its own that names `releaseNumber`. */
+function anotherFileCalled(html: Buffer, releaseNumber: string) {
+  const other = Buffer.from(html);
+  // Not the byte the mismatch test changes, so the two files never meet in the store.
+  other[other.length - 5] ^= 1;
+  return { html: other, checksum: Buffer.from(`${checksumOf(other)}  index.html\nbuild ${releaseNumber}\n`) };
+}
+
+test('a checksum file that names no release number is refused, saying so (ticket 101)', async ({ request }) => {
+  const { html } = await testRelease();
+
+  const response = await upload(signedIn(request), html, Buffer.from(`${checksumOf(html)}  index.html\n`));
+
+  expect(response.status()).toBe(400);
+  const { problem } = await response.json();
+  expect(problem.en).toMatch(/names no release number/);
+  expect(problem.ar).toMatch(/رقم الإصدار/);
+});
+
+test('a release number already used for a different file is refused; the same file again is not a clash (ticket 101)', async ({
+  request,
+}) => {
+  const editor = signedIn(request);
+  const { html, checksum } = await testRelease();
+  expect((await upload(editor, html, checksum)).status()).toBe(200);
+
+  // The same file under the same number, uploaded again, is the same release.
+  expect((await upload(editor, html, checksum)).status()).toBe(200);
+
+  const impostor = anotherFileCalled(html, '2099-01-01.1');
+  const response = await upload(editor, impostor.html, impostor.checksum);
+  expect(response.status()).toBe(409);
+  const { problem } = await response.json();
+  expect(problem.en).toMatch(/2099-01-01\.1 already names a different file/);
+  expect(problem.ar).toMatch(/2099-01-01\.1/);
+});
+
+test('the code copy’s release number is taken too: another file under it is refused (ticket 101)', async ({ request }) => {
+  const editor = signedIn(request);
+  const codeCopy = await release(CODE_COPY);
+  // Its own pair is the same release, and is accepted.
+  expect((await upload(editor, codeCopy.html, codeCopy.checksum)).status()).toBe(200);
+
+  const impostor = anotherFileCalled(codeCopy.html, POUR_TRACKER.build);
+  expect((await upload(editor, impostor.html, impostor.checksum)).status()).toBe(409);
+});
+
+test('a release older than the live one is accepted, and said to be older (ticket 101)', async ({ request }) => {
+  const editor = signedIn(request);
+  const newer = await testRelease(); // 2099-01-01.1
+  const older = await release(CODE_COPY); // 2026-09-23.3
+  await save(editor, await (await upload(editor, newer.html, newer.checksum)).json(), 'published');
+
+  const olderAnswer = await (await upload(editor, older.html, older.checksum)).json();
+  expect(olderAnswer).toMatchObject({ releaseNumber: POUR_TRACKER.build, olderThanLive: true });
+
+  await save(editor, olderAnswer, 'published');
+  expect(await (await upload(editor, newer.html, newer.checksum)).json()).toMatchObject({ olderThanLive: false });
 });
 
 test('a pair whose file does not match its checksum is refused, saying so, and nothing is kept', async ({ request }) => {
@@ -193,6 +254,87 @@ test('in the admin in Arabic, a pair that does not match is refused in Arabic', 
 
   // Payload keeps an alert region of its own on the page; the refusal is the one that says it.
   await expect(page.getByRole('alert').filter({ hasText: 'لا يطابق ملف التحقق' })).toBeVisible();
+});
+
+/** The Pour Tracker screen's account of its releases, as an Editor sees it on opening the entry. */
+async function releasesShown(page: Page) {
+  await page.goto(`${ADMIN_PATH}/globals/pour-tracker`);
+  const panel = page.getByRole('region', { name: 'Releases' });
+  await expect(panel).toBeVisible();
+  return panel;
+}
+
+test('the screen shows the live release and when it went out, the one waiting, and the code copy (ticket 101)', async ({
+  page,
+  request,
+}) => {
+  const editor = signedIn(request);
+  const live = await testRelease(); // 2099-01-01.1
+  const waiting = await release(CODE_COPY); // 2026-09-23.3, older
+  await save(editor, await (await upload(editor, live.html, live.checksum)).json(), 'published');
+  await save(editor, await (await upload(editor, waiting.html, waiting.checksum)).json(), 'draft');
+
+  await logIn(page);
+  const panel = await releasesShown(page);
+
+  await expect(panel).toContainText(/Visitors download release 2099-01-01\.1, published \d/);
+  await expect(panel).toContainText(`Waiting for Publish: release ${POUR_TRACKER.build}`);
+  await expect(panel).toContainText('older than the release visitors download now');
+  await expect(panel).toContainText(`Kept with the site’s code: release ${POUR_TRACKER.build}`);
+});
+
+test('removing the published release in the admin sends visitors the code copy again, and the screen says so (ticket 101)', async ({
+  page,
+  request,
+}) => {
+  const editor = signedIn(request);
+  const { html, checksum } = await testRelease();
+  await save(editor, await (await upload(editor, html, checksum)).json(), 'published');
+
+  await logIn(page);
+  await releasesShown(page);
+  await page.getByRole('button', { name: 'Remove release' }).click();
+  await page.getByRole('button', { name: 'Publish changes' }).click();
+  await expect(page.getByText(/updated successfully|published successfully/i).first()).toBeVisible();
+
+  expect(checksumOf((await download(request)).bytes)).toBe(POUR_TRACKER.sha256);
+  await expect(await releasesShown(page)).toContainText(
+    `No release is published: visitors download the copy kept with the code, release ${POUR_TRACKER.build}`,
+  );
+});
+
+test('an earlier release restored from the history and published is the very next download (ticket 101)', async ({ request }) => {
+  const editor = signedIn(request);
+  const earlier = await testRelease();
+  const later = await release(CODE_COPY);
+  await save(editor, await (await upload(editor, earlier.html, earlier.checksum)).json(), 'published');
+  await save(editor, await (await upload(editor, later.html, later.checksum)).json(), 'published');
+
+  // The admin's Versions → Restore: the kept version becomes the draft, and is published.
+  const versions = await editor.get(`${ENTRY}/versions?where[version.releaseNumber][equals]=2099-01-01.1&sort=-updatedAt&limit=1&depth=0`);
+  const [kept] = ((await versions.json()) as { docs: { id: string }[] }).docs;
+  const restored = await editor.post(`${ENTRY}/versions/${kept!.id}?draft=true`);
+  expect(restored.ok(), await restored.text()).toBe(true);
+  const draft = (await (await editor.get(`${ENTRY}?draft=true&depth=0`)).json()) as Named;
+  await save(editor, { sha256: draft.sha256, releaseNumber: draft.releaseNumber, size: draft.size, fileName: draft.fileName }, 'published');
+
+  expect((await download(request)).bytes.equals(earlier.html)).toBe(true);
+});
+
+test('uploading an older release in the admin says so before it is published (ticket 101)', async ({ page, request }) => {
+  const editor = signedIn(request);
+  const { html, checksum } = await testRelease(); // 2099-01-01.1, live
+  await save(editor, await (await upload(editor, html, checksum)).json(), 'published');
+
+  await logIn(page);
+  await page.goto(`${ADMIN_PATH}/globals/pour-tracker`);
+  await page.getByLabel('Release HTML file').setInputFiles(path.join(CODE_COPY, 'index.html'));
+  await page.getByLabel('Checksum file (.sha256)').setInputFiles(path.join(CODE_COPY, 'index.html.sha256'));
+  await page.getByRole('button', { name: 'Check and upload' }).click();
+
+  // Payload keeps a status region of its own on the page; the upload's is the one that names the release.
+  const said = page.getByRole('status').filter({ hasText: `Release ${POUR_TRACKER.build} checked and kept` });
+  await expect(said).toContainText('older than the release visitors download now');
 });
 
 test('with no release published, the download is the copy kept with the code', async ({ request }) => {

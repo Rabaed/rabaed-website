@@ -38,8 +38,12 @@ const nextConfig: NextConfig = {
   // Nothing statically references those files, so tracing cannot find them.
   outputFileTracingIncludes: {
     '/studio/**': ['./src/screen-mocks/**/*.html'],
-    // The Pour Tracker's code copy, read off disk by its download route.
-    '/downloads/**': ['./src/pour-tracker/fallback/index.html'],
+    // The Pour Tracker's code copy: its file, read off disk by its download
+    // route, and its checksum file, which names its release number for the
+    // upload's clash check and for the admin's Pour Tracker screen.
+    '/downloads/**': ['./src/pour-tracker/fallback/index.html', './src/pour-tracker/fallback/index.html.sha256'],
+    '/api/**': ['./src/pour-tracker/fallback/index.html.sha256'],
+    '/maktab/**': ['./src/pour-tracker/fallback/index.html.sha256'],
   },
 
   /**

@@ -32,6 +32,7 @@ import { IndexLeads } from './cms/globals/index-leads';
 import { PartnershipPage } from './cms/globals/partnership-page';
 import { ProductPage } from './cms/globals/product-page';
 import { PourTracker } from './cms/globals/pour-tracker';
+import { PourTrackerReleases } from './cms/collections/pour-tracker-releases';
 import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
 import { ScreenMocks } from './cms/globals/screen-mocks';
@@ -89,7 +90,7 @@ export default buildConfig({
 
   // No `localization`: page text holds its Arabic and English side by side in
   // fields of its own (`cms/page-fields.ts` says why).
-  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions],
+  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions, PourTrackerReleases],
   // One settings global per form that submits (ticket 27), the Referral
   // Program values (ticket 56), and one entry per marketing page whose words
   // are in the CMS (ticket 53), with the closing section and the Screen mocks
