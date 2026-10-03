@@ -7,9 +7,14 @@ import { createHash } from 'node:crypto';
 export const POUR_TRACKER = {
   name: 'Rabaed-Pour-Tracker.html',
   path: '/downloads/Rabaed-Pour-Tracker.html',
-  /** Build 2026-08-25.7, as the co-founder delivered it with its own checksum file. */
-  build: '2026-08-25.7',
-  sha256: 'd13f6410f71591eceb259f52e399e1db5a1847342b3dc57d089d05c46b1b7f8e',
+  /**
+   * Build 2026-09-23.3, as the co-founder delivered it with its own checksum
+   * file — the copy kept with the code since it went live from the CMS on
+   * 3 October 2026 and passed this walk-through (ADR-0024). Build 2026-08-25.7
+   * before it.
+   */
+  build: '2026-09-23.3',
+  sha256: '925a4ed9d38bc22f8f8c6fc44f606f3c8adbfb3f1011753c645bd4e9c4616eaf',
 } as const;
 
 /**

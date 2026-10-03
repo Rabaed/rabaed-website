@@ -91,12 +91,12 @@ test('the checksum is read however its tool wrote it: capitals, a binary marker,
   }
 });
 
-test('the copy kept with the site’s code matches the checksum file it was delivered with: release 2026-08-25.7', async () => {
+test('the copy kept with the site’s code matches the checksum file it was delivered with: release 2026-09-23.3', async () => {
   const { html, checksum } = await pair(CODE_COPY);
 
   expect(checkedRelease(html, checksum)).toEqual({
     ok: true,
-    sha256: 'd13f6410f71591eceb259f52e399e1db5a1847342b3dc57d089d05c46b1b7f8e',
-    releaseNumber: '2026-08-25.7',
+    sha256: '925a4ed9d38bc22f8f8c6fc44f606f3c8adbfb3f1011753c645bd4e9c4616eaf',
+    releaseNumber: '2026-09-23.3',
   });
 });
