@@ -391,7 +391,7 @@ async function deliver(mail: Mail): Promise<MailOutcome> {
   try {
     const send = mailer();
     if (!send) {
-      console.warn('An email was not sent: no mailbox is configured (MAIL_USER, MAIL_PASSWORD).');
+      console.warn('An email was not sent: nothing to send it with is configured (MAIL_FROM, SENDGRID_API_KEY).');
       return 'skipped';
     }
     await send.send(mail);
