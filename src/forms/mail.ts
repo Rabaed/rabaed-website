@@ -26,8 +26,13 @@ export type Mail = {
   /** Where an answer to the message goes. */
   readonly replyTo?: string;
   readonly subject: string;
-  /** Plain text. Sent as it is, and as HTML beside it laid out in its language's direction. */
+  /** Plain text, sent as it is. */
   readonly text: string;
+  /**
+   * The same message as a whole HTML document. Without one, the text is sent
+   * as HTML beside it too, line by line, laid out in its language's direction.
+   */
+  readonly html?: string;
   /** The language it is written in: the direction its HTML is laid out in, and the name it is sent under. */
   readonly locale: Locale;
 };
@@ -99,7 +104,7 @@ function sendGridMailer(from: string, key: string): Mailer {
           // Plain text first: SendGrid refuses the two in any other order.
           content: [
             { type: 'text/plain', value: mail.text },
-            { type: 'text/html', value: inDirection(mail.text, mail.locale) },
+            { type: 'text/html', value: mail.html ?? inDirection(mail.text, mail.locale) },
           ],
           tracking_settings: {
             click_tracking: { enable: false, enable_text: false },
@@ -116,10 +121,14 @@ function sendGridMailer(from: string, key: string): Mailer {
   };
 }
 
-/** The text as HTML that a mail client lays out in its language's direction, line breaks kept. */
+/**
+ * The text as HTML that a mail client lays out in its language's direction,
+ * each line break a `<br>`: Outlook ignores `white-space`, and drew a message
+ * that relied on it as one long line.
+ */
 function inDirection(text: string, locale: Locale): string {
-  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r?\n/g, '<br>');
   const dir = LOCALES[locale].dir;
   const align = dir === 'rtl' ? 'right' : 'left';
-  return `<div dir="${dir}" style="text-align:${align};font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8;white-space:pre-line">${escaped}</div>`;
+  return `<div dir="${dir}" style="text-align:${align};font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8">${escaped}</div>`;
 }

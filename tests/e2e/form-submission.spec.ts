@@ -281,6 +281,9 @@ test.describe('mail and wording from the admin', () => {
       }
       const stored = await settledSubmission(request, applicant.email);
       expect(alert.text).toContain(`${ADMIN_PATH}/collections/form-submissions/${stored.id}`);
+      // Laid out as an HTML email too: the answers in a table, the record a link.
+      expect(alert.html).toContain(`<span dir="ltr">${applicant.email}</span>`);
+      expect(alert.html).toContain(`${ADMIN_PATH}/collections/form-submissions/${stored.id}" style=`);
 
       await expect.poll(() => mailTo(applicant.email)).toHaveLength(1);
       const [confirmation] = await mailTo(applicant.email);
@@ -977,6 +980,9 @@ test.describe('the partnership application, alerted and confirmed', () => {
 
       const stored = await settledSubmission(request, applicant.email);
       expect(alert.text).toContain(`${ADMIN_PATH}/collections/form-submissions/${stored.id}`);
+      // Laid out as an HTML email too: the answers in a table, the record a link.
+      expect(alert.html).toContain(`<span dir="ltr">${applicant.email}</span>`);
+      expect(alert.html).toContain(`${ADMIN_PATH}/collections/form-submissions/${stored.id}" style=`);
 
       await expect.poll(() => mailTo(applicant.email)).toHaveLength(1);
       const [confirmation] = await mailTo(applicant.email);

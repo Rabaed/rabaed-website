@@ -56,6 +56,7 @@ import {
   type SubmissionOutcome,
 } from './definition';
 import { DOCUMENT_EXTENSIONS, documentContentType, documentStore } from './documents';
+import { alertMail } from './alert-email';
 import { mailer, type Mail } from './mail';
 import { publishedFormSettings, type FormSettings } from './settings';
 
@@ -362,11 +363,12 @@ async function sendMail<Field extends string>(
   let confirmation: ConfirmationOutcome = 'skipped';
 
   if (settings.alertAddress) {
+    const recordUrl = `${siteOrigin()}${ADMIN_ROUTE}/collections/form-submissions/${id}`;
     alert = await deliver({
       to: settings.alertAddress,
       replyTo: applicant.email,
       subject: `${definition.title.ar} — ${applicant.name}`,
-      text: alertText(definition, settings.wording.ar, id, answers, locale),
+      ...alertMail(definition, settings.wording.ar, answers, locale, recordUrl, new Date()),
       locale: 'ar',
     });
     confirmation = (await mayConfirm(id, applicant.email))
@@ -402,44 +404,3 @@ async function deliver(mail: Mail): Promise<MailOutcome> {
   }
 }
 
-/** How the alert names the language a form was filled in, where it was not the team's own. */
-const FILLED_IN: Readonly<Record<Locale, string | null>> = { ar: null, en: 'الإنجليزية' };
-
-/**
- * The team's alert, in Arabic: every answer under the words the Arabic form
- * gives it, and the way to the record — and, for a form filled in another
- * language, which one, so the reply goes back in it. Documents are named,
- * never attached: they are opened from the record, by a signed-in editor.
- */
-function alertText<Field extends string>(
-  definition: FormDefinition<Field>,
-  team: FormWording<Field>,
-  id: number,
-  answers: Answers<Field>,
-  locale: Locale,
-): string {
-  const lines = fieldNames(definition).map((name) => {
-    const wording = team.fields[name];
-    const answer = answers[name];
-    if (definition.fields[name].kind === 'consent') return `${wording.label}: ${answer === CONSENT_GIVEN ? 'موافق' : '—'}`;
-    return `${wording.label}: ${wording.options?.[answer] ?? (answer || '—')}`;
-  });
-  const sentAt = new Intl.DateTimeFormat('ar-u-nu-latn', {
-    timeZone: 'Asia/Riyadh',
-    dateStyle: 'long',
-    timeStyle: 'short',
-  }).format(new Date());
-
-  const language = FILLED_IN[locale];
-  return [
-    `وصل طلب جديد من نموذج «${definition.title.ar}».`,
-    ...(language ? [`مُلئ النموذج بـ${language}، فالرد على مقدّمه بها.`] : []),
-    '',
-    ...lines,
-    '',
-    `وقت الإرسال: ${sentAt} بتوقيت الرياض`,
-    `الطلب في لوحة التحرير: ${siteOrigin()}${ADMIN_ROUTE}/collections/form-submissions/${id}`,
-    '',
-    'للرد على مقدّم الطلب، أجب على هذه الرسالة.',
-  ].join('\n');
-}
