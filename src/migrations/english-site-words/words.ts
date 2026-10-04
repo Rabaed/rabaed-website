@@ -17,7 +17,7 @@
  *
  * A link is found by where it goes, not by its place in the list, since an
  * Editor may have reordered the menu before this runs. The Referral Program
- * and the Partnership Program keep the names `CONTEXT.md` gives them.
+ * and the Partnership Program keep the names `GLOSSARY.md` gives them.
  */
 export const ENGLISH_SITE_WORDS = {
   header: {

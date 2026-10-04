@@ -6,7 +6,7 @@ import type { Locale } from '../lib/locales.ts';
 
 /**
  * The Screen mocks: depictions of Rabaed app screens, shown on the Marketing
- * site (CONTEXT.md). They are not photographs of the real app, which does not
+ * site (GLOSSARY.md). They are not photographs of the real app, which does not
  * exist yet — they are the co-founder's hand-built HTML, kept in the repo and
  * rendered to images by a script rather than rebuilt as components (ADR-0002).
  *
@@ -54,7 +54,7 @@ export type ScreenMock = {
 const STAGE = { width: 1440, height: 900, scale: 2 } as const;
 
 /**
- * The one shape every Phone crop shares (CONTEXT.md, ADR-0022): portrait, four
+ * The one shape every Phone crop shares (GLOSSARY.md, ADR-0022): portrait, four
  * wide by five tall, in stage pixels.
  *
  * Sized for a phone's column rather than for the screen. At 390px wide the

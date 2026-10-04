@@ -3,7 +3,7 @@ import { signedIn } from '../access';
 import { RELEASE_FIELD_LABELS } from '../pour-tracker-words';
 
 /**
- * Every Pour Tracker **Release** (CONTEXT.md) the CMS has kept, by its release
+ * Every Pour Tracker **Release** (GLOSSARY.md) the CMS has kept, by its release
  * number (ticket 101, ADR-0024): what holds a release number to the one file
  * it names, for good. An upload whose number is here with another file is
  * refused; the same file under the same number is the same release.

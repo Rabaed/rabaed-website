@@ -61,7 +61,7 @@ export type StationName = keyof typeof HERO_STATIONS;
 /**
  * One round of the Record: the Contractor raises a request, the Consultant
  * reviews it, the Owner approves it, and the decision comes back to all three
- * (CONTEXT.md). Each step is where the document lands; what the status pill
+ * (GLOSSARY.md). Each step is where the document lands; what the status pill
  * reads once it is there is the same step's entry in `HeroStatuses`.
  *
  * The first entry is where the document starts, so it is also the position the

@@ -2,7 +2,7 @@
 
 Supersedes [ADR-0025](0025-the-portals-old-addresses-on-this-domain-are-named-and-forwarded.md).
 
-Until it moved, the **product app** (CONTEXT.md) answered at `rabaedapp.com`, and its addresses went out where they cannot be recalled: invite emails with a registration token in them, submittal emails, the links inside Excel exports, the QR codes printed on letters. Now the **Marketing site** answers there, and each of those addresses has to reach the product app at `app.rabaedapp.com` instead.
+Until it moved, the **product app** (GLOSSARY.md) answered at `rabaedapp.com`, and its addresses went out where they cannot be recalled: invite emails with a registration token in them, submittal emails, the links inside Excel exports, the QR codes printed on letters. Now the **Marketing site** answers there, and each of those addresses has to reach the product app at `app.rabaedapp.com` instead.
 
 ADR-0025 named the product app's addresses in `next.config.ts` and forwarded those. On 3 October 2026 the founder chose this instead: **for an address this site has no page for, the proxy asks the product app whether it has one.** If it has, the visitor is sent there with the address exactly as it came. If it has not, the request carries on, matches nothing, and this site's own not-found page answers, as it always has.
 

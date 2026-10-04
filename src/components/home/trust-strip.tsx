@@ -25,7 +25,7 @@ export type TrustStripContent = {
 
 /**
  * The Trust strip: a bar of the marks of companies already working on Rabaed,
- * travelling slowly past the label that names them (CONTEXT.md).
+ * travelling slowly past the label that names them (GLOSSARY.md).
  *
  * A server component. Every mark and every company name is in the first
  * response; `TrustStripMarquee` sets the rail moving and swaps a mark that

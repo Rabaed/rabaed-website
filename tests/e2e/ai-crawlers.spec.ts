@@ -162,7 +162,7 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   expect(response.headers()['content-type']).toMatch(/^text\/plain/);
   const llms = await response.text();
 
-  // The company as CONTEXT.md writes it, and the product line in the
+  // The company as GLOSSARY.md writes it, and the product line in the
   // co-founder's own words.
   expect(llms.split('\n')[0]).toBe('# ربائد (Rabaed)');
   expect(llms).toContain('شركة ربائد البناء — الرياض، السعودية.');

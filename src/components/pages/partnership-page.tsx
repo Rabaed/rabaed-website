@@ -14,7 +14,7 @@ import { LOCALES, type Locale } from '@/lib/locales';
 /**
  * The Partnership Program page, for engineering offices and project
  * management companies — a different programme from the Referral Program, for
- * a different audience (CONTEXT.md) — in either language. In the Reference
+ * a different audience (GLOSSARY.md) — in either language. In the Reference
  * site's order: the page hero with its figures, the idea, who it is for, the
  * modes, what a partner gets, the path to joining, the questions, and the
  * application form.

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 /**
- * The check a Pour Tracker **Release** (CONTEXT.md) passes before the CMS
+ * The check a Pour Tracker **Release** (GLOSSARY.md) passes before the CMS
  * keeps it (ticket 100, ADR-0024): its HTML file against the checksum file
  * its builder delivers with it.
  *
