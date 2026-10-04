@@ -17,7 +17,7 @@ The site has **four forms**; three of them are live today and one is not yet con
 Worth reading before the rewrite. The policy in force was written for the company in general, not for this website, and it describes collection that does not happen here:
 
 - It says **credit card details** may be collected. The site never asks for a payment method, anywhere.
-- It says data may be shared with **partners, affiliates and advertisers**. Nothing on this site shares anything with any of them. The only outside companies involved are the three service providers in section 8, which hold the data on Rabaed's behalf and do nothing else with it.
+- It says data may be shared with **partners, affiliates and advertisers**. Nothing on this site shares anything with any of them. The only outside companies involved are the four service providers in section 8, which hold the data on Rabaed's behalf and do nothing else with it.
 - It describes a **mailing list** with an unsubscribe link at the bottom of each message. The site has no mailing list and sends no marketing email. It sends exactly two kinds of message, both in section 6.
 - It says nothing about **uploaded documents**, which are the most sensitive thing the site now holds (section 4).
 - It says nothing about **how long anything is kept**. Nothing is deleted automatically today; see section 5 and the decisions in section 11.
@@ -137,7 +137,7 @@ This is the part of the site that most needs describing in the policy.
 | Form submissions and their answers | A Supabase Postgres database | Any signed-in Rabaed Editor; plus whoever holds the database credentials (the founders) | **Kept until someone deletes it by hand. There is no automatic deletion today** — a decision is needed (section 11) |
 | Uploaded documents (section 4) | The private `documents` store at Supabase | Any signed-in Rabaed Editor, through a 10-minute link; plus whoever holds the storage credentials | As above, and deleted together with their submission |
 | Editor accounts (the team's own logins) | The same Supabase database | Any signed-in Editor can see, invite and remove Editors — there is one level of access, not several (ADR-0007) | Until the account is removed. The number of accounts is the control: access is given only to people who edit the site |
-| Alert and confirmation emails | The company's Microsoft 365 mailbox, and the recipient's own inbox | Whoever has access to that mailbox | Whatever the Microsoft 365 mailbox is set to keep — **to be confirmed by the founders** (section 11) |
+| Alert and confirmation emails | SendGrid, which delivers them and keeps a record of each; the team's Microsoft 365 inbox, for alerts; and the recipient's own inbox | The SendGrid account's users; whoever has access to the team's inbox | SendGrid's record, for as long as the account's plan keeps it, and the team's inbox for as long as it is set to keep mail — **to be confirmed by the founders** (section 11) |
 | Ordinary server records of requests to the site | Vercel, the hosting company | The Vercel team account | Vercel's own retention — **to be confirmed** (section 11) |
 | Visitor analytics | Not installed yet — section 7 | — | — |
 | Images and text the team publishes | The site's public image store and the same database | Public, by design — it is the website | Until the team changes it |
@@ -150,7 +150,7 @@ This is the part of the site that most needs describing in the policy.
 
 ## 6. Email: what the site sends, and through what
 
-The site sends email through **the company's existing Microsoft 365 no-reply mailbox**, over an encrypted connection. No third-party email service is involved, and the mailbox's password is held only in the hosting configuration, never in the code.
+The site sends email from **the company's no-reply address, `noreply@rabaedapp.com`, through SendGrid**, an email delivery service owned by Twilio, over an encrypted connection. SendGrid receives each message whole in order to deliver it, so every answer in a submission passes through it; it is not used for anything else, and its tracking — which would report when a message is opened or a link in it clicked — is switched off on every message. The key that lets the site send through SendGrid is held only in the hosting configuration, never in the code.
 
 Exactly two messages may go out, both triggered by a form submission and neither of them marketing:
 
@@ -175,15 +175,16 @@ All of that is counted in aggregate. No profile of an individual is built, nothi
 
 ## 8. The outside companies involved, and where the data sits
 
-Three service providers hold Rabaed's data on Rabaed's behalf. None of them is paid to do anything else with it, and none is an advertising or data company.
+Four service providers hold Rabaed's data on Rabaed's behalf. None of them is paid to do anything else with it, and none is an advertising or data company.
 
 | Company | What it holds | Where |
 | --- | --- | --- |
 | **Vercel** | Runs the website itself, and keeps ordinary technical records of requests to it | Region **to be confirmed** — by default an account is served from the United States unless it has been set otherwise |
 | **Supabase** | The database (all form submissions) and the private document store | Region **to be confirmed** — the setup instructions call for the region nearest Saudi Arabia, and the founders should confirm which was chosen |
-| **Microsoft 365** | The mailbox that sends the two emails, and the copies in it | The company's existing Microsoft 365 tenancy — region **to be confirmed** |
+| **SendGrid** (Twilio) | Delivers the two emails, and keeps a record of each: who it went to, its subject, and whether it arrived | The United States, by default — **to be confirmed** |
+| **Microsoft 365** | The team's inbox, where alerts arrive and stay | The company's existing Microsoft 365 tenancy — region **to be confirmed** |
 
-**These three answers matter more than their length suggests.** If personal data of people in Saudi Arabia is held outside the Kingdom, the Personal Data Protection Law treats that as a transfer abroad with its own conditions, and the policy has to say so. The technical answer to each is a single setting; nobody has yet written down what each is set to. See section 11.
+**These four answers matter more than their length suggests.** If personal data of people in Saudi Arabia is held outside the Kingdom, the Personal Data Protection Law treats that as a transfer abroad with its own conditions, and the policy has to say so. The technical answer to each is a single setting; nobody has yet written down what each is set to. See section 11.
 
 ## 9. What the site does not collect
 
@@ -210,8 +211,8 @@ How it works today, so the policy describes something the team can actually do:
 None of these is a technical obstacle; each is an answer the policy needs.
 
 1. **How long each category is kept.** Nothing is deleted automatically today. A period is needed for form submissions, and one for uploaded documents — which may reasonably be shorter, since a certificate is needed to enrol and pay a referrer, not to keep indefinitely.
-2. **The three regions** in section 8: where Vercel runs the site, where the Supabase database and document store are, and where the Microsoft 365 mailbox is.
-3. **How long the Microsoft 365 mailbox keeps the alert and confirmation emails**, which are a second copy of every submission.
+2. **The four regions** in section 8: where Vercel runs the site, where the Supabase database and document store are, where SendGrid processes the email, and where the team's Microsoft 365 inbox is.
+3. **How long SendGrid keeps its record of each email, and the team's inbox the alerts**, which are a second copy of every submission.
 4. **Who is named as the contact** for a privacy question or a deletion request.
 5. **The analytics tool**, once chosen, and whether it touches a visitor's internet address at all (section 7).
 6. **What happens off the site with a referrer's bank details** once a payment is made: the site holds the certificate, but the payment runs through whatever the finance process is, and the policy covers the company, not only the website.

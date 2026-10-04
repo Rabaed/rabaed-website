@@ -54,8 +54,8 @@ const env = {
   // (`src/forms/documents.ts`), for the form suite to check.
   DOCUMENTS_DIR: documentsDirectory(port),
   S3_DOCUMENTS_BUCKET: '',
-  MAIL_USER: '',
-  MAIL_PASSWORD: '',
+  MAIL_FROM: '',
+  SENDGRID_API_KEY: '',
   TEST_BUILD_DIR: buildDir,
 };
 

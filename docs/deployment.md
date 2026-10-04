@@ -958,23 +958,26 @@ bucket.
 
 ### Email
 
-The forms send from the company's Microsoft 365 no-reply mailbox, over SMTP
-(`smtp.office365.com`, port 587, TLS).
+The forms send through SendGrid (ADR-0027), from `noreply@rabaedapp.com`.
+`rabaedapp.com` is an authenticated domain in SendGrid (its records are the
+`em228` CNAMEs at GoDaddy), so mail from any address on it is signed as the
+company's.
 
-1. In the Microsoft 365 admin centre, open the no-reply mailbox's account →
-   **Mail → Manage email apps**, and tick **Authenticated SMTP**.
-2. In Vercel, add `MAIL_USER` (the mailbox's address) and `MAIL_PASSWORD` for
-   each environment that should send email. Leave them out of Preview if trying
-   out a pull request should never email anyone.
-3. Set each form's alert address in the admin.
+1. In SendGrid, **Settings → API Keys → Create API Key**: **Restricted
+   Access**, with only **Mail Send** switched on. Copy the key; SendGrid shows
+   it once.
+2. In Vercel, add `MAIL_FROM` (`noreply@rabaedapp.com`) and `SENDGRID_API_KEY`
+   for each environment that should send email, marked **Sensitive**. Leave
+   them out of Preview if trying out a pull request should never email anyone.
+3. Redeploy, and set each form's alert address in the admin.
 
 Without the two variables the site works the same and sends no email; each
-submission records its emails as not sent.
+submission records its emails as not sent. A refused message is recorded as
+failed, and the function log says why in SendGrid's words ("SendGrid refused
+the message (401) ..."): a 401 or 403 is the key, revoked or without Mail Send.
 
-> Microsoft has been retiring password sign-in ("basic authentication") for
-> SMTP in Microsoft 365. If the tenant refuses it, the mailbox's emails will
-> show as failed on every submission; the mail adapter (`src/forms/mail.ts`)
-> is the one place to change to a sign-in Microsoft accepts.
+The site switches SendGrid's click, open and subscription tracking off on
+every message, whatever the account is set to.
 
 ### Not there yet
 

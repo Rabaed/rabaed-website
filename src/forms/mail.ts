@@ -2,15 +2,15 @@
  * How the site sends email, behind one small interface so that what sends it
  * can change without the submission pipeline noticing (spec: Forms).
  *
- * - **Microsoft 365** in production: the company's existing no-reply mailbox,
- *   over SMTP with its own account (spec: Stack and hosting). Its address and
- *   password are `MAIL_USER` and `MAIL_PASSWORD`, set in Vercel and never in
- *   the repository.
+ * - **SendGrid** in production (ADR-0027), from the company's no-reply address
+ *   on its own authenticated domain. The address is `MAIL_FROM`, and the key
+ *   that may send from it `SENDGRID_API_KEY`, set in Vercel and never in the
+ *   repository.
  * - **An outbox** for the test suite: each message written to a folder as a
  *   file (`MAIL_OUTBOX_DIR`), for the tests to read. Never on a deployment,
  *   where a message written to disk would be a message nobody receives.
  * - **Nothing**, where neither is set: a local machine, or a deployment before
- *   the mailbox's credentials are supplied. The site works the same; the
+ *   the key is supplied. The site works the same; the
  *   submission records that its mail was not sent.
  *
  * Server-only: it reads secrets.
@@ -18,7 +18,6 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import nodemailer, { type Transporter } from 'nodemailer';
 import { isPubliclyDeployed } from '../lib/environment';
 import { LOCALES, type Locale } from '../lib/locales';
 
@@ -45,11 +44,11 @@ export function mailer(): Mailer | null {
   const outbox = process.env.MAIL_OUTBOX_DIR;
   if (outbox && !isPubliclyDeployed()) return outboxMailer(outbox);
 
-  const user = process.env.MAIL_USER;
-  const password = process.env.MAIL_PASSWORD;
-  if (user && password) return microsoft365Mailer(user, password);
-  if (user || password) {
-    throw new Error(`Email is half configured: ${user ? 'MAIL_PASSWORD' : 'MAIL_USER'} is missing. Set both, or neither.`);
+  const from = process.env.MAIL_FROM;
+  const key = process.env.SENDGRID_API_KEY;
+  if (from && key) return sendGridMailer(from, key);
+  if (from || key) {
+    throw new Error(`Email is half configured: ${from ? 'SENDGRID_API_KEY' : 'MAIL_FROM'} is missing. Set both, or neither.`);
   }
   return null;
 }
@@ -67,39 +66,52 @@ function outboxMailer(directory: string): Mailer {
   };
 }
 
-let transport: { user: string; transporter: Transporter } | null = null;
+/**
+ * Where SendGrid's API answers. Only the test suite sets `SENDGRID_API_ORIGIN`,
+ * to a stand-in on its own machine (`tests/unit/sendgrid-mail.spec.ts`); a
+ * deployment never does.
+ */
+function sendGridOrigin(): string {
+  return process.env.SENDGRID_API_ORIGIN || 'https://api.sendgrid.com';
+}
 
 /**
- * Microsoft 365's SMTP submission endpoint: port 587, upgraded to TLS before
- * the password is sent, and refused if it cannot be. The mailbox needs
- * "Authenticated SMTP" switched on for its account (see "Email" in
- * `docs/deployment.md`).
+ * SendGrid's v3 `mail/send`, over HTTPS. It answers 202 once it has taken the
+ * message; anything else is a refusal, thrown in SendGrid's own words so the
+ * submission records the email as failed and the log says why.
+ *
+ * Tracking is switched off whatever the account says: click tracking would
+ * rewrite the alert's link to the record through SendGrid's address, open
+ * tracking hides an image in the message that reports when it is read, and
+ * subscription tracking adds an unsubscribe link to mail nobody subscribed to.
  */
-function microsoft365Mailer(user: string, password: string): Mailer {
-  if (transport?.user !== user) {
-    transport = {
-      user,
-      transporter: nodemailer.createTransport({
-        host: 'smtp.office365.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: { user, pass: password },
-      }),
-    };
-  }
-  const { transporter } = transport;
-
+function sendGridMailer(from: string, key: string): Mailer {
   return {
     async send(mail) {
-      await transporter.sendMail({
-        from: { name: SENDER[mail.locale], address: user },
-        to: mail.to,
-        replyTo: mail.replyTo,
-        subject: mail.subject,
-        text: mail.text,
-        html: inDirection(mail.text, mail.locale),
+      const response = await fetch(`${sendGridOrigin()}/v3/mail/send`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: mail.to }] }],
+          from: { email: from, name: SENDER[mail.locale] },
+          ...(mail.replyTo ? { reply_to: { email: mail.replyTo } } : {}),
+          subject: mail.subject,
+          // Plain text first: SendGrid refuses the two in any other order.
+          content: [
+            { type: 'text/plain', value: mail.text },
+            { type: 'text/html', value: inDirection(mail.text, mail.locale) },
+          ],
+          tracking_settings: {
+            click_tracking: { enable: false, enable_text: false },
+            open_tracking: { enable: false },
+            subscription_tracking: { enable: false },
+          },
+        }),
+        signal: AbortSignal.timeout(15_000),
       });
+      if (response.status !== 202) {
+        throw new Error(`SendGrid refused the message (${response.status}): ${await response.text()}`);
+      }
     },
   };
 }
