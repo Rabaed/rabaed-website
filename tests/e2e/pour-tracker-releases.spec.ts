@@ -1,5 +1,5 @@
 /**
- * Ahmed publishes a Pour Tracker **Release** (CONTEXT.md) from the CMS
+ * Ahmed publishes a Pour Tracker **Release** (GLOSSARY.md) from the CMS
  * (ticket 100, ADR-0024): its HTML file and its checksum file, refused unless
  * the two match, kept waiting until Publish, and then the very file visitors
  * download — byte for byte, at the same address, under the same name. And

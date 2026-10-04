@@ -10,7 +10,7 @@ export type StartFreeToolTeaserContent = {
 /**
  * The Pour Tracker, offered free, under the start page's questions. The
  * Reference site's button goes nowhere (`href="#"`); here it leads to the tool
- * page, which describes the tool and delivers it (CONTEXT.md).
+ * page, which describes the tool and delivers it (GLOSSARY.md).
  */
 export function FreeToolTeaser({ content }: { content: StartFreeToolTeaserContent }) {
   return (

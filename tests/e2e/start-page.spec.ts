@@ -176,7 +176,7 @@ test('the free tool teaser leads to the tool page', async ({ page }) => {
   await page.goto('/start');
 
   // The Reference site's button goes nowhere (`href="#"`). The Pour Tracker is
-  // described and delivered by the tool page (CONTEXT.md), which ticket 14 builds.
+  // described and delivered by the tool page (GLOSSARY.md), which ticket 14 builds.
   await expect(page.locator('#faq .free').getByRole('link', { name: 'تحميل الأداة' })).toHaveAttribute('href', '/tool');
 });
 

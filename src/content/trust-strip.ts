@@ -5,7 +5,7 @@ import type { Locale } from '@/lib/locales';
 
 /**
  * The Trust strip: the companies already working on Rabaed, in the order the
- * CMS lists them (CONTEXT.md, ticket 20). One entry for the three pages that
+ * CMS lists them (GLOSSARY.md, ticket 20). One entry for the three pages that
  * carry the strip, so a client signed today appears on all three at once;
  * each page keeps its own switch for whether the strip shows there.
  *

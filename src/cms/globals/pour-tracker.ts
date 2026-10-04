@@ -14,7 +14,7 @@ import { codeCopyRelease } from '../../pour-tracker/code-copy';
 import { checkedRelease, isOlderRelease } from '../../pour-tracker/release';
 
 /**
- * The Pour Tracker **Release** (CONTEXT.md) visitors download: Ahmed uploads
+ * The Pour Tracker **Release** (GLOSSARY.md) visitors download: Ahmed uploads
  * one here, and it reaches the download when he publishes it (ticket 100,
  * ADR-0024). While none is published, visitors receive the copy kept with the
  * site's code (`src/pour-tracker/fallback/`).

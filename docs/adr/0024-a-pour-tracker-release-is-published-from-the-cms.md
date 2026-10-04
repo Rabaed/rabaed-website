@@ -2,7 +2,7 @@
 
 Ticket 49 shipped the Pour Tracker as a file in the site's code: release 2026-08-25.7, byte for byte, held there by a test that knows its checksum and walks through the tool. The tests check that the brand reads ربائد, that it makes no request but the Google Fonts ones, that it opens offline, and that a logged pour shows its 7 and 28-day dates. A new release therefore needed a developer.
 
-On 25 September 2026 the founder chose to have Ahmed, who builds each **Release** (CONTEXT.md), publish it himself from the CMS. He uploads the release's HTML file together with its checksum file. The CMS accepts the upload only when the two match, and publishes it with the Publish button, like any other content. From then on it is what visitors download, at the same address and under the same name, `Rabaed-Pour-Tracker.html`.
+On 25 September 2026 the founder chose to have Ahmed, who builds each **Release** (GLOSSARY.md), publish it himself from the CMS. He uploads the release's HTML file together with its checksum file. The CMS accepts the upload only when the two match, and publishes it with the Publish button, like any other content. From then on it is what visitors download, at the same address and under the same name, `Rabaed-Pour-Tracker.html`.
 
 **A release is accepted on its checksum, not after a walk-through.** The checksum proves the file is the one its builder delivered, undamaged and not mixed up with another. It does not prove what is inside. The walk-through runs only on the site's code, never on an upload, so a release published from the CMS goes live without it. What it would have checked is Ahmed's responsibility as its builder. Two alternatives were turned down:
 

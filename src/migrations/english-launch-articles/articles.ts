@@ -19,7 +19,7 @@
  * **A translation, not new writing.** Every claim is the Arabic article's, and
  * so the site's (see `launch-articles/articles.ts` for where each comes from);
  * a figure is written as the English site writes it, «60 days», «15 minutes»,
- * «30 minutes»; the product's words are `CONTEXT.md`'s — the Owner, the
+ * «30 minutes»; the product's words are `GLOSSARY.md`'s — the Owner, the
  * Consultant and the Contractor, the Record, the Referral Program and the
  * Partnership Program. A link goes to the English address of the page, which
  * answers with an offer of the Arabic until that page's English is published

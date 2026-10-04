@@ -18,7 +18,7 @@ import { LOCALES, type Locale } from '@/lib/locales';
  * it does, the three steps, where its files live, what it needs, the download
  * form, the questions, and the upsell to Rabaed.
  *
- * It describes and delivers the tool (CONTEXT.md). The file itself is ticket
+ * It describes and delivers the tool (GLOSSARY.md). The file itself is ticket
  * 18's, and is the same file in both languages: it carries a language switch
  * of its own.
  *

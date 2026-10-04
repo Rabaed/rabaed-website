@@ -16,7 +16,7 @@ import { nodesOf, structuredData, trail, type JsonLdNode } from './structured-da
 const absolute = (baseURL: string, path: string) => `${baseURL}${path === '/' ? '' : path}`;
 
 /**
- * The company as CONTEXT.md and the approved legal documents name it, and the
+ * The company as GLOSSARY.md and the approved legal documents name it, and the
  * contact points published with the site (restated for the reason `routes.ts`
  * gives). `cms.spec.ts` changes only the WhatsApp number and the social
  * accounts, so these stay put while it runs.

@@ -4,7 +4,7 @@
 
 That footer left pages reachable from nowhere. The blog was linked from no page of the site: ticket 23 left it out of the header until the founder chose where to link it from. The Pour Tracker page was reached only from a teaser on the start page, and the Referral Terms only from the referral page. The header cannot take them: it is full at the words it launched with (ADR-0015, `src/cms/globals/site-words.ts`), with 62px left at its narrowest row.
 
-**So the footer carries a Footer directory** (CONTEXT.md): four columns of links through which every page of the Marketing site can be reached, between the social icons and the bar.
+**So the footer carries a Footer directory** (GLOSSARY.md): four columns of links through which every page of the Marketing site can be reached, between the social icons and the bar.
 
 | Column | Links, in order |
 |---|---|

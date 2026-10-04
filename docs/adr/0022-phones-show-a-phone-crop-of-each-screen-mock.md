@@ -2,7 +2,7 @@
 
 ADR-0002 made Screen mocks exported pictures of a fixed 1440×900 screen, and accepted that a picture cannot reflow. On a phone that meant a screen nobody could read: at 700px wide and narrower the site draws each one 1040px wide in a box that pans sideways, so a visitor sees a third of it at a time, and each third still at about a quarter of its size.
 
-On 23 September 2026 the founder chose a **Phone crop** (CONTEXT.md) for phones: a second picture of each Screen mock, cut from the same screen, zoomed in on the part that tells its story. Tapping it opens the whole screen. Two alternatives were turned down:
+On 23 September 2026 the founder chose a **Phone crop** (GLOSSARY.md) for phones: a second picture of each Screen mock, cut from the same screen, zoomed in on the part that tells its story. Tapping it opens the whole screen. Two alternatives were turned down:
 
 - **The swipe alone, with a hint** (ticket 77). It says the screen can be moved, but still shows a third of it at a time, at the same unreadable size. It stays as the fallback wherever there is no crop to show, which is the case for a picture an Editor has replaced without uploading a crop beside it (ticket 79).
 - **Each screen redrawn as a phone app.** Eight screens of new design in two languages, depicting a phone app that does not exist. The crop is a cut of the real screen, so it cannot show anything the whole screen does not.
