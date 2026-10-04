@@ -47,6 +47,7 @@ export type SentMail = {
   readonly replyTo?: string;
   readonly subject: string;
   readonly text: string;
+  readonly html?: string;
 };
 
 /** Every message sent to `address` so far. */

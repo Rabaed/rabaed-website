@@ -52,10 +52,11 @@ test('an alert is handed to SendGrid from the company, laid out in its language,
     locale: 'ar',
   });
   await mailer()!.send({ to: 'applicant@example.com', subject: 'We have your request', text: 'Hello,', locale: 'en' });
+  await mailer()!.send({ to: 'team@example.com', subject: 'طلب جديد', text: 'نص', html: '<!doctype html><p>جدول</p>', locale: 'ar' });
   await sendGrid.close();
 
-  expect(sendGrid.received).toHaveLength(2);
-  const [alert, confirmation] = sendGrid.received;
+  expect(sendGrid.received).toHaveLength(3);
+  const [alert, confirmation, laidOut] = sendGrid.received;
   expect(alert.method).toBe('POST');
   expect(alert.url).toBe('/v3/mail/send');
   expect(alert.headers.authorization).toBe('Bearer SG.test-key');
@@ -77,7 +78,7 @@ test('an alert is handed to SendGrid from the company, laid out in its language,
       {
         type: 'text/html',
         value:
-          '<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8;white-space:pre-line">سطر أول\nسطر &lt;ثانٍ&gt;</div>',
+          '<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8">سطر أول<br>سطر &lt;ثانٍ&gt;</div>',
       },
     ],
     tracking_settings: untracked,
@@ -92,11 +93,16 @@ test('an alert is handed to SendGrid from the company, laid out in its language,
       {
         type: 'text/html',
         value:
-          '<div dir="ltr" style="text-align:left;font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8;white-space:pre-line">Hello,</div>',
+          '<div dir="ltr" style="text-align:left;font-family:Tahoma,Arial,sans-serif;font-size:15px;line-height:1.8">Hello,</div>',
       },
     ],
     tracking_settings: untracked,
   });
+  // A message laid out as HTML of its own is sent with that HTML, its text beside it.
+  expect((laidOut.body as { content: unknown }).content).toEqual([
+    { type: 'text/plain', value: 'نص' },
+    { type: 'text/html', value: '<!doctype html><p>جدول</p>' },
+  ]);
 });
 
 test('a message SendGrid refuses fails in SendGrid’s own words, and never with the key in them', async () => {
