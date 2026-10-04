@@ -44,7 +44,6 @@ import {
   DOCUMENTS,
   documentProblem,
   fieldNames,
-  NAME_PLACEHOLDER,
   TOKEN_FIELD,
   TRAP_FIELD,
   unacceptableFields,
@@ -57,6 +56,7 @@ import {
 } from './definition';
 import { DOCUMENT_EXTENSIONS, documentContentType, documentStore } from './documents';
 import { alertMail } from './alert-email';
+import { confirmationMail } from './confirmation-email';
 import { mailer, type Mail } from './mail';
 import { publishedFormSettings, type FormSettings } from './settings';
 
@@ -82,9 +82,6 @@ export const CONFIRMATION_LIMIT = {
  * long means something is wrong, and the request fails rather than queueing.
  */
 const LOCK_WAIT = '5s';
-
-/** The longest name a confirmation greets its visitor by (ticket 81). */
-const GREETING_NAME_MAX = 60;
 
 /** The most a request may carry: three documents at their largest, and the rest of the form. */
 export const REQUEST_BYTES_LIMIT = 3 * DOCUMENTS.maxBytes + 1024 * 1024;
@@ -334,22 +331,6 @@ async function mayConfirm(id: number, email: string): Promise<boolean> {
   }
 }
 
-/**
- * A confirmation's words with the visitor's name in the placeholder's place —
- * when what they typed reads as a name (ticket 81, ADR-0022). The name field
- * takes anything two letters long, so a "name" can be an advert with a link in
- * it, and the greeting would be Rabaed's mailbox sending it. So a name longer
- * than `GREETING_NAME_MAX`, or with a digit in any script, an «@», a link or a
- * web address in it, is left out with the space before it: «مرحباً،»,
- * "Hello,". An engineer's «م.» before a name is not a web address.
- */
-function greeted(body: string, placeholder: string, name: string): string {
-  const aName = name.length <= GREETING_NAME_MAX && !/[\p{Nd}@<>]|:\/\/|www\.|[\p{L}\p{N}-]\.[a-z]{2,}/iu.test(name);
-  if (aName) return body.replaceAll(placeholder, name);
-  const escaped = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return body.replace(new RegExp(`[^\\S\\n]*${escaped}`, 'g'), '');
-}
-
 async function sendMail<Field extends string>(
   definition: FormDefinition<Field>,
   settings: FormSettings<Field>,
@@ -375,7 +356,7 @@ async function sendMail<Field extends string>(
       ? await deliver({
           to: applicant.email,
           subject: confirmed.confirmationSubject,
-          text: greeted(confirmed.confirmationBody, NAME_PLACEHOLDER[locale], applicant.name),
+          ...confirmationMail(settings.confirmation[locale], { locale, name: applicant.name, siteOrigin: siteOrigin() }),
           locale,
         })
       : 'withheld';

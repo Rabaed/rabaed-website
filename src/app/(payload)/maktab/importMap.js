@@ -13,6 +13,9 @@ import { HeadingFeatureClient as HeadingFeatureClient_e70f5e05f09f93e00b997edb1e
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ReferralTermsWarning as ReferralTermsWarning_e927be8dca5ee8a936d12506e21d999a } from '../../../cms/components/referral-terms-warning'
 import { DocumentLink as DocumentLink_e408f38cb51586a9880caa1e5ebc7926 } from '../../../cms/components/document-link'
+import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { ConfirmationPreview as ConfirmationPreview_c89704e9b368e05daf66da66c0cc5cdd } from '../../../cms/components/confirmation-preview'
 import { PourTrackerReleasesPanel as PourTrackerReleasesPanel_2dea233f26c1f5f567ce0c47909e02e7 } from '../../../cms/components/pour-tracker-releases-panel'
 import { PourTrackerRelease as PourTrackerRelease_fcf5efa7d171eeed3162f0b64f104fe2 } from '../../../cms/components/pour-tracker-release'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
@@ -35,6 +38,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ParagraphFeatureClient": ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/cms/components/referral-terms-warning#ReferralTermsWarning": ReferralTermsWarning_e927be8dca5ee8a936d12506e21d999a,
   "/cms/components/document-link#DocumentLink": DocumentLink_e408f38cb51586a9880caa1e5ebc7926,
+  "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/cms/components/confirmation-preview#ConfirmationPreview": ConfirmationPreview_c89704e9b368e05daf66da66c0cc5cdd,
   "/cms/components/pour-tracker-releases-panel#PourTrackerReleasesPanel": PourTrackerReleasesPanel_2dea233f26c1f5f567ce0c47909e02e7,
   "/cms/components/pour-tracker-release#PourTrackerRelease": PourTrackerRelease_fcf5efa7d171eeed3162f0b64f104fe2,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,

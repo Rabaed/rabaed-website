@@ -75,6 +75,7 @@ export interface Config {
     'legal-documents': LegalDocument;
     'faq-entries': FaqEntry;
     'form-submissions': FormSubmission;
+    'email-images': EmailImage;
     'pour-tracker-releases': PourTrackerRelease;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -91,6 +92,7 @@ export interface Config {
     'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
     'faq-entries': FaqEntriesSelect<false> | FaqEntriesSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
+    'email-images': EmailImagesSelect<false> | EmailImagesSelect<true>;
     'pour-tracker-releases': PourTrackerReleasesSelect<false> | PourTrackerReleasesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -112,6 +114,7 @@ export interface Config {
     'tool-download-form-en': ToolDownloadFormEn;
     'partnership-application-form': PartnershipApplicationForm;
     'partnership-application-form-en': PartnershipApplicationFormEn;
+    'confirmation-email': ConfirmationEmail;
     'referral-program': ReferralProgram;
     'start-page': StartPage;
     'tool-page': ToolPage;
@@ -137,6 +140,7 @@ export interface Config {
     'tool-download-form-en': ToolDownloadFormEnSelect<false> | ToolDownloadFormEnSelect<true>;
     'partnership-application-form': PartnershipApplicationFormSelect<false> | PartnershipApplicationFormSelect<true>;
     'partnership-application-form-en': PartnershipApplicationFormEnSelect<false> | PartnershipApplicationFormEnSelect<true>;
+    'confirmation-email': ConfirmationEmailSelect<false> | ConfirmationEmailSelect<true>;
     'referral-program': ReferralProgramSelect<false> | ReferralProgramSelect<true>;
     'start-page': StartPageSelect<false> | StartPageSelect<true>;
     'tool-page': ToolPageSelect<false> | ToolPageSelect<true>;
@@ -603,6 +607,40 @@ export interface FormSubmission {
   createdAt: string;
 }
 /**
+ * Images for the confirmation email: its banner and pictures in its text. JPEG, PNG or GIF, since Outlook shows no WebP in an email.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-images".
+ */
+export interface EmailImage {
+  id: number;
+  /**
+   * Shown in the image’s place when the recipient’s mail blocks it, as much mail does until the reader allows images.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    email?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pour-tracker-releases".
  */
@@ -670,6 +708,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'form-submissions';
         value: number | FormSubmission;
+      } | null)
+    | ({
+        relationTo: 'email-images';
+        value: number | EmailImage;
       } | null)
     | ({
         relationTo: 'pour-tracker-releases';
@@ -951,6 +993,38 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-images_select".
+ */
+export interface EmailImagesSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        email?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pour-tracker-releases_select".
  */
 export interface PourTrackerReleasesSelect<T extends boolean = true> {
@@ -1137,9 +1211,28 @@ export interface DemoRequestForm {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {الاسم} where the applicant’s name goes.
+   * Write {الاسم} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1237,9 +1330,28 @@ export interface DemoRequestFormEn {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {name} where the applicant’s name goes.
+   * Write {name} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1404,9 +1516,28 @@ export interface ReferralSignupForm {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {الاسم} where the applicant’s name goes.
+   * Write {الاسم} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1569,9 +1700,28 @@ export interface ReferralSignupFormEn {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {name} where the applicant’s name goes.
+   * Write {name} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1678,9 +1828,28 @@ export interface ToolDownloadForm {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {الاسم} where the applicant’s name goes.
+   * Write {الاسم} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1785,9 +1954,28 @@ export interface ToolDownloadFormEn {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {name} where the applicant’s name goes.
+   * Write {name} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1989,9 +2177,28 @@ export interface PartnershipApplicationForm {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {الاسم} where the applicant’s name goes.
+   * Write {الاسم} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2191,10 +2398,44 @@ export interface PartnershipApplicationFormEn {
   failed: string;
   confirmationSubject: string;
   /**
-   * Write {name} where the applicant’s name goes.
+   * Write {name} where the applicant’s name goes. For pictures: “Email images”.
    */
-  confirmationBody: string;
+  confirmationMessage: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  confirmationButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  confirmationBody?: string | null;
   _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The banner every form’s confirmation email opens with. Each email’s text and button are in its form’s settings.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confirmation-email".
+ */
+export interface ConfirmationEmail {
+  id: number;
+  /**
+   * A wide image, 1200 × 400 pixels for example. Without one, the email opens with Rabaed’s name on a dark band.
+   */
+  banner?: (number | null) | EmailImage;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -5031,6 +5272,13 @@ export interface DemoRequestFormSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5103,6 +5351,13 @@ export interface DemoRequestFormEnSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5226,6 +5481,13 @@ export interface ReferralSignupFormSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5348,6 +5610,13 @@ export interface ReferralSignupFormEnSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5428,6 +5697,13 @@ export interface ToolDownloadFormSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5507,6 +5783,13 @@ export interface ToolDownloadFormEnSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5665,6 +5948,13 @@ export interface PartnershipApplicationFormSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
   updatedAt?: T;
@@ -5822,8 +6112,25 @@ export interface PartnershipApplicationFormEnSelect<T extends boolean = true> {
   refused?: T;
   failed?: T;
   confirmationSubject?: T;
+  confirmationMessage?: T;
+  confirmationButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   confirmationBody?: T;
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "confirmation-email_select".
+ */
+export interface ConfirmationEmailSelect<T extends boolean = true> {
+  banner?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

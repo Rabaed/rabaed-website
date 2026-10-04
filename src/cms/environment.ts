@@ -167,6 +167,11 @@ export function localSharingImageDirectory(): string {
   return process.env.SHARING_IMAGE_DIR ?? path.resolve(process.cwd(), '.data', 'sharing-images');
 }
 
+/** The same, for the images the confirmation email shows (ADR-0028). */
+export function localEmailImageDirectory(): string {
+  return process.env.EMAIL_IMAGE_DIR ?? path.resolve(process.cwd(), '.data', 'email-images');
+}
+
 /**
  * The private Supabase Storage bucket applicant documents go to (ticket 28),
  * reached through the same S3 connection and keys as the media bucket — or
