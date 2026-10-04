@@ -11,8 +11,10 @@
 import config from '@payload-config';
 import { draftMode } from 'next/headers';
 import { getPayload, type GlobalSlug } from 'payload';
+import { CONFIRMATION_EMAIL_SLUG } from '@/cms/globals/confirmation-email';
 import { formSettingsSlug, optionFieldName } from '@/cms/globals/form-settings';
 import { LOCALE_CODES, type Locale } from '@/lib/locales';
+import { richTextFromPlainText, type ConfirmationDesign, type EmailImage, type RichText } from './confirmation-email';
 import { fieldNames, fieldOptions, type FieldWording, type FormDefinition, type FormPageWording, type FormWording } from './definition';
 
 export type FormSettings<Field extends string> = {
@@ -20,6 +22,8 @@ export type FormSettings<Field extends string> = {
   readonly alertAddress: string | null;
   /** Every word, in each language. */
   readonly wording: Readonly<Record<Locale, FormWording<Field>>>;
+  /** The applicant's confirmation email, in each language, with the banner every form shares (ADR-0028). */
+  readonly confirmation: Readonly<Record<Locale, ConfirmationDesign>>;
 };
 
 type Saved = { readonly [key: string]: unknown };
@@ -43,13 +47,50 @@ export async function publishedFormSettings<Field extends string>(definition: Fo
   const wording = Object.fromEntries(
     LOCALE_CODES.map((locale) => [locale, wordingFrom(definition, locale, byLocale.get(locale)!)]),
   ) as Record<Locale, FormWording<Field>>;
-  return { alertAddress: alertAddress || null, wording };
+  const banner = await confirmationBanner();
+  const confirmation = Object.fromEntries(
+    LOCALE_CODES.map((locale) => [locale, confirmationFrom(definition, locale, byLocale.get(locale)!, banner)]),
+  ) as Record<Locale, ConfirmationDesign>;
+  return { alertAddress: alertAddress || null, wording, confirmation };
+}
+
+/**
+ * A form's confirmation email in a language as last saved — the draft, if
+ * there is one — for its preview in the admin.
+ */
+export async function savedConfirmation(definition: FormDefinition, locale: Locale): Promise<ConfirmationDesign> {
+  return confirmationFrom(definition, locale, await saved(definition, locale, true), await confirmationBanner());
+}
+
+/** The banner every form's confirmation opens with, or `null` while none is chosen. */
+async function confirmationBanner(): Promise<EmailImage | null> {
+  const payload = await getPayload({ config });
+  const { banner } = (await payload.findGlobal({ slug: CONFIRMATION_EMAIL_SLUG as GlobalSlug, depth: 1 })) as unknown as Saved;
+  return banner && typeof banner === 'object' ? (banner as EmailImage) : null;
+}
+
+/**
+ * The confirmation as the CMS has it. Its rich text is never missing: the
+ * field reads the plain text it was written in before in its place until it
+ * is first saved (`writtenBefore`), and this falls back the same way should
+ * it be read without that.
+ */
+function confirmationFrom(definition: FormDefinition, locale: Locale, settings: Saved, banner: EmailImage | null): ConfirmationDesign {
+  const stored = settings.confirmationMessage as RichText | null | undefined;
+  const message = Array.isArray(stored?.root?.children) && stored.root.children.length > 0
+    ? stored
+    : richTextFromPlainText(text(settings.confirmationBody, definition.wording[locale].confirmationBody));
+  const button = group(settings.confirmationButton);
+  const label = typeof button.label === 'string' ? button.label.trim() : '';
+  const link = typeof button.link === 'string' ? button.link.trim() : '';
+  return { message, banner, button: label && link ? { label, link } : null };
 }
 
 async function saved(definition: FormDefinition, locale: Locale, draft: boolean): Promise<Saved> {
   const payload = await getPayload({ config });
   const slug = formSettingsSlug(definition.id, locale) as GlobalSlug;
-  return (await payload.findGlobal({ slug, draft, depth: 0 })) as unknown as Saved;
+  // Deep enough for the pictures in the confirmation's rich text to arrive with their addresses.
+  return (await payload.findGlobal({ slug, draft, depth: 1 })) as unknown as Saved;
 }
 
 /**

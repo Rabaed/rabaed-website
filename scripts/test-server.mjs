@@ -47,6 +47,7 @@ const env = {
   PAYLOAD_SECRET: randomBytes(32).toString('hex'),
   MEDIA_DIR: path.join(scratch, 'media'),
   SHARING_IMAGE_DIR: path.join(scratch, 'sharing-images'),
+  EMAIL_IMAGE_DIR: path.join(scratch, 'email-images'),
   // Mail is written here instead of sent, for the form suite to read
   // (`src/forms/mail.ts`). Real credentials on the machine are never used.
   MAIL_OUTBOX_DIR: outboxDirectory(port),

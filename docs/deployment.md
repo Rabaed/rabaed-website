@@ -942,6 +942,14 @@ the Privacy Policy, so adding one is a developer's change.
   record, and a line in the alert — so the reply goes back in English.
 - A request with the hidden trap field filled in, or a sixth request from the
   same network address within an hour, is turned away and not stored.
+- **The confirmation email is designed in the CMS** (ADR-0028). Its text, in
+  each form's settings under **رسالة التأكيد**, is rich text: headings, bold,
+  lists, links and pictures, with `{الاسم}` (or `{name}`) where the applicant's
+  name goes, and an optional button under it. The banner it opens with is one
+  for every form, under **Forms → تصميم رسائل التأكيد**. Its pictures, banner
+  included, come from **Forms → صور البريد**, kept as JPEG, PNG or GIF because
+  Outlook shows no WebP in an email. A preview under the text shows the email
+  as last saved: Save Draft, then **تحديث**.
 
 **Documents.** The Referral Program signup takes an IBAN certificate and, if
 the referrer has them, a commercial registration and a tax registration

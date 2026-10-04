@@ -4,29 +4,15 @@
  * language, which one, so the reply goes back in it. Documents are named,
  * never attached: they are opened from the record, by a signed-in editor.
  *
- * Written twice, as plain text and as HTML. The HTML is laid out in tables
- * with every style inline, because that is what Outlook — where the team
- * reads it — draws faithfully; a block of text styled to keep its line
- * breaks arrived there as one long line.
+ * Written twice, as plain text and as HTML in the site's email frame
+ * (`./email-frame.ts`).
  */
 import type { Locale } from '../lib/locales';
 import { CONSENT_GIVEN, fieldNames, type Answers, type FormDefinition, type FormWording } from './definition';
+import { button, COLOUR, emailDocument, escaped, FONT, footerBand, headerBand } from './email-frame';
 
 /** How the alert names the language a form was filled in, where it was not the team's own. */
 const FILLED_IN: Readonly<Record<Locale, string | null>> = { ar: null, en: 'بالإنجليزية' };
-
-/** The site's own colours (`src/styles/tokens.css`), written out: a mail client reads no stylesheet. */
-const COLOUR = {
-  accent: '#F95738',
-  ink: '#222222',
-  muted: '#6B6A66',
-  line: '#E3E1DC',
-  soft: '#F3F2EF',
-  paper: '#FAFAF8',
-  dark: '#14161C',
-} as const;
-
-const FONT = 'Tahoma,Arial,sans-serif';
 
 /** A letter of any right-to-left script the forms are filled in. */
 const RIGHT_TO_LEFT = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
@@ -74,29 +60,20 @@ export function alertMail<Field extends string>(
     )
     .join('');
 
-  const html =
-    `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escaped(definition.title.ar)}</title></head>` +
-    `<body style="margin:0;padding:0;background:${COLOUR.soft}">` +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLOUR.soft}"><tr><td align="center" style="padding:24px 12px">` +
-    `<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="width:100%;max-width:600px;background:#FFFFFF;border:1px solid ${COLOUR.line};border-collapse:collapse">` +
-    `<tr><td style="padding:20px 24px;background:${COLOUR.dark};border-top:4px solid ${COLOUR.accent};text-align:right">` +
-    `<div style="font-family:${FONT};font-size:13px;color:#BDBBB5">وصل طلب جديد</div>` +
-    `<div style="padding-top:4px;font-family:${FONT};font-size:20px;font-weight:bold;color:#FFFFFF">${escaped(definition.title.ar)}</div></td></tr>` +
-    (languageNote
-      ? `<tr><td style="padding:14px 24px;background:#FFF1EC;border-bottom:1px solid ${COLOUR.line};font-family:${FONT};font-size:14px;color:${COLOUR.ink};text-align:right">${escaped(languageNote)}</td></tr>`
-      : '') +
-    `<tr><td style="padding:8px 24px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="border-collapse:collapse">${answerRows}</table></td></tr>` +
-    `<tr><td style="padding:16px 24px;font-family:${FONT};font-size:13px;color:${COLOUR.muted};text-align:right">وقت الإرسال: ${escaped(time)}</td></tr>` +
-    `<tr><td style="padding:0 24px 24px;text-align:right"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:${COLOUR.accent};border-radius:6px">` +
-    `<a href="${escaped(recordUrl)}" style="display:inline-block;padding:12px 22px;font-family:${FONT};font-size:15px;font-weight:bold;color:#FFFFFF;text-decoration:none">فتح الطلب في لوحة التحرير</a></td></tr></table></td></tr>` +
-    `<tr><td style="padding:16px 24px;background:${COLOUR.paper};border-top:1px solid ${COLOUR.line};font-family:${FONT};font-size:13px;color:${COLOUR.muted};text-align:right">${escaped(reply)}</td></tr>` +
-    `</table></td></tr></table></body></html>`;
+  const html = emailDocument(
+    'ar',
+    definition.title.ar,
+    headerBand('وصل طلب جديد', definition.title.ar, 'right') +
+      (languageNote
+        ? `<tr><td style="padding:14px 24px;background:#FFF1EC;border-bottom:1px solid ${COLOUR.line};font-family:${FONT};font-size:14px;color:${COLOUR.ink};text-align:right">${escaped(languageNote)}</td></tr>`
+        : '') +
+      `<tr><td style="padding:8px 24px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="border-collapse:collapse">${answerRows}</table></td></tr>` +
+      `<tr><td style="padding:16px 24px;font-family:${FONT};font-size:13px;color:${COLOUR.muted};text-align:right">وقت الإرسال: ${escaped(time)}</td></tr>` +
+      `<tr><td style="padding:0 24px 24px;text-align:right">${button('فتح الطلب في لوحة التحرير', recordUrl)}</td></tr>` +
+      footerBand(escaped(reply), 'right'),
+  );
 
   return { text, html };
-}
-
-function escaped(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /**

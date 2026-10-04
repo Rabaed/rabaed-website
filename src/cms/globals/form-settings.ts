@@ -1,5 +1,21 @@
-import type { Field, GlobalConfig } from 'payload';
+import {
+  BoldFeature,
+  FixedToolbarFeature,
+  HeadingFeature,
+  InlineToolbarFeature,
+  ItalicFeature,
+  LinkFeature,
+  OrderedListFeature,
+  ParagraphFeature,
+  UnderlineFeature,
+  UnorderedListFeature,
+  UploadFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical';
+import type { Field, FieldHook, GlobalConfig } from 'payload';
+import { richTextFromPlainText, type RichText } from '../../forms/confirmation-email';
 import { fieldNames, NAME_PLACEHOLDER, type FormDefinition, type FormId } from '../../forms/definition';
+import { followable } from '../../forms/email-frame';
 import { localePath, type Locale } from '../../lib/locales';
 import { signedIn } from '../access';
 import { refreshSiteWhenPublished } from '../revalidation';
@@ -53,6 +69,63 @@ function columnName(field: string): string {
 }
 
 type Words = { readonly ar: string; readonly en: string };
+
+/**
+ * What the confirmation email's text can be made of: what the email frame
+ * knows how to draw (`src/forms/confirmation-email.ts`) and nothing more.
+ * Pictures come from the email images alone, which are kept in formats every
+ * mail client shows.
+ */
+const confirmationEditor = lexicalEditor({
+  features: () => [
+    ParagraphFeature(),
+    HeadingFeature({ enabledHeadingSizes: ['h2', 'h3'] }),
+    BoldFeature(),
+    ItalicFeature(),
+    UnderlineFeature(),
+    UnorderedListFeature(),
+    OrderedListFeature(),
+    LinkFeature({ enabledCollections: [] }),
+    UploadFeature({ enabledCollections: ['email-images'] }),
+    FixedToolbarFeature(),
+    InlineToolbarFeature(),
+  ],
+});
+
+/**
+ * The confirmation as rich text — or, until an Editor first saves it as rich
+ * text, as the plain text it was written in before (ADR-0028): what was
+ * published in `confirmationBody`, else the form's own. So every form goes on
+ * sending what it sent, and the editor opens on it.
+ */
+function writtenBefore(fallback: string): FieldHook {
+  return ({ value, siblingData }) => {
+    if (hasWords(value)) return value;
+    const before = typeof siblingData?.confirmationBody === 'string' && siblingData.confirmationBody.trim() ? siblingData.confirmationBody : fallback;
+    return richTextFromPlainText(before);
+  };
+}
+
+function hasWords(value: unknown): value is RichText {
+  const children = (value as RichText | null | undefined)?.root?.children;
+  return Array.isArray(children) && children.some((node) => node.type !== 'paragraph' || (node.children?.length ?? 0) > 0);
+}
+
+/** A button needs both what it says and where it goes. */
+function bothOrNeither(other: 'label' | 'link') {
+  return (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }): true | string => {
+    const mine = typeof value === 'string' && value.trim() !== '';
+    const theirs = typeof siblingData?.[other] === 'string' && (siblingData[other] as string).trim() !== '';
+    return mine || !theirs ? true : 'اكتب ما يقوله الزر، أو احذف الرابط. / Write what the button says, or remove its link.';
+  };
+}
+
+function buttonLink(value: unknown, args: { siblingData: Record<string, unknown> }): true | string {
+  if (typeof value === 'string' && value.trim() !== '' && !followable(value)) {
+    return 'رابط يبدأ بـ https:// / A link starting with https://';
+  }
+  return bothOrNeither('label')(value, args);
+}
 
 /**
  * A line of the form's wording. Required, because a form with an empty label
@@ -257,10 +330,64 @@ export function formSettingsGlobal(definition: FormDefinition, locale: Locale = 
             },
             fields: [
               words('confirmationSubject', { ar: 'الموضوع', en: 'Subject' }, 120),
-              words('confirmationBody', { ar: 'النص', en: 'Text' }, 3000, {
-                ar: `اكتب ${NAME_PLACEHOLDER[locale]} حيث يوضع اسم مقدّم الطلب.`,
-                en: `Write ${NAME_PLACEHOLDER[locale]} where the applicant’s name goes.`,
-              }),
+              {
+                name: 'confirmationMessage',
+                type: 'richText',
+                required: true,
+                label: { ar: 'النص', en: 'Text' },
+                editor: confirmationEditor,
+                admin: {
+                  description: {
+                    ar: `اكتب ${NAME_PLACEHOLDER[locale]} حيث يوضع اسم مقدّم الطلب. للصور: «صور البريد».`,
+                    en: `Write ${NAME_PLACEHOLDER[locale]} where the applicant’s name goes. For pictures: “Email images”.`,
+                  },
+                },
+                hooks: { afterRead: [writtenBefore(definition.wording[locale].confirmationBody)] },
+              },
+              {
+                name: 'confirmationButton',
+                type: 'group',
+                label: { ar: 'زر تحت النص (اختياري)', en: 'Button under the text (optional)' },
+                fields: [
+                  {
+                    type: 'row',
+                    fields: [
+                      {
+                        name: 'label',
+                        type: 'text',
+                        maxLength: 40,
+                        label: { ar: 'ما يقوله الزر', en: 'What it says' },
+                        admin: { rtl: locale === 'ar' },
+                        validate: bothOrNeither('link'),
+                      },
+                      {
+                        name: 'link',
+                        type: 'text',
+                        maxLength: 500,
+                        label: { ar: 'إلى أين يذهب', en: 'Where it goes' },
+                        admin: { rtl: false, placeholder: 'https://rabaedapp.com/product' },
+                        validate: buttonLink,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                // The email as the applicant would get it, from what was last saved.
+                name: 'confirmationPreview',
+                type: 'ui',
+                admin: {
+                  components: {
+                    Field: {
+                      path: '/cms/components/confirmation-preview#ConfirmationPreview',
+                      clientProps: { form: definition.id, locale },
+                    },
+                  },
+                },
+              },
+              // The confirmation as plain text, as it was written before it was
+              // rich (ADR-0028): read once into the rich text, and never shown.
+              { name: 'confirmationBody', type: 'textarea', admin: { hidden: true } },
             ],
           },
         ],

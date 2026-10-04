@@ -15,6 +15,7 @@ import { en } from '@payloadcms/translations/languages/en';
 import { buildConfig } from 'payload';
 import sharp from 'sharp';
 import { CaseStudies } from './cms/collections/case-studies';
+import { EmailImages } from './cms/collections/email-images';
 import { Faqs } from './cms/collections/faq-entries';
 import { FormSubmissions } from './cms/collections/form-submissions';
 import { LegalDocuments } from './cms/collections/legal-documents';
@@ -25,6 +26,7 @@ import { SharingImages } from './cms/collections/sharing-images';
 import { Users } from './cms/collections/users';
 import { databasePool, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { AiCrawlers } from './cms/globals/ai-crawlers';
+import { ConfirmationEmail } from './cms/globals/confirmation-email';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
@@ -90,7 +92,7 @@ export default buildConfig({
 
   // No `localization`: page text holds its Arabic and English side by side in
   // fields of its own (`cms/page-fields.ts` says why).
-  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions, PourTrackerReleases],
+  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions, EmailImages, PourTrackerReleases],
   // One settings global per form that submits (ticket 27), the Referral
   // Program values (ticket 56), and one entry per marketing page whose words
   // are in the CMS (ticket 53), with the closing section and the Screen mocks
@@ -101,6 +103,8 @@ export default buildConfig({
     AiCrawlers,
     // Each form's settings, in Arabic and then in English (ticket 42).
     ...SUBMITTABLE_FORMS.flatMap((form) => [formSettingsGlobal(form, 'ar'), formSettingsGlobal(form, 'en')]),
+    // The banner every form's confirmation email opens with (ADR-0028).
+    ConfirmationEmail,
     ReferralProgram,
     StartPage,
     ToolPage,
@@ -134,7 +138,9 @@ export default buildConfig({
   plugins: [
     s3Storage({
       enabled: bucket !== null,
-      collections: { media: true, 'sharing-images': true },
+      // The email images' files are named `email-…`, so none takes a name a
+      // sharing image has in the same bucket (`cms/collections/email-images.ts`).
+      collections: { media: true, 'sharing-images': true, 'email-images': true },
       bucket: bucket?.bucket ?? '',
       config: {
         endpoint: bucket?.endpoint,

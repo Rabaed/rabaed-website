@@ -290,6 +290,8 @@ test.describe('mail and wording from the admin', () => {
       expect(confirmation.subject).toBe('ربائد — وصلنا طلبك للعرض الحي');
       expect(confirmation.text).toContain(`مرحباً ${APPLICANT.name}،`);
       expect(confirmation.text).toContain('سيتواصل معك فريقنا خلال يوم عمل لتحديد الموعد.');
+      // As the email it is sent as, too: the text as it was written, a paragraph at a time.
+      expect(confirmation.html).toContain(`مرحباً ${APPLICANT.name}،</p>`);
 
       expect(stored).toMatchObject({ alert: 'sent', confirmation: 'sent' });
     } finally {

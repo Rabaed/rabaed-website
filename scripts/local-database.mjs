@@ -105,6 +105,7 @@ ${name}`).digest().readUInt16BE(0) % 2000);
       PAYLOAD_SECRET: 'local-development-only',
       MEDIA_DIR: path.join(directory, 'media'),
       SHARING_IMAGE_DIR: path.join(directory, 'sharing-images'),
+      EMAIL_IMAGE_DIR: path.join(directory, 'email-images'),
     });
   } catch (error) {
     failure = error;
