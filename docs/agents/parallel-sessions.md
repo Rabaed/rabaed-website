@@ -4,7 +4,7 @@ For a session working in a git worktree while other sessions take tickets from t
 
 ## Sessions
 
-One **Orchestrator** and two **Mains** run the work; each ticket is built by its own **lane** session. A session's name says which it is: `Orchestrator`, `Main 2`, `Main 1, lane B – ticket 102`.
+One **Orchestrator** and two **Mains** run the work; each ticket is built by its own **lane** session. A session's name says which it is, after a `W` that marks it as a website session, apart from the Rabaed Contech sessions: `W Orchestrator`, `W Main 1`, `W Main 2`, `W Main 1, lane B – ticket 102`. Every new website session is filed in the "Rabaed Website" sidebar group.
 
 | Session | Job | Works in |
 |---|---|---|
@@ -58,11 +58,11 @@ Live state sits in `D:\Rabaed Work\Agentic Website\.claude\coordination\`, in th
 
 - **`board.md`** — one line per ticket being built, added on claiming and removed after the merge. The claim branch is still the claim; the board says who holds it.
 
-  `102 | Main 1, lane B | ticket-102 | started 2026-11-04 10:20`
+  `102 | W Main 1, lane B | ticket-102 | started 2026-11-04 10:20`
 
 - **`claims.md`** — shared-file claims, appended and never edited. A file is held while its last line is a CLAIM.
 
-  `CLAIM src/styles/home.css — Main 1, lane B, ticket 102 — 2026-11-04 10:25`
+  `CLAIM src/styles/home.css — W Main 1, lane B, ticket 102 — 2026-11-04 10:25`
   `RELEASE src/styles/home.css — ticket 102 (PR #130) — 2026-11-04 15:02`
 
   The shared files: the home page (`src/app/(ar)/page.tsx`, `src/styles/home.css`), `package.json`, `package-lock.json`, `.github/workflows/*` and `src/payload.config.ts`. Two lanes change a shared file one after the other: across Mains the claims decide, within one Main the tickets share a lane.
