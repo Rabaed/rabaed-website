@@ -62,3 +62,6 @@ yarn-error.log*
 
 # Word temporary files (the legal sources in reference/legal-source/ are committed)
 ~$*.docx
+
+# Live state shared by every session on this machine (docs/agents/parallel-sessions.md, "The board")
+.claude/coordination/
