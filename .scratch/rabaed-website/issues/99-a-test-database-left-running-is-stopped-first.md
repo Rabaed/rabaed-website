@@ -8,6 +8,8 @@ Found by the architecture review of 24 September 2026 (L10).
 
 **Blocked by:** None (can start immediately).
 
+**Lane:** 1b
+
 **Status:** ready-for-agent
 
 - [ ] Before starting, the test server reads `postmaster.pid` in its port's data folder and stops that Postgres if it is still running (`pg_ctl stop -m fast`, or ending the process named there), then starts afresh

@@ -8,6 +8,8 @@ Found by the architecture review of 24 September 2026 (A3).
 
 **Blocked by:** 92 (this reads the registry).
 
+**Lane:** 1a
+
 **Status:** ready-for-agent
 
 - [ ] One module per marketing page, or one for all of them, takes a locale and gives the metadata, the page and the English-or-notice decision
