@@ -19,18 +19,18 @@ Every session leaves the main folder (`D:\Rabaed Work\Agentic Website`) on `main
 1. **Assigns** a spec once the founder says which Main takes it: a `**Main:** 1` or `**Main:** 2` line under the title of its `spec.md`.
 2. **Keeps the rule files** — `CLAUDE.md`, `AGENTS.md`, `docs/agents/*` — in small docs-only pull requests from its own worktree. Other sessions send it the change they want.
 3. **Settles claims**: decides between two Mains wanting the same shared file, and sets the merge order when two open pull requests touch one file.
-4. **Merges** a lane's pull request on the founder's go, once the lane has said "PR #n ready" and `test` is green on its head: `gh pr merge <n> --merge`, one at a time. A pull request behind `main` or conflicting goes back to its lane to merge `origin/main` and go green again. Then it tells the owning Main.
+4. **Merges** a lane's pull request on the founder's go, once the lane has said "PR #n ready": `gh pr merge <n> --merge --auto`, one at a time. The ruleset "main: test must pass" lets a pull request into `main` only with `test` green on a branch up to date with `main`, so GitHub merges it itself the moment that holds. A pull request behind `main` or conflicting goes back to its lane to merge `origin/main` and go green again. Then it tells the owning Main.
 5. **Cleans up** after a merge: checks the ticket merged `resolved`, the claim branch is released and the lane's board line is gone, and asks the lane (or the founder) about anything left.
 6. **Checks in** every 30 minutes while lanes run, with the prompt below, and writes one line per check-in to its scratchpad's `check-in-log.md`.
 
-The founder alone starts lanes, settles `decide` tickets and approves deleting a remote branch. Auto-merge stays off. A command one session's permissions refused is not run for it by another.
+The founder alone starts lanes, settles `decide` tickets and approves deleting a remote branch. Auto-merge is switched on for a pull request only on the founder's go. A command one session's permissions refused is not run for it by another.
 
 ```
 Orchestrator check-in. Quietly:
 1. Handle messages from Mains and lanes.
 2. gh pr list --repo Rabaed/rabaed-website --state open --json number,title,isDraft,mergeable,headRefName
    Conflicting or behind main: tell its lane to merge origin/main and go green again.
-   Said "ready" and test green on its head: merge it if the founder has said to; otherwise tell the founder it is ready.
+   Said "ready": gh pr merge <n> --merge --auto if the founder has said to; otherwise tell the founder it is ready.
 3. A failed test check: read the run's log and send the fix to the owning Main.
 4. After a merge: the ticket is resolved, the claim branch released, the board line gone.
 5. A board.md line whose ticket-NN branch is merged or gone is stale: ask its Main.
