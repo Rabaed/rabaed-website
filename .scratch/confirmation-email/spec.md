@@ -1,5 +1,7 @@
 # Spec: Confirmation email without an Alert address
 
+**Main:** 2
+
 Status: ready-for-agent
 
 ## Problem Statement
