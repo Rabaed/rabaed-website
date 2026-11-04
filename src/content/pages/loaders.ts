@@ -4,6 +4,7 @@ import { getHomePage } from './home';
 import type { PageMeta } from './page-content';
 import { getPartnershipPage } from './partnership';
 import { getProductPage } from './product';
+import { getProfilePage } from './profile';
 import { getReferralPage } from './referral';
 import { getStartPage } from './start';
 import { getToolPage } from './tool';
@@ -22,4 +23,5 @@ export const PAGE_LOADERS: { readonly [Key in MarketingPage]: (locale: Locale) =
   tool: getToolPage,
   referral: getReferralPage,
   partnership: getPartnershipPage,
+  profile: getProfilePage,
 };
