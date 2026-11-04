@@ -242,8 +242,8 @@ test('every word in the section is an Editor’s', async ({ page, cms }) => {
   await expect(tab(page, 2)).toContainText('الخطابات');
   await tab(page, 2).click();
   await expect(panel(page, 2).locator('h3')).toHaveText('أين الخطابات؟');
-  await expect(panel(page, 2).locator('thead th.a')).toHaveText('مع ربائد');
-  await expect(panel(page, 2).locator('tbody tr').nth(2).locator('td.a')).toHaveText('فلتر الردود');
+  await expect(panel(page, 2).locator('thead th.pf-cmp-with')).toHaveText('مع ربائد');
+  await expect(panel(page, 2).locator('tbody tr').nth(2).locator('td.pf-cmp-with')).toHaveText('فلتر الردود');
   await expect(panel(page, 2).locator('figcaption')).toHaveText('ملاحظة جديدة.');
   await expect(playButton(page, 2)).toHaveText('شغّل');
 });

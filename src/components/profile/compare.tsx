@@ -70,10 +70,10 @@ export function Compare({ content, direction }: { content: ProfileCompareContent
                   <thead>
                     <tr>
                       <td />
-                      <th scope="col" className="b">
+                      <th scope="col" className="pf-cmp-before">
                         {content.beforeLabel}
                       </th>
-                      <th scope="col" className="a">
+                      <th scope="col" className="pf-cmp-with">
                         {content.afterLabel}
                       </th>
                     </tr>
@@ -82,10 +82,10 @@ export function Compare({ content, direction }: { content: ProfileCompareContent
                     {comparison.rows.map((row, rowIndex) => (
                       <tr key={rowIndex}>
                         <th scope="row">{row.label}</th>
-                        <td className="b" data-l={content.beforeLabel}>
+                        <td className="pf-cmp-before" data-column={content.beforeLabel}>
                           {row.before}
                         </td>
-                        <td className="a" data-l={content.afterLabel}>
+                        <td className="pf-cmp-with" data-column={content.afterLabel}>
                           {row.after}
                         </td>
                       </tr>

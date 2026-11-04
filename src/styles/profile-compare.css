@@ -26,14 +26,14 @@
 .pf-cmp-table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.6 }
 .pf-cmp-table thead th { padding: 0 10px 10px; text-align: start; font-size: 13px; font-weight: 600 }
 .pf-cmp-table thead th::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 8px; background: var(--acc) }
-.pf-cmp-table thead .b { color: var(--muted) }
+.pf-cmp-table thead .pf-cmp-before { color: var(--muted) }
 /* Green is the mark's alone: as small text on white it is too faint to read (3.3:1). */
-.pf-cmp-table thead .a { color: var(--ink) }
-.pf-cmp-table thead .a::before { background: var(--green) }
+.pf-cmp-table thead .pf-cmp-with { color: var(--ink) }
+.pf-cmp-table thead .pf-cmp-with::before { background: var(--green) }
 .pf-cmp-table tbody th { width: 24%; padding: 12px 0; text-align: start; vertical-align: top; font-size: 13.5px; font-weight: 600; color: var(--muted); border-top: 1px solid var(--line) }
 .pf-cmp-table td { padding: 12px 10px; vertical-align: top; border-top: 1px solid var(--line) }
-.pf-cmp-table td.b { color: var(--muted) }
-.pf-cmp-table td.a { font-weight: 500 }
+.pf-cmp-table td.pf-cmp-before { color: var(--muted) }
+.pf-cmp-table td.pf-cmp-with { font-weight: 500 }
 
 .pf-cmp-media { margin: 0; min-width: 0 }
 .pf-cmp-media figcaption { margin-top: 10px; font-size: 13px; color: var(--muted) }
@@ -55,6 +55,6 @@
   .pf-cmp-table, .pf-cmp-table tbody, .pf-cmp-table tr, .pf-cmp-table th, .pf-cmp-table td { display: block; width: 100% }
   .pf-cmp-table tr { padding-block: 12px; border-top: 1px solid var(--line) }
   .pf-cmp-table tbody th, .pf-cmp-table td { border: 0; padding: 2px 0 }
-  .pf-cmp-table td::before { content: attr(data-l); display: inline-block; min-width: 76px; margin-inline-end: 8px; font-size: 12.5px; font-weight: 600; color: var(--acc-ink) }
-  .pf-cmp-table td.a::before { color: var(--ink) }
+  .pf-cmp-table td::before { content: attr(data-column); display: inline-block; min-width: 76px; margin-inline-end: 8px; font-size: 12.5px; font-weight: 600; color: var(--acc-ink) }
+  .pf-cmp-table td.pf-cmp-with::before { color: var(--ink) }
 }
