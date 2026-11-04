@@ -25060,222 +25060,6 @@
           "notNull": false,
           "default": true
         },
-        "calculator_eyebrow_ar": {
-          "name": "calculator_eyebrow_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_eyebrow_en": {
-          "name": "calculator_eyebrow_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_heading_ar": {
-          "name": "calculator_heading_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_heading_en": {
-          "name": "calculator_heading_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_lead_ar": {
-          "name": "calculator_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_lead_en": {
-          "name": "calculator_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_slider_labels_project_value_ar": {
-          "name": "calculator_slider_labels_project_value_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_slider_labels_project_value_en": {
-          "name": "calculator_slider_labels_project_value_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_slider_labels_delay_days_ar": {
-          "name": "calculator_slider_labels_delay_days_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_slider_labels_delay_days_en": {
-          "name": "calculator_slider_labels_delay_days_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_slider_labels_duration_months_ar": {
-          "name": "calculator_slider_labels_duration_months_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_slider_labels_duration_months_en": {
-          "name": "calculator_slider_labels_duration_months_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_result_label_ar": {
-          "name": "calculator_result_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_result_label_en": {
-          "name": "calculator_result_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_breakdown_financing_ar": {
-          "name": "calculator_breakdown_financing_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_breakdown_financing_en": {
-          "name": "calculator_breakdown_financing_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_breakdown_site_overhead_ar": {
-          "name": "calculator_breakdown_site_overhead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_breakdown_site_overhead_en": {
-          "name": "calculator_breakdown_site_overhead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_assumptions_ar": {
-          "name": "calculator_assumptions_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_assumptions_en": {
-          "name": "calculator_assumptions_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_call_to_action_label_ar": {
-          "name": "calculator_call_to_action_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_call_to_action_label_en": {
-          "name": "calculator_call_to_action_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_currency_ar": {
-          "name": "calculator_currency_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_currency_en": {
-          "name": "calculator_currency_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_one_ar": {
-          "name": "calculator_days_one_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_one_en": {
-          "name": "calculator_days_one_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_two_ar": {
-          "name": "calculator_days_two_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_two_en": {
-          "name": "calculator_days_two_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_few_ar": {
-          "name": "calculator_days_few_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_few_en": {
-          "name": "calculator_days_few_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_many_ar": {
-          "name": "calculator_days_many_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_days_many_en": {
-          "name": "calculator_days_many_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_months_few_ar": {
-          "name": "calculator_months_few_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_months_few_en": {
-          "name": "calculator_months_few_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_months_many_ar": {
-          "name": "calculator_months_many_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "calculator_months_many_en": {
-          "name": "calculator_months_many_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "figures_shows": {
           "name": "figures_shows",
           "type": "boolean",
@@ -27591,222 +27375,6 @@
           "notNull": false,
           "default": true
         },
-        "version_calculator_eyebrow_ar": {
-          "name": "version_calculator_eyebrow_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_eyebrow_en": {
-          "name": "version_calculator_eyebrow_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_heading_ar": {
-          "name": "version_calculator_heading_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_heading_en": {
-          "name": "version_calculator_heading_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_lead_ar": {
-          "name": "version_calculator_lead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_lead_en": {
-          "name": "version_calculator_lead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_slider_labels_project_value_ar": {
-          "name": "version_calculator_slider_labels_project_value_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_slider_labels_project_value_en": {
-          "name": "version_calculator_slider_labels_project_value_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_slider_labels_delay_days_ar": {
-          "name": "version_calculator_slider_labels_delay_days_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_slider_labels_delay_days_en": {
-          "name": "version_calculator_slider_labels_delay_days_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_slider_labels_duration_months_ar": {
-          "name": "version_calculator_slider_labels_duration_months_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_slider_labels_duration_months_en": {
-          "name": "version_calculator_slider_labels_duration_months_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_result_label_ar": {
-          "name": "version_calculator_result_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_result_label_en": {
-          "name": "version_calculator_result_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_breakdown_financing_ar": {
-          "name": "version_calculator_breakdown_financing_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_breakdown_financing_en": {
-          "name": "version_calculator_breakdown_financing_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_breakdown_site_overhead_ar": {
-          "name": "version_calculator_breakdown_site_overhead_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_breakdown_site_overhead_en": {
-          "name": "version_calculator_breakdown_site_overhead_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_assumptions_ar": {
-          "name": "version_calculator_assumptions_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_assumptions_en": {
-          "name": "version_calculator_assumptions_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_call_to_action_label_ar": {
-          "name": "version_calculator_call_to_action_label_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_call_to_action_label_en": {
-          "name": "version_calculator_call_to_action_label_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_currency_ar": {
-          "name": "version_calculator_currency_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_currency_en": {
-          "name": "version_calculator_currency_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_one_ar": {
-          "name": "version_calculator_days_one_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_one_en": {
-          "name": "version_calculator_days_one_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_two_ar": {
-          "name": "version_calculator_days_two_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_two_en": {
-          "name": "version_calculator_days_two_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_few_ar": {
-          "name": "version_calculator_days_few_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_few_en": {
-          "name": "version_calculator_days_few_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_many_ar": {
-          "name": "version_calculator_days_many_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_days_many_en": {
-          "name": "version_calculator_days_many_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_months_few_ar": {
-          "name": "version_calculator_months_few_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_months_few_en": {
-          "name": "version_calculator_months_few_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_months_many_ar": {
-          "name": "version_calculator_months_many_ar",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "version_calculator_months_many_en": {
-          "name": "version_calculator_months_many_en",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "version_figures_shows": {
           "name": "version_figures_shows",
           "type": "boolean",
@@ -28216,6 +27784,707 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.delay_calculator_languages": {
+      "name": "delay_calculator_languages",
+      "schema": "",
+      "columns": {
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "enum_delay_calculator_languages",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "delay_calculator_languages_order_idx": {
+          "name": "delay_calculator_languages_order_idx",
+          "columns": [
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "delay_calculator_languages_parent_idx": {
+          "name": "delay_calculator_languages_parent_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "delay_calculator_languages_parent_fk": {
+          "name": "delay_calculator_languages_parent_fk",
+          "tableFrom": "delay_calculator_languages",
+          "tableTo": "delay_calculator",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.delay_calculator": {
+      "name": "delay_calculator",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "calculator_eyebrow_ar": {
+          "name": "calculator_eyebrow_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_eyebrow_en": {
+          "name": "calculator_eyebrow_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_heading_ar": {
+          "name": "calculator_heading_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_heading_en": {
+          "name": "calculator_heading_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_lead_ar": {
+          "name": "calculator_lead_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_lead_en": {
+          "name": "calculator_lead_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_slider_labels_project_value_ar": {
+          "name": "calculator_slider_labels_project_value_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_slider_labels_project_value_en": {
+          "name": "calculator_slider_labels_project_value_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_slider_labels_delay_days_ar": {
+          "name": "calculator_slider_labels_delay_days_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_slider_labels_delay_days_en": {
+          "name": "calculator_slider_labels_delay_days_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_slider_labels_progress_ar": {
+          "name": "calculator_slider_labels_progress_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_slider_labels_progress_en": {
+          "name": "calculator_slider_labels_progress_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_result_label_ar": {
+          "name": "calculator_result_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_result_label_en": {
+          "name": "calculator_result_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_spent_ar": {
+          "name": "calculator_spent_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_spent_en": {
+          "name": "calculator_spent_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_assumptions_ar": {
+          "name": "calculator_assumptions_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_assumptions_en": {
+          "name": "calculator_assumptions_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_call_to_action_label_ar": {
+          "name": "calculator_call_to_action_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_call_to_action_label_en": {
+          "name": "calculator_call_to_action_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_currency_ar": {
+          "name": "calculator_currency_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_currency_en": {
+          "name": "calculator_currency_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_one_ar": {
+          "name": "calculator_days_one_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_one_en": {
+          "name": "calculator_days_one_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_two_ar": {
+          "name": "calculator_days_two_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_two_en": {
+          "name": "calculator_days_two_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_few_ar": {
+          "name": "calculator_days_few_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_few_en": {
+          "name": "calculator_days_few_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_many_ar": {
+          "name": "calculator_days_many_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculator_days_many_en": {
+          "name": "calculator_days_many_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_status": {
+          "name": "_status",
+          "type": "enum_delay_calculator_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "delay_calculator__status_idx": {
+          "name": "delay_calculator__status_idx",
+          "columns": [
+            {
+              "expression": "_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._delay_calculator_v_version_languages": {
+      "name": "_delay_calculator_v_version_languages",
+      "schema": "",
+      "columns": {
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "enum__delay_calculator_v_version_languages",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_delay_calculator_v_version_languages_order_idx": {
+          "name": "_delay_calculator_v_version_languages_order_idx",
+          "columns": [
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_delay_calculator_v_version_languages_parent_idx": {
+          "name": "_delay_calculator_v_version_languages_parent_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_delay_calculator_v_version_languages_parent_fk": {
+          "name": "_delay_calculator_v_version_languages_parent_fk",
+          "tableFrom": "_delay_calculator_v_version_languages",
+          "tableTo": "_delay_calculator_v",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._delay_calculator_v": {
+      "name": "_delay_calculator_v",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "version_calculator_eyebrow_ar": {
+          "name": "version_calculator_eyebrow_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_eyebrow_en": {
+          "name": "version_calculator_eyebrow_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_heading_ar": {
+          "name": "version_calculator_heading_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_heading_en": {
+          "name": "version_calculator_heading_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_lead_ar": {
+          "name": "version_calculator_lead_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_lead_en": {
+          "name": "version_calculator_lead_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_slider_labels_project_value_ar": {
+          "name": "version_calculator_slider_labels_project_value_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_slider_labels_project_value_en": {
+          "name": "version_calculator_slider_labels_project_value_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_slider_labels_delay_days_ar": {
+          "name": "version_calculator_slider_labels_delay_days_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_slider_labels_delay_days_en": {
+          "name": "version_calculator_slider_labels_delay_days_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_slider_labels_progress_ar": {
+          "name": "version_calculator_slider_labels_progress_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_slider_labels_progress_en": {
+          "name": "version_calculator_slider_labels_progress_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_result_label_ar": {
+          "name": "version_calculator_result_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_result_label_en": {
+          "name": "version_calculator_result_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_spent_ar": {
+          "name": "version_calculator_spent_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_spent_en": {
+          "name": "version_calculator_spent_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_assumptions_ar": {
+          "name": "version_calculator_assumptions_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_assumptions_en": {
+          "name": "version_calculator_assumptions_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_call_to_action_label_ar": {
+          "name": "version_calculator_call_to_action_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_call_to_action_label_en": {
+          "name": "version_calculator_call_to_action_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_currency_ar": {
+          "name": "version_calculator_currency_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_currency_en": {
+          "name": "version_calculator_currency_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_one_ar": {
+          "name": "version_calculator_days_one_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_one_en": {
+          "name": "version_calculator_days_one_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_two_ar": {
+          "name": "version_calculator_days_two_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_two_en": {
+          "name": "version_calculator_days_two_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_few_ar": {
+          "name": "version_calculator_days_few_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_few_en": {
+          "name": "version_calculator_days_few_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_many_ar": {
+          "name": "version_calculator_days_many_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_calculator_days_many_en": {
+          "name": "version_calculator_days_many_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version__status": {
+          "name": "version__status",
+          "type": "enum__delay_calculator_v_version_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "version_updated_at": {
+          "name": "version_updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_created_at": {
+          "name": "version_created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "latest": {
+          "name": "latest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_delay_calculator_v_version_version__status_idx": {
+          "name": "_delay_calculator_v_version_version__status_idx",
+          "columns": [
+            {
+              "expression": "version__status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_delay_calculator_v_created_at_idx": {
+          "name": "_delay_calculator_v_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_delay_calculator_v_updated_at_idx": {
+          "name": "_delay_calculator_v_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_delay_calculator_v_latest_idx": {
+          "name": "_delay_calculator_v_latest_idx",
+          "columns": [
+            {
+              "expression": "latest",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -38655,6 +38924,38 @@
         "published"
       ]
     },
+    "public.enum_delay_calculator_languages": {
+      "name": "enum_delay_calculator_languages",
+      "schema": "public",
+      "values": [
+        "ar",
+        "en"
+      ]
+    },
+    "public.enum_delay_calculator_status": {
+      "name": "enum_delay_calculator_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
+    "public.enum__delay_calculator_v_version_languages": {
+      "name": "enum__delay_calculator_v_version_languages",
+      "schema": "public",
+      "values": [
+        "ar",
+        "en"
+      ]
+    },
+    "public.enum__delay_calculator_v_version_status": {
+      "name": "enum__delay_calculator_v_version_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
     "public.enum_closing_section_languages": {
       "name": "enum_closing_section_languages",
       "schema": "public",
@@ -38890,6 +39191,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "df2a9a0f-f63f-482e-83b3-e61ac2b7e747",
+  "id": "1785356a-a841-47eb-b401-5a4d4803dd7f",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
