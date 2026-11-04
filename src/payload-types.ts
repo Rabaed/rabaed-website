@@ -5480,6 +5480,140 @@ export interface ProfilePage {
       en?: string | null;
     };
   };
+  parties: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three, and each card’s icon is fixed by its place: the Owner, then the Consultant, then the Contractor.
+     */
+    cards: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      want: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    record: {
+      ar: string;
+      en?: string | null;
+    };
+    footer: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  platform: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always four, and each tab’s screen and icon are fixed by its place: correspondence, then approvals, then the daily site report, then documents.
+     */
+    units: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    output: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  record: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    body: {
+      ar: string;
+      en?: string | null;
+    };
+    code: string;
+    document: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Says the card is an example.
+     */
+    example: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always four, in their order on the card.
+     */
+    steps: {
+      verb: {
+        ar: string;
+        en?: string | null;
+      };
+      who: {
+        ar: string;
+        en?: string | null;
+      };
+      time: string;
+      id?: string | null;
+    }[];
+    summary: {
+      ar: string;
+      en?: string | null;
+    };
+  };
   compare: {
     /**
      * Follows the section’s number, which is fixed.
@@ -10121,6 +10255,164 @@ export interface ProfilePageSelect<T extends boolean = true> {
               en?: T;
             };
         quote?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  parties?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cards?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              want?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        record?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        footer?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  platform?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        units?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        output?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  record?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        body?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        code?: T;
+        document?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        example?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        steps?:
+          | T
+          | {
+              verb?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              who?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              time?: T;
+              id?: T;
+            };
+        summary?:
           | T
           | {
               ar?: T;

@@ -5,8 +5,8 @@ import { PROFILE_SOLUTION_SEED, PROFILE_SOLUTION_UNSEED } from './profile-soluti
  * Writes Ahmed's words for the Company profile's sections 06 to 08
  * (ticket 107), in Arabic and in English, into the entry ticket 102 imported.
  * Like that import, nothing here is published: the profile reaches visitors
- * when the founder publishes it (ticket 110). Without them, the fields the
- * migration before this one adds would be empty and the CMS would refuse the
+ * when the founder publishes it (ticket 110). Without them, the fields ticket 107
+ * adds (`20261104_020120_profile_opening_sections`) would be empty and the CMS would refuse the
  * entry's next publish.
  *
  * The statements are in `profile-solution-sections/seed.ts`, and the words in

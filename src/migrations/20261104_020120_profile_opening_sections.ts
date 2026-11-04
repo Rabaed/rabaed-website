@@ -8,6 +8,11 @@ import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-po
  * 104's PDFs), and the before-and-after section — its words, and each of its
  * five comparisons' table, video and poster. Its first words are
  * `20261104_030926_import_profile_compare`'s.
+ *
+ * And ticket 107's: sections 06 to 08 — our solution, the platform and the
+ * documented Record — each with its switch, the three party cards, the four
+ * platform units and the Record card's four steps. Their first words are
+ * `20261104_035809_seed_profile_solution_sections`'s.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -45,6 +50,37 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"text_en" varchar
   );
   
+  CREATE TABLE "profile_page_parties_cards" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"name_ar" varchar,
+  	"name_en" varchar,
+  	"want_ar" varchar,
+  	"want_en" varchar
+  );
+  
+  CREATE TABLE "profile_page_platform_units" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"name_ar" varchar,
+  	"name_en" varchar,
+  	"text_ar" varchar,
+  	"text_en" varchar
+  );
+  
+  CREATE TABLE "profile_page_record_steps" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"verb_ar" varchar,
+  	"verb_en" varchar,
+  	"who_ar" varchar,
+  	"who_en" varchar,
+  	"time" varchar
+  );
+  
   CREATE TABLE "_profile_page_v_version_numbers_figures" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
@@ -63,6 +99,40 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"name_en" varchar,
   	"text_ar" varchar,
   	"text_en" varchar,
+  	"_uuid" varchar
+  );
+  
+  CREATE TABLE "_profile_page_v_version_parties_cards" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"name_ar" varchar,
+  	"name_en" varchar,
+  	"want_ar" varchar,
+  	"want_en" varchar,
+  	"_uuid" varchar
+  );
+  
+  CREATE TABLE "_profile_page_v_version_platform_units" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"name_ar" varchar,
+  	"name_en" varchar,
+  	"text_ar" varchar,
+  	"text_en" varchar,
+  	"_uuid" varchar
+  );
+  
+  CREATE TABLE "_profile_page_v_version_record_steps" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"verb_ar" varchar,
+  	"verb_en" varchar,
+  	"who_ar" varchar,
+  	"who_en" varchar,
+  	"time" varchar,
   	"_uuid" varchar
   );
   
@@ -110,6 +180,40 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "profile_page" ADD COLUMN "about_body_en" varchar;
   ALTER TABLE "profile_page" ADD COLUMN "about_quote_ar" varchar;
   ALTER TABLE "profile_page" ADD COLUMN "about_quote_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_shows" boolean DEFAULT true;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_eyebrow_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_eyebrow_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_title_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_title_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_lead_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_lead_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_record_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_record_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_footer_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "parties_footer_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_shows" boolean DEFAULT true;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_eyebrow_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_eyebrow_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_title_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_title_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_lead_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_lead_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_output_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "platform_output_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_shows" boolean DEFAULT true;
+  ALTER TABLE "profile_page" ADD COLUMN "record_eyebrow_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_eyebrow_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_title_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_title_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_body_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_body_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_code" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_document_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_document_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_example_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_example_en" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_summary_ar" varchar;
+  ALTER TABLE "profile_page" ADD COLUMN "record_summary_en" varchar;
   ALTER TABLE "profile_page" ADD COLUMN "compare_eyebrow_ar" varchar;
   ALTER TABLE "profile_page" ADD COLUMN "compare_eyebrow_en" varchar;
   ALTER TABLE "profile_page" ADD COLUMN "compare_title_ar" varchar;
@@ -295,6 +399,40 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_about_body_en" varchar;
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_about_quote_ar" varchar;
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_about_quote_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_shows" boolean DEFAULT true;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_eyebrow_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_eyebrow_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_title_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_title_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_lead_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_lead_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_record_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_record_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_footer_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_parties_footer_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_shows" boolean DEFAULT true;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_eyebrow_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_eyebrow_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_title_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_title_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_lead_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_lead_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_output_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_platform_output_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_shows" boolean DEFAULT true;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_eyebrow_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_eyebrow_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_title_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_title_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_body_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_body_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_code" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_document_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_document_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_example_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_example_en" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_summary_ar" varchar;
+  ALTER TABLE "_profile_page_v" ADD COLUMN "version_record_summary_en" varchar;
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_compare_eyebrow_ar" varchar;
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_compare_eyebrow_en" varchar;
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_compare_title_ar" varchar;
@@ -439,8 +577,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_profile_page_v" ADD COLUMN "version_compare_daily_report_poster_id" integer;
   ALTER TABLE "profile_page_numbers_figures" ADD CONSTRAINT "profile_page_numbers_figures_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."profile_page"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "profile_page_trap_tools" ADD CONSTRAINT "profile_page_trap_tools_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."profile_page"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "profile_page_parties_cards" ADD CONSTRAINT "profile_page_parties_cards_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."profile_page"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "profile_page_platform_units" ADD CONSTRAINT "profile_page_platform_units_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."profile_page"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "profile_page_record_steps" ADD CONSTRAINT "profile_page_record_steps_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."profile_page"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_profile_page_v_version_numbers_figures" ADD CONSTRAINT "_profile_page_v_version_numbers_figures_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_profile_page_v_version_trap_tools" ADD CONSTRAINT "_profile_page_v_version_trap_tools_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_profile_page_v_version_parties_cards" ADD CONSTRAINT "_profile_page_v_version_parties_cards_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_profile_page_v_version_platform_units" ADD CONSTRAINT "_profile_page_v_version_platform_units_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_profile_page_v_version_record_steps" ADD CONSTRAINT "_profile_page_v_version_record_steps_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
   CREATE INDEX "profile_files_updated_at_idx" ON "profile_files" USING btree ("updated_at");
   CREATE INDEX "profile_files_created_at_idx" ON "profile_files" USING btree ("created_at");
   CREATE UNIQUE INDEX "profile_files_filename_idx" ON "profile_files" USING btree ("filename");
@@ -448,10 +592,22 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "profile_page_numbers_figures_parent_id_idx" ON "profile_page_numbers_figures" USING btree ("_parent_id");
   CREATE INDEX "profile_page_trap_tools_order_idx" ON "profile_page_trap_tools" USING btree ("_order");
   CREATE INDEX "profile_page_trap_tools_parent_id_idx" ON "profile_page_trap_tools" USING btree ("_parent_id");
+  CREATE INDEX "profile_page_parties_cards_order_idx" ON "profile_page_parties_cards" USING btree ("_order");
+  CREATE INDEX "profile_page_parties_cards_parent_id_idx" ON "profile_page_parties_cards" USING btree ("_parent_id");
+  CREATE INDEX "profile_page_platform_units_order_idx" ON "profile_page_platform_units" USING btree ("_order");
+  CREATE INDEX "profile_page_platform_units_parent_id_idx" ON "profile_page_platform_units" USING btree ("_parent_id");
+  CREATE INDEX "profile_page_record_steps_order_idx" ON "profile_page_record_steps" USING btree ("_order");
+  CREATE INDEX "profile_page_record_steps_parent_id_idx" ON "profile_page_record_steps" USING btree ("_parent_id");
   CREATE INDEX "_profile_page_v_version_numbers_figures_order_idx" ON "_profile_page_v_version_numbers_figures" USING btree ("_order");
   CREATE INDEX "_profile_page_v_version_numbers_figures_parent_id_idx" ON "_profile_page_v_version_numbers_figures" USING btree ("_parent_id");
   CREATE INDEX "_profile_page_v_version_trap_tools_order_idx" ON "_profile_page_v_version_trap_tools" USING btree ("_order");
   CREATE INDEX "_profile_page_v_version_trap_tools_parent_id_idx" ON "_profile_page_v_version_trap_tools" USING btree ("_parent_id");
+  CREATE INDEX "_profile_page_v_version_parties_cards_order_idx" ON "_profile_page_v_version_parties_cards" USING btree ("_order");
+  CREATE INDEX "_profile_page_v_version_parties_cards_parent_id_idx" ON "_profile_page_v_version_parties_cards" USING btree ("_parent_id");
+  CREATE INDEX "_profile_page_v_version_platform_units_order_idx" ON "_profile_page_v_version_platform_units" USING btree ("_order");
+  CREATE INDEX "_profile_page_v_version_platform_units_parent_id_idx" ON "_profile_page_v_version_platform_units" USING btree ("_parent_id");
+  CREATE INDEX "_profile_page_v_version_record_steps_order_idx" ON "_profile_page_v_version_record_steps" USING btree ("_order");
+  CREATE INDEX "_profile_page_v_version_record_steps_parent_id_idx" ON "_profile_page_v_version_record_steps" USING btree ("_parent_id");
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_profile_files_fk" FOREIGN KEY ("profile_files_id") REFERENCES "public"."profile_files"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "profile_page" ADD CONSTRAINT "profile_page_truth_photo_id_media_id_fk" FOREIGN KEY ("truth_photo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "profile_page" ADD CONSTRAINT "profile_page_compare_approvals_video_id_profile_files_id_fk" FOREIGN KEY ("compare_approvals_video_id") REFERENCES "public"."profile_files"("id") ON DELETE set null ON UPDATE no action;
@@ -505,13 +661,25 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
    ALTER TABLE "profile_files" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "profile_page_numbers_figures" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "profile_page_trap_tools" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "profile_page_parties_cards" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "profile_page_platform_units" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "profile_page_record_steps" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_profile_page_v_version_numbers_figures" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_profile_page_v_version_trap_tools" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "_profile_page_v_version_parties_cards" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "_profile_page_v_version_platform_units" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "_profile_page_v_version_record_steps" DISABLE ROW LEVEL SECURITY;
   DROP TABLE "profile_files" CASCADE;
   DROP TABLE "profile_page_numbers_figures" CASCADE;
   DROP TABLE "profile_page_trap_tools" CASCADE;
+  DROP TABLE "profile_page_parties_cards" CASCADE;
+  DROP TABLE "profile_page_platform_units" CASCADE;
+  DROP TABLE "profile_page_record_steps" CASCADE;
   DROP TABLE "_profile_page_v_version_numbers_figures" CASCADE;
   DROP TABLE "_profile_page_v_version_trap_tools" CASCADE;
+  DROP TABLE "_profile_page_v_version_parties_cards" CASCADE;
+  DROP TABLE "_profile_page_v_version_platform_units" CASCADE;
+  DROP TABLE "_profile_page_v_version_record_steps" CASCADE;
   ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_profile_files_fk";
   
   ALTER TABLE "profile_page" DROP CONSTRAINT "profile_page_truth_photo_id_media_id_fk";
@@ -625,6 +793,40 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "profile_page" DROP COLUMN "about_body_en";
   ALTER TABLE "profile_page" DROP COLUMN "about_quote_ar";
   ALTER TABLE "profile_page" DROP COLUMN "about_quote_en";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_shows";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_eyebrow_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_eyebrow_en";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_title_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_title_en";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_lead_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_lead_en";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_record_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_record_en";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_footer_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "parties_footer_en";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_shows";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_eyebrow_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_eyebrow_en";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_title_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_title_en";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_lead_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_lead_en";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_output_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "platform_output_en";
+  ALTER TABLE "profile_page" DROP COLUMN "record_shows";
+  ALTER TABLE "profile_page" DROP COLUMN "record_eyebrow_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "record_eyebrow_en";
+  ALTER TABLE "profile_page" DROP COLUMN "record_title_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "record_title_en";
+  ALTER TABLE "profile_page" DROP COLUMN "record_body_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "record_body_en";
+  ALTER TABLE "profile_page" DROP COLUMN "record_code";
+  ALTER TABLE "profile_page" DROP COLUMN "record_document_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "record_document_en";
+  ALTER TABLE "profile_page" DROP COLUMN "record_example_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "record_example_en";
+  ALTER TABLE "profile_page" DROP COLUMN "record_summary_ar";
+  ALTER TABLE "profile_page" DROP COLUMN "record_summary_en";
   ALTER TABLE "profile_page" DROP COLUMN "compare_eyebrow_ar";
   ALTER TABLE "profile_page" DROP COLUMN "compare_eyebrow_en";
   ALTER TABLE "profile_page" DROP COLUMN "compare_title_ar";
@@ -810,6 +1012,40 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_body_en";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_quote_ar";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_quote_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_shows";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_eyebrow_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_eyebrow_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_title_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_title_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_lead_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_lead_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_record_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_record_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_footer_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_parties_footer_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_shows";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_eyebrow_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_eyebrow_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_title_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_title_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_lead_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_lead_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_output_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_platform_output_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_shows";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_eyebrow_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_eyebrow_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_title_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_title_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_body_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_body_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_code";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_document_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_document_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_example_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_example_en";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_summary_ar";
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_record_summary_en";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_compare_eyebrow_ar";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_compare_eyebrow_en";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_compare_title_ar";
