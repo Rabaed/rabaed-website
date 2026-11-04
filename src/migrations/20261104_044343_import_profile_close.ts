@@ -7,7 +7,7 @@ import { PROFILE_CLOSE_SEED, PROFILE_CLOSE_UNSEED } from './profile-close-import
  * and in English, into the entry ticket 102 imported. Like that import,
  * nothing here is published: the profile reaches visitors when the founder
  * publishes it (ticket 110). Without them, the fields
- * `20261104_044342_profile_close` adds would be empty and the CMS would refuse
+ * `20261104_023538_profile_cost` adds would be empty and the CMS would refuse
  * the entry's next publish.
  *
  * The statements are in `profile-close-import/seed.ts`, and the words in
