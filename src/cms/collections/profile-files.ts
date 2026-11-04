@@ -2,7 +2,7 @@ import { APIError, type CollectionConfig } from 'payload';
 import { signedIn } from '../access';
 import { localProfileFileDirectory } from '../environment';
 import { inAdminLanguage } from '../page-fields';
-import { refreshSiteWhenImageChanges } from '../revalidation';
+import { refreshSiteWhenUploadChanges } from '../revalidation';
 
 /**
  * The largest file an Editor can upload here, in megabytes. **This is
@@ -112,7 +112,7 @@ export const ProfileFiles: CollectionConfig = {
       },
     ],
     /** The page that shows it is built again with it (ticket 84). */
-    afterChange: [refreshSiteWhenImageChanges],
-    afterDelete: [refreshSiteWhenImageChanges],
+    afterChange: [refreshSiteWhenUploadChanges],
+    afterDelete: [refreshSiteWhenUploadChanges],
   },
 };
