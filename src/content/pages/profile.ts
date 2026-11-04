@@ -9,12 +9,15 @@ import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
 import type { ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
+import { profileCompare, type ProfileCompareContent } from './profile-compare';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
   /** The home page's hero, with Ahmed's words and the profile's two buttons. */
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
+  /** Section 09, the before-and-after videos (ticket 108), which always shows: the Profile PDFs link to it. */
+  readonly compare: ProfileCompareContent;
 };
 
 /**
@@ -78,5 +81,6 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
+    compare: profileCompare(locale, entry.compare),
   };
 }

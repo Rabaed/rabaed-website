@@ -1,9 +1,10 @@
 import { Hero } from '@/components/home/hero';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
+import { Compare } from '@/components/profile/compare';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import type { ProfilePageContent } from '@/content/pages/profile';
-import type { Locale } from '@/lib/locales';
+import { LOCALES, type Locale } from '@/lib/locales';
 
 /**
  * The Company profile, in either language (ticket 102): Ahmed's profile of
@@ -29,6 +30,7 @@ export async function ProfilePage({
     <PageShell locale={locale} path="/profile" locales={locales}>
       <Hero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
+      <Compare content={content.compare} direction={LOCALES[locale].dir} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/profile' }])} />
     </PageShell>
   );
