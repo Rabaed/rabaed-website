@@ -1,13 +1,18 @@
 import { getContactPoints } from '@/cms/contact-points';
+import { fetchedMedia } from '@/cms/fetched-media';
 import { pageEntry, wordsIn } from '@/cms/pages';
 import type { HomeHeroContent } from '@/components/home/hero';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
+import type { ProfileAboutContent } from '@/components/profile/about';
+import type { ProfileNumbersContent } from '@/components/profile/numbers';
+import type { ProfileTrapContent } from '@/components/profile/trap';
+import { defaultPaperPhoto, type PaperPhoto, type ProfileTruthContent } from '@/components/profile/truth';
 import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
-import type { ProfilePage } from '@/payload-types';
+import type { Media, ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
 
 export type ProfilePageContent = {
@@ -15,6 +20,11 @@ export type ProfilePageContent = {
   /** The home page's hero, with Ahmed's words and the profile's two buttons. */
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
+  /** Ahmed's sections 01 to 04 (ticket 105). */
+  readonly truth: Section<ProfileTruthContent>;
+  readonly numbers: Section<ProfileNumbersContent>;
+  readonly trap: Section<ProfileTrapContent>;
+  readonly about: Section<ProfileAboutContent>;
 };
 
 /**
@@ -31,6 +41,25 @@ const SHARING_IMAGE: Readonly<Record<Locale, SharingImage>> = {
 function fourStatuses(statuses: readonly string[]): HomeHeroContent['statuses'] {
   const [first = '', second = '', third = '', fourth = ''] = statuses;
   return [first, second, third, fourth];
+}
+
+/**
+ * The photo an Editor put in place of Ahmed's, at the sizes it was stored in,
+ * or `null` for his.
+ */
+function replacementPhoto(value: number | Media | null | undefined): PaperPhoto | null {
+  const image = fetchedMedia(value);
+  if (!image?.url || !image.width || !image.height) return null;
+  const copies = [image.sizes?.small, image.sizes?.medium, image.sizes?.large].flatMap((copy) =>
+    copy?.url && copy.width ? [`${copy.url} ${copy.width}w`] : [],
+  );
+  return {
+    src: image.url,
+    srcSet: [...copies, `${image.url} ${image.width}w`].join(', '),
+    width: image.width,
+    height: image.height,
+    alt: image.alt,
+  };
 }
 
 /**
@@ -52,7 +81,7 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const link = (stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink']) => words(stored).trim();
-  const { hero } = entry;
+  const { hero, truth, numbers, trap, about } = entry;
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -78,5 +107,37 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
+    truth: {
+      shows: truth.shows !== false,
+      eyebrow: words(truth.eyebrow),
+      title: words(truth.title),
+      body: words(truth.body),
+      // Ahmed's photo is described by the caption under it.
+      photo: replacementPhoto(truth.photo) ?? defaultPaperPhoto(words(truth.caption)),
+      caption: words(truth.caption),
+      notes: [words(truth.noteRevision), words(truth.noteComments), words(truth.noteWho)],
+    },
+    numbers: {
+      shows: numbers.shows !== false,
+      eyebrow: words(numbers.eyebrow),
+      title: words(numbers.title),
+      figures: numbers.figures.map((each) => ({ figure: each.figure, label: words(each.label) })),
+      source: words(numbers.source),
+    },
+    trap: {
+      shows: trap.shows !== false,
+      eyebrow: words(trap.eyebrow),
+      title: words(trap.title),
+      body: words(trap.body),
+      kicker: words(trap.kicker),
+      tools: trap.tools.map((tool) => ({ name: words(tool.name), text: words(tool.text) })),
+    },
+    about: {
+      shows: about.shows !== false,
+      eyebrow: words(about.eyebrow),
+      title: { line: words(about.title), accent: words(about.titleAccent) },
+      body: words(about.body),
+      quote: words(about.quote),
+    },
   };
 }
