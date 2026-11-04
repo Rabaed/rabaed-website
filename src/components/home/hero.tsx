@@ -37,8 +37,19 @@ export type HomeHeroContent = {
 };
 
 /**
- * The home page's opening screen: the promise in three lines, and beside it a
- * document travelling between the Owner, the Consultant and the Contractor.
+ * A button that leaves the site — the Company profile's WhatsApp button, whose
+ * link an Editor sets (ticket 102) — opens in a new tab, as the footer's
+ * WhatsApp link does, so the page it was pressed on stays open. The home
+ * page's buttons stay on the page, and are drawn as they always were.
+ */
+function newTabIfAway(href: string): { target?: '_blank'; rel?: 'noopener' } {
+  return /^https?:\/\//.test(href) ? { target: '_blank', rel: 'noopener' } : {};
+}
+
+/**
+ * The home page's opening screen, and the Company profile's (ticket 102): the
+ * promise in three lines, and beside it a document travelling between the
+ * Owner, the Consultant and the Contractor.
  *
  * A server component. Every word, every building and the document itself are
  * in the first response at their starting positions; `HeroLoop` only sets them
@@ -69,11 +80,11 @@ export function Hero({ content }: { content: HomeHeroContent }) {
             </h1>
             <p className="lead">{content.lead}</p>
             <div className="ctas">
-              <a className="btn p" href={content.primary.href}>
+              <a className="btn p" href={content.primary.href} {...newTabIfAway(content.primary.href)}>
                 {content.primary.label}
               </a>
               {content.secondary && (
-                <a className="btn g" href={content.secondary.href}>
+                <a className="btn g" href={content.secondary.href} {...newTabIfAway(content.secondary.href)}>
                   {content.secondary.label}
                 </a>
               )}

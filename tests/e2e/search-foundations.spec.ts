@@ -134,7 +134,9 @@ test('the sitemap lists exactly the site’s pages, each at its own canonical ad
 
   // The Arabic site's pages. `/en` and `/en/blog` wait for English (ticket 42),
   // and the Screen mock studio is never listed (ticket 05). With no case study
-  // published, their section has no page (ticket 24).
+  // published, their section has no page (ticket 24), and the Company profile
+  // is not a page until the founder publishes it (ticket 102), which
+  // `profile-page.spec.ts` does on the second server and finds it here.
   const expected = ['/', '/product', '/start', '/tool', '/referral', '/partnership', '/blog', '/terms', '/privacy', '/referral-terms'];
   expect([...pages].sort()).toEqual(expected.map((path) => absolute(baseURL!, path)).sort());
   expect(listed.filter((loc) => loc.includes('/studio'))).toEqual([]);

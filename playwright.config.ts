@@ -44,7 +44,7 @@ const productAppOrigin = `http://127.0.0.1:${PRODUCT_APP_PORT}`;
  * every other suite would wait for (`publishing`, below). Whole file names,
  * so that `tests/unit/page-entries.spec.ts` is not taken for `entries.spec.ts`.
  */
-const PUBLISHING = /(?:^|[\\/])(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries|site-words|pour-tracker-releases|confirmation-email)\.spec\.ts$/;
+const PUBLISHING = /(?:^|[\\/])(case-studies|referral-program-values|ai-crawlers|launch-articles|stale-render|english-pages|confirmation-limit|entries|site-words|pour-tracker-releases|confirmation-email|profile-page)\.spec\.ts$/;
 const baseURL = `http://127.0.0.1:${PORT}`;
 const publishingURL = `http://127.0.0.1:${PUBLISHING_PORT}`;
 
@@ -153,8 +153,10 @@ export default defineConfig({
     // is — on the first server, the product page suite's preview once showed
     // its reworded swipe hint in place of the published one. The confirmation
     // email suite sets the banner every form's confirmation opens with
-    // (ADR-0028). None of that reaches the first server's database, so the
-    // suites there never see it, and never wait for it.
+    // (ADR-0028). The Company profile's suite publishes the profile, which
+    // puts a page in the sitemap and in `llms.txt` (ticket 102). None of that
+    // reaches the first server's database, so the suites there never see it,
+    // and never wait for it.
     //
     // **One at a time.** They would notice each other too, as they would any
     // other suite: no two of them may publish at once, or hold a lock while

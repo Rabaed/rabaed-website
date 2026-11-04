@@ -132,6 +132,12 @@ const IMPORTS: {
     words: ['articles.ts'],
     ticket: 68,
   },
+  {
+    migration: '20261104_010825_import_profile_page',
+    directory: 'profile-page-import',
+    export: 'PROFILE_PAGE_SEED',
+    ticket: 102,
+  },
 ];
 
 /**
