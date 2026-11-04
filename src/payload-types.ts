@@ -77,6 +77,7 @@ export interface Config {
     'form-submissions': FormSubmission;
     'email-images': EmailImage;
     'pour-tracker-releases': PourTrackerRelease;
+    'profile-files': ProfileFile;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'email-images': EmailImagesSelect<false> | EmailImagesSelect<true>;
     'pour-tracker-releases': PourTrackerReleasesSelect<false> | PourTrackerReleasesSelect<true>;
+    'profile-files': ProfileFilesSelect<false> | ProfileFilesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -656,6 +658,26 @@ export interface PourTrackerRelease {
   createdAt: string;
 }
 /**
+ * The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, 4 MB at most each: the site cannot take a larger file.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-files".
+ */
+export interface ProfileFile {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -718,6 +740,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pour-tracker-releases';
         value: number | PourTrackerRelease;
+      } | null)
+    | ({
+        relationTo: 'profile-files';
+        value: number | ProfileFile;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1036,6 +1062,23 @@ export interface PourTrackerReleasesSelect<T extends boolean = true> {
   fileName?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-files_select".
+ */
+export interface ProfileFilesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
