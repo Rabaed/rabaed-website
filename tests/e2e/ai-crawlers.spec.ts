@@ -190,11 +190,15 @@ test('llms.txt says what Rabaed is, and lists every page at its own address', as
   // What `case-studies.spec.ts` publishes on this server is left out of the
   // comparison rather than asserted against: an article, a case study, and the
   // case studies index that appears with the first of them (ticket 24), each
-  // named by the file until its next rebuild after they are deleted. What
-  // stays is the fixed set, which nothing published can add to or take from.
+  // named by the file until its next rebuild after they are deleted. So is the
+  // Company profile, which the migrations leave unpublished and
+  // `profile-page.spec.ts` publishes on this server and leaves published
+  // (ticket 102); that suite holds it to this file. What stays is the fixed
+  // set, which nothing published can add to or take from.
   const pages = listed
     .filter((url) => !url.startsWith(absolute(baseURL!, '/en/')) && url !== absolute(baseURL!, '/en'))
-    .filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'));
+    .filter((url) => !/\/(blog|case-studies)(\/|$)/.test(url) || url.endsWith('/blog'))
+    .filter((url) => url !== absolute(baseURL!, '/profile'));
   expect([...pages].sort()).toEqual(expected.map((path) => absolute(baseURL!, path)).sort());
   expect(listed.filter((url) => url.includes('/studio'))).toEqual([]);
 });

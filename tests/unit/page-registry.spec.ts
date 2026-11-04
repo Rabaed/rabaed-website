@@ -77,9 +77,12 @@ test('every name for a route that is not a page still names a route', async () =
 /**
  * The case studies' index is a page only once a story is published (ticket
  * 24), and the test server's database starts with none, so `routes.ts` cannot
- * list it: `case-studies.spec.ts` publishes one and reaches it.
+ * list it: `case-studies.spec.ts` publishes one and reaches it. The Company
+ * profile likewise is a page only once the founder publishes it, and the
+ * migrations leave it unpublished (ticket 102): `profile-page.spec.ts`
+ * publishes it and holds it to what a page of the site is held to.
  */
-const NOT_IN_ROUTES_TS = new Set(['/case-studies']);
+const NOT_IN_ROUTES_TS = new Set(['/case-studies', '/profile']);
 
 test('tests/e2e/routes.ts lists the pages the registry lists, and no others', () => {
   const listed = new Set(ROUTES.map((route) => inArabic(route.path)));
