@@ -5294,6 +5294,147 @@ export interface ProfilePage {
      */
     shows?: boolean | null;
   };
+  truth: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    body: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * 800×1069, or larger in the same proportions, with names and stamps hidden. The red notes and their circles sit at fixed places over today’s sheet, so a replacement should be the same sheet, framed the same way. Remove it to bring back today’s photo.
+     */
+    photo?: (number | null) | Media;
+    caption: {
+      ar: string;
+      en?: string | null;
+    };
+    noteRevision: {
+      ar: string;
+      en?: string | null;
+    };
+    noteComments: {
+      ar: string;
+      en?: string | null;
+    };
+    noteWho: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  numbers: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three, side by side. Each counts up as the visitor reaches it.
+     */
+    figures: {
+      figure: string;
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    source: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  trap: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    body: {
+      ar: string;
+      en?: string | null;
+    };
+    kicker: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always four, and each card’s icon is fixed by its place: WhatsApp, then email, then Excel, then a SharePoint folder.
+     */
+    tools: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  about: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    titleAccent: {
+      ar: string;
+      en?: string | null;
+    };
+    body: {
+      ar: string;
+      en?: string | null;
+    };
+    quote: {
+      ar: string;
+      en?: string | null;
+    };
+  };
   search: {
     /**
      * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
@@ -9420,6 +9561,170 @@ export interface ProfilePageSelect<T extends boolean = true> {
     | T
     | {
         shows?: T;
+      };
+  truth?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        body?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        photo?: T;
+        caption?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        noteRevision?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        noteComments?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        noteWho?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  numbers?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        figures?:
+          | T
+          | {
+              figure?: T;
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        source?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  trap?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        body?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        kicker?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        tools?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  about?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        titleAccent?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        body?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        quote?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
       };
   search?:
     | T
