@@ -161,14 +161,15 @@ const COMMITMENT: Block = {
  * (ticket 58), built like the product page's (`product-page.ts`). Its closing
  * section is the entry it shares with the product page (`closing-section.ts`),
  * its four units' screens are the Screen mocks entry's (`screen-mocks.ts`), and
- * the Trust strip's marks are ticket 20's: here the strip only shows or hides.
+ * the Trust strip's marks are ticket 20's and the calculator's words are the
+ * Delay-cost calculator's entry (`delay-calculator.ts`, ADR-0029): here each
+ * only shows or hides.
  *
  * **Locked counts** (spec: Content model): the hero's three buildings and its
  * four statuses, which follow the document's route round them
  * (`hero-stations.ts`); each Record trail's four steps, which the seal counts;
  * the before-and-after's four steps, whose resting state `home.css` draws
- * column by column; and the calculator's three sliders. Every other list grows
- * and shrinks.
+ * column by column. Every other list grows and shrinks.
  *
  * **Where the design stops the words.** A situation card is 340×348 and a
  * figure card 344×296 (268px tall on a short window), and a before-and-after
@@ -514,90 +515,10 @@ export const HomePage = pageGlobal({
       label: { ar: 'حاسبة التأخير', en: 'Delay calculator' },
       hideable: true,
       description: {
-        ar: 'ما يسمح به كل مؤشر وطريقة الحساب في الكود؛ هنا كلماتها.',
-        en: 'What each slider allows, and the formula, are in code; its words are here.',
+        ar: 'كلمات الحاسبة في «حاسبة تكلفة التأخير»، مرة واحدة لكل صفحة تظهر فيها. هنا يُختار ظهورها في هذه الصفحة فقط.',
+        en: 'The calculator’s words are in “Delay-cost calculator”, once for every page that shows it. Here you choose only whether it shows on this page.',
       },
-      fields: [
-        EYEBROW,
-        wordsField('heading', HEADING, 60),
-        wordsField('lead', LEAD, 200, { multiline: true }),
-        {
-          name: 'sliderLabels',
-          type: 'group',
-          label: { ar: 'أسماء المؤشرات الثلاثة', en: 'The three sliders’ names' },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                wordsField('projectValue', { ar: 'قيمة المشروع', en: 'Project value' }, 20),
-                wordsField('delayDays', { ar: 'أيام التأخير', en: 'Days of delay' }, 20),
-                wordsField('durationMonths', { ar: 'مدة المشروع', en: 'Project length' }, 20),
-              ],
-            },
-          ],
-        },
-        wordsField('resultLabel', { ar: 'العنوان فوق التكلفة', en: 'Label over the cost' }, 40),
-        {
-          name: 'breakdown',
-          type: 'group',
-          label: { ar: 'السطر الذي يقسم التكلفة', en: 'The line splitting the cost' },
-          admin: { description: { ar: 'يُكتب المبلغ بعد كل اسم.', en: 'Each amount is written after its name.' } },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                wordsField('financing', { ar: 'التمويل', en: 'Financing' }, 20),
-                wordsField('siteOverhead', { ar: 'التكاليف العامة للموقع', en: 'Site overhead' }, 30),
-              ],
-            },
-          ],
-        },
-        wordsField('assumptions', { ar: 'الافتراضات تحت التكلفة', en: 'Assumptions under the cost' }, 240, { multiline: true }),
-        wordsField('callToActionLabel', { ar: 'الزر', en: 'Button' }, 40, { description: TO_DEMO }),
-        wordsField('currency', { ar: 'العملة بعد المبلغ', en: 'Currency after an amount' }, 8),
-        {
-          name: 'days',
-          type: 'group',
-          label: { ar: 'الكلمة بعد عدد الأيام', en: 'Word after a number of days' },
-          admin: {
-            description: {
-              ar: 'كما يعدّ العربي: بعد 1، وبعد 2، ومن 3 إلى 10، ومن 11 فأكثر.',
-              en: 'As Arabic counts: after 1, after 2, from 3 to 10, and from 11 on.',
-            },
-          },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                wordsField('one', { ar: 'بعد 1', en: 'After 1' }, 10),
-                wordsField('two', { ar: 'بعد 2', en: 'After 2' }, 10),
-                wordsField('few', { ar: 'من 3 إلى 10', en: '3 to 10' }, 10),
-                wordsField('many', { ar: 'من 11 فأكثر', en: '11 or more' }, 10),
-              ],
-            },
-          ],
-        },
-        {
-          name: 'months',
-          type: 'group',
-          label: { ar: 'الكلمة بعد عدد الأشهر', en: 'Word after a number of months' },
-          admin: {
-            description: {
-              ar: 'تبدأ مدة المشروع من 6 أشهر.',
-              en: 'A project’s length starts at 6 months.',
-            },
-          },
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                wordsField('few', { ar: 'من 6 إلى 10', en: '6 to 10' }, 10),
-                wordsField('many', { ar: 'من 11 فأكثر', en: '11 or more' }, 10),
-              ],
-            },
-          ],
-        },
-      ],
+      fields: [],
     }),
     sectionTab({
       name: 'figures',

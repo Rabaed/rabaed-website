@@ -5,13 +5,14 @@ import {
   calculatorDisplay,
   figureText,
   settingsFromValues,
+  wordAfterFigure,
   type CalculatorWords,
   type Figure,
 } from '@/components/home/delay-calculator-state';
 
 /**
  * Redraws the calculator whenever a slider moves, attached to markup the server
- * already sent: the three readings, the cost and its two parts, and each track
+ * already sent: the three readings, the cost and what has been spent, and each track
  * filled up to its thumb. Renders nothing. The words it writes beside the
  * numbers are handed down by `DelayCalculator`.
  *
@@ -27,13 +28,13 @@ export function DelayCalculatorBehaviour({ words }: { words: CalculatorWords }) 
     const sliders = [...calculator.querySelectorAll<HTMLInputElement>('input[type="range"]')];
     const readings = [...calculator.querySelectorAll<HTMLElement>('.lr b')];
     const cost = calculator.querySelector<HTMLElement>('.out b');
-    const breakdown = calculator.querySelectorAll<HTMLElement>('.out small')[1];
-    if (sliders.length !== 3 || readings.length !== 3 || !cost || !breakdown) return;
+    const spent = calculator.querySelectorAll<HTMLElement>('.out small')[1];
+    if (sliders.length !== 3 || readings.length !== 3 || !cost || !spent) return;
 
     const write = (target: HTMLElement, figure: Figure) => {
       const [number, word] = target.querySelectorAll('span');
       number.textContent = figure.number;
-      word.textContent = ` ${figure.word}`;
+      word.textContent = wordAfterFigure(figure);
     };
 
     const redraw = () => {
@@ -44,7 +45,7 @@ export function DelayCalculatorBehaviour({ words }: { words: CalculatorWords }) 
         slider.style.background = display.tracks[index];
       });
       write(cost, display.cost);
-      breakdown.textContent = display.breakdown;
+      spent.textContent = display.spent;
     };
 
     sliders.forEach((slider) => slider.addEventListener('input', redraw));
