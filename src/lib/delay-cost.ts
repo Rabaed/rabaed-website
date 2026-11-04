@@ -1,48 +1,71 @@
 /**
- * What a delay costs a construction project — the formula behind the home
- * page's calculator, exactly as the Reference site's script computes it
- * (`reference/site/index.html`, "Calculator (sliders)"), and deliberately
- * conservative: it counts financing and site overhead only, before any claim
- * from the contractor or any penalty.
+ * What a delay costs a construction project's owner — the method behind the
+ * Delay-cost calculator, on the home page and the Company profile alike
+ * (ADR-0029): **the cost of money on what has already been spent**. Money put
+ * into a project comes back only at handover, so each day handover slips holds
+ * it out for a day longer, at 8% a year — financing, or the return it could
+ * have earned elsewhere.
  *
- * - **Financing**: the project's value at 8% a year, for the days of delay.
- * - **Site overhead**: 10% of the project's value, spread evenly across its
- *   duration at 30.4 days a month, for the days of delay.
+ *     spent = value × progress%
+ *     cost  = spent × 8% ÷ 365 × days of delay
+ *
+ * Ahmed's method, from his Company profile (approved 31 October 2026), chosen
+ * by the founder for every page on 4 November 2026. **It overrules the
+ * Reference site's formula on purpose** (financing on the whole value plus
+ * site overhead): do not restore it. What it leaves out — delayed revenue,
+ * supervision fees, contractor claims, penalties — the calculator's
+ * assumptions note says.
+ *
+ * The method and what each slider allows stay here, in code; the words around
+ * them are the CMS's (`src/cms/globals/delay-calculator.ts`).
  *
  * Pure, with no I/O, which is why it is the one piece of the site tested
  * directly rather than through the running page (spec: Testing Decisions):
- * `tests/unit/delay-cost.spec.ts`. The operations are written in the Reference
- * site's order, so a figure that lands on a half rounds the same way.
+ * `tests/unit/delay-cost.spec.ts`. The operations are written in Ahmed's
+ * order, so a figure that lands on a half rounds the same way.
  */
 
 export type DelayCostInputs = {
   /** The project's value, in Saudi riyals. */
   readonly projectValue: number;
   readonly delayDays: number;
-  readonly durationMonths: number;
+  /** How much of the project is built today, from 0 to 100. */
+  readonly progressPercent: number;
 };
 
 export type DelayCost = {
-  readonly financing: number;
-  readonly siteOverhead: number;
+  /** What has been spent so far, in riyals: the value at today's progress. */
+  readonly spent: number;
   readonly total: number;
 };
 
-const FINANCING_PER_YEAR = 0.08;
-const SITE_OVERHEAD_SHARE = 0.1;
-const DAYS_IN_A_YEAR = 365;
-const DAYS_IN_A_MONTH = 30.4;
+/** What a slider allows, and where it starts. */
+export type SliderRange = {
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+  /** Where the slider starts. */
+  readonly start: number;
+};
 
-export function delayCost({ projectValue, delayDays, durationMonths }: DelayCostInputs): DelayCost {
-  const financing = ((projectValue * FINANCING_PER_YEAR) / DAYS_IN_A_YEAR) * delayDays;
-  const siteOverhead = ((projectValue * SITE_OVERHEAD_SHARE) / (durationMonths * DAYS_IN_A_MONTH)) * delayDays;
-  return { financing, siteOverhead, total: financing + siteOverhead };
+/** The calculator's three sliders, in the order they stand (ADR-0029). */
+export const DELAY_COST_SLIDERS = {
+  projectValue: { min: 1_000_000, max: 300_000_000, step: 1_000_000, start: 60_000_000 },
+  delayDays: { min: 1, max: 60, step: 1, start: 7 },
+  progressPercent: { min: 5, max: 100, step: 5, start: 50 },
+} as const satisfies Record<keyof DelayCostInputs, SliderRange>;
+
+const COST_OF_MONEY_PER_YEAR = 0.08;
+const DAYS_IN_A_YEAR = 365;
+
+export function delayCost({ projectValue, delayDays, progressPercent }: DelayCostInputs): DelayCost {
+  const spent = (projectValue * progressPercent) / 100;
+  return { spent, total: ((spent * COST_OF_MONEY_PER_YEAR) / DAYS_IN_A_YEAR) * delayDays };
 }
 
 /**
  * A number of riyals to the nearest riyal, in Latin digits with commas —
- * «84,405» — as the Reference site writes them. The total is rounded on its
- * own, not added up from its rounded parts.
+ * «46,027» — as the site writes them.
  */
 export function formatRiyals(amount: number): string {
   return Math.round(amount).toLocaleString('en-US');

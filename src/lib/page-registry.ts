@@ -52,7 +52,7 @@ export const MARKETING_PAGES = {
     path: '/',
     name: { ar: 'الرئيسية', en: 'Home' },
     entry: { slug: 'home-page', label: { ar: 'الصفحة الرئيسية', en: 'Home page' } },
-    shared: ['closing-section', 'screen-mocks', 'trust-strip', 'site-words'],
+    shared: ['closing-section', 'screen-mocks', 'trust-strip', 'delay-calculator', 'site-words'],
     // The Reference site's own id.
     questionsSection: 'fq',
   },

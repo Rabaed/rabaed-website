@@ -39,12 +39,24 @@ test.describe.configure({ mode: 'default' });
 oneSuiteAtATime(test);
 
 /**
+ * The entries published in English from their first version, so with no
+ * English waiting to be approved: the Delay-cost calculator's (ticket 103),
+ * made after the home page's English was published, with Ahmed's English.
+ */
+const IN_ENGLISH_FROM_THE_START: readonly string[] = ['delay-calculator'];
+
+/**
  * The entries a page reads beside the header and footer, whose English is
  * approved on its own (`approveSiteWords`): as the site decides the page's
  * languages by them (the page registry, `src/lib/page-registry.ts`; tickets 91 and 92).
+ * Less those already in English.
  */
 const entriesOf = (...pages: MarketingPage[]) => [
-  ...new Set(pages.flatMap((page) => entriesRead(page)).filter((slug) => slug !== 'site-words')),
+  ...new Set(
+    pages
+      .flatMap((page) => entriesRead(page))
+      .filter((slug) => slug !== 'site-words' && !IN_ENGLISH_FROM_THE_START.includes(slug)),
+  ),
 ];
 
 /**
