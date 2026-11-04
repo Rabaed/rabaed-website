@@ -79,7 +79,8 @@
 .pf-badge { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); padding: 6px 20px; border-radius: 999px; background: var(--acc-deep); color: #fff; font-size: 13px; font-weight: 700; line-height: 1.5; white-space: nowrap }
 .pf-plan-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px }
 .pf-kicker-line { display: block; font-size: 13px; font-weight: 600; color: var(--muted) }
-:where([dir="rtl"]) .pf-kicker-line, :where([dir="rtl"]) .pf-badge { font-family: var(--label-face); letter-spacing: 0 }
+/* In Arabic the label face, in the one weight the site serves it in (ADR-0018). */
+:where([dir="rtl"]) .pf-kicker-line, :where([dir="rtl"]) .pf-badge { font-family: var(--label-face); letter-spacing: 0; font-weight: 400 }
 .pf-plan h3 { margin: 4px 0 0; font-size: 26px; line-height: 1.3 }
 .pf-plan-mark { width: 56px; height: 56px; color: var(--acc) }
 .pf-plan ul { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 10px }

@@ -182,6 +182,23 @@ test('10, on a mouse a card turns only when pressed, and shows the face aria-pre
   await expect.poll(() => faceShowing(first), { message: 'pressed again' }).toBe('front');
 });
 
+test('every Arabic label on the profile asks Thmanyah Sans for its one weight, Regular', async ({ page, cms }) => {
+  // The site serves Thmanyah Regular alone (ADR-0018): a label asking for
+  // another weight gets one the browser fakes. `fonts.spec.ts` holds every
+  // page in `routes.ts` to this, which the unpublished profile is not in.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await cms.preview('/profile');
+  const bolder = await page.evaluate(() =>
+    [...document.querySelectorAll('body *')].flatMap((element) => {
+      const style = getComputedStyle(element);
+      const own = [...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim());
+      if (!own || !style.fontFamily.startsWith('"Thmanyah Sans"') || style.fontWeight === '400') return [];
+      return [`${element.tagName.toLowerCase()}.${[...element.classList].join('.')} at ${style.fontWeight}`];
+    }),
+  );
+  expect(bolder).toEqual([]);
+});
+
 test('11, why Rabaed: three cards on a light ground', async ({ page, cms }) => {
   await cms.preview('/profile');
   const why = section(page, 'why');
