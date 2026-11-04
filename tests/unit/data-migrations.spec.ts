@@ -61,6 +61,8 @@ import { PARTNERSHIP_APPLICATION_SEED } from '../../src/migrations/partnership-a
 import { PARTNERSHIP_APPLICATION_WORDS } from '../../src/migrations/partnership-application-import/words';
 import { PARTNERSHIP_PAGE_SEED } from '../../src/migrations/partnership-page-import/seed';
 import { PARTNERSHIP_PAGE_WORDS } from '../../src/migrations/partnership-page-import/words';
+import { PROFILE_COST_SEED } from '../../src/migrations/profile-cost-import/seed';
+import { PROFILE_COST_WORDS } from '../../src/migrations/profile-cost-import/words';
 import { PROFILE_PAGE_SEED } from '../../src/migrations/profile-page-import/seed';
 import { PROFILE_PAGE_WORDS } from '../../src/migrations/profile-page-import/words';
 import { PRODUCT_PAGE_SEED } from '../../src/migrations/product-page-import/seed';
@@ -168,6 +170,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     seed: ENGLISH_LAUNCH_ARTICLES_SEED,
   },
   { name: 'the Company profile', words: PROFILE_PAGE_WORDS, seed: PROFILE_PAGE_SEED },
+  { name: 'the Company profile’s calculator button', words: PROFILE_COST_WORDS, seed: PROFILE_COST_SEED },
 ];
 
 /**

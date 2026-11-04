@@ -3,12 +3,14 @@ import { pageGlobal } from '../page-globals';
 
 /**
  * The Delay-cost calculator's words (ticket 103, ADR-0029): one set, kept
- * here once, for every page that shows the calculator — the home page today,
- * the Company profile next (ticket 106) — so the two cannot disagree. Each of
+ * here once, for every page that shows the calculator — the home page and the
+ * Company profile (ticket 106) — so the two cannot disagree. Each of
  * those pages keeps its own switch for whether the calculator shows there.
  *
- * The method and what each slider allows stay in code (`src/lib/delay-cost.ts`);
- * so does where the button leads. An Editor changes the words alone.
+ * The method and what each slider allows stay in code (`src/lib/delay-cost.ts`).
+ * Where the button leads is the home page's code, and the Company profile's
+ * entry, as every button's link on that page is. Here an Editor changes the
+ * words alone.
  *
  * Limits are what the calculator's card carries with every word at its
  * longest, as the home page's calculator words were before they moved here.
@@ -24,8 +26,8 @@ export const DelayCalculator = pageGlobal({
       label: { ar: 'الحاسبة', en: 'Calculator' },
       hideable: false,
       description: {
-        ar: 'تظهر في الصفحة الرئيسية بهذه الكلمات. إظهار الحاسبة في صفحة بعينها يُختار في تلك الصفحة. طريقة الحساب وما يسمح به كل مؤشر في الكود.',
-        en: 'Shown on the home page in these words. Whether the calculator shows on a given page is chosen on that page. The method, and what each slider allows, are in code.',
+        ar: 'تظهر في الصفحة الرئيسية وفي الملف التعريفي بهذه الكلمات. إظهار الحاسبة في صفحة بعينها يُختار في تلك الصفحة، وكذلك وجهة زرّها في الملف التعريفي. طريقة الحساب وما يسمح به كل مؤشر في الكود.',
+        en: 'Shown on the home page and the Company profile in these words. Whether the calculator shows on a given page is chosen on that page, and so is where its button goes on the Company profile. The method, and what each slider allows, are in code.',
       },
       fields: [
         wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40),
@@ -57,7 +59,10 @@ export const DelayCalculator = pageGlobal({
         }),
         wordsField('assumptions', { ar: 'الافتراضات تحت التكلفة', en: 'Assumptions under the cost' }, 240, { multiline: true }),
         wordsField('callToActionLabel', { ar: 'الزر', en: 'Button' }, 40, {
-          description: { ar: 'ينقل إلى نموذج طلب العرض.', en: 'Leads to the demo request form.' },
+          description: {
+            ar: 'ينقل إلى نموذج طلب العرض، وفي الملف التعريفي إلى حيث تختار صفحته.',
+            en: 'Leads to the demo request form, and on the Company profile to wherever its page says.',
+          },
         }),
         wordsField('currency', { ar: 'العملة بعد المبلغ', en: 'Currency after an amount' }, 8),
         {

@@ -4350,7 +4350,7 @@ export interface DelayCalculator {
       en?: string | null;
     };
     /**
-     * Leads to the demo request form.
+     * Leads to the demo request form, and on the Company profile to wherever its page says.
      */
     callToActionLabel: {
       ar: string;
@@ -5295,6 +5295,19 @@ export interface ProfilePage {
      * Untick to hide this section, keeping its words.
      */
     shows?: boolean | null;
+  };
+  cost: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
+     */
+    callToActionLink: {
+      ar: string;
+      en?: string | null;
+    };
   };
   search: {
     /**
@@ -9411,6 +9424,17 @@ export interface ProfilePageSelect<T extends boolean = true> {
     | T
     | {
         shows?: T;
+      };
+  cost?:
+    | T
+    | {
+        shows?: T;
+        callToActionLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
       };
   search?:
     | T

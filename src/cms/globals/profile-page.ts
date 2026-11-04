@@ -118,6 +118,27 @@ export const ProfilePage = pageGlobal({
       },
       fields: [],
     }),
+    // Section 05, «التكلفة الخفية» (ticket 106): the shared calculator, every
+    // word of it its own entry's, its button's among them, so the two pages
+    // cannot disagree (ADR-0029). Here the page chooses whether it shows, and
+    // where its button goes, as every button's link on this page is chosen.
+    sectionTab({
+      name: 'cost',
+      label: { ar: 'حاسبة تكلفة التأخير', en: 'Delay-cost calculator' },
+      hideable: true,
+      description: {
+        ar: 'حاسبة الصفحة الرئيسية نفسها، بكلماتها كلها من «حاسبة تكلفة التأخير» بجانب إعدادات الموقع، وكلمات زرّها منها، فتتفق الصفحتان. هنا يُختار ظهورها في هذه الصفحة فقط، ووجهة زرّها.',
+        en: 'The home page’s own calculator, every word of it from “Delay-cost calculator” beside the site settings, its button’s too, so the two pages agree. Here you choose only whether it shows on this page, and where its button goes.',
+      },
+      fields: [
+        buttonLinkField('callToActionLink', { ar: 'وجهة الزر', en: 'Button goes to' }, {
+          description: {
+            ar: 'نموذج طلب العرض في الصفحة الرئيسية: ‎/#demo في العربية و‎/en#demo في الإنجليزية. رابط خارج الموقع يُفتح في نافذة جديدة.',
+            en: 'The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.',
+          },
+        }),
+      ],
+    }),
     searchTab(),
   ],
 });
