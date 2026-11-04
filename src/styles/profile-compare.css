@@ -1,0 +1,62 @@
+/**
+ * The Company profile's before-and-after section, `#compare` (ticket 108):
+ * Ahmed's pill tabs, his question and two-column table beside his video, in
+ * the site's sizes and colours. Every class is `pf-…`: the home page already
+ * has a `.cmp`, the product page `.tab` and `.panel`.
+ *
+ * The 980px line is the site's phone line, where the video moves under the
+ * table; the 620px one is where the site puts form fields one to a line, and
+ * where the table becomes one stacked row per line, as Ahmed's does at 600px.
+ */
+
+.pf-cmp-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 2px 6px; margin: 6px -2px 0 }
+.pf-cmp-tabs::-webkit-scrollbar { display: none }
+.pf-pill { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding-block: 6px; padding-inline: 12px 16px; border-radius: 99px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color .2s, color .2s }
+.pf-pill-n { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--soft); font-size: 12px; line-height: 1 }
+.pf-pill[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff }
+.pf-pill[aria-selected="true"] .pf-pill-n { background: var(--acc); color: #fff }
+
+.pf-cmp-panel { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding: 36px; border-radius: 22px; background: #fff; border: 1px solid var(--line) }
+.pf-cmp-panel:not(.on) { display: none }
+
+.pf-cmp-module { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted) }
+.pf-cmp-module .pf-icon { width: 30px; height: 30px; color: var(--acc) }
+.pf-icon-folder-search { --pf-icon: url(/profile/icons/folder-search.svg) }
+.pf-icon-gauge { --pf-icon: url(/profile/icons/gauge.png) }
+.pf-cmp-text h3 { font-size: 30px; line-height: 1.4; margin-bottom: 18px; text-wrap: balance }
+
+.pf-cmp-table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.6 }
+.pf-cmp-table thead th { padding: 0 10px 10px; text-align: start; font-size: 13px; font-weight: 600 }
+.pf-cmp-table thead th::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 8px; background: var(--acc) }
+.pf-cmp-table thead .pf-cmp-before { color: var(--muted) }
+/* Green is the mark's alone: as small text on white it is too faint to read (3.3:1). */
+.pf-cmp-table thead .pf-cmp-with { color: var(--ink) }
+.pf-cmp-table thead .pf-cmp-with::before { background: var(--green) }
+.pf-cmp-table tbody th { width: 24%; padding: 12px 0; text-align: start; vertical-align: top; font-size: 13.5px; font-weight: 600; color: var(--muted); border-top: 1px solid var(--line) }
+.pf-cmp-table td { padding: 12px 10px; vertical-align: top; border-top: 1px solid var(--line) }
+.pf-cmp-table td.pf-cmp-before { color: var(--muted) }
+.pf-cmp-table td.pf-cmp-with { font-weight: 500 }
+
+.pf-cmp-media { margin: 0; min-width: 0 }
+.pf-cmp-media figcaption { margin-top: 10px; font-size: 13px; color: var(--muted) }
+.pf-clip { position: relative; border-radius: 14px; overflow: hidden; background: var(--dark) }
+.pf-clip.tall { width: min(100%, 360px); margin-inline: auto }
+.pf-clip video, .pf-clip-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover }
+.pf-clip.playing .pf-clip-poster, .pf-clip.playing .pf-clip-play { display: none }
+.pf-clip-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border: 0; border-radius: 99px; background: rgba(20, 22, 28, .88); color: #fff; font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap; cursor: pointer; box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .6) }
+.pf-clip-play svg { color: var(--acc) }
+
+@media (max-width: 980px) {
+  .pf-cmp-panel { grid-template-columns: 1fr; gap: 28px; padding: 24px }
+  .pf-cmp-text h3 { font-size: 24px }
+}
+
+@media (max-width: 620px) {
+  .pf-cmp-panel { padding: 20px }
+  .pf-cmp-table thead { display: none }
+  .pf-cmp-table, .pf-cmp-table tbody, .pf-cmp-table tr, .pf-cmp-table th, .pf-cmp-table td { display: block; width: 100% }
+  .pf-cmp-table tr { padding-block: 12px; border-top: 1px solid var(--line) }
+  .pf-cmp-table tbody th, .pf-cmp-table td { border: 0; padding: 2px 0 }
+  .pf-cmp-table td::before { content: attr(data-column); display: inline-block; min-width: 76px; margin-inline-end: 8px; font-size: 12.5px; font-weight: 600; color: var(--acc-ink) }
+  .pf-cmp-table td.pf-cmp-with::before { color: var(--ink) }
+}

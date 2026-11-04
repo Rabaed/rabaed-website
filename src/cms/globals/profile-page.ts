@@ -1,12 +1,22 @@
 import type { Field } from 'payload';
 import { PDF_RULE } from '../collections/profile-files';
-import { buttonLinkField, listField, sectionTab, wordsField, type Words } from '../page-fields';
+import { buttonLinkField, latinField, listField, pictureField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
 import { PROFILE_PDFS, type ProfilePdfScreen } from '../../lib/profile-pdfs';
 import type { Locale } from '../../lib/locales';
+import { compareTab } from './profile-compare';
 import { DEMO_LINK_DESCRIPTION, profileCloseTabs, WHATSAPP_LINK_DESCRIPTION } from './profile-close';
+
+const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40, {
+  description: { ar: 'يُكتب بعد رقم القسم، والرقم ثابت.', en: 'Follows the section’s number, which is fixed.' },
+});
+const HEADING: Words = { ar: 'العنوان', en: 'Heading' };
+const LEAD: Words = { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' };
+
+/** Ahmed's photo of the paper submittal (`public/profile/paper-800.webp`), whose shape a replacement keeps. */
+const PAPER = { width: 800, height: 1069 } as const;
 
 /** What each of the four files is called in the admin. */
 const PDF_LABELS: Record<Locale, Record<ProfilePdfScreen, Words>> = {
@@ -41,8 +51,12 @@ function profilePdfField(locale: Locale, screen: ProfilePdfScreen): Field {
 /**
  * The Company profile's words, section by section, in the page's order
  * (ticket 102): the home page's hero with Ahmed's words, and the shared Trust
- * strip, which here only shows or hides. The sections after them are tickets
- * 105–109's.
+ * strip, which here only shows or hides; then Ahmed's numbered sections, 01 to
+ * 04 from ticket 105 and the rest from tickets 106–109. A section's number is
+ * its place in Ahmed's order, which is fixed, so it is code rather than words,
+ * and keeps the number Ahmed's Profile PDFs give it: hiding 03 leaves 01, 02
+ * and 04. Section 09, the before-and-after videos, is ticket 108's
+ * (`./profile-compare.ts`).
  *
  * **Its buttons' links are an Editor's too**, unlike every other page's: the
  * founder chose on 4 November 2026 that a campaign's link may change tomorrow
@@ -145,6 +159,98 @@ export const ProfilePage = pageGlobal({
       },
       fields: [],
     }),
+    sectionTab({
+      name: 'truth',
+      label: { ar: '01 الحقيقة كما هي', en: '01 Here’s the truth' },
+      hideable: true,
+      description: {
+        ar: 'صورة طلب اعتماد ورقي حقيقي، وعليها ثلاث ملاحظات حمراء.',
+        en: 'A photo of a real paper submittal, with three red notes on it.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 80),
+        wordsField('body', LEAD, 400, { multiline: true }),
+        pictureField({
+          name: 'photo',
+          label: { ar: 'صورة الورقة', en: 'Photo of the paper' },
+          size: PAPER,
+          required: false,
+          description: {
+            ar: `بمقاس ${PAPER.width}×${PAPER.height} أو أكبر بالنسبة نفسها، والأسماء والأختام مخفية فيها. الملاحظات الحمراء ودوائرها مرسومة في أماكن ثابتة فوق الورقة الحالية، فالبديل يكون الورقة نفسها بالإطار نفسه. احذفها لتعود الصورة الحالية.`,
+            en: `${PAPER.width}×${PAPER.height}, or larger in the same proportions, with names and stamps hidden. The red notes and their circles sit at fixed places over today’s sheet, so a replacement should be the same sheet, framed the same way. Remove it to bring back today’s photo.`,
+          },
+        }),
+        wordsField('caption', { ar: 'السطر تحت الصورة', en: 'Line under the photo' }, 170),
+        {
+          type: 'row',
+          fields: [
+            wordsField('noteRevision', { ar: 'الملاحظة الأولى، عند رقم الإصدار', en: 'First note, at the revision number' }, 50),
+            wordsField('noteComments', { ar: 'الملاحظة الثانية، عند الملاحظات المكتوبة', en: 'Second note, at the handwritten comments' }, 50),
+            wordsField('noteWho', { ar: 'الملاحظة الثالثة، عند التوقيعات', en: 'Third note, at the signatures' }, 50),
+          ],
+        },
+      ],
+    }),
+    sectionTab({
+      name: 'numbers',
+      label: { ar: '02 الموقع الحقيقي', en: '02 The real site' },
+      hideable: true,
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 80),
+        listField({
+          name: 'figures',
+          labels: { singular: { ar: 'رقم', en: 'Figure' }, plural: { ar: 'الأرقام', en: 'Figures' } },
+          rows: { min: 3, max: 3 },
+          description: {
+            ar: 'ثلاثة دائماً، جنباً إلى جنب. يعدّ الرقم صعوداً حين يصل إليه الزائر.',
+            en: 'Always three, side by side. Each counts up as the visitor reaches it.',
+          },
+          fields: [
+            latinField('figure', { ar: 'الرقم، مثل 35%', en: 'Figure, like 35%' }, 6),
+            wordsField('label', { ar: 'ما يعنيه الرقم', en: 'What it means' }, 120),
+          ],
+        }),
+        wordsField('source', { ar: 'مصدر الأرقام، تحتها', en: 'Where the figures come from, under them' }, 80),
+      ],
+    }),
+    sectionTab({
+      name: 'trap',
+      label: { ar: '03 الفخ', en: '03 The trap' },
+      hideable: true,
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 90),
+        wordsField('body', LEAD, 240, { multiline: true }),
+        wordsField('kicker', { ar: 'الجملة البارزة تحت الفقرة', en: 'The line set off under the paragraph' }, 170),
+        listField({
+          name: 'tools',
+          labels: { singular: { ar: 'أداة', en: 'Tool' }, plural: { ar: 'الأدوات', en: 'Tools' } },
+          rows: { min: 4, max: 4 },
+          description: {
+            ar: 'أربع دائماً، وأيقونة كل بطاقة ثابتة بمكانها: واتساب، ثم البريد، ثم إكسل، ثم مجلد SharePoint.',
+            en: 'Always four, and each card’s icon is fixed by its place: WhatsApp, then email, then Excel, then a SharePoint folder.',
+          },
+          fields: [
+            wordsField('name', { ar: 'اسم الأداة', en: 'Tool' }, 34),
+            wordsField('text', { ar: 'ما مشكلتها', en: 'What goes wrong with it' }, 120),
+          ],
+        }),
+      ],
+    }),
+    sectionTab({
+      name: 'about',
+      label: { ar: '04 من نحن', en: '04 Who we are' },
+      hideable: true,
+      fields: [
+        EYEBROW,
+        wordsField('title', { ar: 'السطر الأول من العنوان', en: 'Heading, first line' }, 60),
+        wordsField('titleAccent', { ar: 'السطر الملوّن تحته', en: 'Line in colour under it' }, 60),
+        wordsField('body', LEAD, 300, { multiline: true }),
+        wordsField('quote', { ar: 'الاقتباس', en: 'Quote' }, 120),
+      ],
+    }),
     // Section 05, «التكلفة الخفية» (ticket 106): the shared calculator, its
     // words its own entry's, so the two pages cannot disagree (ADR-0029). Here
     // the page chooses whether it shows, and its button's words and link, as
@@ -169,6 +275,112 @@ export const ProfilePage = pageGlobal({
         buttonLinkField('callToActionLink', { ar: 'وجهة الزر', en: 'Button goes to' }, { description: DEMO_LINK_DESCRIPTION }),
       ],
     }),
+    sectionTab({
+      name: 'parties',
+      label: { ar: '06 حلّنا', en: '06 Our solution' },
+      hideable: true,
+      description: {
+        ar: 'بطاقات الأطراف الثلاثة، وتحتها السجل الموثّق الذي يجمعها.',
+        en: 'The three parties’ cards, and under them the documented Record they share.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 90),
+        wordsField('lead', LEAD, 300, { multiline: true }),
+        listField({
+          name: 'cards',
+          labels: { singular: { ar: 'طرف', en: 'Party' }, plural: { ar: 'الأطراف', en: 'Parties' } },
+          rows: { min: 3, max: 3 },
+          description: {
+            ar: 'ثلاثة دائماً، وأيقونة كل بطاقة ثابتة بمكانها: المالك، ثم الاستشاري، ثم المقاول.',
+            en: 'Always three, and each card’s icon is fixed by its place: the Owner, then the Consultant, then the Contractor.',
+          },
+          fields: [
+            wordsField('name', { ar: 'الطرف', en: 'Party' }, 50),
+            wordsField('want', { ar: 'ما يريده', en: 'What it wants' }, 50),
+          ],
+        }),
+        {
+          type: 'row',
+          fields: [
+            wordsField('record', { ar: 'ما يجمعها، تحت البطاقات', en: 'What they share, under the cards' }, 44),
+            wordsField('footer', { ar: 'السطر بجانبه', en: 'Line beside it' }, 60),
+          ],
+        },
+      ],
+    }),
+    sectionTab({
+      name: 'platform',
+      label: { ar: '07 المنصة', en: '07 The platform' },
+      hideable: true,
+      description: {
+        ar: 'أربعة تبويبات بجانب شاشة المنصة. صورة كل شاشة ووصفها في «شاشات المنصة».',
+        en: 'Four tabs beside a screen of the platform. Each screen’s picture and description are under Screen mocks.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 80),
+        wordsField('lead', LEAD, 280, { multiline: true }),
+        listField({
+          name: 'units',
+          labels: { singular: { ar: 'وحدة', en: 'Unit' }, plural: { ar: 'الوحدات', en: 'Units' } },
+          rows: { min: 4, max: 4 },
+          description: {
+            ar: 'أربع دائماً، وشاشة كل تبويب وأيقونته ثابتتان بمكانه: المراسلات، ثم الاعتمادات، ثم التقرير اليومي، ثم المستندات.',
+            en: 'Always four, and each tab’s screen and icon are fixed by its place: correspondence, then approvals, then the daily site report, then documents.',
+          },
+          fields: [
+            wordsField('name', { ar: 'اسم الوحدة، على التبويب', en: 'Unit, on the tab' }, 50),
+            wordsField('text', { ar: 'ما تفعله، تحت اسمها حين يُختار التبويب', en: 'What it does, under its name while the tab is chosen' }, 400, {
+              multiline: true,
+            }),
+          ],
+        }),
+        wordsField('output', { ar: 'السطر تحت التبويبات', en: 'Line under the tabs' }, 200),
+      ],
+    }),
+    sectionTab({
+      name: 'record',
+      label: { ar: '08 السجل الموثّق', en: '08 The documented Record' },
+      hideable: true,
+      description: {
+        ar: 'بطاقة مثال لخطاب والخطوات الأربع التي مرّ بها.',
+        en: 'An example card: a letter, and the four steps it went through.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 100),
+        wordsField('body', LEAD, 600, { multiline: true }),
+        {
+          type: 'row',
+          fields: [
+            latinField('code', { ar: 'رقم المستند في البطاقة، مثل LTR-088', en: 'The card’s document number, like LTR-088' }, 16),
+            wordsField('document', { ar: 'المستند', en: 'Document' }, 70),
+            wordsField('example', { ar: 'الوسم بجانبه', en: 'Tag beside it' }, 40, {
+              description: { ar: 'يقول إن البطاقة مثال.', en: 'Says the card is an example.' },
+            }),
+          ],
+        },
+        listField({
+          name: 'steps',
+          labels: { singular: { ar: 'خطوة', en: 'Step' }, plural: { ar: 'الخطوات', en: 'Steps' } },
+          rows: { min: 4, max: 4 },
+          description: { ar: 'أربع دائماً، بترتيبها في البطاقة.', en: 'Always four, in their order on the card.' },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                wordsField('verb', { ar: 'ما حدث', en: 'What happened' }, 30),
+                wordsField('who', { ar: 'من قام به', en: 'Who did it' }, 50),
+                latinField('time', { ar: 'الوقت، مثل 08:15', en: 'Time, like 08:15' }, 8),
+              ],
+            },
+          ],
+        }),
+        wordsField('summary', { ar: 'السطر في آخر البطاقة', en: 'Line at the foot of the card' }, 70),
+      ],
+    }),
+    compareTab(),
     // 10 to 14, the contact section and the floating WhatsApp button (ticket 109).
     ...profileCloseTabs(),
     // The header's Download PDF button (ticket 104): this page's alone.

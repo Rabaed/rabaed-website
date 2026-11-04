@@ -2,7 +2,7 @@ import { APIError, type CollectionConfig } from 'payload';
 import sharp from 'sharp';
 import { signedIn } from '../access';
 import { localSharingImageDirectory } from '../environment';
-import { refreshSiteWhenImageChanges } from '../revalidation';
+import { refreshSiteWhenUploadChanges } from '../revalidation';
 
 /**
  * The picture a page shows when its link is shared — on WhatsApp, on LinkedIn,
@@ -108,7 +108,7 @@ export const SharingImages: CollectionConfig = {
       },
     ],
     /** Whatever page shows the image is built again with it (ticket 84). */
-    afterChange: [refreshSiteWhenImageChanges],
-    afterDelete: [refreshSiteWhenImageChanges],
+    afterChange: [refreshSiteWhenUploadChanges],
+    afterDelete: [refreshSiteWhenUploadChanges],
   },
 };

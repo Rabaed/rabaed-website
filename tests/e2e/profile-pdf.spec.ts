@@ -83,7 +83,9 @@ async function previewInEnglish(cms: Cms) {
   const proposal = (await siteWords.drafts()).find((draft) => draft.version.header.demoLabel.en === PROPOSED_ENGLISH_DEMO);
   expect(proposal, 'no draft carries the English site words proposed').toBeTruthy();
   await siteWords.restoreVersion(proposal!);
-  for (const slug of ['trust-strip', 'profile-page'] as const) {
+  // The Screen mocks too, which section 07 shows: whether English is waiting
+  // as their newest draft depends on what the suite before put back.
+  for (const slug of ['trust-strip', 'screen-mocks', 'profile-page'] as const) {
     const entry = cms.entry(slug);
     await entry.draft({ ...(await entry.published()), languages: ['ar', 'en'] });
   }
@@ -251,8 +253,9 @@ test.describe('Download PDF', () => {
   test('an Editor’s replacement is what downloads next, under its own name, and the other files stay Ahmed’s', async ({ page, cms }, testInfo) => {
     // A real PDF, which the CMS checks a PDF is, but not the Arabic one —
     // Ahmed's English phone file — named as an Editor's file is, and as no
-    // other run has named one. The CMS keeps it as `profile-…` in the bucket
-    // (`profile-files`); the visitor saves it under the name it was given.
+    // other run has named one. The CMS keeps it under that name, in the
+    // bucket's `profile/` folder (`profile-files`), and the visitor saves it
+    // under the same name.
     const name = `Rabaed-Profile-Replacement-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
     const replacement = await kept(PDF.en.phone);
     const uploaded = await page.request.post('/api/profile-files', {
@@ -260,7 +263,7 @@ test.describe('Download PDF', () => {
     });
     expect(uploaded.ok(), await uploaded.text()).toBe(true);
     const { doc } = (await uploaded.json()) as { doc: { id: number; url: string; filename: string } };
-    expect(doc.filename, 'kept in the bucket under a name of its own').toBe(`profile-${name}`);
+    expect(doc.filename, 'kept under the name it was uploaded with').toBe(name);
 
     try {
       const profile = cms.entry('profile-page');

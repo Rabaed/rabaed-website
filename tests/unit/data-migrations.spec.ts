@@ -63,12 +63,18 @@ import { PARTNERSHIP_PAGE_SEED } from '../../src/migrations/partnership-page-imp
 import { PARTNERSHIP_PAGE_WORDS } from '../../src/migrations/partnership-page-import/words';
 import { PROFILE_CLOSE_SEED } from '../../src/migrations/profile-close-import/seed';
 import { PROFILE_CLOSE_WORDS } from '../../src/migrations/profile-close-import/words';
+import { PROFILE_COMPARE_SEED } from '../../src/migrations/profile-compare-import/seed';
+import { PROFILE_COMPARE_WORDS } from '../../src/migrations/profile-compare-import/words';
 import { PROFILE_COST_SEED } from '../../src/migrations/profile-cost-import/seed';
 import { PROFILE_COST_WORDS } from '../../src/migrations/profile-cost-import/words';
+import { PROFILE_OPENING_SEED } from '../../src/migrations/profile-opening-sections/seed';
+import { PROFILE_OPENING_WORDS } from '../../src/migrations/profile-opening-sections/words';
 import { PROFILE_PAGE_SEED } from '../../src/migrations/profile-page-import/seed';
 import { PROFILE_PAGE_WORDS } from '../../src/migrations/profile-page-import/words';
 import { PROFILE_PDF_LABEL_SEED } from '../../src/migrations/profile-pdf-label/seed';
 import { PROFILE_PDF_LABEL } from '../../src/migrations/profile-pdf-label/words';
+import { PROFILE_SOLUTION_SEED } from '../../src/migrations/profile-solution-sections/seed';
+import { PROFILE_SOLUTION_WORDS } from '../../src/migrations/profile-solution-sections/words';
 import { PRODUCT_PAGE_SEED } from '../../src/migrations/product-page-import/seed';
 import {
   CLOSING_SECTION_WORDS,
@@ -174,6 +180,9 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     seed: ENGLISH_LAUNCH_ARTICLES_SEED,
   },
   { name: 'the Company profile', words: PROFILE_PAGE_WORDS, seed: PROFILE_PAGE_SEED },
+  { name: 'the Company profile’s sections 01 to 04', words: PROFILE_OPENING_WORDS, seed: PROFILE_OPENING_SEED },
+  { name: 'the Company profile’s sections 06 to 08', words: PROFILE_SOLUTION_WORDS, seed: PROFILE_SOLUTION_SEED },
+  { name: 'the Company profile’s before and after', words: PROFILE_COMPARE_WORDS, seed: PROFILE_COMPARE_SEED },
   { name: 'the Company profile’s calculator button', words: PROFILE_COST_WORDS, seed: PROFILE_COST_SEED },
   { name: 'the Company profile’s Download PDF button', words: PROFILE_PDF_LABEL, seed: PROFILE_PDF_LABEL_SEED },
   { name: 'the Company profile’s close, 10 to 14 and the contact section', words: PROFILE_CLOSE_WORDS, seed: PROFILE_CLOSE_SEED },

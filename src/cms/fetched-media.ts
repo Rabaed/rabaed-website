@@ -1,11 +1,14 @@
-import type { Media, SharingImage } from '@/payload-types';
+import type { Media, ProfileFile, SharingImage } from '@/payload-types';
 
 /**
- * An image field's value as a page can draw it: the image, when it was fetched
- * along with its entry — otherwise the field holds only its id — and `null`
- * when there is none, as in a draft not finished yet.
+ * An upload field's value as a page can draw it: the image — or, for the
+ * Company profile's files, the video or PDF (`ProfileFile`) — when it was
+ * fetched along with its entry — otherwise the field holds only its id — and
+ * `null` when there is none, as in a draft not finished yet.
  */
-export function fetchedMedia(value: number | Media | null | undefined): Media | null {
+export function fetchedMedia<Upload extends Media | ProfileFile = Media>(
+  value: number | Upload | null | undefined,
+): Upload | null {
   return value && typeof value === 'object' ? value : null;
 }
 

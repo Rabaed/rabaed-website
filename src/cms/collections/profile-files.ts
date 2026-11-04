@@ -1,34 +1,46 @@
-import { APIError, type CollectionConfig } from 'payload';
+import path from 'node:path';
+import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { APIError, type CollectionConfig, type PayloadRequest } from 'payload';
 import { signedIn } from '../access';
-import { localProfileFileDirectory } from '../environment';
-import { refreshSiteWhenImageChanges } from '../revalidation';
+import { localProfileFileDirectory, mediaBucket } from '../environment';
+import { inAdminLanguage } from '../page-fields';
+import { refreshSiteWhenUploadChanges } from '../revalidation';
+import { uploadedFile } from '../uploaded-file';
 
 /**
- * The largest file an Editor can upload here, in megabytes. **This is
- * Vercel's limit, not the site's**: a request sent to a deployment carries at
- * most about 4.5 MB (Vercel Functions' request body limit), and an upload goes
- * up through one, so a larger file is refused before the CMS ever sees it,
- * with an error that says nothing useful. Held here a little under that, with
- * a message that does say, so that an Editor on a local machine, where the
- * limit is not, finds the same rule as on rabaedapp.com.
+ * The largest file an Editor can upload here, in megabytes.
  *
- * Ahmed's videos are 0.8 to 5.4 MB, and his PDFs about 1.7 to 2.0 MB. His
- * largest video, Documents, is a default in `public/` and is never uploaded.
+ * A file goes from the Editor's browser straight to the bucket
+ * (`clientUploads` in `payload.config.ts`), so the deployment's 4.5 MB limit
+ * on a request does not apply. This one is the site's: a video on the page is
+ * downloaded by every visitor who watches it. It stays under Payload's own
+ * `upload.limits.fileSize`, 10 MB, past which Payload cuts a file short
+ * instead of refusing it, so that a file too large is refused here, with a
+ * message that says so.
+ *
+ * Ahmed's videos are 0.8 to 5.4 MB, and his PDFs about 1.7 to 2.0 MB.
  */
-export const LARGEST_PROFILE_FILE_MB = 4;
+export const LARGEST_PROFILE_FILE_MB = 8;
 
 const LARGEST_PROFILE_FILE_BYTES = LARGEST_PROFILE_FILE_MB * 1024 * 1024;
 
+/**
+ * The bucket's folder the files are kept in. The bucket is the one the site's
+ * images are kept in, and a file there under a name an image already has
+ * would replace it.
+ */
+export const PROFILE_FILE_FOLDER = 'profile';
+
 /** What the admin says a video must be, wherever it asks for one. */
 export const VIDEO_RULE = {
-  ar: `ملف MP4 بترميز H.264 وبلا صوت، حجمه ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر: الموقع لا يستقبل ملفاً أكبر. اضغط الفيديو قبل رفعه إن كان أكبر.`,
-  en: `An MP4 in H.264 with no sound, ${LARGEST_PROFILE_FILE_MB} MB at most: the site cannot take a larger file. Compress a larger video before uploading it.`,
+  ar: `ملف MP4 بترميز H.264 وبلا صوت، حجمه ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر. اضغط الفيديو قبل رفعه إن كان أكبر.`,
+  en: `An MP4 in H.264 with no sound, ${LARGEST_PROFILE_FILE_MB} MB at most. Compress a larger video before uploading it.`,
 } as const;
 
 /** What the admin says a PDF must be. */
 export const PDF_RULE = {
-  ar: `ملف PDF حجمه ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر: الموقع لا يستقبل ملفاً أكبر.`,
-  en: `A PDF of ${LARGEST_PROFILE_FILE_MB} MB at most: the site cannot take a larger file.`,
+  ar: `ملف PDF حجمه ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر.`,
+  en: `A PDF of ${LARGEST_PROFILE_FILE_MB} MB at most.`,
 } as const;
 
 /**
@@ -36,15 +48,39 @@ export const PDF_RULE = {
  * says, as the sharing images are measured: an MP4 begins with its `ftyp`
  * box, four bytes in, and a PDF with `%PDF-`.
  */
-function kindOf(data: Buffer): 'video' | 'pdf' | null {
-  if (data.length >= 12 && data.toString('latin1', 4, 8) === 'ftyp') return 'video';
-  if (data.toString('latin1', 0, 5) === '%PDF-') return 'pdf';
+function kindOf(start: Buffer): 'video' | 'pdf' | null {
+  if (start.length >= 12 && start.toString('latin1', 4, 8) === 'ftyp') return 'video';
+  if (start.toString('latin1', 0, 5) === '%PDF-') return 'pdf';
   return null;
 }
 
+/** As much of a file as `kindOf` reads. */
+const START_BYTES = 12;
+
 /**
- * The Company profile's files, kept exactly as they were uploaded: the five
- * before-and-after videos (ticket 108) and the four Profile PDFs (ticket 104).
+ * A file the Editor's browser had already put in the bucket, taken out of it
+ * again once it is refused: the bucket is public, and nothing else would
+ * ever remove it.
+ */
+async function forgetSentFile(file: NonNullable<PayloadRequest['file']>): Promise<void> {
+  const bucket = mediaBucket();
+  if (!bucket || !('clientUploadContext' in file)) return;
+  const context = file.clientUploadContext as { prefix?: string } | undefined;
+  const client = new S3Client({
+    endpoint: bucket.endpoint,
+    region: bucket.region,
+    // Supabase Storage answers S3 requests by path, not by subdomain.
+    forcePathStyle: true,
+    credentials: { accessKeyId: bucket.accessKeyId, secretAccessKey: bucket.secretAccessKey },
+  });
+  const key = path.posix.join(context?.prefix || PROFILE_FILE_FOLDER, file.name);
+  await client.send(new DeleteObjectCommand({ Bucket: bucket.bucket, Key: key }));
+}
+
+/**
+ * The Company profile's files, kept exactly as they were uploaded, under the
+ * name they were uploaded with: the five before-and-after videos (ticket 108)
+ * and the four Profile PDFs (ticket 104).
  *
  * A collection of its own because `media` turns every upload into WebP
  * (`./media.ts`): what is uploaded here is what is served, as the sharing
@@ -63,8 +99,8 @@ export const ProfileFiles: CollectionConfig = {
   },
   admin: {
     description: {
-      ar: `فيديوهات «قبل وبعد» وملفات الـPDF الأربعة للملف التعريفي، محفوظة كما رُفعت. MP4 أو PDF، ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر للملف: الموقع لا يستقبل ملفاً أكبر.`,
-      en: `The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, ${LARGEST_PROFILE_FILE_MB} MB at most each: the site cannot take a larger file.`,
+      ar: `فيديوهات «قبل وبعد» وملفات الـPDF الأربعة للملف التعريفي، محفوظة كما رُفعت. MP4 أو PDF، ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر للملف.`,
+      en: `The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, ${LARGEST_PROFILE_FILE_MB} MB at most each.`,
     },
   },
   access: {
@@ -84,35 +120,27 @@ export const ProfileFiles: CollectionConfig = {
      * Before anything is written or unwritten, for the reason the sharing
      * images give: a replacement refused any later would already have deleted
      * the file it replaces.
-     *
-     * Each file is named `profile-…` too: the bucket is the one the site's
-     * images are kept in, and a name taken there would be overwritten.
      */
     beforeOperation: [
-      ({ operation, req }) => {
+      async ({ operation, req }) => {
         const file = req.file;
-        if ((operation !== 'create' && operation !== 'update') || !file?.data) return;
-        const english = req?.i18n?.language === 'en';
-
-        if (!kindOf(file.data)) {
-          throw new APIError(english ? 'This must be an MP4 or a PDF.' : 'الملف يجب أن يكون MP4 أو PDF.', 400, undefined, true);
-        }
-        if (file.data.length > LARGEST_PROFILE_FILE_BYTES) {
-          const size = (file.data.length / 1024 / 1024).toFixed(1);
-          throw new APIError(
-            english
-              ? `A file can be ${LARGEST_PROFILE_FILE_MB} MB at most, and this one is ${size} MB. Compress it, then upload it again.`
-              : `الملف ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر، وهذا ${size} ميغابايت. اضغطه ثم ارفعه من جديد.`,
-            400,
-            undefined,
-            true,
-          );
-        }
-        if (!file.name.startsWith('profile-')) file.name = `profile-${file.name}`;
+        if ((operation !== 'create' && operation !== 'update') || !file) return;
+        const { start, size } = await uploadedFile(file, START_BYTES);
+        const refusal = !kindOf(start)
+          ? { ar: 'الملف يجب أن يكون MP4 أو PDF.', en: 'This must be an MP4 or a PDF.' }
+          : size > LARGEST_PROFILE_FILE_BYTES
+            ? {
+                ar: `الملف ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر، وهذا ${(size / 1024 / 1024).toFixed(1)} ميغابايت. اضغطه ثم ارفعه من جديد.`,
+                en: `A file can be ${LARGEST_PROFILE_FILE_MB} MB at most, and this one is ${(size / 1024 / 1024).toFixed(1)} MB. Compress it, then upload it again.`,
+              }
+            : null;
+        if (!refusal) return;
+        await forgetSentFile(file);
+        throw new APIError(inAdminLanguage(req, refusal), 400, undefined, true);
       },
     ],
     /** The page that shows it is built again with it (ticket 84). */
-    afterChange: [refreshSiteWhenImageChanges],
-    afterDelete: [refreshSiteWhenImageChanges],
+    afterChange: [refreshSiteWhenUploadChanges],
+    afterDelete: [refreshSiteWhenUploadChanges],
   },
 };
