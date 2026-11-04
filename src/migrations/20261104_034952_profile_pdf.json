@@ -4065,6 +4065,139 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.profile_files": {
+      "name": "profile_files",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thumbnail_u_r_l": {
+          "name": "thumbnail_u_r_l",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filesize": {
+          "name": "filesize",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "width": {
+          "name": "width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "height": {
+          "name": "height",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "focal_x": {
+          "name": "focal_x",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "focal_y": {
+          "name": "focal_y",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "profile_files_updated_at_idx": {
+          "name": "profile_files_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_files_created_at_idx": {
+          "name": "profile_files_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_files_filename_idx": {
+          "name": "profile_files_filename_idx",
+          "columns": [
+            {
+              "expression": "filename",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.payload_kv": {
       "name": "payload_kv",
       "schema": "",
@@ -4284,6 +4417,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "profile_files_id": {
+          "name": "profile_files_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -4481,6 +4620,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "payload_locked_documents_rels_profile_files_id_idx": {
+          "name": "payload_locked_documents_rels_profile_files_id_idx",
+          "columns": [
+            {
+              "expression": "profile_files_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -4620,6 +4774,19 @@
           "tableTo": "pour_tracker_releases",
           "columnsFrom": [
             "pour_tracker_releases_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_profile_files_fk": {
+          "name": "payload_locked_documents_rels_profile_files_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "profile_files_id"
           ],
           "columnsTo": [
             "id"
@@ -37310,6 +37477,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "pdf_arabic_id": {
+          "name": "pdf_arabic_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pdf_arabic_phone_id": {
+          "name": "pdf_arabic_phone_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pdf_english_id": {
+          "name": "pdf_english_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pdf_english_phone_id": {
+          "name": "pdf_english_phone_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "search_title_ar": {
           "name": "search_title_ar",
           "type": "varchar",
@@ -37362,6 +37553,66 @@
         }
       },
       "indexes": {
+        "profile_page_pdf_pdf_arabic_idx": {
+          "name": "profile_page_pdf_pdf_arabic_idx",
+          "columns": [
+            {
+              "expression": "pdf_arabic_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page_pdf_pdf_arabic_phone_idx": {
+          "name": "profile_page_pdf_pdf_arabic_phone_idx",
+          "columns": [
+            {
+              "expression": "pdf_arabic_phone_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page_pdf_pdf_english_idx": {
+          "name": "profile_page_pdf_pdf_english_idx",
+          "columns": [
+            {
+              "expression": "pdf_english_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page_pdf_pdf_english_phone_idx": {
+          "name": "profile_page_pdf_pdf_english_phone_idx",
+          "columns": [
+            {
+              "expression": "pdf_english_phone_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "profile_page_search_search_sharing_image_idx": {
           "name": "profile_page_search_search_sharing_image_idx",
           "columns": [
@@ -37394,6 +37645,58 @@
         }
       },
       "foreignKeys": {
+        "profile_page_pdf_arabic_id_profile_files_id_fk": {
+          "name": "profile_page_pdf_arabic_id_profile_files_id_fk",
+          "tableFrom": "profile_page",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "pdf_arabic_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "profile_page_pdf_arabic_phone_id_profile_files_id_fk": {
+          "name": "profile_page_pdf_arabic_phone_id_profile_files_id_fk",
+          "tableFrom": "profile_page",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "pdf_arabic_phone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "profile_page_pdf_english_id_profile_files_id_fk": {
+          "name": "profile_page_pdf_english_id_profile_files_id_fk",
+          "tableFrom": "profile_page",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "pdf_english_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "profile_page_pdf_english_phone_id_profile_files_id_fk": {
+          "name": "profile_page_pdf_english_phone_id_profile_files_id_fk",
+          "tableFrom": "profile_page",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "pdf_english_phone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "profile_page_search_sharing_image_id_sharing_images_id_fk": {
           "name": "profile_page_search_sharing_image_id_sharing_images_id_fk",
           "tableFrom": "profile_page",
@@ -37894,6 +38197,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "version_pdf_arabic_id": {
+          "name": "version_pdf_arabic_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_pdf_arabic_phone_id": {
+          "name": "version_pdf_arabic_phone_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_pdf_english_id": {
+          "name": "version_pdf_english_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_pdf_english_phone_id": {
+          "name": "version_pdf_english_phone_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "version_search_title_ar": {
           "name": "version_search_title_ar",
           "type": "varchar",
@@ -37966,6 +38293,66 @@
         }
       },
       "indexes": {
+        "_profile_page_v_version_pdf_version_pdf_arabic_idx": {
+          "name": "_profile_page_v_version_pdf_version_pdf_arabic_idx",
+          "columns": [
+            {
+              "expression": "version_pdf_arabic_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_pdf_version_pdf_arabic_phone_idx": {
+          "name": "_profile_page_v_version_pdf_version_pdf_arabic_phone_idx",
+          "columns": [
+            {
+              "expression": "version_pdf_arabic_phone_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_pdf_version_pdf_english_idx": {
+          "name": "_profile_page_v_version_pdf_version_pdf_english_idx",
+          "columns": [
+            {
+              "expression": "version_pdf_english_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_pdf_version_pdf_english_phone_idx": {
+          "name": "_profile_page_v_version_pdf_version_pdf_english_phone_idx",
+          "columns": [
+            {
+              "expression": "version_pdf_english_phone_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "_profile_page_v_version_search_version_search_sharing_im_idx": {
           "name": "_profile_page_v_version_search_version_search_sharing_im_idx",
           "columns": [
@@ -38043,6 +38430,58 @@
         }
       },
       "foreignKeys": {
+        "_profile_page_v_version_pdf_arabic_id_profile_files_id_fk": {
+          "name": "_profile_page_v_version_pdf_arabic_id_profile_files_id_fk",
+          "tableFrom": "_profile_page_v",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "version_pdf_arabic_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "_profile_page_v_version_pdf_arabic_phone_id_profile_files_id_fk": {
+          "name": "_profile_page_v_version_pdf_arabic_phone_id_profile_files_id_fk",
+          "tableFrom": "_profile_page_v",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "version_pdf_arabic_phone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "_profile_page_v_version_pdf_english_id_profile_files_id_fk": {
+          "name": "_profile_page_v_version_pdf_english_id_profile_files_id_fk",
+          "tableFrom": "_profile_page_v",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "version_pdf_english_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "_profile_page_v_version_pdf_english_phone_id_profile_files_id_fk": {
+          "name": "_profile_page_v_version_pdf_english_phone_id_profile_files_id_fk",
+          "tableFrom": "_profile_page_v",
+          "tableTo": "profile_files",
+          "columnsFrom": [
+            "version_pdf_english_phone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "_profile_page_v_version_search_sharing_image_id_sharing_images_id_fk": {
           "name": "_profile_page_v_version_search_sharing_image_id_sharing_images_id_fk",
           "tableFrom": "_profile_page_v",
@@ -39048,6 +39487,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "55515850-021f-4c33-82d7-21e0ed118fa5",
+  "id": "12cb3da1-aeaf-4e35-a9cf-2f858c5f584d",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

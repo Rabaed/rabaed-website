@@ -29,6 +29,10 @@ import { test, expect, type Cms } from './entries';
 import { HEADER_BACKGROUND_OVER_DARK, HEADER_BACKGROUND_OVER_LIGHT } from './header-colours';
 import { ROUTES } from './routes';
 
+// One test at a time: they draft the same entries, and one test putting its
+// entry back would take away the draft another is previewing.
+test.describe.configure({ mode: 'default' });
+
 /** Ahmed's four files, as the site keeps them (`public/profile/pdf/`). */
 const PDF = {
   ar: { desktop: '/profile/pdf/Rabaed-Profile-V4-AR.pdf', phone: '/profile/pdf/Rabaed-Profile-V4-AR-mobile.pdf' },
@@ -191,6 +195,42 @@ test.describe('Download PDF', () => {
       expect(response.status(), file).toBe(200);
       expect(response.headers()['content-type'], file).toBe('application/pdf');
       expect((await response.body()).equals(await kept(file)), file).toBe(true);
+    }
+  });
+
+  test('an Editor’s replacement is what downloads next, under its own name, and the other files stay Ahmed’s', async ({ page, cms }, testInfo) => {
+    // A real PDF, which the CMS checks a PDF is, but not the Arabic one —
+    // Ahmed's English phone file — under a name no other run has used.
+    const name = `profile-replacement-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
+    const replacement = await kept(PDF.en.phone);
+    const uploaded = await page.request.post('/api/profile-files', {
+      multipart: { file: { name, mimeType: 'application/pdf', buffer: replacement } },
+    });
+    expect(uploaded.ok(), await uploaded.text()).toBe(true);
+    const { doc } = (await uploaded.json()) as { doc: { id: number; url: string; filename: string } };
+
+    try {
+      const profile = cms.entry('profile-page');
+      const saved = await profile.published();
+      await profile.draft({ ...saved, pdf: { ...saved.pdf, arabic: doc.id } });
+
+      await page.setViewportSize(DESKTOP);
+      await cms.preview('/profile');
+      await expect(barButton(page)).toHaveAttribute('href', doc.url);
+      const arriving = page.waitForEvent('download');
+      await barButton(page).click();
+      const download = await arriving;
+      expect(download.suggestedFilename()).toBe(doc.filename);
+      const file = testInfo.outputPath(download.suggestedFilename());
+      await download.saveAs(file);
+      expect((await readFile(file)).equals(replacement)).toBe(true);
+
+      // The phone's file was not replaced, so it is still Ahmed's.
+      await page.setViewportSize(PHONE);
+      await expect(panelButton(page)).toHaveAttribute('href', PDF.ar.phone);
+    } finally {
+      await cms.end();
+      await page.request.delete(`/api/profile-files/${doc.id}`);
     }
   });
 

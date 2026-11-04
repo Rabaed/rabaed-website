@@ -4,7 +4,7 @@ import { PROFILE_PDF_LABEL_SEED, PROFILE_PDF_LABEL_UNSEED } from './profile-pdf-
 /**
  * Writes the words on the Company profile's Download PDF button (ticket 104),
  * «تنزيل PDF» and "Download PDF", into its entry, which ticket 102 imported
- * unpublished. Without them the field `20261104_023919_profile_pdf` adds would
+ * unpublished. Without them the field `20261104_034952_profile_pdf` adds would
  * be empty, and the CMS would refuse the founder's publish.
  *
  * The statements are in `profile-pdf-label/seed.ts`, and the words in

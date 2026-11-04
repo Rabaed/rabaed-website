@@ -1,7 +1,32 @@
-import { buttonLinkField, listField, sectionTab, wordsField } from '../page-fields';
+import type { Field } from 'payload';
+import { PDF_RULE } from '../collections/profile-files';
+import { buttonLinkField, listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
+
+/**
+ * One of the four Profile PDFs (ticket 104): a file an Editor uploads to the
+ * Company profile's files, kept exactly as uploaded (`profile-files`). Left
+ * empty, the page gives Ahmed's file, kept with the site's code in
+ * `public/profile/pdf/`; uploaded, the replacement is what downloads next,
+ * under its own name. Only a PDF can be chosen.
+ */
+function profilePdfField(name: string, label: Words, file: string): Field {
+  return {
+    name,
+    type: 'upload',
+    relationTo: 'profile-files',
+    label,
+    filterOptions: { mimeType: { equals: 'application/pdf' } },
+    admin: {
+      description: {
+        ar: `${PDF_RULE.ar} اتركه فارغاً ليُنزَّل ملف أحمد المحفوظ مع الموقع، ${file}.`,
+        en: `${PDF_RULE.en} Leave it empty to give Ahmed’s file, kept with the site: ${file}.`,
+      },
+    },
+  };
+}
 
 /**
  * The Company profile's words, section by section, in the page's order
@@ -126,7 +151,23 @@ export const ProfilePage = pageGlobal({
         ar: 'زر «تنزيل PDF» في أعلى هذه الصفحة وحدها، بجانب «تسجيل الدخول»: يُنزّل الملف التعريفي بلغة الصفحة، بنسخة الجوال لمن شاشته 980 بكسل أو أضيق.',
         en: 'The Download PDF button at the top of this page alone, beside Sign in: it downloads the profile in the page’s language, the phone version on a screen 980px wide or narrower.',
       },
-      fields: [wordsField('label', { ar: 'كلمة الزر', en: 'Button label' }, 16)],
+      fields: [
+        wordsField('label', { ar: 'كلمة الزر', en: 'Button label' }, 16),
+        {
+          type: 'row',
+          fields: [
+            profilePdfField('arabic', { ar: 'العربي', en: 'Arabic' }, 'Rabaed-Profile-V4-AR.pdf'),
+            profilePdfField('arabicPhone', { ar: 'العربي للجوال', en: 'Arabic, for a phone' }, 'Rabaed-Profile-V4-AR-mobile.pdf'),
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            profilePdfField('english', { ar: 'الإنجليزي', en: 'English' }, 'Rabaed-Profile-V4-EN.pdf'),
+            profilePdfField('englishPhone', { ar: 'الإنجليزي للجوال', en: 'English, for a phone' }, 'Rabaed-Profile-V4-EN-mobile.pdf'),
+          ],
+        },
+      ],
     },
     searchTab(),
   ],

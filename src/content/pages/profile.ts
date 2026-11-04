@@ -46,12 +46,27 @@ const DEFAULT_PDFS: Readonly<Record<Locale, Omit<ProfilePdf, 'label'>>> = {
   en: { desktop: '/profile/pdf/Rabaed-Profile-V4-EN.pdf', phone: '/profile/pdf/Rabaed-Profile-V4-EN-mobile.pdf' },
 };
 
+type Screen = keyof Omit<ProfilePdf, 'label'>;
+
+/** Where an Editor's replacement for each file is kept in the entry (`src/cms/globals/profile-page.ts`). */
+const UPLOADED = {
+  ar: { desktop: 'arabic', phone: 'arabicPhone' },
+  en: { desktop: 'english', phone: 'englishPhone' },
+} as const satisfies Record<Locale, Record<Screen, Exclude<keyof ProfilePage['pdf'], 'label'>>>;
+
+/** An uploaded file's address, where the entry names one that is there. */
+function uploadedFile(value: ProfilePage['pdf']['arabic']): string | null {
+  return value && typeof value === 'object' && value.url ? value.url : null;
+}
+
 /**
- * The one place the four files come from: the page's language's pair, Ahmed's
- * defaults until an Editor uploads a replacement for one of them.
+ * The one place the four files come from: the page's language's pair, each
+ * an Editor's replacement where one is uploaded (`profile-files`, served as
+ * uploaded, under its own name) and otherwise Ahmed's default.
  */
-function profilePdfs(locale: Locale): Omit<ProfilePdf, 'label'> {
-  return DEFAULT_PDFS[locale];
+function profilePdfs(locale: Locale, pdf: ProfilePage['pdf']): Omit<ProfilePdf, 'label'> {
+  const file = (screen: Screen) => uploadedFile(pdf[UPLOADED[locale][screen]]) ?? DEFAULT_PDFS[locale][screen];
+  return { desktop: file('desktop'), phone: file('phone') };
 }
 
 /** The hero's four statuses, which the drawing's loop counts, filled out to four for a draft being previewed. */
@@ -105,6 +120,6 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
-    pdf: { label: words(entry.pdf.label), ...profilePdfs(locale) },
+    pdf: { label: words(entry.pdf.label), ...profilePdfs(locale, entry.pdf) },
   };
 }
