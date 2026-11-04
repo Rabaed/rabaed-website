@@ -255,7 +255,7 @@ test('a video and a poster an Editor uploads are the ones served', async ({ page
   const buffer = await readFile(path.join(clips, '05-daily-report.mp4'));
   const uploaded = await uploadProfileFile(page, { name: 'approvals-again.mp4', mimeType: 'video/mp4', buffer });
   expect(uploaded.ok(), await uploaded.text()).toBe(true);
-  const replacement = (await uploaded.json()).doc as { id: number; url: string; filename: string };
+  const replacement = (await uploaded.json()).doc as { id: number; url: string; filename: string; originalName: string };
   const poster = await page.request.post('/api/media', {
     multipart: { file: await pictureFile({ width: 1600, height: 900 }), _payload: JSON.stringify({ alt: 'صورة المقارنة' }) },
   });
@@ -265,6 +265,9 @@ test('a video and a poster an Editor uploads are the ones served', async ({ page
   try {
     // Kept as it was uploaded, under a name of its own in the bucket.
     expect(replacement.filename).toMatch(/^profile-.*\.mp4$/);
+    // The name it had on the Editor's computer, for the admin to show them.
+    expect(replacement.originalName).toMatch(/-approvals-again\.mp4$/);
+    expect(replacement.filename).toBe(`profile-${replacement.originalName}`);
 
     // A new video is not published without its own poster: Ahmed's would stand in for it.
     const alone = await profile.attempt(
