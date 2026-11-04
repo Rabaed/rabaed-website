@@ -43,7 +43,7 @@ export function Numbers({ content }: { content: ProfileNumbersContent }) {
         </ul>
         <p className="pf-source">{content.source}</p>
       </div>
-      <CountUp within="numbers" />
+      <CountUp section="numbers" />
     </section>
   );
 }

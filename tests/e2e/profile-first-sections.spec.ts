@@ -14,6 +14,7 @@
  * rather than imported from the migration, for the reason `routes.ts` gives.
  */
 import type { Page } from '@playwright/test';
+import { transparentMark, uploadFile } from './cms';
 import { test, expect } from './entries';
 import { sidewaysOverflow, whatOverflows } from './geometry';
 
@@ -73,7 +74,7 @@ test('01, the truth: Ahmed’s words, and his redacted paper photo with its thre
   await expect(truth.locator('figcaption')).toHaveText(TRUTH.caption);
   await expect(truth.locator('.pf-note')).toHaveText(TRUTH.notes);
 
-  // Ahmed's photo, the smaller file for a phone: the default an Editor may replace.
+  // Ahmed's photo, with a smaller file for a phone: the default an Editor may replace.
   const photo = truth.locator('figure img');
   await expect(photo).toHaveAttribute('src', /\/profile\/paper-800\.webp$/);
   await expect(photo).toHaveAttribute('srcset', /\/profile\/paper-480\.webp 480w/);
@@ -96,6 +97,34 @@ test('01, the truth: Ahmed’s words, and his redacted paper photo with its thre
   await cms.preview('/profile');
   await expect(truth.locator('h2')).toHaveText('عنوان المحرر');
   await expect(truth.locator('.pf-note').nth(2)).toHaveText('من يحملها؟');
+});
+
+test('01’s paper photo is an Editor’s to replace, the red notes staying where they are pinned', async ({ page, cms }) => {
+  const profile = cms.entry('profile-page');
+  const saved = await profile.published();
+  const replacement = await uploadFile(
+    page.request,
+    { name: 'paper.png', mimeType: 'image/png', buffer: await transparentMark({ width: 800, height: 1069 }) },
+    'طلب اعتماد ورقي آخر',
+  );
+
+  try {
+    await profile.draft({ ...saved, truth: { ...saved.truth, photo: replacement.id } });
+    await cms.preview('/profile');
+    const truth = section(page, 'truth');
+    const photo = truth.locator('figure img');
+    await expect(photo).toHaveAttribute('src', replacement.url);
+    await expect(photo).toHaveAttribute('alt', 'طلب اعتماد ورقي آخر');
+    await expect(truth.locator('.pf-note')).toHaveText(TRUTH.notes);
+
+    // Taken out again, Ahmed's is back.
+    await profile.draft({ ...saved, truth: { ...saved.truth, photo: null } });
+    await cms.preview('/profile');
+    await expect(photo).toHaveAttribute('src', /\/profile\/paper-800\.webp$/);
+  } finally {
+    await profile.restore();
+    await page.request.delete(`/api/media/${replacement.id}`);
+  }
 });
 
 test('02, the real site: three figures, their labels and their source, whole in the first response', async ({ page, cms }) => {

@@ -6,7 +6,7 @@ export type PaperPhoto = {
   readonly srcSet: string;
   readonly width: number;
   readonly height: number;
-  /** Read out in place of the photo; Ahmed's is described by the caption under it. */
+  /** Read out in place of the photo: empty for Ahmed's, which the caption under it describes. */
   readonly alt: string;
 };
 
@@ -20,16 +20,18 @@ export type ProfileTruthContent = {
   readonly notes: readonly [string, string, string];
 };
 
-/** Ahmed's photo, from `public/profile/`, at its two widths. */
-export function defaultPaperPhoto(alt: string): PaperPhoto {
-  return {
-    src: '/profile/paper-800.webp',
-    srcSet: '/profile/paper-480.webp 480w, /profile/paper-800.webp 800w',
-    width: 800,
-    height: 1069,
-    alt,
-  };
-}
+/**
+ * Ahmed's photo, from `public/profile/`, at its two widths. Its alternative
+ * text is empty: the caption under it says what it is, and a screen reader
+ * would otherwise read that twice.
+ */
+export const DEFAULT_PAPER_PHOTO: PaperPhoto = {
+  src: '/profile/paper-800.webp',
+  srcSet: '/profile/paper-480.webp 480w, /profile/paper-800.webp 800w',
+  width: 800,
+  height: 1069,
+  alt: '',
+};
 
 /** The red rings, each round the place on the sheet its note is about. */
 const RINGS = ['rev', 'comments', 'who'] as const;

@@ -16,7 +16,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql.raw(PROFILE_OPENING_SEED));
 }
 
-/** Takes the words and rows back off, where they are still the ones this wrote. */
+/** Takes the words back off, where they are still these, and the list rows this added. */
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql.raw(PROFILE_OPENING_UNSEED));
 }

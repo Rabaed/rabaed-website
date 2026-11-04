@@ -40,7 +40,7 @@ export function Trap({ content }: { content: ProfileTrapContent }) {
           {content.tools.map((tool, index) => (
             <li key={index}>
               <span className="pf-tile" aria-hidden="true">
-                <i className={`pf-icon pf-icon-${ICONS[index % ICONS.length]}`} />
+                <i className={`pf-icon pf-icon-${ICONS[index]}`} />
               </span>
               <div>
                 <h3>{tool.name}</h3>

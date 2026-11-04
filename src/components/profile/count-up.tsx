@@ -10,24 +10,30 @@ const DURATION = 1300;
 const THRESHOLD = 0.6;
 
 /**
- * A figure as written, split round its number: «35%» is `''`, 35 and `'%'`,
- * «1,250+» is `''`, 1250 and `'+'`. `null` for a figure with no number in it,
- * which has nothing to count.
+ * A figure as written, split round its number, and how to write a number on
+ * the way up the way the figure writes its own: «35%» counts 0 to 35 before a
+ * «%»; «1,250+» counts with its thousands set off; «2.5x» keeps one decimal.
+ * `null` for a figure with no number in it, which has nothing to count.
  */
-export function figureParts(figure: string): { before: string; value: number; after: string } | null {
-  const match = /^(\D*?)(\d[\d,]*)(.*)$/s.exec(figure);
+function counting(figure: string): { readonly at: (share: number) => string } | null {
+  const match = /^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/s.exec(figure);
   if (!match) return null;
-  const value = Number(match[2]!.replaceAll(',', ''));
-  return Number.isFinite(value) ? { before: match[1]!, value, after: match[3]! } : null;
+  const [, before, number, after] = match as unknown as [string, string, string, string];
+  const value = Number(number.replaceAll(',', ''));
+  if (!Number.isFinite(value)) return null;
+  const decimals = number.split('.')[1]?.length ?? 0;
+  const write = (each: number) =>
+    number.includes(',')
+      ? each.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+      : each.toFixed(decimals);
+  // The last frame is the figure exactly as written.
+  return { at: (share) => (share >= 1 ? figure : `${before}${write(value * share)}${after}`) };
 }
 
-/** A number as the figures write it: Latin digits, thousands set off by commas. */
-const written = (value: number) => Math.round(value).toLocaleString('en-US');
-
 /**
- * Counts every `[data-count-up]` figure in `#<within>` up from nothing to its
- * value as it comes into view (ticket 105), as Ahmed's profile does. Renders
- * nothing.
+ * Counts every `[data-count-up]` figure in the section `#<section>` up from
+ * nothing to its value as it comes into view (ticket 105), as Ahmed's profile
+ * does. Renders nothing.
  *
  * **The server's figure is the figure.** Every one arrives at its value, in
  * the first response (ADR-0001); this only takes one back to nothing while it
@@ -38,24 +44,24 @@ const written = (value: number) => Math.round(value).toLocaleString('en-US');
  *
  * What counts is the drawn figure only, which is hidden from screen readers;
  * each figure is also written out whole for them beside it, so nobody is ever
- * read a zero.
+ * read a zero. It is counted in the text React rendered, never in place of it,
+ * so React still holds the text it wrote.
  */
-export function CountUp({ within }: { within: string }) {
+export function CountUp({ section }: { section: string }) {
   useEffect(() => {
     if (prefersReducedMotion()) return;
-    const section = document.getElementById(within);
-    if (!section) return;
+    const within = document.getElementById(section);
+    if (!within) return;
 
     const frames = new Set<number>();
-    const counted = new Map<HTMLElement, string>();
+    const waiting = new Map<Element, { text: Text; figure: string; at: (share: number) => string }>();
 
-    const count = (element: HTMLElement, parts: NonNullable<ReturnType<typeof figureParts>>) => {
+    const count = ({ text, at }: { text: Text; at: (share: number) => string }) => {
       const start = performance.now();
       const step = (now: number) => {
         const progress = Math.min(1, (now - start) / DURATION);
         // Ahmed's easing: fast, settling into the value.
-        const eased = 1 - (1 - progress) ** 3;
-        element.textContent = `${parts.before}${written(parts.value * eased)}${parts.after}`;
+        text.data = at(progress < 1 ? 1 - (1 - progress) ** 3 : 1);
         if (progress < 1) frames.add(requestAnimationFrame(step));
       };
       frames.add(requestAnimationFrame(step));
@@ -64,22 +70,23 @@ export function CountUp({ within }: { within: string }) {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
+          const figure = entry.isIntersecting ? waiting.get(entry.target) : undefined;
+          if (!figure) continue;
           observer.unobserve(entry.target);
-          const element = entry.target as HTMLElement;
-          const parts = figureParts(counted.get(element) ?? '');
-          if (parts) count(element, parts);
+          count(figure);
         }
       },
       { threshold: THRESHOLD },
     );
 
-    for (const element of section.querySelectorAll<HTMLElement>('[data-count-up]')) {
-      const figure = element.textContent ?? '';
-      const parts = figureParts(figure);
-      if (!parts || element.getBoundingClientRect().top < window.innerHeight) continue;
-      counted.set(element, figure);
-      element.textContent = `${parts.before}${written(0)}${parts.after}`;
+    for (const element of within.querySelectorAll('[data-count-up]')) {
+      const text = element.firstChild;
+      if (!(text instanceof Text) || element.getBoundingClientRect().top < window.innerHeight) continue;
+      const figure = text.data;
+      const at = counting(figure)?.at;
+      if (!at) continue;
+      waiting.set(element, { text, figure, at });
+      text.data = at(0);
       observer.observe(element);
     }
 
@@ -87,9 +94,9 @@ export function CountUp({ within }: { within: string }) {
       observer.disconnect();
       for (const frame of frames) cancelAnimationFrame(frame);
       // Every figure back at its value, however far it had counted.
-      for (const [element, figure] of counted) element.textContent = figure;
+      for (const { text, figure } of waiting.values()) text.data = figure;
     };
-  }, [within]);
+  }, [section]);
 
   return null;
 }

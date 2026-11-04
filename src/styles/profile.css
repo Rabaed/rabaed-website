@@ -39,7 +39,7 @@
 .pf-note-rev { right: 3%; top: 1.5% }
 .pf-note-comments { left: -3%; top: 52% }
 .pf-note-who { right: 2%; top: 90% }
-.pf-paper figcaption { margin-top: 18px; font-size: 13px; line-height: 1.6; color: var(--dark-muted); text-align: center }
+.pf-paper figcaption { margin-top: 36px; font-size: 13px; line-height: 1.6; color: var(--dark-muted); text-align: center }
 
 /* An icon of Ahmed's (`public/profile/icons/`): a grey mask, drawn in the
    colour of the text around it. */

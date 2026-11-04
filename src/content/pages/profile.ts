@@ -7,7 +7,7 @@ import { numeralsInMono } from '@/components/inline-text';
 import type { ProfileAboutContent } from '@/components/profile/about';
 import type { ProfileNumbersContent } from '@/components/profile/numbers';
 import type { ProfileTrapContent } from '@/components/profile/trap';
-import { defaultPaperPhoto, type PaperPhoto, type ProfileTruthContent } from '@/components/profile/truth';
+import { DEFAULT_PAPER_PHOTO, type PaperPhoto, type ProfileTruthContent } from '@/components/profile/truth';
 import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
@@ -112,8 +112,7 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       eyebrow: words(truth.eyebrow),
       title: words(truth.title),
       body: words(truth.body),
-      // Ahmed's photo is described by the caption under it.
-      photo: replacementPhoto(truth.photo) ?? defaultPaperPhoto(words(truth.caption)),
+      photo: replacementPhoto(truth.photo) ?? DEFAULT_PAPER_PHOTO,
       caption: words(truth.caption),
       notes: [words(truth.noteRevision), words(truth.noteComments), words(truth.noteWho)],
     },
