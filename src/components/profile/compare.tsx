@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { CompareBehaviour } from '@/components/profile/compare-behaviour';
+import { SectionEyebrow } from '@/components/profile/section-eyebrow';
 import type { ProfileCompareContent } from '@/content/pages/profile-compare';
 import type { ReadingDirection } from '@/lib/reading-direction';
 
@@ -24,7 +25,7 @@ export function Compare({ content, direction }: { content: ProfileCompareContent
   return (
     <section id="compare" className="light pad pf-compare" data-direction={direction}>
       <div className="wrap">
-        <div className="eyebrow">{content.eyebrow}</div>
+        <SectionEyebrow number="09" words={content.eyebrow} />
         <h2 id="compare-heading">{content.title}</h2>
         <p className="lead">{content.lead}</p>
 

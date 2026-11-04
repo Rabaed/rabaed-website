@@ -103,14 +103,16 @@ function comparison(name: Comparison): Field {
 export function compareTab(): Tab {
   return sectionTab({
     name: 'compare',
-    label: { ar: 'قبل وبعد', en: 'Before and after' },
+    label: { ar: '09 قبل وبعد', en: '09 Before and after' },
     hideable: false,
     description: {
       ar: 'خمس مقارنات، لكل منها تبويب وسؤال وجدول وفيديو. يظهر دائماً: ملفات الـPDF الأربعة تنتقل إلى هذا القسم.',
       en: 'Five comparisons, each with a tab, a question, a table and a video. Always shows: the four Profile PDFs link to this section.',
     },
     fields: [
-      wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40),
+      wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40, {
+        description: { ar: 'يُكتب بعد رقم القسم، والرقم ثابت.', en: 'Follows the section’s number, which is fixed.' },
+      }),
       wordsField('title', { ar: 'العنوان', en: 'Heading' }, 80),
       wordsField('lead', { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' }, 200, { multiline: true }),
       {
