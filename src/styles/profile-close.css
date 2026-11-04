@@ -21,8 +21,9 @@
 
 /* ---- 10, the templates: cards that turn over. Both faces share one grid
    cell, so the card is as tall as its longer face and an Editor's longer
-   words never spill out of it. Turned by `aria-pressed`, and by a hover where
-   the pointer can hover. */
+   words never spill out of it. Turned by `aria-pressed` alone, so the face
+   shown is always the one it says: a hover that turned it too would have a
+   click on a mouse turn it back to the front while saying it was pressed. */
 .pf-hint { margin: -12px 0 0; font-size: 14px; color: var(--dark-muted) }
 .pf-cards { list-style: none; margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px }
 .pf-cards li { display: flex }
@@ -37,10 +38,6 @@
 .pf-back span { font-size: 14px; line-height: 1.6; font-weight: 500 }
 .pf-card[aria-pressed="true"] .pf-front { transform: rotateY(-180deg) }
 .pf-card[aria-pressed="true"] .pf-back { transform: rotateY(0) }
-@media (hover: hover) {
-  .pf-card:hover .pf-front { transform: rotateY(-180deg) }
-  .pf-card:hover .pf-back { transform: rotateY(0) }
-}
 @media (max-width: 700px) { .pf-cards { grid-template-columns: repeat(2, 1fr) } }
 
 /* ---- 11, why Rabaed: three cards, the card `.rt-c` is, larger. */

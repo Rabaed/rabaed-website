@@ -145,6 +145,43 @@ test('10, the templates: nine flip cards, each turned by a click or a key and ba
   await expect(cards(page).first().locator('.pf-front')).toContainText('خطة الفحص');
 });
 
+/**
+ * Which face of `card` a visitor sees once it has settled: the back faces
+ * them when it is turned to them, its transform's first column pointing the
+ * same way as the page's.
+ */
+const faceShowing = (card: ReturnType<typeof cards>) =>
+  card.evaluate((element) => {
+    const back = new DOMMatrixReadOnly(getComputedStyle(element.querySelector('.pf-back')!).transform);
+    return back.m11 > 0.99 ? 'back' : back.m11 < -0.99 ? 'front' : 'turning';
+  });
+
+test('10, on a mouse a card turns only when pressed, and shows the face aria-pressed says', async ({ page, cms }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await cms.preview('/profile');
+  const first = cards(page).first();
+  await first.scrollIntoViewIfNeeded();
+
+  // Resting under the pointer is not pressing it.
+  await first.hover();
+  await page.waitForTimeout(800);
+  await expect(first).toHaveAttribute('aria-pressed', 'false');
+  expect(await faceShowing(first), 'hovered, not pressed').toBe('front');
+
+  // Pressed, it turns, and stays turned with the pointer still on it or gone.
+  await first.click();
+  await expect(first).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => faceShowing(first), { message: 'pressed, under the pointer' }).toBe('back');
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(800);
+  expect(await faceShowing(first), 'pressed, the pointer gone').toBe('back');
+
+  // Pressed again, it turns back, under the pointer as well.
+  await first.click();
+  await expect(first).toHaveAttribute('aria-pressed', 'false');
+  await expect.poll(() => faceShowing(first), { message: 'pressed again' }).toBe('front');
+});
+
 test('11, why Rabaed: three cards on a light ground', async ({ page, cms }) => {
   await cms.preview('/profile');
   const why = section(page, 'why');
