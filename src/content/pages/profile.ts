@@ -11,6 +11,7 @@ import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
 import type { ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
+import { profileClose, type ProfileCloseContent } from './profile-close';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
@@ -19,6 +20,8 @@ export type ProfilePageContent = {
   readonly trustStrip: Section<TrustStripContent>;
   /** Section 05 (`#cost`): the shared Delay-cost calculator, with the profile's own button: its words, where written, and its link. */
   readonly cost: Section<DelayCalculatorContent>;
+  /** Sections 10 to 14, the contact section and the floating WhatsApp button (ticket 109). */
+  readonly close: ProfileCloseContent;
   /** The header's Download PDF button (ticket 104): its words, and the page's language's two files. */
   readonly pdf: ProfilePdf;
 };
@@ -136,6 +139,7 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       callToAction: { ...calculator.callToAction, label: ownLabel || calculator.callToAction.label },
       shows: cost.shows !== false,
     },
+    close: profileClose(locale, entry, contact),
     pdf: { label: words(entry.pdf.label), ...profilePdfs(locale, entry.pdf) },
   };
 }

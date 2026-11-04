@@ -5359,6 +5359,278 @@ export interface ProfilePage {
       en?: string | null;
     };
   };
+  templates: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    hint: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * In the order they show, three to a row, two on a phone.
+     */
+    cards: {
+      code: string;
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  why: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three, and each card’s icon is fixed by its place: the Arabic interface, then onsite support, then the price.
+     */
+    reasons: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  impact: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always six, three to a row, and each figure’s icon is fixed by its place. Each counts up as the visitor reaches it.
+     */
+    figures: {
+      figure: string;
+      /**
+       * Optional.
+       */
+      unit?: {
+        ar?: string | null;
+        en?: string | null;
+      };
+      label: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    activation: {
+      ar: string;
+      en?: string | null;
+    };
+    source: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  plans: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    badge: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three, and each plan’s icon is fixed by its place. The middle one stands out, with the badge on it.
+     */
+    tiers: {
+      kicker: {
+        ar: string;
+        en?: string | null;
+      };
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      features: {
+        feature: {
+          ar: string;
+          en?: string | null;
+        };
+        id?: string | null;
+      }[];
+      id?: string | null;
+    }[];
+  };
+  start: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always three, numbered in their order, and each step’s icon is fixed by its place.
+     */
+    steps: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    cardTitle: {
+      ar: string;
+      en?: string | null;
+    };
+    cardLine: {
+      ar: string;
+      en?: string | null;
+    };
+    demoLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    whatsappLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
+     */
+    demoLink: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.
+     */
+    whatsappLink?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+  };
+  contact: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    tagline: {
+      ar: string;
+      en?: string | null;
+    };
+    name: {
+      ar: string;
+      en?: string | null;
+    };
+    phoneLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    phone: string;
+    emailLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    email: string;
+    /**
+     * The number beside it is the site’s WhatsApp number, from Site settings.
+     */
+    whatsappLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    location: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  whatsappButton: {
+    /**
+     * Read out by screen readers: the button is an icon with no words.
+     */
+    label: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.
+     */
+    link?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+  };
   pdf: {
     label: {
       ar: string;
@@ -9508,6 +9780,320 @@ export interface ProfilePageSelect<T extends boolean = true> {
               en?: T;
             };
         callToActionLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  templates?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        hint?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cards?:
+          | T
+          | {
+              code?: T;
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  why?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        reasons?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  impact?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        figures?:
+          | T
+          | {
+              figure?: T;
+              unit?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              label?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        activation?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        source?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  plans?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        badge?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        tiers?:
+          | T
+          | {
+              kicker?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              features?:
+                | T
+                | {
+                    feature?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  start?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        steps?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        cardTitle?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cardLine?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        demoLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        whatsappLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        demoLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        whatsappLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  contact?:
+    | T
+    | {
+        shows?: T;
+        tagline?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        name?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        phoneLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        phone?: T;
+        emailLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        email?: T;
+        whatsappLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        location?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  whatsappButton?:
+    | T
+    | {
+        label?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        link?:
           | T
           | {
               ar?: T;

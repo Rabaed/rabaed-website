@@ -4,6 +4,7 @@ import { buttonLinkField, listField, sectionTab, wordsField, type Words } from '
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
+import { profileCloseTabs } from './profile-close';
 
 /**
  * One of the four Profile PDFs (ticket 104): a file an Editor uploads to the
@@ -172,6 +173,8 @@ export const ProfilePage = pageGlobal({
         }),
       ],
     }),
+    // 10 to 14, the contact section and the floating WhatsApp button (ticket 109).
+    ...profileCloseTabs(),
     // The header's Download PDF button (ticket 104): this page's alone.
     {
       name: 'pdf',

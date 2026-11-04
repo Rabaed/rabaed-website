@@ -2,6 +2,7 @@ import { DelayCalculator } from '@/components/home/delay-calculator';
 import { Hero } from '@/components/home/hero';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
+import { ProfileClose } from '@/components/profile/close';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import type { ProfilePageContent } from '@/content/pages/profile';
 import { localePath, type Locale } from '@/lib/locales';
@@ -40,6 +41,8 @@ export async function ProfilePage({
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {/* 05, «التكلفة الخفية»: the home page's calculator, under Ahmed's id (ticket 106). */}
       {content.cost.shows && <DelayCalculator id="cost" content={content.cost} />}
+      {/* 10 to 14, the contact section and the floating WhatsApp button (ticket 109). */}
+      <ProfileClose content={content.close} locale={locale} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/profile' }])} />
     </PageShell>
   );
