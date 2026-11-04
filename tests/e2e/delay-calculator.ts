@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Reading the home page's Delay-cost calculator (ticket 10, ticket 103) —
- * shared by the spec that asserts its behaviour and the ones that compare it
- * with the Reference site, whose markup carries the same class names for every
- * part read here. The comparison leaves out how the tracks are painted, which
+ * Reading the Delay-cost calculator (ticket 10, ticket 103) — shared by the
+ * spec that asserts its behaviour, the Company profile's (ticket 106), and the
+ * ones that compare it with the Reference site, whose markup carries the
+ * same class names for every part read here. The comparison leaves out how the tracks are painted, which
  * the rebuild does differently (ticket 72).
  */
 
@@ -12,11 +12,12 @@ import type { Page } from '@playwright/test';
  * What the calculator says — the cost, the line under it saying what has been
  * spent, and each slider's reading, each as one run of words — and how far
  * each slider's track is coloured, with the value that colouring stands for.
+ * `id` is its section's: the home page's `calc`, the Company profile's `cost`.
  */
-export function readCalculator(page: Page) {
-  return page.evaluate(() => {
+export function readCalculator(page: Page, id = 'calc') {
+  return page.evaluate((id) => {
     const text = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
-    const calculator = document.getElementById('calc')!;
+    const calculator = document.getElementById(id)!;
     const [label, spent] = [...calculator.querySelectorAll('.out small')].map(text);
     return {
       cost: text(calculator.querySelector('.out b')!),
@@ -28,7 +29,7 @@ export function readCalculator(page: Page) {
         painted: getComputedStyle(input).backgroundImage,
       })),
     };
-  });
+  }, id);
 }
 
 /**

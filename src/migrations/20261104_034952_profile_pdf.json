@@ -37465,6 +37465,37 @@
           "notNull": false,
           "default": true
         },
+        "cost_shows": {
+          "name": "cost_shows",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "cost_call_to_action_label_ar": {
+          "name": "cost_call_to_action_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cost_call_to_action_label_en": {
+          "name": "cost_call_to_action_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cost_call_to_action_link_ar": {
+          "name": "cost_call_to_action_link_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cost_call_to_action_link_en": {
+          "name": "cost_call_to_action_link_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "pdf_label_ar": {
           "name": "pdf_label_ar",
           "type": "varchar",
@@ -38184,6 +38215,37 @@
           "primaryKey": false,
           "notNull": false,
           "default": true
+        },
+        "version_cost_shows": {
+          "name": "version_cost_shows",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "version_cost_call_to_action_label_ar": {
+          "name": "version_cost_call_to_action_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_cost_call_to_action_label_en": {
+          "name": "version_cost_call_to_action_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_cost_call_to_action_link_ar": {
+          "name": "version_cost_call_to_action_link_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_cost_call_to_action_link_en": {
+          "name": "version_cost_call_to_action_link_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "version_pdf_label_ar": {
           "name": "version_pdf_label_ar",
@@ -39487,6 +39549,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "12cb3da1-aeaf-4e35-a9cf-2f858c5f584d",
+  "id": "ae026d8b-06cc-420c-8a51-6782db8fb39c",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

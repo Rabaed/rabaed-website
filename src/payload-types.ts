@@ -4393,7 +4393,7 @@ export interface DelayCalculator {
       en?: string | null;
     };
     /**
-     * Leads to the demo request form.
+     * Leads to the demo request form. On the Company profile its page says where it goes, and may give it words other than these.
      */
     callToActionLabel: {
       ar: string;
@@ -5338,6 +5338,26 @@ export interface ProfilePage {
      * Untick to hide this section, keeping its words.
      */
     shows?: boolean | null;
+  };
+  cost: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Leave it empty to say what the calculator’s button says on the home page, from “Delay-cost calculator”. What you write here shows on this page alone.
+     */
+    callToActionLabel?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+    /**
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
+     */
+    callToActionLink: {
+      ar: string;
+      en?: string | null;
+    };
   };
   pdf: {
     label: {
@@ -9476,6 +9496,23 @@ export interface ProfilePageSelect<T extends boolean = true> {
     | T
     | {
         shows?: T;
+      };
+  cost?:
+    | T
+    | {
+        shows?: T;
+        callToActionLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        callToActionLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
       };
   pdf?:
     | T

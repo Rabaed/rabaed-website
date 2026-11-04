@@ -12,7 +12,7 @@ import {
 
 /**
  * Redraws the calculator whenever a slider moves, attached to markup the server
- * already sent: the three readings, the cost and what has been spent, and each track
+ * already sent in the section whose id is `section`: the three readings, the cost and what has been spent, and each track
  * filled up to its thumb. Renders nothing. The words it writes beside the
  * numbers are handed down by `DelayCalculator`.
  *
@@ -21,9 +21,9 @@ import {
  * the visitor left them, and the figures the server drew would then describe
  * other settings.
  */
-export function DelayCalculatorBehaviour({ words }: { words: CalculatorWords }) {
+export function DelayCalculatorBehaviour({ section, words }: { section: string; words: CalculatorWords }) {
   useEffect(() => {
-    const calculator = document.getElementById('calc');
+    const calculator = document.getElementById(section);
     if (!calculator) return;
     const sliders = [...calculator.querySelectorAll<HTMLInputElement>('input[type="range"]')];
     const readings = [...calculator.querySelectorAll<HTMLElement>('.lr b')];
@@ -52,7 +52,7 @@ export function DelayCalculatorBehaviour({ words }: { words: CalculatorWords }) 
     redraw();
 
     return () => sliders.forEach((slider) => slider.removeEventListener('input', redraw));
-  }, [words]);
+  }, [section, words]);
 
   return null;
 }

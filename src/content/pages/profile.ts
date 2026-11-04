@@ -1,8 +1,10 @@
 import { getContactPoints } from '@/cms/contact-points';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import type { DelayCalculatorContent } from '@/components/home/delay-calculator';
 import type { HomeHeroContent } from '@/components/home/hero';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
+import { getDelayCalculator } from '@/content/delay-calculator';
 import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
@@ -15,6 +17,8 @@ export type ProfilePageContent = {
   /** The home page's hero, with Ahmed's words and the profile's two buttons. */
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
+  /** Section 05 (`#cost`): the shared Delay-cost calculator, with the profile's own button: its words, where written, and its link. */
+  readonly cost: Section<DelayCalculatorContent>;
   /** The header's Download PDF button (ticket 104): its words, and the page's language's two files. */
   readonly pdf: ProfilePdf;
 };
@@ -77,7 +81,9 @@ function fourStatuses(statuses: readonly string[]): HomeHeroContent['statuses'] 
 
 /**
  * The Company profile's content in `locale`: its words from its entry in the
- * CMS (ticket 102), the Trust strip's marks from the entry every page shares —
+ * CMS (ticket 102), the Trust strip's marks from the entry every page shares,
+ * the Delay-cost calculator's words from the one it shares with the home page
+ * (ticket 106) —
  * or a refusal, where the page is not published in `locale`, which until the
  * founder publishes it it is in neither.
  *
@@ -93,8 +99,13 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     getContactPoints(),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
-  const link = (stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink']) => words(stored).trim();
-  const { hero } = entry;
+  const link = (
+    stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink'] | ProfilePage['cost']['callToActionLink'],
+  ) => words(stored).trim();
+  const { hero, cost } = entry;
+  // Its words the entry both pages read; its button's, where written, and where it goes, this page's.
+  const calculator = await getDelayCalculator(locale, link(cost.callToActionLink));
+  const ownLabel = words(cost.callToActionLabel).trim();
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -120,6 +131,11 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
+    cost: {
+      ...calculator,
+      callToAction: { ...calculator.callToAction, label: ownLabel || calculator.callToAction.label },
+      shows: cost.shows !== false,
+    },
     pdf: { label: words(entry.pdf.label), ...profilePdfs(locale, entry.pdf) },
   };
 }
