@@ -16,22 +16,7 @@ import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-po
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-   CREATE TABLE "profile_files" (
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"url" varchar,
-  	"thumbnail_u_r_l" varchar,
-  	"filename" varchar,
-  	"mime_type" varchar,
-  	"filesize" numeric,
-  	"width" numeric,
-  	"height" numeric,
-  	"focal_x" numeric,
-  	"focal_y" numeric
-  );
-  
-  CREATE TABLE "profile_page_numbers_figures" (
+   CREATE TABLE "profile_page_numbers_figures" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
   	"id" varchar PRIMARY KEY NOT NULL,
@@ -136,7 +121,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"_uuid" varchar
   );
   
-  ALTER TABLE "payload_locked_documents_rels" ADD COLUMN "profile_files_id" integer;
+  ALTER TABLE "profile_files" ADD COLUMN "prefix" varchar DEFAULT 'profile';
   ALTER TABLE "profile_page" ADD COLUMN "truth_shows" boolean DEFAULT true;
   ALTER TABLE "profile_page" ADD COLUMN "truth_eyebrow_ar" varchar;
   ALTER TABLE "profile_page" ADD COLUMN "truth_eyebrow_en" varchar;
@@ -585,9 +570,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_profile_page_v_version_parties_cards" ADD CONSTRAINT "_profile_page_v_version_parties_cards_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_profile_page_v_version_platform_units" ADD CONSTRAINT "_profile_page_v_version_platform_units_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_profile_page_v_version_record_steps" ADD CONSTRAINT "_profile_page_v_version_record_steps_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_profile_page_v"("id") ON DELETE cascade ON UPDATE no action;
-  CREATE INDEX "profile_files_updated_at_idx" ON "profile_files" USING btree ("updated_at");
-  CREATE INDEX "profile_files_created_at_idx" ON "profile_files" USING btree ("created_at");
-  CREATE UNIQUE INDEX "profile_files_filename_idx" ON "profile_files" USING btree ("filename");
   CREATE INDEX "profile_page_numbers_figures_order_idx" ON "profile_page_numbers_figures" USING btree ("_order");
   CREATE INDEX "profile_page_numbers_figures_parent_id_idx" ON "profile_page_numbers_figures" USING btree ("_parent_id");
   CREATE INDEX "profile_page_trap_tools_order_idx" ON "profile_page_trap_tools" USING btree ("_order");
@@ -608,7 +590,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_profile_page_v_version_platform_units_parent_id_idx" ON "_profile_page_v_version_platform_units" USING btree ("_parent_id");
   CREATE INDEX "_profile_page_v_version_record_steps_order_idx" ON "_profile_page_v_version_record_steps" USING btree ("_order");
   CREATE INDEX "_profile_page_v_version_record_steps_parent_id_idx" ON "_profile_page_v_version_record_steps" USING btree ("_parent_id");
-  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_profile_files_fk" FOREIGN KEY ("profile_files_id") REFERENCES "public"."profile_files"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "profile_page" ADD CONSTRAINT "profile_page_truth_photo_id_media_id_fk" FOREIGN KEY ("truth_photo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "profile_page" ADD CONSTRAINT "profile_page_compare_approvals_video_id_profile_files_id_fk" FOREIGN KEY ("compare_approvals_video_id") REFERENCES "public"."profile_files"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "profile_page" ADD CONSTRAINT "profile_page_compare_approvals_poster_id_media_id_fk" FOREIGN KEY ("compare_approvals_poster_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
@@ -631,7 +612,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_profile_page_v" ADD CONSTRAINT "_profile_page_v_version_compare_dashboard_poster_id_media_id_fk" FOREIGN KEY ("version_compare_dashboard_poster_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_profile_page_v" ADD CONSTRAINT "_profile_page_v_version_compare_daily_report_video_id_profile_files_id_fk" FOREIGN KEY ("version_compare_daily_report_video_id") REFERENCES "public"."profile_files"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_profile_page_v" ADD CONSTRAINT "_profile_page_v_version_compare_daily_report_poster_id_media_id_fk" FOREIGN KEY ("version_compare_daily_report_poster_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
-  CREATE INDEX "payload_locked_documents_rels_profile_files_id_idx" ON "payload_locked_documents_rels" USING btree ("profile_files_id");
   CREATE INDEX "profile_page_truth_truth_photo_idx" ON "profile_page" USING btree ("truth_photo_id");
   CREATE INDEX "profile_page_compare_approvals_compare_approvals_video_idx" ON "profile_page" USING btree ("compare_approvals_video_id");
   CREATE INDEX "profile_page_compare_approvals_compare_approvals_poster_idx" ON "profile_page" USING btree ("compare_approvals_poster_id");
@@ -658,8 +638,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
-   ALTER TABLE "profile_files" DISABLE ROW LEVEL SECURITY;
-  ALTER TABLE "profile_page_numbers_figures" DISABLE ROW LEVEL SECURITY;
+   ALTER TABLE "profile_page_numbers_figures" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "profile_page_trap_tools" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "profile_page_parties_cards" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "profile_page_platform_units" DISABLE ROW LEVEL SECURITY;
@@ -669,7 +648,6 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   ALTER TABLE "_profile_page_v_version_parties_cards" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_profile_page_v_version_platform_units" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_profile_page_v_version_record_steps" DISABLE ROW LEVEL SECURITY;
-  DROP TABLE "profile_files" CASCADE;
   DROP TABLE "profile_page_numbers_figures" CASCADE;
   DROP TABLE "profile_page_trap_tools" CASCADE;
   DROP TABLE "profile_page_parties_cards" CASCADE;
@@ -680,8 +658,6 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   DROP TABLE "_profile_page_v_version_parties_cards" CASCADE;
   DROP TABLE "_profile_page_v_version_platform_units" CASCADE;
   DROP TABLE "_profile_page_v_version_record_steps" CASCADE;
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_profile_files_fk";
-  
   ALTER TABLE "profile_page" DROP CONSTRAINT "profile_page_truth_photo_id_media_id_fk";
   
   ALTER TABLE "profile_page" DROP CONSTRAINT "profile_page_compare_approvals_video_id_profile_files_id_fk";
@@ -726,7 +702,6 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   
   ALTER TABLE "_profile_page_v" DROP CONSTRAINT "_profile_page_v_version_compare_daily_report_poster_id_media_id_fk";
   
-  DROP INDEX "payload_locked_documents_rels_profile_files_id_idx";
   DROP INDEX "profile_page_truth_truth_photo_idx";
   DROP INDEX "profile_page_compare_approvals_compare_approvals_video_idx";
   DROP INDEX "profile_page_compare_approvals_compare_approvals_poster_idx";
@@ -749,7 +724,7 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   DROP INDEX "_profile_page_v_version_compare_dashboard_version_comp_1_idx";
   DROP INDEX "_profile_page_v_version_compare_daily_report_version_com_idx";
   DROP INDEX "_profile_page_v_version_compare_daily_report_version_c_1_idx";
-  ALTER TABLE "payload_locked_documents_rels" DROP COLUMN "profile_files_id";
+  ALTER TABLE "profile_files" DROP COLUMN "prefix";
   ALTER TABLE "profile_page" DROP COLUMN "truth_shows";
   ALTER TABLE "profile_page" DROP COLUMN "truth_eyebrow_ar";
   ALTER TABLE "profile_page" DROP COLUMN "truth_eyebrow_en";

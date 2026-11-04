@@ -660,13 +660,14 @@ export interface PourTrackerRelease {
   createdAt: string;
 }
 /**
- * The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, 4 MB at most each: the site cannot take a larger file.
+ * The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, 8 MB at most each.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "profile-files".
  */
 export interface ProfileFile {
   id: number;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1070,6 +1071,7 @@ export interface PourTrackerReleasesSelect<T extends boolean = true> {
  * via the `definition` "profile-files_select".
  */
 export interface ProfileFilesSelect<T extends boolean = true> {
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -5704,7 +5706,7 @@ export interface ProfilePage {
         en?: string | null;
       };
       /**
-       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
        */
       video?: (number | null) | ProfileFile;
       /**
@@ -5771,7 +5773,7 @@ export interface ProfilePage {
         en?: string | null;
       };
       /**
-       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
        */
       video?: (number | null) | ProfileFile;
       /**
@@ -5838,7 +5840,7 @@ export interface ProfilePage {
         en?: string | null;
       };
       /**
-       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
        */
       video?: (number | null) | ProfileFile;
       /**
@@ -5905,7 +5907,7 @@ export interface ProfilePage {
         en?: string | null;
       };
       /**
-       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
        */
       video?: (number | null) | ProfileFile;
       /**
@@ -5972,7 +5974,7 @@ export interface ProfilePage {
         en?: string | null;
       };
       /**
-       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
        */
       video?: (number | null) | ProfileFile;
       /**
