@@ -6,8 +6,12 @@ import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
 import type { ProfileAboutContent } from '@/components/profile/about';
 import type { ProfileNumbersContent } from '@/components/profile/numbers';
+import type { ProfilePartiesContent } from '@/components/profile/parties';
+import { PLATFORM_SCREENS, type ProfilePlatformContent } from '@/components/profile/platform';
+import type { ProfileRecordContent } from '@/components/profile/record';
 import type { ProfileTrapContent } from '@/components/profile/trap';
 import { DEFAULT_PAPER_PHOTO, type PaperPhoto, type ProfileTruthContent } from '@/components/profile/truth';
+import { getScreenMocks } from '@/content/screen-mocks';
 import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
@@ -25,6 +29,10 @@ export type ProfilePageContent = {
   readonly numbers: Section<ProfileNumbersContent>;
   readonly trap: Section<ProfileTrapContent>;
   readonly about: Section<ProfileAboutContent>;
+  /** Ahmed's sections 06 to 08 (ticket 107). */
+  readonly parties: Section<ProfilePartiesContent>;
+  readonly platform: Section<ProfilePlatformContent>;
+  readonly record: Section<ProfileRecordContent>;
 };
 
 /**
@@ -74,14 +82,15 @@ function replacementPhoto(value: number | Media | null | undefined): PaperPhoto 
  * there changes it here.
  */
 export async function getProfilePage(locale: Locale): Promise<ProfilePageContent> {
-  const [entry, trustStrip, contact] = await Promise.all([
+  const [entry, trustStrip, contact, screenOf] = await Promise.all([
     pageEntry('profile-page', locale),
     getTrustStrip(locale),
     getContactPoints(),
+    getScreenMocks(locale),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const link = (stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink']) => words(stored).trim();
-  const { hero, truth, numbers, trap, about } = entry;
+  const { hero, truth, numbers, trap, about, parties, platform, record } = entry;
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -137,6 +146,38 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       title: { line: words(about.title), accent: words(about.titleAccent) },
       body: words(about.body),
       quote: words(about.quote),
+    },
+    parties: {
+      shows: parties.shows !== false,
+      eyebrow: words(parties.eyebrow),
+      title: words(parties.title),
+      lead: words(parties.lead),
+      cards: parties.cards.map((card) => ({ name: words(card.name), want: words(card.want) })),
+      record: words(parties.record),
+      footer: words(parties.footer),
+    },
+    platform: {
+      shows: platform.shows !== false,
+      eyebrow: words(platform.eyebrow),
+      title: words(platform.title),
+      lead: words(platform.lead),
+      // Each tab's screen is fixed by its place; a fifth row, which the CMS
+      // refuses to publish, has none to show and is left out of a preview.
+      units: platform.units.slice(0, PLATFORM_SCREENS.length).map((unit, index) => ({
+        name: words(unit.name),
+        text: words(unit.text),
+        screen: screenOf(PLATFORM_SCREENS[index]!),
+      })),
+      output: words(platform.output),
+    },
+    record: {
+      shows: record.shows !== false,
+      eyebrow: words(record.eyebrow),
+      title: words(record.title),
+      body: words(record.body),
+      document: { code: record.code, name: words(record.document), example: words(record.example) },
+      steps: record.steps.map((step) => ({ verb: words(step.verb), who: words(step.who), time: step.time })),
+      summary: words(record.summary),
     },
   };
 }
