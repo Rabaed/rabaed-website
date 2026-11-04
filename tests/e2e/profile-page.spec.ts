@@ -51,8 +51,14 @@ const SITE_WHATSAPP = 'https://wa.me/966576767900';
 /** What an English address says while its page is not in English (`src/content/arabic-only-pages.ts`). */
 const NOT_IN_ENGLISH = 'This page is not available in English yet.';
 
-/** Every link on the page that leads to the profile, in either language: the header's menu and the Footer directory among them. */
-const linksToProfile = (page: Page) => page.locator('a[href*="/profile"]');
+/**
+ * Every link on the page that leads to the profile, in either language: the
+ * header's menu and the Footer directory among them. The page itself, that
+ * is, with or without a place on it — not the files kept beside it under
+ * `/profile/`, such as the PDFs its own Download PDF gives (ticket 104).
+ */
+const linksToProfile = (page: Page) =>
+  page.locator('a[href$="/profile"], a[href$="/profile/"], a[href*="/profile#"], a[href*="/profile?"]');
 
 const listed = async (request: APIRequestContext, file: '/sitemap.xml' | '/llms.txt') => (await request.get(file)).text();
 

@@ -1,17 +1,20 @@
+import { DelayCalculator } from '@/components/home/delay-calculator';
 import { Hero } from '@/components/home/hero';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { About } from '@/components/profile/about';
+import { ProfileClose } from '@/components/profile/close';
 import { Compare } from '@/components/profile/compare';
 import { Numbers } from '@/components/profile/numbers';
 import { Parties } from '@/components/profile/parties';
 import { Platform } from '@/components/profile/platform';
 import { DocumentedRecord } from '@/components/profile/record';
+import { SectionEyebrow } from '@/components/profile/section-eyebrow';
 import { Trap } from '@/components/profile/trap';
 import { Truth } from '@/components/profile/truth';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import type { ProfilePageContent } from '@/content/pages/profile';
-import { LOCALES, type Locale } from '@/lib/locales';
+import { LOCALES, localePath, type Locale } from '@/lib/locales';
 
 /**
  * The Company profile, in either language (ticket 102): Ahmed's profile of
@@ -35,17 +38,32 @@ export async function ProfilePage({
   content: ProfilePageContent;
 }) {
   return (
-    <PageShell locale={locale} path="/profile" locales={locales}>
+    <PageShell
+      locale={locale}
+      path="/profile"
+      locales={locales}
+      // The header's own Download PDF button, its "Book a live demo" to the
+      // home page's form, since this page has none, and its colour following
+      // each section, since Ahmed's turn dark again after light ones (ticket 104).
+      header={{ button: content.pdf, demoHref: `${localePath(locale, '/')}#demo`, colours: 'each-section' }}
+    >
       <Hero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       {content.truth.shows && <Truth content={content.truth} />}
       {content.numbers.shows && <Numbers content={content.numbers} />}
       {content.trap.shows && <Trap content={content.trap} />}
       {content.about.shows && <About content={content.about} />}
+      {/* 05, «التكلفة الخفية»: the home page's calculator, under Ahmed's id
+          and with his section number before its shared eyebrow's words (ticket 106). */}
+      {content.cost.shows && (
+        <DelayCalculator id="cost" content={content.cost} eyebrow={<SectionEyebrow number="05" words={content.cost.eyebrow} />} />
+      )}
       {content.parties.shows && <Parties content={content.parties} />}
       {content.platform.shows && <Platform content={content.platform} direction={LOCALES[locale].dir} />}
       {content.record.shows && <DocumentedRecord content={content.record} />}
       <Compare content={content.compare} direction={LOCALES[locale].dir} />
+      {/* 10 to 14, the contact section and the floating WhatsApp button (ticket 109). */}
+      <ProfileClose content={content.close} locale={locale} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/profile' }])} />
     </PageShell>
   );

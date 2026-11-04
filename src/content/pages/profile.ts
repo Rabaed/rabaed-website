@@ -1,7 +1,9 @@
 import { getContactPoints } from '@/cms/contact-points';
 import { fetchedMedia } from '@/cms/fetched-media';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import type { DelayCalculatorContent } from '@/components/home/delay-calculator';
 import type { HomeHeroContent } from '@/components/home/hero';
+import type { DownloadFile, HeaderDownload } from '@/components/site-nav';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
 import type { ProfileAboutContent } from '@/components/profile/about';
@@ -12,14 +14,17 @@ import { PLATFORM_UNITS, type ProfilePlatformContent } from '@/components/profil
 import type { ProfileRecordContent } from '@/components/profile/record';
 import type { ProfileTrapContent } from '@/components/profile/trap';
 import { DEFAULT_PAPER_PHOTO, type PaperPhoto, type ProfileTruthContent } from '@/components/profile/truth';
+import { getDelayCalculator } from '@/content/delay-calculator';
 import { getScreenMocks } from '@/content/screen-mocks';
 import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
 import { COMPARISONS } from '@/lib/profile-comparisons';
+import { PROFILE_PDF_FOLDER, PROFILE_PDFS, type ProfilePdfScreen } from '@/lib/profile-pdfs';
 import type { Media, ProfileFile, ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
+import { buttonLinkIn, profileClose, type ProfileCloseContent } from './profile-close';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
@@ -31,12 +36,18 @@ export type ProfilePageContent = {
   readonly numbers: Section<ProfileNumbersContent>;
   readonly trap: Section<ProfileTrapContent>;
   readonly about: Section<ProfileAboutContent>;
+  /** Section 05 (`#cost`): the shared Delay-cost calculator, with the profile's own button: its words, where written, and its link. */
+  readonly cost: Section<DelayCalculatorContent>;
   /** Ahmed's sections 06 to 08 (ticket 107). */
   readonly parties: Section<ProfilePartiesContent>;
   readonly platform: Section<ProfilePlatformContent>;
   readonly record: Section<ProfileRecordContent>;
   /** Section 09, the before-and-after videos (ticket 108), which always shows: the Profile PDFs link to it. */
   readonly compare: ProfileCompareContent;
+  /** Sections 10 to 14, the contact section and the floating WhatsApp button (ticket 109). */
+  readonly close: ProfileCloseContent;
+  /** The header's Download PDF button (ticket 104): its words, and the page's language's two files (`PROFILE_PDFS`). */
+  readonly pdf: HeaderDownload;
 };
 
 /**
@@ -48,6 +59,31 @@ const SHARING_IMAGE: Readonly<Record<Locale, SharingImage>> = {
   ar: { url: '/profile/og-ar.png', alt: 'ربائد: ثلاثة أطراف. سجل واحد. مسؤولية واضحة.' },
   en: { url: '/profile/og-en.png', alt: 'Rabaed: Three parties. One record. Clear ownership.' },
 };
+
+/**
+ * An Editor's replacement, where the entry names one that is there: served
+ * as uploaded (`profile-files`), and saved under the name it was uploaded
+ * with. A file uploaded under a name `profile-files` already had to number,
+ * `…-1.pdf`, keeps the number: the collection keeps nothing else.
+ */
+function uploadedFile(value: ProfilePage['pdf']['arabic']): DownloadFile | null {
+  if (!value || typeof value !== 'object' || !value.url) return null;
+  return { href: value.url, name: value.filename ?? '' };
+}
+
+/**
+ * The one place the four files come from: the page's language's pair
+ * (`PROFILE_PDFS`), each an Editor's replacement where one is uploaded, and
+ * otherwise Ahmed's, kept with the code as the default, as `public/hero/`
+ * keeps the hero's drawings. Each downloads under its own name.
+ */
+function profilePdfs(locale: Locale, pdf: ProfilePage['pdf']): Pick<HeaderDownload, ProfilePdfScreen> {
+  const file = (screen: ProfilePdfScreen): DownloadFile => {
+    const { field, file: ahmeds } = PROFILE_PDFS[locale][screen];
+    return uploadedFile(pdf[field]) ?? { href: `${PROFILE_PDF_FOLDER}/${ahmeds}`, name: ahmeds };
+  };
+  return { desktop: file('desktop'), phone: file('phone') };
+}
 
 /** The hero's four statuses, which the drawing's loop counts, filled out to four for a draft being previewed. */
 function fourStatuses(statuses: readonly string[]): HomeHeroContent['statuses'] {
@@ -76,7 +112,9 @@ function replacementPhoto(value: number | Media | null | undefined): PaperPhoto 
 
 /**
  * The Company profile's content in `locale`: its words from its entry in the
- * CMS (ticket 102), the Trust strip's marks from the entry every page shares —
+ * CMS (ticket 102), the Trust strip's marks from the entry every page shares,
+ * the Delay-cost calculator's words from the one it shares with the home page
+ * (ticket 106) —
  * or a refusal, where the page is not published in `locale`, which until the
  * founder publishes it it is in neither.
  *
@@ -93,8 +131,11 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     getScreenMocks(locale),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
-  const link = (stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink']) => words(stored).trim();
-  const { hero, truth, numbers, trap, about, parties, platform, record, compare } = entry;
+  const link = (stored: Parameters<typeof wordsIn>[1]) => buttonLinkIn(locale, stored);
+  const { hero, cost, truth, numbers, trap, about, parties, platform, record, compare } = entry;
+  // Its words the entry both pages read; its button's, where written, and where it goes, this page's.
+  const calculator = await getDelayCalculator(locale, link(cost.callToActionLink));
+  const ownLabel = words(cost.callToActionLabel).trim();
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -150,6 +191,11 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       title: { line: words(about.title), accent: words(about.titleAccent) },
       body: words(about.body),
       quote: words(about.quote),
+    },
+    cost: {
+      ...calculator,
+      callToAction: { ...calculator.callToAction, label: ownLabel || calculator.callToAction.label },
+      shows: cost.shows !== false,
     },
     parties: {
       shows: parties.shows !== false,
@@ -215,5 +261,7 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
         };
       }),
     },
+    close: profileClose(locale, entry, contact),
+    pdf: { label: words(entry.pdf.label), ...profilePdfs(locale, entry.pdf) },
   };
 }

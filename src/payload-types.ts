@@ -660,14 +660,13 @@ export interface PourTrackerRelease {
   createdAt: string;
 }
 /**
- * The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, 8 MB at most each.
+ * The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, 4 MB at most each: the site cannot take a larger file.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "profile-files".
  */
 export interface ProfileFile {
   id: number;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1071,7 +1070,6 @@ export interface PourTrackerReleasesSelect<T extends boolean = true> {
  * via the `definition` "profile-files_select".
  */
 export interface ProfileFilesSelect<T extends boolean = true> {
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4395,7 +4393,7 @@ export interface DelayCalculator {
       en?: string | null;
     };
     /**
-     * Leads to the demo request form.
+     * Leads to the demo request form. On the Company profile its page says where it goes, and may give it words other than these.
      */
     callToActionLabel: {
       ar: string;
@@ -5268,7 +5266,7 @@ export interface ProfilePage {
       en?: string | null;
     };
     /**
-     * The demo request form on the home page: /#demo in Arabic and /en#demo in English.
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
      */
     demoLink: {
       ar: string;
@@ -5341,48 +5339,67 @@ export interface ProfilePage {
      */
     shows?: boolean | null;
   };
-  truth: {
+  cost: {
     /**
      * Untick to hide this section, keeping its words.
      */
     shows?: boolean | null;
     /**
-     * Follows the section’s number, which is fixed.
+     * Leave it empty to say what the calculator’s button says on the home page, from “Delay-cost calculator”. What you write here shows on this page alone.
      */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    body: {
-      ar: string;
+    callToActionLabel?: {
+      ar?: string | null;
       en?: string | null;
     };
     /**
-     * 800×1069, or larger in the same proportions, with names and stamps hidden. The red notes and their circles sit at fixed places over today’s sheet, so a replacement should be the same sheet, framed the same way. Remove it to bring back today’s photo.
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
      */
-    photo?: (number | null) | Media;
-    caption: {
-      ar: string;
-      en?: string | null;
-    };
-    noteRevision: {
-      ar: string;
-      en?: string | null;
-    };
-    noteComments: {
-      ar: string;
-      en?: string | null;
-    };
-    noteWho: {
+    callToActionLink: {
       ar: string;
       en?: string | null;
     };
   };
-  numbers: {
+  templates: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    hint: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * In the order they show, three to a row, two on a phone.
+     */
+    cards: {
+      code: string;
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  why: {
     /**
      * Untick to hide this section, keeping its words.
      */
@@ -5399,22 +5416,68 @@ export interface ProfilePage {
       en?: string | null;
     };
     /**
-     * Always three, side by side. Each counts up as the visitor reaches it.
+     * Always three, and each card’s icon is fixed by its place: the Arabic interface, then onsite support, then the price.
+     */
+    reasons: {
+      name: {
+        ar: string;
+        en?: string | null;
+      };
+      text: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+  };
+  impact: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    /**
+     * Follows the section’s number, which is fixed.
+     */
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always six, three to a row, and each figure’s icon is fixed by its place. Each counts up as the visitor reaches it.
      */
     figures: {
       figure: string;
+      /**
+       * Optional.
+       */
+      unit?: {
+        ar?: string | null;
+        en?: string | null;
+      };
       label: {
         ar: string;
         en?: string | null;
       };
       id?: string | null;
     }[];
+    activation: {
+      ar: string;
+      en?: string | null;
+    };
     source: {
       ar: string;
       en?: string | null;
     };
   };
-  trap: {
+  plans: {
     /**
      * Untick to hide this section, keeping its words.
      */
@@ -5430,30 +5493,33 @@ export interface ProfilePage {
       ar: string;
       en?: string | null;
     };
-    body: {
-      ar: string;
-      en?: string | null;
-    };
-    kicker: {
+    badge: {
       ar: string;
       en?: string | null;
     };
     /**
-     * Always four, and each card’s icon is fixed by its place: WhatsApp, then email, then Excel, then a SharePoint folder.
+     * Always three, and each plan’s icon is fixed by its place. The middle one stands out, with the badge on it.
      */
-    tools: {
+    tiers: {
+      kicker: {
+        ar: string;
+        en?: string | null;
+      };
       name: {
         ar: string;
         en?: string | null;
       };
-      text: {
-        ar: string;
-        en?: string | null;
-      };
+      features: {
+        feature: {
+          ar: string;
+          en?: string | null;
+        };
+        id?: string | null;
+      }[];
       id?: string | null;
     }[];
   };
-  about: {
+  start: {
     /**
      * Untick to hide this section, keeping its words.
      */
@@ -5469,519 +5535,123 @@ export interface ProfilePage {
       ar: string;
       en?: string | null;
     };
-    titleAccent: {
-      ar: string;
-      en?: string | null;
-    };
-    body: {
-      ar: string;
-      en?: string | null;
-    };
-    quote: {
-      ar: string;
-      en?: string | null;
-    };
-  };
-  parties: {
     /**
-     * Untick to hide this section, keeping its words.
-     */
-    shows?: boolean | null;
-    /**
-     * Follows the section’s number, which is fixed.
-     */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    lead: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Always three, and each card’s icon is fixed by its place: the Owner, then the Consultant, then the Contractor.
-     */
-    cards: {
-      name: {
-        ar: string;
-        en?: string | null;
-      };
-      want: {
-        ar: string;
-        en?: string | null;
-      };
-      id?: string | null;
-    }[];
-    record: {
-      ar: string;
-      en?: string | null;
-    };
-    footer: {
-      ar: string;
-      en?: string | null;
-    };
-  };
-  platform: {
-    /**
-     * Untick to hide this section, keeping its words.
-     */
-    shows?: boolean | null;
-    /**
-     * Follows the section’s number, which is fixed.
-     */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    lead: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Always four, and each tab’s screen and icon are fixed by its place: correspondence, then approvals, then the daily site report, then documents.
-     */
-    units: {
-      name: {
-        ar: string;
-        en?: string | null;
-      };
-      text: {
-        ar: string;
-        en?: string | null;
-      };
-      id?: string | null;
-    }[];
-    output: {
-      ar: string;
-      en?: string | null;
-    };
-  };
-  record: {
-    /**
-     * Untick to hide this section, keeping its words.
-     */
-    shows?: boolean | null;
-    /**
-     * Follows the section’s number, which is fixed.
-     */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    body: {
-      ar: string;
-      en?: string | null;
-    };
-    code: string;
-    document: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Says the card is an example.
-     */
-    example: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Always four, in their order on the card.
+     * Always three, numbered in their order, and each step’s icon is fixed by its place.
      */
     steps: {
-      verb: {
+      name: {
         ar: string;
         en?: string | null;
       };
-      who: {
+      text: {
         ar: string;
         en?: string | null;
       };
-      time: string;
       id?: string | null;
     }[];
-    summary: {
+    cardTitle: {
+      ar: string;
+      en?: string | null;
+    };
+    cardLine: {
+      ar: string;
+      en?: string | null;
+    };
+    demoLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    whatsappLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
+     */
+    demoLink: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.
+     */
+    whatsappLink?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+  };
+  contact: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+    tagline: {
+      ar: string;
+      en?: string | null;
+    };
+    name: {
+      ar: string;
+      en?: string | null;
+    };
+    phoneLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    phone: string;
+    emailLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    email: string;
+    /**
+     * The number beside it is the site’s WhatsApp number, from Site settings.
+     */
+    whatsappLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    location: {
       ar: string;
       en?: string | null;
     };
   };
-  compare: {
+  whatsappButton: {
     /**
-     * Follows the section’s number, which is fixed.
+     * Read out by screen readers: the button is an icon with no words.
      */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    lead: {
-      ar: string;
-      en?: string | null;
-    };
-    beforeLabel: {
-      ar: string;
-      en?: string | null;
-    };
-    afterLabel: {
+    label: {
       ar: string;
       en?: string | null;
     };
     /**
-     * On a video that does not start by itself: with reduced motion, Save-Data or a slow connection.
+     * Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.
      */
-    playLabel: {
+    link?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+  };
+  pdf: {
+    label: {
       ar: string;
       en?: string | null;
     };
-    approvals: {
-      /**
-       * Shown on the tab and above the question.
-       */
-      module: {
-        ar: string;
-        en?: string | null;
-      };
-      question: {
-        ar: string;
-        en?: string | null;
-      };
-      firstRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      secondRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      thirdRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      note: {
-        ar: string;
-        en?: string | null;
-      };
-      /**
-       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
-       */
-      video?: (number | null) | ProfileFile;
-      /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
-       */
-      poster?: (number | null) | Media;
-    };
-    documents: {
-      /**
-       * Shown on the tab and above the question.
-       */
-      module: {
-        ar: string;
-        en?: string | null;
-      };
-      question: {
-        ar: string;
-        en?: string | null;
-      };
-      firstRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      secondRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      thirdRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      note: {
-        ar: string;
-        en?: string | null;
-      };
-      /**
-       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
-       */
-      video?: (number | null) | ProfileFile;
-      /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
-       */
-      poster?: (number | null) | Media;
-    };
-    correspondence: {
-      /**
-       * Shown on the tab and above the question.
-       */
-      module: {
-        ar: string;
-        en?: string | null;
-      };
-      question: {
-        ar: string;
-        en?: string | null;
-      };
-      firstRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      secondRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      thirdRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      note: {
-        ar: string;
-        en?: string | null;
-      };
-      /**
-       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
-       */
-      video?: (number | null) | ProfileFile;
-      /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
-       */
-      poster?: (number | null) | Media;
-    };
-    dashboard: {
-      /**
-       * Shown on the tab and above the question.
-       */
-      module: {
-        ar: string;
-        en?: string | null;
-      };
-      question: {
-        ar: string;
-        en?: string | null;
-      };
-      firstRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      secondRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      thirdRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      note: {
-        ar: string;
-        en?: string | null;
-      };
-      /**
-       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
-       */
-      video?: (number | null) | ProfileFile;
-      /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
-       */
-      poster?: (number | null) | Media;
-    };
-    dailyReport: {
-      /**
-       * Shown on the tab and above the question.
-       */
-      module: {
-        ar: string;
-        en?: string | null;
-      };
-      question: {
-        ar: string;
-        en?: string | null;
-      };
-      firstRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      secondRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      thirdRow: {
-        label: {
-          ar: string;
-          en?: string | null;
-        };
-        before: {
-          ar: string;
-          en?: string | null;
-        };
-        after: {
-          ar: string;
-          en?: string | null;
-        };
-      };
-      note: {
-        ar: string;
-        en?: string | null;
-      };
-      /**
-       * An MP4 in H.264 with no sound, 8 MB at most. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
-       */
-      video?: (number | null) | ProfileFile;
-      /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
-       */
-      poster?: (number | null) | Media;
-    };
+    /**
+     * A PDF of 4 MB at most: the site cannot take a larger file. Leave it empty to give Ahmed’s file, kept with the site: Rabaed-Profile-V4-AR.pdf.
+     */
+    arabic?: (number | null) | ProfileFile;
+    /**
+     * A PDF of 4 MB at most: the site cannot take a larger file. Leave it empty to give Ahmed’s file, kept with the site: Rabaed-Profile-V4-AR-mobile.pdf.
+     */
+    arabicPhone?: (number | null) | ProfileFile;
+    /**
+     * A PDF of 4 MB at most: the site cannot take a larger file. Leave it empty to give Ahmed’s file, kept with the site: Rabaed-Profile-V4-EN.pdf.
+     */
+    english?: (number | null) | ProfileFile;
+    /**
+     * A PDF of 4 MB at most: the site cannot take a larger file. Leave it empty to give Ahmed’s file, kept with the site: Rabaed-Profile-V4-EN-mobile.pdf.
+     */
+    englishPhone?: (number | null) | ProfileFile;
   };
   search: {
     /**
@@ -10099,55 +9769,24 @@ export interface ProfilePageSelect<T extends boolean = true> {
     | {
         shows?: T;
       };
-  truth?:
+  cost?:
     | T
     | {
         shows?: T;
-        eyebrow?:
+        callToActionLabel?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        body?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        photo?: T;
-        caption?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        noteRevision?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        noteComments?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        noteWho?:
+        callToActionLink?:
           | T
           | {
               ar?: T;
               en?: T;
             };
       };
-  numbers?:
+  templates?:
     | T
     | {
         shows?: T;
@@ -10158,6 +9797,93 @@ export interface ProfilePageSelect<T extends boolean = true> {
               en?: T;
             };
         title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        hint?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cards?:
+          | T
+          | {
+              code?: T;
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  why?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        reasons?:
+          | T
+          | {
+              name?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              text?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+      };
+  impact?:
+    | T
+    | {
+        shows?: T;
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
           | T
           | {
               ar?: T;
@@ -10167,6 +9893,12 @@ export interface ProfilePageSelect<T extends boolean = true> {
           | T
           | {
               figure?: T;
+              unit?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
               label?:
                 | T
                 | {
@@ -10175,6 +9907,12 @@ export interface ProfilePageSelect<T extends boolean = true> {
                   };
               id?: T;
             };
+        activation?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
         source?:
           | T
           | {
@@ -10182,7 +9920,7 @@ export interface ProfilePageSelect<T extends boolean = true> {
               en?: T;
             };
       };
-  trap?:
+  plans?:
     | T
     | {
         shows?: T;
@@ -10198,37 +9936,42 @@ export interface ProfilePageSelect<T extends boolean = true> {
               ar?: T;
               en?: T;
             };
-        body?:
+        badge?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        kicker?:
+        tiers?:
           | T
           | {
-              ar?: T;
-              en?: T;
-            };
-        tools?:
-          | T
-          | {
+              kicker?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
               name?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              text?:
+              features?:
                 | T
                 | {
-                    ar?: T;
-                    en?: T;
+                    feature?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    id?: T;
                   };
               id?: T;
             };
       };
-  about?:
+  start?:
     | T
     | {
         shows?: T;
@@ -10239,158 +9982,6 @@ export interface ProfilePageSelect<T extends boolean = true> {
               en?: T;
             };
         title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        titleAccent?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        body?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        quote?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-      };
-  parties?:
-    | T
-    | {
-        shows?: T;
-        eyebrow?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        lead?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        cards?:
-          | T
-          | {
-              name?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              want?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              id?: T;
-            };
-        record?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        footer?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-      };
-  platform?:
-    | T
-    | {
-        shows?: T;
-        eyebrow?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        lead?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        units?:
-          | T
-          | {
-              name?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              text?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              id?: T;
-            };
-        output?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-      };
-  record?:
-    | T
-    | {
-        shows?: T;
-        eyebrow?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        body?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        code?: T;
-        document?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        example?:
           | T
           | {
               ar?: T;
@@ -10399,517 +9990,129 @@ export interface ProfilePageSelect<T extends boolean = true> {
         steps?:
           | T
           | {
-              verb?:
+              name?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              who?:
+              text?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              time?: T;
               id?: T;
             };
-        summary?:
+        cardTitle?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        cardLine?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        demoLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        whatsappLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        demoLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        whatsappLink?:
           | T
           | {
               ar?: T;
               en?: T;
             };
       };
-  compare?:
+  contact?:
     | T
     | {
-        eyebrow?:
+        shows?: T;
+        tagline?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        title?:
+        name?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        lead?:
+        phoneLabel?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        beforeLabel?:
+        phone?: T;
+        emailLabel?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        afterLabel?:
+        email?: T;
+        whatsappLabel?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        playLabel?:
+        location?:
           | T
           | {
               ar?: T;
               en?: T;
             };
-        approvals?:
+      };
+  whatsappButton?:
+    | T
+    | {
+        label?:
           | T
           | {
-              module?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              question?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              firstRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              secondRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              thirdRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              note?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              video?: T;
-              poster?: T;
+              ar?: T;
+              en?: T;
             };
-        documents?:
+        link?:
           | T
           | {
-              module?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              question?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              firstRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              secondRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              thirdRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              note?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              video?: T;
-              poster?: T;
+              ar?: T;
+              en?: T;
             };
-        correspondence?:
+      };
+  pdf?:
+    | T
+    | {
+        label?:
           | T
           | {
-              module?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              question?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              firstRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              secondRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              thirdRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              note?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              video?: T;
-              poster?: T;
+              ar?: T;
+              en?: T;
             };
-        dashboard?:
-          | T
-          | {
-              module?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              question?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              firstRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              secondRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              thirdRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              note?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              video?: T;
-              poster?: T;
-            };
-        dailyReport?:
-          | T
-          | {
-              module?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              question?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              firstRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              secondRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              thirdRow?:
-                | T
-                | {
-                    label?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    before?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                    after?:
-                      | T
-                      | {
-                          ar?: T;
-                          en?: T;
-                        };
-                  };
-              note?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              video?: T;
-              poster?: T;
-            };
+        arabic?: T;
+        arabicPhone?: T;
+        english?: T;
+        englishPhone?: T;
       };
   search?:
     | T

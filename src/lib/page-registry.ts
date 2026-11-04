@@ -101,7 +101,7 @@ export const MARKETING_PAGES = {
     name: { ar: 'الملف التعريفي', en: 'Company profile' },
     entry: { slug: 'profile-page', label: { ar: 'صفحة الملف التعريفي', en: 'Company profile page' } },
     // The Screen mocks are section 07's (ticket 107).
-    shared: ['trust-strip', 'screen-mocks', 'site-words'],
+    shared: ['trust-strip', 'screen-mocks', 'delay-calculator', 'site-words'],
     questionsSection: null,
   },
 } as const satisfies Record<string, MarketingPageSpec>;
