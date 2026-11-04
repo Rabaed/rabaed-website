@@ -34,6 +34,8 @@ const HERO = {
   eyebrow: 'نظام تشغيل مشاريع الإنشاء · المملكة العربية السعودية',
   heading: ['ثلاثة أطراف.', 'سجل واحد.', 'مسؤولية واضحة.'],
   lead: 'ربائد تجمع المالك والاستشاري والمقاول على منصة واحدة: مراسلات معتمدة، اعتمادات وطلبات فحص، مستندات بأحدث إصدار، وتقارير يومية من الموقع. كل خطوة موثّقة ومؤرخة باسم من قام بها، والتشغيل خلال أيام.',
+  // His second badge, «ضمان استرجاع كامل المبلغ خلال 60 يوماً», set as the
+  // home page's guarantee is: the period in bold, then the promise.
   badges: ['عرض حي · 30 دقيقة · بالعربية', '60 يوماً ضمان استرجاع كامل المبلغ'],
 };
 
@@ -142,7 +144,12 @@ test('a link that is not an address is refused, and an empty demo link is too', 
   const profile = cms.entry('profile-page');
   const saved = await profile.published();
 
-  for (const demoLink of [{ ...saved.hero.demoLink, ar: 'احجز' }, { ...saved.hero.demoLink, ar: '' }]) {
+  for (const demoLink of [
+    { ...saved.hero.demoLink, ar: 'احجز' },
+    { ...saved.hero.demoLink, ar: '' },
+    // Begins like a path, and is another site.
+    { ...saved.hero.demoLink, ar: '//another.example/demo' },
+  ]) {
     const response = await profile.attempt({ ...saved, hero: { ...saved.hero, demoLink } }, 'published');
     expect(response.status(), JSON.stringify(demoLink)).toBe(400);
   }
@@ -186,7 +193,7 @@ test('published, it is a page of the site, in the sitemap and llms.txt, linked f
   // Its place in the site, for a search engine.
   const [breadcrumbs] = nodesOf(structuredData(html), 'BreadcrumbList');
   expect(trail(breadcrumbs!)).toEqual([
-    ['الرئيسية', `${baseURL}/`],
+    ['الرئيسية', baseURL!],
     ['الملف التعريفي', `${baseURL}/profile`],
   ]);
 

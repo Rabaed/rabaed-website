@@ -303,8 +303,12 @@ const BUTTON_LINK_NEEDED: Words = {
   en: 'Write where this button goes: a path on the site beginning with a slash, such as /#demo, or a full address beginning with https://',
 };
 
-/** A path on the site, with a place on its page after `#` if it names one, or a full address on the web. */
-const BUTTON_LINK = /^(?:\/\S*|https:\/\/\S+)$/;
+/**
+ * A path on the site, with a place on its page after `#` if it names one, or a
+ * full address on the web. Never `//another.example`, which a browser reads as
+ * another site, though it begins like a path.
+ */
+const BUTTON_LINK = /^(?:\/(?!\/)\S*|https:\/\/\S+)$/;
 
 /**
  * Where a button goes, on the Arabic page and on the English one: each written

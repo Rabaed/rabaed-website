@@ -595,6 +595,14 @@ links to it: it is reached by the link Ahmed sends. Unlike every other page's,
 its buttons' links are yours to change in the entry — an empty WhatsApp link
 is the number in the site settings.
 
+- **Publish it in the preview CMS first.** Once published, it stays on the
+  site: what visitors see is the newest published version in the entry's
+  history, and the admin's **Unpublish** leaves that version there. Publishing
+  is the approval, as it is for every page's English.
+- **While it is unpublished, `/en/profile`'s button to the Arabic leads to a
+  page not found**, since the Arabic is not there yet either. Nobody is sent
+  either address until you publish it.
+
 And beside them:
 
 - **FAQs** — an English question for every Arabic one, 36 in all, each a draft.

@@ -3,7 +3,6 @@ import { allPublishedPosts } from '@/cms/blog';
 import { pageEntry } from '@/cms/pages';
 import { allPublishedCaseStudies } from '@/cms/case-studies';
 import { isPublishedIn } from '@/content/pages/languages';
-import { contentOrNull } from '@/content/pages/page-content';
 import { blogPostPath } from '@/lib/blog-paths';
 import { CASE_STUDIES_PATH, caseStudyPath } from '@/lib/case-study-paths';
 import { absoluteUrl } from '@/lib/environment';
@@ -58,13 +57,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     Promise.all(
       MARKETING_PAGE_KEYS.map(async (page) => {
         const { path, entry: own } = MARKETING_PAGES[page];
-        // A page is listed once it is published, which the Company profile is
-        // not until the founder publishes it (ticket 102).
-        const [entry, inEnglish] = await Promise.all([
-          contentOrNull(pageEntry(own.slug, DEFAULT_LOCALE)),
-          isPublishedIn(page, 'en'),
-        ]);
-        return entry ? [{ path, inEnglish, lastModified: entry.updatedAt ?? undefined }] : [];
+        // A page is listed once it is published, by the rule its address and
+        // `llms.txt` follow — which the Company profile is not until the
+        // founder publishes it (ticket 102).
+        const [inArabic, inEnglish] = await Promise.all([isPublishedIn(page, DEFAULT_LOCALE), isPublishedIn(page, 'en')]);
+        if (!inArabic) return [];
+        const entry = await pageEntry(own.slug, DEFAULT_LOCALE);
+        return [{ path, inEnglish, lastModified: entry.updatedAt ?? undefined }];
       }),
     ).then((pages) => pages.flat()),
   ]);
