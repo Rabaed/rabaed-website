@@ -5,6 +5,7 @@ import type { HomeHeroContent } from '@/components/home/hero';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
 import type { ProfileAboutContent } from '@/components/profile/about';
+import { COMPARISON_DEFAULTS, type ProfileCompareContent } from '@/components/profile/compare';
 import type { ProfileNumbersContent } from '@/components/profile/numbers';
 import type { ProfilePartiesContent } from '@/components/profile/parties';
 import { PLATFORM_UNITS, type ProfilePlatformContent } from '@/components/profile/platform';
@@ -16,9 +17,9 @@ import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
-import type { Media, ProfilePage } from '@/payload-types';
+import { COMPARISONS } from '@/lib/profile-comparisons';
+import type { Media, ProfileFile, ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
-import { profileCompare, type ProfileCompareContent } from './profile-compare';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
@@ -93,7 +94,7 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const link = (stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink']) => words(stored).trim();
-  const { hero, truth, numbers, trap, about, parties, platform, record } = entry;
+  const { hero, truth, numbers, trap, about, parties, platform, record, compare } = entry;
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -182,6 +183,37 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       steps: record.steps.map((step) => ({ verb: words(step.verb), who: words(step.who), time: step.time })),
       summary: words(record.summary),
     },
-    compare: profileCompare(locale, entry.compare),
+    // Every word an Editor's, and each video and poster an Editor's where one
+    // has been chosen, Ahmed's where not.
+    compare: {
+      eyebrow: words(compare.eyebrow),
+      title: words(compare.title),
+      lead: words(compare.lead),
+      beforeLabel: words(compare.beforeLabel),
+      afterLabel: words(compare.afterLabel),
+      playLabel: words(compare.playLabel),
+      comparisons: COMPARISONS.map((id) => {
+        const stored = compare[id];
+        const defaults = COMPARISON_DEFAULTS[id];
+        const video = fetchedMedia<ProfileFile>(stored.video);
+        const poster = fetchedMedia(stored.poster);
+        return {
+          id,
+          module: words(stored.module),
+          question: words(stored.question),
+          rows: [stored.firstRow, stored.secondRow, stored.thirdRow].map((row) => ({
+            label: words(row.label),
+            before: words(row.before),
+            after: words(row.after),
+          })),
+          note: words(stored.note),
+          video: video?.url || `/profile/clips/${defaults.clip}`,
+          poster:
+            poster?.url && poster.width && poster.height
+              ? { url: poster.url, width: poster.width, height: poster.height }
+              : { url: `/profile/clips/${defaults.poster}`, width: defaults.width, height: defaults.height },
+        };
+      }),
+    },
   };
 }

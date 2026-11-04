@@ -20,7 +20,9 @@
 .pf-cmp-panel:not(.on) { display: none }
 
 .pf-cmp-module { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted) }
-.pf-cmp-module i { flex: none; width: 30px; height: 30px; background: var(--acc); -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat }
+.pf-cmp-module .pf-icon { width: 30px; height: 30px; color: var(--acc) }
+.pf-icon-folder-search { --pf-icon: url(/profile/icons/folder-search.svg) }
+.pf-icon-gauge { --pf-icon: url(/profile/icons/gauge.png) }
 .pf-cmp-text h3 { font-size: 30px; line-height: 1.4; margin-bottom: 18px; text-wrap: balance }
 
 .pf-cmp-table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.6 }

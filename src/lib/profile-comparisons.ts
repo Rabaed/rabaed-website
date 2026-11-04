@@ -3,7 +3,7 @@
  * the order of their tabs, which is fixed: each is one of Ahmed's videos
  * (ticket 108). The names are those of the profile's entry
  * (`src/cms/globals/profile-compare.ts`) and of the page
- * (`src/content/pages/profile-compare.ts`).
+ * (`src/components/profile/compare.tsx`).
  */
 export const COMPARISONS = ['approvals', 'documents', 'correspondence', 'dashboard', 'dailyReport'] as const;
 

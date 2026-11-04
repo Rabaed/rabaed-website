@@ -1,9 +1,50 @@
-import type { CSSProperties } from 'react';
 import { CompareBehaviour } from '@/components/profile/compare-behaviour';
 import { comparisonAppearance, FIRST_COMPARISON } from '@/components/profile/compare-state';
 import { SectionEyebrow } from '@/components/profile/section-eyebrow';
-import type { ProfileCompareContent } from '@/content/pages/profile-compare';
+import type { Comparison } from '@/lib/profile-comparisons';
 import type { ReadingDirection } from '@/lib/reading-direction';
+
+/** One of the five comparisons, as its tab and panel draw it. */
+export type CompareItem = {
+  readonly id: Comparison;
+  /** The tab's name, and the line above the question. */
+  readonly module: string;
+  readonly question: string;
+  readonly rows: readonly { readonly label: string; readonly before: string; readonly after: string }[];
+  readonly note: string;
+  /** Where the video is fetched from, once it is due. */
+  readonly video: string;
+  /** What stands in the video's place until it starts; its shape is the frame's. */
+  readonly poster: { readonly url: string; readonly width: number; readonly height: number };
+};
+
+export type ProfileCompareContent = {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly lead: string;
+  readonly beforeLabel: string;
+  readonly afterLabel: string;
+  readonly playLabel: string;
+  readonly comparisons: readonly CompareItem[];
+};
+
+/**
+ * Each comparison's icon, and Ahmed's video and poster, the defaults an
+ * Editor's replace (`public/profile/clips/`), with each frame's size: his
+ * Approvals clip is a tall page, 720×1020, and the other four are 1552×1030
+ * screens. The icon is one of Ahmed's (`.pf-icon-…`), fixed by the
+ * comparison, as the platform section's are by their places
+ * (`PLATFORM_UNITS`).
+ */
+export const COMPARISON_DEFAULTS: Readonly<
+  Record<Comparison, { clip: string; poster: string; icon: string; width: number; height: number }>
+> = {
+  approvals: { clip: '01-approvals.mp4', poster: 'poster-01.webp', icon: 'approvals', width: 720, height: 1020 },
+  documents: { clip: '02-documents.mp4', poster: 'poster-02.webp', icon: 'folder-search', width: 1552, height: 1030 },
+  correspondence: { clip: '03-correspondence.mp4', poster: 'poster-03.webp', icon: 'mail-open', width: 1552, height: 1030 },
+  dashboard: { clip: '04-dashboard.mp4', poster: 'poster-04.webp', icon: 'gauge', width: 1552, height: 1030 },
+  dailyReport: { clip: '05-daily-report.mp4', poster: 'poster-05.webp', icon: 'chart', width: 1552, height: 1030 },
+};
 
 /**
  * Section 09 of the Company profile, «قبل وبعد» (`#compare`, ticket 108): a
@@ -62,7 +103,7 @@ export function Compare({ content, direction }: { content: ProfileCompareContent
             >
               <div className="pf-cmp-text">
                 <p className="pf-cmp-module">
-                  <i style={{ '--icon': `url(${comparison.icon})` } as CSSProperties} aria-hidden="true" />
+                  <i className={`pf-icon pf-icon-${COMPARISON_DEFAULTS[comparison.id].icon}`} aria-hidden="true" />
                   {comparison.module}
                 </p>
                 <h3>{comparison.question}</h3>
