@@ -18,6 +18,7 @@ import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
 import type { Media, ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
+import { profileCompare, type ProfileCompareContent } from './profile-compare';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
@@ -33,6 +34,8 @@ export type ProfilePageContent = {
   readonly parties: Section<ProfilePartiesContent>;
   readonly platform: Section<ProfilePlatformContent>;
   readonly record: Section<ProfileRecordContent>;
+  /** Section 09, the before-and-after videos (ticket 108), which always shows: the Profile PDFs link to it. */
+  readonly compare: ProfileCompareContent;
 };
 
 /**
@@ -179,5 +182,6 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       steps: record.steps.map((step) => ({ verb: words(step.verb), who: words(step.who), time: step.time })),
       summary: words(record.summary),
     },
+    compare: profileCompare(locale, entry.compare),
   };
 }

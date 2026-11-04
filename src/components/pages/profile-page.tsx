@@ -2,6 +2,7 @@ import { Hero } from '@/components/home/hero';
 import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { About } from '@/components/profile/about';
+import { Compare } from '@/components/profile/compare';
 import { Numbers } from '@/components/profile/numbers';
 import { Parties } from '@/components/profile/parties';
 import { Platform } from '@/components/profile/platform';
@@ -44,6 +45,7 @@ export async function ProfilePage({
       {content.parties.shows && <Parties content={content.parties} />}
       {content.platform.shows && <Platform content={content.platform} direction={LOCALES[locale].dir} />}
       {content.record.shows && <DocumentedRecord content={content.record} />}
+      <Compare content={content.compare} direction={LOCALES[locale].dir} />
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/profile' }])} />
     </PageShell>
   );

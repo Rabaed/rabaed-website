@@ -77,6 +77,7 @@ export interface Config {
     'form-submissions': FormSubmission;
     'email-images': EmailImage;
     'pour-tracker-releases': PourTrackerRelease;
+    'profile-files': ProfileFile;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'email-images': EmailImagesSelect<false> | EmailImagesSelect<true>;
     'pour-tracker-releases': PourTrackerReleasesSelect<false> | PourTrackerReleasesSelect<true>;
+    'profile-files': ProfileFilesSelect<false> | ProfileFilesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -658,6 +660,26 @@ export interface PourTrackerRelease {
   createdAt: string;
 }
 /**
+ * The Company profile’s before-and-after videos and its four PDFs, kept exactly as uploaded. An MP4 or a PDF, 4 MB at most each: the site cannot take a larger file.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-files".
+ */
+export interface ProfileFile {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -720,6 +742,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pour-tracker-releases';
         value: number | PourTrackerRelease;
+      } | null)
+    | ({
+        relationTo: 'profile-files';
+        value: number | ProfileFile;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1038,6 +1064,23 @@ export interface PourTrackerReleasesSelect<T extends boolean = true> {
   fileName?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-files_select".
+ */
+export interface ProfileFilesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5437,11 +5480,7 @@ export interface ProfilePage {
       en?: string | null;
     };
   };
-  parties: {
-    /**
-     * Untick to hide this section, keeping its words.
-     */
-    shows?: boolean | null;
+  compare: {
     /**
      * Follows the section’s number, which is fixed.
      */
@@ -5457,118 +5496,355 @@ export interface ProfilePage {
       ar: string;
       en?: string | null;
     };
+    beforeLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    afterLabel: {
+      ar: string;
+      en?: string | null;
+    };
     /**
-     * Always three, and each card’s icon is fixed by its place: the Owner, then the Consultant, then the Contractor.
+     * On a video that does not start by itself: with reduced motion, Save-Data or a slow connection.
      */
-    cards: {
-      name: {
+    playLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    approvals: {
+      /**
+       * Shown on the tab and above the question.
+       */
+      module: {
         ar: string;
         en?: string | null;
       };
-      want: {
+      question: {
         ar: string;
         en?: string | null;
       };
-      id?: string | null;
-    }[];
-    record: {
-      ar: string;
-      en?: string | null;
-    };
-    footer: {
-      ar: string;
-      en?: string | null;
-    };
-  };
-  platform: {
-    /**
-     * Untick to hide this section, keeping its words.
-     */
-    shows?: boolean | null;
-    /**
-     * Follows the section’s number, which is fixed.
-     */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    lead: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Always four, and each tab’s screen and icon are fixed by its place: correspondence, then approvals, then the daily site report, then documents.
-     */
-    units: {
-      name: {
+      firstRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      secondRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      thirdRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      note: {
         ar: string;
         en?: string | null;
       };
-      text: {
+      /**
+       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       */
+      video?: (number | null) | ProfileFile;
+      /**
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
+       */
+      poster?: (number | null) | Media;
+    };
+    documents: {
+      /**
+       * Shown on the tab and above the question.
+       */
+      module: {
         ar: string;
         en?: string | null;
       };
-      id?: string | null;
-    }[];
-    output: {
-      ar: string;
-      en?: string | null;
-    };
-  };
-  record: {
-    /**
-     * Untick to hide this section, keeping its words.
-     */
-    shows?: boolean | null;
-    /**
-     * Follows the section’s number, which is fixed.
-     */
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    title: {
-      ar: string;
-      en?: string | null;
-    };
-    body: {
-      ar: string;
-      en?: string | null;
-    };
-    code: string;
-    document: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Says the card is an example.
-     */
-    example: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Always four, in their order on the card.
-     */
-    steps: {
-      verb: {
+      question: {
         ar: string;
         en?: string | null;
       };
-      who: {
+      firstRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      secondRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      thirdRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      note: {
         ar: string;
         en?: string | null;
       };
-      time: string;
-      id?: string | null;
-    }[];
-    summary: {
-      ar: string;
-      en?: string | null;
+      /**
+       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       */
+      video?: (number | null) | ProfileFile;
+      /**
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
+       */
+      poster?: (number | null) | Media;
+    };
+    correspondence: {
+      /**
+       * Shown on the tab and above the question.
+       */
+      module: {
+        ar: string;
+        en?: string | null;
+      };
+      question: {
+        ar: string;
+        en?: string | null;
+      };
+      firstRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      secondRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      thirdRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      note: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       */
+      video?: (number | null) | ProfileFile;
+      /**
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
+       */
+      poster?: (number | null) | Media;
+    };
+    dashboard: {
+      /**
+       * Shown on the tab and above the question.
+       */
+      module: {
+        ar: string;
+        en?: string | null;
+      };
+      question: {
+        ar: string;
+        en?: string | null;
+      };
+      firstRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      secondRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      thirdRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      note: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       */
+      video?: (number | null) | ProfileFile;
+      /**
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
+       */
+      poster?: (number | null) | Media;
+    };
+    dailyReport: {
+      /**
+       * Shown on the tab and above the question.
+       */
+      module: {
+        ar: string;
+        en?: string | null;
+      };
+      question: {
+        ar: string;
+        en?: string | null;
+      };
+      firstRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      secondRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      thirdRow: {
+        label: {
+          ar: string;
+          en?: string | null;
+        };
+        before: {
+          ar: string;
+          en?: string | null;
+        };
+        after: {
+          ar: string;
+          en?: string | null;
+        };
+      };
+      note: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * An MP4 in H.264 with no sound, 4 MB at most: the site cannot take a larger file. Compress a larger video before uploading it. Leave it empty for Ahmed’s.
+       */
+      video?: (number | null) | ProfileFile;
+      /**
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
+       */
+      poster?: (number | null) | Media;
     };
   };
   search: {
@@ -9851,10 +10127,9 @@ export interface ProfilePageSelect<T extends boolean = true> {
               en?: T;
             };
       };
-  parties?:
+  compare?:
     | T
     | {
-        shows?: T;
         eyebrow?:
           | T
           | {
@@ -9873,140 +10148,473 @@ export interface ProfilePageSelect<T extends boolean = true> {
               ar?: T;
               en?: T;
             };
-        cards?:
+        beforeLabel?:
           | T
           | {
-              name?:
+              ar?: T;
+              en?: T;
+            };
+        afterLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        playLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        approvals?:
+          | T
+          | {
+              module?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              want?:
+              question?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              id?: T;
-            };
-        record?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        footer?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-      };
-  platform?:
-    | T
-    | {
-        shows?: T;
-        eyebrow?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        lead?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        units?:
-          | T
-          | {
-              name?:
+              firstRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              secondRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              thirdRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              note?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              text?:
+              video?: T;
+              poster?: T;
+            };
+        documents?:
+          | T
+          | {
+              module?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              id?: T;
-            };
-        output?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-      };
-  record?:
-    | T
-    | {
-        shows?: T;
-        eyebrow?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        title?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        body?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        code?: T;
-        document?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        example?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        steps?:
-          | T
-          | {
-              verb?:
+              question?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              who?:
+              firstRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              secondRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              thirdRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              note?:
                 | T
                 | {
                     ar?: T;
                     en?: T;
                   };
-              time?: T;
-              id?: T;
+              video?: T;
+              poster?: T;
             };
-        summary?:
+        correspondence?:
           | T
           | {
-              ar?: T;
-              en?: T;
+              module?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              question?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              firstRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              secondRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              thirdRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              note?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              video?: T;
+              poster?: T;
+            };
+        dashboard?:
+          | T
+          | {
+              module?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              question?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              firstRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              secondRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              thirdRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              note?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              video?: T;
+              poster?: T;
+            };
+        dailyReport?:
+          | T
+          | {
+              module?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              question?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              firstRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              secondRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              thirdRow?:
+                | T
+                | {
+                    label?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    before?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                    after?:
+                      | T
+                      | {
+                          ar?: T;
+                          en?: T;
+                        };
+                  };
+              note?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              video?: T;
+              poster?: T;
             };
       };
   search?:

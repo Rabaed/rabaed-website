@@ -61,6 +61,8 @@ import { PARTNERSHIP_APPLICATION_SEED } from '../../src/migrations/partnership-a
 import { PARTNERSHIP_APPLICATION_WORDS } from '../../src/migrations/partnership-application-import/words';
 import { PARTNERSHIP_PAGE_SEED } from '../../src/migrations/partnership-page-import/seed';
 import { PARTNERSHIP_PAGE_WORDS } from '../../src/migrations/partnership-page-import/words';
+import { PROFILE_COMPARE_SEED } from '../../src/migrations/profile-compare-import/seed';
+import { PROFILE_COMPARE_WORDS } from '../../src/migrations/profile-compare-import/words';
 import { PROFILE_OPENING_SEED } from '../../src/migrations/profile-opening-sections/seed';
 import { PROFILE_OPENING_WORDS } from '../../src/migrations/profile-opening-sections/words';
 import { PROFILE_PAGE_SEED } from '../../src/migrations/profile-page-import/seed';
@@ -174,6 +176,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
   { name: 'the Company profile', words: PROFILE_PAGE_WORDS, seed: PROFILE_PAGE_SEED },
   { name: 'the Company profile’s sections 01 to 04', words: PROFILE_OPENING_WORDS, seed: PROFILE_OPENING_SEED },
   { name: 'the Company profile’s sections 06 to 08', words: PROFILE_SOLUTION_WORDS, seed: PROFILE_SOLUTION_SEED },
+  { name: 'the Company profile’s before and after', words: PROFILE_COMPARE_WORDS, seed: PROFILE_COMPARE_SEED },
 ];
 
 /**

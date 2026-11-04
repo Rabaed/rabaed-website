@@ -2,6 +2,7 @@ import { buttonLinkField, latinField, listField, pictureField, sectionTab, words
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
+import { compareTab } from './profile-compare';
 
 const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40, {
   description: { ar: 'يُكتب بعد رقم القسم، والرقم ثابت.', en: 'Follows the section’s number, which is fixed.' },
@@ -19,7 +20,8 @@ const PAPER = { width: 800, height: 1069 } as const;
  * 04 from ticket 105 and the rest from tickets 106–109. A section's number is
  * its place in Ahmed's order, which is fixed, so it is code rather than words,
  * and keeps the number Ahmed's Profile PDFs give it: hiding 03 leaves 01, 02
- * and 04.
+ * and 04. Section 09, the before-and-after videos, is ticket 108's
+ * (`./profile-compare.ts`).
  *
  * **Its buttons' links are an Editor's too**, unlike every other page's: the
  * founder chose on 4 November 2026 that a campaign's link may change tomorrow
@@ -327,6 +329,7 @@ export const ProfilePage = pageGlobal({
         wordsField('summary', { ar: 'السطر في آخر البطاقة', en: 'Line at the foot of the card' }, 70),
       ],
     }),
+    compareTab(),
     searchTab(),
   ],
 });

@@ -167,6 +167,11 @@ export function localSharingImageDirectory(): string {
   return process.env.SHARING_IMAGE_DIR ?? path.resolve(process.cwd(), '.data', 'sharing-images');
 }
 
+/** The same, for the Company profile's videos and PDFs (tickets 108 and 104). */
+export function localProfileFileDirectory(): string {
+  return process.env.PROFILE_FILE_DIR ?? path.resolve(process.cwd(), '.data', 'profile-files');
+}
+
 /** The same, for the images the confirmation email shows (ADR-0028). */
 export function localEmailImageDirectory(): string {
   return process.env.EMAIL_IMAGE_DIR ?? path.resolve(process.cwd(), '.data', 'email-images');
