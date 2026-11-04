@@ -23,8 +23,12 @@ import { drawnFrom, expectPhoneCrop, expectWholeToSwipe, frameShowing, mediaFile
 import { screenMockFieldName } from '../../src/cms/screen-mock-fields';
 import { ENGLISH_SCREEN_MOCK_DESCRIPTIONS } from '../../src/migrations/english-screen-mock-words/words';
 import { phoneCropExportSize, SCREEN_MOCKS } from '../../src/screen-mocks/registry';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+// The Screen mocks this drafts are the ones the Company profile's suites
+// preview on the same server (`profile-solution-sections.spec.ts`).
+oneSuiteAtATime(test);
 
 type Global = 'product-page' | 'closing-section' | 'screen-mocks';
 
