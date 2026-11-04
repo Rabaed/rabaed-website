@@ -76,3 +76,6 @@ Two reviews. The spec review checked the copy by script against the Reference pa
 **"No duplicates in development"** is protected by construction — every listener removed, the hint and its trigger killed, and the seam's inline drawing taken off the page on teardown — and was not separately checked by hand, for the reason ticket 07 gives.
 
 **A finger dragging the seam** is not tested: Playwright's touchscreen can tap but not drag. The seam listens to pointer events, which a finger sends as a mouse does.
+
+
+**4 November 2026: the formula is replaced.** The founder adopted Ahmed's method for every page: the cost of money, at 8% a year, on what has been spent so far (value × progress), with no site overhead. The line above that this ticket "preserves the Reference site's formula exactly" no longer holds, on purpose. See ADR-0029 and ticket 103 in `.scratch/company-profile/`.

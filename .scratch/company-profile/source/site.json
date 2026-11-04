@@ -1,0 +1,101 @@
+{
+  "site_url": "https://rabaedapp.com",
+  "profile_path": {
+    "ar": "/profile",
+    "en": "/en/profile"
+  },
+  "demo_url": {
+    "ar": "https://rabaedapp.com/#demo",
+    "en": "https://rabaedapp.com/en#demo"
+  },
+  "website_label": "rabaedapp.com",
+  "whatsapp": {
+    "number": "966579012646",
+    "display": "+966 57 901 2646"
+  },
+  "phone": {
+    "number": "+966596006615",
+    "display": "+966 59 600 6615"
+  },
+  "email": "Ahmed.s@rabaedapp.com",
+  "social": [
+    {
+      "name": "LinkedIn",
+      "url": "https://www.linkedin.com/company/rabaed"
+    },
+    {
+      "name": "X",
+      "url": "https://x.com/Rabaedsa"
+    },
+    {
+      "name": "Instagram",
+      "url": "https://www.instagram.com/rabaedapp"
+    },
+    {
+      "name": "Facebook",
+      "url": "https://www.facebook.com/rabaedapp"
+    }
+  ],
+  "clients": [
+    {
+      "file": "client-nawah.webp",
+      "ar": "نواة للاستثمار العقاري",
+      "en": "Nawah Real Estate Investment"
+    },
+    {
+      "file": "client-staterra-1.webp",
+      "ar": "Staterra",
+      "en": "Staterra"
+    },
+    {
+      "file": "client-alsharq-1.webp",
+      "ar": "شركة الشرق للاستشارات الهندسية",
+      "en": "Alsharq Engineering Consultants"
+    },
+    {
+      "file": "client-shaheen-1.webp",
+      "ar": "شاهين للاستشارات الهندسية",
+      "en": "Shaheen Engineering Consultants"
+    },
+    {
+      "file": "client-north-injazat.webp",
+      "ar": "North Injazat",
+      "en": "North Injazat"
+    },
+    {
+      "file": "client-amak.webp",
+      "ar": "شركة أماك بيلد",
+      "en": "Amak Build"
+    },
+    {
+      "file": "client-smart-directions.webp",
+      "ar": "Smart Directions",
+      "en": "Smart Directions"
+    }
+  ],
+  "calculator": {
+    "defaults": {
+      "value": 60000000,
+      "days": 7,
+      "progress": 50
+    },
+    "ranges": {
+      "value": [
+        1000000,
+        300000000,
+        1000000
+      ],
+      "days": [
+        1,
+        60,
+        1
+      ],
+      "progress": [
+        5,
+        100,
+        5
+      ]
+    },
+    "money_rate": 0.08
+  }
+}

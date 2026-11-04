@@ -48,8 +48,24 @@ A second picture of a Screen mock, zoomed in on the part of the screen that matt
 _Avoid_: mobile screenshot, mobile version (both suggest a phone app).
 
 **Footer directory**:
-The columns of links at the foot of every page, through which every page of the Marketing site can be reached, including those the header has no room for. Its columns and links are an Editor's.
+The columns of links at the foot of every page, through which every page of the Marketing site can be reached, including those the header has no room for, except the Company profile. Its columns and links are an Editor's.
 _Avoid_: sitemap, which is the file search engines read (`/sitemap.xml`), a different thing with a different audience.
+
+**Company profile** (الملف التعريفي):
+The page at `/profile` (and `/en/profile`) that presents Rabaed in one long read, sent to a prospect by link, in a WhatsApp campaign for instance, and also downloadable as a Profile PDF. Search engines may find it, but neither the header nor the Footer directory links to it.
+_Avoid_: Rabaed Profile, profile page, brochure.
+
+**Profile PDF**:
+The Company profile as a file, in four versions: Arabic and English, each laid out for a desktop screen and for a phone. Its Download PDF button gives the one for the page's language and the visitor's screen.
+_Avoid_: brochure, deck.
+
+**Delay-cost calculator** (حاسبة تكلفة التأخير):
+The section that estimates what one delayed approval costs a project: the cost of money, at 8% a year, on what has been spent so far, for the days handover slips. One calculator with one set of words, shown on the home page and on the Company profile.
+_Avoid_: hidden cost (the Company profile's heading for it), ROI calculator.
+
+**Sign in** (تسجيل الدخول):
+The header link to the Product app's sign-in page.
+_Avoid_: record, which is the Record, the product's core concept; login.
 
 **Trust strip** (شريط الثقة):
 The moving bar of client and partner logos. Content managed in the CMS so logos can be added over time.

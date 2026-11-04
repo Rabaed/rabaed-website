@@ -1,0 +1,529 @@
+{
+  "meta": {
+    "lang": "en",
+    "dir": "ltr",
+    "title": "Company profile · Rabaed",
+    "description": "Rabaed puts owner, consultant and contractor on one documented record: correspondence, approvals, daily site reports and documents. Live within days.",
+    "og_alt": "Rabaed: Three parties. One record. Clear ownership.",
+    "version": "Company profile · Version 4 · 2026",
+    "pdf_desktop": "Rabaed-Profile-V4-EN.pdf",
+    "pdf_mobile": "Rabaed-Profile-V4-EN-mobile.pdf"
+  },
+  "ui": {
+    "other_lang": "العربية",
+    "download_pdf": "Download PDF",
+    "book_demo": "Book a live demo",
+    "whatsapp": "WhatsApp us",
+    "play": "Play the comparison",
+    "watch_online": "Watch the comparisons on video",
+    "flip_hint": "Tap any form to see what it is for",
+    "drag_hint": "Drag the handle to see the same approval on Rabaed",
+    "before": "Before",
+    "after": "With Rabaed",
+    "interactive_link": "Interactive version",
+    "skip": "Skip to content",
+    "page": "Page"
+  },
+  "hero": {
+    "eyebrow": "The construction project OS · Saudi Arabia",
+    "title": [
+      "Three parties.",
+      "One record.",
+      "Clear ownership."
+    ],
+    "lead": "Rabaed puts owner, consultant and contractor on one platform: approved correspondence, approvals and inspections, documents at their latest revision, and daily site reports. Every step is dated, with the name of who took it, and you go live within days.",
+    "parties": [
+      "Owner",
+      "Consultant",
+      "Contractor"
+    ],
+    "record": "Approved · 12:05",
+    "badges": [
+      "Live demo · 30 minutes",
+      "60-day full money-back guarantee"
+    ]
+  },
+  "logos": {
+    "title": "Parties working on Rabaed right now"
+  },
+  "truth": {
+    "num": "01",
+    "eyebrow": "Here's the truth",
+    "title": "Your approvals live on scraps of paper.",
+    "body": "Every submittal and every official letter: handwritten comments, stamps, a phone photo, then a file lost between email, WhatsApp and SharePoint. Until the day you need to prove what happened on site.",
+    "caption": "A real material submittal from a housing project, April 2023. Names and stamps hidden.",
+    "marks": [
+      "REV 00… is it the latest?",
+      "Comments over the fields… who reads them?",
+      "And who has it now?"
+    ]
+  },
+  "numbers": {
+    "num": "02",
+    "eyebrow": "The real site",
+    "title": "The numbers behind the mess.",
+    "stats": [
+      {
+        "value": 35,
+        "suffix": "%",
+        "label": "of a project team's time goes on paperwork and data collection"
+      },
+      {
+        "value": 30,
+        "suffix": "%",
+        "label": "of construction project delays are related to paperwork"
+      },
+      {
+        "value": 95,
+        "suffix": "%",
+        "label": "of all construction data goes completely unused"
+      }
+    ]
+  },
+  "trap": {
+    "num": "03",
+    "eyebrow": "The trap",
+    "title": "Yes, a skilled engineer can organize the mess.",
+    "body": "But it takes twice the effort and time, just to stay afloat. You're paying senior salaries to fight tools, not to build.",
+    "kicker": "The problem isn't email or Excel. It's the manual, scattered process underneath them.",
+    "tools": [
+      {
+        "name": "WhatsApp",
+        "text": "Critical project decisions buried in group chats"
+      },
+      {
+        "name": "Email",
+        "text": "Fragmented data and siloed communication"
+      },
+      {
+        "name": "Excel",
+        "text": "Out of sync, and needs a manual update after every approval"
+      },
+      {
+        "name": "SharePoint",
+        "text": "Heavy manual rework to store dead, unusable data"
+      }
+    ]
+  },
+  "about": {
+    "num": "04",
+    "eyebrow": "Who we are",
+    "title": [
+      "We didn't study this problem.",
+      "We lived it."
+    ],
+    "body": "We're engineers and project managers who spent years in the field, facing the same delays, lost communications and endless paperwork you face every day.",
+    "quote": "So we decided to build the platform we always wished existed."
+  },
+  "cost": {
+    "num": "05",
+    "eyebrow": "The hidden cost",
+    "title": "What does a week's delay on one approval cost you?",
+    "lead": "What you've spent on the project only comes back to you at handover, and every week of delay pushes that back a week.",
+    "inputs": {
+      "value": "Project value",
+      "days": "Days of delay",
+      "progress": "Progress to date"
+    },
+    "units": {
+      "currency": "SAR",
+      "days": "days",
+      "day": "day"
+    },
+    "result": "Estimated cost of the delay",
+    "spent": "on {amount} SAR spent so far",
+    "assumptions": "Assumptions: cost of money at 8% a year, whether financing or a forgone return, on what has been spent so far, if the approval delays handover by the same period. Excludes delayed revenue, supervision fees, contractor claims and penalties.",
+    "try": "Change the numbers to match your project",
+    "cta": "Book a demo to see how we prevent it"
+  },
+  "parties": {
+    "num": "06",
+    "eyebrow": "Our solution",
+    "title": "Bridging the gap between the stakeholders.",
+    "lead": "Most software serves one party. Rabaed puts owner, consultant and contractor on one record, and each party keeps an internal review the others never see.",
+    "items": [
+      {
+        "name": "Project owner",
+        "want": "Wants delivery on time"
+      },
+      {
+        "name": "Engineering consultant",
+        "want": "Wants quality assurance"
+      },
+      {
+        "name": "Main contractor",
+        "want": "Wants cost control"
+      }
+    ],
+    "center": "The documented Record",
+    "footer": "A win for all three parties."
+  },
+  "platform": {
+    "num": "07",
+    "eyebrow": "The platform",
+    "title": "Four units. One record gathers them.",
+    "lead": "Each unit serves the owner's, the consultant's and the contractor's work where it happens, and they share one output: the documented Record.",
+    "modules": [
+      {
+        "id": "correspondence",
+        "name": "Official correspondence",
+        "text": "Letters with reference numbers, reply status and how long each party has waited. If the project manager leaves, the letters stay with the project."
+      },
+      {
+        "id": "kanban",
+        "name": "Approvals and requests",
+        "text": "Draft, internal review, then approval. Escalations and reminders fire automatically, and every step carries a name and a time. Every approval exports to PDF with a reference number and a check code."
+      },
+      {
+        "id": "daily-report",
+        "name": "Daily site report",
+        "text": "Labor, equipment, activities, materials and photos, with weekly and monthly reports generated automatically."
+      },
+      {
+        "id": "documents",
+        "name": "Documents and revisions",
+        "text": "Always the latest revision, with every earlier one and who uploaded it, ready the moment a claim or dispute arises."
+      }
+    ],
+    "output": "The output: the documented Record. Every request and approval dated with the name of whoever made it."
+  },
+  "record": {
+    "num": "08",
+    "eyebrow": "The documented Record",
+    "title": "Don't ask \"who approved?\" Open the transaction.",
+    "body": "The Record in Rabaed isn't a feature you switch on. It's the result of every step. Any transaction that passes through the platform carries its full record: an official letter, a material approval, a work inspection request or a schedule update. After the project ends, the record itself is still there.",
+    "doc": "Letter: extension of time request",
+    "steps": [
+      {
+        "verb": "Sent",
+        "who": "Eng. Fahd · Contractor",
+        "time": "08:15"
+      },
+      {
+        "verb": "Received",
+        "who": "Automatic receipt",
+        "time": "08:15"
+      },
+      {
+        "verb": "Checked",
+        "who": "Eng. Sara · Consultant",
+        "time": "13:40"
+      },
+      {
+        "verb": "Answered",
+        "who": "\"14 days granted\" · Owner",
+        "time": "11:05"
+      }
+    ],
+    "summary": "Full record · 4 steps · 3 parties",
+    "illustrative": "Illustrative example",
+    "doc_code": "LTR-088"
+  },
+  "compare": {
+    "num": "09",
+    "eyebrow": "Before and after",
+    "title": "Five everyday questions. Two answers.",
+    "lead": "Each comparison is a moment from a real project: the usual way, then the same moment on Rabaed.",
+    "items": [
+      {
+        "id": "approvals",
+        "module": "Approvals",
+        "question": "What are the comments? Which revision? And who has it now?",
+        "rows": [
+          [
+            "Comments",
+            "Handwritten, over the fields and in the margins",
+            "6 numbered items in the consultant's reply"
+          ],
+          [
+            "Revision",
+            "REV 00… and nobody can say it's the latest",
+            "A reference number and a check code for every revision"
+          ],
+          [
+            "Who has it now",
+            "Only a phone call will tell you",
+            "The next step is visible, and every step before it has a name and a date"
+          ]
+        ],
+        "note": "The paper is from a real submittal. The Rabaed sheet is an illustration."
+      },
+      {
+        "id": "library",
+        "module": "Documents",
+        "question": "How many minutes until you reach the file?",
+        "rows": [
+          [
+            "Effort",
+            "1 minute 8 seconds, and 19 clicks",
+            "8 clicks, and each one narrows the results"
+          ],
+          [
+            "Path",
+            "7 nested folders, and 5 wrong turns",
+            "Discipline, then document type and code, no going back"
+          ],
+          [
+            "What you find",
+            "A scan of the last copy",
+            "The request with every revision, and the consultant's comments on each"
+          ]
+        ],
+        "note": "Timed from a real OneDrive recording. The Rabaed screen is an illustration."
+      },
+      {
+        "id": "correspondence",
+        "module": "Correspondence",
+        "question": "If the project manager leaves… where does the next one find the letters?",
+        "rows": [
+          [
+            "Where the letters are",
+            "In the project manager's mailbox",
+            "In the project record on Rabaed"
+          ],
+          [
+            "If they leave",
+            "The account is closed, and the letters go with it",
+            "They stay, and the successor logs in and finds them"
+          ],
+          [
+            "What awaits a reply",
+            "Nobody knows",
+            "A \"needs my reply\" filter with days waiting"
+          ]
+        ],
+        "note": "The Rabaed screen is an illustration."
+      },
+      {
+        "id": "dashboard",
+        "module": "Dashboard",
+        "question": "The engineer had no time to update the Excel… are the numbers right?",
+        "rows": [
+          [
+            "Log size",
+            "28,936 requests in one file",
+            "Every request is its own record, and the dashboard adds them up"
+          ],
+          [
+            "Last update",
+            "Manual, and stopped at 27/03/2023",
+            "With every request and every approval"
+          ],
+          [
+            "The numbers",
+            "82 pending, and closing days of -45,012",
+            "Real waiting days from system time"
+          ]
+        ],
+        "note": "A real Excel log from a past project, names hidden. The Rabaed screen is an illustration."
+      },
+      {
+        "id": "daily",
+        "module": "Daily report",
+        "question": "\"What happened on site today?\"",
+        "rows": [
+          [
+            "How the owner finds out",
+            "Asks the consultant on WhatsApp",
+            "An automatic notification once the report is approved"
+          ],
+          [
+            "When",
+            "Next morning… if it arrives",
+            "The same day, at 17:53"
+          ],
+          [
+            "What reaches them",
+            "\"The contractor's report hasn't come in yet\"",
+            "The day's summary: 7 activities, a delivery, and 10 photos"
+          ]
+        ],
+        "note": "The chat is a re-enactment. The report is from a real project."
+      }
+    ]
+  },
+  "templates": {
+    "num": "10",
+    "eyebrow": "Pre-made templates",
+    "title": "Forms, ready out of the box.",
+    "lead": "Every Saudi construction form your team already uses: pre-built, routed and tracked, and exported to a clean PDF in one click. No setup, no template engineering.",
+    "items": [
+      {
+        "code": "SAR",
+        "name": "Supplier Approval Request",
+        "text": "Approve the supplier or manufacturer before delivery, with prequalification documents."
+      },
+      {
+        "code": "MAR",
+        "name": "Material Approval Request",
+        "text": "Approve materials with specifications, samples and test certificates."
+      },
+      {
+        "code": "DAR",
+        "name": "Drawing Approval Request",
+        "text": "Approve shop drawings across revisions, with the consultant's comments."
+      },
+      {
+        "code": "MIR",
+        "name": "Material Inspection Request",
+        "text": "Inspect materials on arrival at site against what was approved."
+      },
+      {
+        "code": "WIR",
+        "name": "Work Inspection Request",
+        "text": "Hand over completed work before moving to the next stage."
+      },
+      {
+        "code": "RFI",
+        "name": "Request for Information",
+        "text": "A documented technical query from contractor to consultant, with a reply deadline."
+      },
+      {
+        "code": "DAS",
+        "name": "Document Approval Submittal",
+        "text": "Approve general documents such as quality and safety plans."
+      },
+      {
+        "code": "NPD",
+        "name": "Notice of Possible Delay",
+        "text": "An early, documented notice of a possible delay that protects your rights."
+      },
+      {
+        "code": "NPV",
+        "name": "Notice of Possible Variation",
+        "text": "An early, documented notice of a possible change in scope or cost."
+      }
+    ]
+  },
+  "why": {
+    "num": "11",
+    "eyebrow": "Why Rabaed wins",
+    "title": "Three things no competitor can claim at once.",
+    "items": [
+      {
+        "name": "User-friendly Arabic interface",
+        "text": "A fully Arabic interface with simple screens. Any site engineer can use it from day one, with no long training. Non-Arabic teams get an English interface."
+      },
+      {
+        "name": "Onsite support",
+        "text": "Our team comes to your site in Saudi Arabia: we set it up, train your people and fix problems fast. Same language, same time zone."
+      },
+      {
+        "name": "Built and priced for SMEs",
+        "text": "Made for firms running 2 to 10 projects, all from one account. One clear yearly subscription, with no big contracts and no hidden fees."
+      }
+    ]
+  },
+  "impact": {
+    "num": "12",
+    "eyebrow": "The impact",
+    "title": "Proven impact, in numbers.",
+    "lead": "Against the paper cycle on the same project, once the owner, the consultant and the contractor work on the platform.",
+    "metrics": [
+      {
+        "value": 3.6,
+        "decimals": 1,
+        "suffix": "×",
+        "label": "Faster approvals and handovers"
+      },
+      {
+        "value": 7,
+        "suffix": "×",
+        "label": "Faster document retrieval"
+      },
+      {
+        "value": 31,
+        "suffix": "%",
+        "label": "Time saved on admin tasks"
+      },
+      {
+        "value": 22,
+        "suffix": "%",
+        "label": "Better document control"
+      },
+      {
+        "value": 1900,
+        "prefix": "+",
+        "label": "Approvals documented on the platform"
+      },
+      {
+        "value": 15,
+        "suffix": " min",
+        "label": "One introductory session per team"
+      }
+    ],
+    "activation": "Fully live on site within days, with no stoppage."
+  },
+  "plans": {
+    "num": "13",
+    "eyebrow": "Plans",
+    "title": "Flexible, tailored plans, priced well below comparable global software.",
+    "badge": "Most requested",
+    "items": [
+      {
+        "id": "basic",
+        "kicker": "Starter",
+        "name": "Basic",
+        "features": [
+          "One active project",
+          "Standard Arabic templates",
+          "60-day money-back guarantee"
+        ]
+      },
+      {
+        "id": "growth",
+        "kicker": "Most chosen",
+        "name": "Growth",
+        "featured": true,
+        "features": [
+          "Up to 5 active projects",
+          "Unlimited users",
+          "Unlimited cloud storage",
+          "Dedicated support"
+        ]
+      },
+      {
+        "id": "pro",
+        "kicker": "Fixed annual fee",
+        "name": "Professional",
+        "features": [
+          "Unlimited projects and users",
+          "Dedicated onsite support",
+          "Custom workflows and branding",
+          "Guaranteed support availability",
+          "Data localization"
+        ]
+      }
+    ]
+  },
+  "start": {
+    "num": "14",
+    "eyebrow": "How we start",
+    "title": "Our team on your site. All three parties on the platform within days.",
+    "steps": [
+      {
+        "name": "Set up",
+        "text": "We set up the project and its forms, invite the owner, the consultant and the contractor, and spend 15 minutes with each team."
+      },
+      {
+        "name": "Go live",
+        "text": "Within days, with no stoppage. Everyone starts from where the project has got to, and we import the schedule from Primavera P6 or MS Project."
+      },
+      {
+        "name": "60-day guarantee",
+        "text": "Not seeing a difference after activation? We refund the full amount and hand you a copy of the record."
+      }
+    ],
+    "cta_title": "Book a live demo with examples from your project",
+    "cta_meta": "30 minutes · walk us through one approval and we'll show you what Rabaed would have done"
+  },
+  "contact": {
+    "tagline": "We shape the future of construction technology.",
+    "name": "Ahmed Alsosi",
+    "phone_label": "Mobile",
+    "email_label": "Email",
+    "whatsapp_label": "Company WhatsApp",
+    "web_label": "Website",
+    "location": "Riyadh, Saudi Arabia"
+  }
+}
