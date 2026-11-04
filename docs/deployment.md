@@ -575,6 +575,7 @@ do, publishing an Arabic change to the entry publishes none of its English.
 | **قسم «كيف نبدأ معك»** | Home, Product | The closing section both pages end on |
 | **شاشات المنصة** | Home, Product | Each screen's description. Its English is the next section's proposal, and has **الإنجليزية** ticked already |
 | **شريط الثقة** | Home, Product, Start, Profile | Its line, and each company's name |
+| **حاسبة تكلفة التأخير** | Home | The Delay-cost calculator's words (ADR-0029). Published in English when it was made, with Ahmed's English |
 | **كلمات الموقع المشتركة** | Home, Product, Start, Tool, Referral, Partnership, Profile | The header and the footer (the section above) |
 
 The site decides whether a page is in English by exactly these entries, listed

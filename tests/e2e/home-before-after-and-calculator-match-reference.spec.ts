@@ -12,8 +12,14 @@
  * **In use**, with the seam dragged to the same points on both sites — through
  * and either side of the band where a step turns over — every face's opacity
  * and transform, the verdicts, the tags and what the handle announces; the
- * same after the arrow keys; and the calculator's words and figures after the
- * same slider settings.
+ * same after the arrow keys.
+ *
+ * **The calculator in other words** (ticket 103, ADR-0029). It counts the cost
+ * of money on what has been spent, in Ahmed's words, where the Reference site's
+ * counts financing and site overhead in its own, so its words and figures are
+ * not the Reference site's, on purpose: `home-calculator.spec.ts` holds them.
+ * Its look still is. So the Reference site's calculator is given the rebuilt
+ * one's words before the two are measured (`giveReferenceTheRebuiltWords`).
  *
  * Not its track colouring: the Reference site's fill agrees with its thumb only
  * at the middle of the bar, and the rebuild's ends under the thumb wherever it
@@ -37,7 +43,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { dragSeam, readSeam } from './before-after';
-import { readCalculator } from './delay-calculator';
+import { giveReferenceTheRebuiltWords } from './delay-calculator';
 import { measureRegion, type Measurement, type Region } from './geometry';
 import {
   BASELINE_VIEWPORTS,
@@ -110,16 +116,6 @@ function calculatorRegion(costWrapsOnlyOnReference: boolean): Region {
   };
 }
 
-/**
- * What the calculator says, without how its tracks are painted: the rebuild
- * fills each track to the middle of its thumb, which the Reference site does
- * not (ticket 72), and `home-calculator.spec.ts` holds the fill to the thumb.
- */
-async function readFigures(page: Page) {
-  const { tracks, ...figures } = await readCalculator(page);
-  return { ...figures, values: tracks.map((track) => track.value) };
-}
-
 /** How many lines the calculator's cost takes. */
 function costLines(page: Page) {
   return page.evaluate(() => {
@@ -144,6 +140,7 @@ test.describe('the before-and-after section and the calculator match the Referen
       const pages = await openBothPages(browser, baseURL!, site, viewport);
 
       try {
+        await giveReferenceTheRebuiltWords(pages.reference, pages.rebuilt);
         const costWrapsOnlyOnReference = (await costLines(pages.reference)) > (await costLines(pages.rebuilt));
         for (const region of [COMPARISON, calculatorRegion(costWrapsOnlyOnReference)]) {
           expect(await measureRegion(pages.rebuilt, region), region.name).toEqual(
@@ -151,7 +148,6 @@ test.describe('the before-and-after section and the calculator match the Referen
           );
         }
         expect(await readSeam(pages.rebuilt)).toEqual(await readSeam(pages.reference));
-        expect(await readFigures(pages.rebuilt)).toEqual(await readFigures(pages.reference));
       } finally {
         await pages.close();
       }
@@ -199,35 +195,4 @@ test.describe('the before-and-after seam turns the steps over as on the Referenc
       await pages.close();
     }
   });
-});
-
-test('the calculator gives the Reference site\'s figures as the sliders move', async ({ browser, baseURL }) => {
-  const pages = await openBothPages(browser, baseURL!, site, { width: 1440, height: 900 });
-
-  try {
-    for (const settings of [
-      ['50000000', '14', '24'],
-      ['1000000', '1', '6'],
-      ['300000000', '60', '48'],
-      ['120000000', '11', '10'],
-      ['7000000', '10', '47'],
-    ]) {
-      for (const page of [pages.reference, pages.rebuilt]) {
-        const sliders = page.locator('#calc .rng');
-        for (const [index, value] of settings.entries()) await sliders.nth(index).fill(value);
-      }
-      // A reading by its number alone: the founders chose Arabic's words after a
-      // count over the Reference site's «1 أيام» and «6 شهراً» (ticket 58), which
-      // `home-calculator.spec.ts` holds.
-      const byNumbers = ({ readings, ...rest }: Awaited<ReturnType<typeof readFigures>>) => ({
-        ...rest,
-        readings: readings.map((reading) => reading.split(' ')[0]),
-      });
-      expect(byNumbers(await readFigures(pages.rebuilt)), settings.join(' / ')).toEqual(
-        byNumbers(await readFigures(pages.reference)),
-      );
-    }
-  } finally {
-    await pages.close();
-  }
 });
