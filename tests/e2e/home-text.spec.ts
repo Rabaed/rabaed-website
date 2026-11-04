@@ -10,7 +10,7 @@
  * its own suites running beside this one, so nothing here publishes a change
  * they could notice (ticket 22's rule): changes are saved as drafts and checked
  * in the editor's preview, which visitors never see; the one change published
- * is a space at the end of the calculator's paragraph, which no screenshot
+ * is a space at the end of the figures' paragraph, which no screenshot
  * shows and no suite reads; refused changes are never saved at all.
  *
  * The tests sign in as an editor of their own and run one at a time, and what
@@ -157,8 +157,6 @@ test('the home page shows the words the CMS has published, every section of it, 
     entry.beforeAfter.heading,
     firstStep.name,
     firstStep.usual.words,
-    entry.calculator.heading,
-    entry.calculator.sliderLabels.delayDays,
     ...entry.figures.figures.map((figure) => figure.claim),
     entry.questions.heading,
   ]) {
@@ -553,14 +551,14 @@ test('the home page is published in English once every word it has is written in
   // A visitor's Arabic page is meant to come back exactly as it was, which
   // leaves nothing in it to wait for — and a publish is in nobody's page the
   // moment it is saved (`cms.ts`). So the English is published together with a
-  // space at the end of the calculator's paragraph, which is in the HTML and drawn
+  // space at the end of the figures' paragraph, which is in the HTML and drawn
   // nowhere, and the page waited for is the one that space arrives in: built
   // from this publish, not from before it.
   const english = withEnglish(entry);
-  const lead = `${entry.calculator.lead.ar} `;
+  const lead = `${entry.figures.lead.ar} `;
   await home.publish({
     ...english,
-    calculator: { ...english.calculator, lead: { ...english.calculator.lead, ar: lead } },
+    figures: { ...english.figures, lead: { ...english.figures.lead, ar: lead } },
     languages: ['ar', 'en'],
   });
   expect((await home.published()).languages).toEqual(['ar', 'en']);
@@ -574,8 +572,8 @@ test('a change to the home page published reaches visitors', async ({ page, requ
   const home = cms.entry('home-page');
   const entry = await home.published();
   // A space at the end of the paragraph: in the HTML, but drawn nowhere.
-  const lead = `${entry.calculator.lead.ar} `;
+  const lead = `${entry.figures.lead.ar} `;
 
-  await home.publish({ ...entry, calculator: { ...entry.calculator, lead: { ...entry.calculator.lead, ar: lead } } });
-  await reachesVisitors(request, '/', `${lead}</p>`, "the calculator's reworded paragraph");
+  await home.publish({ ...entry, figures: { ...entry.figures, lead: { ...entry.figures.lead, ar: lead } } });
+  await reachesVisitors(request, '/', `${lead}</p>`, "the figures' reworded paragraph");
 });

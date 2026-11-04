@@ -5,7 +5,7 @@ import { pageEntry, wordsIn } from '@/cms/pages';
 import { pageMeta } from '@/content/search-settings';
 import type { ClosingSectionContent } from '@/components/closing-section';
 import type { ComparisonStep, Face, HomeBeforeAfterContent } from '@/components/home/before-after';
-import type { HomeDelayCalculatorContent } from '@/components/home/delay-calculator';
+import type { DelayCalculatorContent } from '@/components/home/delay-calculator';
 import type { HomeFiguresContent, ProofFigure } from '@/components/home/figures';
 import type { HomeFourUnitsContent, UnitTab } from '@/components/home/four-units';
 import type { HomeHeroContent } from '@/components/home/hero';
@@ -15,6 +15,7 @@ import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
 import type { QuestionsContent } from '@/components/questions';
 import { getClosingSection } from '@/content/closing-section';
+import { getDelayCalculator } from '@/content/delay-calculator';
 import { getScreenMocks } from '@/content/screen-mocks';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { FormPageWording } from '@/forms/definition';
@@ -33,7 +34,7 @@ export type HomePageContent = {
   readonly fourUnits: Section<HomeFourUnitsContent>;
   readonly record: Section<HomeRecordSectionContent>;
   readonly beforeAfter: Section<HomeBeforeAfterContent>;
-  readonly calculator: Section<HomeDelayCalculatorContent>;
+  readonly calculator: Section<DelayCalculatorContent>;
   readonly figures: Section<HomeFiguresContent>;
   readonly questions: Section<QuestionsContent>;
   /** Its demo request form (`#demo`) is where this page's hero and calculator buttons, and the header's, land. */
@@ -69,12 +70,13 @@ const EMPTY_STEP: TransactionStep = { action: '', by: '', time: '' };
  * a button says, never where it goes.
  */
 export async function getHomePage(locale: Locale): Promise<HomePageContent> {
-  const [entry, screenOf, closing, demoForm, trustStrip] = await Promise.all([
+  const [entry, screenOf, closing, demoForm, trustStrip, calculatorWords] = await Promise.all([
     pageEntry('home-page', locale),
     getScreenMocks(locale),
     getClosingSection(locale),
     formPageWording(DEMO_REQUEST, locale),
     getTrustStrip(locale),
+    getDelayCalculator(locale, '#demo'),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
   const { hero, situations, fourUnits, record, beforeAfter, calculator, figures, questions } = entry;
@@ -202,32 +204,8 @@ export async function getHomePage(locale: Locale): Promise<HomePageContent> {
         { name: '', usual: EMPTY_FACE, rabaed: EMPTY_FACE },
       ),
     },
-    calculator: {
-      shows: calculator.shows !== false,
-      eyebrow: words(calculator.eyebrow),
-      heading: words(calculator.heading),
-      lead: words(calculator.lead),
-      sliderLabels: [
-        words(calculator.sliderLabels.projectValue),
-        words(calculator.sliderLabels.delayDays),
-        words(calculator.sliderLabels.durationMonths),
-      ],
-      resultLabel: words(calculator.resultLabel),
-      assumptions: words(calculator.assumptions),
-      // To the demo request form at the foot of this page.
-      callToAction: { label: words(calculator.callToActionLabel), href: '#demo' },
-      words: {
-        currency: words(calculator.currency),
-        days: {
-          one: words(calculator.days.one),
-          two: words(calculator.days.two),
-          few: words(calculator.days.few),
-          many: words(calculator.days.many),
-        },
-        months: { few: words(calculator.months.few), many: words(calculator.months.many) },
-        breakdown: { financing: words(calculator.breakdown.financing), siteOverhead: words(calculator.breakdown.siteOverhead) },
-      },
-    },
+    // The calculator's words are the entry every page that shows it reads (ADR-0029); the page chooses only whether it shows.
+    calculator: { ...calculatorWords, shows: calculator?.shows !== false },
     figures: {
       shows: figures.shows !== false,
       eyebrow: words(figures.eyebrow),

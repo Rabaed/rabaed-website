@@ -25,6 +25,7 @@ const ENTRY_NAMED: Readonly<Record<string, string>> = {
   'قسم «كيف نبدأ معك»': 'closing-section',
   'شاشات المنصة': 'screen-mocks',
   'شريط الثقة': 'trust-strip',
+  'حاسبة تكلفة التأخير': 'delay-calculator',
   'كلمات الموقع المشتركة': 'site-words',
 };
 

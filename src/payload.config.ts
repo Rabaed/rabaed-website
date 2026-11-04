@@ -30,6 +30,7 @@ import { ConfirmationEmail } from './cms/globals/confirmation-email';
 import { formSettingsGlobal } from './cms/globals/form-settings';
 import { SiteSettings } from './cms/globals/site-settings';
 import { ClosingSection } from './cms/globals/closing-section';
+import { DelayCalculator } from './cms/globals/delay-calculator';
 import { HomePage } from './cms/globals/home-page';
 import { IndexLeads } from './cms/globals/index-leads';
 import { PartnershipPage } from './cms/globals/partnership-page';
@@ -114,6 +115,7 @@ export default buildConfig({
     ReferralPage,
     ProductPage,
     HomePage,
+    DelayCalculator,
     ClosingSection,
     ScreenMocks,
     PartnershipPage,
