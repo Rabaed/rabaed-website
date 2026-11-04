@@ -21,22 +21,25 @@ export type ProfilePlatformContent = {
   readonly eyebrow: string;
   readonly title: string;
   readonly lead: string;
-  /** Four, whose screens and icons are fixed by their places (`PLATFORM_SCREENS`, `ICONS`). */
+  /** Four, whose screens and icons are fixed by their places (`PLATFORM_UNITS`). */
   readonly units: readonly ProfileUnit[];
   /** The line under the tabs: what the four produce. */
   readonly output: string;
 };
 
 /**
- * Each tab's screen, by its place: the Screen mocks of the four units, in
- * Ahmed's order — the correspondence, the approvals board, the daily site
- * report and the documents (spec: Sections, in order). By place, as the names
- * are the Editor's.
+ * Each tab's screen and icon, by its place: the Screen mocks of the four
+ * units, in Ahmed's order — the correspondence, the approvals board, the
+ * daily site report and the documents (spec: Sections, in order) — each with
+ * the icon Ahmed draws it with (`public/profile/icons/`). By place, as the
+ * names are the Editor's.
  */
-export const PLATFORM_SCREENS = ['correspondence', 'kanban', 'daily-report', 'documents'] as const;
-
-/** Each tab's icon, by its place, as Ahmed draws them (`public/profile/icons/`). */
-const ICONS = ['mail-open', 'approvals', 'chart', 'layers'] as const;
+export const PLATFORM_UNITS = [
+  { screen: 'correspondence', icon: 'mail-open' },
+  { screen: 'kanban', icon: 'approvals' },
+  { screen: 'daily-report', icon: 'chart' },
+  { screen: 'documents', icon: 'layers' },
+] as const;
 
 /**
  * Section 07 of the Company profile, "The platform" (`#platform`, ticket
@@ -62,7 +65,7 @@ export function Platform({ content, direction }: { content: ProfilePlatformConte
         <p className="lead">{content.lead}</p>
 
         <div className="pf-units">
-          <div className="pf-unit-tabs" role="tablist" aria-labelledby="platform-heading" aria-orientation="vertical">
+          <div className="pf-unit-tabs" role="tablist" aria-labelledby="platform-heading">
             {content.units.map((unit, index) => {
               const look = unitAppearance(index, FIRST_UNIT);
               return (
@@ -77,7 +80,7 @@ export function Platform({ content, direction }: { content: ProfilePlatformConte
                   aria-describedby={`platform-text-${index}`}
                   className={look.tabClass}
                 >
-                  <i className={`pf-icon pf-icon-${ICONS[index]}`} aria-hidden="true" />
+                  <i className={`pf-icon pf-icon-${PLATFORM_UNITS[index]!.icon}`} aria-hidden="true" />
                   <span className="pf-unit-name" id={`platform-name-${index}`}>
                     {unit.name}
                   </span>

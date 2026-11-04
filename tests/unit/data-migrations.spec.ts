@@ -66,9 +66,9 @@ import { PROFILE_COMPARE_WORDS } from '../../src/migrations/profile-compare-impo
 import { PROFILE_OPENING_SEED } from '../../src/migrations/profile-opening-sections/seed';
 import { PROFILE_OPENING_WORDS } from '../../src/migrations/profile-opening-sections/words';
 import { PROFILE_PAGE_SEED } from '../../src/migrations/profile-page-import/seed';
+import { PROFILE_PAGE_WORDS } from '../../src/migrations/profile-page-import/words';
 import { PROFILE_SOLUTION_SEED } from '../../src/migrations/profile-solution-sections/seed';
 import { PROFILE_SOLUTION_WORDS } from '../../src/migrations/profile-solution-sections/words';
-import { PROFILE_PAGE_WORDS } from '../../src/migrations/profile-page-import/words';
 import { PRODUCT_PAGE_SEED } from '../../src/migrations/product-page-import/seed';
 import {
   CLOSING_SECTION_WORDS,

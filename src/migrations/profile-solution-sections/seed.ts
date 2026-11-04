@@ -60,26 +60,22 @@ const CARD_IDS = ['6aea85eceefa064f2c623108', '6aea85eceefa064f2c623109', '6aea8
 const UNIT_IDS = ['6aea85eceefa064f2c623111', '6aea85eceefa064f2c623112', '6aea85eceefa064f2c623113', '6aea85eceefa064f2c623114'];
 const STEP_IDS = ['6aea85eceefa064f2c623115', '6aea85eceefa064f2c623116', '6aea85eceefa064f2c623117', '6aea85eceefa064f2c623118'];
 
+/** Every column this writes, each language's on its own, with what it writes there. */
+const WRITTEN: readonly (readonly [string, string])[] = [
+  ...COLUMNS.flatMap(([column, words]) => (['ar', 'en'] as const).map((language) => [`${column}_${language}`, words[language]] as const)),
+  ...LATIN,
+];
+
 /** Every word and Latin value, set where it is still empty — null, or cleared to nothing. */
 const filled = (prefix: '' | 'version_') =>
-  [
-    ...COLUMNS.flatMap(([column, words]) => (['ar', 'en'] as const).map((language) => [`${column}_${language}`, words[language]] as const)),
-    ...LATIN,
-  ]
-    .map(([column, value]) => {
-      const name = `"${prefix}${column}"`;
-      return `${name} = coalesce(nullif(${name}, ''), ${text(value)})`;
-    })
-    .join(',\n       ');
+  WRITTEN.map(([column, value]) => {
+    const name = `"${prefix}${column}"`;
+    return `${name} = coalesce(nullif(${name}, ''), ${text(value)})`;
+  }).join(',\n       ');
 
-/** Takes a word back off where it is still this one. */
+/** Every word and Latin value taken back off, where it is still this one. */
 const emptied = (prefix: '' | 'version_') =>
-  [
-    ...COLUMNS.flatMap(([column, words]) => (['ar', 'en'] as const).map((language) => [`${column}_${language}`, words[language]] as const)),
-    ...LATIN,
-  ]
-    .map(([column, value]) => `"${prefix}${column}" = NULLIF("${prefix}${column}", ${text(value)})`)
-    .join(',\n       ');
+  WRITTEN.map(([column, value]) => `"${prefix}${column}" = NULLIF("${prefix}${column}", ${text(value)})`).join(',\n       ');
 
 /** The versions written into: the newest, and the newest published. */
 const WRITTEN_VERSIONS = `

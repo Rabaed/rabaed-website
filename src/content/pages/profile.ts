@@ -7,7 +7,7 @@ import { numeralsInMono } from '@/components/inline-text';
 import type { ProfileAboutContent } from '@/components/profile/about';
 import type { ProfileNumbersContent } from '@/components/profile/numbers';
 import type { ProfilePartiesContent } from '@/components/profile/parties';
-import { PLATFORM_SCREENS, type ProfilePlatformContent } from '@/components/profile/platform';
+import { PLATFORM_UNITS, type ProfilePlatformContent } from '@/components/profile/platform';
 import type { ProfileRecordContent } from '@/components/profile/record';
 import type { ProfileTrapContent } from '@/components/profile/trap';
 import { DEFAULT_PAPER_PHOTO, type PaperPhoto, type ProfileTruthContent } from '@/components/profile/truth';
@@ -166,10 +166,10 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
       lead: words(platform.lead),
       // Each tab's screen is fixed by its place; a fifth row, which the CMS
       // refuses to publish, has none to show and is left out of a preview.
-      units: platform.units.slice(0, PLATFORM_SCREENS.length).map((unit, index) => ({
+      units: platform.units.slice(0, PLATFORM_UNITS.length).map((unit, index) => ({
         name: words(unit.name),
         text: words(unit.text),
-        screen: screenOf(PLATFORM_SCREENS[index]!),
+        screen: screenOf(PLATFORM_UNITS[index]!.screen),
       })),
       output: words(platform.output),
     },

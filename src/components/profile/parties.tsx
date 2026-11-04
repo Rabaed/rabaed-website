@@ -35,7 +35,8 @@ export function Parties({ content }: { content: ProfilePartiesContent }) {
         <h2>{content.title}</h2>
         <p className="lead">{content.lead}</p>
         <ul className="pf-party-cards">
-          {content.cards.map((card, index) => (
+          {/* Each card's icon is by its place; a fourth row, which the CMS refuses to publish, has none, and a preview leaves it out. */}
+          {content.cards.slice(0, ICONS.length).map((card, index) => (
             <li key={index} className={`pf-party-${ICONS[index]}`}>
               <i className={`pf-icon pf-icon-${ICONS[index]}`} aria-hidden="true" />
               <h3>{card.name}</h3>
@@ -43,7 +44,7 @@ export function Parties({ content }: { content: ProfilePartiesContent }) {
             </li>
           ))}
         </ul>
-        <div className="pf-centre">
+        <div className="pf-party-record">
           <span className="pf-pulse" aria-hidden="true" />
           <strong>{content.record}</strong>
           <p>{content.footer}</p>

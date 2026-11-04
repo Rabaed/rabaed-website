@@ -125,8 +125,8 @@ test('06, our solution: the lead, the three parties with what each wants, and th
   await expect(parties.locator('.lead')).toHaveText(PARTIES.lead);
   await expect(parties.locator('li h3')).toHaveText(PARTIES.cards.map(([name]) => name));
   await expect(parties.locator('li p')).toHaveText(PARTIES.cards.map(([, want]) => want));
-  await expect(parties.locator('.pf-centre strong')).toHaveText(PARTIES.record);
-  await expect(parties.locator('.pf-centre p')).toHaveText(PARTIES.footer);
+  await expect(parties.locator('.pf-party-record strong')).toHaveText(PARTIES.record);
+  await expect(parties.locator('.pf-party-record p')).toHaveText(PARTIES.footer);
   // A dark section: the header stays dark over it.
   await expect(parties).not.toHaveClass(/\blight\b/);
 
@@ -153,7 +153,7 @@ test('06, our solution: the lead, the three parties with what each wants, and th
   });
   await cms.preview('/profile');
   await expect(parties.locator('li p').first()).toHaveText('يريد وضوح الصورة');
-  await expect(parties.locator('.pf-centre strong')).toHaveText('سجل المشروع');
+  await expect(parties.locator('.pf-party-record strong')).toHaveText('سجل المشروع');
 });
 
 test('07, the platform: its words, every unit and every screen in the first response, the first unit chosen', async ({ page, cms }) => {
@@ -180,6 +180,11 @@ test('07, the platform: its words, every unit and every screen in the first resp
     await expect(tab(page, index)).toHaveAccessibleName(unit.name);
   }
   await expect(tab(page, 0)).toHaveAccessibleDescription(PLATFORM.units[0]!.text);
+
+  // Each tab's icon is Ahmed's, by its place, and is served.
+  const icons = await iconsOf(platform.getByRole('tab').locator('.pf-icon'));
+  expect(icons).toEqual(['mail-open', 'approvals', 'chart', 'layers'].map((name) => `/profile/icons/${name}.png`));
+  for (const icon of icons) expect((await page.request.get(icon)).status(), icon).toBe(200);
 
   await platform.scrollIntoViewIfNeeded();
   await expectShowing(page, 0);
@@ -215,6 +220,10 @@ test('07: the arrow keys move between units in the reading direction, and wrap r
 });
 
 test('07 in English: Ahmed’s English words, and the next unit is to the right', async ({ page, cms }) => {
+  // The English shows once the entry says it is in English, as a draft here.
+  const profile = cms.entry('profile-page');
+  const saved = await profile.published();
+  await profile.draft({ ...saved, languages: ['ar', 'en'] });
   await cms.preview('/en/profile');
   const platform = section(page, 'platform');
   await expect(platform.locator('h2')).toHaveText('Four units. One record gathers them.');

@@ -121,9 +121,9 @@
 .pf-party-contractor .pf-icon { color: var(--green) }
 .pf-party-cards h3 { font-size: 20px; font-weight: 600 }
 .pf-party-cards p { margin: 4px 0 0; font-size: 15px; color: var(--dark-muted) }
-.pf-centre { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 20px 24px; border-radius: 18px; background: var(--acc-soft); border: 1px solid rgba(249, 87, 56, .35) }
-.pf-centre strong { font-size: 20px; font-weight: 700 }
-.pf-centre p { margin: 0; color: var(--dark-muted) }
+.pf-party-record { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 20px 24px; border-radius: 18px; background: var(--acc-soft); border: 1px solid rgba(249, 87, 56, .35) }
+.pf-party-record strong { font-size: 20px; font-weight: 700 }
+.pf-party-record p { margin: 0; color: var(--dark-muted) }
 @media (max-width: 980px) {
   .pf-party-cards { grid-template-columns: 1fr }
   .pf-party-cards li::after { display: none }
