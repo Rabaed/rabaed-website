@@ -36841,6 +36841,1203 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.profile_page_languages": {
+      "name": "profile_page_languages",
+      "schema": "",
+      "columns": {
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "enum_profile_page_languages",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "profile_page_languages_order_idx": {
+          "name": "profile_page_languages_order_idx",
+          "columns": [
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page_languages_parent_idx": {
+          "name": "profile_page_languages_parent_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "profile_page_languages_parent_fk": {
+          "name": "profile_page_languages_parent_fk",
+          "tableFrom": "profile_page_languages",
+          "tableTo": "profile_page",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.profile_page_hero_title_lines": {
+      "name": "profile_page_hero_title_lines",
+      "schema": "",
+      "columns": {
+        "_order": {
+          "name": "_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "line_ar": {
+          "name": "line_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "line_en": {
+          "name": "line_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "profile_page_hero_title_lines_order_idx": {
+          "name": "profile_page_hero_title_lines_order_idx",
+          "columns": [
+            {
+              "expression": "_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page_hero_title_lines_parent_id_idx": {
+          "name": "profile_page_hero_title_lines_parent_id_idx",
+          "columns": [
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "profile_page_hero_title_lines_parent_id_fk": {
+          "name": "profile_page_hero_title_lines_parent_id_fk",
+          "tableFrom": "profile_page_hero_title_lines",
+          "tableTo": "profile_page",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.profile_page_hero_statuses": {
+      "name": "profile_page_hero_statuses",
+      "schema": "",
+      "columns": {
+        "_order": {
+          "name": "_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status_ar": {
+          "name": "status_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status_en": {
+          "name": "status_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "profile_page_hero_statuses_order_idx": {
+          "name": "profile_page_hero_statuses_order_idx",
+          "columns": [
+            {
+              "expression": "_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page_hero_statuses_parent_id_idx": {
+          "name": "profile_page_hero_statuses_parent_id_idx",
+          "columns": [
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "profile_page_hero_statuses_parent_id_fk": {
+          "name": "profile_page_hero_statuses_parent_id_fk",
+          "tableFrom": "profile_page_hero_statuses",
+          "tableTo": "profile_page",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.profile_page": {
+      "name": "profile_page",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "hero_eyebrow_ar": {
+          "name": "hero_eyebrow_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_eyebrow_en": {
+          "name": "hero_eyebrow_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_title_accent_ar": {
+          "name": "hero_title_accent_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_title_accent_en": {
+          "name": "hero_title_accent_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_lead_ar": {
+          "name": "hero_lead_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_lead_en": {
+          "name": "hero_lead_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_demo_label_ar": {
+          "name": "hero_demo_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_demo_label_en": {
+          "name": "hero_demo_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_whatsapp_label_ar": {
+          "name": "hero_whatsapp_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_whatsapp_label_en": {
+          "name": "hero_whatsapp_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_demo_link_ar": {
+          "name": "hero_demo_link_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_demo_link_en": {
+          "name": "hero_demo_link_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_whatsapp_link_ar": {
+          "name": "hero_whatsapp_link_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_whatsapp_link_en": {
+          "name": "hero_whatsapp_link_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_trust_ar": {
+          "name": "hero_trust_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_trust_en": {
+          "name": "hero_trust_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_guarantee_period_ar": {
+          "name": "hero_guarantee_period_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_guarantee_period_en": {
+          "name": "hero_guarantee_period_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_guarantee_promise_ar": {
+          "name": "hero_guarantee_promise_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_guarantee_promise_en": {
+          "name": "hero_guarantee_promise_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_parties_owner_ar": {
+          "name": "hero_parties_owner_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_parties_owner_en": {
+          "name": "hero_parties_owner_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_parties_consultant_ar": {
+          "name": "hero_parties_consultant_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_parties_consultant_en": {
+          "name": "hero_parties_consultant_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_parties_contractor_ar": {
+          "name": "hero_parties_contractor_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_parties_contractor_en": {
+          "name": "hero_parties_contractor_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_diagram_description_ar": {
+          "name": "hero_diagram_description_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_diagram_description_en": {
+          "name": "hero_diagram_description_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_status_at_rest_ar": {
+          "name": "hero_status_at_rest_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_status_at_rest_en": {
+          "name": "hero_status_at_rest_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trust_strip_shows": {
+          "name": "trust_strip_shows",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "search_title_ar": {
+          "name": "search_title_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_title_en": {
+          "name": "search_title_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_description_ar": {
+          "name": "search_description_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_description_en": {
+          "name": "search_description_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_sharing_image_id": {
+          "name": "search_sharing_image_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_status": {
+          "name": "_status",
+          "type": "enum_profile_page_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "profile_page_search_search_sharing_image_idx": {
+          "name": "profile_page_search_search_sharing_image_idx",
+          "columns": [
+            {
+              "expression": "search_sharing_image_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "profile_page__status_idx": {
+          "name": "profile_page__status_idx",
+          "columns": [
+            {
+              "expression": "_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "profile_page_search_sharing_image_id_sharing_images_id_fk": {
+          "name": "profile_page_search_sharing_image_id_sharing_images_id_fk",
+          "tableFrom": "profile_page",
+          "tableTo": "sharing_images",
+          "columnsFrom": [
+            "search_sharing_image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._profile_page_v_version_languages": {
+      "name": "_profile_page_v_version_languages",
+      "schema": "",
+      "columns": {
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "enum__profile_page_v_version_languages",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_profile_page_v_version_languages_order_idx": {
+          "name": "_profile_page_v_version_languages_order_idx",
+          "columns": [
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_languages_parent_idx": {
+          "name": "_profile_page_v_version_languages_parent_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_profile_page_v_version_languages_parent_fk": {
+          "name": "_profile_page_v_version_languages_parent_fk",
+          "tableFrom": "_profile_page_v_version_languages",
+          "tableTo": "_profile_page_v",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._profile_page_v_version_hero_title_lines": {
+      "name": "_profile_page_v_version_hero_title_lines",
+      "schema": "",
+      "columns": {
+        "_order": {
+          "name": "_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "line_ar": {
+          "name": "line_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "line_en": {
+          "name": "line_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_uuid": {
+          "name": "_uuid",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_profile_page_v_version_hero_title_lines_order_idx": {
+          "name": "_profile_page_v_version_hero_title_lines_order_idx",
+          "columns": [
+            {
+              "expression": "_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_hero_title_lines_parent_id_idx": {
+          "name": "_profile_page_v_version_hero_title_lines_parent_id_idx",
+          "columns": [
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_profile_page_v_version_hero_title_lines_parent_id_fk": {
+          "name": "_profile_page_v_version_hero_title_lines_parent_id_fk",
+          "tableFrom": "_profile_page_v_version_hero_title_lines",
+          "tableTo": "_profile_page_v",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._profile_page_v_version_hero_statuses": {
+      "name": "_profile_page_v_version_hero_statuses",
+      "schema": "",
+      "columns": {
+        "_order": {
+          "name": "_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status_ar": {
+          "name": "status_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status_en": {
+          "name": "status_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_uuid": {
+          "name": "_uuid",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_profile_page_v_version_hero_statuses_order_idx": {
+          "name": "_profile_page_v_version_hero_statuses_order_idx",
+          "columns": [
+            {
+              "expression": "_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_hero_statuses_parent_id_idx": {
+          "name": "_profile_page_v_version_hero_statuses_parent_id_idx",
+          "columns": [
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_profile_page_v_version_hero_statuses_parent_id_fk": {
+          "name": "_profile_page_v_version_hero_statuses_parent_id_fk",
+          "tableFrom": "_profile_page_v_version_hero_statuses",
+          "tableTo": "_profile_page_v",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._profile_page_v": {
+      "name": "_profile_page_v",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "version_hero_eyebrow_ar": {
+          "name": "version_hero_eyebrow_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_eyebrow_en": {
+          "name": "version_hero_eyebrow_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_title_accent_ar": {
+          "name": "version_hero_title_accent_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_title_accent_en": {
+          "name": "version_hero_title_accent_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_lead_ar": {
+          "name": "version_hero_lead_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_lead_en": {
+          "name": "version_hero_lead_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_demo_label_ar": {
+          "name": "version_hero_demo_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_demo_label_en": {
+          "name": "version_hero_demo_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_whatsapp_label_ar": {
+          "name": "version_hero_whatsapp_label_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_whatsapp_label_en": {
+          "name": "version_hero_whatsapp_label_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_demo_link_ar": {
+          "name": "version_hero_demo_link_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_demo_link_en": {
+          "name": "version_hero_demo_link_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_whatsapp_link_ar": {
+          "name": "version_hero_whatsapp_link_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_whatsapp_link_en": {
+          "name": "version_hero_whatsapp_link_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_trust_ar": {
+          "name": "version_hero_trust_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_trust_en": {
+          "name": "version_hero_trust_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_guarantee_period_ar": {
+          "name": "version_hero_guarantee_period_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_guarantee_period_en": {
+          "name": "version_hero_guarantee_period_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_guarantee_promise_ar": {
+          "name": "version_hero_guarantee_promise_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_guarantee_promise_en": {
+          "name": "version_hero_guarantee_promise_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_parties_owner_ar": {
+          "name": "version_hero_parties_owner_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_parties_owner_en": {
+          "name": "version_hero_parties_owner_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_parties_consultant_ar": {
+          "name": "version_hero_parties_consultant_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_parties_consultant_en": {
+          "name": "version_hero_parties_consultant_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_parties_contractor_ar": {
+          "name": "version_hero_parties_contractor_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_parties_contractor_en": {
+          "name": "version_hero_parties_contractor_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_diagram_description_ar": {
+          "name": "version_hero_diagram_description_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_diagram_description_en": {
+          "name": "version_hero_diagram_description_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_status_at_rest_ar": {
+          "name": "version_hero_status_at_rest_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_hero_status_at_rest_en": {
+          "name": "version_hero_status_at_rest_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_trust_strip_shows": {
+          "name": "version_trust_strip_shows",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "version_search_title_ar": {
+          "name": "version_search_title_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_search_title_en": {
+          "name": "version_search_title_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_search_description_ar": {
+          "name": "version_search_description_ar",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_search_description_en": {
+          "name": "version_search_description_en",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_search_sharing_image_id": {
+          "name": "version_search_sharing_image_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version__status": {
+          "name": "version__status",
+          "type": "enum__profile_page_v_version_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "version_updated_at": {
+          "name": "version_updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_created_at": {
+          "name": "version_created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "latest": {
+          "name": "latest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_profile_page_v_version_search_version_search_sharing_im_idx": {
+          "name": "_profile_page_v_version_search_version_search_sharing_im_idx",
+          "columns": [
+            {
+              "expression": "version_search_sharing_image_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_version_version__status_idx": {
+          "name": "_profile_page_v_version_version__status_idx",
+          "columns": [
+            {
+              "expression": "version__status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_created_at_idx": {
+          "name": "_profile_page_v_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_updated_at_idx": {
+          "name": "_profile_page_v_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_profile_page_v_latest_idx": {
+          "name": "_profile_page_v_latest_idx",
+          "columns": [
+            {
+              "expression": "latest",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_profile_page_v_version_search_sharing_image_id_sharing_images_id_fk": {
+          "name": "_profile_page_v_version_search_sharing_image_id_sharing_images_id_fk",
+          "tableFrom": "_profile_page_v",
+          "tableTo": "sharing_images",
+          "columnsFrom": [
+            "version_search_sharing_image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -37783,6 +38980,38 @@
         "draft",
         "published"
       ]
+    },
+    "public.enum_profile_page_languages": {
+      "name": "enum_profile_page_languages",
+      "schema": "public",
+      "values": [
+        "ar",
+        "en"
+      ]
+    },
+    "public.enum_profile_page_status": {
+      "name": "enum_profile_page_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
+    },
+    "public.enum__profile_page_v_version_languages": {
+      "name": "enum__profile_page_v_version_languages",
+      "schema": "public",
+      "values": [
+        "ar",
+        "en"
+      ]
+    },
+    "public.enum__profile_page_v_version_status": {
+      "name": "enum__profile_page_v_version_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
+      ]
     }
   },
   "schemas": {},
@@ -37795,6 +39024,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "bfa3b7a2-9039-4185-83f4-60c5c0c75e11",
+  "id": "293e4634-6049-485a-a5fc-e68396884c6f",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

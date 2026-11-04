@@ -1,4 +1,4 @@
-import { type MigrateUpArgs, type MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
 
 /**
  * Gives the Delay-cost calculator's words an entry of their own, for every page
@@ -7,7 +7,7 @@ import { type MigrateUpArgs, type MigrateDownArgs, sql } from '@payloadcms/db-po
  * project-length slider's words, the line splitting the cost in two and the
  * words after a number of months go with them: Ahmed's method has none.
  *
- * Empty here. `20261104_005957_import_delay_calculator` writes Ahmed's words in.
+ * Empty here. `20261104_020005_import_delay_calculator` writes Ahmed's words in.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -188,7 +188,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_home_page_v" DROP COLUMN "version_calculator_months_few_ar";
   ALTER TABLE "_home_page_v" DROP COLUMN "version_calculator_months_few_en";
   ALTER TABLE "_home_page_v" DROP COLUMN "version_calculator_months_many_ar";
-  ALTER TABLE "_home_page_v" DROP COLUMN "version_calculator_months_many_en";`)
+  ALTER TABLE "_home_page_v" DROP COLUMN "version_calculator_months_many_en";`);
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
@@ -272,5 +272,5 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   DROP TYPE "public"."enum_delay_calculator_languages";
   DROP TYPE "public"."enum_delay_calculator_status";
   DROP TYPE "public"."enum__delay_calculator_v_version_languages";
-  DROP TYPE "public"."enum__delay_calculator_v_version_status";`)
+  DROP TYPE "public"."enum__delay_calculator_v_version_status";`);
 }
