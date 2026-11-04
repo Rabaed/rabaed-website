@@ -24,6 +24,7 @@ import { Posts } from './cms/collections/posts';
 import { PourTrackerReleases } from './cms/collections/pour-tracker-releases';
 import { SharingImages } from './cms/collections/sharing-images';
 import { Users } from './cms/collections/users';
+import { ProfileFiles } from './cms/collections/profile-files';
 import { databasePool, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { AiCrawlers } from './cms/globals/ai-crawlers';
 import { ConfirmationEmail } from './cms/globals/confirmation-email';
@@ -94,7 +95,7 @@ export default buildConfig({
 
   // No `localization`: page text holds its Arabic and English side by side in
   // fields of its own (`cms/page-fields.ts` says why).
-  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions, EmailImages, PourTrackerReleases],
+  collections: [Users, Media, SharingImages, Posts, CaseStudies, LegalDocuments, Faqs, FormSubmissions, EmailImages, PourTrackerReleases, ProfileFiles],
   // One settings global per form that submits (ticket 27), the Referral
   // Program values (ticket 56), and one entry per marketing page whose words
   // are in the CMS (ticket 53), with the closing section and the Screen mocks
@@ -143,8 +144,9 @@ export default buildConfig({
     s3Storage({
       enabled: bucket !== null,
       // The email images' files are named `email-…`, so none takes a name a
-      // sharing image has in the same bucket (`cms/collections/email-images.ts`).
-      collections: { media: true, 'sharing-images': true, 'email-images': true },
+      // sharing image has in the same bucket (`cms/collections/email-images.ts`),
+      // and the Company profile's files `profile-…` (`cms/collections/profile-files.ts`).
+      collections: { media: true, 'sharing-images': true, 'email-images': true, 'profile-files': true },
       bucket: bucket?.bucket ?? '',
       config: {
         endpoint: bucket?.endpoint,

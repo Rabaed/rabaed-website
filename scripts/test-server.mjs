@@ -48,6 +48,7 @@ const env = {
   MEDIA_DIR: path.join(scratch, 'media'),
   SHARING_IMAGE_DIR: path.join(scratch, 'sharing-images'),
   EMAIL_IMAGE_DIR: path.join(scratch, 'email-images'),
+  PROFILE_FILE_DIR: path.join(scratch, 'profile-files'),
   // Mail is written here instead of sent, for the form suite to read
   // (`src/forms/mail.ts`). Real credentials on the machine are never used.
   MAIL_OUTBOX_DIR: outboxDirectory(port),
