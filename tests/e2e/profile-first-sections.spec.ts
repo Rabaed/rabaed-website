@@ -7,8 +7,9 @@
  *
  * The profile is unpublished on this server (`profile-page.spec.ts` publishes
  * it on the second), so everything here is seen as an Editor previews it, and
- * nothing is published: each change is a draft of the profile's entry, which
- * no other suite on this server previews.
+ * nothing is published: each change is a draft of the profile's entry.
+ * `profile-solution-sections.spec.ts` drafts the same entry on this server,
+ * so the two take turns (`oneSuiteAtATime`).
  *
  * Ahmed's words are restated from his profile (`.scratch/company-profile/source/`)
  * rather than imported from the migration, for the reason `routes.ts` gives.
@@ -17,8 +18,10 @@ import type { Page } from '@playwright/test';
 import { transparentMark, uploadFile } from './cms';
 import { test, expect } from './entries';
 import { sidewaysOverflow, whatOverflows } from './geometry';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const TRUTH = {
   eyebrow: 'الحقيقة كما هي',

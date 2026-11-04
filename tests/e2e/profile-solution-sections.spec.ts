@@ -8,8 +8,16 @@
  *
  * The profile is unpublished on this server (`profile-page.spec.ts` publishes
  * it on the second), so everything here is seen as an Editor previews it, and
- * nothing is published: each change is a draft of the profile's entry, which
- * no other suite on this server previews.
+ * nothing is published: each change is a draft of the profile's entry.
+ * `profile-first-sections.spec.ts` drafts the same entry on this server, so
+ * the two take turns (`oneSuiteAtATime`): run side by side, each previewed
+ * the other's drafts.
+ *
+ * The English page is not previewed here: on this server the Trust strip, the
+ * Screen mocks and the site's words are not in English, and a page shows in
+ * English only once every entry it reads is (`src/content/pages/languages.ts`).
+ * The arrows' turning round for English is `listenToTabs`'s, from the
+ * section's `data-direction`, as on the home and product pages.
  *
  * Ahmed's words are restated from his profile (`.scratch/company-profile/source/`)
  * rather than imported from the migration, for the reason `routes.ts` gives.
@@ -17,9 +25,11 @@
 import type { Page } from '@playwright/test';
 import { test, expect } from './entries';
 import { sidewaysOverflow, whatOverflows } from './geometry';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 import { drawnFrom, expectPhoneCrop } from './screen-mock-phone';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const PARTIES = {
   eyebrow: 'حلّنا',
@@ -217,29 +227,6 @@ test('07: the arrow keys move between units in the reading direction, and wrap r
   await page.keyboard.press('ArrowRight');
   await expect(tab(page, 3)).toBeFocused();
   await expectShowing(page, 3);
-});
-
-test('07 in English: Ahmed’s English words, and the next unit is to the right', async ({ page, cms }) => {
-  // The English shows once the entry says it is in English, as a draft here.
-  const profile = cms.entry('profile-page');
-  const saved = await profile.published();
-  await profile.draft({ ...saved, languages: ['ar', 'en'] });
-  await cms.preview('/en/profile');
-  const platform = section(page, 'platform');
-  await expect(platform.locator('h2')).toHaveText('Four units. One record gathers them.');
-  await expect(tab(page, 1)).toHaveAccessibleName('Approvals and requests');
-
-  await tab(page, 0).focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(tab(page, 1)).toBeFocused();
-  await expect(tab(page, 1)).toHaveAttribute('aria-selected', 'true');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await expect(tab(page, 3)).toBeFocused();
-  await expect(tab(page, 3)).toHaveAttribute('aria-selected', 'true');
-  // The English pages' own screens (ticket 41).
-  const picture = panel(page, 3).locator('img[data-screen-mock]');
-  expect(await drawnFrom(picture)).toBe('/screen-mocks/en/documents.webp');
 });
 
 test('07: each unit shows the site’s own Screen mock of it, described by its caption', async ({ page, cms }) => {
