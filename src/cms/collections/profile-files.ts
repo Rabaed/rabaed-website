@@ -1,6 +1,7 @@
 import { APIError, type CollectionConfig } from 'payload';
 import { signedIn } from '../access';
 import { localProfileFileDirectory } from '../environment';
+import { inAdminLanguage } from '../page-fields';
 import { refreshSiteWhenImageChanges } from '../revalidation';
 
 /**
@@ -92,17 +93,16 @@ export const ProfileFiles: CollectionConfig = {
       ({ operation, req }) => {
         const file = req.file;
         if ((operation !== 'create' && operation !== 'update') || !file?.data) return;
-        const english = req?.i18n?.language === 'en';
-
         if (!kindOf(file.data)) {
-          throw new APIError(english ? 'This must be an MP4 or a PDF.' : 'الملف يجب أن يكون MP4 أو PDF.', 400, undefined, true);
+          throw new APIError(inAdminLanguage(req, { ar: 'الملف يجب أن يكون MP4 أو PDF.', en: 'This must be an MP4 or a PDF.' }), 400, undefined, true);
         }
         if (file.data.length > LARGEST_PROFILE_FILE_BYTES) {
           const size = (file.data.length / 1024 / 1024).toFixed(1);
           throw new APIError(
-            english
-              ? `A file can be ${LARGEST_PROFILE_FILE_MB} MB at most, and this one is ${size} MB. Compress it, then upload it again.`
-              : `الملف ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر، وهذا ${size} ميغابايت. اضغطه ثم ارفعه من جديد.`,
+            inAdminLanguage(req, {
+              ar: `الملف ${LARGEST_PROFILE_FILE_MB} ميغابايت على الأكثر، وهذا ${size} ميغابايت. اضغطه ثم ارفعه من جديد.`,
+              en: `A file can be ${LARGEST_PROFILE_FILE_MB} MB at most, and this one is ${size} MB. Compress it, then upload it again.`,
+            }),
             400,
             undefined,
             true,
