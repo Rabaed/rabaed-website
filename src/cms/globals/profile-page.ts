@@ -222,6 +222,111 @@ export const ProfilePage = pageGlobal({
         wordsField('quote', { ar: 'الاقتباس', en: 'Quote' }, 120),
       ],
     }),
+    sectionTab({
+      name: 'parties',
+      label: { ar: '06 حلّنا', en: '06 Our solution' },
+      hideable: true,
+      description: {
+        ar: 'بطاقات الأطراف الثلاثة، وتحتها السجل الموثّق الذي يجمعها.',
+        en: 'The three parties’ cards, and under them the documented Record they share.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 90),
+        wordsField('lead', LEAD, 300, { multiline: true }),
+        listField({
+          name: 'cards',
+          labels: { singular: { ar: 'طرف', en: 'Party' }, plural: { ar: 'الأطراف', en: 'Parties' } },
+          rows: { min: 3, max: 3 },
+          description: {
+            ar: 'ثلاثة دائماً، وأيقونة كل بطاقة ثابتة بمكانها: المالك، ثم الاستشاري، ثم المقاول.',
+            en: 'Always three, and each card’s icon is fixed by its place: the Owner, then the Consultant, then the Contractor.',
+          },
+          fields: [
+            wordsField('name', { ar: 'الطرف', en: 'Party' }, 50),
+            wordsField('want', { ar: 'ما يريده', en: 'What it wants' }, 50),
+          ],
+        }),
+        {
+          type: 'row',
+          fields: [
+            wordsField('record', { ar: 'ما يجمعها، تحت البطاقات', en: 'What they share, under the cards' }, 44),
+            wordsField('footer', { ar: 'السطر بجانبه', en: 'Line beside it' }, 60),
+          ],
+        },
+      ],
+    }),
+    sectionTab({
+      name: 'platform',
+      label: { ar: '07 المنصة', en: '07 The platform' },
+      hideable: true,
+      description: {
+        ar: 'أربعة تبويبات بجانب شاشة المنصة. صورة كل شاشة ووصفها في «شاشات المنصة».',
+        en: 'Four tabs beside a screen of the platform. Each screen’s picture and description are under Screen mocks.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 80),
+        wordsField('lead', LEAD, 280, { multiline: true }),
+        listField({
+          name: 'units',
+          labels: { singular: { ar: 'وحدة', en: 'Unit' }, plural: { ar: 'الوحدات', en: 'Units' } },
+          rows: { min: 4, max: 4 },
+          description: {
+            ar: 'أربع دائماً، وشاشة كل تبويب وأيقونته ثابتتان بمكانه: المراسلات، ثم الاعتمادات، ثم التقرير اليومي، ثم المستندات.',
+            en: 'Always four, and each tab’s screen and icon are fixed by its place: correspondence, then approvals, then the daily site report, then documents.',
+          },
+          fields: [
+            wordsField('name', { ar: 'اسم الوحدة، على التبويب', en: 'Unit, on the tab' }, 50),
+            wordsField('text', { ar: 'ما تفعله، تحت اسمها حين يُختار التبويب', en: 'What it does, under its name while the tab is chosen' }, 400, {
+              multiline: true,
+            }),
+          ],
+        }),
+        wordsField('output', { ar: 'السطر تحت التبويبات', en: 'Line under the tabs' }, 200),
+      ],
+    }),
+    sectionTab({
+      name: 'record',
+      label: { ar: '08 السجل الموثّق', en: '08 The documented Record' },
+      hideable: true,
+      description: {
+        ar: 'بطاقة مثال لخطاب والخطوات الأربع التي مرّ بها.',
+        en: 'An example card: a letter, and the four steps it went through.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 100),
+        wordsField('body', LEAD, 600, { multiline: true }),
+        {
+          type: 'row',
+          fields: [
+            latinField('code', { ar: 'رقم المستند في البطاقة، مثل LTR-088', en: 'The card’s document number, like LTR-088' }, 16),
+            wordsField('document', { ar: 'المستند', en: 'Document' }, 70),
+            wordsField('example', { ar: 'الوسم بجانبه', en: 'Tag beside it' }, 40, {
+              description: { ar: 'يقول إن البطاقة مثال.', en: 'Says the card is an example.' },
+            }),
+          ],
+        },
+        listField({
+          name: 'steps',
+          labels: { singular: { ar: 'خطوة', en: 'Step' }, plural: { ar: 'الخطوات', en: 'Steps' } },
+          rows: { min: 4, max: 4 },
+          description: { ar: 'أربع دائماً، بترتيبها في البطاقة.', en: 'Always four, in their order on the card.' },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                wordsField('verb', { ar: 'ما حدث', en: 'What happened' }, 30),
+                wordsField('who', { ar: 'من قام به', en: 'Who did it' }, 50),
+                latinField('time', { ar: 'الوقت، مثل 08:15', en: 'Time, like 08:15' }, 8),
+              ],
+            },
+          ],
+        }),
+        wordsField('summary', { ar: 'السطر في آخر البطاقة', en: 'Line at the foot of the card' }, 70),
+      ],
+    }),
     searchTab(),
   ],
 });
