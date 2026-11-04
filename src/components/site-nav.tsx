@@ -67,10 +67,10 @@ function DownloadIcon() {
  * without JavaScript gives the desktop file, and the script swaps in the
  * phone one where the screen asks for it.
  *
- * `download` names the file the browser saves, which is not always the name
- * it is kept under: an Editor's replacement is kept as `profile-…`
- * (`profile-files`). The files are the site's own, served with no name of
- * their own (`Content-Disposition`), so this is the name the visitor gets.
+ * `download` names the file the browser saves: an Editor's replacement under
+ * the name it was uploaded with (`profile-files`), Ahmed's under his. The
+ * files are the site's own, served with no name of their own
+ * (`Content-Disposition`), so this is the name the visitor gets.
  */
 function DownloadButton({ button, className }: { button: HeaderDownload; className: string }) {
   const { desktop, phone } = button;
