@@ -128,6 +128,7 @@ export interface Config {
     'site-words': SiteWord;
     'index-leads': IndexLead;
     'trust-strip': TrustStrip;
+    'profile-page': ProfilePage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
@@ -154,6 +155,7 @@ export interface Config {
     'site-words': SiteWordsSelect<false> | SiteWordsSelect<true>;
     'index-leads': IndexLeadsSelect<false> | IndexLeadsSelect<true>;
     'trust-strip': TrustStripSelect<false> | TrustStripSelect<true>;
+    'profile-page': ProfilePageSelect<false> | ProfilePageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -5176,6 +5178,148 @@ export interface TrustStrip {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-page".
+ */
+export interface ProfilePage {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  hero: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A line at a time, then the line in colour under them.
+     */
+    titleLines: {
+      line: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    titleAccent: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    demoLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The outlined button beside the first.
+     */
+    whatsappLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English.
+     */
+    demoLink: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.
+     */
+    whatsappLink?: {
+      ar?: string | null;
+      en?: string | null;
+    };
+    trust: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * In bold, like «60 يوماً».
+     */
+    guaranteePeriod: {
+      ar: string;
+      en?: string | null;
+    };
+    guaranteePromise: {
+      ar: string;
+      en?: string | null;
+    };
+    parties: {
+      owner: {
+        ar: string;
+        en?: string | null;
+      };
+      consultant: {
+        ar: string;
+        en?: string | null;
+      };
+      contractor: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    /**
+     * Read out by screen readers in place of the drawing.
+     */
+    diagramDescription: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Always four, in the order the document travels: at the Contractor, then the Consultant, then the Owner, then back to all three. Each shows as the document arrives.
+     */
+    statuses: {
+      status: {
+        ar: string;
+        en?: string | null;
+      };
+      id?: string | null;
+    }[];
+    /**
+     * For visitors whose device asks for less motion.
+     */
+    statusAtRest: {
+      ar: string;
+      en?: string | null;
+    };
+  };
+  trustStrip?: {
+    /**
+     * Untick to hide this section, keeping its words.
+     */
+    shows?: boolean | null;
+  };
+  search: {
+    /**
+     * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
+     */
+    title: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * A sentence or two describing the page. It shows under the title, and it is what an AI assistant quotes from /llms.txt. A result shows about 160 characters and cuts the rest; the limit here is 180, and what follows the cut is read but not shown.
+     */
+    description: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
+     */
+    sharingImage?: (number | null) | SharingImage;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -9140,6 +9284,159 @@ export interface TrustStripSelect<T extends boolean = true> {
               link?: T;
               id?: T;
             };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "profile-page_select".
+ */
+export interface ProfilePageSelect<T extends boolean = true> {
+  languages?: T;
+  hero?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        titleLines?:
+          | T
+          | {
+              line?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        titleAccent?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        demoLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        whatsappLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        demoLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        whatsappLink?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        trust?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        guaranteePeriod?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        guaranteePromise?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        parties?:
+          | T
+          | {
+              owner?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              consultant?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              contractor?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        diagramDescription?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        statuses?:
+          | T
+          | {
+              status?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              id?: T;
+            };
+        statusAtRest?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+      };
+  trustStrip?:
+    | T
+    | {
+        shows?: T;
+      };
+  search?:
+    | T
+    | {
+        title?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        description?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sharingImage?: T;
       };
   _status?: T;
   updatedAt?: T;
