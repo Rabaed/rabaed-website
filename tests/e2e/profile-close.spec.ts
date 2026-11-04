@@ -20,8 +20,10 @@ import { test, expect, type Cms } from './entries';
 import { sidewaysOverflow, whatOverflows } from './geometry';
 import { HEADER_BACKGROUND_OVER_DARK, HEADER_BACKGROUND_OVER_LIGHT } from './header-colours';
 import { ROUTES } from './routes';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const TEMPLATES = {
   eyebrow: 'نماذج جاهزة',

@@ -30,10 +30,12 @@ import { PNG } from 'pngjs';
 import { test, expect, type Cms } from './entries';
 import { HEADER_BACKGROUND_OVER_DARK, HEADER_BACKGROUND_OVER_LIGHT } from './header-colours';
 import { ROUTES } from './routes';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 // One test at a time: they draft the same entries, and one test putting its
 // entry back would take away the draft another is previewing.
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 /** Ahmed's four files, as the site keeps them (`public/profile/pdf/`). */
 const PDF = {

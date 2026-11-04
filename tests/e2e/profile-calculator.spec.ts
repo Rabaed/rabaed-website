@@ -18,9 +18,11 @@
 import type { Page } from '@playwright/test';
 import { readCalculator } from './delay-calculator';
 import { test, expect } from './entries';
+import { oneSuiteAtATime } from './one-suite-at-a-time';
 
 // One after another: each test drafts the profile's one entry.
 test.describe.configure({ mode: 'default' });
+oneSuiteAtATime(test);
 
 const section = (page: Page) => page.locator('section#cost');
 const button = (page: Page) => section(page).locator('.out .btn');
