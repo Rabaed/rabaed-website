@@ -4,13 +4,14 @@ import {
   calculatorDisplay,
   figureText,
   settingsAsValues,
+  wordAfterFigure,
   type CalculatorWords,
   type Figure,
 } from '@/components/home/delay-calculator-state';
 import { DelayCalculatorBehaviour } from '@/components/home/delay-calculator-behaviour';
 import type { PageLink } from '@/components/page-link';
 
-export type HomeDelayCalculatorContent = {
+export type DelayCalculatorContent = {
   readonly eyebrow: string;
   readonly heading: string;
   readonly lead: string;
@@ -20,16 +21,18 @@ export type HomeDelayCalculatorContent = {
   readonly resultLabel: string;
   /** What the estimate assumes and leaves out, under the cost. */
   readonly assumptions: string;
-  /** The button under them. */
+  /** The button under them, to the page's demo request form. */
   readonly callToAction: PageLink;
   /** The words written around the numbers, here and again in the browser as a slider moves. */
   readonly words: CalculatorWords;
 };
 
 /**
- * «كم يكلفك أسبوع تأخير اعتماد واحد؟» — three sliders, and what the delay they
- * describe costs. `DelayCalculatorBehaviour` redraws the figures as a slider
- * moves.
+ * The Delay-cost calculator (ADR-0029): three sliders — the project's value,
+ * the days of delay and how much of it is built — and what that delay costs in
+ * the cost of money on what has been spent. `DelayCalculatorBehaviour`
+ * redraws the figures as a slider moves. Its words are one CMS entry, for
+ * every page that shows it (`src/content/delay-calculator.ts`).
  *
  * A server component. The starting figures, and each track filled up to its
  * thumb, are worked out here with the same code the browser uses, so the first
@@ -37,12 +40,12 @@ export type HomeDelayCalculatorContent = {
  * script.
  *
  * **DIVERGENCE FROM THE REFERENCE SITE, deliberate:** the Reference site sets
- * «84,405 ر.س» and every slider reading wholly in DM Mono, a face with no
+ * its cost and every slider reading wholly in DM Mono, a face with no
  * Arabic glyphs, so the words beside the numbers drop to the browser's
  * last-resort monospace — the defect the footer and the guarantee pill already
  * fix. Only the number is `.mono` here.
  */
-export function DelayCalculator({ content }: { content: HomeDelayCalculatorContent }) {
+export function DelayCalculator({ content }: { content: DelayCalculatorContent }) {
   const display = calculatorDisplay(STARTING_SETTINGS, content.words);
   const values = settingsAsValues(STARTING_SETTINGS);
 
@@ -77,7 +80,7 @@ export function DelayCalculator({ content }: { content: HomeDelayCalculatorConte
           <div className="out">
             <small>{content.resultLabel}</small>
             <FigureWithWord figure={display.cost} />
-            <small>{display.breakdown}</small>
+            <small>{display.spent}</small>
             <div className="n">{content.assumptions}</div>
             {/* The Reference site's own inline spacing above the button. */}
             <div style={{ marginTop: '18px' }}>
@@ -94,12 +97,12 @@ export function DelayCalculator({ content }: { content: HomeDelayCalculatorConte
   );
 }
 
-/** «84,405 ر.س»: the number in DM Mono, the word in the Arabic face. */
+/** «46,027 ر.س»: the number in DM Mono, the word in the Arabic face. */
 function FigureWithWord({ figure }: { figure: Figure }) {
   return (
     <b>
       <span className="mono">{figure.number}</span>
-      <span> {figure.word}</span>
+      <span>{wordAfterFigure(figure)}</span>
     </b>
   );
 }

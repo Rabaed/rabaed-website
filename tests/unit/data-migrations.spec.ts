@@ -31,6 +31,8 @@ import { ANSWER_FIRST_PROPOSAL_SEED } from '../../src/migrations/answer-first-pr
 import { COMPARISON_QUESTIONS, FAQ_REWRITES, SECTION_OPENERS } from '../../src/migrations/answer-first-proposal/words';
 import { CONTACT_POINTS_SEED } from '../../src/migrations/contact-points-import/seed';
 import { CONTACT_POINTS } from '../../src/migrations/contact-points-import/words';
+import { DELAY_CALCULATOR_SEED } from '../../src/migrations/delay-calculator-import/seed';
+import { DELAY_CALCULATOR_WORDS } from '../../src/migrations/delay-calculator-import/words';
 import { DEMO_REQUEST_SEED } from '../../src/migrations/demo-request-import/seed';
 import { DEMO_REQUEST_WORDS } from '../../src/migrations/demo-request-import/words';
 import { ENGLISH_ARTICLE_PER_QUESTION_KIND } from '../../src/migrations/english-launch-articles/articles';
@@ -160,6 +162,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
   { name: 'Pour Tracker download form', words: TOOL_DOWNLOAD_WORDS, seed: TOOL_DOWNLOAD_SEED },
   { name: 'the swipe hint over a Screen mock', words: SWIPE_HINT, seed: SWIPE_HINT_SEED },
   { name: 'the words on a Phone crop and its whole screen', words: WHOLE_SCREEN_WORDS, seed: WHOLE_SCREEN_SEED },
+  { name: 'the Delay-cost calculator', words: DELAY_CALCULATOR_WORDS, seed: DELAY_CALCULATOR_SEED },
   { name: 'launch articles', words: ARTICLE_PER_QUESTION_KIND, seed: LAUNCH_ARTICLES_SEED },
   {
     name: 'launch articles in English',

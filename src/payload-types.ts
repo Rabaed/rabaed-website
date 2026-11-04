@@ -122,6 +122,7 @@ export interface Config {
     'referral-page': ReferralPage;
     'product-page': ProductPage;
     'home-page': HomePage;
+    'delay-calculator': DelayCalculator;
     'closing-section': ClosingSection;
     'screen-mocks': ScreenMock;
     'partnership-page': PartnershipPage;
@@ -149,6 +150,7 @@ export interface Config {
     'referral-page': ReferralPageSelect<false> | ReferralPageSelect<true>;
     'product-page': ProductPageSelect<false> | ProductPageSelect<true>;
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
+    'delay-calculator': DelayCalculatorSelect<false> | DelayCalculatorSelect<true>;
     'closing-section': ClosingSectionSelect<false> | ClosingSectionSelect<true>;
     'screen-mocks': ScreenMocksSelect<false> | ScreenMocksSelect<true>;
     'partnership-page': PartnershipPageSelect<false> | PartnershipPageSelect<true>;
@@ -4123,103 +4125,11 @@ export interface HomePage {
       id?: string | null;
     }[];
   };
-  calculator: {
+  calculator?: {
     /**
      * Untick to hide this section, keeping its words.
      */
     shows?: boolean | null;
-    eyebrow: {
-      ar: string;
-      en?: string | null;
-    };
-    heading: {
-      ar: string;
-      en?: string | null;
-    };
-    lead: {
-      ar: string;
-      en?: string | null;
-    };
-    sliderLabels: {
-      projectValue: {
-        ar: string;
-        en?: string | null;
-      };
-      delayDays: {
-        ar: string;
-        en?: string | null;
-      };
-      durationMonths: {
-        ar: string;
-        en?: string | null;
-      };
-    };
-    resultLabel: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Each amount is written after its name.
-     */
-    breakdown: {
-      financing: {
-        ar: string;
-        en?: string | null;
-      };
-      siteOverhead: {
-        ar: string;
-        en?: string | null;
-      };
-    };
-    assumptions: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * Leads to the demo request form.
-     */
-    callToActionLabel: {
-      ar: string;
-      en?: string | null;
-    };
-    currency: {
-      ar: string;
-      en?: string | null;
-    };
-    /**
-     * As Arabic counts: after 1, after 2, from 3 to 10, and from 11 on.
-     */
-    days: {
-      one: {
-        ar: string;
-        en?: string | null;
-      };
-      two: {
-        ar: string;
-        en?: string | null;
-      };
-      few: {
-        ar: string;
-        en?: string | null;
-      };
-      many: {
-        ar: string;
-        en?: string | null;
-      };
-    };
-    /**
-     * A project’s length starts at 6 months.
-     */
-    months: {
-      few: {
-        ar: string;
-        en?: string | null;
-      };
-      many: {
-        ar: string;
-        en?: string | null;
-      };
-    };
   };
   figures: {
     /**
@@ -4379,6 +4289,98 @@ export interface HomePage {
      * Optional: shown when the link is shared on WhatsApp or LinkedIn. 1200×630 pixels, PNG. Without one, the site’s own image is used.
      */
     sharingImage?: (number | null) | SharingImage;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "delay-calculator".
+ */
+export interface DelayCalculator {
+  id: number;
+  /**
+   * Arabic always. Add English once every word of the page is written in English.
+   */
+  languages: ('ar' | 'en')[];
+  calculator: {
+    eyebrow: {
+      ar: string;
+      en?: string | null;
+    };
+    heading: {
+      ar: string;
+      en?: string | null;
+    };
+    lead: {
+      ar: string;
+      en?: string | null;
+    };
+    sliderLabels: {
+      projectValue: {
+        ar: string;
+        en?: string | null;
+      };
+      delayDays: {
+        ar: string;
+        en?: string | null;
+      };
+      /**
+       * The percentage is written after it: “50%”.
+       */
+      progress: {
+        ar: string;
+        en?: string | null;
+      };
+    };
+    resultLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * What has been spent so far. Write {amount} where the amount goes: “on {amount} SAR spent so far”.
+     */
+    spent: {
+      ar: string;
+      en?: string | null;
+    };
+    assumptions: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * Leads to the demo request form.
+     */
+    callToActionLabel: {
+      ar: string;
+      en?: string | null;
+    };
+    currency: {
+      ar: string;
+      en?: string | null;
+    };
+    /**
+     * As Arabic counts: after 1, after 2, from 3 to 10, and from 11 on.
+     */
+    days: {
+      one: {
+        ar: string;
+        en?: string | null;
+      };
+      two: {
+        ar: string;
+        en?: string | null;
+      };
+      few: {
+        ar: string;
+        en?: string | null;
+      };
+      many: {
+        ar: string;
+        en?: string | null;
+      };
+    };
   };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -8351,130 +8353,6 @@ export interface HomePageSelect<T extends boolean = true> {
     | T
     | {
         shows?: T;
-        eyebrow?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        heading?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        lead?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        sliderLabels?:
-          | T
-          | {
-              projectValue?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              delayDays?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              durationMonths?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-            };
-        resultLabel?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        breakdown?:
-          | T
-          | {
-              financing?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              siteOverhead?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-            };
-        assumptions?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        callToActionLabel?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        currency?:
-          | T
-          | {
-              ar?: T;
-              en?: T;
-            };
-        days?:
-          | T
-          | {
-              one?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              two?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              few?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              many?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-            };
-        months?:
-          | T
-          | {
-              few?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-              many?:
-                | T
-                | {
-                    ar?: T;
-                    en?: T;
-                  };
-            };
       };
   figures?:
     | T
@@ -8650,6 +8528,119 @@ export interface HomePageSelect<T extends boolean = true> {
               en?: T;
             };
         sharingImage?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "delay-calculator_select".
+ */
+export interface DelayCalculatorSelect<T extends boolean = true> {
+  languages?: T;
+  calculator?:
+    | T
+    | {
+        eyebrow?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        heading?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        lead?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        sliderLabels?:
+          | T
+          | {
+              projectValue?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              delayDays?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              progress?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
+        resultLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        spent?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        assumptions?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        callToActionLabel?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        currency?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
+        days?:
+          | T
+          | {
+              one?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              two?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              few?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+              many?:
+                | T
+                | {
+                    ar?: T;
+                    en?: T;
+                  };
+            };
       };
   _status?: T;
   updatedAt?: T;

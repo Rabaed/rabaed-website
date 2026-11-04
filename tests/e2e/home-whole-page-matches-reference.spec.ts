@@ -19,6 +19,7 @@
  * is not compared there. Everything else's is.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { giveReferenceTheRebuiltWords } from './delay-calculator';
 import {
   BASELINE_VIEWPORTS,
   openBothPages,
@@ -150,6 +151,9 @@ test.describe('the home page as a whole matches the Reference site', () => {
       const pages = await openBothPages(browser, baseURL!, site, viewport);
 
       try {
+        // The calculator's words are Ahmed's, not the Reference site's, on
+        // purpose (ADR-0029); its look is the Reference site's still.
+        await giveReferenceTheRebuiltWords(pages.reference, pages.rebuilt);
         const reference = await readSections(pages.reference);
         const rebuilt = await readSections(pages.rebuilt);
 

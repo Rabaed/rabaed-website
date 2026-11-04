@@ -14,6 +14,7 @@
  */
 import type { GlobalConfig, PayloadRequest } from 'payload';
 import { ClosingSection } from '../../src/cms/globals/closing-section';
+import { DelayCalculator } from '../../src/cms/globals/delay-calculator';
 import { HomePage } from '../../src/cms/globals/home-page';
 import { PartnershipPage } from '../../src/cms/globals/partnership-page';
 import { ProductPage } from '../../src/cms/globals/product-page';
@@ -21,6 +22,7 @@ import { ReferralPage } from '../../src/cms/globals/referral-page';
 import { StartPage } from '../../src/cms/globals/start-page';
 import { ToolPage } from '../../src/cms/globals/tool-page';
 import { TrustStripLogos } from '../../src/cms/globals/trust-strip';
+import { DELAY_CALCULATOR_WORDS } from '../../src/migrations/delay-calculator-import/words';
 import { ENGLISH_ENTRIES, ENGLISH_PAIRS } from '../../src/migrations/english-pages/entries';
 import { MARKETING_PAGES, type MarketingPage } from '../../src/lib/page-registry';
 import { englishFieldAt } from './cms-fields';
@@ -65,10 +67,20 @@ function at(value: unknown, path: readonly (string | number)[]): unknown {
   return path.reduce<unknown>((inside, step) => (inside as Record<string | number, unknown> | undefined)?.[step], value);
 }
 
+/**
+ * Whether a proposed word's field has since left its entry. The home page's
+ * calculator words moved to the Delay-cost calculator's own entry (ticket 103,
+ * ADR-0029), published there with Ahmed's English, which replaced the words
+ * proposed here: there is no field left to hold these.
+ */
+function moved(pair: (typeof ENGLISH_PAIRS)[number]): boolean {
+  return pair.entry === 'home-page' && pair.path[0] === 'calculator';
+}
+
 /** Every English word the CMS would refuse, with its place and its reason. */
 async function refusedEnglish(): Promise<string[]> {
   const refused: string[] = [];
-  for (const pair of ENGLISH_PAIRS) {
+  for (const pair of ENGLISH_PAIRS.filter((each) => !moved(each))) {
     const { entry, path } = heldAt(pair);
     const twins = ENGLISH_ENTRIES.find((each) => each.slug === pair.entry)!.twins;
     const blockTypeAt = (path: readonly (string | number)[]) =>
@@ -87,7 +99,23 @@ async function refusedEnglish(): Promise<string[]> {
       : true;
     if (answer !== true) refused.push(`${pair.entry} ${pair.path.join('.')} (${pair.en.length}): ${answer} — «${pair.en}»`);
   }
+  // And the English that replaced them, Ahmed's, published with the entry's
+  // first version: the next save of that entry asks the same of it.
+  for (const [path, words] of wordsIn(DELAY_CALCULATOR_WORDS)) {
+    const field = englishFieldAt(DelayCalculator, ['calculator', ...path], () => undefined);
+    const validate = (field as { validate?: (value: unknown, options: unknown) => Promise<string | true> }).validate;
+    const answer = validate
+      ? await validate(words.en, { ...field, req: REQUEST, data: { languages: ['ar', 'en'] }, siblingData: words })
+      : true;
+    if (answer !== true) refused.push(`delay-calculator calculator.${path.join('.')} (${words.en.length}): ${answer} — «${words.en}»`);
+  }
   return refused;
+}
+
+/** Every word in `value` — an object of `{ ar, en }` — with its path. */
+function wordsIn(value: object, path: string[] = []): [string[], { ar: string; en: string }][] {
+  if ('ar' in value && 'en' in value) return [[path, value as { ar: string; en: string }]];
+  return Object.entries(value).flatMap(([key, each]) => wordsIn(each as object, [...path, key]));
 }
 
 console.log(JSON.stringify(await refusedEnglish()));
