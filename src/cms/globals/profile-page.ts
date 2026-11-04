@@ -118,19 +118,27 @@ export const ProfilePage = pageGlobal({
       },
       fields: [],
     }),
-    // Section 05, «التكلفة الخفية» (ticket 106): the shared calculator, every
-    // word of it its own entry's, its button's among them, so the two pages
-    // cannot disagree (ADR-0029). Here the page chooses whether it shows, and
-    // where its button goes, as every button's link on this page is chosen.
+    // Section 05, «التكلفة الخفية» (ticket 106): the shared calculator, its
+    // words its own entry's, so the two pages cannot disagree (ADR-0029). Here
+    // the page chooses whether it shows, and its button's words and link, as
+    // every button on this page has its own — for a campaign, without
+    // touching the home page's. Words left empty are the shared entry's.
     sectionTab({
       name: 'cost',
       label: { ar: 'حاسبة تكلفة التأخير', en: 'Delay-cost calculator' },
       hideable: true,
       description: {
-        ar: 'حاسبة الصفحة الرئيسية نفسها، بكلماتها كلها من «حاسبة تكلفة التأخير» بجانب إعدادات الموقع، وكلمات زرّها منها، فتتفق الصفحتان. هنا يُختار ظهورها في هذه الصفحة فقط، ووجهة زرّها.',
-        en: 'The home page’s own calculator, every word of it from “Delay-cost calculator” beside the site settings, its button’s too, so the two pages agree. Here you choose only whether it shows on this page, and where its button goes.',
+        ar: 'حاسبة الصفحة الرئيسية نفسها، بكلماتها من «حاسبة تكلفة التأخير» بجانب إعدادات الموقع، فتتفق الصفحتان. هنا يُختار ظهورها في هذه الصفحة فقط، وزرّها.',
+        en: 'The home page’s own calculator, in its words from “Delay-cost calculator” beside the site settings, so the two pages agree. Here you choose only whether it shows on this page, and its button.',
       },
       fields: [
+        wordsField('callToActionLabel', { ar: 'الزر', en: 'Button' }, 40, {
+          optional: true,
+          description: {
+            ar: 'اتركه فارغاً ليقول ما يقوله زر الحاسبة في الصفحة الرئيسية، من «حاسبة تكلفة التأخير». ما تكتبه هنا يظهر في هذه الصفحة وحدها.',
+            en: 'Leave it empty to say what the calculator’s button says on the home page, from “Delay-cost calculator”. What you write here shows on this page alone.',
+          },
+        }),
         buttonLinkField('callToActionLink', { ar: 'وجهة الزر', en: 'Button goes to' }, {
           description: {
             ar: 'نموذج طلب العرض في الصفحة الرئيسية: ‎/#demo في العربية و‎/en#demo في الإنجليزية. رابط خارج الموقع يُفتح في نافذة جديدة.',

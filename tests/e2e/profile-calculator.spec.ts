@@ -1,9 +1,10 @@
 /**
  * The Delay-cost calculator on the Company profile (ticket 106, ADR-0029):
  * section 05, «التكلفة الخفية» (`#cost`), the home page's calculator with the
- * words of the one entry both pages read, its button's among them. Where the
- * button goes is the profile's Editor's, as every button's link on the page is
- * (spec: Buttons and links), and the profile has its own switch to show it.
+ * words of the one entry both pages read. Its button is the profile's
+ * Editor's, words and link, as every button on the page is (spec: Buttons and
+ * links) — words left empty being the shared entry's — and the profile has
+ * its own switch to show it.
  *
  * How the calculator itself behaves — its ranges, its count words, its
  * typefaces — is `home-calculator.spec.ts`'s; the formula is
@@ -56,7 +57,7 @@ async function setSliders(page: Page, root: string, values: readonly [string, st
   for (const [index, value] of values.entries()) await sliders.nth(index).fill(value);
 }
 
-test('the profile shows the home page’s calculator, in the shared entry’s words, its button going where its Editor says', async ({
+test('the profile shows the home page’s calculator, in the shared entry’s words, its button its Editor’s', async ({
   page,
   cms,
 }) => {
@@ -81,8 +82,9 @@ test('the profile shows the home page’s calculator, in the shared entry’s wo
   await expect(button(page)).not.toHaveAttribute('target', /./);
   expect((await readWords(page, 'cost')).heading).not.toBe('');
 
-  // Every word of it, the button's among them, is the home page's calculator's
-  // — read again if another suite's draft of them came between the two pages.
+  // Every word of it, the button's among them while the profile gives it none,
+  // is the home page's calculator's — read again if another suite's draft of
+  // them came between the two pages.
   await expect(async () => {
     await page.goto('/profile');
     const words = await readWords(page, 'cost');
@@ -90,19 +92,28 @@ test('the profile shows the home page’s calculator, in the shared entry’s wo
     expect(await readWords(page, 'calc')).toEqual(words);
   }).toPass();
 
-  // Where the button goes is the profile's Editor's, on the profile alone, and
-  // a link away from the site opens in a new tab. Its words stay the shared
-  // entry's, which `home-calculator.spec.ts` shows an Editor changing.
+  // The button's words and where it goes are the profile's Editor's, for a
+  // campaign, on the profile alone; a link away from the site opens in a new
+  // tab. Left empty, as they arrive, its words are the shared entry's above.
+  const campaign = 'اطلب عرض الحملة';
   await profile.draft({
     ...saved,
-    cost: { ...saved.cost, callToActionLink: { ...saved.cost.callToActionLink, ar: 'https://wa.me/966500000000?text=cost' } },
+    cost: {
+      ...saved.cost,
+      callToActionLabel: { ...saved.cost.callToActionLabel, ar: campaign },
+      callToActionLink: { ...saved.cost.callToActionLink, ar: 'https://wa.me/966500000000?text=cost' },
+    },
   });
   await cms.preview('/profile');
+  await expect(button(page)).toHaveText(campaign);
   await expect(button(page)).toHaveAttribute('href', 'https://wa.me/966500000000?text=cost');
   await expect(button(page)).toHaveAttribute('target', '_blank');
   await page.goto('/');
-  await expect(page.locator('#calc .out .btn')).toHaveAttribute('href', '#demo');
-  await expect(page.locator('#calc .out .btn')).not.toHaveAttribute('target', /./);
+  const homeButton = page.locator('#calc .out .btn');
+  await expect(homeButton).not.toHaveText(campaign);
+  await expect(homeButton).not.toBeEmpty();
+  await expect(homeButton).toHaveAttribute('href', '#demo');
+  await expect(homeButton).not.toHaveAttribute('target', /./);
 });
 
 test('the same inputs give the same total on the profile and on the home page', async ({ page, cms }) => {

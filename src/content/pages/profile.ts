@@ -17,7 +17,7 @@ export type ProfilePageContent = {
   /** The home page's hero, with Ahmed's words and the profile's two buttons. */
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
-  /** Section 05 (`#cost`): the shared Delay-cost calculator, with the profile's own button. */
+  /** Section 05 (`#cost`): the shared Delay-cost calculator, with the profile's own button: its words, where written, and its link. */
   readonly cost: Section<DelayCalculatorContent>;
 };
 
@@ -61,8 +61,9 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink'] | ProfilePage['cost']['callToActionLink'],
   ) => words(stored).trim();
   const { hero, cost } = entry;
-  // Every word of it the entry both pages read; where its button goes, this page's.
+  // Its words the entry both pages read; its button's, where written, and where it goes, this page's.
   const calculator = await getDelayCalculator(locale, link(cost.callToActionLink));
+  const ownLabel = words(cost.callToActionLabel).trim();
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -88,6 +89,10 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
-    cost: { ...calculator, shows: cost.shows !== false },
+    cost: {
+      ...calculator,
+      callToAction: { ...calculator.callToAction, label: ownLabel || calculator.callToAction.label },
+      shows: cost.shows !== false,
+    },
   };
 }
