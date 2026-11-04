@@ -35,8 +35,11 @@ function readWords(page: Page, id: string) {
   return page.locator(`#${id}`).evaluate((calculator) => {
     const text = (element: Element) => element.textContent!.replace(/\s+/g, ' ').trim();
     const one = (selector: string) => text(calculator.querySelector(selector)!);
+    // The eyebrow's words, after the profile's section number where it has one.
+    const eyebrow = calculator.querySelector('.eyebrow')!.cloneNode(true) as Element;
+    eyebrow.querySelector('.pf-num')?.remove();
     return {
-      eyebrow: one('.eyebrow'),
+      eyebrow: text(eyebrow),
       heading: one('h2'),
       lead: one('.lead'),
       // A slider's name is its reading's line without the reading.
@@ -81,6 +84,11 @@ test('the profile shows the home page’s calculator, in the shared entry’s wo
   await expect(button(page)).toHaveAttribute('href', '/#demo');
   await expect(button(page)).not.toHaveAttribute('target', /./);
   expect((await readWords(page, 'cost')).heading).not.toBe('');
+  // Its place in Ahmed's order, 05, before the shared eyebrow's words, as
+  // every numbered section of the profile has it: one eyebrow, not two.
+  await expect(section(page).locator('.eyebrow')).toHaveCount(1);
+  await expect(section(page).locator('.eyebrow .pf-num')).toHaveText('05');
+  expect((await readWords(page, 'cost')).eyebrow).not.toBe('');
 
   // Every word of it, the button's among them while the profile gives it none,
   // is the home page's calculator's — read again if another suite's draft of
@@ -114,6 +122,8 @@ test('the profile shows the home page’s calculator, in the shared entry’s wo
   await expect(homeButton).not.toBeEmpty();
   await expect(homeButton).toHaveAttribute('href', '#demo');
   await expect(homeButton).not.toHaveAttribute('target', /./);
+  // And the home page's calculator has no number: it is not one of Ahmed's sections.
+  await expect(page.locator('#calc .pf-num')).toHaveCount(0);
 });
 
 test('the same inputs give the same total on the profile and on the home page', async ({ page, cms }) => {

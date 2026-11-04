@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   SLIDERS,
   STARTING_SETTINGS,
@@ -46,16 +47,18 @@ export type DelayCalculatorContent = {
  * fix. Only the number is `.mono` here.
  *
  * `id` is the section's: the home page's `calc`, the Reference site's own,
- * and the Company profile's `cost`, Ahmed's (ticket 106).
+ * and the Company profile's `cost`, Ahmed's (ticket 106). `eyebrow` is the
+ * line above the heading where a page draws its own in place of the plain
+ * one — the Company profile's, with its section number — from the same words.
  */
-export function DelayCalculator({ content, id = 'calc' }: { content: DelayCalculatorContent; id?: string }) {
+export function DelayCalculator({ content, id = 'calc', eyebrow }: { content: DelayCalculatorContent; id?: string; eyebrow?: ReactNode }) {
   const display = calculatorDisplay(STARTING_SETTINGS, content.words);
   const values = settingsAsValues(STARTING_SETTINGS);
 
   return (
     <section id={id} className="light pad">
       <div className="wrap">
-        <div className="eyebrow">{content.eyebrow}</div>
+        {eyebrow ?? <div className="eyebrow">{content.eyebrow}</div>}
         <h2>{content.heading}</h2>
         <p className="lead">{content.lead}</p>
 
