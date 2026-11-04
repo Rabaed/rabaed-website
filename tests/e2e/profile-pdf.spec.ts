@@ -22,9 +22,11 @@
  * The four file names are Ahmed's (`PDF/` in his folder), restated here
  * rather than imported, for the reason `routes.ts` gives.
  */
-import type { Page } from '@playwright/test';
+import type { Page, TestInfo } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import pixelmatch from 'pixelmatch';
+import { PNG } from 'pngjs';
 import { test, expect, type Cms } from './entries';
 import { HEADER_BACKGROUND_OVER_DARK, HEADER_BACKGROUND_OVER_LIGHT } from './header-colours';
 import { ROUTES } from './routes';
@@ -60,9 +62,26 @@ const openPanel = async (page: Page) => {
   await expect(page.locator('.nav')).toHaveClass(/\bopen\b/);
 };
 
-/** The profile, and the entries it shares — its header and footer, the Trust strip — previewed in English as well as Arabic. */
+/**
+ * The English button of the header as `20260923_090000_propose_english_site_words`
+ * proposed it, by which that proposal is found among the site words' drafts:
+ * restated rather than imported, for the reason `routes.ts` gives.
+ */
+const PROPOSED_ENGLISH_DEMO = 'Book a demo';
+
+/**
+ * The profile previewed in English, under the English header and footer the
+ * founder has been proposed (ticket 40): the proposal made the draft, as
+ * restoring it from the admin's Versions does, so the bar carries real English
+ * words rather than the empty ones the published entry has. The Trust strip
+ * and the profile are drafted as published in English too.
+ */
 async function previewInEnglish(cms: Cms) {
-  for (const slug of ['site-words', 'trust-strip', 'profile-page'] as const) {
+  const siteWords = cms.entry('site-words');
+  const proposal = (await siteWords.drafts()).find((draft) => draft.version.header.demoLabel.en === PROPOSED_ENGLISH_DEMO);
+  expect(proposal, 'no draft carries the English site words proposed').toBeTruthy();
+  await siteWords.restoreVersion(proposal!);
+  for (const slug of ['trust-strip', 'profile-page'] as const) {
     const entry = cms.entry(slug);
     await entry.draft({ ...(await entry.published()), languages: ['ar', 'en'] });
   }
@@ -105,19 +124,48 @@ test.describe('Download PDF', () => {
     expect(Math.abs(login.y + login.height / 2 - (button.y + button.height / 2))).toBeLessThan(2);
   });
 
-  test('the bar has room for it at every width that shows the bar, in both languages', async ({ page, cms }) => {
+  test('the bar has room for it at every width that shows the bar, in both languages, the English in its own words', async ({ page, cms }) => {
     for (const [address, preview] of [
       ['/profile', () => cms.preview('/profile')],
       ['/en/profile', () => previewInEnglish(cms)],
     ] as const) {
       for (const width of [1100, 1280, 1440]) {
+        const where = `${address} at ${width}px`;
         await page.setViewportSize({ width, height: 900 });
         await preview();
         await expect(barButton(page)).toBeVisible();
-        const [links, actions] = await Promise.all([page.locator('.nav .links').boundingBox(), page.locator('.nav .nav-cta').boundingBox()]);
-        const apart = links!.x + links!.width <= actions!.x || actions!.x + actions!.width <= links!.x;
-        expect(apart, `${address} at ${width}px: the menu and the buttons overlap`).toBe(true);
-        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), `${address} at ${width}px`).toBeLessThanOrEqual(0);
+        if (address === '/en/profile') {
+          // The words the bar has to hold, not empty ones.
+          await expect(page.locator('.nav .links a').first()).toHaveText('Home');
+          await expect(page.locator('.nav .login')).toHaveText('Sign in');
+          await expect(headerDemo(page)).toHaveText(PROPOSED_ENGLISH_DEMO);
+        }
+        const [brand, links, actions] = await Promise.all(
+          ['.nav .brand', '.nav .links', '.nav .nav-cta'].map(async (selector) => (await page.locator(selector).boundingBox())!),
+        );
+        const apart = (one: typeof brand, other: typeof brand) => one.x + one.width <= other.x || other.x + other.width <= one.x;
+        expect(apart(links, actions), `${where}: the menu and the buttons overlap`).toBe(true);
+        expect(apart(brand, links), `${where}: the wordmark and the menu overlap`).toBe(true);
+        expect(apart(brand, actions), `${where}: the wordmark and the buttons overlap`).toBe(true);
+        // Every word on the bar on one line, as the bar is one line high.
+        for (const item of await page.locator('.nav .links > a, .nav .nsub-t, .nav .nav-cta > a').all()) {
+          if (!(await item.isVisible())) continue;
+          // The lines its words are drawn on: each text's boxes, by how far down they start.
+          const lines = await item.evaluate((element) => {
+            const tops: number[] = [];
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+            for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+              if (!node.textContent!.trim()) continue;
+              const range = document.createRange();
+              range.selectNodeContents(node);
+              tops.push(...[...range.getClientRects()].map((rect) => rect.top));
+            }
+            tops.sort((a, b) => a - b);
+            return tops.filter((top, index) => index === 0 || top - tops[index - 1]! > 4).length;
+          });
+          expect(lines, `${where}: “${(await item.textContent())?.trim()}” breaks over lines`).toBeLessThanOrEqual(1);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), where).toBeLessThanOrEqual(0);
       }
     }
   });
@@ -340,4 +388,86 @@ test.describe('the header’s colour', () => {
     await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(() => headerBackground(page), { message: 'back at the top' }).toBe(HEADER_BACKGROUND_OVER_DARK);
   });
+});
+
+/**
+ * The site's header or footer, as pixels, with nothing else of the page
+ * around it: the header's translucent bar over the same plain ground on both
+ * pages, and the footer taken out of the page's flow to its top, with nothing
+ * laid over it. Where the page left it, a fraction of a pixel down that
+ * differs between two pages, it is drawn a pixel taller or shorter.
+ */
+async function shotOf(page: Page, part: 'header' | 'footer'): Promise<PNG> {
+  await page.addStyleTag({ content: 'section, .preview-banner, .pf-wa { visibility: hidden !important }' });
+  if (part === 'footer') {
+    await page.addStyleTag({ content: 'nav.nav { visibility: hidden !important }' });
+    // The site's footer comes after everything the page holds: all else goes.
+    await page.locator('footer').last().evaluate((footer) => {
+      for (let kept: Element = footer; kept.parentElement && kept !== document.body; kept = kept.parentElement) {
+        for (const other of kept.parentElement.children) {
+          if (other !== kept && !other.matches('nav.nav, script, style, link')) (other as HTMLElement).style.display = 'none';
+        }
+      }
+      window.scrollTo(0, 0);
+    });
+  } else {
+    await page.addStyleTag({ content: 'footer { visibility: hidden !important }' });
+  }
+  await page.evaluate(() => document.fonts.ready);
+  const element = part === 'header' ? page.locator('nav.nav') : page.locator('footer').last();
+  return PNG.sync.read(await element.screenshot({ animations: 'disabled' }));
+}
+
+/**
+ * How many pixels the profile's picture of a part differs from the home
+ * page's in, once they are the same size. Where any do, the two pictures and
+ * where they differ are kept with the test's results.
+ */
+async function differing(home: PNG, profile: PNG, part: string, testInfo: TestInfo): Promise<number> {
+  expect({ width: profile.width, height: profile.height }, `the ${part}’s size`).toEqual({ width: home.width, height: home.height });
+  const apart = new PNG({ width: home.width, height: home.height });
+  const count = pixelmatch(home.data, profile.data, apart.data, home.width, home.height, { threshold: 0.1 });
+  if (count > 0) {
+    for (const [name, picture] of [['home', home], ['profile', profile], ['apart', apart]] as const) {
+      await testInfo.attach(`${part}-${name}.png`, { body: PNG.sync.write(picture), contentType: 'image/png' });
+    }
+  }
+  return count;
+}
+
+/**
+ * The spec's Testing Decisions: the profile's header and footer are the home
+ * page's to the pixel, Download PDF aside — so every other page's header is
+ * the one it was (ticket 104). Both pages are previewed, the profile being
+ * unpublished on this server, so each carries the same banner; and each is
+ * read at its top, where the header is dark.
+ */
+test.describe('the header and footer are the home page’s, to the pixel', () => {
+  for (const viewport of [DESKTOP, PHONE]) {
+    test(`at ${viewport.width}px, the header, Download PDF hidden`, async ({ page, cms }, testInfo) => {
+      await page.setViewportSize(viewport);
+      await cms.preview('/');
+      // The home page's own link is marked in the menu, as each page's is, and
+      // the profile has no link there to mark: the one difference a page's
+      // header is meant to have.
+      await page.evaluate(() => document.querySelectorAll('.nav .links a.on').forEach((link) => link.classList.remove('on')));
+      const home = await shotOf(page, 'header');
+
+      await cms.preview('/profile');
+      await page.addStyleTag({ content: '.nav a.pdf { display: none !important }' });
+      const profile = await shotOf(page, 'header');
+
+      expect(await differing(home, profile, 'header', testInfo), 'pixels apart from the home page’s header').toBe(0);
+    });
+
+    test(`at ${viewport.width}px, the footer`, async ({ page, cms }, testInfo) => {
+      await page.setViewportSize(viewport);
+      await cms.preview('/');
+      const home = await shotOf(page, 'footer');
+      await cms.preview('/profile');
+      const profile = await shotOf(page, 'footer');
+
+      expect(await differing(home, profile, 'footer', testInfo), 'pixels apart from the home page’s footer').toBe(0);
+    });
+  }
 });
