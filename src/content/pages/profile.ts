@@ -1,20 +1,31 @@
 import { getContactPoints } from '@/cms/contact-points';
 import { pageEntry, wordsIn } from '@/cms/pages';
+import type { DelayCalculatorContent } from '@/components/home/delay-calculator';
 import type { HomeHeroContent } from '@/components/home/hero';
+import type { DownloadFile, HeaderDownload } from '@/components/site-nav';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
+import { getDelayCalculator } from '@/content/delay-calculator';
 import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
+import { PROFILE_PDF_FOLDER, PROFILE_PDFS, type ProfilePdfScreen } from '@/lib/profile-pdfs';
 import type { ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
+import { buttonLinkIn, profileClose, type ProfileCloseContent } from './profile-close';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
   /** The home page's hero, with Ahmed's words and the profile's two buttons. */
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
+  /** Section 05 (`#cost`): the shared Delay-cost calculator, with the profile's own button: its words, where written, and its link. */
+  readonly cost: Section<DelayCalculatorContent>;
+  /** Sections 10 to 14, the contact section and the floating WhatsApp button (ticket 109). */
+  readonly close: ProfileCloseContent;
+  /** The header's Download PDF button (ticket 104): its words, and the page's language's two files (`PROFILE_PDFS`). */
+  readonly pdf: HeaderDownload;
 };
 
 /**
@@ -27,6 +38,40 @@ const SHARING_IMAGE: Readonly<Record<Locale, SharingImage>> = {
   en: { url: '/profile/og-en.png', alt: 'Rabaed: Three parties. One record. Clear ownership.' },
 };
 
+/**
+ * What `profile-files` puts before the name of every file uploaded to it, so
+ * that none takes a name the site's images have in the same bucket. Not part
+ * of the name the Editor gave the file, so not part of the one a visitor's
+ * browser saves it under.
+ */
+const KEPT_AS = 'profile-';
+
+/**
+ * An Editor's replacement, where the entry names one that is there: served
+ * as uploaded (`profile-files`), and saved under the name it was uploaded
+ * with. A file uploaded under a name `profile-files` already had to number,
+ * `…-1.pdf`, keeps the number: the collection keeps nothing else.
+ */
+function uploadedFile(value: ProfilePage['pdf']['arabic']): DownloadFile | null {
+  if (!value || typeof value !== 'object' || !value.url) return null;
+  const kept = value.filename ?? '';
+  return { href: value.url, name: kept.startsWith(KEPT_AS) ? kept.slice(KEPT_AS.length) : kept };
+}
+
+/**
+ * The one place the four files come from: the page's language's pair
+ * (`PROFILE_PDFS`), each an Editor's replacement where one is uploaded, and
+ * otherwise Ahmed's, kept with the code as the default, as `public/hero/`
+ * keeps the hero's drawings. Each downloads under its own name.
+ */
+function profilePdfs(locale: Locale, pdf: ProfilePage['pdf']): Pick<HeaderDownload, ProfilePdfScreen> {
+  const file = (screen: ProfilePdfScreen): DownloadFile => {
+    const { field, file: ahmeds } = PROFILE_PDFS[locale][screen];
+    return uploadedFile(pdf[field]) ?? { href: `${PROFILE_PDF_FOLDER}/${ahmeds}`, name: ahmeds };
+  };
+  return { desktop: file('desktop'), phone: file('phone') };
+}
+
 /** The hero's four statuses, which the drawing's loop counts, filled out to four for a draft being previewed. */
 function fourStatuses(statuses: readonly string[]): HomeHeroContent['statuses'] {
   const [first = '', second = '', third = '', fourth = ''] = statuses;
@@ -35,7 +80,9 @@ function fourStatuses(statuses: readonly string[]): HomeHeroContent['statuses'] 
 
 /**
  * The Company profile's content in `locale`: its words from its entry in the
- * CMS (ticket 102), the Trust strip's marks from the entry every page shares —
+ * CMS (ticket 102), the Trust strip's marks from the entry every page shares,
+ * the Delay-cost calculator's words from the one it shares with the home page
+ * (ticket 106) —
  * or a refusal, where the page is not published in `locale`, which until the
  * founder publishes it it is in neither.
  *
@@ -51,8 +98,11 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     getContactPoints(),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
-  const link = (stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink']) => words(stored).trim();
-  const { hero } = entry;
+  const link = (stored: Parameters<typeof wordsIn>[1]) => buttonLinkIn(locale, stored);
+  const { hero, cost } = entry;
+  // Its words the entry both pages read; its button's, where written, and where it goes, this page's.
+  const calculator = await getDelayCalculator(locale, link(cost.callToActionLink));
+  const ownLabel = words(cost.callToActionLabel).trim();
   const meta = pageMeta(locale, entry.search, { name: MARKETING_PAGES.profile.name[locale] });
 
   return {
@@ -78,5 +128,12 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
+    cost: {
+      ...calculator,
+      callToAction: { ...calculator.callToAction, label: ownLabel || calculator.callToAction.label },
+      shows: cost.shows !== false,
+    },
+    close: profileClose(locale, entry, contact),
+    pdf: { label: words(entry.pdf.label), ...profilePdfs(locale, entry.pdf) },
   };
 }

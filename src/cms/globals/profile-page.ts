@@ -1,7 +1,42 @@
-import { buttonLinkField, listField, sectionTab, wordsField } from '../page-fields';
+import type { Field } from 'payload';
+import { PDF_RULE } from '../collections/profile-files';
+import { buttonLinkField, listField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
+import { PROFILE_PDFS, type ProfilePdfScreen } from '../../lib/profile-pdfs';
+import type { Locale } from '../../lib/locales';
+import { DEMO_LINK_DESCRIPTION, profileCloseTabs, WHATSAPP_LINK_DESCRIPTION } from './profile-close';
+
+/** What each of the four files is called in the admin. */
+const PDF_LABELS: Record<Locale, Record<ProfilePdfScreen, Words>> = {
+  ar: { desktop: { ar: 'العربي', en: 'Arabic' }, phone: { ar: 'العربي للجوال', en: 'Arabic, for a phone' } },
+  en: { desktop: { ar: 'الإنجليزي', en: 'English' }, phone: { ar: 'الإنجليزي للجوال', en: 'English, for a phone' } },
+};
+
+/**
+ * One of the four Profile PDFs (ticket 104): a file an Editor uploads to the
+ * Company profile's files, kept exactly as uploaded (`profile-files`). Left
+ * empty, the page gives Ahmed's file, kept with the site's code in
+ * `public/profile/pdf/`; uploaded, the replacement is what downloads next,
+ * under its own name. Only a PDF can be chosen.
+ */
+function profilePdfField(locale: Locale, screen: ProfilePdfScreen): Field {
+  const { field: name, file } = PROFILE_PDFS[locale][screen];
+  return {
+    name,
+    label: PDF_LABELS[locale][screen],
+    type: 'upload',
+    relationTo: 'profile-files',
+    filterOptions: { mimeType: { equals: 'application/pdf' } },
+    admin: {
+      description: {
+        ar: `${PDF_RULE.ar} اتركه فارغاً ليُنزَّل ملف أحمد المحفوظ مع الموقع، ${file}.`,
+        en: `${PDF_RULE.en} Leave it empty to give Ahmed’s file, kept with the site: ${file}.`,
+      },
+    },
+  };
+}
 
 /**
  * The Company profile's words, section by section, in the page's order
@@ -51,18 +86,10 @@ export const ProfilePage = pageGlobal({
             }),
           ],
         },
-        buttonLinkField('demoLink', { ar: 'وجهة الزر الأول', en: 'First button goes to' }, {
-          description: {
-            ar: 'نموذج طلب العرض في الصفحة الرئيسية: ‎/#demo في العربية و‎/en#demo في الإنجليزية.',
-            en: 'The demo request form on the home page: /#demo in Arabic and /en#demo in English.',
-          },
-        }),
+        buttonLinkField('demoLink', { ar: 'وجهة الزر الأول', en: 'First button goes to' }, { description: DEMO_LINK_DESCRIPTION }),
         buttonLinkField('whatsappLink', { ar: 'وجهة الزر الثاني', en: 'Second button goes to' }, {
           optional: true,
-          description: {
-            ar: 'اتركه فارغاً ليفتح رقم واتساب الموقع من «إعدادات الموقع»، أو اكتب رابطاً آخر مثل رابط حملة. رابط خارج الموقع يُفتح في نافذة جديدة.',
-            en: 'Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.',
-          },
+          description: WHATSAPP_LINK_DESCRIPTION,
         }),
         wordsField('trust', { ar: 'السطر تحت الأزرار', en: 'Line under the buttons' }, 50),
         {
@@ -118,6 +145,48 @@ export const ProfilePage = pageGlobal({
       },
       fields: [],
     }),
+    // Section 05, «التكلفة الخفية» (ticket 106): the shared calculator, its
+    // words its own entry's, so the two pages cannot disagree (ADR-0029). Here
+    // the page chooses whether it shows, and its button's words and link, as
+    // every button on this page has its own — for a campaign, without
+    // touching the home page's. Words left empty are the shared entry's.
+    sectionTab({
+      name: 'cost',
+      label: { ar: 'حاسبة تكلفة التأخير', en: 'Delay-cost calculator' },
+      hideable: true,
+      description: {
+        ar: 'حاسبة الصفحة الرئيسية نفسها، بكلماتها من «حاسبة تكلفة التأخير» بجانب إعدادات الموقع، فتتفق الصفحتان. هنا يُختار ظهورها في هذه الصفحة فقط، وزرّها.',
+        en: 'The home page’s own calculator, in its words from “Delay-cost calculator” beside the site settings, so the two pages agree. Here you choose only whether it shows on this page, and its button.',
+      },
+      fields: [
+        wordsField('callToActionLabel', { ar: 'الزر', en: 'Button' }, 40, {
+          optional: true,
+          description: {
+            ar: 'اتركه فارغاً ليقول ما يقوله زر الحاسبة في الصفحة الرئيسية، من «حاسبة تكلفة التأخير». ما تكتبه هنا يظهر في هذه الصفحة وحدها.',
+            en: 'Leave it empty to say what the calculator’s button says on the home page, from “Delay-cost calculator”. What you write here shows on this page alone.',
+          },
+        }),
+        buttonLinkField('callToActionLink', { ar: 'وجهة الزر', en: 'Button goes to' }, { description: DEMO_LINK_DESCRIPTION }),
+      ],
+    }),
+    // 10 to 14, the contact section and the floating WhatsApp button (ticket 109).
+    ...profileCloseTabs(),
+    // The header's Download PDF button (ticket 104): this page's alone.
+    {
+      name: 'pdf',
+      label: { ar: 'ملف PDF', en: 'Profile PDF' },
+      description: {
+        ar: 'زر «تنزيل PDF» في أعلى هذه الصفحة وحدها، بجانب «تسجيل الدخول»: يُنزّل الملف التعريفي بلغة الصفحة، بنسخة الجوال لمن شاشته 980 بكسل أو أضيق.',
+        en: 'The Download PDF button at the top of this page alone, beside Sign in: it downloads the profile in the page’s language, the phone version on a screen 980px wide or narrower.',
+      },
+      fields: [
+        wordsField('label', { ar: 'كلمة الزر', en: 'Button label' }, 16),
+        // A row per language: its desktop file, then its phone one.
+        ...(['ar', 'en'] as const).map(
+          (locale): Field => ({ type: 'row', fields: [profilePdfField(locale, 'desktop'), profilePdfField(locale, 'phone')] }),
+        ),
+      ],
+    },
     searchTab(),
   ],
 });

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   SLIDERS,
   STARTING_SETTINGS,
@@ -9,7 +10,7 @@ import {
   type Figure,
 } from '@/components/home/delay-calculator-state';
 import { DelayCalculatorBehaviour } from '@/components/home/delay-calculator-behaviour';
-import type { PageLink } from '@/components/page-link';
+import { newTabIfAway, type PageLink } from '@/components/page-link';
 
 export type DelayCalculatorContent = {
   readonly eyebrow: string;
@@ -21,7 +22,7 @@ export type DelayCalculatorContent = {
   readonly resultLabel: string;
   /** What the estimate assumes and leaves out, under the cost. */
   readonly assumptions: string;
-  /** The button under them, to the page's demo request form. */
+  /** The button under them: the home page's to its demo request form, the Company profile's where its Editor sends it. */
   readonly callToAction: PageLink;
   /** The words written around the numbers, here and again in the browser as a slider moves. */
   readonly words: CalculatorWords;
@@ -44,15 +45,20 @@ export type DelayCalculatorContent = {
  * Arabic glyphs, so the words beside the numbers drop to the browser's
  * last-resort monospace — the defect the footer and the guarantee pill already
  * fix. Only the number is `.mono` here.
+ *
+ * `id` is the section's: the home page's `calc`, the Reference site's own,
+ * and the Company profile's `cost`, Ahmed's (ticket 106). `eyebrow` is the
+ * line above the heading where a page draws its own in place of the plain
+ * one — the Company profile's, with its section number — from the same words.
  */
-export function DelayCalculator({ content }: { content: DelayCalculatorContent }) {
+export function DelayCalculator({ content, id = 'calc', eyebrow }: { content: DelayCalculatorContent; id?: string; eyebrow?: ReactNode }) {
   const display = calculatorDisplay(STARTING_SETTINGS, content.words);
   const values = settingsAsValues(STARTING_SETTINGS);
 
   return (
-    <section id="calc" className="light pad">
+    <section id={id} className="light pad">
       <div className="wrap">
-        <div className="eyebrow">{content.eyebrow}</div>
+        {eyebrow ?? <div className="eyebrow">{content.eyebrow}</div>}
         <h2>{content.heading}</h2>
         <p className="lead">{content.lead}</p>
 
@@ -84,7 +90,7 @@ export function DelayCalculator({ content }: { content: DelayCalculatorContent }
             <div className="n">{content.assumptions}</div>
             {/* The Reference site's own inline spacing above the button. */}
             <div style={{ marginTop: '18px' }}>
-              <a className="btn p" href={content.callToAction.href}>
+              <a className="btn p" href={content.callToAction.href} {...newTabIfAway(content.callToAction.href)}>
                 {content.callToAction.label}
               </a>
             </div>
@@ -92,7 +98,7 @@ export function DelayCalculator({ content }: { content: DelayCalculatorContent }
         </div>
       </div>
 
-      <DelayCalculatorBehaviour words={content.words} />
+      <DelayCalculatorBehaviour section={id} words={content.words} />
     </section>
   );
 }

@@ -238,6 +238,26 @@ test('an Editor’s change to the calculator’s words reaches the home page', a
   await expect(spentLine(page)).toHaveText('صُرف منها 60,000,000 ر.س');
 });
 
+test('the line under the cost is refused without {amount}, in either language, saying why', async ({ cms }) => {
+  // Without it the line would say what has been spent and never say how much.
+  const words = cms.entry('delay-calculator');
+  const entry = await words.published();
+  const { calculator } = entry;
+
+  for (const [what, spent, field, message] of [
+    ['Arabic', { ...calculator.spent, ar: 'على المبلغ المصروف حتى الآن' }, 'calculator.spent.ar', '{amount}'],
+    ['English', { ...calculator.spent, en: 'on what has been spent so far' }, 'calculator.spent.en', '{amount}'],
+  ] as const) {
+    const response = await words.attempt({ ...entry, calculator: { ...calculator, spent } }, 'published');
+    const body = await response.text();
+    expect(response.status(), `${what}: ${body}`).toBe(400);
+    expect(body, what).toContain(field);
+    expect(body, what).toContain(message);
+  }
+  // Nothing refused was kept.
+  expect(await words.published()).toEqual(entry);
+});
+
 test('with JavaScript off, the sliders show their starting positions filled in', async ({ browser }) => {
   const read = async (javaScriptEnabled: boolean) => {
     const context = await browser.newContext({ javaScriptEnabled });

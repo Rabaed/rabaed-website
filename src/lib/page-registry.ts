@@ -100,7 +100,7 @@ export const MARKETING_PAGES = {
     path: '/profile',
     name: { ar: 'الملف التعريفي', en: 'Company profile' },
     entry: { slug: 'profile-page', label: { ar: 'صفحة الملف التعريفي', en: 'Company profile page' } },
-    shared: ['trust-strip', 'site-words'],
+    shared: ['trust-strip', 'delay-calculator', 'site-words'],
     questionsSection: null,
   },
 } as const satisfies Record<string, MarketingPageSpec>;

@@ -35,6 +35,12 @@ import { valueNameProblem } from './referral-program-values';
 
 export type Words = { readonly ar: string; readonly en: string };
 
+/**
+ * A token a page writes a figure in place of, `{amount}`, which its words
+ * must carry, and what the Editor is told when they do not.
+ */
+export type Placeholder = { readonly token: string; readonly missing: Words };
+
 /** A message in the language the Editor has the admin in. */
 export function inAdminLanguage(req: PayloadRequest | undefined, message: Words): string {
   return req?.i18n?.language === 'en' ? message.en : message.ar;
@@ -119,7 +125,10 @@ const englishWhereArabic = (options: ValidateOptions) =>
  * between asterisks, and break a line where a new one starts (`emphasis.ts`).
  * `answerFirst` words are a section's opening paragraph, held to a standalone
  * answer of 30 to 60 words whenever one is written (`answer-first.ts`); an
- * optional one left empty is not an answer at all, and passes.
+ * optional one left empty is not an answer at all, and passes. Words with a
+ * `placeholder` are refused, in each language they are written in, without
+ * the token the page writes a figure in place of: the calculator's
+ * `{amount}`.
  *
  * Payload checks all of this only when a page is published: a draft may be
  * unfinished.
@@ -136,6 +145,7 @@ export function wordsField(
     readonly values?: boolean;
     readonly emphasis?: boolean;
     readonly answerFirst?: boolean;
+    readonly placeholder?: Placeholder;
   } = {},
 ): Field {
   const {
@@ -146,8 +156,10 @@ export function wordsField(
     values = false,
     emphasis = false,
     answerFirst = false,
+    placeholder,
   } = options;
   const marks = (written: string) =>
+    (placeholder && !written.includes(placeholder.token) ? placeholder.missing : null) ??
     (latinNames ? latinNameProblem(written) : null) ??
     (values ? valueNameProblem(written) : null) ??
     (emphasis ? emphasisProblem(written) : null) ??

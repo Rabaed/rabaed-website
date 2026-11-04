@@ -1,0 +1,17 @@
+/**
+ * The Company profile's own sections (`src/components/profile/`), Ahmed's
+ * design in the site's tokens, type and breakpoints (spec: Look). His own
+ * stylesheet is a picture of the intent, not a source: his 17px body, 52px
+ * headings, Plex Mono and 560/760/960px lines do not carry over.
+ *
+ * Every class here starts `pf-`. The stylesheet is one global bundle, and the
+ * names Ahmed used — `.cmp`, `.party`, `.tabs`, `.tl` — are already the home
+ * and product pages'.
+ *
+ * Dark and light follow Ahmed's rhythm, and the header reads it: a light
+ * section carries `.light` and a dark one nothing (ticket 104).
+ */
+
+/* A section's number, before its eyebrow's words. */
+.pf-eyebrow { display: flex; align-items: center; gap: 10px }
+.pf-num { font-family: "DM Mono", monospace; letter-spacing: 0; line-height: 1; padding: 5px 7px; border-radius: 7px; background: var(--acc-soft) }

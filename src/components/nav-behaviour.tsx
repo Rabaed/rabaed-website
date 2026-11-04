@@ -26,7 +26,48 @@ export function NavBehaviour() {
   usePartnershipsDropdown();
   useHeaderColourToggle();
   useRememberedLanguage();
+  useDownloadForTheScreen();
   return null;
+}
+
+/**
+ * The site's phone line (spec: Design system): a screen this wide or less is
+ * a phone's, and gets a page's phone file.
+ */
+const PHONE_SCREEN = '(max-width: 980px)';
+
+/**
+ * Points a page's own download button at the file for the screen (ticket
+ * 104), and the name it is saved under with it: the phone file on a screen
+ * 980px wide or less, the desktop file on a wider one, and again as the
+ * screen changes — a tablet turned, a window dragged narrower. The markup
+ * carries the desktop file, so a page without JavaScript gives that.
+ *
+ * Only the Company profile has such a button; elsewhere nothing is listened for.
+ */
+function useDownloadForTheScreen() {
+  useEffect(() => {
+    const buttons = [...document.querySelectorAll<HTMLAnchorElement>('.nav a[data-phone-href][data-desktop-href]')];
+    if (buttons.length === 0) return;
+
+    const screen = window.matchMedia(PHONE_SCREEN);
+    const point = (phone: boolean) => {
+      for (const button of buttons) {
+        const { phoneHref, phoneName, desktopHref, desktopName } = button.dataset;
+        button.setAttribute('href', (phone ? phoneHref : desktopHref) ?? '');
+        button.setAttribute('download', (phone ? phoneName : desktopName) ?? '');
+      }
+    };
+    const onChange = () => point(screen.matches);
+
+    onChange();
+    screen.addEventListener('change', onChange);
+    return () => {
+      screen.removeEventListener('change', onChange);
+      // As the markup has it, so a remount starts from where the server left it.
+      point(false);
+    };
+  }, []);
 }
 
 /** Where the language a visitor picked is kept. One browser's, and nobody else's. */
@@ -198,9 +239,53 @@ function usePartnershipsDropdown() {
 }
 
 /**
- * Dark over the dark sections, light from the first light section until the
- * footer. The header is translucent, so without this it becomes unreadable the
- * moment a pale section slides under it.
+ * What counts as a light section. A legal document's pale ground does: it is
+ * not `.light`, because its own rules set the colour of every part of it, as
+ * on the Reference site; this is the rule the animated pages follow, which
+ * ticket 17 asks the legal pages to share rather than the listener of their
+ * own the Reference site gave them. Anything else is dark.
+ */
+const LIGHT_SECTION = 'section.light, section.legal';
+
+/**
+ * Whether the header is over a light section now, by the page's rule
+ * (`PageHeader['colours']`, `site-nav.tsx`) — or `null` where the page has
+ * nothing that could ever turn it light, and nothing need be listened for.
+ *
+ * **Every page but one:** light from the moment the first light section's top
+ * edge passes under the header, and back to dark once the footer's top edge
+ * reaches the window's — the two positions ScrollTrigger was given, `top
+ * 78px` on the first light section and `top top` on the footer.
+ *
+ * **The Company profile** (`data-colours="each-section"`, ticket 104): the
+ * section beneath the header's lower edge decides, all the way down, so a
+ * dark section after a light one turns it dark again. Ahmed's sections do
+ * that after 03; the founder chose this on 4 November 2026. The sections are
+ * found afresh each time, so one drawn late still counts. Where two sections
+ * nest, the innermost decides; over the footer, which is no section, the
+ * header is dark.
+ */
+function headerRule(nav: HTMLElement): (() => boolean) | null {
+  if (nav.dataset.colours === 'each-section') {
+    return () => {
+      const beneath = [...document.querySelectorAll('section')].filter((section) => {
+        const { top, bottom } = section.getBoundingClientRect();
+        return top <= HEADER_HEIGHT && bottom > HEADER_HEIGHT;
+      });
+      return beneath.at(-1)?.matches(LIGHT_SECTION) ?? false;
+    };
+  }
+
+  const firstLight = document.querySelector(LIGHT_SECTION);
+  const footer = document.querySelector('footer');
+  if (!firstLight) return null;
+  return () => firstLight.getBoundingClientRect().top <= HEADER_HEIGHT && (footer?.getBoundingClientRect().top ?? Infinity) > 0;
+}
+
+/**
+ * Dark over the dark sections and light over the light ones, by the page's
+ * rule (`headerRule`). The header is translucent, so without this it becomes
+ * unreadable the moment a pale section slides under it.
  *
  * The colours are written as inline styles, exactly as the Reference site
  * writes them, because they have to beat `.nav`'s own background and border in
@@ -221,22 +306,14 @@ function usePartnershipsDropdown() {
  * animations that are actually animations. The Reference tool page settles
  * this the same way: a plain scroll listener, and no GSAP at all.
  *
- * The two positions are the ones ScrollTrigger was given — `top 78px` on the
- * first light section, `top top` on the footer — read straight off the two
- * elements, and read on every scroll rather than measured once, so a section
- * that changes height needs no refreshing.
+ * The positions are read straight off the elements on every scroll rather
+ * than measured once, so a section that changes height needs no refreshing.
  */
 function useHeaderColourToggle() {
   useEffect(() => {
     const nav = document.querySelector<HTMLElement>('.nav');
-    // A legal document's pale ground counts as a light section. It is not
-    // `.light`, because its own rules set the colour of every part of it, as
-    // on the Reference site; this is the rule the animated pages follow,
-    // which ticket 17 asks the legal pages to share rather than the listener
-    // of their own the Reference site gave them.
-    const firstLight = document.querySelector('section.light, section.legal');
-    const footer = document.querySelector('footer');
-    if (!nav || !firstLight) return;
+    const overLight = nav && headerRule(nav);
+    if (!nav || !overLight) return;
 
     // What the markup the server sent already shows, so that a page opened at
     // the top writes nothing: `.nav`'s own rule sets a bottom border and lets
@@ -244,9 +321,7 @@ function useHeaderColourToggle() {
     // values over it would put a border on all four.
     let onLight = false;
     const paint = () => {
-      // Light from the moment the section's top edge passes under the header,
-      // and back to dark once the footer's top edge reaches the window's.
-      const light = firstLight.getBoundingClientRect().top <= HEADER_HEIGHT && (footer?.getBoundingClientRect().top ?? Infinity) > 0;
+      const light = overLight();
       if (light === onLight) return;
       onLight = light;
 

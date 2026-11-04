@@ -9,6 +9,8 @@ import type { SiteSetting } from '@/payload-types';
 
 export type ContactPoints = {
   whatsappUrl: string;
+  /** The number itself, in figures only, country code first: `966576767900`. */
+  whatsappNumber: string;
   /** Each account's address, or `null` where none has been supplied. */
   social: Record<'linkedin' | 'x' | 'facebook' | 'instagram', string | null>;
 };
@@ -18,7 +20,11 @@ export async function getContactPoints(): Promise<ContactPoints> {
   const payload = await getPayload({ config });
   const settings = await payload.findGlobal({ slug: 'site-settings', draft: previewing, depth: 0 });
 
-  return { whatsappUrl: `https://wa.me/${settings.whatsappNumber}`, social: socialAccounts(settings) };
+  return {
+    whatsappUrl: `https://wa.me/${settings.whatsappNumber}`,
+    whatsappNumber: settings.whatsappNumber,
+    social: socialAccounts(settings),
+  };
 }
 
 /** How to reach the company, as the company's structured data states it (ticket 32). */

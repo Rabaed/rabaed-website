@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { HeroLoop } from '@/components/home/hero-loop';
 import { HERO_DOCUMENT, HERO_STATIONS, HERO_START, type HeroStatuses, type StationName } from '@/components/home/hero-stations';
 import { Inline, type InlineText } from '@/components/inline-text';
-import type { PageLink } from '@/components/page-link';
+import { newTabIfAway, type PageLink } from '@/components/page-link';
 
 export type HomeHeroContent = {
   readonly eyebrow: string;
@@ -35,16 +35,6 @@ export type HomeHeroContent = {
    */
   readonly pictures: Readonly<Record<StationName | 'document', string | null>>;
 };
-
-/**
- * A button that leaves the site — the Company profile's WhatsApp button, whose
- * link an Editor sets (ticket 102) — opens in a new tab, as the footer's
- * WhatsApp link does, so the page it was pressed on stays open. The home
- * page's buttons stay on the page, and are drawn as they always were.
- */
-function newTabIfAway(href: string): { target?: '_blank'; rel?: 'noopener' } {
-  return /^https?:\/\//.test(href) ? { target: '_blank', rel: 'noopener' } : {};
-}
 
 /**
  * The home page's opening screen, and the Company profile's (ticket 102): the
