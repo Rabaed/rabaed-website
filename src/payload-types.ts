@@ -5430,7 +5430,7 @@ export interface ProfilePage {
        */
       video?: (number | null) | ProfileFile;
       /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Upload one with every new video. Leave it empty for Ahmed’s.
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
        */
       poster?: (number | null) | Media;
     };
@@ -5497,7 +5497,7 @@ export interface ProfilePage {
        */
       video?: (number | null) | ProfileFile;
       /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Upload one with every new video. Leave it empty for Ahmed’s.
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
        */
       poster?: (number | null) | Media;
     };
@@ -5564,7 +5564,7 @@ export interface ProfilePage {
        */
       video?: (number | null) | ProfileFile;
       /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Upload one with every new video. Leave it empty for Ahmed’s.
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
        */
       poster?: (number | null) | Media;
     };
@@ -5631,7 +5631,7 @@ export interface ProfilePage {
        */
       video?: (number | null) | ProfileFile;
       /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Upload one with every new video. Leave it empty for Ahmed’s.
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
        */
       poster?: (number | null) | Media;
     };
@@ -5698,7 +5698,7 @@ export interface ProfilePage {
        */
       video?: (number | null) | ProfileFile;
       /**
-       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Upload one with every new video. Leave it empty for Ahmed’s.
+       * The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.
        */
       poster?: (number | null) | Media;
     };
