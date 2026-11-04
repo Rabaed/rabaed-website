@@ -1,16 +1,29 @@
-import type { Field, Tab } from 'payload';
+import { validations, type Field, type Tab, type UploadFieldSingleValidation } from 'payload';
+import { COMPARISONS, type Comparison } from '../../lib/profile-comparisons';
 import { VIDEO_RULE } from '../collections/profile-files';
-import { sectionTab, wordsField, type Words } from '../page-fields';
+import { inAdminLanguage, sectionTab, wordsField, type Words } from '../page-fields';
+
+/** Whether an upload field holds nothing, whichever shape Payload hands it in. */
+function chosenNothing(value: unknown): boolean {
+  const id = value && typeof value === 'object' ? (value as { id?: unknown }).id : value;
+  return id === null || id === undefined || id === '';
+}
 
 /**
- * The five comparisons of the Company profile's before-and-after section, in
- * the order of their tabs, which is fixed: each is one of Ahmed's videos
- * (ticket 108). The names are the entry's, and the page's
- * (`src/content/pages/profile-compare.ts`).
+ * A new video needs its poster with it: without one, Ahmed's picture would
+ * stand in for another clip until it starts, and the frame would keep his
+ * clip's shape.
  */
-export const COMPARISONS = ['approvals', 'documents', 'correspondence', 'dashboard', 'dailyReport'] as const;
-
-export type Comparison = (typeof COMPARISONS)[number];
+async function posterWithItsVideo(value: unknown, options: Parameters<UploadFieldSingleValidation>[1]) {
+  const checked = await validations.upload(value as Parameters<UploadFieldSingleValidation>[0], options);
+  if (checked !== true) return checked;
+  const video = (options.siblingData as { video?: unknown } | undefined)?.video;
+  if (chosenNothing(video) || !chosenNothing(value)) return true;
+  return inAdminLanguage(options.req, {
+    ar: 'ارفع صورة الفيديو الجديد معه: من دونها تظهر صورة فيديو أحمد مكانه.',
+    en: 'Upload the new video’s picture with it: without one, Ahmed’s picture shows in its place.',
+  });
+}
 
 const LABELS: Readonly<Record<Comparison, Words>> = {
   approvals: { ar: 'المقارنة الأولى: الاعتمادات', en: 'First comparison: Approvals' },
@@ -54,6 +67,8 @@ function comparison(name: Comparison): Field {
         type: 'upload',
         relationTo: 'profile-files',
         required: false,
+        // The collection keeps the profile's PDFs too, which are no video.
+        filterOptions: { mimeType: { equals: 'video/mp4' } },
         label: { ar: 'الفيديو', en: 'Video' },
         admin: {
           description: {
@@ -67,11 +82,12 @@ function comparison(name: Comparison): Field {
         type: 'upload',
         relationTo: 'media',
         required: false,
+        validate: posterWithItsVideo,
         label: { ar: 'صورة الفيديو قبل تشغيله', en: 'Picture before the video plays' },
         admin: {
           description: {
-            ar: 'أول لقطة من الفيديو، بشكله نفسه: تُعرض مكانه حتى يبدأ، ويأخذ الإطار شكلها. ارفعها مع كل فيديو جديد. اتركها فارغة لصورة أحمد.',
-            en: 'The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Upload one with every new video. Leave it empty for Ahmed’s.',
+            ar: 'أول لقطة من الفيديو، بشكله نفسه: تُعرض مكانه حتى يبدأ، ويأخذ الإطار شكلها. مطلوبة مع كل فيديو جديد. اتركها فارغة لصورة أحمد.',
+            en: 'The video’s first frame, in the same shape: shown in its place until it starts, and the frame takes its shape. Needed with every new video. Leave it empty for Ahmed’s.',
           },
         },
       },
