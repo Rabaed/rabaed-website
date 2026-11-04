@@ -5296,6 +5296,12 @@ export interface ProfilePage {
      */
     shows?: boolean | null;
   };
+  pdf: {
+    label: {
+      ar: string;
+      en?: string | null;
+    };
+  };
   search: {
     /**
      * Read on its own in a results page, away from the page itself: say what is on it, not hello. A result shows about 60 characters and cuts the rest; the limit here is 70.
@@ -9411,6 +9417,16 @@ export interface ProfilePageSelect<T extends boolean = true> {
     | T
     | {
         shows?: T;
+      };
+  pdf?:
+    | T
+    | {
+        label?:
+          | T
+          | {
+              ar?: T;
+              en?: T;
+            };
       };
   search?:
     | T

@@ -118,6 +118,16 @@ export const ProfilePage = pageGlobal({
       },
       fields: [],
     }),
+    // The header's Download PDF button (ticket 104): this page's alone.
+    {
+      name: 'pdf',
+      label: { ar: 'ملف PDF', en: 'Profile PDF' },
+      description: {
+        ar: 'زر «تنزيل PDF» في أعلى هذه الصفحة وحدها، بجانب «تسجيل الدخول»: يُنزّل الملف التعريفي بلغة الصفحة، بنسخة الجوال لمن شاشته 980 بكسل أو أضيق.',
+        en: 'The Download PDF button at the top of this page alone, beside Sign in: it downloads the profile in the page’s language, the phone version on a screen 980px wide or narrower.',
+      },
+      fields: [wordsField('label', { ar: 'كلمة الزر', en: 'Button label' }, 16)],
+    },
     searchTab(),
   ],
 });

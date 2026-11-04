@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/site-footer';
-import { SiteNav } from '@/components/site-nav';
+import { SiteNav, type PageHeader } from '@/components/site-nav';
 import { siteWordsIn } from '@/content/site-words';
 import { LOCALE_CODES, type Locale } from '@/lib/locales';
 
@@ -29,6 +29,7 @@ export async function PageShell({
   path,
   ownPath = path,
   locales = LOCALE_CODES,
+  header,
   children,
 }: {
   locale: Locale;
@@ -54,13 +55,15 @@ export async function PageShell({
    * round.
    */
   locales?: readonly Locale[];
+  /** What the page changes about its header: only the Company profile changes anything (ticket 104). */
+  header?: PageHeader;
   children: ReactNode;
 }) {
   if (!(await siteWordsIn(locale))) return <main>{children}</main>;
 
   return (
     <>
-      <SiteNav locale={locale} path={path} ownPath={ownPath} locales={locales} />
+      <SiteNav locale={locale} path={path} ownPath={ownPath} locales={locales} header={header} />
       {children}
       <SiteFooter locale={locale} />
     </>

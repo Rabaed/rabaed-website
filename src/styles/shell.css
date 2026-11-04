@@ -57,6 +57,17 @@
 .nav.on-light .login:hover { color: var(--ink); border-color: var(--ink) }
 @media (max-width: 1099px) { .login { display: none } }
 
+/* A page's own download button beside Sign in (ticket 104), which only the
+   Company profile has: Sign in's outlined pill, with Ahmed's download arrow
+   before the words. Every other page's header is untouched by these rules,
+   which match nothing there. */
+.nav-cta .pdf { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: var(--dark-muted); padding: 9px 14px; border: 1px solid var(--dark-line); border-radius: 999px; transition: all .3s; white-space: nowrap }
+.nav-cta .pdf:hover { color: #fff; border-color: rgba(255, 255, 255, .28) }
+.nav.on-light .nav-cta .pdf { color: var(--muted); border-color: var(--line) }
+.nav.on-light .nav-cta .pdf:hover { color: var(--ink); border-color: var(--ink) }
+.nav .pdf-i { flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round }
+@media (max-width: 1099px) { .nav-cta .pdf { display: none } }
+
 /* ---- Partnerships dropdown ---- */
 .nsub { position: relative; display: flex; align-items: center }
 .nsub-t { font-family: inherit; font-size: 14px; line-height: inherit; color: var(--dark-muted); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: color .25s }
@@ -174,6 +185,11 @@
      words — in the panel's own ink and size. */
   .mnav .mlogin { display: inline-flex; align-items: center; border: 1px solid var(--dark-line); border-radius: 999px; padding: 9px 18px; color: #fff; font-size: 15px; white-space: nowrap }
   .nav.on-light .mnav .mlogin { border-color: var(--line); color: var(--ink) }
+
+  /* A page's own download button (ticket 104), Login's pill beside Login,
+     with the language still at the row's far end. */
+  .mnav .mpdf { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--dark-line); border-radius: 999px; padding: 9px 18px; color: #fff; font-size: 15px; white-space: nowrap; margin-inline-end: auto }
+  .nav.on-light .mnav .mpdf { border-color: var(--line); color: var(--ink) }
 
   /* The switcher in the panel: a globe and the language's name, with none of
      a menu link's line above it. */

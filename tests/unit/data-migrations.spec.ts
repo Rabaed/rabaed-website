@@ -63,6 +63,8 @@ import { PARTNERSHIP_PAGE_SEED } from '../../src/migrations/partnership-page-imp
 import { PARTNERSHIP_PAGE_WORDS } from '../../src/migrations/partnership-page-import/words';
 import { PROFILE_PAGE_SEED } from '../../src/migrations/profile-page-import/seed';
 import { PROFILE_PAGE_WORDS } from '../../src/migrations/profile-page-import/words';
+import { PROFILE_PDF_LABEL_SEED } from '../../src/migrations/profile-pdf-label/seed';
+import { PROFILE_PDF_LABEL } from '../../src/migrations/profile-pdf-label/words';
 import { PRODUCT_PAGE_SEED } from '../../src/migrations/product-page-import/seed';
 import {
   CLOSING_SECTION_WORDS,
@@ -168,6 +170,7 @@ const FROZEN: { name: string; words: unknown; seed: string; except?: (value: str
     seed: ENGLISH_LAUNCH_ARTICLES_SEED,
   },
   { name: 'the Company profile', words: PROFILE_PAGE_WORDS, seed: PROFILE_PAGE_SEED },
+  { name: 'the Company profile’s Download PDF button', words: PROFILE_PDF_LABEL, seed: PROFILE_PDF_LABEL_SEED },
 ];
 
 /**

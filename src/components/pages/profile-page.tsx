@@ -3,7 +3,7 @@ import { TrustStrip } from '@/components/home/trust-strip';
 import { PageShell } from '@/components/page-shell';
 import { breadcrumbData, StructuredData } from '@/components/structured-data';
 import type { ProfilePageContent } from '@/content/pages/profile';
-import type { Locale } from '@/lib/locales';
+import { localePath, type Locale } from '@/lib/locales';
 
 /**
  * The Company profile, in either language (ticket 102): Ahmed's profile of
@@ -26,7 +26,15 @@ export async function ProfilePage({
   content: ProfilePageContent;
 }) {
   return (
-    <PageShell locale={locale} path="/profile" locales={locales}>
+    <PageShell
+      locale={locale}
+      path="/profile"
+      locales={locales}
+      // The header's own Download PDF button, its "Book a live demo" to the
+      // home page's form, since this page has none, and its colour following
+      // each section, since Ahmed's turn dark again after light ones (ticket 104).
+      header={{ button: content.pdf, demoHref: `${localePath(locale, '/')}#demo`, colours: 'each-section' }}
+    >
       <Hero content={content.hero} />
       {content.trustStrip.shows && <TrustStrip content={content.trustStrip} />}
       <StructuredData data={await breadcrumbData(locale, [{ name: content.meta.name, path: '/profile' }])} />

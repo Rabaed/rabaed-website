@@ -15,7 +15,16 @@ export type ProfilePageContent = {
   /** The home page's hero, with Ahmed's words and the profile's two buttons. */
   readonly hero: HomeHeroContent;
   readonly trustStrip: Section<TrustStripContent>;
+  /** The header's Download PDF button (ticket 104): its words, and the page's language's two files. */
+  readonly pdf: ProfilePdf;
 };
+
+/**
+ * The Profile PDF for the page's language, one file per screen: `desktop` for
+ * a screen wider than 980px, and for every screen without JavaScript; `phone`
+ * for one 980px wide or less (spec: Profile PDFs).
+ */
+export type ProfilePdf = { readonly label: string; readonly desktop: string; readonly phone: string };
 
 /**
  * The picture a shared link to the profile unfurls as until an Editor gives it
@@ -26,6 +35,24 @@ const SHARING_IMAGE: Readonly<Record<Locale, SharingImage>> = {
   ar: { url: '/profile/og-ar.png', alt: 'ربائد: ثلاثة أطراف. سجل واحد. مسؤولية واضحة.' },
   en: { url: '/profile/og-en.png', alt: 'Rabaed: Three parties. One record. Clear ownership.' },
 };
+
+/**
+ * Ahmed's four Profile PDFs (`PDF/` in his folder), kept with the code as the
+ * defaults, as `public/hero/` keeps the hero's drawings. Each downloads under
+ * its own name.
+ */
+const DEFAULT_PDFS: Readonly<Record<Locale, Omit<ProfilePdf, 'label'>>> = {
+  ar: { desktop: '/profile/pdf/Rabaed-Profile-V4-AR.pdf', phone: '/profile/pdf/Rabaed-Profile-V4-AR-mobile.pdf' },
+  en: { desktop: '/profile/pdf/Rabaed-Profile-V4-EN.pdf', phone: '/profile/pdf/Rabaed-Profile-V4-EN-mobile.pdf' },
+};
+
+/**
+ * The one place the four files come from: the page's language's pair, Ahmed's
+ * defaults until an Editor uploads a replacement for one of them.
+ */
+function profilePdfs(locale: Locale): Omit<ProfilePdf, 'label'> {
+  return DEFAULT_PDFS[locale];
+}
 
 /** The hero's four statuses, which the drawing's loop counts, filled out to four for a draft being previewed. */
 function fourStatuses(statuses: readonly string[]): HomeHeroContent['statuses'] {
@@ -78,5 +105,6 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     },
     // The Trust strip's marks are ticket 20's; the page chooses only whether it shows.
     trustStrip: { ...trustStrip, shows: entry.trustStrip?.shows !== false },
+    pdf: { label: words(entry.pdf.label), ...profilePdfs(locale) },
   };
 }
