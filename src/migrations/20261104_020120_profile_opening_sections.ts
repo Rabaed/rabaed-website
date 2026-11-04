@@ -1,7 +1,7 @@
 import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres';
 
 /** The Company profile's sections 01 to 04 (ticket 105): the truth, the real site, the trap and who we are, each with its switch. */
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TABLE "profile_page_numbers_figures" (
   	"_order" integer NOT NULL,
@@ -144,10 +144,10 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "profile_page" ADD CONSTRAINT "profile_page_truth_photo_id_media_id_fk" FOREIGN KEY ("truth_photo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_profile_page_v" ADD CONSTRAINT "_profile_page_v_version_truth_photo_id_media_id_fk" FOREIGN KEY ("version_truth_photo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   CREATE INDEX "profile_page_truth_truth_photo_idx" ON "profile_page" USING btree ("truth_photo_id");
-  CREATE INDEX "_profile_page_v_version_truth_version_truth_photo_idx" ON "_profile_page_v" USING btree ("version_truth_photo_id");`)
+  CREATE INDEX "_profile_page_v_version_truth_version_truth_photo_idx" ON "_profile_page_v" USING btree ("version_truth_photo_id");`);
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    ALTER TABLE "profile_page_numbers_figures" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "profile_page_trap_tools" DISABLE ROW LEVEL SECURITY;
@@ -248,5 +248,5 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_body_ar";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_body_en";
   ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_quote_ar";
-  ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_quote_en";`)
+  ALTER TABLE "_profile_page_v" DROP COLUMN "version_about_quote_en";`);
 }
