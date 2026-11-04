@@ -1,14 +1,26 @@
-import { buttonLinkField, listField, sectionTab, wordsField } from '../page-fields';
+import { buttonLinkField, latinField, listField, pictureField, sectionTab, wordsField, type Words } from '../page-fields';
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
 import { compareTab } from './profile-compare';
 
+const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق العنوان', en: 'Line above the heading' }, 40, {
+  description: { ar: 'يُكتب بعد رقم القسم، والرقم ثابت.', en: 'Follows the section’s number, which is fixed.' },
+});
+const HEADING: Words = { ar: 'العنوان', en: 'Heading' };
+const LEAD: Words = { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' };
+
+/** Ahmed's photo of the paper submittal (`public/profile/paper-800.webp`), whose shape a replacement keeps. */
+const PAPER = { width: 800, height: 1069 } as const;
+
 /**
  * The Company profile's words, section by section, in the page's order
  * (ticket 102): the home page's hero with Ahmed's words, and the shared Trust
- * strip, which here only shows or hides. The sections after them are tickets
- * 105–109's: the before-and-after videos, section 09, are ticket 108's
+ * strip, which here only shows or hides; then Ahmed's numbered sections, 01 to
+ * 04 from ticket 105 and the rest from tickets 106–109. A section's number is
+ * its place in Ahmed's order, which is fixed, so it is code rather than words,
+ * and keeps the number Ahmed's Profile PDFs give it: hiding 03 leaves 01, 02
+ * and 04. Section 09, the before-and-after videos, is ticket 108's
  * (`./profile-compare.ts`).
  *
  * **Its buttons' links are an Editor's too**, unlike every other page's: the
@@ -119,6 +131,98 @@ export const ProfilePage = pageGlobal({
         en: 'The marks of the companies working on Rabaed, the same on every page. Here you choose only whether it shows on this page.',
       },
       fields: [],
+    }),
+    sectionTab({
+      name: 'truth',
+      label: { ar: '01 الحقيقة كما هي', en: '01 Here’s the truth' },
+      hideable: true,
+      description: {
+        ar: 'صورة طلب اعتماد ورقي حقيقي، وعليها ثلاث ملاحظات حمراء.',
+        en: 'A photo of a real paper submittal, with three red notes on it.',
+      },
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 80),
+        wordsField('body', LEAD, 400, { multiline: true }),
+        pictureField({
+          name: 'photo',
+          label: { ar: 'صورة الورقة', en: 'Photo of the paper' },
+          size: PAPER,
+          required: false,
+          description: {
+            ar: `بمقاس ${PAPER.width}×${PAPER.height} أو أكبر بالنسبة نفسها، والأسماء والأختام مخفية فيها. الملاحظات الحمراء ودوائرها مرسومة في أماكن ثابتة فوق الورقة الحالية، فالبديل يكون الورقة نفسها بالإطار نفسه. احذفها لتعود الصورة الحالية.`,
+            en: `${PAPER.width}×${PAPER.height}, or larger in the same proportions, with names and stamps hidden. The red notes and their circles sit at fixed places over today’s sheet, so a replacement should be the same sheet, framed the same way. Remove it to bring back today’s photo.`,
+          },
+        }),
+        wordsField('caption', { ar: 'السطر تحت الصورة', en: 'Line under the photo' }, 170),
+        {
+          type: 'row',
+          fields: [
+            wordsField('noteRevision', { ar: 'الملاحظة الأولى، عند رقم الإصدار', en: 'First note, at the revision number' }, 50),
+            wordsField('noteComments', { ar: 'الملاحظة الثانية، عند الملاحظات المكتوبة', en: 'Second note, at the handwritten comments' }, 50),
+            wordsField('noteWho', { ar: 'الملاحظة الثالثة، عند التوقيعات', en: 'Third note, at the signatures' }, 50),
+          ],
+        },
+      ],
+    }),
+    sectionTab({
+      name: 'numbers',
+      label: { ar: '02 الموقع الحقيقي', en: '02 The real site' },
+      hideable: true,
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 80),
+        listField({
+          name: 'figures',
+          labels: { singular: { ar: 'رقم', en: 'Figure' }, plural: { ar: 'الأرقام', en: 'Figures' } },
+          rows: { min: 3, max: 3 },
+          description: {
+            ar: 'ثلاثة دائماً، جنباً إلى جنب. يعدّ الرقم صعوداً حين يصل إليه الزائر.',
+            en: 'Always three, side by side. Each counts up as the visitor reaches it.',
+          },
+          fields: [
+            latinField('figure', { ar: 'الرقم، مثل 35%', en: 'Figure, like 35%' }, 6),
+            wordsField('label', { ar: 'ما يعنيه الرقم', en: 'What it means' }, 120),
+          ],
+        }),
+        wordsField('source', { ar: 'مصدر الأرقام، تحتها', en: 'Where the figures come from, under them' }, 80),
+      ],
+    }),
+    sectionTab({
+      name: 'trap',
+      label: { ar: '03 الفخ', en: '03 The trap' },
+      hideable: true,
+      fields: [
+        EYEBROW,
+        wordsField('title', HEADING, 90),
+        wordsField('body', LEAD, 240, { multiline: true }),
+        wordsField('kicker', { ar: 'الجملة البارزة تحت الفقرة', en: 'The line set off under the paragraph' }, 170),
+        listField({
+          name: 'tools',
+          labels: { singular: { ar: 'أداة', en: 'Tool' }, plural: { ar: 'الأدوات', en: 'Tools' } },
+          rows: { min: 4, max: 4 },
+          description: {
+            ar: 'أربع دائماً، وأيقونة كل بطاقة ثابتة بمكانها: واتساب، ثم البريد، ثم إكسل، ثم مجلد SharePoint.',
+            en: 'Always four, and each card’s icon is fixed by its place: WhatsApp, then email, then Excel, then a SharePoint folder.',
+          },
+          fields: [
+            wordsField('name', { ar: 'اسم الأداة', en: 'Tool' }, 34),
+            wordsField('text', { ar: 'ما مشكلتها', en: 'What goes wrong with it' }, 120),
+          ],
+        }),
+      ],
+    }),
+    sectionTab({
+      name: 'about',
+      label: { ar: '04 من نحن', en: '04 Who we are' },
+      hideable: true,
+      fields: [
+        EYEBROW,
+        wordsField('title', { ar: 'السطر الأول من العنوان', en: 'Heading, first line' }, 60),
+        wordsField('titleAccent', { ar: 'السطر الملوّن تحته', en: 'Line in colour under it' }, 60),
+        wordsField('body', LEAD, 300, { multiline: true }),
+        wordsField('quote', { ar: 'الاقتباس', en: 'Quote' }, 120),
+      ],
     }),
     compareTab(),
     searchTab(),
