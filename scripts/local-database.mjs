@@ -106,6 +106,7 @@ ${name}`).digest().readUInt16BE(0) % 2000);
       MEDIA_DIR: path.join(directory, 'media'),
       SHARING_IMAGE_DIR: path.join(directory, 'sharing-images'),
       EMAIL_IMAGE_DIR: path.join(directory, 'email-images'),
+      PROFILE_FILE_DIR: path.join(directory, 'profile-files'),
     });
   } catch (error) {
     failure = error;
