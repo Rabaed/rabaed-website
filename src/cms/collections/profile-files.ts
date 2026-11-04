@@ -79,7 +79,19 @@ export const ProfileFiles: CollectionConfig = {
     mimeTypes: ['video/mp4', 'application/pdf'],
     // No `formatOptions` and no `imageSizes`: what is uploaded is what is served.
   },
-  fields: [],
+  fields: [
+    /**
+     * The file's name as the Editor's computer had it, before `profile-` was
+     * put in front: what the admin shows them to tell their files apart.
+     * Written by `beforeOperation` with each new file, never by hand.
+     */
+    {
+      name: 'originalName',
+      type: 'text',
+      label: { ar: 'اسم الملف الأصلي', en: 'Original file name' },
+      admin: { readOnly: true },
+    },
+  ],
   hooks: {
     /**
      * Before anything is written or unwritten, for the reason the sharing
@@ -90,7 +102,7 @@ export const ProfileFiles: CollectionConfig = {
      * images are kept in, and a name taken there would be overwritten.
      */
     beforeOperation: [
-      ({ operation, req }) => {
+      ({ args, operation, req }) => {
         const file = req.file;
         if ((operation !== 'create' && operation !== 'update') || !file?.data) return;
         if (!kindOf(file.data)) {
@@ -108,7 +120,9 @@ export const ProfileFiles: CollectionConfig = {
             true,
           );
         }
+        const originalName = file.name;
         if (!file.name.startsWith('profile-')) file.name = `profile-${file.name}`;
+        return { ...args, data: { ...args.data, originalName } };
       },
     ],
     /** The page that shows it is built again with it (ticket 84). */
