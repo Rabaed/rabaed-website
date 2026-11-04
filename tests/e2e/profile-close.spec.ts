@@ -478,7 +478,9 @@ test('each section hides with its own switch, keeping its words, and the others 
 });
 
 test('in English: Ahmed’s English words, and the demo button to the English form', async ({ page, cms }) => {
-  for (const slug of ['site-words', 'trust-strip', 'profile-page'] as const) {
+  // The Screen mocks too, which section 07 shows: whether English is waiting
+  // as their newest draft depends on what the suite before put back.
+  for (const slug of ['site-words', 'trust-strip', 'screen-mocks', 'profile-page'] as const) {
     const entry = cms.entry(slug);
     await entry.draft({ ...(await entry.published()), languages: ['ar', 'en'] });
   }

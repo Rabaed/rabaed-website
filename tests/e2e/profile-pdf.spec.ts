@@ -83,7 +83,9 @@ async function previewInEnglish(cms: Cms) {
   const proposal = (await siteWords.drafts()).find((draft) => draft.version.header.demoLabel.en === PROPOSED_ENGLISH_DEMO);
   expect(proposal, 'no draft carries the English site words proposed').toBeTruthy();
   await siteWords.restoreVersion(proposal!);
-  for (const slug of ['trust-strip', 'profile-page'] as const) {
+  // The Screen mocks too, which section 07 shows: whether English is waiting
+  // as their newest draft depends on what the suite before put back.
+  for (const slug of ['trust-strip', 'screen-mocks', 'profile-page'] as const) {
     const entry = cms.entry(slug);
     await entry.draft({ ...(await entry.published()), languages: ['ar', 'en'] });
   }
