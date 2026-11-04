@@ -1,3 +1,4 @@
+import { newTabIfAway } from '@/components/page-link';
 import type { ProfileContactContent } from '@/content/pages/profile-close';
 import { Glyph } from './glyph';
 
@@ -24,7 +25,7 @@ export function Contact({ content, brand }: { content: ProfileContactContent; br
         <ul className="pf-lines">
           {content.lines.map(({ kind, label, written, href }) => (
             <li key={kind}>
-              <a href={href} {...(kind === 'whatsapp' ? { target: '_blank', rel: 'noopener' } : {})}>
+              <a href={href} {...newTabIfAway(href)}>
                 <Glyph file={ICONS[kind]} />
                 <span className="pf-line-label">{label}</span>
                 <bdi dir="ltr">{written}</bdi>

@@ -1,6 +1,7 @@
 import { newTabIfAway } from '@/components/page-link';
 import type { ProfileStartContent } from '@/content/pages/profile-close';
 import { Glyph } from './glyph';
+import { Place } from './place';
 import { SectionEyebrow } from './section-eyebrow';
 
 /** Each step's icon, by its place: set up, go live, the guarantee. */
@@ -22,8 +23,8 @@ export function Start({ content }: { content: ProfileStartContent }) {
         <ol className="pf-steps">
           {content.steps.map(({ name, text }, index) => (
             <li key={index}>
-              <Glyph file={ICONS[index % ICONS.length]!} className="pf-step-mark" />
-              <span className="pf-step-n">{String(index + 1).padStart(2, '0')}</span>
+              <Glyph file={ICONS[index]!} className="pf-step-mark" />
+              <Place index={index} />
               <h3>{name}</h3>
               <p>{text}</p>
             </li>

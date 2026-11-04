@@ -28,7 +28,7 @@ export function Plans({ content }: { content: ProfilePlansContent }) {
                   <span className="pf-kicker-line">{kicker}</span>
                   <h3>{name}</h3>
                 </div>
-                <Glyph file={ICONS[index % ICONS.length]!} className="pf-plan-mark" />
+                <Glyph file={ICONS[index]!} className="pf-plan-mark" />
               </div>
               <ul>
                 {features.map((feature, place) => (

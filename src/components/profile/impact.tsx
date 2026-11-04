@@ -23,7 +23,7 @@ export function Impact({ content }: { content: ProfileImpactContent }) {
         <ul className="pf-metrics">
           {content.figures.map(({ figure, unit, label }, index) => (
             <li key={index}>
-              <Glyph file={ICONS[index % ICONS.length]!} className="pf-metric-mark" />
+              <Glyph file={ICONS[index]!} className="pf-metric-mark" />
               <div className="pf-metric">
                 <b aria-hidden="true">
                   <span data-count-up="">{figure}</span>

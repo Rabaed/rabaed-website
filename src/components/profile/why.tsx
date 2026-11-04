@@ -1,5 +1,6 @@
 import type { ProfileWhyContent } from '@/content/pages/profile-close';
 import { Glyph } from './glyph';
+import { Place } from './place';
 import { SectionEyebrow } from './section-eyebrow';
 
 /** Each card's icon, by its place: the Arabic interface, onsite support, the price. */
@@ -18,8 +19,8 @@ export function Why({ content }: { content: ProfileWhyContent }) {
         <ul className="pf-reasons">
           {content.reasons.map(({ name, text }, index) => (
             <li key={index}>
-              <Glyph file={ICONS[index % ICONS.length]!} className="pf-reason-mark" />
-              <span className="pf-step-n">{String(index + 1).padStart(2, '0')}</span>
+              <Glyph file={ICONS[index]!} className="pf-reason-mark" />
+              <Place index={index} />
               <h3>{name}</h3>
               <p>{text}</p>
             </li>

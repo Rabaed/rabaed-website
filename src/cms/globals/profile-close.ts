@@ -24,12 +24,14 @@ const EYEBROW = wordsField('eyebrow', { ar: 'السطر الصغير فوق ال
 const HEADING: Words = { ar: 'العنوان', en: 'Heading' };
 const LEAD: Words = { ar: 'الفقرة تحت العنوان', en: 'Paragraph under the heading' };
 
-const WHATSAPP_LINK_DESCRIPTION: Words = {
+/** What every WhatsApp button's link says it is for, on the whole profile. */
+export const WHATSAPP_LINK_DESCRIPTION: Words = {
   ar: 'اتركه فارغاً ليفتح رقم واتساب الموقع من «إعدادات الموقع»، أو اكتب رابطاً آخر مثل رابط حملة. رابط خارج الموقع يُفتح في نافذة جديدة.',
   en: 'Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.',
 };
 
-const DEMO_LINK_DESCRIPTION: Words = {
+/** What every "Book a live demo" button's link says it is for, on the whole profile. */
+export const DEMO_LINK_DESCRIPTION: Words = {
   ar: 'نموذج طلب العرض في الصفحة الرئيسية: ‎/#demo في العربية و‎/en#demo في الإنجليزية. رابط خارج الموقع يُفتح في نافذة جديدة.',
   en: 'The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.',
 };

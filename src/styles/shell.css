@@ -186,7 +186,7 @@
   .mnav .mlogin { display: inline-flex; align-items: center; border: 1px solid var(--dark-line); border-radius: 999px; padding: 9px 18px; color: #fff; font-size: 15px; white-space: nowrap }
   .nav.on-light .mnav .mlogin { border-color: var(--line); color: var(--ink) }
 
-  /* A page's own download button (ticket 104), Login's pill beside Login,
+  /* A page's own download button (ticket 104), Sign in's pill beside Sign in,
      with the language still at the row's far end. */
   .mnav .mpdf { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--dark-line); border-radius: 999px; padding: 9px 18px; color: #fff; font-size: 15px; white-space: nowrap; margin-inline-end: auto }
   .nav.on-light .mnav .mpdf { border-color: var(--line); color: var(--ink) }

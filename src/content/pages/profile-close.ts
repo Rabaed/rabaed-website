@@ -68,12 +68,24 @@ const SOCIAL = [
   ['facebook', 'Facebook'],
 ] as const satisfies readonly (readonly [keyof ContactPoints['social'], string])[];
 
+/** Words as the entry stores them: an Arabic and an English. */
+type Stored = Parameters<typeof wordsIn>[1];
+
+/**
+ * A button's link on the Company profile, as its Editor wrote it in `locale`
+ * (spec: Buttons and links): trimmed, and empty where left empty, which for a
+ * WhatsApp button means the site's own WhatsApp address.
+ */
+export function buttonLinkIn(locale: Locale, stored: Stored): string {
+  return wordsIn(locale, stored).trim();
+}
+
 /**
  * A WhatsApp number as a Saudi number is written: `966576767900` is
  * «+966 57 676 7900». A number of another shape keeps its figures as they are,
  * after the plus.
  */
-export function writtenWhatsapp(number: string): string {
+function writtenWhatsapp(number: string): string {
   const saudi = /^966(\d{2})(\d{3})(\d{4})$/.exec(number);
   return saudi ? `+966 ${saudi[1]} ${saudi[2]} ${saudi[3]}` : `+${number}`;
 }
@@ -89,10 +101,10 @@ const telephone = (written: string) => `tel:${written.trim().startsWith('+') ? '
  * the number there changes it here.
  */
 export function profileClose(locale: Locale, entry: ProfilePage, contact: ContactPoints): ProfileCloseContent {
-  const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
-  const link = (stored: Parameters<typeof wordsIn>[1]) => words(stored).trim();
+  const words = (stored: Stored) => wordsIn(locale, stored);
+  const link = (stored: Stored) => buttonLinkIn(locale, stored);
   const { templates, why, impact, plans, start, contact: card, whatsappButton } = entry;
-  const opening = (section: { eyebrow: Parameters<typeof wordsIn>[1]; title: Parameters<typeof wordsIn>[1] }) => ({
+  const opening = (section: { eyebrow: Stored; title: Stored }) => ({
     eyebrow: words(section.eyebrow),
     title: words(section.title),
   });

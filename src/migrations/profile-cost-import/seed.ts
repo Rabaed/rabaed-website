@@ -38,3 +38,13 @@ UPDATE "_profile_page_v"
    AND "id" IN (${WRITTEN_VERSIONS});`;
   })
   .join('\n');
+
+/** Takes the link back off, wherever it is still this one. */
+export const PROFILE_COST_UNSEED = (['ar', 'en'] as const)
+  .map((language) => {
+    const link = text(WORDS.callToActionLink[language]);
+    return `
+UPDATE "profile_page" SET "cost_call_to_action_link_${language}" = NULL WHERE "cost_call_to_action_link_${language}" = ${link};
+UPDATE "_profile_page_v" SET "version_cost_call_to_action_link_${language}" = NULL WHERE "version_cost_call_to_action_link_${language}" = ${link};`;
+  })
+  .join('\n');
