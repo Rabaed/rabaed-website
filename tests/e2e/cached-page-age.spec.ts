@@ -41,12 +41,17 @@ const PAGES = [
   '/tool',
   '/referral',
   '/partnership',
+  // Not found on this server until it is published (ticket 102), as the case
+  // studies' index is until a story is; the not-found carries the age too, and
+  // is what a publish has to replace.
+  '/profile',
   '/blog',
   '/case-studies',
   '/terms',
   '/privacy',
   '/referral-terms',
   '/en',
+  '/en/profile',
   '/en/blog',
   '/en/case-studies',
 ];

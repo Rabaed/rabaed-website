@@ -35,6 +35,7 @@ import { HomePage } from './cms/globals/home-page';
 import { IndexLeads } from './cms/globals/index-leads';
 import { PartnershipPage } from './cms/globals/partnership-page';
 import { ProductPage } from './cms/globals/product-page';
+import { ProfilePage } from './cms/globals/profile-page';
 import { PourTracker } from './cms/globals/pour-tracker';
 import { ReferralPage } from './cms/globals/referral-page';
 import { ReferralProgram } from './cms/globals/referral-program';
@@ -121,6 +122,7 @@ export default buildConfig({
     SiteWords,
     IndexLeads,
     TrustStripLogos,
+    ProfilePage,
   ],
 
   db: postgresAdapter({

@@ -57,19 +57,26 @@ const newestEntry = cache(async (slug: PageSlug) => {
         })
       ).docs[0]?.version;
 
-  // Every database is given each page by a migration. A page with nothing
-  // published is a database that was not migrated, and says so.
-  if (!entry) throw new Error(`The ${slug} page is not in the CMS: run the migrations (docs/deployment.md).`);
-  return entry;
+  if (entry) return entry;
+
+  // Every database is given each page by a migration, published, but for the
+  // Company profile's: it arrives saved, and waits for the founder to publish
+  // it (ticket 102). An entry saved and never published is published in no
+  // language. One with nothing saved at all is a database that was not
+  // migrated, and says so.
+  const saved = await payload.findGlobalVersions({ slug, limit: 1, pagination: false, depth: 0 });
+  if (saved.docs.length > 0) return null;
+  throw new Error(`The ${slug} page is not in the CMS: run the migrations (docs/deployment.md).`);
 });
 
 /**
  * The languages an entry is published in — or, while an Editor is previewing,
- * saved in. Read with the entry itself, so asking costs nothing more than the
- * page reading it (ticket 91, `src/content/pages/languages.ts`).
+ * saved in: none, for an entry saved and never published. Read with the entry
+ * itself, so asking costs nothing more than the page reading it (ticket 91,
+ * `src/content/pages/languages.ts`).
  */
 export async function entryLanguages(slug: PageSlug): Promise<readonly Locale[]> {
-  return (await newestEntry(slug)).languages ?? [];
+  return (await newestEntry(slug))?.languages ?? [];
 }
 
 /** The entry of the page asked for, typed as that page's: `cache` keeps one function for every page. */
@@ -77,7 +84,7 @@ export async function pageEntry<Slug extends PageSlug>(slug: Slug, locale: Local
   const entry = await newestEntry(slug);
   // Never another language's words in its place (spec: Routing and
   // localisation): a page is shown only in the languages it is published in.
-  if (!(entry.languages ?? []).includes(locale)) throw new ContentNotInLocale(slug, locale);
+  if (!entry?.languages?.includes(locale)) throw new ContentNotInLocale(slug, locale);
   return entry as DataFromGlobalSlug<Slug>;
 }
 

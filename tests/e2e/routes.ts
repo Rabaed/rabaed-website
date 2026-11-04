@@ -20,7 +20,10 @@
  * which the test server's database holds as drafts. Until then their English
  * address is a notice, not a page of the site's, and `localisation.spec.ts`
  * holds it apart (ticket 40); `english-pages.spec.ts` publishes one and holds
- * it to everything a page of the site is held to.
+ * it to everything a page of the site is held to. The Company profile is not
+ * listed: the migrations leave it unpublished until the founder publishes it,
+ * so on the test server it is not found, and `profile-page.spec.ts` publishes
+ * it on the second (ticket 102).
  */
 export const ROUTES = [
   {

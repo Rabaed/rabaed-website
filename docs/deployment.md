@@ -571,15 +571,38 @@ do, publishing an Arabic change to the entry publishes none of its English.
 | **صفحة الأداة المجانية** | Tool | The same, for the tool page |
 | **صفحة برنامج الإحالة** | Referral | The same, for the referral page |
 | **صفحة برنامج الشراكات** | Partnership | The same, for the partnership page |
+| **صفحة الملف التعريفي** | Profile | The same, for the Company profile — Ahmed's English, in the entry itself rather than a draft of its own (below) |
 | **قسم «كيف نبدأ معك»** | Home, Product | The closing section both pages end on |
 | **شاشات المنصة** | Home, Product | Each screen's description. Its English is the next section's proposal, and has **الإنجليزية** ticked already |
-| **شريط الثقة** | Home, Product, Start | Its line, and each company's name |
+| **شريط الثقة** | Home, Product, Start, Profile | Its line, and each company's name |
 | **حاسبة تكلفة التأخير** | Home | The Delay-cost calculator's words (ADR-0029). Published in English when it was made, with Ahmed's English |
-| **كلمات الموقع المشتركة** | Home, Product, Start, Tool, Referral, Partnership | The header and the footer (the section above) |
+| **كلمات الموقع المشتركة** | Home, Product, Start, Tool, Referral, Partnership, Profile | The header and the footer (the section above) |
 
 The site decides whether a page is in English by exactly these entries, listed
 once in the page registry, `src/lib/page-registry.ts` (tickets 91 and 92); a
 test fails if this table and that list disagree.
+
+**The Company profile waits for you in Arabic too** (ticket 102). Every other
+page arrived published in Arabic; the profile, `/profile`, arrives with
+Ahmed's words in both languages and nothing published, so that it can be
+built section by section without rabaedapp.com showing half of it. Until you
+publish its entry, **صفحة الملف التعريفي**, `/profile` is not found and is in
+neither the sitemap nor `llms.txt`, and `/en/profile` says the page is not in
+English yet. Preview it with the entry's **Preview** button. Publishing it
+puts `/profile` on the site and in the sitemap; ticking **الإنجليزية** as
+well, with the Trust strip's and the header and footer's English published,
+puts `/en/profile` there too. Neither the header menu nor the Footer directory
+links to it: it is reached by the link Ahmed sends. Unlike every other page's,
+its buttons' links are yours to change in the entry — an empty WhatsApp link
+is the number in the site settings.
+
+- **Publish it in the preview CMS first.** Once published, it stays on the
+  site: what visitors see is the newest published version in the entry's
+  history, and the admin's **Unpublish** leaves that version there. Publishing
+  is the approval, as it is for every page's English.
+- **While it is unpublished, `/en/profile`'s button to the Arabic leads to a
+  page not found**, since the Arabic is not there yet either. Nobody is sent
+  either address until you publish it.
 
 And beside them:
 

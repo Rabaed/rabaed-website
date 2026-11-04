@@ -235,9 +235,13 @@ test('every entry the English pages read waits as a draft, with every word of it
     // save a name written in Latin letters in the Arabic box too.
     for (const word of words(proposed.version)) expect(String(word.en), `${slug} ${word.path}`).not.toMatch(ARABIC);
 
-    // Nothing is published in English: a visitor reads none of it.
+    // Nothing is published in English: a visitor reads none of it. The
+    // Company profile may be published in nothing at all (ticket 102): the
+    // migrations leave it so, and `profile-page.spec.ts` publishes it in Arabic.
     const [published] = await versions(request, slug, 'published');
-    expect(published.version.languages, `${slug} is published in English`).toEqual(['ar']);
+    if (published || slug !== 'profile-page') {
+      expect(published?.version.languages, `${slug} is published in English`).toEqual(['ar']);
+    }
   }
 
   // So every English address is still what it was: the home page says the
@@ -297,6 +301,17 @@ test('previewed, each English page is the whole page, in English, left to right'
     eyebrows += faces.length;
   }
   expect(eyebrows, 'no English page has an eyebrow').toBeGreaterThan(0);
+
+  // The Company profile's English is Ahmed's, written in its own entry rather
+  // than proposed beside it (ticket 102): its buttons go to the English demo
+  // form and to the site's one WhatsApp, and its link unfurls as his English
+  // picture.
+  await page.goto(`/api/preview?path=${encodeURIComponent(PATH.profile)}`);
+  await expect(page.locator('#hero .eyebrow')).toHaveText('The construction project OS · Saudi Arabia');
+  await expect(page.locator('#hero .ctas .btn.p')).toHaveAttribute('href', '/en#demo');
+  await expect(page.locator('#hero .ctas .btn.g')).toHaveText('WhatsApp us');
+  await expect(page.locator('#hero .ctas .btn.g')).toHaveAttribute('href', 'https://wa.me/966576767900');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/profile\/og-en\.png$/);
 });
 
 test('previewed on a phone, the English Screen mocks are English Phone crops; at 768px, whole English screens', async ({

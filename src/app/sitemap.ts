@@ -57,13 +57,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     Promise.all(
       MARKETING_PAGE_KEYS.map(async (page) => {
         const { path, entry: own } = MARKETING_PAGES[page];
-        const [entry, inEnglish] = await Promise.all([
-          pageEntry(own.slug, DEFAULT_LOCALE),
-          isPublishedIn(page, 'en'),
-        ]);
-        return { path, inEnglish, lastModified: entry.updatedAt ?? undefined };
+        // A page is listed once it is published, by the rule its address and
+        // `llms.txt` follow — which the Company profile is not until the
+        // founder publishes it (ticket 102).
+        const [inArabic, inEnglish] = await Promise.all([isPublishedIn(page, DEFAULT_LOCALE), isPublishedIn(page, 'en')]);
+        if (!inArabic) return [];
+        const entry = await pageEntry(own.slug, DEFAULT_LOCALE);
+        return [{ path, inEnglish, lastModified: entry.updatedAt ?? undefined }];
       }),
-    ),
+    ).then((pages) => pages.flat()),
   ]);
 
   return [

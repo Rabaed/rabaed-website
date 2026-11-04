@@ -92,6 +92,17 @@ export const MARKETING_PAGES = {
     shared: ['site-words'],
     questionsSection: 'faq',
   },
+  // The Company profile (ticket 102): reached by the link Ahmed sends, so
+  // neither the header menu nor the Footer directory names it. Unlike every
+  // page above, its entry arrives unpublished, and the page is not there until
+  // the founder publishes it (`src/cms/pages.ts`).
+  profile: {
+    path: '/profile',
+    name: { ar: 'الملف التعريفي', en: 'Company profile' },
+    entry: { slug: 'profile-page', label: { ar: 'صفحة الملف التعريفي', en: 'Company profile page' } },
+    shared: ['trust-strip', 'site-words'],
+    questionsSection: null,
+  },
 } as const satisfies Record<string, MarketingPageSpec>;
 
 /** A marketing page, by its key: `product`. */

@@ -298,6 +298,68 @@ export function addressField(
   };
 }
 
+const BUTTON_LINK_NEEDED: Words = {
+  ar: 'اكتب وجهة هذا الزر: مساراً في الموقع يبدأ بشرطة مائلة مثل ‎/#demo، أو رابطاً كاملاً يبدأ بـ https://',
+  en: 'Write where this button goes: a path on the site beginning with a slash, such as /#demo, or a full address beginning with https://',
+};
+
+/**
+ * A path on the site, with a place on its page after `#` if it names one, or a
+ * full address on the web. Never `//another.example`, which a browser reads as
+ * another site, though it begins like a path.
+ */
+const BUTTON_LINK = /^(?:\/(?!\/)\S*|https:\/\/\S+)$/;
+
+/**
+ * Where a button goes, on the Arabic page and on the English one: each written
+ * as it is, `/#demo` and `/en#demo`, since a campaign's link may differ by
+ * language and an address a visitor follows is not translated. The Company
+ * profile's buttons (ticket 102), whose links the founder chose to make an
+ * Editor's on 4 November 2026, departing from the rule that an Editor changes
+ * what a button says, never where it goes.
+ *
+ * Held to the shape of an address, not to a page of the site, as
+ * `addressField` is. The English is needed, like a word's, only once the page
+ * is published in English. `optional` is a button with somewhere to go when
+ * its box is empty, which its `description` says.
+ */
+export function buttonLinkField(
+  name: string,
+  label: Words,
+  options: { readonly description?: Words; readonly optional?: boolean } = {},
+): Field {
+  const optional = options.optional ?? false;
+  const box = (language: keyof Words): Field => {
+    const validate = async (value: null | string | undefined, validateOptions: ValidateOptions) => {
+      const checked = await checkedByPayload(text, value, validateOptions);
+      if (checked !== true) return checked;
+      const written = typeof value === 'string' ? value.trim() : '';
+      if (written === '') {
+        const needed = !optional && (language === 'ar' || publishedInEnglish(validateOptions.data));
+        return needed ? inAdminLanguage(validateOptions.req, BUTTON_LINK_NEEDED) : true;
+      }
+      return BUTTON_LINK.test(written) ? true : inAdminLanguage(validateOptions.req, BUTTON_LINK_NEEDED);
+    };
+    return {
+      name: language,
+      type: 'text',
+      required: language === 'ar' && !optional,
+      // As `addressField`'s, with room for a campaign's tracking.
+      maxLength: 300,
+      label: language === 'ar' ? { ar: 'في الصفحة العربية', en: 'On the Arabic page' } : { ar: 'في الصفحة الإنجليزية', en: 'On the English page' },
+      admin: { rtl: false },
+      validate: validate as unknown as TextFieldSingleValidation,
+    };
+  };
+  return {
+    name,
+    type: 'group',
+    label,
+    admin: { description: options.description },
+    fields: [{ type: 'row', fields: [box('ar'), box('en')] }],
+  };
+}
+
 /**
  * Whether no image has been chosen at all — which a field that does not
  * require one is allowed. Payload hands the value as an id or as the document

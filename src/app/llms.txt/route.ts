@@ -6,7 +6,7 @@ import { BLOG_COPY } from '@/content/blog';
 import { CASE_STUDIES_COPY } from '@/content/case-studies';
 import { COMPANY } from '@/content/company';
 import { getIndexLead } from '@/content/index-leads';
-import { inEnglish } from '@/content/pages/languages';
+import { inLanguage } from '@/content/pages/languages';
 import { contentOrNull, type PageMeta } from '@/content/pages/page-content';
 import { PAGE_LOADERS } from '@/content/pages/loaders';
 import { blogIndexPath, blogPostPath } from '@/lib/blog-paths';
@@ -103,8 +103,10 @@ function section(locale: Locale, heading: string, entries: readonly Entry[]): st
  * name="description">` describes it: one module per page hands over both
  * (`src/content/pages/`).
  *
- * Arabic, every page is; English, a page is once it is published in English
- * (`src/content/pages/languages.ts`), and only then is its English read. An index is listed where it has something to list —
+ * A page is listed in a language once it is published in it, and only then
+ * is it read (`src/content/pages/languages.ts`): in Arabic, every page but the
+ * Company profile until the founder publishes it (ticket 102); in English, a
+ * page once its English is published. An index is listed where it has something to list —
  * the Arabic blog index always, as it always has been — which is the
  * sitemap's rule, and the case studies section has no page at all until a
  * story is published (ticket 24).
@@ -114,7 +116,7 @@ async function pageEntries(
   posts: readonly Post[],
   caseStudies: readonly CaseStudy[],
 ): Promise<Entry[]> {
-  const read = (page: (typeof PAGES_AND_READERS)[number]) => (locale === 'en' ? inEnglish(page.page, page.read) : page.read(locale));
+  const read = (page: (typeof PAGES_AND_READERS)[number]) => inLanguage(page.page, locale, page.read);
   const marketing = PAGES_AND_READERS.filter((page) => locale === 'en' || page.path !== '/');
   // The line under an index's heading, which is also its search description —
   // in the CMS since ticket 59 — or `null` where its entry is not published in

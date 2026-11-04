@@ -37,6 +37,7 @@ const PAGE_NAMED: Readonly<Record<string, MarketingPage>> = {
   Tool: 'tool',
   Referral: 'referral',
   Partnership: 'partnership',
+  Profile: 'profile',
 };
 
 const HEADER = '| Entry in the admin | English pages that read it | What they read there |';
