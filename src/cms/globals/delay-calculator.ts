@@ -56,6 +56,14 @@ export const DelayCalculator = pageGlobal({
             ar: 'ما صُرف حتى الآن. اكتب {amount} حيث يُكتب المبلغ: «على {amount} ر.س مصروفة حتى الآن».',
             en: 'What has been spent so far. Write {amount} where the amount goes: “on {amount} SAR spent so far”.',
           },
+          // Without it the line says something was spent, and never how much.
+          placeholder: {
+            token: '{amount}',
+            missing: {
+              ar: 'اكتب {amount} حيث يُكتب المبلغ المصروف، وإلا لم يقل السطر كم صُرف: «على {amount} ر.س مصروفة حتى الآن».',
+              en: 'Write {amount} where the amount spent goes, or the line never says how much: “on {amount} SAR spent so far”.',
+            },
+          },
         }),
         wordsField('assumptions', { ar: 'الافتراضات تحت التكلفة', en: 'Assumptions under the cost' }, 240, { multiline: true }),
         wordsField('callToActionLabel', { ar: 'الزر', en: 'Button' }, 40, {
