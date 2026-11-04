@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { comparisonAppearance, FIRST_COMPARISON } from '@/components/profile/compare-state';
 import { prefersReducedMotion } from '@/lib/motion';
 import { readingDirectionOf } from '@/lib/reading-direction';
 import { listenToTabs } from '@/lib/tab-strip';
@@ -52,7 +53,7 @@ export function CompareBehaviour() {
     const pausedHere = new Set<HTMLVideoElement>();
     /** Videos the visitor stopped with the controls, which nothing here starts again. */
     const stoppedByVisitor = new Set<HTMLVideoElement>();
-    let chosen = 0;
+    let chosen = FIRST_COMPARISON;
 
     const videoOf = (clip: HTMLElement) => clip.querySelector('video')!;
 
@@ -113,8 +114,11 @@ export function CompareBehaviour() {
 
     const show = (index: number) => {
       chosen = index;
-      tabs.forEach((tab, each) => tab.setAttribute('aria-selected', String(each === index)));
-      panels.forEach((panel, each) => panel.classList.toggle('on', each === index));
+      tabs.forEach((tab, each) => {
+        const look = comparisonAppearance(each, index);
+        tab.setAttribute('aria-selected', look.selected);
+        panels[each].className = look.panelClass;
+      });
       clips.forEach((clip, each) => {
         if (each !== index) pause(clip);
       });
@@ -153,7 +157,7 @@ export function CompareBehaviour() {
         videoOf(clip).removeEventListener('pause', onPause);
         videoOf(clip).removeEventListener('play', onPlay);
       }
-      show(0);
+      show(FIRST_COMPARISON);
     };
   }, []);
 

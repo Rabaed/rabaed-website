@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { CompareBehaviour } from '@/components/profile/compare-behaviour';
+import { comparisonAppearance, FIRST_COMPARISON } from '@/components/profile/compare-state';
 import { SectionEyebrow } from '@/components/profile/section-eyebrow';
 import type { ProfileCompareContent } from '@/content/pages/profile-compare';
 import type { ReadingDirection } from '@/lib/reading-direction';
@@ -37,7 +38,7 @@ export function Compare({ content, direction }: { content: ProfileCompareContent
               role="tab"
               id={`compare-tab-${index}`}
               aria-controls={`compare-panel-${index}`}
-              aria-selected={index === 0}
+              aria-selected={comparisonAppearance(index, FIRST_COMPARISON).selected}
               className="pf-pill"
             >
               <span className="pf-pill-n mono" aria-hidden="true">
@@ -57,7 +58,7 @@ export function Compare({ content, direction }: { content: ProfileCompareContent
               id={`compare-panel-${index}`}
               role="tabpanel"
               aria-labelledby={`compare-tab-${index}`}
-              className={index === 0 ? 'pf-cmp-panel on' : 'pf-cmp-panel'}
+              className={comparisonAppearance(index, FIRST_COMPARISON).panelClass}
             >
               <div className="pf-cmp-text">
                 <p className="pf-cmp-module">
