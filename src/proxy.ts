@@ -83,6 +83,6 @@ function decoded(pathname: string): string {
 export const config = {
   matcher: [
     '/studio/:path*',
-    '/((?!(?:product|start|tool|referral|partnership|blog|case-studies|terms|privacy|referral-terms|sitemap\\.xml|llms\\.txt|robots\\.txt|_not-found|maktab|api|studio|portal-redirect|en|_next|icon\\.png|apple-icon\\.png|brand|downloads|hero|logos|og-rabaed\\.png|screen-mocks)(?:/|$)).+)',
+    '/((?!(?:product|start|tool|referral|partnership|profile|blog|case-studies|terms|privacy|referral-terms|sitemap\\.xml|llms\\.txt|robots\\.txt|_not-found|maktab|api|studio|portal-redirect|en|_next|icon\\.png|apple-icon\\.png|brand|downloads|hero|logos|og-rabaed\\.png|screen-mocks)(?:/|$)).+)',
   ],
 };

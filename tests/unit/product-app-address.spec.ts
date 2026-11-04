@@ -47,6 +47,11 @@ test('the Marketing site’s own addresses are never asked about', () => {
     '/tool',
     '/referral',
     '/partnership',
+    // The Company profile, whose link Ahmed sends to prospects (ticket 102),
+    // and the files kept beside it.
+    '/profile',
+    '/en/profile',
+    '/profile/og-ar.png',
     '/terms',
     '/privacy',
     '/referral-terms',
@@ -158,6 +163,7 @@ test('the proxy runs for every address the product app might have, and for none 
     '/terms-and-conditions',
     '/english',
     '/hero-image',
+    '/profiles',
     // The studio is closed in production by the proxy too.
     '/studio/ar/kanban',
   ]) {
