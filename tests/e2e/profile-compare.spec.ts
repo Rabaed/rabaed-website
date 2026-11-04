@@ -255,7 +255,7 @@ test('a video and a poster an Editor uploads are the ones served', async ({ page
   const buffer = await readFile(path.join(clips, '05-daily-report.mp4'));
   const uploaded = await uploadProfileFile(page, { name: 'approvals-again.mp4', mimeType: 'video/mp4', buffer });
   expect(uploaded.ok(), await uploaded.text()).toBe(true);
-  const replacement = (await uploaded.json()).doc as { id: number; url: string; filename: string; originalName: string };
+  const replacement = (await uploaded.json()).doc as { id: number; url: string; filename: string };
   const poster = await page.request.post('/api/media', {
     multipart: { file: await pictureFile({ width: 1600, height: 900 }), _payload: JSON.stringify({ alt: 'صورة المقارنة' }) },
   });
@@ -264,10 +264,8 @@ test('a video and a poster an Editor uploads are the ones served', async ({ page
 
   try {
     // Kept as it was uploaded, under a name of its own in the bucket.
-    expect(replacement.filename).toMatch(/^profile-.*\.mp4$/);
-    // The name it had on the Editor's computer, for the admin to show them.
-    expect(replacement.originalName).toMatch(/-approvals-again\.mp4$/);
-    expect(replacement.filename).toBe(`profile-${replacement.originalName}`);
+    // Kept under the name it was uploaded with.
+    expect(replacement.filename).toMatch(/^\d+-[a-z0-9]+-approvals-again\.mp4$/);
 
     // A new video is not published without its own poster: Ahmed's would stand in for it.
     const alone = await profile.attempt(
@@ -314,14 +312,21 @@ test('the CMS keeps nothing but an MP4 or a PDF, and nothing larger than the sit
   const picture = await uploadProfileFile(page, await pictureFile());
   expect(picture.status()).toBe(400);
 
-  // Ahmed's Documents clip, 5.4 MB: more than a request to Vercel carries.
+  // Ahmed's Documents clip, 5.4 MB: more than a request to Vercel carries, and
+  // kept, since a file goes from the browser straight to the bucket.
+  const documents = await readFile(path.join(clips, '02-documents.mp4'));
+  const kept = await uploadProfileFile(page, { name: 'documents.mp4', mimeType: 'video/mp4', buffer: documents });
+  expect(kept.ok(), await kept.text()).toBe(true);
+  await page.request.delete(`/api/profile-files/${(await kept.json()).doc.id}`);
+
+  // The same clip made 9 MB: more than a visitor should download.
   const large = await uploadProfileFile(page, {
-    name: 'documents.mp4',
+    name: 'documents-large.mp4',
     mimeType: 'video/mp4',
-    buffer: await readFile(path.join(clips, '02-documents.mp4')),
+    buffer: Buffer.concat([documents, Buffer.alloc(9 * 1024 * 1024 - documents.length)]),
   });
   expect(large.status()).toBe(400);
-  expect(await large.text()).toContain('4 ميغابايت');
+  expect(await large.text()).toContain('8 ميغابايت');
 });
 
 test('the section cannot be hidden: the Profile PDFs link to it', async ({ page, cms }) => {

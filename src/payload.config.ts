@@ -24,7 +24,7 @@ import { Posts } from './cms/collections/posts';
 import { PourTrackerReleases } from './cms/collections/pour-tracker-releases';
 import { SharingImages } from './cms/collections/sharing-images';
 import { Users } from './cms/collections/users';
-import { ProfileFiles } from './cms/collections/profile-files';
+import { PROFILE_FILE_FOLDER, ProfileFiles } from './cms/collections/profile-files';
 import { databasePool, mediaBucket, payloadSecret, requireDeploymentVariables } from './cms/environment';
 import { AiCrawlers } from './cms/globals/ai-crawlers';
 import { ConfirmationEmail } from './cms/globals/confirmation-email';
@@ -62,6 +62,19 @@ export const ADMIN_ROUTE = '/maktab';
 // about all of them in one failed build.
 requireDeploymentVariables();
 const bucket = mediaBucket();
+
+/** The one bucket every upload goes to, or none on a local machine. */
+const bucketConnection = {
+  enabled: bucket !== null,
+  bucket: bucket?.bucket ?? '',
+  config: {
+    endpoint: bucket?.endpoint,
+    region: bucket?.region,
+    // Supabase Storage answers S3 requests by path, not by subdomain.
+    forcePathStyle: true,
+    credentials: bucket ? { accessKeyId: bucket.accessKeyId, secretAccessKey: bucket.secretAccessKey } : undefined,
+  },
+};
 
 export default buildConfig({
   secret: payloadSecret(),
@@ -142,21 +155,21 @@ export default buildConfig({
 
   plugins: [
     s3Storage({
-      enabled: bucket !== null,
+      ...bucketConnection,
       // The email images' files are named `email-…`, so none takes a name a
-      // sharing image has in the same bucket (`cms/collections/email-images.ts`),
-      // and the Company profile's files `profile-…` (`cms/collections/profile-files.ts`).
-      collections: { media: true, 'sharing-images': true, 'email-images': true, 'profile-files': true },
-      bucket: bucket?.bucket ?? '',
-      config: {
-        endpoint: bucket?.endpoint,
-        region: bucket?.region,
-        // Supabase Storage answers S3 requests by path, not by subdomain.
-        forcePathStyle: true,
-        credentials: bucket
-          ? { accessKeyId: bucket.accessKeyId, secretAccessKey: bucket.secretAccessKey }
-          : undefined,
-      },
+      // sharing image has in the same bucket (`cms/collections/email-images.ts`).
+      collections: { media: true, 'sharing-images': true, 'email-images': true },
+    }),
+    // The Company profile's files go from the Editor's browser straight to
+    // the bucket, past the deployment's 4.5 MB limit on a request, and are
+    // kept in a `profile/` folder of their own there
+    // (`cms/collections/profile-files.ts`). Its fields are the same with no
+    // bucket, so a local machine's database matches a deployment's.
+    s3Storage({
+      ...bucketConnection,
+      collections: { 'profile-files': { prefix: PROFILE_FILE_FOLDER } },
+      clientUploads: true,
+      alwaysInsertFields: true,
     }),
   ],
 
