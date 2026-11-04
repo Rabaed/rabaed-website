@@ -2,12 +2,14 @@ import { buttonLinkField, listField, sectionTab, wordsField } from '../page-fiel
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
+import { compareTab } from './profile-compare';
 
 /**
  * The Company profile's words, section by section, in the page's order
  * (ticket 102): the home page's hero with Ahmed's words, and the shared Trust
  * strip, which here only shows or hides. The sections after them are tickets
- * 105–109's.
+ * 105–109's: the before-and-after videos, section 09, are ticket 108's
+ * (`./profile-compare.ts`).
  *
  * **Its buttons' links are an Editor's too**, unlike every other page's: the
  * founder chose on 4 November 2026 that a campaign's link may change tomorrow
@@ -118,6 +120,7 @@ export const ProfilePage = pageGlobal({
       },
       fields: [],
     }),
+    compareTab(),
     searchTab(),
   ],
 });
