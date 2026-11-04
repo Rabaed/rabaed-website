@@ -5266,7 +5266,7 @@ export interface ProfilePage {
       en?: string | null;
     };
     /**
-     * The demo request form on the home page: /#demo in Arabic and /en#demo in English.
+     * The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.
      */
     demoLink: {
       ar: string;

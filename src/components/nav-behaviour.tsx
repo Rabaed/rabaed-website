@@ -38,10 +38,10 @@ const PHONE_SCREEN = '(max-width: 980px)';
 
 /**
  * Points a page's own download button at the file for the screen (ticket
- * 104): the phone file on a screen 980px wide or less, the desktop file on a
- * wider one, and again as the screen changes — a tablet turned, a window
- * dragged narrower. The markup carries the desktop file, so a page without
- * JavaScript gives that.
+ * 104), and the name it is saved under with it: the phone file on a screen
+ * 980px wide or less, the desktop file on a wider one, and again as the
+ * screen changes — a tablet turned, a window dragged narrower. The markup
+ * carries the desktop file, so a page without JavaScript gives that.
  *
  * Only the Company profile has such a button; elsewhere nothing is listened for.
  */
@@ -52,7 +52,11 @@ function useDownloadForTheScreen() {
 
     const screen = window.matchMedia(PHONE_SCREEN);
     const point = (phone: boolean) => {
-      for (const button of buttons) button.setAttribute('href', (phone ? button.dataset.phoneHref : button.dataset.desktopHref) ?? '');
+      for (const button of buttons) {
+        const { phoneHref, phoneName, desktopHref, desktopName } = button.dataset;
+        button.setAttribute('href', (phone ? phoneHref : desktopHref) ?? '');
+        button.setAttribute('download', (phone ? phoneName : desktopName) ?? '');
+      }
     };
     const onChange = () => point(screen.matches);
 

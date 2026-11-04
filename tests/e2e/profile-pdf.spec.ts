@@ -80,7 +80,7 @@ test.describe('Download PDF', () => {
     await expect(barButton(page)).toBeVisible();
     await expect(barButton(page)).toHaveText(LABEL.ar);
     await expect(barButton(page)).toHaveAttribute('href', PDF.ar.desktop);
-    await expect(barButton(page)).toHaveAttribute('download', '');
+    await expect(barButton(page)).toHaveAttribute('download', 'Rabaed-Profile-V4-AR.pdf');
     // Beside Sign in: the next thing along the bar.
     await expect(page.locator('.nav .nav-cta a.login + a.pdf')).toBeVisible();
     await expect(panelButton(page)).toBeHidden();
@@ -200,14 +200,17 @@ test.describe('Download PDF', () => {
 
   test('an Editor’s replacement is what downloads next, under its own name, and the other files stay Ahmed’s', async ({ page, cms }, testInfo) => {
     // A real PDF, which the CMS checks a PDF is, but not the Arabic one —
-    // Ahmed's English phone file — under a name no other run has used.
-    const name = `profile-replacement-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
+    // Ahmed's English phone file — named as an Editor's file is, and as no
+    // other run has named one. The CMS keeps it as `profile-…` in the bucket
+    // (`profile-files`); the visitor saves it under the name it was given.
+    const name = `Rabaed-Profile-Replacement-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
     const replacement = await kept(PDF.en.phone);
     const uploaded = await page.request.post('/api/profile-files', {
       multipart: { file: { name, mimeType: 'application/pdf', buffer: replacement } },
     });
     expect(uploaded.ok(), await uploaded.text()).toBe(true);
     const { doc } = (await uploaded.json()) as { doc: { id: number; url: string; filename: string } };
+    expect(doc.filename, 'kept in the bucket under a name of its own').toBe(`profile-${name}`);
 
     try {
       const profile = cms.entry('profile-page');
@@ -220,14 +223,18 @@ test.describe('Download PDF', () => {
       const arriving = page.waitForEvent('download');
       await barButton(page).click();
       const download = await arriving;
-      expect(download.suggestedFilename()).toBe(doc.filename);
+      expect(download.suggestedFilename()).toBe(name);
       const file = testInfo.outputPath(download.suggestedFilename());
       await download.saveAs(file);
       expect((await readFile(file)).equals(replacement)).toBe(true);
 
-      // The phone's file was not replaced, so it is still Ahmed's.
+      // The phone's file was not replaced, so it is still Ahmed's, under his name.
       await page.setViewportSize(PHONE);
       await expect(panelButton(page)).toHaveAttribute('href', PDF.ar.phone);
+      await expect(panelButton(page)).toHaveAttribute('download', 'Rabaed-Profile-V4-AR-mobile.pdf');
+      // And on a desktop again, the replacement, under its own.
+      await page.setViewportSize(DESKTOP);
+      await expect(barButton(page)).toHaveAttribute('download', name);
     } finally {
       await cms.end();
       await page.request.delete(`/api/profile-files/${doc.id}`);

@@ -2,6 +2,7 @@ import { getContactPoints } from '@/cms/contact-points';
 import { pageEntry, wordsIn } from '@/cms/pages';
 import type { DelayCalculatorContent } from '@/components/home/delay-calculator';
 import type { HomeHeroContent } from '@/components/home/hero';
+import type { DownloadFile, HeaderDownload } from '@/components/site-nav';
 import type { TrustStripContent } from '@/components/home/trust-strip';
 import { numeralsInMono } from '@/components/inline-text';
 import { getDelayCalculator } from '@/content/delay-calculator';
@@ -9,9 +10,10 @@ import { pageMeta } from '@/content/search-settings';
 import { getTrustStrip } from '@/content/trust-strip';
 import type { Locale } from '@/lib/locales';
 import { MARKETING_PAGES } from '@/lib/page-registry';
+import { PROFILE_PDF_FOLDER, PROFILE_PDFS, type ProfilePdfScreen } from '@/lib/profile-pdfs';
 import type { ProfilePage } from '@/payload-types';
 import type { PageMeta, Section, SharingImage } from './page-content';
-import { profileClose, type ProfileCloseContent } from './profile-close';
+import { buttonLinkIn, profileClose, type ProfileCloseContent } from './profile-close';
 
 export type ProfilePageContent = {
   readonly meta: PageMeta;
@@ -22,16 +24,9 @@ export type ProfilePageContent = {
   readonly cost: Section<DelayCalculatorContent>;
   /** Sections 10 to 14, the contact section and the floating WhatsApp button (ticket 109). */
   readonly close: ProfileCloseContent;
-  /** The header's Download PDF button (ticket 104): its words, and the page's language's two files. */
-  readonly pdf: ProfilePdf;
+  /** The header's Download PDF button (ticket 104): its words, and the page's language's two files (`PROFILE_PDFS`). */
+  readonly pdf: HeaderDownload;
 };
-
-/**
- * The Profile PDF for the page's language, one file per screen: `desktop` for
- * a screen wider than 980px, and for every screen without JavaScript; `phone`
- * for one 980px wide or less (spec: Profile PDFs).
- */
-export type ProfilePdf = { readonly label: string; readonly desktop: string; readonly phone: string };
 
 /**
  * The picture a shared link to the profile unfurls as until an Editor gives it
@@ -44,35 +39,36 @@ const SHARING_IMAGE: Readonly<Record<Locale, SharingImage>> = {
 };
 
 /**
- * Ahmed's four Profile PDFs (`PDF/` in his folder), kept with the code as the
- * defaults, as `public/hero/` keeps the hero's drawings. Each downloads under
- * its own name.
+ * What `profile-files` puts before the name of every file uploaded to it, so
+ * that none takes a name the site's images have in the same bucket. Not part
+ * of the name the Editor gave the file, so not part of the one a visitor's
+ * browser saves it under.
  */
-const DEFAULT_PDFS: Readonly<Record<Locale, Omit<ProfilePdf, 'label'>>> = {
-  ar: { desktop: '/profile/pdf/Rabaed-Profile-V4-AR.pdf', phone: '/profile/pdf/Rabaed-Profile-V4-AR-mobile.pdf' },
-  en: { desktop: '/profile/pdf/Rabaed-Profile-V4-EN.pdf', phone: '/profile/pdf/Rabaed-Profile-V4-EN-mobile.pdf' },
-};
+const KEPT_AS = 'profile-';
 
-type Screen = keyof Omit<ProfilePdf, 'label'>;
-
-/** Where an Editor's replacement for each file is kept in the entry (`src/cms/globals/profile-page.ts`). */
-const UPLOADED = {
-  ar: { desktop: 'arabic', phone: 'arabicPhone' },
-  en: { desktop: 'english', phone: 'englishPhone' },
-} as const satisfies Record<Locale, Record<Screen, Exclude<keyof ProfilePage['pdf'], 'label'>>>;
-
-/** An uploaded file's address, where the entry names one that is there. */
-function uploadedFile(value: ProfilePage['pdf']['arabic']): string | null {
-  return value && typeof value === 'object' && value.url ? value.url : null;
+/**
+ * An Editor's replacement, where the entry names one that is there: served
+ * as uploaded (`profile-files`), and saved under the name it was uploaded
+ * with. A file uploaded under a name `profile-files` already had to number,
+ * `…-1.pdf`, keeps the number: the collection keeps nothing else.
+ */
+function uploadedFile(value: ProfilePage['pdf']['arabic']): DownloadFile | null {
+  if (!value || typeof value !== 'object' || !value.url) return null;
+  const kept = value.filename ?? '';
+  return { href: value.url, name: kept.startsWith(KEPT_AS) ? kept.slice(KEPT_AS.length) : kept };
 }
 
 /**
- * The one place the four files come from: the page's language's pair, each
- * an Editor's replacement where one is uploaded (`profile-files`, served as
- * uploaded, under its own name) and otherwise Ahmed's default.
+ * The one place the four files come from: the page's language's pair
+ * (`PROFILE_PDFS`), each an Editor's replacement where one is uploaded, and
+ * otherwise Ahmed's, kept with the code as the default, as `public/hero/`
+ * keeps the hero's drawings. Each downloads under its own name.
  */
-function profilePdfs(locale: Locale, pdf: ProfilePage['pdf']): Omit<ProfilePdf, 'label'> {
-  const file = (screen: Screen) => uploadedFile(pdf[UPLOADED[locale][screen]]) ?? DEFAULT_PDFS[locale][screen];
+function profilePdfs(locale: Locale, pdf: ProfilePage['pdf']): Pick<HeaderDownload, ProfilePdfScreen> {
+  const file = (screen: ProfilePdfScreen): DownloadFile => {
+    const { field, file: ahmeds } = PROFILE_PDFS[locale][screen];
+    return uploadedFile(pdf[field]) ?? { href: `${PROFILE_PDF_FOLDER}/${ahmeds}`, name: ahmeds };
+  };
   return { desktop: file('desktop'), phone: file('phone') };
 }
 
@@ -102,9 +98,7 @@ export async function getProfilePage(locale: Locale): Promise<ProfilePageContent
     getContactPoints(),
   ]);
   const words = (stored: Parameters<typeof wordsIn>[1]) => wordsIn(locale, stored);
-  const link = (
-    stored: ProfilePage['hero']['demoLink'] | ProfilePage['hero']['whatsappLink'] | ProfilePage['cost']['callToActionLink'],
-  ) => words(stored).trim();
+  const link = (stored: Parameters<typeof wordsIn>[1]) => buttonLinkIn(locale, stored);
   const { hero, cost } = entry;
   // Its words the entry both pages read; its button's, where written, and where it goes, this page's.
   const calculator = await getDelayCalculator(locale, link(cost.callToActionLink));

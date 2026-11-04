@@ -32,22 +32,25 @@ export type PageHeader = {
    */
   readonly demoHref?: string;
   /**
-   * How the header colours itself as the page scrolls (`nav-behaviour.tsx`):
-   * light from the first light section until the footer, as on every page, or
-   * following the section beneath it all the way down, as the Company profile
-   * does, whose sections turn dark again after light ones (the founder's
-   * decision, 4 November 2026).
+   * How the header colours itself as the page scrolls (`nav-behaviour.tsx`).
+   * Unsaid, as on every page, light from the first light section until the
+   * footer; `each-section`, following the section beneath it all the way
+   * down, as the Company profile does, whose sections turn dark again after
+   * light ones (the founder's decision, 4 November 2026).
    */
-  readonly colours?: 'from-first-light' | 'each-section';
+  readonly colours?: 'each-section';
 };
 
+/** One file a download gives: where it is, and the name a visitor's browser saves it under. */
+export type DownloadFile = { readonly href: string; readonly name: string };
+
 /**
- * A file the header's own button downloads, under its own name: one for a
- * screen wider than 980px — which is also what every screen gets without
- * JavaScript — and one for a screen 980px wide or less, which the button
- * changes to as the screen does (`nav-behaviour.tsx`).
+ * What the header's own button downloads, each file under its own name: one
+ * for a screen wider than 980px — which is also what every screen gets
+ * without JavaScript — and one for a screen 980px wide or less, which the
+ * button changes to as the screen does (`nav-behaviour.tsx`).
  */
-export type HeaderDownload = { readonly label: string; readonly desktop: string; readonly phone: string };
+export type HeaderDownload = { readonly label: string; readonly desktop: DownloadFile; readonly phone: DownloadFile };
 
 /** The download arrow beside the button's words, Ahmed's. Decorative: the words name it. */
 function DownloadIcon() {
@@ -63,10 +66,24 @@ function DownloadIcon() {
  * carries the desktop one: the server cannot know the screen, so a page read
  * without JavaScript gives the desktop file, and the script swaps in the
  * phone one where the screen asks for it.
+ *
+ * `download` names the file the browser saves, which is not always the name
+ * it is kept under: an Editor's replacement is kept as `profile-…`
+ * (`profile-files`). The files are the site's own, served with no name of
+ * their own (`Content-Disposition`), so this is the name the visitor gets.
  */
 function DownloadButton({ button, className }: { button: HeaderDownload; className: string }) {
+  const { desktop, phone } = button;
   return (
-    <a className={className} href={button.desktop} data-desktop-href={button.desktop} data-phone-href={button.phone} download>
+    <a
+      className={className}
+      href={desktop.href}
+      download={desktop.name}
+      data-desktop-href={desktop.href}
+      data-desktop-name={desktop.name}
+      data-phone-href={phone.href}
+      data-phone-name={phone.name}
+    >
       <DownloadIcon />
       {button.label}
     </a>

@@ -4,7 +4,15 @@ import { buttonLinkField, listField, sectionTab, wordsField, type Words } from '
 import { pageGlobal } from '../page-globals';
 import { searchTab } from '../search-fields';
 import { MARKETING_PAGES } from '../../lib/page-registry';
-import { profileCloseTabs } from './profile-close';
+import { PROFILE_PDFS, type ProfilePdfScreen } from '../../lib/profile-pdfs';
+import type { Locale } from '../../lib/locales';
+import { DEMO_LINK_DESCRIPTION, profileCloseTabs, WHATSAPP_LINK_DESCRIPTION } from './profile-close';
+
+/** What each of the four files is called in the admin. */
+const PDF_LABELS: Record<Locale, Record<ProfilePdfScreen, Words>> = {
+  ar: { desktop: { ar: 'العربي', en: 'Arabic' }, phone: { ar: 'العربي للجوال', en: 'Arabic, for a phone' } },
+  en: { desktop: { ar: 'الإنجليزي', en: 'English' }, phone: { ar: 'الإنجليزي للجوال', en: 'English, for a phone' } },
+};
 
 /**
  * One of the four Profile PDFs (ticket 104): a file an Editor uploads to the
@@ -13,12 +21,13 @@ import { profileCloseTabs } from './profile-close';
  * `public/profile/pdf/`; uploaded, the replacement is what downloads next,
  * under its own name. Only a PDF can be chosen.
  */
-function profilePdfField(name: string, label: Words, file: string): Field {
+function profilePdfField(locale: Locale, screen: ProfilePdfScreen): Field {
+  const { field: name, file } = PROFILE_PDFS[locale][screen];
   return {
     name,
+    label: PDF_LABELS[locale][screen],
     type: 'upload',
     relationTo: 'profile-files',
-    label,
     filterOptions: { mimeType: { equals: 'application/pdf' } },
     admin: {
       description: {
@@ -77,18 +86,10 @@ export const ProfilePage = pageGlobal({
             }),
           ],
         },
-        buttonLinkField('demoLink', { ar: 'وجهة الزر الأول', en: 'First button goes to' }, {
-          description: {
-            ar: 'نموذج طلب العرض في الصفحة الرئيسية: ‎/#demo في العربية و‎/en#demo في الإنجليزية.',
-            en: 'The demo request form on the home page: /#demo in Arabic and /en#demo in English.',
-          },
-        }),
+        buttonLinkField('demoLink', { ar: 'وجهة الزر الأول', en: 'First button goes to' }, { description: DEMO_LINK_DESCRIPTION }),
         buttonLinkField('whatsappLink', { ar: 'وجهة الزر الثاني', en: 'Second button goes to' }, {
           optional: true,
-          description: {
-            ar: 'اتركه فارغاً ليفتح رقم واتساب الموقع من «إعدادات الموقع»، أو اكتب رابطاً آخر مثل رابط حملة. رابط خارج الموقع يُفتح في نافذة جديدة.',
-            en: 'Leave it empty to open the site’s WhatsApp number from Site settings, or write another link, such as a campaign’s. A link away from the site opens in a new tab.',
-          },
+          description: WHATSAPP_LINK_DESCRIPTION,
         }),
         wordsField('trust', { ar: 'السطر تحت الأزرار', en: 'Line under the buttons' }, 50),
         {
@@ -165,12 +166,7 @@ export const ProfilePage = pageGlobal({
             en: 'Leave it empty to say what the calculator’s button says on the home page, from “Delay-cost calculator”. What you write here shows on this page alone.',
           },
         }),
-        buttonLinkField('callToActionLink', { ar: 'وجهة الزر', en: 'Button goes to' }, {
-          description: {
-            ar: 'نموذج طلب العرض في الصفحة الرئيسية: ‎/#demo في العربية و‎/en#demo في الإنجليزية. رابط خارج الموقع يُفتح في نافذة جديدة.',
-            en: 'The demo request form on the home page: /#demo in Arabic and /en#demo in English. A link away from the site opens in a new tab.',
-          },
-        }),
+        buttonLinkField('callToActionLink', { ar: 'وجهة الزر', en: 'Button goes to' }, { description: DEMO_LINK_DESCRIPTION }),
       ],
     }),
     // 10 to 14, the contact section and the floating WhatsApp button (ticket 109).
@@ -185,20 +181,10 @@ export const ProfilePage = pageGlobal({
       },
       fields: [
         wordsField('label', { ar: 'كلمة الزر', en: 'Button label' }, 16),
-        {
-          type: 'row',
-          fields: [
-            profilePdfField('arabic', { ar: 'العربي', en: 'Arabic' }, 'Rabaed-Profile-V4-AR.pdf'),
-            profilePdfField('arabicPhone', { ar: 'العربي للجوال', en: 'Arabic, for a phone' }, 'Rabaed-Profile-V4-AR-mobile.pdf'),
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
-            profilePdfField('english', { ar: 'الإنجليزي', en: 'English' }, 'Rabaed-Profile-V4-EN.pdf'),
-            profilePdfField('englishPhone', { ar: 'الإنجليزي للجوال', en: 'English, for a phone' }, 'Rabaed-Profile-V4-EN-mobile.pdf'),
-          ],
-        },
+        // A row per language: its desktop file, then its phone one.
+        ...(['ar', 'en'] as const).map(
+          (locale): Field => ({ type: 'row', fields: [profilePdfField(locale, 'desktop'), profilePdfField(locale, 'phone')] }),
+        ),
       ],
     },
     searchTab(),
