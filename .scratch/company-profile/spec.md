@@ -58,6 +58,7 @@ The page is open to search engines and listed in `sitemap.xml`. Neither the head
 ### Header and footer
 
 - **The site's header, unchanged, plus a Download PDF button on the Company profile only**, beside Sign in, on the desktop bar and in the phone panel. Its label is the CMS's (seed «تنزيل PDF» / "Download PDF"). No other page shows it. On this page the header's "Book a live demo" goes to the home page's demo form (`/#demo`, `/en#demo`), since this page has no form.
+- **On the Company profile the header follows the section beneath it**, dark over a dark section and light over a light one, because Ahmed's sections turn dark again after 03. Every other page keeps the rule it has today: light from the first light section until the footer. The founder chose this on 4 November 2026.
 - **The site's footer, unchanged.** Ahmed's footer becomes the page's last section (his tagline, Ahmed's name, mobile and email, the company WhatsApp and the social links), above the site's footer.
 
 ### Profile PDFs

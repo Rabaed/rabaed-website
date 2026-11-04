@@ -1,11 +1,12 @@
 /**
- * The home page's delay-cost calculator (ticket 10): three sliders — the
- * project's value, the days of delay, the project's length in months — and
- * what that delay costs, with its two parts.
+ * The home page's Delay-cost calculator (ticket 10, ticket 103 and ADR-0029):
+ * three sliders — the project's value, the days of delay, how much of it is
+ * built — and what that delay costs, with what has been spent so far.
  *
  * Asserted through what a visitor meets: the figures and words on the page as
  * the sliders move, what the sliders allow, and whether the numbers read in the
- * right order and typeface inside Arabic text.
+ * right order and typeface inside Arabic text; and through what an Editor
+ * meets, the calculator's words changed in their one entry.
  *
  * The formula itself is tested directly in `tests/unit/delay-cost.spec.ts`;
  * this spec asks only that the sliders reach it. Whether the calculator looks
@@ -14,21 +15,23 @@
  * track is filled is asked here, because the fill follows the thumb where the
  * Reference site's does not (ticket 72).
  */
-import { test, expect, type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { readCalculator } from './delay-calculator';
+import { test, expect } from './entries';
 
 const calculator = (page: Page) => page.locator('#calc');
 const slider = (page: Page, name: string) => calculator(page).getByRole('slider', { name: new RegExp(name) });
 const projectValue = (page: Page) => slider(page, 'قيمة المشروع');
 const delayDays = (page: Page) => slider(page, 'أيام التأخير');
-const duration = (page: Page) => slider(page, 'مدة المشروع');
+const progress = (page: Page) => slider(page, 'نسبة الإنجاز');
 const result = (page: Page) => calculator(page).locator('.out b');
+const spentLine = (page: Page) => calculator(page).locator('.out small').nth(1);
 
-/** What the calculator says: the cost, its two parts, and the three sliders' readings. */
+/** What the calculator says: the cost, what has been spent, and the three sliders' readings. */
 async function readFigures(page: Page) {
-  const { cost, parts, readings } = await readCalculator(page);
-  return { cost, parts, readings };
+  const { cost, spent, readings } = await readCalculator(page);
+  return { cost, spent, readings };
 }
 
 /**
@@ -67,58 +70,66 @@ function placesOf(locator: Locator, phrases: string[]) {
   }, phrases);
 }
 
-test('the calculator and its opening figures are in the first response', async ({ request }) => {
+test('the calculator, in Ahmed’s words, and its opening figures are in the first response', async ({ request }) => {
   const html = await (await request.get('/')).text();
 
-  expect(html).toContain('كم يكلفك أسبوع تأخير اعتماد واحد؟');
-  expect(html).toContain('تقدير محافظ يشمل تكلفة التمويل والتكاليف العامة للموقع فقط');
-  expect(html).toContain('الافتراضات: تكلفة تمويل 8% سنوياً');
+  expect(html).toContain('كم يكلّفك أسبوع تأخير اعتماد واحد؟');
+  expect(html).toContain('ما صرفته على المشروع لا يعود إليك إلا عند التسليم.');
+  expect(html).toContain('نسبة الإنجاز اليوم');
+  expect(html).toContain('الافتراضات: تكلفة المال 8% سنوياً');
   expect(html).toContain('احجز عرضاً لترى كيف نمنعه');
   // The figures for the sliders' starting positions, worked out on the server.
-  for (const figure of ['84,405', '46,027', '38,377', '30,000,000']) {
+  for (const figure of ['46,027', 'على 30,000,000 ر.س مصروفة حتى الآن', '60,000,000']) {
     expect(html).toContain(figure);
   }
+  // Ahmed's method has no financing and site overhead to split the cost into (ADR-0029).
+  expect(html).not.toContain('تكاليف عامة للموقع');
 });
 
-test('the sliders allow what the Reference site allows, and start where it starts', async ({ page }) => {
+test('the sliders allow what ADR-0029 allows, and start where it starts', async ({ page }) => {
   await page.goto('/');
 
   for (const [control, range] of [
-    [projectValue(page), { min: '1000000', max: '300000000', step: '1000000', value: '30000000' }],
+    [projectValue(page), { min: '1000000', max: '300000000', step: '1000000', value: '60000000' }],
     [delayDays(page), { min: '1', max: '60', step: '1', value: '7' }],
-    [duration(page), { min: '6', max: '48', step: '1', value: '18' }],
+    [progress(page), { min: '5', max: '100', step: '5', value: '50' }],
   ] as const) {
     expect(await control.evaluate((input: HTMLInputElement) => ({ min: input.min, max: input.max, step: input.step, value: input.value }))).toEqual(range);
   }
   expect(await readFigures(page)).toEqual({
-    cost: '84,405 ر.س',
-    parts: 'تمويل 46,027 + تكاليف عامة للموقع 38,377',
-    readings: ['30,000,000 ر.س', '7 أيام', '18 شهراً'],
+    cost: '46,027 ر.س',
+    spent: 'على 30,000,000 ر.س مصروفة حتى الآن',
+    readings: ['60,000,000 ر.س', '7 أيام', '50%'],
   });
 });
 
-test('moving a slider changes the cost at once', async ({ page }) => {
+test('moving a slider changes the cost, and what has been spent, at once', async ({ page }) => {
   await page.goto('/');
 
+  // 30,000,000 spent × 8% ÷ 365 × 14
   await delayDays(page).fill('14');
   expect(await readFigures(page)).toEqual({
-    cost: '168,809 ر.س',
-    parts: 'تمويل 92,055 + تكاليف عامة للموقع 76,754',
-    readings: ['30,000,000 ر.س', '14 يوماً', '18 شهراً'],
+    cost: '92,055 ر.س',
+    spent: 'على 30,000,000 ر.س مصروفة حتى الآن',
+    readings: ['60,000,000 ر.س', '14 يوماً', '50%'],
   });
 
-  await duration(page).fill('24');
+  // 60,000,000 spent × 8% ÷ 365 × 14
+  await progress(page).fill('100');
   expect(await readFigures(page)).toEqual({
-    cost: '149,621 ر.س',
-    parts: 'تمويل 92,055 + تكاليف عامة للموقع 57,566',
-    readings: ['30,000,000 ر.س', '14 يوماً', '24 شهراً'],
+    cost: '184,110 ر.س',
+    spent: 'على 60,000,000 ر.س مصروفة حتى الآن',
+    readings: ['60,000,000 ر.س', '14 يوماً', '100%'],
   });
 
-  await projectValue(page).fill('50000000');
+  // One of Ahmed's acceptance cases: 200,000,000 at 50% for 7 days.
+  await projectValue(page).fill('200000000');
+  await delayDays(page).fill('7');
+  await progress(page).fill('50');
   expect(await readFigures(page)).toEqual({
-    cost: '249,368 ر.س',
-    parts: 'تمويل 153,425 + تكاليف عامة للموقع 95,943',
-    readings: ['50,000,000 ر.س', '14 يوماً', '24 شهراً'],
+    cost: '153,425 ر.س',
+    spent: 'على 100,000,000 ر.س مصروفة حتى الآن',
+    readings: ['200,000,000 ر.س', '7 أيام', '50%'],
   });
 });
 
@@ -132,14 +143,19 @@ test('the sliders can be moved from the keyboard', async ({ page }) => {
   expect((await readFigures(page)).readings[1]).toBe('10 أيام');
   await page.keyboard.press('ArrowRight');
   expect((await readFigures(page)).readings[1]).toBe('11 يوماً');
+
+  // Progress moves in fives.
+  await progress(page).focus();
+  await page.keyboard.press('ArrowRight');
+  expect((await readFigures(page)).readings[2]).toBe('55%');
+  await expect(progress(page)).toHaveAttribute('aria-valuetext', '55%');
 });
 
-test('the words after the days and the months follow how Arabic counts', async ({ page }) => {
+test('the words after the days follow how Arabic counts, and progress reads as a percentage', async ({ page }) => {
   await page.goto('/');
 
   // One, two, three to ten, and eleven and more each take their own word. The
-  // founders chose Arabic's rule over the Reference site's «1 أيام» and
-  // «6 شهراً» (ticket 58).
+  // founders chose Arabic's rule over the Reference site's «1 أيام» (ticket 58).
   for (const [days, reading] of [
     ['1', '1 يوم'],
     ['2', '2 يومان'],
@@ -151,14 +167,13 @@ test('the words after the days and the months follow how Arabic counts', async (
     await delayDays(page).fill(days);
     expect((await readFigures(page)).readings[1], `${days} days`).toBe(reading);
   }
-  for (const [months, reading] of [
-    ['6', '6 أشهر'],
-    ['10', '10 أشهر'],
-    ['11', '11 شهراً'],
-    ['48', '48 شهراً'],
+  for (const [percent, reading] of [
+    ['5', '5%'],
+    ['35', '35%'],
+    ['100', '100%'],
   ] as const) {
-    await duration(page).fill(months);
-    expect((await readFigures(page)).readings[2], `${months} months`).toBe(reading);
+    await progress(page).fill(percent);
+    expect((await readFigures(page)).readings[2], `${percent}%`).toBe(reading);
   }
 });
 
@@ -166,14 +181,13 @@ test('the numbers read in the right order and typeface inside the Arabic', async
   await page.goto('/');
   await calculator(page).scrollIntoViewIfNeeded();
 
-  // «84,405 ر.س» and «7 أيام»: the number first, which reading right to left
+  // «46,027 ر.س» and «7 أيام»: the number first, which reading right to left
   // puts it to the right of the word; the number in DM Mono, which has no
   // Arabic, and the word in the Arabic face.
   for (const [figure, number, word] of [
-    [result(page), '84,405', 'ر.س'],
-    [calculator(page).locator('.lr b').nth(0), '30,000,000', 'ر.س'],
+    [result(page), '46,027', 'ر.س'],
+    [calculator(page).locator('.lr b').nth(0), '60,000,000', 'ر.س'],
     [calculator(page).locator('.lr b').nth(1), '7', 'أيام'],
-    [calculator(page).locator('.lr b').nth(2), '18', 'شهراً'],
   ] as const) {
     const runs = await readRuns(figure);
     const digits = runs.find((run) => run.text === number)!;
@@ -184,17 +198,44 @@ test('the numbers read in the right order and typeface inside the Arabic', async
     expect(arabic.face, `«${word}»`).toMatch(/^"IBM Plex Sans Arabic"/);
     expect(digits.left, `«${number}» is to the right of «${word}»`).toBeGreaterThanOrEqual(arabic.right - 0.5);
   }
-
-  // The breakdown is one line of Arabic with numbers in it.
-  const [financing, financingAmount, plus, overhead] = await placesOf(calculator(page).locator('.out small').nth(1), [
-    'تمويل',
-    '46,027',
-    '+',
-    'تكاليف',
+  // «50%» is a number alone, all of it in DM Mono.
+  expect(await readRuns(calculator(page).locator('.lr b').nth(2))).toEqual([
+    expect.objectContaining({ text: '50%', face: expect.stringMatching(/^"DM Mono"/) }),
   ]);
-  expect(financing.left).toBeGreaterThanOrEqual(financingAmount.right - 0.5);
-  expect(financingAmount.left).toBeGreaterThanOrEqual(plus.right - 0.5);
-  expect(plus.left).toBeGreaterThanOrEqual(overhead.right - 0.5);
+
+  // What has been spent is one line of Arabic with a number in it, read right to left.
+  const [on, amount, currency, spent] = await placesOf(spentLine(page), ['على', '30,000,000', 'ر.س', 'مصروفة']);
+  expect(on.left).toBeGreaterThanOrEqual(amount.right - 0.5);
+  expect(amount.left).toBeGreaterThanOrEqual(currency.right - 0.5);
+  expect(currency.left).toBeGreaterThanOrEqual(spent.right - 0.5);
+});
+
+test('an Editor’s change to the calculator’s words reaches the home page', async ({ page, cms }) => {
+  // One entry for every page that shows the calculator (ADR-0029). Saved as a
+  // draft and seen in the preview, so no other suite reading the home page
+  // meets it.
+  const words = cms.entry('delay-calculator');
+  const entry = await words.published();
+  const heading = `${entry.calculator.heading.ar} مسودة`;
+  const { calculator: drafted } = entry;
+
+  await words.draft({
+    ...entry,
+    calculator: {
+      ...drafted,
+      heading: { ...drafted.heading, ar: heading },
+      sliderLabels: { ...drafted.sliderLabels, progress: { ...drafted.sliderLabels.progress, ar: 'ما أُنجز' } },
+      spent: { ...drafted.spent, ar: 'صُرف منها {amount} ر.س' },
+    },
+  });
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await cms.preview('/');
+  await expect(calculator(page).locator('h2')).toHaveText(heading);
+  await expect(spentLine(page)).toHaveText('صُرف منها 30,000,000 ر.س');
+  // The browser redraws the line in the drafted words too.
+  await slider(page, 'ما أُنجز').fill('100');
+  await expect(spentLine(page)).toHaveText('صُرف منها 60,000,000 ر.س');
 });
 
 test('with JavaScript off, the sliders show their starting positions filled in', async ({ browser }) => {
@@ -267,7 +308,7 @@ for (const width of [1440, 390]) {
     for (const [control, { min, max, between }] of [
       [projectValue(page), { min: '1000000', max: '300000000', between: '71000000' }],
       [delayDays(page), { min: '1', max: '60', between: '9' }],
-      [duration(page), { min: '6', max: '48', between: '40' }],
+      [progress(page), { min: '5', max: '100', between: '35' }],
     ] as const) {
       await control.scrollIntoViewIfNeeded();
       for (const value of [min, max, between]) {
