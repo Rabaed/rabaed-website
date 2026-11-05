@@ -9,8 +9,8 @@
  * floor under all of them.
  *
  * Next reads `export const revalidate` by static analysis and accepts only a
- * literal, so the number cannot be imported into the six routes that set it.
- * What this spec holds is that the six literals still agree with
+ * literal, so the number cannot be imported into the routes that set it.
+ * What this spec holds is that those literals still agree with
  * `MAX_PAGE_AGE_SECONDS`, and that the route groups deliberately left without
  * an age are still without one on purpose rather than by having been
  * forgotten.
@@ -26,7 +26,7 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { MAX_PAGE_AGE_SECONDS } from '../../src/lib/cache-age';
-import { DISCOVERY_FILES, NOT_FOUND_ADDRESS, NOT_PAGES } from '../../src/lib/page-registry';
+import { DISCOVERY_FILES, DISCOVERY_FILES_ON_EACH_REQUEST, NOT_FOUND_ADDRESS, NOT_PAGES } from '../../src/lib/page-registry';
 import { appRoutes, repoRoot, under } from './app-routes';
 
 /**
@@ -41,9 +41,12 @@ const LAYOUTS = ['src/app/(ar)/layout.tsx', 'src/app/(en)/en/layout.tsx'];
  * discovery files, routes with no layout above them, and the not-found page,
  * which sits in neither language's layout and shows words from the CMS
  * (ticket 59); Next builds it as a page of its own, `/_not-found` (ticket 84).
- * The page registry lists all four (ticket 92, `src/lib/page-registry.ts`).
+ * The page registry lists them (ticket 92, `src/lib/page-registry.ts`). The
+ * sitemap and `robots.txt` are not among them: they are built on each request
+ * (ticket 111), so there is nothing kept for an age to run out on.
  */
-const ROUTES_OF_THEIR_OWN = [...DISCOVERY_FILES, NOT_FOUND_ADDRESS];
+const ON_EACH_REQUEST: readonly string[] = DISCOVERY_FILES_ON_EACH_REQUEST;
+const ROUTES_OF_THEIR_OWN = [...DISCOVERY_FILES.filter((file) => !ON_EACH_REQUEST.includes(file)), NOT_FOUND_ADDRESS];
 
 /**
  * The routes that must not have one: what the page registry names as not a
@@ -83,6 +86,18 @@ for (const address of ROUTES_OF_THEIR_OWN) {
     const route = (await appRoutes()).find((each) => !each.layout && each.address === address);
     expect(route, `no route answers ${address}`).toBeTruthy();
     await expectTheAge(route!.file);
+  });
+}
+
+for (const address of ON_EACH_REQUEST) {
+  test(`${address} is built on each request, with no age`, async () => {
+    const route = (await appRoutes()).find((each) => !each.layout && each.address === address);
+    expect(route, `no route answers ${address}`).toBeTruthy();
+    const source = await readFile(path.join(repoRoot, route!.file), 'utf8');
+    expect(source, `${route!.file} must be built on each request: ahead of time, the host is given it fixed at the deploy (ticket 111).`).toMatch(
+      /^export const dynamic = 'force-dynamic';$/m,
+    );
+    expect(source, `${route!.file} is built on each request, so an age there would mean nothing.`).not.toMatch(AGE_EXPORT);
   });
 }
 

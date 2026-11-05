@@ -155,6 +155,14 @@ export const SITE_PAGES = {
 export const DISCOVERY_FILES = ['/sitemap.xml', '/llms.txt', '/robots.txt'] as const;
 
 /**
+ * The discovery files built on each request rather than ahead of time (ticket
+ * 111): those at a metadata file's address. Built ahead of time, the host is
+ * given such a file fixed at the deploy, so neither a publish nor an age
+ * reaches it (`src/app/sitemap.ts` says why). They need no age of their own.
+ */
+export const DISCOVERY_FILES_ON_EACH_REQUEST = ['/sitemap.xml', '/robots.txt'] as const satisfies readonly (typeof DISCOVERY_FILES)[number][];
+
+/**
  * The page any address no page answers shows, which Next builds as a page of
  * its own at this address. Not in the sitemap, and in neither language's
  * layout; it shows words from the CMS (ticket 59).

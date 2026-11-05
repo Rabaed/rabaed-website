@@ -19,22 +19,23 @@ const PAGES = Object.entries(SITE_PAGES)
   .map(([, page]) => page.path);
 
 /**
- * The floor under `sitemap.xml`: whatever becomes of a publish's mark, it is
- * rebuilt at most ten minutes after it was last built (ticket 66, ADR-0016).
- *
- * Its own, because a discovery file is a route beside the layouts rather than
- * beneath one, so no layout's age reaches it — the same reason
- * `DISCOVERY_FILES` exists in `src/lib/page-registry.ts`. Written out rather
- * than imported because Next reads only a literal; `src/lib/cache-age.ts`
- * holds the number and the reason it is that number.
+ * Built on each request, not ahead of time (ticket 111). When the build hands
+ * the host its outputs, Next makes a route built ahead of time at a metadata
+ * file's address a static file, and leaves out its function
+ * (`node_modules/next/dist/build/adapter/build-complete.js`, Next 16.3.5). So
+ * on `rabaedapp.com` this stayed as the last deploy wrote it: neither a
+ * publish's mark nor a ten-minute age (ADR-0016) could reach it. Built on
+ * each request, it is a function the host keeps, and a publish is in it at
+ * once. It costs a few reads of the CMS per crawler's visit.
+ * `tests/unit/discovery-files-on-the-host.spec.ts` holds it.
  */
-export const revalidate = 600;
+export const dynamic = 'force-dynamic';
 
 /**
  * `sitemap.xml`: the site's pages and every published article and case study,
  * in whichever language it is published (tickets 23 and 24). A draft is never
- * listed, and an entry leaves when it is unpublished: publishing and
- * unpublishing mark this stale along with the pages (`src/cms/revalidation.ts`).
+ * listed, and an entry leaves when it is unpublished: this is built on each
+ * request (above), so it lists what is published at that moment.
  *
  * Pages are listed by name — the page registry's, `src/lib/page-registry.ts` —
  * not found by walking the routes, so nothing that is not a page of the site

@@ -15,8 +15,11 @@ export const SKIP_REVALIDATION = 'skipRevalidation';
  * group, and the not-found page, which sits in neither and shows words from
  * the CMS (ticket 59). The discovery files — the sitemap, `llms.txt` and
  * `robots.txt` — are routes of their own beside the layouts, so marking the
- * pages covers none of them: the page registry lists them (ticket 92). The second mark reaches the pages through these rather
- * than through the root layout the first mark uses (below).
+ * pages covers none of them: the page registry lists them (ticket 92). The
+ * sitemap and `robots.txt` are built on each request (ticket 111), so for them
+ * the marks change nothing; `llms.txt` is built ahead of time and needs them.
+ * The second mark reaches the pages through these rather than through the
+ * root layout the first mark uses (below).
  */
 const PAGE_LAYOUTS = ['/(ar)', '/(en)', NOT_FOUND_ADDRESS];
 
