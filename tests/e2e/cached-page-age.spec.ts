@@ -5,7 +5,8 @@
  * A page is rebuilt when a publish marks it stale and at no other time, so
  * anything that loses a mark leaves that page wrong until somebody publishes
  * again. Ten minutes is the floor under that, set on the two site layouts and
- * on each of the three discovery files.
+ * on `llms.txt`. The sitemap and `robots.txt` are built on each request
+ * instead (ticket 111).
  *
  * **Why this is asked of the running application rather than of the build.**
  * The whole point of setting the age on two layouts instead of twenty pages is
@@ -26,6 +27,7 @@
  */
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { MAX_PAGE_AGE_SECONDS } from '../../src/lib/cache-age';
+import { DISCOVERY_FILES_ON_EACH_REQUEST } from '../../src/lib/page-registry';
 
 /** What Next sends for a route that has an age. */
 const CARRIES_THE_AGE = `s-maxage=${MAX_PAGE_AGE_SECONDS}`;
@@ -98,16 +100,18 @@ test.describe('every page a visitor can reach has a maximum age', () => {
   });
 
   /**
-   * `sitemap.xml` and `robots.txt` are the metadata-file convention rather than
-   * route handlers, and Next serves them `must-revalidate` instead of an
-   * `s-maxage`: a cache must ask the origin every time, and the origin answers
-   * from its own store, where the age they set does apply. So they are no
-   * staler than the pages — the number simply is not visible here, and
-   * asserting it were would be asserting a thing that is not true.
+   * `sitemap.xml` and `robots.txt` are built on each request (ticket 111):
+   * built ahead of time at a metadata file's address, the host was given each
+   * as a file fixed at the deploy, which no age reached. So they carry no age,
+   * and nothing in front of the site may keep them: Next sends a metadata file
+   * `max-age=0, must-revalidate` with no `s-maxage`, built ahead of time or
+   * not, so every request reaches the function.
    */
-  for (const path of ['/sitemap.xml', '/robots.txt']) {
-    test(`${path} is revalidated against the origin every time`, async ({ request }) => {
-      expect(await cacheControl(request, path)).toContain('must-revalidate');
+  for (const path of DISCOVERY_FILES_ON_EACH_REQUEST) {
+    test(`${path} is built on each request, and kept by no cache`, async ({ request }) => {
+      const header = await cacheControl(request, path);
+      expect(header).toContain('max-age=0, must-revalidate');
+      expect(header).not.toContain('s-maxage');
     });
   }
 
